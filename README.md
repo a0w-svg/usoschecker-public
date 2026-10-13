@@ -3,6 +3,10 @@
 Natywna aplikacja w języku polskim dla Akademii Finansów i Biznesu Vistula.
 Android 8.0 (API 26) lub nowszy. Nie jest oficjalną aplikacją uczelni.
 
+Projekt można otworzyć bezpośrednio w **Android Studio**: wybierz katalog zawierający
+`settings.gradle`, wykonaj Gradle Sync i uruchom konfigurację `app`.
+Dokładne kroki: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
+
 ## Funkcje
 
 - Monitor ocen: nowe, zmienione i usunięte oceny; wartość, komentarz, termin egzaminu i czas modyfikacji z API.

@@ -1,0 +1,94 @@
+{
+  "name": "services/apistlog/formatted",
+  "short_name": "formatted",
+  "description": "\n\n        <p>Works similar to the <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a>\n        method, but the results are formatted to be human-readable.</p>\n    ",
+  "brief_description": "\nGet formatted (human-readable) results for your query",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#formatted",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "period_length",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "14 days",
+      "description": "\n\n            <p>As in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a> method.</p>\n        "
+    },
+    {
+      "name": "period_start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "1 period ago",
+      "description": "\n\n            <p>As in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a> method.</p>\n        "
+    },
+    {
+      "name": "method_filter",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>As in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a> method.</p>\n        "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "period|method_name|all_calls|all_runtime|all_avg_runtime",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a> method.\n</p>\n        "
+    },
+    {
+      "name": "subperiod",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "auto",
+      "description": "\n\n            <p>As in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a> method.</p>\n        "
+    },
+    {
+      "name": "order_by",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "method_name|period",
+      "description": "\n\n            <p>As in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a> method.</p>\n        "
+    },
+    {
+      "name": "limit",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "1000",
+      "description": "\n\n                <p>As in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/apistlog/#raw'>raw</a>\n                method.</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A string with the formatted table representation.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

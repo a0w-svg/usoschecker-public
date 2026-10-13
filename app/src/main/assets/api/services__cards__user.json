@@ -1,0 +1,40 @@
+{
+  "name": "services/cards/user",
+  "short_name": "user",
+  "description": "\tGet information on a user's ID cards.",
+  "brief_description": "Get information on a user's ID cards.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/cards/#user",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "cards"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<text>\n\t\tArray of dictionaries describing cards of access token issuer. Note that will be returned only:\n\t\t<ul>\n\t\t\t<li>student and phd cards that are not cancelled</li>\n\t\t\t<li>staff cards that are not cancelled and not expired</li>\n\t\t</ul>\n\t\teach dictionary contains\n\t\tfields from <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/cards/#card\">card</a> method\n</text>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

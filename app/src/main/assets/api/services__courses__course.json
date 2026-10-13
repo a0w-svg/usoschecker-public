@@ -1,0 +1,151 @@
+{
+  "name": "services/courses/course",
+  "short_name": "course",
+  "description": "\n\n        <p>Get information on a given course.</p>\n    ",
+  "brief_description": "\nGet information on a given course.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/courses/#course",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Pipe-separated list of course IDs.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a course.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    a LangDict object with the course's name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>homepage_url</b> -\n                    course's homepage URL (or null if none);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>profile_url</b> -\n                    course's profile URL;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_currently_conducted</b> -\n                    boolean, indicates if the course is conducted in one of active academic terms;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>terms</b> - list of academic terms the course was conducted in.</p>\n\n                \nList of academic terms the course was conducted in. Currently only id of the term is returned.\n                      List is sorted by terms order from newest to oldest.\n                      \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>fac_id</b> -\n                    ID of a faculty which runs this course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>lang_id</b> -\n                    ID of a language in which the course is conducted, or null if language is unknown;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>ects_credits_simplified</b> - float; number of ECTS credits *usually* rewarded for completing this course, <b>or null</b> if unknown.</p>\n\n                \n\n                    <p>\"Usually\", because there are many variants and\n                    exceptions. For example, students of a specific degree\n                    programme may be rewarded a different number of credits.\n                    Or, students which plan to study a course in different\n                    academic terms, can also be awarded different number of\n                    credits. All this means that you SHOULD NOT put much trust\n                    in this value.</p>\n                \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    a LangDict object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>bibliography</b> -\n                    a LangDict object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>learning_outcomes</b> -\n                    a LangDict object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>assessment_criteria</b> -\n                    a LangDict object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>practical_placement</b> -\n                    a LangDict object;</p>\n            \n            \n        </li>\n        \n        <li class='deprecated'>\n            \n                <p><b>attributes</b> - additional attributes assigned to this course edition.</p>\n\n                \n\n                    <p>A list of dictionaries sorted in the order they should be presented\n                    to the user. Each dictionary will contain the following fields:</p>\n\n                    <ul>\n                        <li><b>name</b> - a LangDict object, a name of this attribute,</li>\n                        <li>\n                            <p><b>values</b> - a <b>list</b> of LangDict objects, which represent\n                            the content of this attribute.</p>\n\n                            <p>If the list contains only a single element, the you may assume that\n                            it's safe to display it as a paragraph. If it contains many elements,\n                            then you should display them a separate list entries (e.g. using\n                            bullets).</p>\n                        </li>\n                    </ul>\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attributes2</b> - additional attributes assigned to this course edition.</p>\n\n                \n\n                    <p>A list of dictionaries sorted in the order they should be presented\n                    to the user. Each dictionary will contain the following fields:</p>\n\n                    <ul>\n                        <li><b>name</b> - a LangDict object, a name of this attribute,</li>\n                        <li>\n                            <p><b>values</b> - a <b>list</b> of objects, which represent\n                            the content of this attribute. Each object could be one of following</p>\n\n                            <p>If the list contains only a single element, the you may assume that\n                            it's safe to display it as a paragraph. If it contains many elements,\n                            then you should display them a separate list entries (e.g. using\n                            bullets).</p>\n                        </li>\n                    </ul>\n                \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a course.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\na LangDict object with the course's name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "homepage_url",
+      "description": "\ncourse's homepage URL (or null if none)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "profile_url",
+      "description": "\ncourse's profile URL",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_currently_conducted",
+      "description": "\nboolean, indicates if the course is conducted in one of active academic terms",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "terms",
+      "description": "\nList of academic terms the course was conducted in. Currently only id of the term is returned.\n                      List is sorted by terms order from newest to oldest.\n                      ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "fac_id",
+      "description": "\nID of a faculty which runs this course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "lang_id",
+      "description": "\nID of a language in which the course is conducted, or null if language is unknown",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "ects_credits_simplified",
+      "description": "\n\n                    <p>\"Usually\", because there are many variants and\n                    exceptions. For example, students of a specific degree\n                    programme may be rewarded a different number of credits.\n                    Or, students which plan to study a course in different\n                    academic terms, can also be awarded different number of\n                    credits. All this means that you SHOULD NOT put much trust\n                    in this value.</p>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\na LangDict object",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "bibliography",
+      "description": "\na LangDict object",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "learning_outcomes",
+      "description": "\na LangDict object",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "assessment_criteria",
+      "description": "\na LangDict object",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "practical_placement",
+      "description": "\na LangDict object",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "attributes",
+      "description": "\n\n                    <p>A list of dictionaries sorted in the order they should be presented\n                    to the user. Each dictionary will contain the following fields:</p>\n\n                    <ul>\n                        <li><b>name</b> - a LangDict object, a name of this attribute,</li>\n                        <li>\n                            <p><b>values</b> - a <b>list</b> of LangDict objects, which represent\n                            the content of this attribute.</p>\n\n                            <p>If the list contains only a single element, the you may assume that\n                            it's safe to display it as a paragraph. If it contains many elements,\n                            then you should display them a separate list entries (e.g. using\n                            bullets).</p>\n                        </li>\n                    </ul>\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "attributes2",
+      "description": "\n\n                    <p>A list of dictionaries sorted in the order they should be presented\n                    to the user. Each dictionary will contain the following fields:</p>\n\n                    <ul>\n                        <li><b>name</b> - a LangDict object, a name of this attribute,</li>\n                        <li>\n                            <p><b>values</b> - a <b>list</b> of objects, which represent\n                            the content of this attribute. Each object could be one of following</p>\n\n                            <p>If the list contains only a single element, the you may assume that\n                            it's safe to display it as a paragraph. If it contains many elements,\n                            then you should display them a separate list entries (e.g. using\n                            bullets).</p>\n                        </li>\n                    </ul>\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,133 @@
+{
+  "name": "services/registrations/token_registration_round",
+  "short_name": "token_registration_round",
+  "description": "<p>\nGet token registration round details</p>",
+  "brief_description": "\nGet token registration round details",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/registrations/#token_registration_round",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nToken registration round id"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|start_date|end_date",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Registration round id;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>start_date</b> -\n                    A datetime string;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end_date</b> -\n                    A datetime string;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>selection_limit</b> -\n                    Number of choices in this round;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_dedicated</b> -\n                    Is dedicated round;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_exchange</b> -\n                    Is exchange;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_only_entitled</b> -\n                    Is only for students with permissions;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>micro_round_length</b> -\n                    Length of one micro round;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>micro_break_length</b> -\n                    Break between micro rounds;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_prioritized</b> -\n                    Is prioritized;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>first_round_scale</b> -\n                    Scale of first round.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>registration</b> - Related registration.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/registrations/#token_registration'>token_registration</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nRegistration round id",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start_date",
+      "description": "\nA datetime string",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end_date",
+      "description": "\nA datetime string",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "selection_limit",
+      "description": "\nNumber of choices in this round",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_dedicated",
+      "description": "\nIs dedicated round",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_exchange",
+      "description": "\nIs exchange",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_only_entitled",
+      "description": "\nIs only for students with permissions",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "micro_round_length",
+      "description": "\nLength of one micro round",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "micro_break_length",
+      "description": "\nBreak between micro rounds",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_prioritized",
+      "description": "\nIs prioritized",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "first_round_scale",
+      "description": "\nScale of first round",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registration",
+      "description": "\nRelated registration",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

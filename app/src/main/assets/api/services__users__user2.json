@@ -1,0 +1,97 @@
+{
+  "name": "services/users/user2",
+  "short_name": "user2",
+  "description": "<p>\nGet information on a given user.</p>",
+  "brief_description": "\nGet information on a given user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#user2",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(access token issuer)",
+      "description": "\n<p>ID of a user.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|first_name|last_name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    user's ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>first_name</b> -\n                    user's first name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_number</b> - either string, or <b>null</b>.</p>\n\n                \n\n                <p>If you got a string, then it's the primary student number\n                of this user.</p>\n\n                <p>If it's <b>null</b>, then either the user is not a student,\n                <u>or</u> you don't have access to view his/her student\n                number.</p>\n\n                <p>Note, that you may increase your chances of getting a\n                non-null value by asking your user for the <b>studies</b> and\n                <b>staff_perspective</b> scopes.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>middle_names</b> - user's middle name(s), separated with spaces, or <b>null</b>\n                if the user has no middle name(s).</p>\n\n                \n\n                <p>In most cases, this will be a single name, but not always.\n                See <a href='http://en.wikipedia.org/wiki/Middle_name'>here</a>\n                for the details.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>last_name</b> -\n                    user's last name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_status</b> - integer (0, 1 or 2), or <b>null</b>.</p>\n\n                \n\n                <p>This indicates the user's status of \"being a student\". The\n                meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>null</b> - This means that you are not allowed to\n                        access the student status of this user. (You may need\n                        to provide an Access Token to access such values.)\n                    </li>\n                    <li>\n                        <b>0</b> - The user is not, and never was, a student\n                        on any of the study programmes of this university.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an \"inactive student\". That is,\n                        currently he's not studying, but he was an active\n                        student in the past.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active student.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>staff_status</b> - integer (0, 1 or 2).</p>\n\n                \n\n                <p>This indicates the user's status of \"being a staff member\".\n                The meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>0</b> - The user is currently not a staff member.\n                        He might have been a staff member once, but he is not\n                        now.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an employed staff member, but he\n                        is not an academic teacher.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active academic teacher.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>field_forbidden</b> - access to field denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>user_unauthorized</b> -\n                                access token issuer does not have permission to retrieve value of this field, because it refers to other user.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nuser's ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "first_name",
+      "description": "\nuser's first name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_number",
+      "description": "\n\n                <p>If you got a string, then it's the primary student number\n                of this user.</p>\n\n                <p>If it's <b>null</b>, then either the user is not a student,\n                <u>or</u> you don't have access to view his/her student\n                number.</p>\n\n                <p>Note, that you may increase your chances of getting a\n                non-null value by asking your user for the <b>studies</b> and\n                <b>staff_perspective</b> scopes.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "middle_names",
+      "description": "\n\n                <p>In most cases, this will be a single name, but not always.\n                See <a href='http://en.wikipedia.org/wiki/Middle_name'>here</a>\n                for the details.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "last_name",
+      "description": "\nuser's last name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_status",
+      "description": "\n\n                <p>This indicates the user's status of \"being a student\". The\n                meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>null</b> - This means that you are not allowed to\n                        access the student status of this user. (You may need\n                        to provide an Access Token to access such values.)\n                    </li>\n                    <li>\n                        <b>0</b> - The user is not, and never was, a student\n                        on any of the study programmes of this university.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an \"inactive student\". That is,\n                        currently he's not studying, but he was an active\n                        student in the past.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active student.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "staff_status",
+      "description": "\n\n                <p>This indicates the user's status of \"being a staff member\".\n                The meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>0</b> - The user is currently not a staff member.\n                        He might have been a staff member once, but he is not\n                        now.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an employed staff member, but he\n                        is not an academic teacher.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active academic teacher.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

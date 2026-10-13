@@ -1,0 +1,80 @@
+{
+  "name": "services/housing/check_in",
+  "short_name": "check_in",
+  "description": "\n\n        <p>Check an user into dormitory. Only <b>dormitory administrators</b>\n        can perform this action.</p>\n    ",
+  "brief_description": "\nCheck an user into dormitory",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#check_in",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "dorm_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "assignment_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>The ID of the user's assignment. The user may have multiple\n                assignments (e.g. for different academic terms), that's why we\n                need a specific assignment ID here (instead of just\n                user_id).</p>\n            "
+    },
+    {
+      "name": "dormroom_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the room person will be checked into"
+    },
+    {
+      "name": "check_in_date",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Check-in date, if not given it defaults to now.</p>\n\n                <p>The residence registration period (check-in and planned\n                check-out dates) must be contained within the period defined by\n                the user's assignment.</p>\n            "
+    },
+    {
+      "name": "check_out_date",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Planned check-out date - if not given it defaults to a final\n                day of the assignment period.</p>\n\n                <p>The residence registration period (check-in and planned\n                check-out dates) must be contained within the period defined by\n                the user's assignment.</p>\n            "
+    },
+    {
+      "name": "resident_type_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>ID of the resident type - if not given it defaults to the\n                value stored in the assignment (if there is no such value\n                stored in the assignment, an error is raised).</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>If a check in is successful, a following dictionary will be\n        returned:</p>\n\n        <ul>\n            <li>\n                <b>success</b> - always <b>true</b>,\n            </li>\n            <li>\n                <b>residence_id</b> - ID of the newly created\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#residence'>residence</a>.\n            </li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

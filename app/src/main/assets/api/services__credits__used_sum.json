@@ -1,0 +1,56 @@
+{
+  "name": "services/credits/used_sum",
+  "short_name": "used_sum",
+  "description": "\t\n\t<p>Returns the sum of ECTS credits based on the course's that have been linked\n\tto a specified programme and passed. Details of this calculations can be, in some cases,\n\tcomplex and are defined according to an act. This sum is used for a study declaration\n\tthat is required to study free of charge.</p>\n\t<p><em>If neither of the optional parameters is used than we return the overall sum that\n\t\ttakes into account all of the student's programmes. User token is required in that\n\t\tsituation.</em></p>\n",
+  "brief_description": "Get the sum of credits used",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/credits/#used_sum",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "studies"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "students_programme_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\t\n\t<p>If this parameter is used credits sum will be based only on the courses linked to this\n\tstudent's programme.</p>\n"
+    },
+    {
+      "name": "programme_id",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>This parameter is deprecated. Use <b>students_programme_id</b> instead.</p>\n\t<p><em>Note that you cannot use both programme_id and students_programme_id!</em></p>\n\t<p>ID of a student programme.</p>\n\t<p>If this parameter is used than:\n\t<ul>\n\t\t<li>credits sum will be based only on the courses linked to this programme,</li>\n\t\t<li>user token has to be passed.</li>\n\t</ul>\n</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Sum of ECTS credits as a decimal number.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

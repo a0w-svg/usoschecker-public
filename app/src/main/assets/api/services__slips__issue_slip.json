@@ -1,0 +1,64 @@
+{
+  "name": "services/slips/issue_slip",
+  "short_name": "issue_slip",
+  "description": "\t\n\t<p>Issue a new slip instance. The issued slip will initially be closed,\n\tso that it can be edited before its questions begin to be answered.</p>\n",
+  "brief_description": "Issue a new slip instance",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#issue_slip",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "tpl_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>ID of the slip template to be used for the slip.</p>\n"
+    },
+    {
+      "name": "client_user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>ID of the user to whom the slip is to be issued.</p>\n"
+    },
+    {
+      "name": "student_programme_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tOptional ID of the student's programme which is said to be &quot;bound&quot; to\n\tthe issued slip instance.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true, &quot;slip_id&quot;: &quot;&lt;id of the new\n\t\tslip&gt;&quot;}</code></p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

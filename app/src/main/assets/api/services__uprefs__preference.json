@@ -1,0 +1,111 @@
+{
+  "name": "services/uprefs/preference",
+  "short_name": "preference",
+  "description": "<p>\nGet information on a given preference (or group).</p>",
+  "brief_description": "\nGet information on a given preference (or group).",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/uprefs/#preference",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "upref_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p>ID of the user preference (or group of preferences).</p>\n\n            <p>Most of the IDs are not backward-compatible. They may either\n            disappear or change their type or meaning at any time. You should\n            not hardcode any of these IDs in your code, unless it is a\n            <b>predefined ID</b>:</p>\n\n            <ul>\n                <li>\n                    <b>root</b> - use this ID if you want to access the tree of\n                    all available preferences,\n                </li>\n                <li>\n                    <b>photo_visibility</b> - the subtree of preferences\n                    regarding visibility of the user's photo,\n                </li>\n                <li>\n                    <b>email_privacy_root</b> - the subtree of preferences\n                    regarding the privacy ad visibility of the user's email\n                    address,\n                </li>\n            </ul>\n        "
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "preferred_types",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>Pipe-separated list of preference types which you are able to\n            display properly. See the \"returns\" section for current list of\n            types.</p>\n\n            <p>In time, we will be adding more preference types. Some of them\n            might be quite complex. However, many preferences might still be\n            expressed using the \"legacy\" types, e.g. textboxes or checkboxes.\n            If we know that you don't support some new types of preferences, we\n            may choose to convert them to the \"legacy\" types, supported by\n            you.</p>\n\n            <p>This parameter is optional, but recommended. If you don't supply\n            this value, we will currently assume that you can understand every\n            preference we can think of.</p>\n\n            <p>Keep in mind, that these are only <u>preferred</u> types. This\n            means that we may still include unknown types in the response and\n            you must ignore preferences with such unknown types.</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    the ID of the preference (or group of preferences);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> - type of the preference.</p>\n\n                \n\n            <p>One of the following values:</p>\n\n            <ul>\n                <li><b>textbox</b> - such preferences should be rendered as\n                textboxes. The type of their <i>value</i> is a string.</li>\n\n                <li><b>checkbox</b> - such preferences should be rendered as\n                checkboxes. The type of their <i>value</i> is boolean.</li>\n\n                <li><b>list</b> - such preferences should be rendered using a\n                radiobox or other similar component. The type of their\n                <i>value</i> is a string and the possible values are presented\n                in the <i>list_items</i> field.</li>\n\n                <li><b>group</b> - a group of preferences. Preferences can be\n                nested within groups (e.g. pages, tabs, sections, dialogs). The\n                group-type preferences are inner nodes within the preferences\n                tree. Such nodes have no <i>value</i> (it will be always\n                <i>null</i>), instead they have a list of <i>entries</i>.</li>\n\n                <li><b>Other types will come in the future!</b> Some of these\n                types might be quite complex and may require you to design your\n                own specialized components. You should ignore preferences with\n                types unknown to you.</li>\n            </ul>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title</b> -\n                    A LangDict object. A short title for the preference (in\n                plaintext);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>summary</b> - A LangDict object, or <b>null</b> if empty.</p>\n\n                \n\n                <p>If given, it will be a short description of the preference -\n                usually one or two sentences in a single paragraph. May contain\n                simple HTML markup and links to external resources.</p>\n\n                <p><b>Important:</b> Some summaries may change based on the\n                values of their own preference and/or other preferences. It is\n                important that you refresh the values of these fields every\n                time the user changes any preference via your UI. (This also\n                means that we require the user interface to \"live\" - i.e. you\n                should not require your users to click any \"save\" buttons).</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>enabled</b> - boolean, indicates if the user can change this preference.</p>\n\n                \n\n                <p><b>Important:</b> Similar as above, some preferences might\n                get disabled or enabled based on other preferences. You must\n                refresh these fields every time the user changes any preference\n                via your UI!</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>value</b> - the current value of the preference.</p>\n\n                \n\n            <p>The format of this field varies on the preference type. See the\n            description of the <b>type</b> field for more information.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>list_items</b> - items to display on a <i>list</i> preference.</p>\n\n                \n\n                <p>This field is not-null only for preferences of the\n                <b>list</b> type.</p>\n\n                <p>A list of dictionaries. Each dictionary has the following\n                keys:</p>\n\n                <ul>\n                    <li><b>value</b> - the value of the item. One of the values\n                    in <b>list_items</b> will always match the current value of\n                    the preference (the one in the <i>value</i> field). This is\n                    the internal value of the preference and should not be\n                    displayed to the user.</li>\n\n                    <li><b>title</b> - a LangDict object, the name of the\n                    item to be displayed for the user, in plaintext.</li>\n\n                    <li><b>summary</b> - a LangDict object, additional\n                    information on the item. One paragraph with one or two\n                    sentences. May contain simple HTML markup.</li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>entries</b> - the list of preferences within the group, or <b>null</b> if it\n                is not a group.</p>\n\n                \n\n                <p>This is simply the list of preference objects. Each object\n                is of the same type as the object described in the method that\n                you're now reading.</p>\n\n                <p>If no <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> is given, each entry will\n                contain the same fields which you have asked for in your\n                <b>fields</b> parameter, including the <b>entries</b> field.\n                This allows you to access the entire subtree of preferences\n                recursively.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/uprefs/#preference'>preference</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nthe ID of the preference (or group of preferences)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\n\n            <p>One of the following values:</p>\n\n            <ul>\n                <li><b>textbox</b> - such preferences should be rendered as\n                textboxes. The type of their <i>value</i> is a string.</li>\n\n                <li><b>checkbox</b> - such preferences should be rendered as\n                checkboxes. The type of their <i>value</i> is boolean.</li>\n\n                <li><b>list</b> - such preferences should be rendered using a\n                radiobox or other similar component. The type of their\n                <i>value</i> is a string and the possible values are presented\n                in the <i>list_items</i> field.</li>\n\n                <li><b>group</b> - a group of preferences. Preferences can be\n                nested within groups (e.g. pages, tabs, sections, dialogs). The\n                group-type preferences are inner nodes within the preferences\n                tree. Such nodes have no <i>value</i> (it will be always\n                <i>null</i>), instead they have a list of <i>entries</i>.</li>\n\n                <li><b>Other types will come in the future!</b> Some of these\n                types might be quite complex and may require you to design your\n                own specialized components. You should ignore preferences with\n                types unknown to you.</li>\n            </ul>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title",
+      "description": "\n\n                A LangDict object. A short title for the preference (in\n                plaintext)\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "summary",
+      "description": "\n\n                <p>If given, it will be a short description of the preference -\n                usually one or two sentences in a single paragraph. May contain\n                simple HTML markup and links to external resources.</p>\n\n                <p><b>Important:</b> Some summaries may change based on the\n                values of their own preference and/or other preferences. It is\n                important that you refresh the values of these fields every\n                time the user changes any preference via your UI. (This also\n                means that we require the user interface to \"live\" - i.e. you\n                should not require your users to click any \"save\" buttons).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "enabled",
+      "description": "\n\n                <p><b>Important:</b> Similar as above, some preferences might\n                get disabled or enabled based on other preferences. You must\n                refresh these fields every time the user changes any preference\n                via your UI!</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "value",
+      "description": "\n\n            <p>The format of this field varies on the preference type. See the\n            description of the <b>type</b> field for more information.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "list_items",
+      "description": "\n\n                <p>This field is not-null only for preferences of the\n                <b>list</b> type.</p>\n\n                <p>A list of dictionaries. Each dictionary has the following\n                keys:</p>\n\n                <ul>\n                    <li><b>value</b> - the value of the item. One of the values\n                    in <b>list_items</b> will always match the current value of\n                    the preference (the one in the <i>value</i> field). This is\n                    the internal value of the preference and should not be\n                    displayed to the user.</li>\n\n                    <li><b>title</b> - a LangDict object, the name of the\n                    item to be displayed for the user, in plaintext.</li>\n\n                    <li><b>summary</b> - a LangDict object, additional\n                    information on the item. One paragraph with one or two\n                    sentences. May contain simple HTML markup.</li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "entries",
+      "description": "\n\n                <p>This is simply the list of preference objects. Each object\n                is of the same type as the object described in the method that\n                you're now reading.</p>\n\n                <p>If no <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> is given, each entry will\n                contain the same fields which you have asked for in your\n                <b>fields</b> parameter, including the <b>entries</b> field.\n                This allows you to access the entire subtree of preferences\n                recursively.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

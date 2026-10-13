@@ -1,0 +1,83 @@
+{
+  "name": "services/payments/user_accounts",
+  "short_name": "user_accounts",
+  "description": "<p>\nGet access token issuer's banking accounts</p>",
+  "brief_description": "\nGet access token issuer's banking accounts",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/payments/#user_accounts",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "payments"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n<p>List of objects representing accounts. Each dictionary contains\n    following fields:</p>\n\n    \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>account_number</b> -\n                    Account number.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>account_owner</b> -\n                    Account owner.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    Account name.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title_prefix</b> -\n                    Account title prefix.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> -\n                    Faculty owning account.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>currency</b> -\n                    Account currency.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>swift</b> -\n                    Swift code of the account. Might be null..</p>\n            \n            \n        </li>\n        \n    </ul>\n\n\n    <p><b>Warning:</b> these accounts numbers are related to user faculties and not\n    to payments! They are for informational purposes only!<p>\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "account_number",
+      "description": "\nAccount number.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "account_owner",
+      "description": "\nAccount owner.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nAccount name.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title_prefix",
+      "description": "\nAccount title prefix.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nFaculty owning account.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "currency",
+      "description": "\nAccount currency.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "swift",
+      "description": "\nSwift code of the account. Might be null.",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,55 @@
+{
+  "name": "services/tt/upcoming_share",
+  "short_name": "upcoming_share",
+  "description": "\n\n        <p>Get the webcal feed of the user's upcoming events.</p>\n\n        <p>Use this method to get the webcal URI needed to import user's\n        upcoming events into external applications.</p>\n    ",
+  "brief_description": "\nGet the webcal feed of the user's upcoming events",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#upcoming_share",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "studies"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "lang",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Preferred language of the calendar and its entries. This should be\n            either <b>pl</b> or <b>en</b>.\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of following fields and their values:\n                    \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>webcal_url</b> -\n                    an URI with the webcal scheme.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "webcal_url",
+      "description": "\nan URI with the webcal scheme",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

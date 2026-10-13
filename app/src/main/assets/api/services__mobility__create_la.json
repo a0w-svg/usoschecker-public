@@ -1,0 +1,62 @@
+{
+  "name": "services/mobility/create_la",
+  "short_name": "create_la",
+  "description": "\nCreate new LA for mobility. Note that only coordinator of mobilities may execute this method",
+  "brief_description": "\nCreate LA for mobility",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#create_la",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "mobility_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a mobility"
+    },
+    {
+      "name": "mobility_type",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nmobility type for LA<p>Possible values: <b>semester</b>, <b>blended</b>, <b>doctoral</b>.</p>"
+    },
+    {
+      "name": "eqf_level",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nLevel of studies of mobility"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nID of created LA",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>la_already_exists</b> -\n                                Learning agreement already exists.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>mobility_not_found</b> -\n                                Referenced mobility does not exist or access is forbidden.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,54 @@
+{
+  "name": "services/oauth/revoke_consumer_key",
+  "short_name": "revoke_consumer_key",
+  "description": "\t\n\t<p>Revoke (or begin the process of revoking) an existing Consumer Key.\n\tThis might be useful after a Consumer Key was compromised.</p>\n\t\n\t<p>There are two ways in which you can use this method:</p>\n\t<ul>\n\t\t<li>You may call it without any arguments <b>and sign it</b>\n\t\t\twith the Consumer Key you want revoked, or:</li>\n\t\t\n\t\t<li>Pass Consumer Key (and Secret) in plain text, as\n\t\t\targuments.</li>\n\t</ul>\n\t\n\t<p>Initially, this method allowed revoking Consumer Keys without the\n\toriginal owner's approval. Currently, only the owner may revoke the\n\tkey. After you call this method, a message will be sent to the email\n\taddress registered with the given Consumer Key. In order to complete\n\tthe revoking process, additional action will be required.</p>\n",
+  "brief_description": "Revoke an existing Consumer Key.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/oauth/#revoke_consumer_key",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "consumer_key",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tConsumer Key. Note: there is no oauth_ prefix.\n"
+    },
+    {
+      "name": "consumer_secret",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tConsumer Secret.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true}</code>. In case of error, expect HTTP 400\n\tresponse (with the proper message field).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

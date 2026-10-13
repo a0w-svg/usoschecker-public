@@ -1,0 +1,75 @@
+{
+  "name": "services/exams/condition",
+  "short_name": "condition",
+  "description": "<p>\nGet information on a admission condition.</p>",
+  "brief_description": "\nGet information on a admission condition.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/exams/#condition",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "exam_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nId of an exam."
+    },
+    {
+      "name": "examrep_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nId of an exam report"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "examrep|grade_value",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>examrep</b> - Related exam report.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep/#exam'>services/examrep/exam</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grade_value</b> -\n                    Null or dictionary of the following structure:\n                <ul>\n                    <li>symbol - e.g. 5, ZAL</li>\n                    <li>passes - boolean, true if student passes course with this grade</li>\n                    <li>decimal_value - numerical value of the grade</li>\n                    <li>name - a LangDict object with the grade name</li>\n                    <li>order_key - int used for ordering grades (should not be displayed for users)\n                    </li>\n                </ul>\n            Null means that any grade that passes is required. If dictionary is returned, described grade or higher is required..</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "examrep",
+      "description": "\nRelated exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grade_value",
+      "description": "\n\n            Null or dictionary of the following structure:\n                <ul>\n                    <li>symbol - e.g. 5, ZAL</li>\n                    <li>passes - boolean, true if student passes course with this grade</li>\n                    <li>decimal_value - numerical value of the grade</li>\n                    <li>name - a LangDict object with the grade name</li>\n                    <li>order_key - int used for ordering grades (should not be displayed for users)\n                    </li>\n                </ul>\n            Null means that any grade that passes is required. If dictionary is returned, described grade or higher is required.\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

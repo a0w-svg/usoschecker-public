@@ -1,0 +1,54 @@
+{
+  "name": "services/uprefs/values",
+  "short_name": "values",
+  "description": "\n\n        <p>This method allows you to retrieve current values of a single\n        preference for multiple users. Only some preferences can be fetched\n        this way.</p>\n\n        <p><b>Important:</b> Since preference IDs are not backward compatible,\n        this method <u>should be avoided</u>! It is intended to be used\n        primarily from within USOS API itself, in order to properly determine\n        the <i>effective outcomes</i>, which are later exposed in other,\n        specialized methods. Before you use this method, make sure no such\n        specialized methods exist, you may also contact us and we may provide\n        such specialized methods for you.</p>\n    ",
+  "brief_description": "\nFetch the values of a single preference for multiple users.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/uprefs/#values",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "upref_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            ID of the preference. Only some preferences can be fetched using\n            this method. If the given preference ID is not supported, then you\n            will get a HTTP 400 response.\n        "
+    },
+    {
+      "name": "user_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Pipe-separated list of user IDs. They must be valid user IDs, if\n            they're not, then the results are undetermined - you may get an\n            error, but you may also get fake/invalid values.\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary: your <b>user_ids</b> will be mapped to dictionary's\n        keys, and each value will contain the current value of the preference,\n        as defined in the <b>value</b> field in the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/uprefs/#preference'>preference</a> method.</p>\n\n        <p>If the given preference is unknown or not supported, then you will\n        get a HTTP 400 response.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

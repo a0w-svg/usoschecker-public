@@ -1,0 +1,99 @@
+{
+  "name": "services/cards/mcard_order2",
+  "short_name": "mcard_order2",
+  "description": "<p>\nGet details of mStudentCard order</p>",
+  "brief_description": "\nGet details of mStudentCard order",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/cards/#mcard_order2",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "cards"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "order_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nIdentifier of an order"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|order_date|status|token|distribution_pass|student_number|expiration_date",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the order;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>order_date</b> -\n                    Datetime string with time of order;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - status of the order.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>pending</b> - the order is waiting to be sent to the external service</p></li>\n<li><p><b>in_progress</b> - the order is being processed by the external service</p></li>\n<li><p><b>ready_to_receive</b> - the order is completed and the card is waiting to be installed on the user's device</p></li>\n<li><p><b>received</b> - the card is installed on the user's device</p></li>\n<li><p><b>error</b> - an error occurred</p></li>\n<li><p><b>revoked_by_me</b> - the card has been revoked by the user</p></li>\n<li><p><b>revoked</b> - the card has been revoked by the system</p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>token</b> -\n                    If order has status 'ready' token for mObywatel app will be returned;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>distribution_pass</b> -\n                    If order has status 'ready' distribution password will be returned;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_number</b> -\n                    Student number related to mcard;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>expiration_date</b> -\n                    Expiration date of mcard.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the order",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "order_date",
+      "description": "\nDatetime string with time of order",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>pending</b> - the order is waiting to be sent to the external service</p></li>\n<li><p><b>in_progress</b> - the order is being processed by the external service</p></li>\n<li><p><b>ready_to_receive</b> - the order is completed and the card is waiting to be installed on the user's device</p></li>\n<li><p><b>received</b> - the card is installed on the user's device</p></li>\n<li><p><b>error</b> - an error occurred</p></li>\n<li><p><b>revoked_by_me</b> - the card has been revoked by the user</p></li>\n<li><p><b>revoked</b> - the card has been revoked by the system</p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "token",
+      "description": "\nIf order has status 'ready' token for mObywatel app will be returned",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "distribution_pass",
+      "description": "\nIf order has status 'ready' distribution password will be returned",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_number",
+      "description": "\nStudent number related to mcard",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "expiration_date",
+      "description": "\nExpiration date of mcard",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,97 @@
+{
+  "name": "services/calendar/calendar_event",
+  "short_name": "calendar_event",
+  "description": "<p>\nGet event details</p>",
+  "brief_description": "\nGet event details",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/calendar/#calendar_event",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nEvent id"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|start_date|end_date|type|is_day_off",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    A calendar event id;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>start_date</b> -\n                    A datetime string;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end_date</b> -\n                    A datetime string;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - An associated faculty.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> -\n                    one of following values:\n            <ul>\n                <li>rector</li>\n                <li>dean</li>\n                <li>holidays</li>\n                <li>public_holidays</li>\n                <li>exam_session</li>\n                <li>academic_year</li>\n                <li>break</li>\n                <li>links_edit</li>\n                <li>public_holidays</li>\n                <li>undefined</li>\n            </ul>;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_day_off</b> -\n                    true if day of event is off from classes.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nA calendar event id",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start_date",
+      "description": "\nA datetime string",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end_date",
+      "description": "\nA datetime string",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nAn associated faculty",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\n\n            one of following values:\n            <ul>\n                <li>rector</li>\n                <li>dean</li>\n                <li>holidays</li>\n                <li>public_holidays</li>\n                <li>exam_session</li>\n                <li>academic_year</li>\n                <li>break</li>\n                <li>links_edit</li>\n                <li>public_holidays</li>\n                <li>undefined</li>\n            </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_day_off",
+      "description": "\ntrue if day of event is off from classes",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

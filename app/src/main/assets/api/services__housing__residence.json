@@ -1,0 +1,99 @@
+{
+  "name": "services/housing/residence",
+  "short_name": "residence",
+  "description": "\n\n        <p>Get information on a single residence.</p>\n\n        <p>A residence object represents a single check-in and check-out\n        of a user to a dormitory dormroom.</p>\n    ",
+  "brief_description": "\nGet information on a single residence",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#residence",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "dorm_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "residence_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a residence"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the residence;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>assignment</b> - an <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#assignment'>assignment</a> object associated with this residence, <b>or null</b> if this residence has no such association.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#assignment'>assignment</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - a <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormitory_user'>dormitory_user</a> associated with this residence.</p>\n\n                \n\n                <p>Please note, that the <b>assignment</b> field may contain\n                <b>null</b>, but the <b>user</b> will always contain some\n                value.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>dormroom</b> - a dormroom to which the user has checked in.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormroom'>dormroom</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>check_in_date</b> -\n                    datetime string; indicates when the user has checked in;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>check_out_date</b> -\n                    datetime string; indicates when the user has checked out OR (if its in the future) when he is <i>planning</i> to check out;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>resident_type</b> - a <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#resident_type'>resident_type</a> assigned to this user during this residence.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#resident_type'>resident_type</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the residence",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "assignment",
+      "description": "\nan <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#assignment'>assignment</a> object associated with this residence, <b>or null</b> if this residence has no such association",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\n\n                <p>Please note, that the <b>assignment</b> field may contain\n                <b>null</b>, but the <b>user</b> will always contain some\n                value.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "dormroom",
+      "description": "\na dormroom to which the user has checked in",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "check_in_date",
+      "description": "\ndatetime string; indicates when the user has checked in",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "check_out_date",
+      "description": "\ndatetime string; indicates when the user has checked out OR (if its in the future) when he is <i>planning</i> to check out",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "resident_type",
+      "description": "\na <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#resident_type'>resident_type</a> assigned to this user during this residence",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

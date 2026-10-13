@@ -1,0 +1,133 @@
+{
+  "name": "services/meetings/meeting",
+  "short_name": "meeting",
+  "description": "<p>\nGet information about a single meeting.</p>",
+  "brief_description": "\nGet information about a single meeting.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "meeting_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nMeeting ID"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|comment|open",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of meeting;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict, meeting name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    LangDict, meeting comment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - meeting faculty.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term</b> - term assigned to meeting or <b>null</b> if no term was assigned.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/terms/#term'>services/terms/term</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>lecturer</b> - Lecturer.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>open</b> -\n                    boolean, is meeting open?;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_attend</b> - boolean, can I attend?.</p>\n\n                \n\n                  User can attend the meeting if the meeting is open or they are a participant of one of\n                  the groups assigned to meeting\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>state</b> - meeting state.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>active</b></p></li>\n<li><p><b>in_preparation</b></p></li>\n<li><p><b>closed</b></p></li>\n<li><p><b>archived</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>substantiation_mode</b> - substantiation choice mode.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>this_faculty_only</b> - user can use only justifications from faculty of the meeting</p></li>\n<li><p><b>this_faculty_and_parents</b> - user can use justifications from faculty of the meeting and parents</p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>auto_accept</b> -\n                    boolean, are requests accepted automatically?;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>groups</b> - groups assigned to meeting.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#group'>services/groups/group</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>soonest_datetime</b> -\n                    datetime, start of soonest meeting date (see <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting_date'>meeting_date</a>)\n            or <b>null</b> if this meeting does not have any future dates.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of meeting",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict, meeting name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\nLangDict, meeting comment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nmeeting faculty",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term",
+      "description": "\nterm assigned to meeting or <b>null</b> if no term was assigned",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "lecturer",
+      "description": "\nLecturer",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "open",
+      "description": "\nboolean, is meeting open?",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_attend",
+      "description": "\n\n                  User can attend the meeting if the meeting is open or they are a participant of one of\n                  the groups assigned to meeting\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "state",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>active</b></p></li>\n<li><p><b>in_preparation</b></p></li>\n<li><p><b>closed</b></p></li>\n<li><p><b>archived</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "substantiation_mode",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>this_faculty_only</b> - user can use only justifications from faculty of the meeting</p></li>\n<li><p><b>this_faculty_and_parents</b> - user can use justifications from faculty of the meeting and parents</p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "auto_accept",
+      "description": "\nboolean, are requests accepted automatically?",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "groups",
+      "description": "\ngroups assigned to meeting",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "soonest_datetime",
+      "description": "\n\n            datetime, start of soonest meeting date (see <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting_date'>meeting_date</a>)\n            or <b>null</b> if this meeting does not have any future dates\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

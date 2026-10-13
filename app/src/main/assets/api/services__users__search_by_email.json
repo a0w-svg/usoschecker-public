@@ -1,0 +1,54 @@
+{
+  "name": "services/users/search_by_email",
+  "short_name": "search_by_email",
+  "description": "\n\n        <p>Search for users with a given email address.</p>\n        <ul>\n            <li>We do not guarantee the uniqueness of users' emails.\n                Therefore, there might actually be more than one result\n                for your query.</li>\n            <li>We store only one email address per user. Some users\n                use aliases (alternate names for their email accounts),\n                this method won't help you identify users of such aliases.</li>\n        </ul>\n    ",
+  "brief_description": "\nSearch for users with a given email address.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#search_by_email",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "email",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Email address. Must be an exact match (case insensitive).</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|first_name|last_name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        List of dictionaries. Each dictionary contains a user description,\n        as defined in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a> method.\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

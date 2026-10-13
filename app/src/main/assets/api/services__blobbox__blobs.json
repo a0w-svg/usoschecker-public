@@ -1,0 +1,54 @@
+{
+  "name": "services/blobbox/blobs",
+  "short_name": "blobs",
+  "description": "\tGet information on given blobs.",
+  "brief_description": "Get information on given blobs.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#blobs",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Pipe-separated list of blob IDs (no more than 500).</p>\n\t<p>You may get information <i>only</i> on blobs which were uploaded\n\tby yourself (using your consumer key). All foreign blobs will\n\tappear as inexistent.</p>\n\t<p>If you want to get <b>the content</b> of the blob, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#get\">get</a> method.</p>\n"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're interested\n\tin. This must be any subset of keys, which are described in the\n\t<b>returns</b> section of the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#blob\">blob</a> method.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary. Blob IDs will be mapped to keys of this dictionary.\n\tEach value will be a dictionary of the same structure as described in\n\tthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#blob\">blob</a> method.</p>\n<p>For all invalid references (blob IDs which point to inexistent\nblobs, or blobs you do not own), the value will be <b>null</b> (instead\nof a dictionary).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,38 @@
+{
+  "name": "services/events2/generate_one_time_code",
+  "short_name": "generate_one_time_code",
+  "description": "<p>\nGenerate and send one time code to user</p>",
+  "brief_description": "\nGenerate and send one time code to user",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events2/#generate_one_time_code",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nUnique token used to verification of generated code",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,60 @@
+{
+  "name": "services/crstests/lecturer",
+  "short_name": "lecturer",
+  "description": "\t\n\tThis methods returns tests for which the lecturer has at least read access permission.\n",
+  "brief_description": "Get lecturer's tests.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#lecturer",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "staff_perspective",
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "tests",
+      "description": "\t\n\tA dictionary mapping from term IDs to a list of dictionaries representing roots of tests, each of the following structure:\n\tThe dictionary will contain primary fields from <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_node\">root_node</a> method.\n\n<b>Please note:</b> templates to which the token issuer has read access will not be listed, they will be\nin in the <b>templates</b> field of the result.\n",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "templates",
+      "description": "\t\n\tList of dictionaries representing roots of tests which are templates, each of the following structure:\n\tThe dictionary will contain primary fields from <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_node\">root_node</a> method.\n",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "terms",
+      "description": "\t\n\tA dictionary mapping from term IDs (the keys of <b>tests</b> field) to the results of the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/terms/#term\">term</a> method. Only primary keys will be present.\n",
+      "is_primary": false,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

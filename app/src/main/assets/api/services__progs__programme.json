@@ -1,0 +1,115 @@
+{
+  "name": "services/progs/programme",
+  "short_name": "programme",
+  "description": "<p>\nGet information on a given study programme.</p>",
+  "brief_description": "\nGet information on a given study programme.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/progs/#programme",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "programme_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>ID of a programme.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|description",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the programme;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    a LangDict object with the name of the programme;</p>\n            \n            \n        </li>\n        \n        <li class='deprecated'>\n            \n                <p><b>description</b> - again, a LangDict object with the name of the programme.</p>\n\n                \n\n                <p>This field is deprecated because its name was misleading.\n                It <b>does not</b> contain the description of the programme.\n                Its value is very short and contains only the name of the\n                programme. Currently it is an alias of the <b>name</b>\n                field.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - a faculty object, or <b>null</b>.</p>\n\n                \n\n                <p>This is the faculty which administers this study programme.\n                The object is of the same structure as the one described in\n                the <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. If no\n                faculty administers this programme, then <b>null</b> will be\n                returned.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>all_faculties</b> - a faculty object, or <b>null</b>.</p>\n\n                \n\n                <p>List of faculties related to programme.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>mode_of_studies</b> -\n                    a LangDict object with a short, human-readable representation of the studies-mode provided by the programme (e.g. full-time);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>level_of_studies</b> -\n                    a LangDict object with a short, human-readable representation of the level of the programme (e.g. first cycle programme);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>duration</b> -\n                    a LangDict object with a short, human-readable representation of the duration of the programme (e.g. 3-year studies);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>professional_status</b> -\n                    a LangDict object with the description of qualifications that will be acquired after graduation from this programme;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>level</b> -\n                    One of following values: first_cycle, second_cycle, third_cycle, phd_school, long_cycle.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>programme_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the programme",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\na LangDict object with the name of the programme",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\n\n                <p>This field is deprecated because its name was misleading.\n                It <b>does not</b> contain the description of the programme.\n                Its value is very short and contains only the name of the\n                programme. Currently it is an alias of the <b>name</b>\n                field.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\n\n                <p>This is the faculty which administers this study programme.\n                The object is of the same structure as the one described in\n                the <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. If no\n                faculty administers this programme, then <b>null</b> will be\n                returned.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "all_faculties",
+      "description": "\n\n                <p>List of faculties related to programme.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "mode_of_studies",
+      "description": "\na LangDict object with a short, human-readable representation of the studies-mode provided by the programme (e.g. full-time)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "level_of_studies",
+      "description": "\na LangDict object with a short, human-readable representation of the level of the programme (e.g. first cycle programme)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "duration",
+      "description": "\na LangDict object with a short, human-readable representation of the duration of the programme (e.g. 3-year studies)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "professional_status",
+      "description": "\na LangDict object with the description of qualifications that will be acquired after graduation from this programme",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "level",
+      "description": "\nOne of following values: first_cycle, second_cycle, third_cycle, phd_school, long_cycle",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

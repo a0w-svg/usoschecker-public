@@ -1,0 +1,97 @@
+{
+  "name": "services/meetings/get_note",
+  "short_name": "get_note",
+  "description": "<p>\nGet meeting note.</p>",
+  "brief_description": "\nGet meeting note.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/meetings/#get_note",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fac_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nFaculty ID"
+    },
+    {
+      "name": "term_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nTerm ID"
+    },
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nUser ID"
+    },
+    {
+      "name": "note_type",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\ntype of note<p>Possible values: <b>private</b>, <b>public</b>.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|creation_date|content",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of note;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>creation_date</b> -\n                    datetime of creation;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>content</b> -\n                    Note content.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>method_forbidden</b> - access to method denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>staff_only</b> -\n                                this method can only be invoked by staff members.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of note",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "creation_date",
+      "description": "\ndatetime of creation",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "content",
+      "description": "\nNote content",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

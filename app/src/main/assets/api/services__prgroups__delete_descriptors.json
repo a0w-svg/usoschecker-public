@@ -1,0 +1,46 @@
+{
+  "name": "services/prgroups/delete_descriptors",
+  "short_name": "delete_descriptors",
+  "description": "<p>\nDelete descriptors of primary groups.</p>",
+  "brief_description": "\nDelete descriptors of primary groups.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#delete_descriptors",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "descriptor_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>List of descriptor IDs.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following structure:</p>\n        <ul>\n            <li>\n                <p><b>matched</b> - a list of descriptor IDs which were actually deleted.</p>\n            </li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

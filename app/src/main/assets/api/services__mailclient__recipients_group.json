@@ -1,0 +1,81 @@
+{
+  "name": "services/mailclient/recipients_group",
+  "short_name": "recipients_group",
+  "description": "<p>\nGet information on a given recipients group.</p>",
+  "brief_description": "\nGet information on a given recipients group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#recipients_group",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "message_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Message ID.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>primary_groups</b> - list of dictionaries describing primary groups that were added to this group.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#primary_group'>services/prgroups/primary_group</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>custom_groups</b> - list of dictionaries describing custom groups\n        that were added to this group; each dictionary contains primary fields\n        described in this section.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/csgroups/#custom_group'>services/csgroups/custom_group</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>users</b> - list of dictionaries describing users that were added to this group.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>emails</b> -\n                    list of individual email addresses added to this group.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                message could not be found; <b>param_name</b> is equal to <b>message_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "primary_groups",
+      "description": "\n\n        list of dictionaries describing primary groups that were added to this group\n    ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "custom_groups",
+      "description": "\n\n        list of dictionaries describing custom groups\n        that were added to this group; each dictionary contains primary fields\n        described in this section\n    ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "users",
+      "description": "\n\n        list of dictionaries describing users that were added to this group\n    ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "emails",
+      "description": "\n\n        list of individual email addresses added to this group\n    ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

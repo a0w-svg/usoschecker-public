@@ -1,0 +1,46 @@
+{
+  "name": "services/fac/subfaculties_deep",
+  "short_name": "subfaculties_deep",
+  "description": "\tGet the list of all descendant faculty IDs of a given faculty.",
+  "brief_description": "Get all descendant faculty IDs.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fac/#subfaculties_deep",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fac_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the faculty."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of strings - all descendant faculty IDs of the given faculty (the root\n\tfaculty is <b>not</b> included).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

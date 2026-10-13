@@ -1,0 +1,46 @@
+{
+  "name": "services/mobility/cancel_version",
+  "short_name": "cancel_version",
+  "description": "<p>\nCancel empty version of LA</p>",
+  "brief_description": "\nCancel empty version of LA",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#cancel_version",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "version_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a LA"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nID of LA",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>version_not_empty</b> -\n                                Version is not empty.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

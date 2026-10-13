@@ -1,0 +1,46 @@
+{
+  "name": "services/crstests/groups",
+  "short_name": "groups",
+  "description": "\t\n\tIf a root of a test has <b>limit_to_groups</b> parameter set\n\tthen this method will return the groups the test is limited to, otherwise\n\tit will return all the groups of the course edition the test is connected to.\n\tThe <b>root_id</b> you supply must be an ID of a test which is connected to some course edition.\n",
+  "brief_description": "Get groups of a test.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#groups",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "root_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of a root of a test (this test must be a template)."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tList of the dictionaries of the following structure:\n\t<ul>\n\t\t<li><b>course_unit_id</b> - unit_id</li>\n\t\t<li><b>group_number</b> - group_number</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

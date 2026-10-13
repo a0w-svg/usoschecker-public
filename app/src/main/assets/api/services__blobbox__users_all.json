@@ -1,0 +1,46 @@
+{
+  "name": "services/blobbox/users_all",
+  "short_name": "users_all",
+  "description": "\t\n\t<p>This method works like the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#users\">users</a> method,\nbut it returns all users in whose name you store any data. Note, that\nthe result might be very large.</p>\n",
+  "brief_description": "Get storage usage statistics for all users.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#users_all",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "hard_count|hard_vsize",
+      "description": "\t\n\tPipe-separated list of fields (as in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#consumer\">consumer</a> method).\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Same as the the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#users\">users</a> method.</p>\n<p><b>Note:</b> Only users with <b>all_count</b> greater than zero\nwill be included.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

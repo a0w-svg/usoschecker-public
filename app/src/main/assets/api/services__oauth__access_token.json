@@ -1,0 +1,30 @@
+{
+  "name": "services/oauth/access_token",
+  "short_name": "access_token",
+  "description": "\t\n\t<p>Exchange authorized Request Token for an Access Token.\n\tAccess Token can be used to access resources of a user who\n\tauthorized the Request Token.</p>\n\t<p>Standard OAuth &quot;Consumer &amp; Request Token&quot; Authorization arguments\n\tare required.</p>\n\t<p>Please note, that the returned Access Token MAY have access to more\n\tscopes than you declared in request_token method (but it will never have\n\taccess to these scopes, which user hasn't granted your application access to).</p>\n",
+  "brief_description": "Exchange authorized Request Token for an Access Token.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/oauth/#access_token",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "oauth_verifier",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tConsult <a href=\"http://oauth.net/documentation/spec/\">OAuth documentation</a> for details.\n"
+    }
+  ],
+  "returns": "\t\n\t<p>Standard OAuth 1.0a Token response - a string in a form-encoded format:</p>\n\t<pre>oauth_token=...&amp;oauth_token_secret=...</pre>\n\t<p>You <b>must</b> be prepared that there might be more parameters returned\n\tin the future (you should ignore them gracefully).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

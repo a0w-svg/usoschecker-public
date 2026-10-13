@@ -1,0 +1,102 @@
+{
+  "name": "services/users/change",
+  "short_name": "change",
+  "description": "\n\n        <p>Change user data, such as his email address, or phone number.</p>\n\n        <p>The number of fields which you can change with this method is very\n        limited, but it will grow depending on users' needs (contact us if you\n        want more fields supported).</p>\n\n        <p>All the changes made by this method are atomic. That is, if any of\n        the changes fail to be saved, then none of them will be saved.</p>\n\n        <p>Please note that it may take time for some changes to propagate to\n        all USOS-related applications.</p>\n    ",
+  "brief_description": "\nChange user data.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#change",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>The ID of the user whose data is to be updated. Required if you\n            don't use an Access Token.</p>\n        "
+    },
+    {
+      "name": "email",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unchanged)",
+      "description": "\n\n                <p>If given, then user's email address will be replaced with\n                the given value.</p>\n\n                <p>Administrative Consumer Key required.</p>\n            "
+    },
+    {
+      "name": "alt_email",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unchanged)",
+      "description": "\n\n                <p>If given, then user's alternative email address will be\n                replaced with the given value.</p>\n\n                <p>Scope required: <b>edit_user_attrs</b>.</p>\n            "
+    },
+    {
+      "name": "homepage_url",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unchanged)",
+      "description": "\n\n                <p>If given, then user's homepage URL will be replaced with the\n                given value.</p>\n\n                <p>Administrative Consumer Key required.</p>\n            "
+    },
+    {
+      "name": "phone_numbers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unchanged)",
+      "description": "\n\n                <p>Pipe-separated list of strings. If given, then user's\n                official phone numbers will be replaced with the given values.\n                Note, that currently only staff members are allowed to have\n                phone numbers, and no more than two of them. This may change in\n                future.</p>\n\n                <p>Administrative Consumer Key required.</p>\n            "
+    },
+    {
+      "name": "mobile_numbers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unchanged)",
+      "description": "\n\n                <p>Pipe-separated list of strings. If given, then user's\n                mobile phone numbers will be replaced with the given values.\n                This may change in future.</p>\n\n                <p>Administrative Consumer Key required.</p>\n            "
+    },
+    {
+      "name": "room_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unchanged)",
+      "description": "\n\n                <p>ID of a room. If given, then the user's current office room\n                will be replaced with the given one. Note, that only staff\n                members are allowed to have an office room.</p>\n\n                <p>Administrative Consumer Key required.</p>\n            "
+    },
+    {
+      "name": "revenue_office_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unchanged)",
+      "description": "\n\n                <p>ID of revenue office. If given, then user's revenue office ID will\n                be replaced with the given one.</p>\n                <p>Administrative Consumer Key required.</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>If all changes succeed, <code>{\"success\": true}</code> will be\n        returned.</p>\n\n        <p>If any of the changes fail, then none of them will be saved, and you\n        will receive HTTP 400 error with detailed error message. This error\n        message is given in plaintext string - readable to humans, but not to\n        machines. Contact us if you need enhanced error handling in your\n        application (e.g. error codes, or list of invalid fields).</p>\n\n        <p>The error response may (but doesn't have to) contain the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages'>user_messages field</a>\n        (especially if you're changing the fields editable by non-administrative\n        consumers).</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

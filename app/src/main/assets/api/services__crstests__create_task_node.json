@@ -1,0 +1,123 @@
+{
+  "name": "services/crstests/create_task_node",
+  "short_name": "create_task_node",
+  "description": "\t\n\tCreates a <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#TaskNode\">TaskNode</a> with the specified parameters. <br/>\nIf you won't provide <b>name_pl</b> parameter, the default value = &quot;Nowe Zadanie&quot;\nwill be used.\nIf you won't provide some other parameters, their respective default values will be used.\n",
+  "brief_description": "Create a TaskNode.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#create_task_node",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": [
+      "adm_documents",
+      "cards",
+      "change_all_preferences",
+      "crstests",
+      "dorm_admin",
+      "edit_user_attrs",
+      "email",
+      "events",
+      "grades",
+      "grades_write",
+      "mailclient",
+      "mobile_numbers",
+      "offline_access",
+      "other_emails",
+      "payments",
+      "personal",
+      "photo",
+      "placement_tests",
+      "session_debugging_perms",
+      "slips",
+      "slips_admin",
+      "staff_perspective",
+      "student_exams",
+      "student_exams_write",
+      "studies",
+      "surveys_filling",
+      "surveys_reports",
+      "theses_protocols_write"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "parent_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the parent node for our new node. The type of this node must be root or folder."
+    },
+    {
+      "name": "name_pl",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the node (in polish)."
+    },
+    {
+      "name": "name_en",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the node (in english)."
+    },
+    {
+      "name": "order",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tinteger - order (see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#ordering\">ordering</a>)"
+    },
+    {
+      "name": "points_min",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tMinimal number of points available for this task. Default value = 0.0"
+    },
+    {
+      "name": "points_max",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tMaximal number of points available for this task. Default value = 10.0"
+    },
+    {
+      "name": "points_precision",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tThe number of digits after the decimal point.\n\tIt should be used while displaying points from this node.\n\tDefault value = 1\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tDictionary with only one key 'id'.\n\tID of the newly created TaskNode.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

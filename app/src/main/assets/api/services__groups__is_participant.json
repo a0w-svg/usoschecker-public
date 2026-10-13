@@ -1,0 +1,54 @@
+{
+  "name": "services/groups/is_participant",
+  "short_name": "is_participant",
+  "description": "\tIs student participant of the group.",
+  "brief_description": "Is student participant of the group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#is_participant",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\tID of a course unit."
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\t\n\tGroup number unique with regard to the course unit.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Boolean value - true if student participates in the group.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

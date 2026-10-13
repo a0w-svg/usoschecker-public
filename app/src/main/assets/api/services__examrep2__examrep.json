@@ -1,0 +1,115 @@
+{
+  "name": "services/examrep2/examrep",
+  "short_name": "examrep",
+  "description": "<p>\nGet info about exam report</p>",
+  "brief_description": "\nGet info about exam report",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "examrep_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nidentifier of exam report"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|description|is_general_report|sessions",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    identifier of exam report;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    description of exam report (LangDict object);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>counts_into_average</b> -\n                    True if grades given in this exam report counts into average;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grade_type</b> - Grade type related to given exam report.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#grade_type'>grade_type</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_general_report</b> -\n                    True if report is a general report assigned to course edition;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>sessions</b> - List of exam report session objects related to this report. Ordered by session number.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep_session'>examrep_session</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>edit_access</b> -\n                    Flag describing access rights.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>course_edition</b> - Course edition that report is assigned to.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_edition2'>services/courses/course_edition2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_unit</b> - Report may be assigned to course unit. If it is, related object will be returned.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_unit'>services/courses/course_unit</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>active_sessions</b> - List of exam report sessions that have status allowing edition and deadline is in the future.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep_session'>examrep_session</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nidentifier of exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\ndescription of exam report (LangDict object)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "counts_into_average",
+      "description": "\nTrue if grades given in this exam report counts into average",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grade_type",
+      "description": "\nGrade type related to given exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_general_report",
+      "description": "\nTrue if report is a general report assigned to course edition",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "sessions",
+      "description": "\nList of exam report session objects related to this report. Ordered by session number",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "edit_access",
+      "description": "\nFlag describing access rights",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_edition",
+      "description": "\nCourse edition that report is assigned to",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "course_unit",
+      "description": "\nReport may be assigned to course unit. If it is, related object will be returned",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "active_sessions",
+      "description": "\nList of exam report sessions that have status allowing edition and deadline is in the future",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,54 @@
+{
+  "name": "services/courses/units",
+  "short_name": "units",
+  "description": "\n\n        <p>Get information on multiple course units.</p>\n\n        <p>This method is similar to the <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#unit'>unit</a> method, but\n        it works with multiple units. It also has a <b>limited fields support</b>.</p>\n    ",
+  "brief_description": "\nGet information on multiple course units.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/courses/#units",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "unit_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPipe-separated list of unit IDs."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector must contain subset of\n    <b>primary</b> fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#unit'>unit</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary: your <b>unit_ids</b> will be mapped to dictionary's\n        keys, and each value will contain the description of a course, as\n        defined in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#unit'>unit</a> method (or <b>null</b> if the\n        given unit_id has not been found).</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

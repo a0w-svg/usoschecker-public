@@ -1,0 +1,38 @@
+{
+  "name": "services/apiref/method_index",
+  "short_name": "method_index",
+  "description": "\tGet a list of USOS API methods with brief descriptions.",
+  "brief_description": "Get a list of USOS API methods with brief descriptions.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apiref/#method_index",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tA list of dictionaries, each of which contains one API\n\tmethod description in the following format:\n\t<ul>\n\t\t<li><b>name</b> - name of a method,</li>\n\t\t<li><b>brief_description</b> - plain-text, brief (usually single\n\t\t\tsentenced) description of what the method does.</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

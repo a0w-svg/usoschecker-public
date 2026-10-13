@@ -1,0 +1,46 @@
+{
+  "name": "services/mailing/check_message_status",
+  "short_name": "check_message_status",
+  "description": "\t\n\t<p>Check for the detailed status of a previously sent message.</p>\n\t<p>When you've used a method like <a href=\"#send_simple_message\">send_simple_message</a>,\n\tyou have not - strictly speaking - &quot;sent&quot; the message. You have enqueued it\n\tto be sent. USOS API will try to send this message as fast as possible.\n\tYou may check for the status of this operation here.</p>\n",
+  "brief_description": "Check detailed status of a message.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailing/#check_message_status",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "message_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>ID of the message. You will need to sign your request with the same\n\tConsumer Key as the one you signed the original sending request with.</p>\n\t<p>Please note, that currently messages are kept for a period of <b>7 days</b>.\n\tAfter this time, you won't be able to reference your message.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>The method returns a dictionary of the following structure:</p>\n\t<ul>\n\t\t<li>\n\t\t\t<b>finished</b> - <b>true</b>, if USOS API has finished working with\n\t\t\tthis message; if <b>false</b>, then the message is still waiting in a queue,\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>sent_successfully</b> - boolean:</p>\n\t\t\t<ul>\n\t\t\t\t<li><b>true</b>, if USOS API has finished sending the message and\n\t\t\t\t\tit has been sent to all recipients,</li>\n\t\t\t\t<li><b>false</b> if the mail server rejected at least one of\n\t\t\t\t\tthe recipients.</li>\n\t\t\t</ul>\n\t\t\t<p>Please do not confuse &quot;being sent&quot; with &quot;being delivered&quot;. Currently, you have no\n\t\t\tway of knowing, if your mail was successfully delivered to the final recipient.\n\t\t\tUSOS API does not keep track of events like mail returns etc.</p>\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>status_by_recipient</b> - a dictionary, one entry for each recipient:</p>\n\t\t\t<ul>\n\t\t\t\t<li><i>key</i> - recipient email address,</li>\n\t\t\t\t<li><i>value</i> - one of <b>pending</b>, <b>sent</b> or <b>error</b>.</li>\n\t\t\t</ul>\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,79 @@
+{
+  "name": "services/crstests/course_test",
+  "short_name": "course_test",
+  "description": "<p>\nGet informations about course test</p>",
+  "brief_description": "\nGet informations about course test",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#course_test",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a course test"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "course_edition|is_limited_to_groups|class_groups|root",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>course_edition</b> - Course edition that test is defined for.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_edition2'>services/courses/course_edition2</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_limited_to_groups</b> -\n                    boolean - true if test is for some selected groups only;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>class_groups</b> - If is_limited_to_groups is true this field contains list of groups.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#class_group'>services/groups/class_group</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>root</b> - Root node of a test.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#node2'>node2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "course_edition",
+      "description": "\nCourse edition that test is defined for",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_limited_to_groups",
+      "description": "\nboolean - true if test is for some selected groups only",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "class_groups",
+      "description": "\nIf is_limited_to_groups is true this field contains list of groups",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "root",
+      "description": "\nRoot node of a test",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

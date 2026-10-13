@@ -1,0 +1,46 @@
+{
+  "name": "services/theses/search_history_affect",
+  "short_name": "search_history_affect",
+  "description": "\n\n        <p>Add a thesis to search history.</p>\n\n        <p>This method aims at improving user experience while searching. Call\n        this method once your user visits thesis' page, or when he/she\n        selects a given thesis while searching for theses, etc.</p>\n\n        <p>Given thesis will be added to search history (currently stored\n        separately for each consumer key and each user). Items saved in search\n        history may appear more frequently in search results.</p>\n    ",
+  "brief_description": "\nAdd a thesis to search history.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/theses/#search_history_affect",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "ths_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>The ID of the thesis you want saved to the search\n                history.</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>Currently, it always returns <code>{\"success\": true}</code>.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

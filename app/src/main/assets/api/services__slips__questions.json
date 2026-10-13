@@ -1,0 +1,54 @@
+{
+  "name": "services/slips/questions",
+  "short_name": "questions",
+  "description": "\t\n\t<p>Get information on multiple questions. They don't have to belong to\n\tone template. If your looking for an ordered list of questions for a\n\tgiven template, see <b>questions</b> field of the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#template\">template</a> method.</p>\n",
+  "brief_description": "Get information on multiple questions",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#questions",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "question_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Pipe-separated list of question IDs.</p>\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "question",
+      "description": "\t\n\tPipe-separated list of fields you're interested in. This must be any\n\tsubset of keys, which are described in the <b>returns</b> section of\n\tthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary. Question IDs will be mapped to keys of this\n\tdictionary. Each value will be a dictionary of the same structure as\n\tdescribed in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a>\nmethod.</p>\n\n<p>For all invalid references, the value will be <b>null</b> (instead\nof a dictionary).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

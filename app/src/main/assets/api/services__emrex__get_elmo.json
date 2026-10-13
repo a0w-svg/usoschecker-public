@@ -1,0 +1,30 @@
+{
+  "name": "services/emrex/get_elmo",
+  "short_name": "get_elmo",
+  "description": "<p>\nDownload an ELMO file.</p>",
+  "brief_description": "\nDownload an ELMO file.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/emrex/#get_elmo",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nBlob ID."
+    }
+  ],
+  "returns": "\n\n        Same response as <a href='https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text'>services/blobbox/put_text</a> method\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

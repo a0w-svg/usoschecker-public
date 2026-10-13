@@ -1,0 +1,121 @@
+{
+  "name": "services/mobility/la_version",
+  "short_name": "la_version",
+  "description": "<p>\nVersion of LA</p>",
+  "brief_description": "\nVersion of LA",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#la_version",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a version"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|la_id|date_created|status|status_description|approvals|components|comment|allowed_actions|diff_from|is_significant",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a version;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>la_id</b> -\n                    ID of Learning Agreement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>date_created</b> -\n                    Datetime string;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - TODO!!!.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>new</b></p></li>\n<li><p><b>coordinator_edits</b></p></li>\n<li><p><b>student_approved</b></p></li>\n<li><p><b>coordinator_approved</b></p></li>\n<li><p><b>approved_locally</b></p></li>\n<li><p><b>approved</b></p></li>\n<li><p><b>cancelled</b></p></li>\n<li><p><b>rejected</b></p></li>\n<li><p><b>virtual</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status_description</b> -\n                    Description of current status;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>approvals</b> - list of approvals for this version.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#approval'>approval</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>components</b> - list of components for this version.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#component'>component</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    Comment for version;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>allowed_actions</b> - List of actions that access token issuer can perform.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>edit</b></p></li>\n<li><p><b>approve</b></p></li>\n<li><p><b>cancel_approvals</b></p></li>\n<li><p><b>cancel</b></p></li>\n<li><p><b>delete</b></p></li>\n<li><p><b>edit_with_reason</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>diff_from</b> -\n                    If version is treated as diff from first approved version, then id of that version is returned, null otherwise;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_significant</b> -\n                    True if version should be displayed to user as significant.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a version",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "la_id",
+      "description": "\nID of Learning Agreement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "date_created",
+      "description": "\nDatetime string",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>new</b></p></li>\n<li><p><b>coordinator_edits</b></p></li>\n<li><p><b>student_approved</b></p></li>\n<li><p><b>coordinator_approved</b></p></li>\n<li><p><b>approved_locally</b></p></li>\n<li><p><b>approved</b></p></li>\n<li><p><b>cancelled</b></p></li>\n<li><p><b>rejected</b></p></li>\n<li><p><b>virtual</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status_description",
+      "description": "\nDescription of current status",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "approvals",
+      "description": "\nlist of approvals for this version",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "components",
+      "description": "\nlist of components for this version",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\nComment for version",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "allowed_actions",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>edit</b></p></li>\n<li><p><b>approve</b></p></li>\n<li><p><b>cancel_approvals</b></p></li>\n<li><p><b>cancel</b></p></li>\n<li><p><b>delete</b></p></li>\n<li><p><b>edit_with_reason</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "diff_from",
+      "description": "\nIf version is treated as diff from first approved version, then id of that version is returned, null otherwise",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_significant",
+      "description": "\nTrue if version should be displayed to user as significant",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

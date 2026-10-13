@@ -1,0 +1,96 @@
+{
+  "name": "services/slips/slip",
+  "short_name": "slip",
+  "description": "\t\n\t<p>Get information on a single issued slip.</p>\n",
+  "brief_description": "Get information on a single issued slip",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "slip_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the slip.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "template",
+      "description": "\t\n\tPipe-separated list of fields described in the <b>returns</b> section.\n"
+    },
+    {
+      "name": "tpl_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead (e.g.\n<code>fields=template[id|name]</code>).</p>\n\n<p>Pipe-separated list of fields to be included in the <b>template</b>\nfield. See the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#template\">template</a> method for\nthe list of allowed values.</p>\n"
+    },
+    {
+      "name": "ctpl_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead.</p>\n\n<p>Pipe-separated list of fields to be included in the\n<b>connected_tpls</b> field. See the\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#template\">template</a> method for the list of\nallowed values.</p>\n"
+    },
+    {
+      "name": "ctpl_q_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|question",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead.</p>\n\n<p>Pipe-separated list of fields to be included in the\n<b>connected_tpls.questions</b>. See the\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method for the list of\nallowed values.</p>\n"
+    },
+    {
+      "name": "sq_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead.</p>\n\n<p>Pipe-separated list of fields to be included in each of the\nslipquestion objects in the <b>questions</b> field. See the\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion\">slipquestion</a> method for the list of\nallowed values.</p>\n"
+    },
+    {
+      "name": "sq_q_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "question",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead.</p>\n\n<p>Pipe-separated list of fields to be included in each of the\nslipquestion.question objects in the <b>questions.question</b> field.\nSee the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method for the list\nof allowed values.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of selected fields and their values.</p>\n\t<p>Available fields:</p>\n\t<ul>\n\t\t<li><b>id</b> - ID of the slip,</li>\n\t\t<li>\n\t\t\t<b>template</b> - the slip's template. See the\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#template\">template</a> method for the list\n\t\tof allowed subfields.\n\t</li>\n\t<li>\n\t\t<p><b>connected_tpls</b> - an ordered list of\n\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#template\">template</a> objects.</p>\n\t\n\t<p>The list begins with the primary slip's template. Then, all\n\ttemplates referenced in the primary template's\n\t<b>connected_tpl_ids_deep</b> field. In the end, all templates\n\twhich were not listed before and which are used in the\n\t<b>questions</b> field.</p>\n\t\n\t<p>When the slip contains large number of templates, this is\n\tour estimate of the proper order of templates in which the\n\tquestions should be ordered.</p>\n\t\n\t<p><b>Important:</b> Currently, this field can be accessed only\n\twhen you are reading exactly one slip ID (it doesn't work in\n\tthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slips\">slips</a> method).</p>\n</li>\n<li>\n<b>issuer</b> - an object describing the user who issued the\nslip. You may use <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> to access more\nsubfields (id, first_name and last_name by default).\n</li>\n<li>\n<b>client</b> - an object describing the user who is the client\nof the slip. You may use <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> to access more\nsubfields.\n</li>\n<li>\n<p><b>student_programme</b> - this is either <b>null</b> or a\ndictionary. If the client is a student then this field\n<b>may</b> reference one of his/hers student programmes, which\nis said to be &quot;bound&quot; to this slip instance.</p>\n\n<p>The format of the dictionary is the same as the one returned\nby the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme\">student_programme</a>\nmethod. Use the subfield selector in the <b>fields</b>\nparameter to access individual fields.</p>\n</li>\n<li>\n<b>state</b> - this can be &quot;closed&quot; or &quot;active&quot;.\n</li>\n<li>\n<p><b>user_roles</b> - a list of roles which the current user\n&quot;has&quot; in regard of this slip. Possible roles are (more may be\ncoming):</p>\n\n<ul>\n<li><b>template_admin</b> - the user is a template admin.\nHe can view all the slips which were issued using any of\nthe template he has access to. This role will be included\nonly if your user allowed you access to the\n<b>slips_admin</b> scope.</li>\n\n<li><b>issuer</b> - the user can issue template in the\nfaculty of the slip's template.</li>\n\n<li><b>answerer</b> - the user was appointed to answer one\nof the questions included in the slip.</li>\n\n<li><b>client</b> - the user is the client of the\nslip.</li>\n\n<li><i>More roles may be introduced in the future. Your\napp must be ready for that!</i></li>\n</ul>\n</li>\n<li>\n<b>date_created</b> - datetime string, the time when the\nslip was first created. Please note, that slips are created\nin the &quot;closed&quot; state, but they are usually made &quot;active&quot; just\na moment later.\n</li>\n<li>\n<b>date_last_closed</b> - datetime string, the time when the\nslip was last closed, or <b>null</b> if the slip has never\nchanged its state from active to closed. Slips can be made\n&quot;active&quot; and &quot;closed&quot; unlimited number of times.\n</li>\n<li>\n<b>issuers_comment</b> - issuers' comment. This is visable by\neveryone who can view the slip (including the client), but only\nthe current issuers can edit it.\n</li>\n<li>\n<b>can_i_edit</b> - boolean, <b>true</b> if the user can edit\nthe slip (change which questions are included, assign\nextra answerers, change the <b>state</b>, etc.).\n</li>\n<li>\n<b>why_cant_i_edit</b> - LangDict or null, if the current user\ncannot edit the slip, it will briefly explain why. This is\nintended to be displayed for the users.\n</li>\n<li>\n<b>can_i_delete</b> - boolean, <b>true</b> if the user can\ndelete the slip.\n</li>\n<li>\n<b>why_cant_i_delete</b> - LangDict or null, if the current\nuser cannot delete the slip, it will briefly explain why. This\nis intended to be displayed for the users.\n</li>\n<li>\n<p><b>questions</b> - this object describes which questions are\nincluded in this slip, grouped by their template. It has the\nstructure of a dictionary.</p>\n\n<ul>\n<li>The keys of this dictionary are <b>template\nIDs</b>.</li>\n\n<li>The values are <b>ordered lists of slipquestion\nobjects</b>, bound to the given template <b>and</b>\nincluded on the slip. See the\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion\">slipquestion</a> method\nfor the list of available subfields.</li>\n</ul>\n\n<p>Please note, that questions may refer to any template. I.e.\nthe template may not be present on the\n<b>connected_tpl_ids_deep</b> list of the slip's template.</p>\n</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

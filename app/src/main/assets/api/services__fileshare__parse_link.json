@@ -1,0 +1,46 @@
+{
+  "name": "services/fileshare/parse_link",
+  "short_name": "parse_link",
+  "description": "\t\n\t\n\t<p>Parse a link back into blob_id and params.</p>\n\t\n\t<p>Links produced by the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link\">create_link</a> method\nare short, because their parameters are encoded and/or stored inside\nthe USOS API database. Every link produced by the\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link\">create_link</a> method may be parsed back,\nproducing the initial parameters (the ones which were supplied when\ncalling the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link\">create_link</a> method). Underlying\nblob may have been deleted, but these parameters are still present.</p>\n\n<p>Note, that usually you won't have any need to use this method. The\nstandard course of action is, you simply give the link to your users.\nIf you want to reference your data later, you may simply do that using\nthe blob_id.</p>\n\n",
+  "brief_description": "Parse a link into blob_id and params.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#parse_link",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "link",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>The link you got from the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link\">create_link</a>\nmethod. It <b>doesn't</b> have to be a link produced by yourself.\n(Note, that you don't need a consumer key to use this method.)</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><b>If the link is valid</b>, you will receive a dictionary of the\n\tfollowing structure:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<b>consumer_key</b> - ID of the consumer which have uploaded\n\t\t\tthe blob and produced the link,\n\t\t</li>\n\t\t<li>\n\t\t\t<b>user_id</b> - user ID, in whose name the blob was uploaded\n\t\t\t(may be <b>null</b>),\n\t\t</li>\n\t\t<li>\n\t\t\t<b>blob_id</b> - blob ID (the blob itself doesn't have to exist\n\t\t\tanymore),\n\t\t</li>\n\t\t<li>\n\t\t\t<b>filename</b> - value given in the\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link\">create_link</a>'s <b>filename</b>\n\t\tparameter (possible with some minor compatibility changes),\n\t</li>\n\t<li>\n\t\t<b>prefer_save</b> - boolean, value given in the\n\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link\">create_link</a>'s <b>prefer_save</b>\n\tparameter,\n</li>\n<li>\n\t<b>content_type</b> - value given in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link\">create_link</a>'s <b>content_type</b>\nparameter (may be <b>null</b>),\n</li>\n<li>\n<b>date_blob_created</b> - datetime string, represents the date\nwhen the underlying blob was created.\n</li>\n</ul>\n\n<p><b>If the link is invalid</b>, you will get a HTTP 400 error. This\nmeans that the link was not created by this USOS API installation.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

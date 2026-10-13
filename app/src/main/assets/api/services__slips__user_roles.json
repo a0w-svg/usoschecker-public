@@ -1,0 +1,38 @@
+{
+  "name": "services/slips/user_roles",
+  "short_name": "user_roles",
+  "description": "\t\n\t<p>Return the description of user's roles within the slips system.</p>\n\t\n\t<p><b>Important:</b> The result of this method depends on the scopes\n\tused. I.e. you must have access to <b>slips_admin</b> scope to retrieve\n\tinformation if the user is a slip template editor.</p>\n",
+  "brief_description": "Return the description of user's roles",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#user_roles",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>template_admin</b> - dictionary of the following\n\t\t\tstrucutre:</p>\n\t\t\t\n\t\t\t<ul>\n\t\t\t\t<li><b>has_role</b> - boolean, <b>true</b> if the user is a\n\t\t\t\t\ttemplate admin. He can view all the slips which were issued\n\t\t\t\t\tusing any of the templates he has access to.</li>\n\t\t\t\t\n\t\t\t\t<li><b>faculties</b> - a dictionary of faculty objects, as\n\t\t\t\t\treturned by the\n\t\t\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculties\">services/fac/faculties</a> method\n\t\t\t\t(with id|name fields). These are the faculties within which\n\t\t\t\tthe user has the template admin role.</li>\n\t\t</ul>\n\t\t\n\t\t<p><b>Important:</b> This entry will be included only if your\n\t\tuser allowed you access to the <b>slips_admin</b> scope!</p>\n\t</li>\n\t\n\t<li>\n\t\t<p><b>issuer</b> - a dictionary of the following structure:</p>\n\t\t\n\t\t<ul>\n\t\t\t<li><b>has_role</b> - boolean, <b>true</b> if the user is a\n\t\t\t\tslips issuer. He can view all the slips which were issued\n\t\t\t\tusing any of the templates he is allowed to issue.</li>\n\t\t\t\n\t\t\t<li><b>faculties</b> - a dictionary of faculty objects, as\n\t\t\t\treturned by the\n\t\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculties\">services/fac/faculties</a> method\n\t\t\t(with id|name fields). These are the faculties within which\n\t\t\tthe user has the slips issuer role.</li>\n\t</ul>\n\t\n\t<p><b>Important:</b> This entry will be included only if your\n\tuser allowed you access to the <b>slips</b> scope!</p>\n</li>\n\n<li>\n\t<p><b>answerer</b> - a dictionary of the following\n\tstructure:</p>\n\t\n\t<ul>\n\t\t<li><b>has_role</b> - boolean, <b>true</b> if the user is,\n\t\t\tor recently was, designated to answer at least one\n\t\t\tquestion.</li>\n\t\t\n\t\t<li><b>is_default_answerer</b> - boolean, <b>true</b> if\n\t\t\tthe user is currently assigned as the default answerer of\n\t\t\tat least one question.</li>\n\t</ul>\n\t\n\t<p><b>Important:</b> This entry will be included only if your\n\tuser allowed you access to the <b>slips</b> scope!</p>\n</li>\n\n<li>\n\t<p><b>client</b> - a dictionary of the following\n\tstructure:</p>\n\t\n\t<ul>\n\t\t<li><b>has_role</b> - boolean, <b>true</b> if the user is a\n\t\t\tclient of at least one clearance slip.</li>\n\t</ul>\n\t\n\t<p><b>Important:</b> This entry will be included only if your\n\tuser allowed you access to the <b>slips</b> scope!</p>\n</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

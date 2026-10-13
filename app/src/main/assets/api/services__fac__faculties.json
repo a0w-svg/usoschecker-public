@@ -1,0 +1,54 @@
+{
+  "name": "services/fac/faculties",
+  "short_name": "faculties",
+  "description": "\t\n\tGet information on mulitple faculties.\n",
+  "brief_description": "Get information on mulitple faculties.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculties",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fac_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of faculty IDs.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\t\n\tPipe-separated list of fields you're interested in. This must be a\n\tsubset of keys described in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty\">faculty</a> method.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary with your <b>fac_ids</b> mapped to its keys. The value\n\tfor a specific key depends whether it exists or not.</p>\n\t\n\t<ul>\n\t\t<li>It it exists, the value will be of the same format as the one\n\t\t\treturned in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty\">faculty</a> method.</li>\n\t\t\n\t\t<li>If it does not exist, the value will be null.</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

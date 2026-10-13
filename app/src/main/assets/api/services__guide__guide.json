@@ -1,0 +1,54 @@
+{
+  "name": "services/guide/guide",
+  "short_name": "guide",
+  "description": "\n\n        <p>Get university guide structure.</p>\n    ",
+  "brief_description": "\nGet whole guide structure.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/guide/#guide",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "lang",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>A code of the preferred language (\"pl\" or \"en\").</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|title|pages[id|title]",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/guide/#chapter'>chapter</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A list of chapter objects ( as defined in\n        the <a href='https://usosapps.vistula.edu.pl/developers/api/services/guide/#chapter'>chapter</a> method)\n        in order you should place them in your menu or on a page.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

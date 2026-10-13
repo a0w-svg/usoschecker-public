@@ -1,0 +1,70 @@
+{
+  "name": "services/blobbox/chmod",
+  "short_name": "chmod",
+  "description": "\tUpdate an existing blob's sharing options.",
+  "brief_description": "Update an existing blob's sharing options.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#chmod",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the blob (you got it from the <b>put_*</b> method). It has to\n\texist and you have to be its owner.\n"
+    },
+    {
+      "name": "read_access",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "skip",
+      "description": "\t\n\t<p>One of the options listed in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a>\nmethod, or a special <b>skip</b> option to indicate that you don't want\nto change the previous settings.</p>\n"
+    },
+    {
+      "name": "min_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "skip",
+      "description": "\t\n\t<p>One of the options listed in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a>\nmethod, or a special <b>skip</b> option to indicate that you don't want\nto change the previous settings.</p> <p>Just to clear up: We will count\nthis age starting from the current time (and <b>not</b> from the\noriginal upload time).</p>\n"
+    },
+    {
+      "name": "max_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "skip",
+      "description": "\t\n\t<p>One of the options listed in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a>\nmethod, or a special <b>skip</b> option to indicate that you don't want\nto change the previous settings.</p> <p>Just to clear up: We will count\nthis age starting from the current time (and <b>not</b> from the\noriginal upload time).</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Currently, this method always returns the same value: a dictionary\n\twith single <b>success</b> key with values of <b>true</b>.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

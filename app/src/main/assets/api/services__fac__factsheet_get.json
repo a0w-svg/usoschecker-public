@@ -1,0 +1,30 @@
+{
+  "name": "services/fac/factsheet_get",
+  "short_name": "factsheet_get",
+  "description": "<p>\nRetrieve faculty's factsheet</p>",
+  "brief_description": "\nRetrieve faculty's factsheet",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fac/#factsheet_get",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fac_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the faculty"
+    }
+  ],
+  "returns": "\n\n        <p>Either a PDF file (with a valid Content-Type header), or a HTTP 4xx\n        error response.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

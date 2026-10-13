@@ -1,0 +1,77 @@
+{
+  "name": "services/geo/building",
+  "short_name": "building",
+  "description": "\n\n        <p>Get information on a given building. This method had multiple errors\n        and has been deprecated. We advise not to use it.</p>\n    ",
+  "brief_description": "\nGet information on a given building",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/geo/#building",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "building_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the building."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|location",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    building ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> - the building's name, in Polish only.</p>\n\n                \n\n                Deprecated. Use the <b>building2</b> to get the name in a\n                proper LangDict object.\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>location</b> - this will be always <b>null</b>.</p>\n\n                \n\n                This field had a major bug - latitude and longitude were\n                switched places! We decided to fix this by returning\n                <b>null</b> <u>every time</u>, which will make your app\n                perceive the building as a building with no location. We think\n                it's safer than continuing the previous behavior. <b>Please use\n                the <b>building2</b> method to get the location of the\n                building.</b>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>building_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nbuilding ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\n\n                Deprecated. Use the <b>building2</b> to get the name in a\n                proper LangDict object.\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "location",
+      "description": "\n\n                This field had a major bug - latitude and longitude were\n                switched places! We decided to fix this by returning\n                <b>null</b> <u>every time</u>, which will make your app\n                perceive the building as a building with no location. We think\n                it's safer than continuing the previous behavior. <b>Please use\n                the <b>building2</b> method to get the location of the\n                building.</b>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": {
+    "deprecated_by": "services/geo/building2",
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

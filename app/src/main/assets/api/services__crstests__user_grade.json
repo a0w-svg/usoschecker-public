@@ -1,0 +1,46 @@
+{
+  "name": "services/crstests/user_grade",
+  "short_name": "user_grade",
+  "description": "\t\n\t<p>\n\tGet grade which a token issuer got in node specified by node_id parameter.\n\tPlease see the note about automatic grading\n\t(<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>).\n</p>\n",
+  "brief_description": "Get student's grade for a single node.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#user_grade",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int_id",
+      "default_value": null,
+      "description": "\tThe node id."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tA single\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#TestGradeObject\">TestGradeObject</a>\nor an empty dictionary if a token issuer does not have grade in node.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,70 @@
+{
+  "name": "services/blobbox/put",
+  "short_name": "put",
+  "description": "\t\n\t<p>Put a blob into the database. Use form-data encoding to pass the\n\tbinary data.</p>\n\t\n\t<p>Please note that we require SSL and OAuth PLAINTEXT signature for\n\tthis method to work (regular OAuth 1.0 SHA1 signature doesn't work\n\tcorrectly with multipart/form-data encoding).</p>\n\t\n\t<p>Please include an Access Token if you have one\n\t(<a href=\"#why_use_access_tokens\">why?</a>)</p>\n",
+  "brief_description": "Put a blob into the database, using form-data encoding.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": true,
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "data",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tThe file to be uploaded. Your request <b>has to</b> use\n\t<b>multipart/form-data</b> encoding and the <b>data</b> key must have a\n\t&quot;filename&quot; in its Content-Disposition header.\n"
+    },
+    {
+      "name": "read_access",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "consumer",
+      "description": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n"
+    },
+    {
+      "name": "min_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "none",
+      "description": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n"
+    },
+    {
+      "name": "max_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "none",
+      "description": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

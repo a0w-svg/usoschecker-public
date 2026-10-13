@@ -1,0 +1,62 @@
+{
+  "name": "services/crstests/user_grade_modified",
+  "short_name": "user_grade_modified",
+  "description": "\t\n\t<p>\n\tNotify USOS API about user's course test grade modification. USOS API\n\tnotifications system will pass this information to those subscribed to\n\tcrstests/user_grade event. This method does not check if the provided\n\tparameter value refers to a valid node. You do not need to call this method\n\tif it was you who modified the node grade or visibility through\n\tappropriate methods.\n</p>\n",
+  "brief_description": "Notify about user's course test grade modification.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#user_grade_modified",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "operation",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tOperation that has been applied to user course test grade.\n"
+    },
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int_id",
+      "default_value": null,
+      "description": "\tThe node id."
+    },
+    {
+      "name": "related_user_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tA list with one element: the ID of a user whose course points have been\n\tmodified.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tEmpty dictionary.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

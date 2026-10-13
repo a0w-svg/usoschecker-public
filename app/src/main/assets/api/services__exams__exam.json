@@ -1,0 +1,193 @@
+{
+  "name": "services/exams/exam",
+  "short_name": "exam",
+  "description": "\n<p>Get information on a given exam.</p>",
+  "brief_description": "\nGet information on a given exam.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/exams/#exam",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nId of an exam."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|examination_session_id|term|course|registration_start|registration_end|examiners_visible|groups|code|has_priorities|preferences_limit",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of an Exam;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>examination_session_id</b> -\n                    ID of the Examination session object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term</b> - Academic Term during which the Course Edition is conducted.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/terms/#term'>services/terms/term</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course</b> - ID of a course.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course'>services/courses/course</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>registration_start</b> -\n                    a DateTime string (or null), indicates when does the registration\n            for this exam starts;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>registration_end</b> -\n                    a DateTime string (or null), indicates when does the registration\n            for this exam ends;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>examiners_visible</b> -\n                    boolean, indicates if the\n            list of examiners is visible (if false, then null will be returned instead of list);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    a LandDict object with the name of an exam (there may be many exams\n            for one course, each will usually have a different name);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    a LangDict object with some additional exam's description;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>groups</b> - List of exam groups.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/exams/#group'>group</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>code</b> -\n                    Unique code of exam;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>has_priorities</b> -\n                    Boolean - true if students' preferences have priorities;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>preferences_limit</b> -\n                    Maximal number of preferences that student can make in this exam;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>micro_round_length</b> -\n                    Micro-round length in seconds;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>micro_break_length</b> -\n                    Micro-break length in seconds;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>register_until</b> -\n                    a DateTime string (or null), indicates when registrations for exam are allowed;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>unregister_until</b> -\n                    a DateTime string (or null), indicates when unregistrations from exam are allowed;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>exchange_until</b> -\n                    a DateTime string (or null), indicates when exchanges are allowed;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>examrep_session</b> - an object representing session for examrep module.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep/#exam_session'>services/examrep/exam_session</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>students_count</b> -\n                    Number of students allowed to pass the course..</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>admission_conditions</b> - Dictionary mapping exam report IDS to objects representing conditions.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/exams/#condition'>condition</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>admitted_students</b> -\n                    List of IDs of users that are admitted to registration;</p>\n            \n            \n            <p>\n                <em>Additional permissions note</em>: Consumer key with administrative access is required, and SSL connection is required.\n            </p>\n            \n        </li>\n        \n        <li >\n            \n                <p><b>unadmitted_students</b> -\n                    Dictionary mapping user's IDs to lists of exam report ids, that fails admission conditions.</p>\n            \n            \n            <p>\n                <em>Additional permissions note</em>: Consumer key with administrative access is required, and SSL connection is required.\n            </p>\n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\n ID of an Exam",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "examination_session_id",
+      "description": "\n ID of the Examination session object",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term",
+      "description": "\n Academic Term during which the Course Edition is conducted",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course",
+      "description": "\nID of a course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registration_start",
+      "description": "\n a DateTime string (or null), indicates when does the registration\n            for this exam starts",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registration_end",
+      "description": "\n a DateTime string (or null), indicates when does the registration\n            for this exam ends",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "examiners_visible",
+      "description": "\n boolean, indicates if the\n            list of examiners is visible (if false, then null will be returned instead of list)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\n a LandDict object with the name of an exam (there may be many exams\n            for one course, each will usually have a different name)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\n a LangDict object with some additional exam's description",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "groups",
+      "description": "\nList of exam groups",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "code",
+      "description": "\nUnique code of exam",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "has_priorities",
+      "description": "\nBoolean - true if students' preferences have priorities",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "preferences_limit",
+      "description": "\nMaximal number of preferences that student can make in this exam",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "micro_round_length",
+      "description": "\nMicro-round length in seconds",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "micro_break_length",
+      "description": "\nMicro-break length in seconds",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "register_until",
+      "description": "\na DateTime string (or null), indicates when registrations for exam are allowed",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "unregister_until",
+      "description": "\na DateTime string (or null), indicates when unregistrations from exam are allowed",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "exchange_until",
+      "description": "\na DateTime string (or null), indicates when exchanges are allowed",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "examrep_session",
+      "description": "\nan object representing session for examrep module",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "students_count",
+      "description": "\nNumber of students allowed to pass the course.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "admission_conditions",
+      "description": "\nDictionary mapping exam report IDS to objects representing conditions",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "admitted_students",
+      "description": "\nList of IDs of users that are admitted to registration",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "unadmitted_students",
+      "description": "\nDictionary mapping user's IDs to lists of exam report ids, that fails admission conditions",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

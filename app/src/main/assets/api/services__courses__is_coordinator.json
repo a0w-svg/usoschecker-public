@@ -1,0 +1,62 @@
+{
+  "name": "services/courses/is_coordinator",
+  "short_name": "is_coordinator",
+  "description": "\tIs staff member a course edition coordinator.",
+  "brief_description": "Is staff member a course edition coordinator.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/courses/#is_coordinator",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of a course unit (first part of primary key)."
+    },
+    {
+      "name": "term_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of a term (second part of primary key)."
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": "access token issuer.",
+      "description": "\tID of a user."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Boolean value.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

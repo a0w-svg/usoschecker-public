@@ -1,0 +1,77 @@
+{
+  "name": "services/emrex/save_as_document",
+  "short_name": "save_as_document",
+  "description": "<p>\nSave ELMO file as document</p>",
+  "brief_description": "\nSave ELMO file as document",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/emrex/#save_as_document",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nBlob ID"
+    },
+    {
+      "name": "signature",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nSignature of document"
+    },
+    {
+      "name": "release_date",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nRelease date of document"
+    },
+    {
+      "name": "description",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nDescription of document"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of following fields and their values:\n                    \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>document_id</b> -\n                    ID of created document.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                blob could not be found; <b>param_name</b> is equal to <b>blob_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "document_id",
+      "description": "\nID of created document",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

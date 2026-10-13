@@ -1,0 +1,54 @@
+{
+  "name": "services/blobbox/user",
+  "short_name": "user",
+  "description": "\t\n\t<p>Get storage usage statistics for a given user. Note, that\n\tuser stats <b>do not</b> include blobs uploaded by other consumers!\n\tYou have access only to stats related to your application.</p>\n",
+  "brief_description": "Get storage usage statistics for a given user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#user",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the user. If you provide an invalid user ID, you will get a\n\tHTTP 400 error.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "hard_count|hard_vsize",
+      "description": "\t\n\tPipe-separated list of fields (as in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#consumer\">consumer</a> method).\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the same structure as the one returned in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#consumer\">consumer</a> method. However, all the values will\nbe computed against blobs uploaded by matched users only.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

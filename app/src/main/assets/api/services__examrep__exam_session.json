@@ -1,0 +1,111 @@
+{
+  "name": "services/examrep/exam_session",
+  "short_name": "exam_session",
+  "description": "<p>\nGet info about exam sessions related to en exam.</p>",
+  "brief_description": "\nGet info about exam sessions related to en exam.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/examrep/#exam_session",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "exam_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an exam report"
+    },
+    {
+      "name": "number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nnumber of exam session"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "number|examrep_id|status|description|deadline|is_editable",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    number of exam session;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>examrep_id</b> -\n                    ID of exam report;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    exam session's status;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    description of an exam session (LangDict object);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>deadline</b> -\n                    a datetime string, date when exam session becomes expired;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_editable</b> -\n                    true if exam session is not expired yet, and has status allowing edition..</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>grades</b> - Dictionary mapping IDs of participants of the course their grades.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade'>services/grades/grade</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n            <p>\n                <em>Additional permissions note</em>: Consumer key with administrative access is required.\n            </p>\n            \n        </li>\n        \n        <li >\n            \n                <p><b>issuer_grades</b> - Access token issuer grades.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade'>services/grades/grade</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "number",
+      "description": "\nnumber of exam session",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "examrep_id",
+      "description": "\nID of exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\nexam session's status",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\ndescription of an exam session (LangDict object)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "deadline",
+      "description": "\na datetime string, date when exam session becomes expired",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_editable",
+      "description": "\ntrue if exam session is not expired yet, and has status allowing edition.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grades",
+      "description": "\nDictionary mapping IDs of participants of the course their grades",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "issuer_grades",
+      "description": "\nAccess token issuer grades",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

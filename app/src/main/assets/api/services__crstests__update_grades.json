@@ -1,0 +1,57 @@
+{
+  "name": "services/crstests/update_grades",
+  "short_name": "update_grades",
+  "description": "\t\n\tThis method enables a lecturer to give and change already given grades in a particular node.\n\tPlease see the note about automatic grading (<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>).\n",
+  "brief_description": "Give grades to students.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#update_grades",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "staff_perspective",
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the grade node."
+    },
+    {
+      "name": "new_grades",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tDictionary mapping from student ids to dictionaries of the following structure\n\t(these fields, except 'order' field match the fields of the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#TestGradeObject\">TestGradeObject</a> object):\n<ul>\n\t<li> <b>public_comment</b> - Comment intended to be viewed by the student</li>\n\t<li> <b>private_comment</b> - Private comment of the grader, which should not be visible to the student</li>\n\t<li> <b>order</b> - order of the given grade.\n\t\tPlease consult <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade_type\">grade_type</a> for further information about possible\n\tvalues of this field.\n\t\n\tThis field can also be equal to null or -1.\n\tNull signifies that the grade is empty and if some other grade was give in a node using automatic\n\tgrading then that value will be used in further computations.\n\tWhereas the value of -1 means that the grade is empty and when some other grade was given in a node\n\tusing automatic grading then it will not be used.\n</li>\n\n<li> <b>last_changed</b> -\n\tThis field is used to prevent simultaneous update of grades by two graders.\n\tIt should be set to the 'last_changed' field You should previously fetch,\n\tor null if You believe a grade for this student haven't been given yet.\n\t\n\tSo the workflow to use this method is:\n\tFirstly fetch available grades to retrieve 'last_changed' fields.\n\tThen try to update grades using the 'last_changed' values You fetched.\n</li>\n</ul>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tIf the method succeeds a dictionary with single key 'success' and value true will be returned.\n\tIn case of the failure i.e. You are trying to modify grades that were modified in the meantime\n\t('last_changed' parameters didn't match) we will respond with HTTP 400.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

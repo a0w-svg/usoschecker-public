@@ -1,0 +1,56 @@
+{
+  "name": "services/housing/check_out",
+  "short_name": "check_out",
+  "description": "\n\n        <p>Check out a user from a dormitory. Only <b>dormitory\n        administrators</b> can perform this action.</p>\n    ",
+  "brief_description": "\nCheck out a user from a dormitory.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#check_out",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "dorm_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "residence_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>ID of the residence. This ID can be obtained from the\n                <b>residences</b> field of the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#assignment'>assignment</a> method.</p>\n            "
+    },
+    {
+      "name": "check_out_date",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Check-out date. If not given it defaults to <b>now</b>.</p>\n\n                <p>The residence period (check-in and planned check-out\n                dates) must fit within period defined in the user's\n                assignment.</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>On successful checkout <code>{\"success\": true}</code> will be\n        returned. HTTP 4xx errors will be raised on error.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

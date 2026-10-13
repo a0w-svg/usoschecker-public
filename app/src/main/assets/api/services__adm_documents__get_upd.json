@@ -1,0 +1,32 @@
+{
+  "name": "services/adm_documents/get_upd",
+  "short_name": "get_upd",
+  "description": "<p>\nGet selected administration document UPD of a given user.</p>",
+  "brief_description": "\nGet selected administration document UPD of a given user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#get_upd",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "adm_documents"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "adm_document_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of Administration document"
+    }
+  ],
+  "returns": "\n\n        <p>HTTP 200 response with raw contents of UPD as XML file.</p>\n        <p>If no such document exists, does not have UPD or you don't have access to it, this method will respond\n        with HTTP 400 error.</p>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

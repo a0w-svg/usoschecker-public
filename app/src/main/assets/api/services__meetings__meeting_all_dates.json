@@ -1,0 +1,54 @@
+{
+  "name": "services/meetings/meeting_all_dates",
+  "short_name": "meeting_all_dates",
+  "description": "<p>\nSearch for all meeting dates for specific meeting.</p>",
+  "brief_description": "\nSearch for all meeting dates for specific meeting.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting_all_dates",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "meeting_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nMeeting ID"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|comment|start_time|end_time|registration_start_time|registration_end_time|seats_limit|reserve_seats_limit|meeting",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting_date'>meeting_date</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nList of all meeting dates for meeting, as defined in <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting_date'>meeting_date</a> method.",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

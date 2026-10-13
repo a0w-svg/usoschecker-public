@@ -1,0 +1,93 @@
+{
+  "name": "services/guide/entry",
+  "short_name": "entry",
+  "description": "\n<p>Allows to get an university guide entry (the smallest piece of information)\n            by its id.</p>",
+  "brief_description": "\nGet a single university guide entry.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/guide/#entry",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "entry_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nId of the guide entry."
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\n\n                <p>A code of the preferred language (\"pl\" or \"en\").\n                It may influence the order of data returned.</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|title",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of selected fields: </p>\n        \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Id of the guide entry;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title</b> -\n                    Title of the guide entry;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>content</b> -\n                    Content of the guide page as langdict;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>page</b> - Page the entry should be placed on. It is used to group entries on the same topic.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/guide/#page'>page</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>image_urls</b> - URLs of the main image for the guide entry.</p>\n\n                \nURLs of the main image\n                    for the guide entry in various dimensions\n                    or a set of nulls if this entry does not have a main image.\n                    Use the <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to choose\n                    the wanted size/dimensions of the image.</p>\n                    <p>Currently available subfields:</p>\n                    <ul>\n                        <li>\n                            <p><b>original</b> - original version of the image;\n                            the exact dimensions are undocumented and depend on the image.\n                            Note, that in some rare cases, this image can be\n                            actually smaller than the others.</p>\n                        </li>\n                        <li>\n                             <p><b>16:9</b> aspect ratio images</p>\n                             <ul>\n                                 <li><b>270x152</b> - 270px x 152px,</li>\n                                 <li><b>360x203</b> - 360px x 203px,</li>\n                                 <li><b>540x304</b> - 540px x 304px,</li>\n                                 <li><b>720x405</b> - 720px x 405px,</li>\n                                 <li><b>1080x608</b> - 1080px x 608px,</li>\n                                 <li><b>1440x810</b> - 1440px x 810px,</li>\n                              </ul>\n                        </li>\n                    </ul>\n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nId of the guide entry",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title",
+      "description": "\nTitle of the guide entry",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "content",
+      "description": "\nContent of the guide page as langdict",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "page",
+      "description": "\nPage the entry should be placed on. It is used to group entries on the same topic",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "image_urls",
+      "description": "\nURLs of the main image\n                    for the guide entry in various dimensions\n                    or a set of nulls if this entry does not have a main image.\n                    Use the <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to choose\n                    the wanted size/dimensions of the image.</p>\n                    <p>Currently available subfields:</p>\n                    <ul>\n                        <li>\n                            <p><b>original</b> - original version of the image;\n                            the exact dimensions are undocumented and depend on the image.\n                            Note, that in some rare cases, this image can be\n                            actually smaller than the others.</p>\n                        </li>\n                        <li>\n                             <p><b>16:9</b> aspect ratio images</p>\n                             <ul>\n                                 <li><b>270x152</b> - 270px x 152px,</li>\n                                 <li><b>360x203</b> - 360px x 203px,</li>\n                                 <li><b>540x304</b> - 540px x 304px,</li>\n                                 <li><b>720x405</b> - 720px x 405px,</li>\n                                 <li><b>1080x608</b> - 1080px x 608px,</li>\n                                 <li><b>1440x810</b> - 1440px x 810px,</li>\n                              </ul>\n                        </li>\n                    </ul>",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

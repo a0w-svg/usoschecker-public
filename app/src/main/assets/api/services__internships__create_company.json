@@ -1,0 +1,158 @@
+{
+  "name": "services/internships/create_company",
+  "short_name": "create_company",
+  "description": "\n\n        <p>Create database records for company.</p>\n    ",
+  "brief_description": "\nCreate a new company.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/internships/#create_company",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "name_pl",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nCompany name in Polish"
+    },
+    {
+      "name": "country",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nCountry part of the address"
+    },
+    {
+      "name": "name_en",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nCompany name in English"
+    },
+    {
+      "name": "nip",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPolish tax number"
+    },
+    {
+      "name": "parent_company_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of parent company"
+    },
+    {
+      "name": "www",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nWWW address"
+    },
+    {
+      "name": "email",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nE-mail address"
+    },
+    {
+      "name": "street",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nStreet part of the address"
+    },
+    {
+      "name": "building_number",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nBuilding number part of the address"
+    },
+    {
+      "name": "apartment_number",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nApartment number part of the address"
+    },
+    {
+      "name": "postal_code",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPostal code part of the address"
+    },
+    {
+      "name": "foreign_postal_code",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nForeign postal code part of the address"
+    },
+    {
+      "name": "city",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nCity part of the address"
+    },
+    {
+      "name": "phone_number",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nTelephone number"
+    },
+    {
+      "name": "fac_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the faculty of the internship"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n    <p>A dictionary of the following structure:</p>\n        <ul>\n            <li>\n                <p><b>company_id</b> - ID of the created company.</p>\n            </li>\n        </ul>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>company_already_exists</b> -\n                                the company already exists.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>parent_company_not_found</b> -\n                                the parent company was not found.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

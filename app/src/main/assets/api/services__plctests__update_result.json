@@ -1,0 +1,70 @@
+{
+  "name": "services/plctests/update_result",
+  "short_name": "update_result",
+  "description": "\n\n        <p>Update result of placement test for given user to 'new_value'.</p>\n        <p>\n            If you want to avoid concurrency problems (if two or more users are modifying same results),\n            you may specify \"old_value\" parameter. Result will be updated only if given value match with\n            currently value in database.\n        </p>\n    ",
+  "brief_description": "\nUpdate test result",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/plctests/#update_result",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "test_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of placement test"
+    },
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of user whose grade will be updated"
+    },
+    {
+      "name": "new_value",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nNumber of points, that you want to set"
+    },
+    {
+      "name": "old_value",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(If parameter is unused, no check will be made)",
+      "description": "\nNumber of points, that you expect that is current set.\n                                          If you expect that result wasn't entered yet, set this parameter to null.\n                                          "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n    An empty dictionary returned if the method has been executed successfully.\n    Some keys may be added in the future.\n",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>test_modified</b> -\n                                test result probably was updated concurrently.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

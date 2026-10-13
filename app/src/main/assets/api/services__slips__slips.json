@@ -1,0 +1,96 @@
+{
+  "name": "services/slips/slips",
+  "short_name": "slips",
+  "description": "\t\n\t<p>Get information on multiple issued slips.</p>\n",
+  "brief_description": "Get information on multiple issued slips",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#slips",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "slip_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Pipe-separated list of slip IDs.</p>\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "template",
+      "description": "\t\n\tAs in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.\n"
+    },
+    {
+      "name": "tpl_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|name|fac",
+      "description": "\t\n\tDeprecated. As in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.\n"
+    },
+    {
+      "name": "ctpl_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\t\n\tDeprecated. As in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.\n"
+    },
+    {
+      "name": "ctpl_q_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|question",
+      "description": "\t\n\tDeprecated. As in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.\n"
+    },
+    {
+      "name": "sq_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id",
+      "description": "\t\n\tDeprecated. As in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.\n"
+    },
+    {
+      "name": "sq_q_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "question",
+      "description": "\t\n\tDeprecated. As in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary. Slip IDs will be mapped to keys of this dictionary.\n\tEach value will be a dictionary of the same structure as described in\n\tthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.</p>\n\n<p>For all invalid references, the value will be <b>null</b> (instead\nof a dictionary).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,78 @@
+{
+  "name": "services/photos/photo",
+  "short_name": "photo",
+  "description": "\n\n        <p>Get user's photo.</p>\n\n        <p><b>Important:</b> Please avoid using this method. The preferred\n        method of retrieving user photos is to use the <b>photo_urls</b> field\n        of the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method.</p>\n    ",
+  "brief_description": "\nGet user's photo.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/photos/#photo",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(access token issuer)",
+      "description": "\nID of a user."
+    },
+    {
+      "name": "blank_photo",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n\n                <p>Boolean. By default, if you are not allowed to see the\n                photo, then this method will return a HTTP 400 error response.\n                Set this parameter to <b>true</b> if you want to receive a\n                blank placeholder image instead.</p>\n            "
+    },
+    {
+      "name": "transform",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n\n                <p><b>Important:</b> Photo transformations are allowed only for\n                Administrative Consumers. However, you can still use some basic\n                photo transformations with the <b>photo_urls</b> field of the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method.</p>\n\n                <p>Boolean. If set to <b>false</b> (default):</p>\n\n                <ul>\n                    <li>USOS API will respond with the original photo, exactly\n                    as it is stored in our database, without any kind of\n                    processing. Such images can be quite big (and this applies\n                    to the blank photo placeholder too).</li>\n\n                    <li>We do NOT guarantee that the original raw file will be\n                    valid, nor that it will be in a JPEG format.</li>\n                </ul>\n\n                <p>If set to <b>true</b>:</p>\n\n                <ul>\n                    <li>USOS API will process, resize and validate the photo\n                    before it is returned to you.</li>\n\n                    <li>The output will always be in the JPEG format.</li>\n\n                    <li>If USOS API encounters any problems while loading the\n                    original image file, then it will respond with an empty\n                    placeholder image.</li>\n\n                    <li>Please note that the image processing library that we\n                    use often fails to load images which seem to be perfectly\n                    valid when opened in different viewers. This causes USOS\n                    API to return blank placeholder in place of a valid image.\n                    We are investigating this problem. (If this is important in\n                    your case, then don't use transform.)</li>\n                </ul>\n            "
+    },
+    {
+      "name": "max_width",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>This parameter is <b>required</b> if you're using\n                <b>transform</b>.</p>\n\n                <p>Integer in the 1..1000 range. The maximum width of the image\n                you want to get, in pixels. The aspect ratio will be kept while\n                resizing.</p>\n            "
+    },
+    {
+      "name": "max_height",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>This parameter is <b>required</b> if you're using\n                <b>transform</b>.</p>\n\n                <p>Integer in the 1..1000 range. The maximum height of the image\n                you want to get, in pixels. The aspect ratio will be kept while\n                resizing.</p>\n            "
+    },
+    {
+      "name": "enlarge",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n\n                <p>Boolean. By default, the photos are resized only if they are\n                too large (if they don't fit in the dimensions you have\n                provided). If you set this to <b>true</b>, then we will also\n                enlarge smaller photos.</p>\n            "
+    },
+    {
+      "name": "cover",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n\n                <p>Boolean.</p>\n\n                <p>By default, the photos are resized so that the entire photo\n                fits inside the dimensions you have provided. This means that\n                one of the dimensions (width or height) can be smaller than the\n                <b>max_width</b> or <b>max_height</b>.</p>\n\n                <p>Setting this to <b>true</b> forces the width and height to\n                match your dimensions exactly, while the aspect ratio will\n                still be kept. That means that the result may be cropped (we\n                will decide which part of the image is best to be\n                returned).</p>\n\n                <p>If you set this to <b>true</b>, then you must also set the\n                <b>enlarge</b> parameter to <b>true</b>.</p>\n            "
+    }
+  ],
+  "returns": "\n\n        <p>If you are allowed to see the photo, then you will receive a binary\n        stream with the photo content. If not, you will receive a HTTP 400 error\n        response.</p>\n\n        <p>You can use the <a href='https://usosapps.vistula.edu.pl/developers/api/services/photos/#can_see_photo'>can_see_photo</a>\n        method to check if you will be able to get the photo. You can also set\n        the <b>blank_photo</b> to <b>true</b> - if you do, you will get a HTTP\n        200 response regardless of your permissions.</p>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_forbidden</b> - access to object denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>insufficient_privileges</b> -\n                                insufficient privileges to get access to this photo.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                user could not be found; <b>param_name</b> is equal to <b>user_id</b>;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>photo_not_found</b> -\n                user does not have a photo.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

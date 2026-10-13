@@ -1,0 +1,191 @@
+{
+  "name": "services/payments/payment",
+  "short_name": "payment",
+  "description": "<p>\nAn object representing users payment</p>",
+  "brief_description": "\nAn object representing users payment",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/payments/#payment",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "payments"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of installment plan"
+    },
+    {
+      "name": "type",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPayment type<p>Possible values: <b>dormitory</b>, <b>tuition_fee</b>, <b>deposit</b>, <b>interest</b>, <b>retake_of_study_period</b>, <b>conditional_promotion</b>, <b>course_registration</b>, <b>course_retake</b>, <b>credit_point</b>, <b>token</b>, <b>others</b>.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|user|saldo_amount|chosen_installment_plan|who_chose_plan|date_of_plan_choice|available_installment_plans|type|description|state|account_number|payment_deadline|bonus_deadline|bonus_amount|has_bonus|interest|total_amount|currency|faculty|default_choice_date|debt_type",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Payment ID. Might be null in case of virtual payments;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - User that payment is defined for.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>saldo_amount</b> -\n                    Current saldo of payment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>chosen_installment_plan</b> - If a plan is chosen field contains object representing installment plan.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/payments/#installment_plan'>installment_plan</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>who_chose_plan</b> - User who have chosen installment plan.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>date_of_plan_choice</b> -\n                    Date of choice of installment plan;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>available_installment_plans</b> - List of available installment plans for this payment.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/payments/#installment_plan'>installment_plan</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> -\n                    One of following values;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    A langdict object, at this moment always only \"pl\" key may be not null;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>state</b> -\n                    One of following values;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>account_number</b> -\n                    Bank account number for payment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>payment_deadline</b> -\n                    Payment date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>bonus_deadline</b> -\n                    Deadline for bonus;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>bonus_amount</b> -\n                    Bonus amount;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>has_bonus</b> -\n                    Does the payment have bonus;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>interest</b> -\n                    Interests for today;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>total_amount</b> -\n                    Total amount of money to pay, with bonus and interest;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>currency</b> -\n                    Payment currency;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> -\n                    Payment faculty;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>default_choice_date</b> -\n                    Date when default plan will be chosen automatically;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>debt_type</b> - Type of the payment object.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>installment_plan</b></p></li>\n<li><p><b>charged_installment</b></p></li>\n<li><p><b>charged_interest</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nPayment ID. Might be null in case of virtual payments",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nUser that payment is defined for",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "saldo_amount",
+      "description": "\nCurrent saldo of payment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "chosen_installment_plan",
+      "description": "\nIf a plan is chosen field contains object representing installment plan",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "who_chose_plan",
+      "description": "\nUser who have chosen installment plan",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "date_of_plan_choice",
+      "description": "\nDate of choice of installment plan",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "available_installment_plans",
+      "description": "\nList of available installment plans for this payment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\nOne of following values",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\nA langdict object, at this moment always only \"pl\" key may be not null",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "state",
+      "description": "\nOne of following values",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "account_number",
+      "description": "\nBank account number for payment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "payment_deadline",
+      "description": "\nPayment date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "bonus_deadline",
+      "description": "\nDeadline for bonus",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "bonus_amount",
+      "description": "\nBonus amount",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "has_bonus",
+      "description": "\nDoes the payment have bonus",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "interest",
+      "description": "\nInterests for today",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "total_amount",
+      "description": "\nTotal amount of money to pay, with bonus and interest",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "currency",
+      "description": "\nPayment currency",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nPayment faculty",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "default_choice_date",
+      "description": "\nDate when default plan will be chosen automatically",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "debt_type",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>installment_plan</b></p></li>\n<li><p><b>charged_installment</b></p></li>\n<li><p><b>charged_interest</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

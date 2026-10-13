@@ -1,0 +1,95 @@
+{
+  "name": "services/examrep2/user_grade",
+  "short_name": "user_grade",
+  "description": "<p>\nGet information about access token user's grade</p>",
+  "brief_description": "\nGet information about access token user's grade",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#user_grade",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "grades"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "examrep_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of exam report"
+    },
+    {
+      "name": "examrep_session_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nNumber of exam report session"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "grade_value|comment|last_updated",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>grade_value</b> - Grade value, may be null.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#grade_value'>grade_value</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    Comment for student;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - Graded student.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grader</b> - User who was last editing grade.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>last_updated</b> -\n                    Datetime of last edition of grade.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "grade_value",
+      "description": "\nGrade value, may be null",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\nComment for student",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nGraded student",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grader",
+      "description": "\nUser who was last editing grade",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "last_updated",
+      "description": "\nDatetime of last edition of grade",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

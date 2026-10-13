@@ -1,0 +1,46 @@
+{
+  "name": "services/crstests/user_points_modified",
+  "short_name": "user_points_modified",
+  "description": "\t\n\t<p>\n\tNotify USOS API about modifications of multiple user's course test points.\n\tThe result of this method is equal to calling\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#user_point_modified\">user_point_modified</a> method multiple\ntimes. Note that you need administrative scope for\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#user_point_modified\">user_point_modified</a> method in order\nto perform a successful call to this method.\n</p>\n",
+  "brief_description": "Notify USOS API that crstests points were modified.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#user_points_modified",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_point_modified_params",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tA list of dictionaries containing fields and values that match the\n\tparameters of <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#user_point_modified\">user_point_modified</a>\nmethod.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tEmpty dictionary.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

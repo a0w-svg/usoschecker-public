@@ -1,0 +1,46 @@
+{
+  "name": "services/crstests/unsubscribe",
+  "short_name": "unsubscribe",
+  "description": "\t\n\tThis method removes <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#ReadPerm\">ReadPerm</a> permission in a public template for an issuer.\nPlease note that no permissions are required by this method.\n",
+  "brief_description": "Remove ReadPerm.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#unsubscribe",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tnode ID"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tCurrently, this method always returns the same value: a dictionary with single success key with value of true.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

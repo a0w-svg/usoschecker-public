@@ -1,0 +1,127 @@
+{
+  "name": "services/news/article",
+  "short_name": "article",
+  "description": "<p>\nRetrieve a single news article by ID.</p>",
+  "brief_description": "\nRetrieve a single news article by ID.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/news/#article",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "article_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the article you want to retrieve information on."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|author|publication_date|title|headline_html",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the article;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>author</b> -\n                    langdict; the author of the article;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>publication_date</b> -\n                    datetime string; article publication date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title</b> -\n                    langdict; title of the article;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>headline_html</b> -\n                    HTML langdict (langdict with HTML in its values); headline of the article;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>content_html</b> -\n                    HTML langdict (langdict with HTML in its values); content of the article;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>expiry_date</b> -\n                    datetime string; date from which the article is considered \"archived\";</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>category</b> - category of the article.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/news/#category_index'>category_index</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - faculty the article is related to.</p>\n\n                \n\n                <p>You can use primary subfields from\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>image_urls</b> - dictionary of URLs <b>or nulls</b>; these URLs point to different versions of the main image for this article.</p>\n\n                \n\n                <p>Each value contains either the URL an image, or <b>null</b>\n                if the article does not have an image. All of these returned\n                images are the same, but in various dimensions. Use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to choose the wanted sizes/dimensions\n                of the image.</p>\n\n                <p>Currently available subfields:</p>\n\n                <ul>\n                    <li>\n                        <p><b>original</b> - original version of the image.\n                        This image may come in any dimensions. It can actually\n                        be smaller than the ones in other fields.</p>\n                    </li>\n                    <li>\n                        <p><b>1:1</b> aspect ratio images:</p>\n                        <ul>\n                            <li><b>30x30</b> - 30px x 30px,</li>\n                            <li><b>40x40</b> - 40px x 40px,</li>\n                            <li><b>60x60</b> - 60px x 60px,</li>\n                            <li><b>80x80</b> - 80px x 80px,</li>\n                            <li><b>120x120</b> - 120px x 120px,</li>\n                            <li><b>135x135</b> - 135px x 135px,</li>\n                            <li><b>160x160</b> - 160px x 160px,</li>\n                            <li><b>180x180</b> - 180px x 180px,</li>\n                            <li><b>270x270</b> - 270px x 270px,</li>\n                            <li><b>360x260</b> - 360px x 360px,</li>\n                            <li><b>540x540</b> - 540px x 540px,</li>\n                            <li><b>720x720</b> - 720px x 720px,</li>\n                         </ul>\n                    </li>\n                    <li>\n                        <p><b>16:9</b> aspect ratio images:</p>\n                        <ul>\n                            <li><b>270x152</b> - 270px x 152px,</li>\n                            <li><b>360x203</b> - 360px x 203px,</li>\n                            <li><b>540x304</b> - 540px x 304px,</li>\n                            <li><b>720x405</b> - 720px x 405px,</li>\n                            <li><b>1080x608</b> - 1080px x 608px,</li>\n                            <li><b>1440x810</b> - 1440px x 810px,</li>\n                        </ul>\n                    </li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>image_description</b> - langdict; description/caption of the image.</p>\n\n                \n\n                <p>It may contain, for example, the title of the image,\n                the photographer's name, or copyright notes.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>event</b> - dictionary; describes the event associated with the article.</p>\n\n                \n\n                <p>If no event is associated with this article, then this\n                dictionary will still be non-null, but all of its fields will\n                contain <b>null</b>s.</p>\n\n                <p>It has the following structure:</p>\n\n                <ul>\n                    <li><b>start_date</b> - datetime string <b>or null</b>;\n                    the beginning of the event,</li>\n\n                    <li><b>end_date</b> - datetime string <b>or null</b>; the\n                    end of the event,</li>\n\n                    <li><b>city</b> - string <b>or null</b>; name of the\n                    city/locality of the event\",</li>\n\n                    <li><b>address</b> - string <b>or null</b>; address of the\n                    event with no city/locality included,</li>\n\n                    <li><b>geo_lat</b> - float <b>or null</b>; geographical\n                    latitude of the event's place (in degrees, north is\n                    positive),</li>\n\n                    <li><b>geo_long</b>: float <b>or null</b>; geographical\n                    longitude of the event's place (in degrees, east is\n                    positive).</li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the article",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "author",
+      "description": "\nlangdict; the author of the article",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "publication_date",
+      "description": "\ndatetime string; article publication date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title",
+      "description": "\nlangdict; title of the article",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "headline_html",
+      "description": "\nHTML langdict (langdict with HTML in its values); headline of the article",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "content_html",
+      "description": "\nHTML langdict (langdict with HTML in its values); content of the article",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "expiry_date",
+      "description": "\ndatetime string; date from which the article is considered \"archived\"",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "category",
+      "description": "\ncategory of the article",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\n\n                <p>You can use primary subfields from\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "image_urls",
+      "description": "\n\n                <p>Each value contains either the URL an image, or <b>null</b>\n                if the article does not have an image. All of these returned\n                images are the same, but in various dimensions. Use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to choose the wanted sizes/dimensions\n                of the image.</p>\n\n                <p>Currently available subfields:</p>\n\n                <ul>\n                    <li>\n                        <p><b>original</b> - original version of the image.\n                        This image may come in any dimensions. It can actually\n                        be smaller than the ones in other fields.</p>\n                    </li>\n                    <li>\n                        <p><b>1:1</b> aspect ratio images:</p>\n                        <ul>\n                            <li><b>30x30</b> - 30px x 30px,</li>\n                            <li><b>40x40</b> - 40px x 40px,</li>\n                            <li><b>60x60</b> - 60px x 60px,</li>\n                            <li><b>80x80</b> - 80px x 80px,</li>\n                            <li><b>120x120</b> - 120px x 120px,</li>\n                            <li><b>135x135</b> - 135px x 135px,</li>\n                            <li><b>160x160</b> - 160px x 160px,</li>\n                            <li><b>180x180</b> - 180px x 180px,</li>\n                            <li><b>270x270</b> - 270px x 270px,</li>\n                            <li><b>360x260</b> - 360px x 360px,</li>\n                            <li><b>540x540</b> - 540px x 540px,</li>\n                            <li><b>720x720</b> - 720px x 720px,</li>\n                         </ul>\n                    </li>\n                    <li>\n                        <p><b>16:9</b> aspect ratio images:</p>\n                        <ul>\n                            <li><b>270x152</b> - 270px x 152px,</li>\n                            <li><b>360x203</b> - 360px x 203px,</li>\n                            <li><b>540x304</b> - 540px x 304px,</li>\n                            <li><b>720x405</b> - 720px x 405px,</li>\n                            <li><b>1080x608</b> - 1080px x 608px,</li>\n                            <li><b>1440x810</b> - 1440px x 810px,</li>\n                        </ul>\n                    </li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "image_description",
+      "description": "\n\n                <p>It may contain, for example, the title of the image,\n                the photographer's name, or copyright notes.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "event",
+      "description": "\n\n                <p>If no event is associated with this article, then this\n                dictionary will still be non-null, but all of its fields will\n                contain <b>null</b>s.</p>\n\n                <p>It has the following structure:</p>\n\n                <ul>\n                    <li><b>start_date</b> - datetime string <b>or null</b>;\n                    the beginning of the event,</li>\n\n                    <li><b>end_date</b> - datetime string <b>or null</b>; the\n                    end of the event,</li>\n\n                    <li><b>city</b> - string <b>or null</b>; name of the\n                    city/locality of the event\",</li>\n\n                    <li><b>address</b> - string <b>or null</b>; address of the\n                    event with no city/locality included,</li>\n\n                    <li><b>geo_lat</b> - float <b>or null</b>; geographical\n                    latitude of the event's place (in degrees, north is\n                    positive),</li>\n\n                    <li><b>geo_long</b>: float <b>or null</b>; geographical\n                    longitude of the event's place (in degrees, east is\n                    positive).</li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

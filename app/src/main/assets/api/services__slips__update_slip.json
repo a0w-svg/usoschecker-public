@@ -1,0 +1,80 @@
+{
+  "name": "services/slips/update_slip",
+  "short_name": "update_slip",
+  "description": "\t\n\t<p>Change attributes of an existing issued slip.</p>\n\t\n\t<p>Note, that your user has to hold proper privileges in order for you\n\tto use this method. However, if he does not, you will still receive a\n\tHTTP 200 response (see &quot;returns&quot; section).</p>\n\t\n\t<p><b>Important:</b> Please note the difference between:</p>\n\t\n\t<ul>\n\t\t<li>passing the parameter with an empty string value - in this case\n\t\t\twe will try to set the value of the appropriate field to an empty\n\t\t\tstring,</li>\n\t\t\n\t\t<li>not passing the parameter at all - in this case the current\n\t\t\tstate of the field will not be changed.</li>\n\t</ul>\n",
+  "brief_description": "Edit an existing issued slip",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#update_slip",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "slip_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the template been edited.\n"
+    },
+    {
+      "name": "state",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New slip state. For more information see\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.</p>\n"
+    },
+    {
+      "name": "student_programme_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the student's programme which is said to be &quot;bound&quot; to the issued\n\tslip instance <b>or</b> an empty string to remove the existing\n\treference.\n"
+    },
+    {
+      "name": "issuers_comment",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New value of the issuers' comment.</p>\n"
+    },
+    {
+      "name": "question_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Pipe-separated list of question IDs which are to be included in this\n\tslip. If you want to edit other properties of the questions, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#update_slipquestion\">update_slipquestion</a> method.</p>\n\n<p><b>Important:</b> There are strict rules regarding as to which\nquestions are allowed on which slip. Short extract:</p>\n\n<ul>\n\t<li>Issuers are allowed to remove any existing question from the\n\t\ttemplate, but it is possible that they won't be able to re-add\n\t\tit.</li>\n\t\n\t<li>Issuer is allowed to add a question if the question is not\n\t\tobsolete and it is present on any of the active templates currently\n\t\tconnected to the primary template of this slip.</li>\n</ul>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true}</code></p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

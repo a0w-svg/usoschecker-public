@@ -1,0 +1,81 @@
+{
+  "name": "services/grades/course_edition",
+  "short_name": "course_edition",
+  "description": "<p>\nGet grade of user on given course_edition</p>",
+  "brief_description": "\nGet grade of user on given course_edition",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/grades/#course_edition",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "grades"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "course_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of course"
+    },
+    {
+      "name": "term_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of academic term"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "value_symbol|passes|value_description|exam_id|exam_session_number",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector must contain subset of\n    <b>primary</b> fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade'>grade</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li class='deprecated'>\n            \n                <p><b>course_grades</b> -\n                    Array of dictionaries describing grades related to course edition's main exam. Dictionaries\n            will have structure as defined in <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#exam'>exam</a>\n            method, or null if course edition is not related with any exam report;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_units_grades</b> -\n                    Dictionary mapping course unit ID that are related to exam report to dictionaries\n            describing exam grades as defined in <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#exam'>exam</a> method.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "course_grades",
+      "description": "\n\n            Array of dictionaries describing grades related to course edition's main exam. Dictionaries\n            will have structure as defined in <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#exam'>exam</a>\n            method, or null if course edition is not related with any exam report\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_units_grades",
+      "description": "\n\n            Dictionary mapping course unit ID that are related to exam report to dictionaries\n            describing exam grades as defined in <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#exam'>exam</a> method\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": {
+    "deprecated_by": "services/grades/course_edition2",
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

@@ -1,0 +1,107 @@
+{
+  "name": "services/exams/slot",
+  "short_name": "slot",
+  "description": "<p>\nGet information on a given slot</p>",
+  "brief_description": "\nGet information on a given slot",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/exams/#slot",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "exam_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an exam"
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nNumber of an exam group"
+    },
+    {
+      "name": "slot_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nNumber of a slot"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "number|capacity|attendees_count|attendees",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    number of slot;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>capacity</b> -\n                    maximal number of attendees for this slot;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attendees_count</b> -\n                    Number of attendees;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attendees</b> -\n                    List of user IDs. Note that only examiners and course coordinators have access to list of attendees;</p>\n            \n            \n            <p>\n                <em>Additional permissions note</em>: Consumer key with administrative access is required, and SSL connection is required.\n            </p>\n            \n        </li>\n        \n        <li >\n            \n                <p><b>start</b> -\n                    time of start;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end</b> -\n                    time of end.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>exam_id</b>;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>group_number</b>;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>slot_number</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "number",
+      "description": "\nnumber of slot",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "capacity",
+      "description": "\nmaximal number of attendees for this slot",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "attendees_count",
+      "description": "\nNumber of attendees",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "attendees",
+      "description": "\nList of user IDs. Note that only examiners and course coordinators have access to list of attendees",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start",
+      "description": "\ntime of start",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end",
+      "description": "\ntime of end",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,91 @@
+{
+  "name": "services/progs/search",
+  "short_name": "search",
+  "description": "\n\n        <p><b>Search for programmes</b> matching the given query and/or\n        filters.</p>\n\n        <p>USOS API supports <b>personalized search results</b>. For example,\n        it may display certain items higher in the results, based on personal\n        user preferences and connections. You should include Access Tokens in\n        your requests in order to make use of these features. For best results,\n        you should also use the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#search_history_affect'>search_history_affect</a> method.</p>\n    ",
+  "brief_description": "\nSearch for programmes.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/progs/#search",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "lang",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>A code of the preferred language (\"pl\" or \"en\"). It may\n                influence the order and other properties of the returned\n                matches (in particular, the language used in the <b>match</b>\n                field).</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "items[programme[id]|match]|next_page",
+      "description": "\n\n                <p>A selector of result fields you are interested in.</p>\n            "
+    },
+    {
+      "name": "query",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>The search query. The most obvious value for this field is\n                the programme title, but we'll try to be smart about it.</p>\n            "
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "6",
+      "description": "\n\n                <p>The number of search results to return. The maximum allowed\n                value of num is 20.</p>\n            "
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\n\n                <p>Zero-based offset of the first item that should be included\n                in the response. (Or, in other words, the number of items to\n                strip from the beginning of the items-list.)</p>\n\n                <p>Note, that currently no more than 100 items will be returned\n                for any query, even if more than 100 matches were found.</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>items</b> - a list of items which have matched your query.</p>\n\n                \n\n                <p>The length of this list is limited to <b>num</b> items. You\n                can access further results by specifying the <b>start</b>\n                argument.</p>\n\n                <p>Each item on this list is a dictionary of the following\n                structure (you can choose more fields with a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a>):</p>\n\n                <ul>\n                    <li><b>programme</b> - the programme object, as described\n                    in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#programme'>programme</a> method.</li>\n\n                    <li>\n                        <p><b>match</b> - programme name with matching\n                        fragments highlighted with HTML &lt;b&gt; tag.</p>\n\n                        <p>The <b>match</b> may also contain other content,\n                        depending on your query, e.g. programme ID.</p>\n                    </li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>next_page</b> -\n                    boolean, indicates if there is a next page of results for this\n                query.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "items",
+      "description": "\n\n                <p>The length of this list is limited to <b>num</b> items. You\n                can access further results by specifying the <b>start</b>\n                argument.</p>\n\n                <p>Each item on this list is a dictionary of the following\n                structure (you can choose more fields with a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a>):</p>\n\n                <ul>\n                    <li><b>programme</b> - the programme object, as described\n                    in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#programme'>programme</a> method.</li>\n\n                    <li>\n                        <p><b>match</b> - programme name with matching\n                        fragments highlighted with HTML &lt;b&gt; tag.</p>\n\n                        <p>The <b>match</b> may also contain other content,\n                        depending on your query, e.g. programme ID.</p>\n                    </li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "next_page",
+      "description": "\n\n                boolean, indicates if there is a next page of results for this\n                query\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

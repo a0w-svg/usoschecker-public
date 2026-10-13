@@ -1,0 +1,48 @@
+{
+  "name": "services/exams/administrator",
+  "short_name": "administrator",
+  "description": "<p>\nGet information on a exams administrated by user.</p>",
+  "brief_description": "\nGet information on a exams administrated by user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/exams/#administrator",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "staff_perspective"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|status|exams|faculty",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/exams/#examination_session'>examination_session</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nDictionary mapping faculty ids (fetched using method <a href='https://usosapps.vistula.edu.pl/developers/api/services/facperms/#effective_fac_ids'>services/facperms/effective_fac_ids</a> for\n       permission named \"ROLA_ZARZADZANIE_REJESTRACJAMI\") to list of examination session objects.\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

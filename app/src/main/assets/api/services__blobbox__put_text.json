@@ -1,0 +1,70 @@
+{
+  "name": "services/blobbox/put_text",
+  "short_name": "put_text",
+  "description": "\t\n\t<p>Put a text blob into the database.</p>\n\t\n\t<p>Please include an Access Token if you have one\n\t(<a href=\"#why_use_access_tokens\">why?</a>)</p>\n",
+  "brief_description": "Put a text blob into the database.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "data",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Data to be stored (no more than 1 MB).</p>\n\t\n\t<p>This method can be used for text blobs only. You'll get an error if\n\tyou try to send binary data which cannot be read as utf8-encoded text.\n\tUse <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put\">put</a> or\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_base64\">put_base64</a> methods if you're\nnot sure if your content is binary or not.</p>\n\n<p>If 1 MB id not enough, use <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put\">put</a>\nor <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_unsigned\">put_unsigned</a> methods to upload\nyour data.</p>\n"
+    },
+    {
+      "name": "read_access",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "consumer",
+      "description": "\t\n\t<p>Sharing options. One of the following values:</p>\n\t<ul>\n\t\t<li>\n\t\t\t<b>public</b> - any Consumer (even non-administrative one) in\n\t\t\tpossession of the <b>blob_id</b> will be allowed to read the\n\t\t\tdata. You will also be able to use the <b>fileshare</b> module\n\t\t\tto share the blob publicly with end users (they won't need to\n\t\t\tuse any Consumer Key).\n\t\t</li>\n\t\t<li>\n\t\t\t<b>consumer</b> - only you (the Consumer) will be allowed to\n\t\t\tread the data.\n\t\t</li>\n\t\t<li>\n\t\t\tMore sharing options may come on demand. E.g. <b>users</b>\n\t\t\toption, which would allow to share a blob only with the chosen\n\t\t\tUSOS users, or <b>consumers</b> options which would do the same\n\t\t\tfor chosen Consumer Keys.\n\t\t\t<a href=\"/developers/api/contact/\">Contact\n\t\tus</a> if you need one.\n\t</li>\n</ul>\n<p>Regardless of what you choose, only you (the Consumer) will be\nallowed to update or delete the data. You can use the sharing options\nto allow others to <b>read</b> your data, but you <b>cannot</b> allow\nothers to change it in any way.</p>\n"
+    },
+    {
+      "name": "min_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "none",
+      "description": "\t\n\t<p>By default (if <i>min_age</i> and <i>max_age</i> are set to\n\t<b>none</b>), your data is kept indefinitely (or, until explicit\n\tremoval). When passing this parameter, you allow us to delete your data\n\tafter the specified time.</p>\n\t\n\t<p>Integer, or a special <b>none</b> value. The minimum number of\n\tseconds to store the data (counting from now). We will not delete your\n\tdata before this time, but we <b>may</b> choose to store it longer,\n\tbased, for example, on its size and last access time (blobs which are\n\tregularly read may be kept much longer, even indefinitely).</p>\n\t\n\t<p>This parameter is useful when you want to allow public read access\n\tto a big chunk of temporary data (like an email attachment), but you're\n\tnot sure how long it takes until people will actually stop accessing\n\tit. You may combine this parameter with <b>max_age</b> or\n\t<b>expires</b>.</p>\n"
+    },
+    {
+      "name": "max_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "none",
+      "description": "\t\n\t<p>By default (if <i>min_age</i> and <i>max_age</i> are set to\n\t<b>none</b>), your data is kept indefinitely (or, until explicit\n\tremoval). By passing this parameter, you tell us to delete it after a\n\tspecified time.</p>\n\t\n\t<p>Integer, or a special <b>none</b> value. The maximum time (in\n\tseconds) after which the data must be deleted. Note, that the data\n\t<b>may</b> be deleted sooner, if you use <b>min_age</b> parameter.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t\n\t<ul>\n\t\t<li><b>blob_id</b> - newly created blob ID, which you can use to\n\t\t\treference this blob.</li>\n\t</ul>\n\t\n\t<p>In case of storage error (i.e. out of space), we will respond with\n\t<b>HTTP 500</b> status and USOS API administrators will be\n\tnotified.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

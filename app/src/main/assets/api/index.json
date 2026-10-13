@@ -1,0 +1,2286 @@
+[
+  {
+    "name": "services/adm_documents/document",
+    "brief_description": "\nGet information on administration document by id."
+  },
+  {
+    "name": "services/adm_documents/generate_code",
+    "brief_description": "\nGenerate receive code and send it by e-mail."
+  },
+  {
+    "name": "services/adm_documents/get_upd",
+    "brief_description": "\nGet selected administration document UPD of a given user."
+  },
+  {
+    "name": "services/adm_documents/get_upo",
+    "brief_description": "\nGet selected administration document UPO of a given user."
+  },
+  {
+    "name": "services/adm_documents/receive",
+    "brief_description": "\nReceive document using authorization code."
+  },
+  {
+    "name": "services/adm_documents/user_documents",
+    "brief_description": "\nGet information on administration documents of a given user."
+  },
+  {
+    "name": "services/apiref/method",
+    "brief_description": "Get information on a given USOS API method."
+  },
+  {
+    "name": "services/apiref/method_index",
+    "brief_description": "Get a list of USOS API methods with brief descriptions."
+  },
+  {
+    "name": "services/apiref/module",
+    "brief_description": "Get information on a given USOS API module."
+  },
+  {
+    "name": "services/apiref/scopes",
+    "brief_description": "Get a list of all available scopes."
+  },
+  {
+    "name": "services/apisrv/consumer",
+    "brief_description": "Get information on the Consumer."
+  },
+  {
+    "name": "services/apisrv/installation",
+    "brief_description": "\nGet information on this USOS API installation."
+  },
+  {
+    "name": "services/apisrv/installations",
+    "brief_description": "Get a list of all public USOS API installations."
+  },
+  {
+    "name": "services/apisrv/now",
+    "brief_description": "Get current USOS API time."
+  },
+  {
+    "name": "services/apistlog/formatted",
+    "brief_description": "\nGet formatted (human-readable) results for your query"
+  },
+  {
+    "name": "services/apistlog/raw",
+    "brief_description": "\nPerform a raw apistlog query"
+  },
+  {
+    "name": "services/attendance/attendance",
+    "brief_description": "\nGet information of attendance."
+  },
+  {
+    "name": "services/attendance/attendance_list",
+    "brief_description": "\nGet information of a single attendance list."
+  },
+  {
+    "name": "services/attendance/attendance_lists",
+    "brief_description": "\nGet information of multiple attendance lists."
+  },
+  {
+    "name": "services/attendance/change_list_mode",
+    "brief_description": "\nChange mode of attendance list. This requires no set attendance for that list."
+  },
+  {
+    "name": "services/attendance/create_attendance_list",
+    "brief_description": "\nCreate a new attendance list."
+  },
+  {
+    "name": "services/attendance/create_from_tt",
+    "brief_description": "\nCreate new attendance lists from group meetings."
+  },
+  {
+    "name": "services/attendance/delete_list",
+    "brief_description": "\nDelete attendance list. This requires no set attendance for that list."
+  },
+  {
+    "name": "services/attendance/group",
+    "brief_description": "\nGet information of attendance lists for selected group."
+  },
+  {
+    "name": "services/attendance/update_attendance",
+    "brief_description": "\nUpdate attendance entry."
+  },
+  {
+    "name": "services/attendance/user",
+    "brief_description": "\nGet all attendance lists for user."
+  },
+  {
+    "name": "services/blobbox/blob",
+    "brief_description": "Get information on a given blob."
+  },
+  {
+    "name": "services/blobbox/blobs",
+    "brief_description": "Get information on given blobs."
+  },
+  {
+    "name": "services/blobbox/chmod",
+    "brief_description": "Update an existing blob's sharing options."
+  },
+  {
+    "name": "services/blobbox/consumer",
+    "brief_description": "Get consumer's storage usage statistics."
+  },
+  {
+    "name": "services/blobbox/delete",
+    "brief_description": "Delete a blob (or multiple blobs)."
+  },
+  {
+    "name": "services/blobbox/get",
+    "brief_description": "Get the contents of a blob."
+  },
+  {
+    "name": "services/blobbox/inspect_blob",
+    "brief_description": "\nInspect the blob's contents and retrieve basic metadata"
+  },
+  {
+    "name": "services/blobbox/put",
+    "brief_description": "Put a blob into the database, using form-data encoding."
+  },
+  {
+    "name": "services/blobbox/put_base64",
+    "brief_description": "Put a blob into the database, using base64 encoding."
+  },
+  {
+    "name": "services/blobbox/put_sha1",
+    "brief_description": "Put a blob into the database, using a SHA-1 hash."
+  },
+  {
+    "name": "services/blobbox/put_text",
+    "brief_description": "Put a text blob into the database."
+  },
+  {
+    "name": "services/blobbox/put_unsigned",
+    "brief_description": "Upload data using form-data encoding."
+  },
+  {
+    "name": "services/blobbox/user",
+    "brief_description": "Get storage usage statistics for a given user."
+  },
+  {
+    "name": "services/blobbox/users",
+    "brief_description": "Get storage usage statistics for given users."
+  },
+  {
+    "name": "services/blobbox/users_all",
+    "brief_description": "Get storage usage statistics for all users."
+  },
+  {
+    "name": "services/calendar/calendar_event",
+    "brief_description": "\nGet event details"
+  },
+  {
+    "name": "services/calendar/search",
+    "brief_description": "\nSearch for events in calendar"
+  },
+  {
+    "name": "services/cards/card",
+    "brief_description": "Get information on a given card."
+  },
+  {
+    "name": "services/cards/check_orders_status",
+    "brief_description": "\nGet information about student card and related mcard (mLegitymacje)"
+  },
+  {
+    "name": "services/cards/make_mcard_order",
+    "brief_description": "\nCreate new mStudentCard order"
+  },
+  {
+    "name": "services/cards/mark_student_card_prolonged",
+    "brief_description": "\nUprade student card status as to be prolonged"
+  },
+  {
+    "name": "services/cards/mcard",
+    "brief_description": "\nGet information about student card and related mcard (mLegitymacje)"
+  },
+  {
+    "name": "services/cards/mcard2",
+    "brief_description": "\nGet information about student card and related mcard (mLegitymacje)"
+  },
+  {
+    "name": "services/cards/mcard_order",
+    "brief_description": "\nGet details of mStudentCard order"
+  },
+  {
+    "name": "services/cards/mcard_order2",
+    "brief_description": "\nGet details of mStudentCard order"
+  },
+  {
+    "name": "services/cards/revoke_mcard",
+    "brief_description": "\nRevoke existing mStudentCard or mStudentCard order"
+  },
+  {
+    "name": "services/cards/student_card_data",
+    "brief_description": "\nGet data required to write new structure on ELS card"
+  },
+  {
+    "name": "services/cards/user",
+    "brief_description": "Get information on a user's ID cards."
+  },
+  {
+    "name": "services/cards/user_cards",
+    "brief_description": "\nGet all student's cards data"
+  },
+  {
+    "name": "services/courses/classtypes_index",
+    "brief_description": "Get a list of all possible class types."
+  },
+  {
+    "name": "services/courses/coordinator",
+    "brief_description": "\nGet course editions that user is coordinator of"
+  },
+  {
+    "name": "services/courses/course",
+    "brief_description": "\nGet information on a given course."
+  },
+  {
+    "name": "services/courses/course2",
+    "brief_description": "\nGet information on a given course."
+  },
+  {
+    "name": "services/courses/course_edition",
+    "brief_description": "\nGet information on a given course edition."
+  },
+  {
+    "name": "services/courses/course_edition2",
+    "brief_description": "\nGet information on a given course edition."
+  },
+  {
+    "name": "services/courses/course_unit",
+    "brief_description": "\nGet information on a given unit."
+  },
+  {
+    "name": "services/courses/courses",
+    "brief_description": "\nGet information on multiple courses."
+  },
+  {
+    "name": "services/courses/is_coordinator",
+    "brief_description": "Is staff member a course edition coordinator."
+  },
+  {
+    "name": "services/courses/is_lecturer",
+    "brief_description": "Is staff member a course edition lecturer."
+  },
+  {
+    "name": "services/courses/is_participant",
+    "brief_description": "Is student participant of course edition."
+  },
+  {
+    "name": "services/courses/search",
+    "brief_description": "Search for courses."
+  },
+  {
+    "name": "services/courses/unit",
+    "brief_description": "\nGet information on a given unit."
+  },
+  {
+    "name": "services/courses/units",
+    "brief_description": "\nGet information on multiple course units."
+  },
+  {
+    "name": "services/courses/user",
+    "brief_description": "\nGet information on user's courses."
+  },
+  {
+    "name": "services/courses/user_ects_points",
+    "brief_description": "\nGet ECTS points count for user courses"
+  },
+  {
+    "name": "services/credits/student_programme",
+    "brief_description": "Get sums of credits used on the given student programme."
+  },
+  {
+    "name": "services/credits/used_sum",
+    "brief_description": "Get the sum of credits used"
+  },
+  {
+    "name": "services/crstests/all_user_grades",
+    "brief_description": "Get grades of a student."
+  },
+  {
+    "name": "services/crstests/all_user_points",
+    "brief_description": "Get points of a student."
+  },
+  {
+    "name": "services/crstests/change_folder_node_permissions",
+    "brief_description": "Change FolderNode permissions."
+  },
+  {
+    "name": "services/crstests/change_folder_node_properties",
+    "brief_description": "Change properties of a FolderNode."
+  },
+  {
+    "name": "services/crstests/change_grade_node_permissions",
+    "brief_description": "Change GradeNode permissions."
+  },
+  {
+    "name": "services/crstests/change_grade_node_properties",
+    "brief_description": "Change properties of a GradeNode."
+  },
+  {
+    "name": "services/crstests/change_root_node_permissions",
+    "brief_description": "Change RootNode permissions."
+  },
+  {
+    "name": "services/crstests/change_root_node_properties",
+    "brief_description": "Change properties of a RootNode."
+  },
+  {
+    "name": "services/crstests/change_task_node_permissions",
+    "brief_description": "Change TaskNode permissions."
+  },
+  {
+    "name": "services/crstests/change_task_node_properties",
+    "brief_description": "Change properties of a TaskNode."
+  },
+  {
+    "name": "services/crstests/connect_template_to_course_edition",
+    "brief_description": "Connect a template to a course edition."
+  },
+  {
+    "name": "services/crstests/course_test",
+    "brief_description": "\nGet informations about course test"
+  },
+  {
+    "name": "services/crstests/create_folder_node",
+    "brief_description": "Create a FolderNode"
+  },
+  {
+    "name": "services/crstests/create_grade_node",
+    "brief_description": "Creates a GradeNode"
+  },
+  {
+    "name": "services/crstests/create_root_node",
+    "brief_description": "Create a RootNode"
+  },
+  {
+    "name": "services/crstests/create_task_node",
+    "brief_description": "Create a TaskNode."
+  },
+  {
+    "name": "services/crstests/delete_subtree",
+    "brief_description": "Delete a subtree of test."
+  },
+  {
+    "name": "services/crstests/duplicate_subtree",
+    "brief_description": "Duplicate a subtree."
+  },
+  {
+    "name": "services/crstests/duplicate_tree",
+    "brief_description": "Duplicate a test or a template."
+  },
+  {
+    "name": "services/crstests/examinee",
+    "brief_description": "\ncommon tests"
+  },
+  {
+    "name": "services/crstests/folder_node",
+    "brief_description": "Get a FolderNode."
+  },
+  {
+    "name": "services/crstests/folder_node_details",
+    "brief_description": "\nGet folder node details"
+  },
+  {
+    "name": "services/crstests/grade_node",
+    "brief_description": "Get a GradeNode."
+  },
+  {
+    "name": "services/crstests/grade_node_details",
+    "brief_description": "\nDetails of a grade node"
+  },
+  {
+    "name": "services/crstests/groups",
+    "brief_description": "Get groups of a test."
+  },
+  {
+    "name": "services/crstests/lecturer",
+    "brief_description": "Get lecturer's tests."
+  },
+  {
+    "name": "services/crstests/lecturer2",
+    "brief_description": "\nGet student's tests"
+  },
+  {
+    "name": "services/crstests/move_node",
+    "brief_description": "Move a node."
+  },
+  {
+    "name": "services/crstests/node",
+    "brief_description": "Get nodes"
+  },
+  {
+    "name": "services/crstests/node2",
+    "brief_description": "\nGet nodes"
+  },
+  {
+    "name": "services/crstests/node_grades",
+    "brief_description": "Get grades given in some node."
+  },
+  {
+    "name": "services/crstests/node_points",
+    "brief_description": "Get points given in some node."
+  },
+  {
+    "name": "services/crstests/node_stats",
+    "brief_description": "\nNode statistics"
+  },
+  {
+    "name": "services/crstests/participant",
+    "brief_description": "Get student's tests."
+  },
+  {
+    "name": "services/crstests/participant2",
+    "brief_description": "\nGet student's tests"
+  },
+  {
+    "name": "services/crstests/public_templates",
+    "brief_description": "Get public templates templates."
+  },
+  {
+    "name": "services/crstests/root_node",
+    "brief_description": "Get description of a RootNode."
+  },
+  {
+    "name": "services/crstests/root_nodes",
+    "brief_description": "Get multiple RootNodes."
+  },
+  {
+    "name": "services/crstests/student_grade",
+    "brief_description": "\nGet student's grade for a single node."
+  },
+  {
+    "name": "services/crstests/student_point",
+    "brief_description": "\nGet points which token issuer got in node specified by node_id parameter"
+  },
+  {
+    "name": "services/crstests/subscribe",
+    "brief_description": "Grant ReadPerm."
+  },
+  {
+    "name": "services/crstests/task_node",
+    "brief_description": "Get a TaskNode."
+  },
+  {
+    "name": "services/crstests/task_node_details",
+    "brief_description": "\nDetails of a task node"
+  },
+  {
+    "name": "services/crstests/unsubscribe",
+    "brief_description": "Remove ReadPerm."
+  },
+  {
+    "name": "services/crstests/update_grades",
+    "brief_description": "Give grades to students."
+  },
+  {
+    "name": "services/crstests/update_points",
+    "brief_description": "Give points to students."
+  },
+  {
+    "name": "services/crstests/user_grade",
+    "brief_description": "Get student's grade for a single node."
+  },
+  {
+    "name": "services/crstests/user_grade_modified",
+    "brief_description": "Notify about user's course test grade modification."
+  },
+  {
+    "name": "services/crstests/user_grades",
+    "brief_description": "Get student's grades for some nodes."
+  },
+  {
+    "name": "services/crstests/user_grades_modified",
+    "brief_description": "Notify USOS API that crstests grades were modified."
+  },
+  {
+    "name": "services/crstests/user_point",
+    "brief_description": "Get points of a student for a single node."
+  },
+  {
+    "name": "services/crstests/user_point_modified",
+    "brief_description": "Notify about user's course test points modification."
+  },
+  {
+    "name": "services/crstests/user_points",
+    "brief_description": "Get points of a student."
+  },
+  {
+    "name": "services/crstests/user_points_modified",
+    "brief_description": "Notify USOS API that crstests points were modified."
+  },
+  {
+    "name": "services/csgroups/create",
+    "brief_description": "\nCreate a custom group."
+  },
+  {
+    "name": "services/csgroups/custom_group",
+    "brief_description": "\nGet information on a given custom group."
+  },
+  {
+    "name": "services/csgroups/custom_groups",
+    "brief_description": "\nGet information on multiple custom groups."
+  },
+  {
+    "name": "services/csgroups/delete",
+    "brief_description": "\nDelete custom groups."
+  },
+  {
+    "name": "services/csgroups/update",
+    "brief_description": "\nUpdate a custom group."
+  },
+  {
+    "name": "services/csgroups/user",
+    "brief_description": "\nGet user's custom groups."
+  },
+  {
+    "name": "services/emrex/delete_elmo",
+    "brief_description": "\nDelete an ELMO file."
+  },
+  {
+    "name": "services/emrex/get_elmo",
+    "brief_description": "\nDownload an ELMO file."
+  },
+  {
+    "name": "services/emrex/put_elmo",
+    "brief_description": "\nUpload an ELMO."
+  },
+  {
+    "name": "services/emrex/save_as_document",
+    "brief_description": "\nSave ELMO file as document"
+  },
+  {
+    "name": "services/events/notifier_status",
+    "brief_description": "\nGet information on the status of the notifier."
+  },
+  {
+    "name": "services/events/register_fcm_token",
+    "brief_description": "\nRegister instance ID."
+  },
+  {
+    "name": "services/events/registered_fcm_tokens",
+    "brief_description": "\nList your (user) registered FCM instances."
+  },
+  {
+    "name": "services/events/subscribe_event",
+    "brief_description": "\nSubscribe for event notifications."
+  },
+  {
+    "name": "services/events/subscriptions",
+    "brief_description": "\nLists your (the consumer) subscriptions."
+  },
+  {
+    "name": "services/events/test_my_fcm",
+    "brief_description": "\nSend a notification to your FCM instances"
+  },
+  {
+    "name": "services/events/unsubscribe",
+    "brief_description": "\nUnsubscribe from event notifications."
+  },
+  {
+    "name": "services/events2/add_recipient",
+    "brief_description": "\nAdd user to recipients list"
+  },
+  {
+    "name": "services/events2/delete_recipient",
+    "brief_description": "\nDelete user from recipients list"
+  },
+  {
+    "name": "services/events2/delete_statement",
+    "brief_description": "\nDelete statement"
+  },
+  {
+    "name": "services/events2/distribution_channel",
+    "brief_description": "\nGet information about distribution channel"
+  },
+  {
+    "name": "services/events2/event_channel",
+    "brief_description": "\nget information about assignment channel to event type"
+  },
+  {
+    "name": "services/events2/event_channel_preference",
+    "brief_description": "\nGet user prefetences for given event type channel"
+  },
+  {
+    "name": "services/events2/event_preference",
+    "brief_description": "\nget single user preference object"
+  },
+  {
+    "name": "services/events2/event_type",
+    "brief_description": "\nGet information about event type"
+  },
+  {
+    "name": "services/events2/event_type_schedule",
+    "brief_description": "\nget event type schedule details"
+  },
+  {
+    "name": "services/events2/event_types_index",
+    "brief_description": "\nGet all events types"
+  },
+  {
+    "name": "services/events2/generate_one_time_code",
+    "brief_description": "\nGenerate and send one time code to user"
+  },
+  {
+    "name": "services/events2/generate_one_time_code2",
+    "brief_description": "\nGenerate and send one time code to user"
+  },
+  {
+    "name": "services/events2/latest_notifications",
+    "brief_description": "\nGet user's notifications"
+  },
+  {
+    "name": "services/events2/notification_channels_index",
+    "brief_description": "\nList of all notifiaction channels"
+  },
+  {
+    "name": "services/events2/notifications_schedule",
+    "brief_description": "\nGet notifications sending schedule details"
+  },
+  {
+    "name": "services/events2/notifications_schedule_index",
+    "brief_description": "\nGet all available schedules"
+  },
+  {
+    "name": "services/events2/personalized_statements",
+    "brief_description": "\nFilter statements"
+  },
+  {
+    "name": "services/events2/search_statements",
+    "brief_description": "\nFilter statements"
+  },
+  {
+    "name": "services/events2/send_notification",
+    "brief_description": "\nSend custom notification to selected user"
+  },
+  {
+    "name": "services/events2/statement",
+    "brief_description": "\nGet statement"
+  },
+  {
+    "name": "services/events2/update_event_channel",
+    "brief_description": "\nUpdate event channel for selected event type"
+  },
+  {
+    "name": "services/events2/update_event_schedule",
+    "brief_description": "\nupdate event type schedule"
+  },
+  {
+    "name": "services/events2/update_event_type",
+    "brief_description": "\nGet information about event type"
+  },
+  {
+    "name": "services/events2/update_statement",
+    "brief_description": "\nUpdate or insert statement"
+  },
+  {
+    "name": "services/events2/update_user_preference",
+    "brief_description": "\nUpdate user preference object"
+  },
+  {
+    "name": "services/events2/user_preferences",
+    "brief_description": "\nGet user preferences"
+  },
+  {
+    "name": "services/events2/validate_one_time_code",
+    "brief_description": "\nGenerate and send one time code to user"
+  },
+  {
+    "name": "services/examrep/course_edition",
+    "brief_description": "\nGet exams and grades related to given course edition"
+  },
+  {
+    "name": "services/examrep/course_edition2",
+    "brief_description": "\nGet exams and grades related to given course edition"
+  },
+  {
+    "name": "services/examrep/exam",
+    "brief_description": "\nGet info about exam."
+  },
+  {
+    "name": "services/examrep/exam_session",
+    "brief_description": "\nGet info about exam sessions related to en exam."
+  },
+  {
+    "name": "services/examrep/user",
+    "brief_description": "\nGet exams and grades related to given course edition"
+  },
+  {
+    "name": "services/examrep/user2",
+    "brief_description": "\nGet exams and grades related to given course edition"
+  },
+  {
+    "name": "services/examrep2/class_group",
+    "brief_description": "\nGet class group and grades in given group for given exam report"
+  },
+  {
+    "name": "services/examrep2/examinee",
+    "brief_description": "\nGet exam reports that allows access token issuer to update grades of given student"
+  },
+  {
+    "name": "services/examrep2/examrep",
+    "brief_description": "\nGet info about exam report"
+  },
+  {
+    "name": "services/examrep2/examrep_session",
+    "brief_description": "\nGet info about exam report session."
+  },
+  {
+    "name": "services/examrep2/examrep_session_access",
+    "brief_description": "\nGet access token issuer to exam report"
+  },
+  {
+    "name": "services/examrep2/examrep_type",
+    "brief_description": "\nExam report type"
+  },
+  {
+    "name": "services/examrep2/grade_type",
+    "brief_description": "\nGet info about grade type."
+  },
+  {
+    "name": "services/examrep2/grade_value",
+    "brief_description": "\nGet information about grade value"
+  },
+  {
+    "name": "services/examrep2/grader",
+    "brief_description": "\nGet exam reports that access token issuer has access"
+  },
+  {
+    "name": "services/examrep2/student_grade",
+    "brief_description": "\nGet information about single user's grade"
+  },
+  {
+    "name": "services/examrep2/student_grades",
+    "brief_description": "\nGet information about all user's grade from single exam report"
+  },
+  {
+    "name": "services/examrep2/update_student_grade",
+    "brief_description": "\nUpdate user's grade."
+  },
+  {
+    "name": "services/examrep2/user_grade",
+    "brief_description": "\nGet information about access token user's grade"
+  },
+  {
+    "name": "services/exams/active_examination_sessions",
+    "brief_description": "\nGet list of active examination sessions"
+  },
+  {
+    "name": "services/exams/administrator",
+    "brief_description": "\nGet information on a exams administrated by user."
+  },
+  {
+    "name": "services/exams/batch_register_exam",
+    "brief_description": "\nRegister multiple users at one request"
+  },
+  {
+    "name": "services/exams/batch_registration",
+    "brief_description": "\nUnregister and register multiple users at one request"
+  },
+  {
+    "name": "services/exams/batch_unregister_exam",
+    "brief_description": "\nUnregister multiple users at one request"
+  },
+  {
+    "name": "services/exams/condition",
+    "brief_description": "\nGet information on a admission condition."
+  },
+  {
+    "name": "services/exams/exam",
+    "brief_description": "\nGet information on a given exam."
+  },
+  {
+    "name": "services/exams/exam_group",
+    "brief_description": "\nGet information on a given exam group"
+  },
+  {
+    "name": "services/exams/examination_session",
+    "brief_description": "\nGet information on a given examination session"
+  },
+  {
+    "name": "services/exams/examination_sessions",
+    "brief_description": "\nGet information on a given examination sessions"
+  },
+  {
+    "name": "services/exams/exams",
+    "brief_description": "\nGet information on a given exam."
+  },
+  {
+    "name": "services/exams/faculty_examination_sessions",
+    "brief_description": "\nGet list of active examination sessions"
+  },
+  {
+    "name": "services/exams/group",
+    "brief_description": "\nGet information on a given exam group"
+  },
+  {
+    "name": "services/exams/search_exams_registrations",
+    "brief_description": "\nSearch for exam registrations"
+  },
+  {
+    "name": "services/exams/slot",
+    "brief_description": "\nGet information on a given slot"
+  },
+  {
+    "name": "services/exams/student_exams",
+    "brief_description": "\nGet list of student exams."
+  },
+  {
+    "name": "services/exams/user",
+    "brief_description": "\nGet information on a exams assigned to user."
+  },
+  {
+    "name": "services/fac/factsheet_get",
+    "brief_description": "\nRetrieve faculty's factsheet"
+  },
+  {
+    "name": "services/fac/faculties",
+    "brief_description": "Get information on mulitple faculties."
+  },
+  {
+    "name": "services/fac/faculty",
+    "brief_description": "Get information on a given faculty."
+  },
+  {
+    "name": "services/fac/resolve_facpattern",
+    "brief_description": "Resolve facpattern value into a list of faculty IDs."
+  },
+  {
+    "name": "services/fac/search",
+    "brief_description": "Search among faculties."
+  },
+  {
+    "name": "services/fac/subfaculties_deep",
+    "brief_description": "Get all descendant faculty IDs."
+  },
+  {
+    "name": "services/facperms/delete",
+    "brief_description": "\nDELETE an existing user-faculty-permission row."
+  },
+  {
+    "name": "services/facperms/effective_fac_ids",
+    "brief_description": "\nGet a list of faculty IDs in which the user has a role."
+  },
+  {
+    "name": "services/facperms/fpclass",
+    "brief_description": "\nGet information on a given permission class."
+  },
+  {
+    "name": "services/facperms/fpclass_index",
+    "brief_description": "\nGet the full list of faculty permission classes."
+  },
+  {
+    "name": "services/facperms/fpclasses",
+    "brief_description": "\nGet information on multiple permission classes."
+  },
+  {
+    "name": "services/facperms/has_facperm",
+    "brief_description": "\nCheck if access token issuer has selected facperm"
+  },
+  {
+    "name": "services/facperms/replace",
+    "brief_description": "\nINSERT new or UPDATE existing user-faculty-permission row."
+  },
+  {
+    "name": "services/facperms/select",
+    "brief_description": "\nPerform a SELECT on the user-faculty-permission rows."
+  },
+  {
+    "name": "services/feedback/report_db",
+    "brief_description": "\nReport invalid data in USOS database."
+  },
+  {
+    "name": "services/feedback/status",
+    "brief_description": "\nGet the module status."
+  },
+  {
+    "name": "services/fileshare/create_link",
+    "brief_description": "Publish a file using an existing blob."
+  },
+  {
+    "name": "services/fileshare/parse_link",
+    "brief_description": "Parse a link into blob_id and params."
+  },
+  {
+    "name": "services/fileshare/set_404",
+    "brief_description": "Register/Unregister a custom 404 error handler."
+  },
+  {
+    "name": "services/geo/building",
+    "brief_description": "\nGet information on a given building"
+  },
+  {
+    "name": "services/geo/building2",
+    "brief_description": "\nGet information on a given building"
+  },
+  {
+    "name": "services/geo/building_index",
+    "brief_description": "\nGet the list of all buildings."
+  },
+  {
+    "name": "services/geo/buildings",
+    "brief_description": "\nGet information on multiple buildings"
+  },
+  {
+    "name": "services/geo/buildings2",
+    "brief_description": "\nGet information on multiple buildings."
+  },
+  {
+    "name": "services/geo/room",
+    "brief_description": "\nGet information on a given room."
+  },
+  {
+    "name": "services/geo/rooms",
+    "brief_description": "\nGet information on multiple rooms."
+  },
+  {
+    "name": "services/geo/staticmap",
+    "brief_description": "\nGet a map of the surroundings of a given point"
+  },
+  {
+    "name": "services/grades/course_edition",
+    "brief_description": "\nGet grade of user on given course_edition"
+  },
+  {
+    "name": "services/grades/course_edition2",
+    "brief_description": "\nGet grade of user on given course_edition"
+  },
+  {
+    "name": "services/grades/exam",
+    "brief_description": "\nGet user's grades of given exam."
+  },
+  {
+    "name": "services/grades/grade",
+    "brief_description": "\nGet grade of given user and exam session."
+  },
+  {
+    "name": "services/grades/grade_type",
+    "brief_description": "\nGet info about grade type."
+  },
+  {
+    "name": "services/grades/grade_type_index",
+    "brief_description": "\nGet info about all grade types."
+  },
+  {
+    "name": "services/grades/grade_types",
+    "brief_description": "\nGet info about multiple grade types."
+  },
+  {
+    "name": "services/grades/latest",
+    "brief_description": "\nGet user's latest grades"
+  },
+  {
+    "name": "services/grades/terms",
+    "brief_description": "\nGet grades of a user on given terms"
+  },
+  {
+    "name": "services/grades/terms2",
+    "brief_description": "\nGet grades of a user on given terms"
+  },
+  {
+    "name": "services/grades/update_grade",
+    "brief_description": "\nUpdate user's grade."
+  },
+  {
+    "name": "services/groups/class_group",
+    "brief_description": "\nGet information on a given group."
+  },
+  {
+    "name": "services/groups/common_groups",
+    "brief_description": "\nGet a list of common classgroups of two users"
+  },
+  {
+    "name": "services/groups/group",
+    "brief_description": "Get information on a given group."
+  },
+  {
+    "name": "services/groups/groups",
+    "brief_description": "Get information on multiple groups."
+  },
+  {
+    "name": "services/groups/is_lecturer",
+    "brief_description": "Is user a group lecturer."
+  },
+  {
+    "name": "services/groups/is_participant",
+    "brief_description": "Is student participant of the group."
+  },
+  {
+    "name": "services/groups/lecturer",
+    "brief_description": "Get public list of groups lectured by given staff member."
+  },
+  {
+    "name": "services/groups/participant",
+    "brief_description": "Get groups related to given user's study"
+  },
+  {
+    "name": "services/groups/user",
+    "brief_description": "Get all groups related to the user."
+  },
+  {
+    "name": "services/guide/chapter",
+    "brief_description": "\nGet a single university guide chapter info."
+  },
+  {
+    "name": "services/guide/chapters",
+    "brief_description": "\nGet guide chapters."
+  },
+  {
+    "name": "services/guide/entries",
+    "brief_description": "\nGet guide entries by its ids."
+  },
+  {
+    "name": "services/guide/entry",
+    "brief_description": "\nGet a single university guide entry."
+  },
+  {
+    "name": "services/guide/guide",
+    "brief_description": "\nGet whole guide structure."
+  },
+  {
+    "name": "services/guide/page",
+    "brief_description": "\nGet a single university guide page."
+  },
+  {
+    "name": "services/guide/pages",
+    "brief_description": "\nGet guide pages by its ids."
+  },
+  {
+    "name": "services/housing/allocation_period",
+    "brief_description": "\nGet information on a single allocation period"
+  },
+  {
+    "name": "services/housing/allocation_period_index",
+    "brief_description": "\nGet the index of all allocation periods."
+  },
+  {
+    "name": "services/housing/allocation_periods",
+    "brief_description": "\nGet information on multiple allocation periods"
+  },
+  {
+    "name": "services/housing/assignment",
+    "brief_description": "\nGet data on a given assignment."
+  },
+  {
+    "name": "services/housing/assignment_extend",
+    "brief_description": "\nExtend assignment's expiry date."
+  },
+  {
+    "name": "services/housing/assignments",
+    "brief_description": "\nGet information on multiple assignments."
+  },
+  {
+    "name": "services/housing/check_in",
+    "brief_description": "\nCheck an user into dormitory"
+  },
+  {
+    "name": "services/housing/check_out",
+    "brief_description": "\nCheck out a user from a dormitory."
+  },
+  {
+    "name": "services/housing/dormitories",
+    "brief_description": "\nGet information on multiple dormitories."
+  },
+  {
+    "name": "services/housing/dormitory",
+    "brief_description": "\nGet information on a single dormitory."
+  },
+  {
+    "name": "services/housing/dormitory_index",
+    "brief_description": "\nGet the index of all dormitories."
+  },
+  {
+    "name": "services/housing/dormitory_user",
+    "brief_description": "\nGet information on a given user."
+  },
+  {
+    "name": "services/housing/dormitory_users",
+    "brief_description": "\nGet information on multiple users."
+  },
+  {
+    "name": "services/housing/dormroom",
+    "brief_description": "\nGet information on a single dormitory room."
+  },
+  {
+    "name": "services/housing/dormroom_type",
+    "brief_description": "\nGet information on a single dormroom type"
+  },
+  {
+    "name": "services/housing/dormroom_type_index",
+    "brief_description": "\nGet a list of all dormroom types."
+  },
+  {
+    "name": "services/housing/dormroom_types",
+    "brief_description": "\nGet information on multiple dormroom types"
+  },
+  {
+    "name": "services/housing/dormrooms",
+    "brief_description": "\nGet information on multiple dormitory rooms."
+  },
+  {
+    "name": "services/housing/residence",
+    "brief_description": "\nGet information on a single residence"
+  },
+  {
+    "name": "services/housing/residences",
+    "brief_description": "\nGet information on multiple residences."
+  },
+  {
+    "name": "services/housing/resident_type",
+    "brief_description": "\nGet information on a single resident type"
+  },
+  {
+    "name": "services/housing/resident_type_index",
+    "brief_description": "\nGet a list of all resident types."
+  },
+  {
+    "name": "services/housing/resident_types",
+    "brief_description": "\nGet information on multiple resident types"
+  },
+  {
+    "name": "services/housing/unused_assignment_ids",
+    "brief_description": "\nGet a list of assignments which were not checked-in yet."
+  },
+  {
+    "name": "services/instaddr/all",
+    "brief_description": "\nGet a list of all institutional addresses."
+  },
+  {
+    "name": "services/instaddr/create",
+    "brief_description": "\nCreate institutional address."
+  },
+  {
+    "name": "services/instaddr/delete",
+    "brief_description": "\nDelete institutional addresses."
+  },
+  {
+    "name": "services/instaddr/inst_address",
+    "brief_description": "\nGet information on a given institutional address."
+  },
+  {
+    "name": "services/instaddr/inst_addresses",
+    "brief_description": "\nGet information on multiple institutional addresses."
+  },
+  {
+    "name": "services/instaddr/update",
+    "brief_description": "\nUpdate an institutional address."
+  },
+  {
+    "name": "services/instaddr/update_user",
+    "brief_description": "\nUpdate user institutional addresses."
+  },
+  {
+    "name": "services/instaddr/user",
+    "brief_description": "\nGet user's institutional addresses."
+  },
+  {
+    "name": "services/internships/create_company",
+    "brief_description": "\nCreate a new company."
+  },
+  {
+    "name": "services/internships/update_company",
+    "brief_description": "\nUpdate an existing company."
+  },
+  {
+    "name": "services/mailclient/attachment",
+    "brief_description": "\nGet information on a given attachment."
+  },
+  {
+    "name": "services/mailclient/attachments",
+    "brief_description": "\nGet information on multiple attachments."
+  },
+  {
+    "name": "services/mailclient/case_category",
+    "brief_description": "\nGet a single case category"
+  },
+  {
+    "name": "services/mailclient/cases_categories",
+    "brief_description": "\nGet emails of cases categories."
+  },
+  {
+    "name": "services/mailclient/copy_message",
+    "brief_description": "\nCreate a copy of a message."
+  },
+  {
+    "name": "services/mailclient/create_and_send_message",
+    "brief_description": "\nCreate and send a simple message."
+  },
+  {
+    "name": "services/mailclient/create_message",
+    "brief_description": "\nCreate a new message."
+  },
+  {
+    "name": "services/mailclient/delete_attachments",
+    "brief_description": "\nDelete message attachments."
+  },
+  {
+    "name": "services/mailclient/delete_messages",
+    "brief_description": "\nDelete messages."
+  },
+  {
+    "name": "services/mailclient/message",
+    "brief_description": "\nGet information on a given message."
+  },
+  {
+    "name": "services/mailclient/message_address_limit",
+    "brief_description": "\nGet the maximum number of recipient addresses allowed"
+  },
+  {
+    "name": "services/mailclient/messages",
+    "brief_description": "\nGet information on multiple messages."
+  },
+  {
+    "name": "services/mailclient/put_attachment",
+    "brief_description": "\nUpload an attachment."
+  },
+  {
+    "name": "services/mailclient/recipients",
+    "brief_description": "\nGet a list of recipients."
+  },
+  {
+    "name": "services/mailclient/recipients_group",
+    "brief_description": "\nGet information on a given recipients group."
+  },
+  {
+    "name": "services/mailclient/refresh_recipients",
+    "brief_description": "\nRegenerate recipients list."
+  },
+  {
+    "name": "services/mailclient/retry_send_message",
+    "brief_description": "\nRetry sending a message."
+  },
+  {
+    "name": "services/mailclient/send_message",
+    "brief_description": "\nSend a message."
+  },
+  {
+    "name": "services/mailclient/update_attachment",
+    "brief_description": "\nUpdate an attachment."
+  },
+  {
+    "name": "services/mailclient/update_message",
+    "brief_description": "\nUpdate a message."
+  },
+  {
+    "name": "services/mailclient/update_recipients_group",
+    "brief_description": "\nUpdate a recipients group."
+  },
+  {
+    "name": "services/mailclient/user",
+    "brief_description": "\nGet user's messages."
+  },
+  {
+    "name": "services/mailing/check_message_status",
+    "brief_description": "Check detailed status of a message."
+  },
+  {
+    "name": "services/mailing/check_messages_status",
+    "brief_description": "Check status of a messages."
+  },
+  {
+    "name": "services/mailing/send_simple_by_template",
+    "brief_description": "Send multiple messages using a template."
+  },
+  {
+    "name": "services/mailing/send_simple_message",
+    "brief_description": "Send an email message."
+  },
+  {
+    "name": "services/mailing/send_simple_messages",
+    "brief_description": "Call send_simple_message multiple times in one call."
+  },
+  {
+    "name": "services/mailing/system_status",
+    "brief_description": "Get information on the status of the module."
+  },
+  {
+    "name": "services/meetings/accept_participant",
+    "brief_description": "\nAccept participant to specific meeting date"
+  },
+  {
+    "name": "services/meetings/available_meetings",
+    "brief_description": "\nGet all meetings available for user."
+  },
+  {
+    "name": "services/meetings/cart",
+    "brief_description": "\nGet user meetings cart"
+  },
+  {
+    "name": "services/meetings/course_meetings",
+    "brief_description": "\nSearch for specific course meetings for student"
+  },
+  {
+    "name": "services/meetings/courses_with_meetings",
+    "brief_description": "\nSearch for student course units with meetings"
+  },
+  {
+    "name": "services/meetings/delete_note",
+    "brief_description": "\nDelete private or public note."
+  },
+  {
+    "name": "services/meetings/generate_meeting_dates",
+    "brief_description": "\nGenerate meeting dates"
+  },
+  {
+    "name": "services/meetings/get_meeting_substantiations",
+    "brief_description": "\nGet meeting substantiations"
+  },
+  {
+    "name": "services/meetings/get_note",
+    "brief_description": "\nGet meeting note."
+  },
+  {
+    "name": "services/meetings/get_rejection_substantiations",
+    "brief_description": "\nGet meeting rejection substantiations"
+  },
+  {
+    "name": "services/meetings/lecturer",
+    "brief_description": "\nSearch for meetings for lecturer"
+  },
+  {
+    "name": "services/meetings/lecturer_meeting_dates",
+    "brief_description": "\nSearch for meeting dates of specified meeting conducted by user."
+  },
+  {
+    "name": "services/meetings/meeting",
+    "brief_description": "\nGet information about a single meeting."
+  },
+  {
+    "name": "services/meetings/meeting_all_dates",
+    "brief_description": "\nSearch for all meeting dates for specific meeting."
+  },
+  {
+    "name": "services/meetings/meeting_date",
+    "brief_description": "\nGet information about single meeting date"
+  },
+  {
+    "name": "services/meetings/meeting_date_participants",
+    "brief_description": "\nGet meeting date participants."
+  },
+  {
+    "name": "services/meetings/meeting_dates",
+    "brief_description": "\nGet information about multiple meeting dates"
+  },
+  {
+    "name": "services/meetings/meetings",
+    "brief_description": "\nGet information about a multiple meetings."
+  },
+  {
+    "name": "services/meetings/note",
+    "brief_description": "\nGet meeting note instance."
+  },
+  {
+    "name": "services/meetings/open_meeting_dates",
+    "brief_description": "\nSearch for open meeting dates for specific lecturer"
+  },
+  {
+    "name": "services/meetings/participant",
+    "brief_description": "\nGet information about meeting participant."
+  },
+  {
+    "name": "services/meetings/participants",
+    "brief_description": "\nGet information about multiple meeting participants."
+  },
+  {
+    "name": "services/meetings/put_note",
+    "brief_description": "\nCreate or edit meeting note"
+  },
+  {
+    "name": "services/meetings/reject_participant",
+    "brief_description": "\nReject participant from specific meeting date"
+  },
+  {
+    "name": "services/meetings/search_meeting_dates",
+    "brief_description": "\nSearch for dates fot specific meeting for student"
+  },
+  {
+    "name": "services/meetings/sign_off",
+    "brief_description": "\nSign off from specific meeting date"
+  },
+  {
+    "name": "services/meetings/sign_up",
+    "brief_description": "\nSign up for specific meeting date"
+  },
+  {
+    "name": "services/meetings/sign_up_non_usos_person",
+    "brief_description": "\nSign up non USOS person for specific meeting date"
+  },
+  {
+    "name": "services/meetings/sign_up_specific_user",
+    "brief_description": "\nSign up specific user for specific meeting date"
+  },
+  {
+    "name": "services/meetings/substantiation",
+    "brief_description": "\nGet substantiation object"
+  },
+  {
+    "name": "services/meetings/user_calendar",
+    "brief_description": "\nSearch lecturer's meeting dates"
+  },
+  {
+    "name": "services/mobility/approval",
+    "brief_description": "\nApproval for LA version"
+  },
+  {
+    "name": "services/mobility/approve",
+    "brief_description": "\nUpdate component of LA"
+  },
+  {
+    "name": "services/mobility/cancel_approvals",
+    "brief_description": "\nUpdate component of LA"
+  },
+  {
+    "name": "services/mobility/cancel_version",
+    "brief_description": "\nCancel empty version of LA"
+  },
+  {
+    "name": "services/mobility/change_reason",
+    "brief_description": "\nReason of a change of component"
+  },
+  {
+    "name": "services/mobility/change_reasons",
+    "brief_description": "\nReasons of changes of selected type"
+  },
+  {
+    "name": "services/mobility/component",
+    "brief_description": "\nReturn specified component data"
+  },
+  {
+    "name": "services/mobility/coordinator",
+    "brief_description": "\nMobilities that  access token issuer may access as coordinator"
+  },
+  {
+    "name": "services/mobility/create_cnr",
+    "brief_description": "\nSend CNR again"
+  },
+  {
+    "name": "services/mobility/create_component",
+    "brief_description": "\nCreate new new component for given version of LA"
+  },
+  {
+    "name": "services/mobility/create_draft",
+    "brief_description": "\nCreate new version of LA"
+  },
+  {
+    "name": "services/mobility/create_external_user",
+    "brief_description": "\nCreate external user"
+  },
+  {
+    "name": "services/mobility/create_la",
+    "brief_description": "\nCreate LA for mobility"
+  },
+  {
+    "name": "services/mobility/decision",
+    "brief_description": "\nGed decision"
+  },
+  {
+    "name": "services/mobility/decision_points",
+    "brief_description": "\nDecision points"
+  },
+  {
+    "name": "services/mobility/decisions_course",
+    "brief_description": "\nDecision course"
+  },
+  {
+    "name": "services/mobility/delete_component",
+    "brief_description": "\nDelete component of LA"
+  },
+  {
+    "name": "services/mobility/delete_decisions_course",
+    "brief_description": "\nDelete decisions course"
+  },
+  {
+    "name": "services/mobility/delete_decisions_points",
+    "brief_description": "\nDelete decisions points"
+  },
+  {
+    "name": "services/mobility/delete_external_course",
+    "brief_description": "\nDelete external course"
+  },
+  {
+    "name": "services/mobility/delete_la",
+    "brief_description": "\nUpdate LA"
+  },
+  {
+    "name": "services/mobility/delete_version",
+    "brief_description": "\nDelete empty version of LA"
+  },
+  {
+    "name": "services/mobility/external_course",
+    "brief_description": "\nExternal course"
+  },
+  {
+    "name": "services/mobility/external_user",
+    "brief_description": "\nExternal user description"
+  },
+  {
+    "name": "services/mobility/institution",
+    "brief_description": "\nDetails of a institution"
+  },
+  {
+    "name": "services/mobility/la",
+    "brief_description": "\nLearning agreement"
+  },
+  {
+    "name": "services/mobility/la_to_decision",
+    "brief_description": "\nGed decision"
+  },
+  {
+    "name": "services/mobility/la_version",
+    "brief_description": "\nVersion of LA"
+  },
+  {
+    "name": "services/mobility/mobility",
+    "brief_description": "\nObject describing student's mobility"
+  },
+  {
+    "name": "services/mobility/points_type",
+    "brief_description": "\nType of points description"
+  },
+  {
+    "name": "services/mobility/points_type_index",
+    "brief_description": "\nIndex of points types"
+  },
+  {
+    "name": "services/mobility/search_course",
+    "brief_description": "\nSearch for internal course"
+  },
+  {
+    "name": "services/mobility/student",
+    "brief_description": "\nMobilities of access token issuer"
+  },
+  {
+    "name": "services/mobility/update_component",
+    "brief_description": "\nUpdate component of LA"
+  },
+  {
+    "name": "services/mobility/update_decision",
+    "brief_description": "\nGed decision"
+  },
+  {
+    "name": "services/mobility/update_decision_course",
+    "brief_description": "\nExternal course"
+  },
+  {
+    "name": "services/mobility/update_decision_points",
+    "brief_description": "\nUpdate decisions points"
+  },
+  {
+    "name": "services/mobility/update_external_course",
+    "brief_description": "\nExternal course"
+  },
+  {
+    "name": "services/mobility/update_external_user",
+    "brief_description": "\nCreate external user"
+  },
+  {
+    "name": "services/mobility/update_la",
+    "brief_description": "\nUpdate LA"
+  },
+  {
+    "name": "services/mobility/update_la_status",
+    "brief_description": "\nUpdate LA status"
+  },
+  {
+    "name": "services/mobility/update_mobility",
+    "brief_description": "\nUpdate mobility"
+  },
+  {
+    "name": "services/mobility/update_status",
+    "brief_description": "\nUpdate status"
+  },
+  {
+    "name": "services/news/article",
+    "brief_description": "\nRetrieve a single news article by ID."
+  },
+  {
+    "name": "services/news/articles",
+    "brief_description": "\nRetrieve multiple articles by their IDs."
+  },
+  {
+    "name": "services/news/category_index",
+    "brief_description": "\nRetrieve the list of all existing article categories."
+  },
+  {
+    "name": "services/news/search",
+    "brief_description": "\nSearch for articles with simple filters."
+  },
+  {
+    "name": "services/oauth/access_token",
+    "brief_description": "Exchange authorized Request Token for an Access Token."
+  },
+  {
+    "name": "services/oauth/authorize",
+    "brief_description": "Authorize the Request Token."
+  },
+  {
+    "name": "services/oauth/proxy",
+    "brief_description": "Make a request with weakened permissions"
+  },
+  {
+    "name": "services/oauth/request_token",
+    "brief_description": "Get a new unauthorized OAuth Request Token."
+  },
+  {
+    "name": "services/oauth/revoke_consumer_key",
+    "brief_description": "Revoke an existing Consumer Key."
+  },
+  {
+    "name": "services/oauth/revoke_token",
+    "brief_description": "Revoke an existing Access Token"
+  },
+  {
+    "name": "services/oauth2/impersonated_token",
+    "brief_description": "\nGet token without prompting user"
+  },
+  {
+    "name": "services/payments/choose_installment_plan",
+    "brief_description": "\nChoose installment plan for a given payment"
+  },
+  {
+    "name": "services/payments/installment",
+    "brief_description": "\nAn installment object"
+  },
+  {
+    "name": "services/payments/installment_plan",
+    "brief_description": "\nInstallments plans"
+  },
+  {
+    "name": "services/payments/payment",
+    "brief_description": "\nAn object representing users payment"
+  },
+  {
+    "name": "services/payments/remittance",
+    "brief_description": "\nAn object representing remittance"
+  },
+  {
+    "name": "services/payments/user_accounts",
+    "brief_description": "\nGet access token issuer's banking accounts"
+  },
+  {
+    "name": "services/payments/user_payments",
+    "brief_description": "\nGet access token issuer's payments"
+  },
+  {
+    "name": "services/payments/user_remittances",
+    "brief_description": "\nGet access token issuer's remittances"
+  },
+  {
+    "name": "services/phones/phone_number",
+    "brief_description": "\nGet phone number details"
+  },
+  {
+    "name": "services/phones/phone_type",
+    "brief_description": "\nget phone type"
+  },
+  {
+    "name": "services/phones/replace",
+    "brief_description": "\nReplace all phone numbers bound to the given entity."
+  },
+  {
+    "name": "services/phones/select",
+    "brief_description": "\nGet the phone numbers bound to the given entities."
+  },
+  {
+    "name": "services/photos/can_see_photo",
+    "brief_description": "\nCheck if one user can view other user's photo."
+  },
+  {
+    "name": "services/photos/delete_photo",
+    "brief_description": "\nDelete user's photo."
+  },
+  {
+    "name": "services/photos/my_photo_visibility",
+    "brief_description": "\nGet information on the visibility of the user's photo."
+  },
+  {
+    "name": "services/photos/photo",
+    "brief_description": "\nGet user's photo."
+  },
+  {
+    "name": "services/photos/settings",
+    "brief_description": "\nGet current photo settings."
+  },
+  {
+    "name": "services/photos/update_photo",
+    "brief_description": "\nUpdate user's photo."
+  },
+  {
+    "name": "services/pit/fetch_pdf",
+    "brief_description": "\nDownload document"
+  },
+  {
+    "name": "services/pit/pit",
+    "brief_description": "\nGet PIT details."
+  },
+  {
+    "name": "services/pit/user",
+    "brief_description": "\nUser's PITs"
+  },
+  {
+    "name": "services/plctests/test",
+    "brief_description": "\nGet information on given placement test"
+  },
+  {
+    "name": "services/plctests/test_result",
+    "brief_description": "\nGet placement test's result"
+  },
+  {
+    "name": "services/plctests/tests_index",
+    "brief_description": "\nGet IDs of all placement tests"
+  },
+  {
+    "name": "services/plctests/update_result",
+    "brief_description": "\nUpdate test result"
+  },
+  {
+    "name": "services/plctests/update_results",
+    "brief_description": "\nUpdate test result"
+  },
+  {
+    "name": "services/plctests/user",
+    "brief_description": "\nUser's results"
+  },
+  {
+    "name": "services/prgroups/admin",
+    "brief_description": "\nGet user's primary groups"
+  },
+  {
+    "name": "services/prgroups/auto_assign_users",
+    "brief_description": "\nAuto assign users for this descriptor."
+  },
+  {
+    "name": "services/prgroups/create_descriptor",
+    "brief_description": "\nCreate a descriptor of primary groups."
+  },
+  {
+    "name": "services/prgroups/delete_descriptors",
+    "brief_description": "\nDelete descriptors of primary groups."
+  },
+  {
+    "name": "services/prgroups/descriptor",
+    "brief_description": "\nGet information on a given descriptor of primary groups."
+  },
+  {
+    "name": "services/prgroups/descriptors",
+    "brief_description": "\nGet information on multiple descriptors of primary groups."
+  },
+  {
+    "name": "services/prgroups/descriptors_all",
+    "brief_description": "\nGet a list of all descriptors of primary groups."
+  },
+  {
+    "name": "services/prgroups/primary_group",
+    "brief_description": "\nGet information on a given primary group."
+  },
+  {
+    "name": "services/prgroups/primary_groups",
+    "brief_description": "\nGet information on multiple primary groups."
+  },
+  {
+    "name": "services/prgroups/schema",
+    "brief_description": "\nGet a schema of descriptors of primary groups."
+  },
+  {
+    "name": "services/prgroups/update_descriptor",
+    "brief_description": "\nUpdate a descriptor of primary groups."
+  },
+  {
+    "name": "services/prgroups/update_user",
+    "brief_description": "\nChange primary groups assigned to the user."
+  },
+  {
+    "name": "services/prgroups/user",
+    "brief_description": "\nGet user's primary groups"
+  },
+  {
+    "name": "services/progs/programme",
+    "brief_description": "\nGet information on a given study programme."
+  },
+  {
+    "name": "services/progs/programmes",
+    "brief_description": "\nGet information on multiple study programmes."
+  },
+  {
+    "name": "services/progs/search",
+    "brief_description": "\nSearch for programmes."
+  },
+  {
+    "name": "services/progs/search_history_affect",
+    "brief_description": "\nAdd a programme to search history."
+  },
+  {
+    "name": "services/progs/stage",
+    "brief_description": "\nGet stage info"
+  },
+  {
+    "name": "services/progs/student",
+    "brief_description": "\nGet information on student programmes of a given user."
+  },
+  {
+    "name": "services/progs/student_programme",
+    "brief_description": "\nGet information on a given student programme."
+  },
+  {
+    "name": "services/progs/student_programmes",
+    "brief_description": "\nGet information on multiple student programmes."
+  },
+  {
+    "name": "services/registrations/course_registration_rounds",
+    "brief_description": "\nGet list of course registration rounds"
+  },
+  {
+    "name": "services/registrations/courses_cart",
+    "brief_description": "\nGet user courses cart with registrations information."
+  },
+  {
+    "name": "services/registrations/faculty_registrations",
+    "brief_description": "\nGet faculty registrations"
+  },
+  {
+    "name": "services/registrations/faculty_token_registrations",
+    "brief_description": "\nGet faculty token registrations"
+  },
+  {
+    "name": "services/registrations/ranking",
+    "brief_description": "\nGet details of specified ranking"
+  },
+  {
+    "name": "services/registrations/register",
+    "brief_description": "\nRegister to a course."
+  },
+  {
+    "name": "services/registrations/registration",
+    "brief_description": "\nGet registration details"
+  },
+  {
+    "name": "services/registrations/registration_course",
+    "brief_description": "\nGet details of course related to registrations"
+  },
+  {
+    "name": "services/registrations/registration_round",
+    "brief_description": "\nGet registration round details"
+  },
+  {
+    "name": "services/registrations/registration_round_courses",
+    "brief_description": "\nGet list of course registration entries for specific registration round."
+  },
+  {
+    "name": "services/registrations/search_rounds",
+    "brief_description": "\nSearch for registrations rounds in calendar"
+  },
+  {
+    "name": "services/registrations/search_token_rounds",
+    "brief_description": "\nSearch for token registrations rounds in calendar"
+  },
+  {
+    "name": "services/registrations/token_registration",
+    "brief_description": "\nGet token registration details"
+  },
+  {
+    "name": "services/registrations/token_registration_course",
+    "brief_description": "\nGet details of course related to token registration"
+  },
+  {
+    "name": "services/registrations/token_registration_round",
+    "brief_description": "\nGet token registration round details"
+  },
+  {
+    "name": "services/registrations/unregister",
+    "brief_description": "\nUnregister from course."
+  },
+  {
+    "name": "services/registrations/user_registrations",
+    "brief_description": "\nGet user registrations"
+  },
+  {
+    "name": "services/registrations/user_token_registrations",
+    "brief_description": "\nGet user token registrations"
+  },
+  {
+    "name": "services/slips/add_question",
+    "brief_description": "Add a new question to a template"
+  },
+  {
+    "name": "services/slips/create_template",
+    "brief_description": "Create a new slip template"
+  },
+  {
+    "name": "services/slips/delete_question",
+    "brief_description": "Delete a question from the template"
+  },
+  {
+    "name": "services/slips/delete_slip",
+    "brief_description": "Delete an issued slip"
+  },
+  {
+    "name": "services/slips/delete_template",
+    "brief_description": "Delete a template"
+  },
+  {
+    "name": "services/slips/issue_slip",
+    "brief_description": "Issue a new slip instance"
+  },
+  {
+    "name": "services/slips/question",
+    "brief_description": "Get information on a single question"
+  },
+  {
+    "name": "services/slips/questions",
+    "brief_description": "Get information on multiple questions"
+  },
+  {
+    "name": "services/slips/search_answerer",
+    "brief_description": "\nSearch among slip answerers"
+  },
+  {
+    "name": "services/slips/search_issuer",
+    "brief_description": "\nSearch among slip issuers"
+  },
+  {
+    "name": "services/slips/search_slips",
+    "brief_description": "Search among the issued slips"
+  },
+  {
+    "name": "services/slips/search_templates",
+    "brief_description": "Search the list of templates"
+  },
+  {
+    "name": "services/slips/slip",
+    "brief_description": "Get information on a single issued slip"
+  },
+  {
+    "name": "services/slips/slipquestion",
+    "brief_description": "Get information on a single slipquestion"
+  },
+  {
+    "name": "services/slips/slipquestions",
+    "brief_description": "Get information on multiple slipquestions"
+  },
+  {
+    "name": "services/slips/slips",
+    "brief_description": "Get information on multiple issued slips"
+  },
+  {
+    "name": "services/slips/template",
+    "brief_description": "Get information on a given template"
+  },
+  {
+    "name": "services/slips/templates",
+    "brief_description": "Get information on multiple templates"
+  },
+  {
+    "name": "services/slips/to_be_answered",
+    "brief_description": "Browse slipquestions to be answered"
+  },
+  {
+    "name": "services/slips/trigger",
+    "brief_description": "\nGet information on a single \"question trigger\"."
+  },
+  {
+    "name": "services/slips/trigger_index",
+    "brief_description": "\nGet the full list of triggers."
+  },
+  {
+    "name": "services/slips/triggers",
+    "brief_description": "\nGet information on multiple triggers."
+  },
+  {
+    "name": "services/slips/update_question",
+    "brief_description": "Edit an existing question"
+  },
+  {
+    "name": "services/slips/update_slip",
+    "brief_description": "Edit an existing issued slip"
+  },
+  {
+    "name": "services/slips/update_slipquestion",
+    "brief_description": "Edit an existing slipquestion object"
+  },
+  {
+    "name": "services/slips/update_template",
+    "brief_description": "Edit an existing slip template"
+  },
+  {
+    "name": "services/slips/user_roles",
+    "brief_description": "Return the description of user's roles"
+  },
+  {
+    "name": "services/statements/awaiting_statements",
+    "brief_description": "\nGet all awaiting statement declarations."
+  },
+  {
+    "name": "services/statements/statement",
+    "brief_description": "\nGet information of a single statement."
+  },
+  {
+    "name": "services/statements/statement_declaration",
+    "brief_description": "\nGet single statement declaration."
+  },
+  {
+    "name": "services/statements/statement_declarations",
+    "brief_description": "\nGet information of a multiple statement declarations."
+  },
+  {
+    "name": "services/statements/statements",
+    "brief_description": "\nGet information of a multiple statements."
+  },
+  {
+    "name": "services/statements/user_statements",
+    "brief_description": "\nGet all statement declarations for user."
+  },
+  {
+    "name": "services/statements/user_status",
+    "brief_description": "\nCheck if user has all required declarations and is allowed to use USOS."
+  },
+  {
+    "name": "services/surveys/fill_out",
+    "brief_description": "\nPost a survey result in the name of a user."
+  },
+  {
+    "name": "services/surveys/fill_out2",
+    "brief_description": "\nPost a survey result in the name of a user."
+  },
+  {
+    "name": "services/surveys/survey",
+    "brief_description": "\nGet a single survey."
+  },
+  {
+    "name": "services/surveys/survey2",
+    "brief_description": "\nGet a single survey."
+  },
+  {
+    "name": "services/surveys/surveys",
+    "brief_description": "\nGet surveys."
+  },
+  {
+    "name": "services/surveys/surveys2",
+    "brief_description": "\nGet surveys."
+  },
+  {
+    "name": "services/surveys/surveys_about_me",
+    "brief_description": "\nRetrieve all surveys \"about\" the caller."
+  },
+  {
+    "name": "services/surveys/surveys_about_me2",
+    "brief_description": "\nRetrieve all surveys \"about\" the caller."
+  },
+  {
+    "name": "services/surveys/surveys_to_fill",
+    "brief_description": "\nGet the list of surveys waiting to be filled out by the user."
+  },
+  {
+    "name": "services/surveys/surveys_to_fill2",
+    "brief_description": "\nGet the list of surveys waiting to be filled out by the user."
+  },
+  {
+    "name": "services/terms/search",
+    "brief_description": "\nSearch for terms."
+  },
+  {
+    "name": "services/terms/term",
+    "brief_description": "Get information on a single term."
+  },
+  {
+    "name": "services/terms/terms",
+    "brief_description": "Get information on multiple terms."
+  },
+  {
+    "name": "services/terms/terms_index",
+    "brief_description": "\nGet the list of all terms."
+  },
+  {
+    "name": "services/theses/authorship_preference",
+    "brief_description": "\nGet information about whether users prefer sharing their theses' authorship."
+  },
+  {
+    "name": "services/theses/exam_report",
+    "brief_description": "\nGet diploma exam report."
+  },
+  {
+    "name": "services/theses/exam_reports",
+    "brief_description": "\nGet information on multiple exam reports."
+  },
+  {
+    "name": "services/theses/search",
+    "brief_description": "\nSearch for theses."
+  },
+  {
+    "name": "services/theses/search_history_affect",
+    "brief_description": "\nAdd a thesis to search history."
+  },
+  {
+    "name": "services/theses/sign_report",
+    "brief_description": "\nSign the exam report."
+  },
+  {
+    "name": "services/theses/signable_reports",
+    "brief_description": "\nGet diploma exam reports that can get signed by user."
+  },
+  {
+    "name": "services/theses/theses",
+    "brief_description": "\nGet information on multiple theses."
+  },
+  {
+    "name": "services/theses/thesis",
+    "brief_description": "\nGet information on a single thesis."
+  },
+  {
+    "name": "services/theses/user",
+    "brief_description": "\nGet theses-related information on a given user."
+  },
+  {
+    "name": "services/theses/users",
+    "brief_description": "\nGet theses-related information on multiple users."
+  },
+  {
+    "name": "services/tt/classgroup",
+    "brief_description": "Get activities related to single class group."
+  },
+  {
+    "name": "services/tt/classgroup_dates",
+    "brief_description": "Get dates of all activities related to a class group."
+  },
+  {
+    "name": "services/tt/classgroup_dates2",
+    "brief_description": "Get all activities related to a class group."
+  },
+  {
+    "name": "services/tt/classgroups",
+    "brief_description": "Get activities related to given class groups."
+  },
+  {
+    "name": "services/tt/course_edition",
+    "brief_description": "Get all activities related to a specified course edition."
+  },
+  {
+    "name": "services/tt/course_editions",
+    "brief_description": "Get all activities related to specified course editions."
+  },
+  {
+    "name": "services/tt/room",
+    "brief_description": "Get activities for a given room."
+  },
+  {
+    "name": "services/tt/staff",
+    "brief_description": "Get public staff member's activities."
+  },
+  {
+    "name": "services/tt/student",
+    "brief_description": "Get activities related to user's studies."
+  },
+  {
+    "name": "services/tt/upcoming_ical",
+    "brief_description": "\nGet iCalendar file with the user's upcoming events"
+  },
+  {
+    "name": "services/tt/upcoming_share",
+    "brief_description": "\nGet the webcal feed of the user's upcoming events"
+  },
+  {
+    "name": "services/tt/user",
+    "brief_description": "Get all activities related to the user."
+  },
+  {
+    "name": "services/uprefs/change_preference",
+    "brief_description": "\nChange the value of a preference."
+  },
+  {
+    "name": "services/uprefs/preference",
+    "brief_description": "\nGet information on a given preference (or group)."
+  },
+  {
+    "name": "services/uprefs/preferences",
+    "brief_description": "\nGet information on multiple preferences."
+  },
+  {
+    "name": "services/uprefs/values",
+    "brief_description": "\nFetch the values of a single preference for multiple users."
+  },
+  {
+    "name": "services/users/change",
+    "brief_description": "\nChange user data."
+  },
+  {
+    "name": "services/users/employment_functions",
+    "brief_description": "\nGet information on employment functions of a given user."
+  },
+  {
+    "name": "services/users/employment_group",
+    "brief_description": "\nGet information on employment group"
+  },
+  {
+    "name": "services/users/employment_groups_index",
+    "brief_description": "\nGet information on employment group"
+  },
+  {
+    "name": "services/users/employment_positions",
+    "brief_description": "\nGet information on employment positions of a given user."
+  },
+  {
+    "name": "services/users/pesel",
+    "brief_description": "\nGet information on a user given by PESEL number."
+  },
+  {
+    "name": "services/users/photo",
+    "brief_description": "\nGet user's photo."
+  },
+  {
+    "name": "services/users/position",
+    "brief_description": "\nDescription of employee position"
+  },
+  {
+    "name": "services/users/search",
+    "brief_description": "\nSearch among all users."
+  },
+  {
+    "name": "services/users/search2",
+    "brief_description": "\nSearch for users."
+  },
+  {
+    "name": "services/users/search_by_email",
+    "brief_description": "\nSearch for users with a given email address."
+  },
+  {
+    "name": "services/users/search_current_students",
+    "brief_description": "\nSearch among current students."
+  },
+  {
+    "name": "services/users/search_current_teachers",
+    "brief_description": "\nSearch among current teachers."
+  },
+  {
+    "name": "services/users/search_history_affect",
+    "brief_description": "\nAdd a user to search history."
+  },
+  {
+    "name": "services/users/search_staff",
+    "brief_description": "\nSearch among all staff members."
+  },
+  {
+    "name": "services/users/search_students",
+    "brief_description": "\nSearch among all students."
+  },
+  {
+    "name": "services/users/staff_index",
+    "brief_description": "\nRetrieve lists of faculty staff members."
+  },
+  {
+    "name": "services/users/student_index",
+    "brief_description": "\nRetrieve lists of students."
+  },
+  {
+    "name": "services/users/student_programmes",
+    "brief_description": "\nGet information on user's studies."
+  },
+  {
+    "name": "services/users/user",
+    "brief_description": "\nGet information on a given user."
+  },
+  {
+    "name": "services/users/user2",
+    "brief_description": "\nGet information on a given user."
+  },
+  {
+    "name": "services/users/users",
+    "brief_description": "\nGet information on multiple users."
+  }
+]

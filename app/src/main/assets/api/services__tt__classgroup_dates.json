@@ -1,0 +1,54 @@
+{
+  "name": "services/tt/classgroup_dates",
+  "short_name": "classgroup_dates",
+  "description": "\t\n\t<p>This is an older version of\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/tt/#classgroup_dates\">classgroup_dates</a> method. It takes the\nsame parameters, but it returns <u>dates only</u>. Also, some of the\ndates with &quot;unsure&quot; frequency are removed from the results.</p>\n",
+  "brief_description": "Get dates of all activities related to a class group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#classgroup_dates",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of class group's &quot;parent&quot; course unit."
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tGroup number of the class."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of strings. Each string is a date in the &quot;YYYY-MM-DD&quot;\n\tformat.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

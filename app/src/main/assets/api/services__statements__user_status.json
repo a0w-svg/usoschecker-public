@@ -1,0 +1,46 @@
+{
+  "name": "services/statements/user_status",
+  "short_name": "user_status",
+  "description": "<p>\nCheck if user has all required declarations and is allowed to use USOS.</p>",
+  "brief_description": "\nCheck if user has all required declarations and is allowed to use USOS.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/statements/#user_status",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of user"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following format:</p>\n\n        <ul>\n            <li><b>allowed</b> - boolean, <b>true</b> if user has all required declarations and\n            is allowed to use USOS.</li>\n            <li><b>reason</b> - reason why user is not allowed to use USOS.<br>\n                Possible values:\n                <ul>\n                    <li><b>awaiting_declarations</b> - user has not made all declarations</li>\n                    <li><b>no_pledge</b> - user has not pledged on any active programmes</li>\n                    <li><b>null</b> - user is allowed to use USOS</li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

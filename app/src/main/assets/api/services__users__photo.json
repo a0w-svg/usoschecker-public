@@ -1,0 +1,27 @@
+{
+  "name": "services/users/photo",
+  "short_name": "photo",
+  "description": "\n\n        <p>Get user's photo.</p>\n\n        <p>This method is deprecated. Please use the <b>photo_urls</b> field of\n        the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a> method.</p>\n    ",
+  "brief_description": "\nGet user's photo.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#photo",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "photo"
+    ]
+  },
+  "arguments": [],
+  "returns": "\n\n        <p>Photo of the user who authorized the Access Token.</p>\n        <ul>\n            <li>If everything is OK, you will receive binary stream in a JPEG format.</li>\n            <li>\n                <p>If something is wrong (i.e. user has no photo), you will get a HTTP 400 error message.</p>\n                <p>Note, that you may also check if the photo exists, with <i>has_photo</i> field of\n                the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a> method.</p>\n            </li>\n        </ul>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                this user does not have a photo.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": {
+    "deprecated_by": null,
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

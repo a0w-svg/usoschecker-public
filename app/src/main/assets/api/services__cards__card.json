@@ -1,0 +1,125 @@
+{
+  "name": "services/cards/card",
+  "short_name": "card",
+  "description": "\t\n\tGet information on a given card - specified by exactly one parameter of the following:\n\tcontact_chip_uid, contactless_chip_uid, barcode_number.\n",
+  "brief_description": "Get information on a given card.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/cards/#card",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "contact_chip_uid",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tUnique ID of integrated circuit card\n"
+    },
+    {
+      "name": "contactless_chip_uid",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tUnique ID of contacless smart card\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe separated list of requested fields\n"
+    },
+    {
+      "name": "barcode_number",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tBarcode printed on a card\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "user",
+      "description": "\t\n\tdictionaries describing the owner of selected card; each dictionary contains fields\n\tfrom <strong>primary</strong> section in {method_link 'services/users/user'} method,\n",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "id",
+      "description": "\tID of a card",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "contact_chip_uid",
+      "description": "\tunique ID of integrated circuit card,",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "contactless_chip_uid",
+      "description": "\tunique ID of contacless smart card,",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "barcode_number",
+      "description": "\tbarcode printed on a card,",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\ttype of card, one of: 'student', 'phd', 'staff', 'graduate', 'academic_teacher'",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "expiration_date",
+      "description": "\tID card expiration date,",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "date_of_issue",
+      "description": "\tcard's date of issue.",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "student_number",
+      "description": "\tStudent number printed on a card",
+      "is_primary": false,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

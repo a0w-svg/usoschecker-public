@@ -1,0 +1,46 @@
+{
+  "name": "services/terms/term",
+  "short_name": "term",
+  "description": "\tGet information on a single term.",
+  "brief_description": "Get information on a single term.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/terms/#term",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "term_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of an Academic Term."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t<ul>\n\t\t<li><b>id</b> - an ID of the term,</li>\n\t\t<li><b>order_key</b> - long int, used for ordering Academic Term objects (should\n\t\t\tnot be displayed for users),</li>\n\t\t<li><b>name</b> - a LangDict object with the name of a term,</li>\n\t\t<li><b>start_date</b> - a Date string, the first day of this Academic Term,</li>\n\t\t<li><b>end_date</b> - a Date string, the last day of classes in this Academic Term,</li>\n\t\t<li><b>finish_date</b> - a Date string, the last day of this Academic Term (this day\n\t\t\t<b>is</b> part of this Academic Term.</li>\n\t\t<li><b>is_active</b> - true if Academic Term is marked as active</li>\n\t\t\n\t</ul>\n\t<p>Method will end with a 400 error, if referenced term cannot be found.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

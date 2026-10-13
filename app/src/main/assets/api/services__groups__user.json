@@ -1,0 +1,62 @@
+{
+  "name": "services/groups/user",
+  "short_name": "user",
+  "description": "\t\n\tGet all groups related to the user. This is like joining\n\t<a href=\"#participant\">participant</a> and <a href=\"#lecturer\">lecturer</a> methods in one.\n",
+  "brief_description": "Get all groups related to the user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#user",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of fields\n\t(as in the <a href=\"#group\">group</a> method). Only <b>primary</b> fields\n\tare allowed.\n"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\t\n\tEither <b>pl</b> or <b>en</b> - resulting list of groups will be sorted by the course name\n\tin the specified language.\n"
+    },
+    {
+      "name": "active_terms",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\t\n\t<p>Return only these groups which are related to the currently active academic terms.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>The same as defined in <a href=\"#participant\">participant</a> method extended by\n\tfield <b>relationship_type</b> - which determines the relationship between the\n\ttoken issuer (if available) and this group (allowed values are: <b>participant</b>,\n\tor <b>lecturer</b>).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

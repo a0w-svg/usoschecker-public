@@ -1,0 +1,54 @@
+{
+  "name": "services/progs/student_programmes",
+  "short_name": "student_programmes",
+  "description": "\n\n        <p>Get information on a multiple student programmes at once.</p>\n    ",
+  "brief_description": "\nGet information on multiple student programmes.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programmes",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "student_programme_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Pipe-separated list of student programme IDs.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|programme",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>student_programme</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary.</p>\n\n        <ul>\n            <li>\n                Your <b>student_programme_ids</b> will be mapped to the keys of\n                the dictionary.\n            </li>\n            <li>\n                <p>The values will be either:<p>\n\n                <ul>\n                    <li><b>null</b> - if the student programme does not exist\n                    <b><u>or</u></b> you don't have access to it,</li>\n\n                    <li>a dictionary in the same format as the one returned in\n                    the <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>student_programme</a>\n                    method.</li>\n                </ul>\n            </li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,66 @@
+{
+  "name": "services/users/search_staff",
+  "short_name": "search_staff",
+  "description": "\n\n        <p>Why deprecated? Because you can get more features and -\n        in some cases - achieve better performance by using the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#search2'>search2</a> method.</p>\n\n        <p>Search for staff members matching given query. This is very similar\n        to the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#search'>search</a> method, but searches among staff\n        members only. This includes <b>all staff members</b> in the USOS database,\n        employed presently and in the past. This is usually less interesting than,\n        for example, the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#search_current_teachers'>search_current_teachers</a> method.</p>\n    ",
+  "brief_description": "\nSearch among all staff members.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#search_staff",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>The search query. The most obvious value for this field is the\n            user's name, but we'll try to be smart about it (for example, it\n            allows you to find a student by his/her student number, etc.).</p>\n        "
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "6",
+      "description": "\n\n            <p>The number of search results to return. The maximum allowed\n            value of num is 20.</p>\n        "
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\n\n            <p>Indicates the first matching search result that should be\n            included in the response. This parameter uses a zero-based index,\n            meaning the first result is 0, the second result is 1 and so\n            forth.</p>\n\n            <p>Note, that no more than 100 search result will ever be returned\n            for any query, even if more than 100 matches were found. If you need\n            more, than probably you're looking at a wrong method. Contact us if\n            you're not sure.</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nSame format as in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#search'>search</a> method.",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": {
+    "deprecated_by": null,
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

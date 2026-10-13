@@ -1,0 +1,38 @@
+{
+  "name": "services/events/notifier_status",
+  "short_name": "notifier_status",
+  "description": "<p>\nGet information on the status of the notifier.</p>",
+  "brief_description": "\nGet information on the status of the notifier.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events/#notifier_status",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following structure:</p>\n        <ul>\n            <li><strong>daemon_running</strong> - true if notification sending\n            daemon is running correctly, false otherwise,</li>\n\n            <li><strong>total_pending_events_count</strong> - number of all\n            unprocessed events in the queue.</li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

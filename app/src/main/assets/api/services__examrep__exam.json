@@ -1,0 +1,127 @@
+{
+  "name": "services/examrep/exam",
+  "short_name": "exam",
+  "description": "<p>\nGet info about exam.</p>",
+  "brief_description": "\nGet info about exam.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/examrep/#exam",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an exam."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|type_id|type_description",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of an exam report;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    description of an exam report (LangDict object);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type_id</b> -\n                    ID an exam report type object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type_description</b> -\n                    description of an exam report type (LangDict object);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>counts_into_average</b> -\n                    boolean, indicates if grade from this exam report is counted into average;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grade_type</b> - object describing grade type for given exam report.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade_type'>services/grades/grade_type</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term_id</b> -\n                    ID of the academic term related to en exam report;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_editable</b> -\n                    true if any of related exam session is editable;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_unit</b> - Course unit object if exam report is related to a course unit.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#unit'>services/courses/unit</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course</b> - Course related to given exam report.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course'>services/courses/course</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>sessions</b> - Exam sessions related to given exam report..</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep/#exam_session'>exam_session</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grades_distribution</b> -\n                    List of objects of the following structure:\n            <ul>\n                <li>grade_symbol - symbol of a grade</li>\n                <li>percentage - percentage of all final grades with this value (empty grades are omitted)</li>\n            </ul>.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of an exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\ndescription of an exam report (LangDict object)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type_id",
+      "description": "\nID an exam report type object",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type_description",
+      "description": "\ndescription of an exam report type (LangDict object)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "counts_into_average",
+      "description": "\nboolean, indicates if grade from this exam report is counted into average",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grade_type",
+      "description": "\nobject describing grade type for given exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term_id",
+      "description": "\nID of the academic term related to en exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_editable",
+      "description": "\ntrue if any of related exam session is editable",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_unit",
+      "description": "\nCourse unit object if exam report is related to a course unit",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course",
+      "description": "\nCourse related to given exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "sessions",
+      "description": "\nExam sessions related to given exam report.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "grades_distribution",
+      "description": "\nList of objects of the following structure:\n            <ul>\n                <li>grade_symbol - symbol of a grade</li>\n                <li>percentage - percentage of all final grades with this value (empty grades are omitted)</li>\n            </ul>\n            ",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

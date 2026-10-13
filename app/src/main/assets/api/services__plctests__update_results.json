@@ -1,0 +1,62 @@
+{
+  "name": "services/plctests/update_results",
+  "short_name": "update_results",
+  "description": "\n\n        <p>Update result of placement test for given users</p>\n    ",
+  "brief_description": "\nUpdate test result",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/plctests/#update_results",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "test_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of placement test"
+    },
+    {
+      "name": "new_values",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Dictionary mapping user IDs to numbers of points, that you want to set\n        "
+    },
+    {
+      "name": "old_values",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Dictionary mapping user IDs to numbers of points, you expect that is currently set\n            (similarly to parameter old_value in method\n            <a href='https://usosapps.vistula.edu.pl/developers/api/services/plctests/#update_result'>update_result</a>).\n            Note that if you use this parameter dictionary must contain the same user IDs as\n            dictionary passed in new_values parameter.\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n    An empty dictionary returned if the method has been executed successfully.\n    Some keys may be added in the future.\n",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>test_modified</b> -\n                                test result probably was updated concurrently.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>test_not_found</b> -\n                                referenced placement test does not exist.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

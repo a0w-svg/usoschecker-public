@@ -1,0 +1,30 @@
+{
+  "name": "services/fac/resolve_facpattern",
+  "short_name": "resolve_facpattern",
+  "description": "\t\n\t<p>This method allows the caller to &quot;select&quot; a set of faculties with\n\thelp of a specially formatted string called a &quot;facpattern&quot;.</p>\n\t\n\t<p>Other USOS API methods may make use of this method whenever they\n\twant their users to use facpatterns. This method serves as the primary\n\tlocation for facpattern's documentation.</p>\n\t\n\t<p>Facpattern is a string of pipe-separated &quot;facpattern entries&quot;. Each\n\tof these entries consists of a single character prefix (described\n\tbelow), followed by a faculty ID (which MUST refer to an existing\n\tfaculty). Depending on the prefix, different sets of faculties are\n\tadded to the final result. Currently allowed prefixes are:</p>\n\t\n\t<ul>\n\t\t<li><b>=</b> - add the faculty (and <i>only this</i> faculty) to\n\t\t\tthe result,</li>\n\t\t\n\t\t<li><b>+</b> - add the faculty <b>and all its descendants</b> to\n\t\t\tthe result,</li>\n\t\t\n\t\t<li><b>&lt;</b> - add the faculty <b>and all its ancestors</b> to\n\t\t\tthe result.</li>\n\t</ul>\n\t\n\t<p>For example, <code>facpattern=&lt;A12|+A70</code> will resolve to\n\tthe following list: faculty A12, all ancestor faculties of faculty A12,\n\tA70, all descendant faculties of faculty A70.</p>\n\t\n\t<p>Also note, that root faculty can be found via the <b>institution</b>\n\tfield of the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/apisrv/#installation\">installation</a>\nmethod. Using this ID with the &quot;+&quot; prefix will allow you to select\n<i>all</i> faculties.</p>\n",
+  "brief_description": "Resolve facpattern value into a list of faculty IDs.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fac/#resolve_facpattern",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "facpattern",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tThe pattern, as desribed in the method above.\n"
+    }
+  ],
+  "returns": "\t\n\t<p>A list of faculty IDs which matched the given pattern.</p>\n\t\n\t<p>If any of the facpattern entries refers to a non-existent faculty,\n\tUSOS API will respond with a HTTP 400 error.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

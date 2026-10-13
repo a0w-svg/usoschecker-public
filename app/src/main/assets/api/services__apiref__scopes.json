@@ -1,0 +1,38 @@
+{
+  "name": "services/apiref/scopes",
+  "short_name": "scopes",
+  "description": "\t\n\t<p>Get a list of all scopes which are available in this USOS\n\tAPI installation.</p>\n\t<p>Note, that if you want to determine if a specific installation\n\tsupports some functionality, you may also refer to its version string\n\t(see <i>services/apisrv/installations</i> method).</p>\n",
+  "brief_description": "Get a list of all available scopes.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apiref/#scopes",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tA list od dictionaries, each of the following structure:\n\t<ul>\n\t\t<li><b>key</b> - a key (code) of a scope,</li>\n\t\t<li><b>developers_description</b> - HTML formatted, developer-oriented description\n\t\t\tof the scope (&quot;Provides access to...&quot;).</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

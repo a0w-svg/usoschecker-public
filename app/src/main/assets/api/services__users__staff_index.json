@@ -1,0 +1,97 @@
+{
+  "name": "services/users/staff_index",
+  "short_name": "staff_index",
+  "description": "\n\n        <p>Retrieve lists of staff members of the given faculty.</p>\n\n        <p>This is different than searching. The\n\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#search2'>search2</a>\n\n        method aims at simplifing the task of finding one particular user,\n        whereas the <b>*_index</b> methods are designed to return ordered lists\n        of users matching the given, simple criteria. In this case, it returns\n        all the staff members of the given faculty.</p>\n\n        <p>You might say, that <b>search</b> methods are for humans, and\n        <b>index</b> methods are for automated robots (e.g. for pages to by\n        crawled by Google), but that's not always the case.</p>\n\n        <p>Note that there is no limit on the number of items returned via the\n        <b>index</b> method. Still, you cannot retrieve all items in a single\n        request - you need to paginate your results.</p>\n\n        <p>The results of this method may vary on the permissions of your\n        user.</p>\n    ",
+  "brief_description": "\nRetrieve lists of faculty staff members.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#staff_index",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fac_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>Pipe-separated list of faculty IDs (usually a single\n                faculty). Staff members of these faculties will be\n                returned.</p>\n            "
+    },
+    {
+      "name": "teachers_only",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n\n                <p>If set to <b>true</b> then the results will be additionally\n                filtered and will contain active academic teachers only.</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "users|next_page|total",
+      "description": "\n\n                <p>Or, more precisely:\n                <b>users[id|first_name|last_name]|next_page|total</b></p>\n\n                <p>A selector of result fields you are interested in.\n                \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n            "
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "20",
+      "description": "\n\n                <p>The maximum number of items to return on one \"page\". The\n                maximum allowed value of num is 100.</p>\n            "
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\n\n                <p>Zero-based offset of the first item that should be included\n                in the response. (Or, in other words, the number of items to\n                strip from the beginning of the items-list.)</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>users</b> - a list of users which have matched your query.</p>\n\n                \n\n                <p>The length of this list is limited to <b>num</b> items. You\n                can access further results by specifying the <b>start</b>\n                argument.</p>\n\n                <p>Each item on this list is a dictionary of the structure\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a>\n                method. You may access more fields with a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a>).</p>\n            </ul>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>next_page</b> -\n                    boolean, indicates if there is a next page of results for this\n                query;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>total</b> -\n                    integer, total number of matched items.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "users",
+      "description": "\n\n                <p>The length of this list is limited to <b>num</b> items. You\n                can access further results by specifying the <b>start</b>\n                argument.</p>\n\n                <p>Each item on this list is a dictionary of the structure\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a>\n                method. You may access more fields with a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a>).</p>\n            </ul>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "next_page",
+      "description": "\n\n                boolean, indicates if there is a next page of results for this\n                query\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "total",
+      "description": "\n\n                integer, total number of matched items\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

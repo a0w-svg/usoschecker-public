@@ -1,0 +1,54 @@
+{
+  "name": "services/slips/question",
+  "short_name": "question",
+  "description": "\t\n\t<p>Get information on a single question.</p>\n",
+  "brief_description": "Get information on a single question",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#question",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "question_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the question.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "question",
+      "description": "\t\n\tPipe-separated list of fields described in the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of selected fields and their values.</p>\n\t<p>Available fields:</p>\n\t<ul>\n\t\t<li><b>id</b> - ID of the question,</li>\n\t\t<li>\n\t\t\t<b>tpl_id</b> - ID of the template to which the question is\n\t\t\tattached,\n\t\t</li>\n\t\t<li><b>question</b> - plaintext, the content of the question.</li>\n\t\t<li>\n\t\t\t<p><b>desc_for_answerers</b> - plaintext, possible multiline,\n\t\t\tadditional description of the question, for the answerers.</p>\n\t\t\t\n\t\t\t<p>The <b>question</b> fields must be simple and short, but\n\t\t\tmany such questions require some additional explanation\n\t\t\t(especially if the question's answerer is the slip's client).\n\t\t\tThis field was created for that purpose. It's content should be\n\t\t\teasily accessible for anyone allowed see the question itself\n\t\t\t(especially, the client answerers).</p>\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>answerers</b> - a list of user objects; these are the\n\t\t\tusers which are allowed to answer this question, regardless of\n\t\t\tthe slip it is on (should not be confused with extra answerers,\n\t\t\tsee <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#update_slipquestion\">update_slipquestion</a>\n\t\tmethod.</p>\n\t\t\n\t\t<p>A user object will contain three fields: id, first_name and\n\t\tlast_name (see the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/users/#user\">services/users/user</a>\n\tmethod).</p>\n</li>\n<li>\n\t<b>is_included_by_default</b> - boolean, set to <b>true</b> if\n\tthe question should be &quot;initially checked&quot; when a new slip is\n\tbeing issued. (The issuer can still uncheck the question and\n\texclude it from the slip.)\n</li>\n<li>\n\t<b>can_client_answer</b> - boolean, set to <b>true</b> if the\n\tclient (the issuee) is allowed to answer this question on his\n\town.\n</li>\n<li>\n\t<b>can_issuers_answer</b> - boolean, set to <b>true</b> if the\n\tissuers are allowed to answer this question on his own.\n</li>\n<li>\n\t<b>can_issuers_assign_answerers</b> - boolean, set to\n\t<b>true</b> if the issuers are allowed to define extra\n\tanswerers. These answerers are bound to the issued slip, NOT\n\tits template.\n</li>\n<li>\n\t<b>is_obsolete</b> - boolean, marks if the question is\n\tobsolete. Such questions cannot be included in newly issued\n\tslips. They can only be present in the slips released in the\n\tpast.\n</li>\n<li>\n\t<b>regexp_cleared</b> - regular expression, if it is\n\tsuccessfully matched against an answer to this question, then\n\tthe answer gets a dynamic &quot;cleared&quot; status. See\n\t<b>answer_status</b> in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion\">slipquestion</a> method.\n</li>\n<li>\n<p><b>regexp_rejected</b> - regular expression, works as the\none above, but the matched answer gets the &quot;rejected&quot;\nstatus.</p>\n\n<p>If an answer does not match any of these two expressions,\n<b>or it matches both of them</b>, if will get an &quot;unclear&quot;\nstatus.</p>\n</li>\n<li>\n<b>quick_answers</b> - pipe-separated list of strings, each of\nwhich is a common answer to this question. When defined, these\nanswers should be displayed to the answerers, allowing them to\nanswer quickly.\n</li>\n<li>\n<b>can_i_delete</b> - boolean, indicates if the current user is\nallowed to delete this question. Access Token and the\n'slips_admin' scope is required to access this field.\n</li>\n<li>\n<b>why_cant_i_delete</b> - LangDict or null, if the current\nuser cannot delete the question, it will briefly explain why.\nThis is intended to be displayed for the users.\n</li>\n<li>\n<b>triggers</b> - a list of\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#trigger\">trigger</a> objects applied to\nthis question. You can use subfield selectors to access\ntriggers' properties.\n</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

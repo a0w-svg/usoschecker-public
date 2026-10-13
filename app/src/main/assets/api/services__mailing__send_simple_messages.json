@@ -1,0 +1,46 @@
+{
+  "name": "services/mailing/send_simple_messages",
+  "short_name": "send_simple_messages",
+  "description": "\t\n\tCall send_simple_message multiple times in one call. This is useful when you\n\twant to send bulk messages with different content.\n",
+  "brief_description": "Call send_simple_message multiple times in one call.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailing/#send_simple_messages",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "param_sets",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>JSON-formatted, UTF-8 encoded <b>list of dictionaries</b>. Each dictionary\n\tis the set of parameters with which the <a href=\"#send_simple_message\">send_simple_message</a>\n\tmethod is to be invoked with.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>This method never fails (always returns HTTP 200). All of your calls are\n\texecuted sequentially. If one fails, others still will be executed.</p>\n\t<p>Method will return a list of Message IDs. <i>n-th</i> element on this list\n\tcorresponds to the <i>n-th</i> dictionary in the <b>param_sets</b> list.</p>\n\t<p>If <i>n-th</i> call fails (invalid arguments will be passed), then the <i>n-th</i>\n\telement will contain a single boolean <b>false</b>. No additional explanation (as to the\n\tcause of the error) will be returned. If you need error message, use the\n\t<a href=\"#send_simple_message\">send_simple_message</a> method (call it multiple times).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

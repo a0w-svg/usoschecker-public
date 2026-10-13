@@ -1,0 +1,67 @@
+{
+  "name": "services/courses/user",
+  "short_name": "user",
+  "description": "<p>\nGet information on user's courses.</p>",
+  "brief_description": "\nGet information on user's courses.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/courses/#user",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "course_editions",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "active_terms_only",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "true",
+      "description": "\nReturn only these course editions which are related to the currently active academic terms."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>course_editions</b> - Dictionary mapping an academic terms to array of dictionaries describing course editions.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_edition'>course_edition</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>terms</b> - List of Academic Terms.</p>\n\n                \nA list of Academic Terms referenced (by ID) in\n                              <b>course_editions</b> section sorted anti-chronologically.\n                              Format will be the same as in the terms/terms method.\n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/terms/#term'>services/terms/term</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "course_editions",
+      "description": "\nDictionary mapping an academic terms to array of dictionaries describing course editions",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "terms",
+      "description": "\nA list of Academic Terms referenced (by ID) in\n                              <b>course_editions</b> section sorted anti-chronologically.\n                              Format will be the same as in the terms/terms method.",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

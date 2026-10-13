@@ -1,0 +1,151 @@
+{
+  "name": "services/crstests/node2",
+  "short_name": "node2",
+  "description": "\nThis method can be used to fetch whole subtree of a test, or only a node with its direct subnodes,\n            see <b>return</b> section for more information.",
+  "brief_description": "\nGet nodes",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#node2",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the subtree root"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|order|name|description|visible_for_students|type|subnodes",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Node's ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_test</b> - Test containing this node.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#course_test'>course_test</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>parent_id</b> -\n                    ID of parent node;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>order</b> -\n                    integer, used to sort children;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict object - name of the node;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    LangDict object with description of the test that this node represents.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>visible_for_students</b> -\n                    boolean - if true marks and points of this node are visible to students;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> -\n                    one of following values: root, folder, task, grade;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>my_permissions</b> -\n                    List of PermissionObjects representing permissions of of the access token issuer.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>subnodes</b> - For nodes of type root and folder list of subnodes will be returnes, null otherwise.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#node2'>node2</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>subnodes_deep</b> - For nodes of type root and folder list of subnodes will be returned. Note that subnodes atlower level will be returned too.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#node2'>node2</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>task_node_details</b> - If type of node is task, details will be returned, null otherwise.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#task_node_details'>task_node_details</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>folder_node_details</b> - If type of node is folder, details will be returned, null otherwise.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#task_node_details'>task_node_details</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grade_node_details</b> - If type of node is grade, details will be returned, null otherwise.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#grade_node_details'>grade_node_details</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>stats</b> -\n                    Histogram for selected node;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>students_points</b> - access token issuer points.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#student_point'>student_point</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nNode's ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_test",
+      "description": "\nTest containing this node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "parent_id",
+      "description": "\nID of parent node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "order",
+      "description": "\ninteger, used to sort children",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict object - name of the node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\nLangDict object with description of the test that this node represents.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "visible_for_students",
+      "description": "\nboolean - if true marks and points of this node are visible to students",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\none of following values: root, folder, task, grade",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "my_permissions",
+      "description": "\nList of PermissionObjects representing permissions of of the access token issuer",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "subnodes",
+      "description": "\nFor nodes of type root and folder list of subnodes will be returnes, null otherwise",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "subnodes_deep",
+      "description": "\nFor nodes of type root and folder list of subnodes will be returned. Note that subnodes atlower level will be returned too",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "task_node_details",
+      "description": "\nIf type of node is task, details will be returned, null otherwise",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "folder_node_details",
+      "description": "\nIf type of node is folder, details will be returned, null otherwise",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "grade_node_details",
+      "description": "\nIf type of node is grade, details will be returned, null otherwise",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "stats",
+      "description": "\nHistogram for selected node",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "students_points",
+      "description": "\naccess token issuer points",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

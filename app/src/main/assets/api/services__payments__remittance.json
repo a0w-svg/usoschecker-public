@@ -1,0 +1,117 @@
+{
+  "name": "services/payments/remittance",
+  "short_name": "remittance",
+  "description": "<p>\nAn object representing remittance</p>",
+  "brief_description": "\nAn object representing remittance",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/payments/#remittance",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "payments"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of remittance"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|remaining|description|amount|status|is_settled|date",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Remittance ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - User that remittance is defined for.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>remaining</b> -\n                    Remaining amount;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    Description;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>amount</b> -\n                    Remittance amount;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    Status;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_settled</b> -\n                    Is remittance settled;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>date</b> -\n                    Date of remittance;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>currency</b> -\n                    Payment currency;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> -\n                    Payment faculty.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nRemittance ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nUser that remittance is defined for",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "remaining",
+      "description": "\nRemaining amount",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\nDescription",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "amount",
+      "description": "\nRemittance amount",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\nStatus",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_settled",
+      "description": "\nIs remittance settled",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "date",
+      "description": "\nDate of remittance",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "currency",
+      "description": "\nPayment currency",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nPayment faculty",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

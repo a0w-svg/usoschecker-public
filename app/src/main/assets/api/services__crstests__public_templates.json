@@ -1,0 +1,38 @@
+{
+  "name": "services/crstests/public_templates",
+  "short_name": "public_templates",
+  "description": "\t\n\tGet list of public templates.\n",
+  "brief_description": "Get public templates templates.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#public_templates",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tList of all public templates (represented as dictionaries).\n\tEach dictionary will contain primary fields from <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_node\">root_node</a> method.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

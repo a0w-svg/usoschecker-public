@@ -1,0 +1,56 @@
+{
+  "name": "services/adm_documents/receive",
+  "short_name": "receive",
+  "description": "<p>\nReceive document using authorization code.</p>",
+  "brief_description": "\nReceive document using authorization code.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#receive",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "adm_documents"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\ndocument ID"
+    },
+    {
+      "name": "code",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nauthorization code, see <a href='https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#generate_code'>generate_code</a> method"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>Empty dict on success.</p>\n        <p>On error: dictionary of the following structure:</p>\n        <ul>\n            <li><b>status</b> - the value will be set to <b>Err</b></li>\n            <li><b>message</b> - LangDict, message to show to user about attempts left or if code reset is required</li>\n        </ul>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>param_invalid</b> -\n                parameter has invalid value.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

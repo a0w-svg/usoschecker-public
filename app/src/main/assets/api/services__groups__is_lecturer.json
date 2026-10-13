@@ -1,0 +1,62 @@
+{
+  "name": "services/groups/is_lecturer",
+  "short_name": "is_lecturer",
+  "description": "\tIs user a group lecturer.",
+  "brief_description": "Is user a group lecturer.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#is_lecturer",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\tID of a course unit."
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\t\n\tGroup number unique with regard to the course unit.\n"
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": "access token issuer.",
+      "description": "\tID of a user."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Boolean value - true if user corresponds to Access Token is lecturer of the group, false\n\totherwise.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

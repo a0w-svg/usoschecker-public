@@ -1,0 +1,54 @@
+{
+  "name": "services/feedback/report_db",
+  "short_name": "report_db",
+  "description": "\n\n        <p>Report feedback from the user, regarding invalid (or outdated) data\n        in the USOS database. User's feedback will be logged, and might help to\n        fix the errors later.</p>\n\n        <p><b>This is an experimental feature.</b> There's a big chance that\n        this method will be either removed, or changed in a backward\n        incompatible way (e.g. we may require captchas).</p>\n\n        <p>Before you use this method, please make sure that the module is\n        enabled - see the <a href='https://usosapps.vistula.edu.pl/developers/api/services/feedback/#status'>status</a>\n        method.</p>\n    ",
+  "brief_description": "\nReport invalid data in USOS database.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/feedback/#report_db",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_form",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p>JSON-encoded list of dictionaries. These dictionaries represent\n            user inputs present in the feedback form, that the user has\n            submitted. The list can be empty, but usually it should contain at\n            least element (user's comment).</p>\n\n            <p>Each dictionary has two fields:</p>\n\n            <ul>\n                <li><b>title</b> - string, the title of the field, exactly as\n                displayed to the user (in the language the user was seeing it\n                at the time the form was submitted). Usually these titles are\n                presented as questions for the user (e.g. \"What's wrong with\n                this address?\", \"What is the correct value of this\n                field?\").</li>\n\n                <li><b>value</b> - string, the answer that the user has\n                supplied (can be empty).</li>\n            </ul>\n        "
+    },
+    {
+      "name": "meta",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>JSON-encoded object. It may contain any data you want. The\n                format of this object is currently left undocumented, but some\n                of the keys are recommended. You should include at least\n                such data which would enable the report reader to pinpoint the\n                entity the user is reporting.</p>\n\n                <p>Some example meta keys:/p>\n\n                <ul>\n                    <li><b>feedback_type</b> - e.g.\n                    \"invalid-building-address\",</li>\n\n                    <li><i>building_id</i>, <i>user_id</i>, <i>course_id</i> or\n                    any other ID of the entity the user is reporting to be\n                    invalid,</li>\n\n                    <li><b>displayed_value</b> - the value of the field, that\n                    the user is reporting to be invalid, exactly as it was\n                    displayed to the user,</li>\n\n                    <li><b>url</b> - URL which may enable the report reader\n                    to see what the user had seen,</li>\n\n                    <li><b>comment</b> - additional comment supplied by the\n                    developer (preferably in Polish, as it is probably this\n                    language that the report reader will understand best).</li>\n                </ul>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>If the report has been successfully stored, <code>{\"success\":\n        true}</code> will be returned.</p>\n\n        <p>In case of error, you should check the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages'>user_messages field</a>\n        and display the proper message for the user.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

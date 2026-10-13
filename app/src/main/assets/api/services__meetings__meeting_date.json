@@ -1,0 +1,151 @@
+{
+  "name": "services/meetings/meeting_date",
+  "short_name": "meeting_date",
+  "description": "<p>\nGet information about single meeting date</p>",
+  "brief_description": "\nGet information about single meeting date",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting_date",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "meeting_date_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of meeting date"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|comment|start_time|end_time|registration_start_time|registration_end_time|seats_limit|reserve_seats_limit|meeting",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    id;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    LangDict, meeting date comment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>start_time</b> -\n                    datetime, start time;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end_time</b> -\n                    datetime, end time;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>registration_start_time</b> -\n                    datetime, registration start time;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>registration_end_time</b> -\n                    datetime, registration end time;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>seats_limit</b> -\n                    seats limit;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>reserve_seats_limit</b> -\n                    seserve seats limit;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>meeting</b> - meeting.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting'>meeting</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>registered_participants_count</b> -\n                    number of registered participants;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>accepted_participants_count</b> -\n                    number of participants in the main list;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>waiting_participants_count</b> -\n                    number of participants in the reserve list;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user_status</b> - registration status of user.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>accepted</b> - user is accepted to meeting</p></li>\n<li><p><b>waiting</b> - user is waiting for acceptance</p></li>\n<li><p><b>rejected</b> - user has been rejected</p></li>\n<li><p><b>token_created</b> - registration token has been generated</p></li><li><p><b>null</b> - user has not registered to meeting</p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_sign_up</b> -\n                    boolean, can I sign up for meeting?;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_sign_out</b> -\n                    boolean, can I sign out from meeting?;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>room</b> - room assigned to meeting date or <b>null</b> if no room was assigned.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/geo/#room'>services/geo/room</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nid",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\nLangDict, meeting date comment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start_time",
+      "description": "\ndatetime, start time",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end_time",
+      "description": "\ndatetime, end time",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registration_start_time",
+      "description": "\ndatetime, registration start time",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registration_end_time",
+      "description": "\ndatetime, registration end time",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "seats_limit",
+      "description": "\nseats limit",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "reserve_seats_limit",
+      "description": "\nseserve seats limit",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "meeting",
+      "description": "\nmeeting",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registered_participants_count",
+      "description": "\nnumber of registered participants",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "accepted_participants_count",
+      "description": "\nnumber of participants in the main list",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "waiting_participants_count",
+      "description": "\nnumber of participants in the reserve list",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user_status",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>accepted</b> - user is accepted to meeting</p></li>\n<li><p><b>waiting</b> - user is waiting for acceptance</p></li>\n<li><p><b>rejected</b> - user has been rejected</p></li>\n<li><p><b>token_created</b> - registration token has been generated</p></li><li><p><b>null</b> - user has not registered to meeting</p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_sign_up",
+      "description": "\nboolean, can I sign up for meeting?",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_sign_out",
+      "description": "\nboolean, can I sign out from meeting?",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "room",
+      "description": "\nroom assigned to meeting date or <b>null</b> if no room was assigned",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

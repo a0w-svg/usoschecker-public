@@ -1,0 +1,111 @@
+{
+  "name": "services/adm_documents/document",
+  "short_name": "document",
+  "description": "<p>\nGet information on administration document by id.</p>",
+  "brief_description": "\nGet information on administration document by id.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#document",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "adm_documents"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of document"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|published_date|delivered_date|id_blobbox|actions|name|status|type|type_name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    document ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>published_date</b> -\n                    document publication date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>delivered_date</b> -\n                    document delivery date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>id_blobbox</b> -\n                    ID of document in blobbox;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>actions</b> - allowed actions.</p>\n\n                \n\n                    <p>List of allowed actions for the document. Possible values:</p>\n                    <ul>\n                        <li><b>RECEIVE_DOCUMENT</b> - the document can be received\n                            (see <a href='https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#receive'>receive</a>)</li>\n                        <li><b>GET_DOCUMENT</b> - the document can be downloaded from blobbox\n                            (see <a href='https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#get'>services/blobbox/get</a>)</li>\n                        <li><b>GET_UPO</b> - UPO for the document can be downloaded via\n                            <a href='https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#get_upo'>get_upo</a></li>\n                        <li><b>GET_UPD</b> - UPD for the document can be downloaded via\n                            <a href='https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#get_upd'>get_upd</a></li>\n                    </ul>\n                  \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict - name of document;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - LangDict - name of document status.</p>\n\n                \n\n                    <p>Note that this field is meant only for showing its value for user.\n                    Use <code>actions</code> field to differentiate between document states.</p>\n                  \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> - Document type.</p>\n\n                \n\n                  <p>Possible values: <b>D</b>, <b>P</b>, <b>W</b>, <b>Z</b>.</p>\n                  <p>Use <code>type_name</code> field for human-friendly document type names.</p>\n                  \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type_name</b> -\n                    LangDict - document type name.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\ndocument ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "published_date",
+      "description": "\ndocument publication date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "delivered_date",
+      "description": "\ndocument delivery date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "id_blobbox",
+      "description": "\nID of document in blobbox",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "actions",
+      "description": "\n\n                    <p>List of allowed actions for the document. Possible values:</p>\n                    <ul>\n                        <li><b>RECEIVE_DOCUMENT</b> - the document can be received\n                            (see <a href='https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#receive'>receive</a>)</li>\n                        <li><b>GET_DOCUMENT</b> - the document can be downloaded from blobbox\n                            (see <a href='https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#get'>services/blobbox/get</a>)</li>\n                        <li><b>GET_UPO</b> - UPO for the document can be downloaded via\n                            <a href='https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#get_upo'>get_upo</a></li>\n                        <li><b>GET_UPD</b> - UPD for the document can be downloaded via\n                            <a href='https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#get_upd'>get_upd</a></li>\n                    </ul>\n                  ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict - name of document",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n                    <p>Note that this field is meant only for showing its value for user.\n                    Use <code>actions</code> field to differentiate between document states.</p>\n                  ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\n\n                  <p>Possible values: <b>D</b>, <b>P</b>, <b>W</b>, <b>Z</b>.</p>\n                  <p>Use <code>type_name</code> field for human-friendly document type names.</p>\n                  ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type_name",
+      "description": "\nLangDict - document type name",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

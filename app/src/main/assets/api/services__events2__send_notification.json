@@ -1,0 +1,94 @@
+{
+  "name": "services/events2/send_notification",
+  "short_name": "send_notification",
+  "description": "<p>\nSend custom notification to selected user</p>",
+  "brief_description": "\nSend custom notification to selected user",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events2/#send_notification",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "message_pl",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nMessage in polish language that will be displayed to a user"
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nUser who will be notified"
+    },
+    {
+      "name": "user_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nList of users who will be notified. Note that parameters user_id and users_ids cannot be used thogether"
+    },
+    {
+      "name": "message_en",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nMessage in english language that will be displayed to a user"
+    },
+    {
+      "name": "event_type_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "custom",
+      "description": "\nEvent type of notification to send"
+    },
+    {
+      "name": "send_after",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nDatetime string - if used, notification will be delayed to selected time"
+    },
+    {
+      "name": "data",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nJSON object with data that will be send in notification"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nEmpty dict on success",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

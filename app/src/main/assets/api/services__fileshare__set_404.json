@@ -1,0 +1,30 @@
+{
+  "name": "services/fileshare/set_404",
+  "short_name": "set_404",
+  "description": "\t\n\t\n\t<p>When your blob expires, users won't be able to download the file. By\n\tdefault, USOS API will present them with a generic HTTP 404 error\n\tpage.</p>\n\t\n\t<p>You should provide your users with more than that. We allow you to\n\tdefine a personalized &quot;Not Found&quot; error page, where you can introduce\n\talternative ways of obtaining the file, if any exist (e.g. you may\n\tencourage them to contact the user which originally uploaded the\n\tfile).</p>\n\t\n",
+  "brief_description": "Register/Unregister a custom 404 error handler.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#set_404",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "url",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t\n\t<p>URL of your custom HTTP 404 page, or &quot;<b>none</b>&quot; if you don't want\n\tto use one. In case of error, users will be redirected there. We\n\t<b>MAY</b> append some extra parameters to your URL, to make it easier\n\tfor you to recover from the error:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<b>usosapi_consumer_key</b> - your Consumer Key (useful if you\n\t\t\twant to register one 404 page for multiple Consumer Keys),\n\t\t</li>\n\t\t<li>\n\t\t\t<b>usosapi_blob_id</b> - ID of the blob which the user was\n\t\t\ttrying to access (and which got deleted),\n\t\t</li>\n\t\t<li>\n\t\t\t<b>usosapi_user_id</b> - ID of the user who uploaded the blob\n\t\t\t(present only for blobs which were uploaded by a user),\n\t\t</li>\n\t\t<li>\n\t\t\t<b>usosapi_filename</b> - filename which was used for serving\n\t\t\tthe file (may differ from the one you've originally provided),\n\t\t</li>\n\t\t<li>\n\t\t\t<b>usosapi_date_blob_created</b> - datetime string, represents\n\t\t\tthe date when the blob was initially uploaded. Users may\n\t\t\tattempt to use old links <i>years</i> after blobs are deleted!\n\t\t</li>\n\t</ul>\n\t<p><b>Important:</b> All of these extra parameters are optional. We\n\twill try to pass all of them, but we may even end up appending none of\n\tthem. You should be prepared for any configuration.</p>\n"
+    }
+  ],
+  "returns": "\t\n\t<p>Currently, this method always returns the same value: a dictionary\n\twith single <b>success</b> key with values of <b>true</b>.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,195 @@
+{
+  "name": "services/groups/group",
+  "short_name": "group",
+  "description": "\tGet information on a given group.",
+  "brief_description": "Get information on a given group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#group",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\tID of a course unit."
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\t\n\tGroup number unique with regard to the course unit.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "course_unit_id",
+      "description": "\tID of the course unit related to the group,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "group_number",
+      "description": "\tnumber of the group unique with regard to the course unit,\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "class_type",
+      "description": "\ta LangDict object identyfing class type,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "class_type_id",
+      "description": "\tclass type id,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "group_url",
+      "description": "\tgroup homepage URL (or null if none),",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_id",
+      "description": "\tcourse ID,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_name",
+      "description": "\ta LangDict object with the courses name,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_homepage_url",
+      "description": "\tcourses homepage URL (or null if none),",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_profile_url",
+      "description": "\tcourses profile URL,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_is_currently_conducted",
+      "description": "\tboolean, indicates if the course\n\tis conducted in one of active academic terms,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_fac_id",
+      "description": "\tID of a faculty which runs this course.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_lang_id",
+      "description": "\tID of a language in which the course is conducted, or null\n\tif language is unknown.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term_id",
+      "description": "\tID of academic term to which this group is related.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "lecturers",
+      "description": "\tan array of dictionaries describing lecturers of this group;\n\teach dictionary contains fields from <strong>primary</strong> section in\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/users/#user\">services/users/user</a> method\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "participants",
+      "description": "\tan array of dictionaries describing participants of this\n\tgroup; each dictionary contains fields from <strong>primary</strong> section in\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/users/#user\">services/users/user</a> method. <br/>\n<i>Additional permissions note:</i> Access Token with the <b>'studies' scope</b>\nrequired (or administrative access). Note that only lecturer or participant can\nask for group participants.\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "group_description",
+      "description": "\ta LangDict\n\tobject.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "group_literature",
+      "description": "\ta LangDict\n\tobject.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "course_learning_outcomes",
+      "description": "\ta LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "course_description",
+      "description": "\ta LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "course_bibliography",
+      "description": "\ta LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "course_assessment_criteria",
+      "description": "\ta LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "course_practical_placement",
+      "description": "\ta LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

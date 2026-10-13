@@ -1,0 +1,54 @@
+{
+  "name": "services/theses/users",
+  "short_name": "users",
+  "description": "\n\n        <p>Get theses-related information on multiple users. This is very\n        similar to the <a href='https://usosapps.vistula.edu.pl/developers/api/services/theses/#user'>user</a> method, but\n        work with multiple users.</p>\n    ",
+  "brief_description": "\nGet theses-related information on multiple users.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/theses/#users",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Pipe-separated list of user IDs.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/theses/#user'>user</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary: your <b>user_ids</b> will be mapped to dictionary's\n        keys, and each value will contain an object with user-related thesis\n        data, as defined in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/theses/#user'>user</a>\n        method.</p>\n\n        <p>For invalid <b>user_ids</b> (users which do not exist) <b>null</b>\n        will be returned (instead of a dictionary).</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

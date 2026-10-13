@@ -1,0 +1,54 @@
+{
+  "name": "services/apiref/method",
+  "short_name": "method",
+  "description": "\tGet information on a given USOS API method.",
+  "brief_description": "Get information on a given USOS API method.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apiref/#method",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "name",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tName of a method (begins with &quot;services/&quot;).\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(most of them)",
+      "description": "\t\n\t<p>Pipe-separated list of fields which you are interested in.</p>\n\t\n\t<p>Initially, this method did not take the <b>fields</b> parameter.\n\tThat's why, for backwards compatibility, all the fields which were\n\texposed by this method before the <b>fields</b> parameter was added,\n\tare now also included by default.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of requested fields. Allowed fields include:</p>\n\t<ul>\n\t\t<li><b>name</b> - name of the method,</li>\n\t\t<li><b>short_name</b> - name without a path,</li>\n\t\t<li><b>description</b> - HTML-formatted description of what the method does,</li>\n\t\t<li><b>brief_description</b> - brief (max 80 characters), single-line,\n\t\t\tplain-text description of what the method does,</li>\n\t\t<li><b>ref_url</b> - URL of a USOSap Reference webpage with method description,</li>\n\t\t<li>\n\t\t\t<b>auth_options</b> - a dictionary which describes authentication\n\t\t\trequirements for this method, it has a following structure:\n\t\t\t<ul>\n\t\t\t\t<li><b>consumer</b> - &quot;required&quot;, &quot;optional&quot;, &quot;ignored&quot;,</li>\n\t\t\t\t<li><b>token</b> - &quot;required&quot;, &quot;optional&quot;, &quot;ignored&quot;,</li>\n\t\t\t\t<li><b>administrative_only</b> - boolean, indicates if method\n\t\t\t\t\tis available for Administrative Consumers only,</li>\n\t\t\t\t<li><b>ssl_required</b> - boolean, indicates if secure connection\n\t\t\t\t\trequired to call this method (if it is, then just switch http\n\t\t\t\t\tto https).</li>\n\t\t\t\t<li><b>scopes</b> - a list of strings, scope identifiers,\n\t\t\t\t\twhich you need to have access to in order to run the method.</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t<li><b>arguments</b> - list of dictionaries describing method's\n\t\t\tparameters. Each dictionary has a following structure:\n\t\t\t<ul>\n\t\t\t\t<li><b>name</b> - name of a parameter,</li>\n\t\t\t\t<li><b>is_required</b> - boolean, true if the parameter is required,</li>\n\t\t\t\t<li><b>is_deprecated</b> - boolean, true if the parameter is deprecated,</li>\n\t\t\t\t<li><b>default_value</b> - default value of the parameter or null if parameter\n\t\t\t\t\tdoesn't have a default value,</li>\n\t\t\t\t<li><b>description</b> - HTML-formatted description of a parameter.</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t<li><b>returns</b> - HTML-formatted description method's return value.</li>\n\t\t<li><b>errors</b> - HTML-formatted description of possible method exceptions.</li>\n\t\t<li>\n\t\t\t<p><b>result_fields</b> - list of method's result fields. Any field can belong to\n\t\t\teither primary or secondary section. This list serves as a concrete\n\t\t\tspecification and an alternative for the &quot;returns&quot; field in the method description.\n\t\t\tEach element of that list has a following structure:</p>\n\t\t\t\n\t\t\t<ul>\n\t\t\t\t<li><b>name</b></li>\n\t\t\t\t<li><b>description</b></li>\n\t\t\t\t<li><b>is_primary</b> - True if field is in primary section.</li>\n\t\t\t\t<li><b>is_secondary</b> - True if field is in secondary section.</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t<li>\n\t\t\t<b>beta</b> - <b>true</b> if this method has a BETA status.\n\t\t\tBETA methods may be altered in a backward-incompatible way.\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>deprecated</b> - in case of non-deprecated methods this\n\t\t\twill be <b>null</b>. In case of deprecated methods, this will\n\t\t\tbe a dictionary of the following structure:</p>\n\t\t\t\n\t\t\t<ul>\n\t\t\t\t<li>\n\t\t\t\t\t<b>deprecated_by</b> - method that should be used\n\t\t\t\t\tinstead of this one or <b>null</b> if the user should\n\t\t\t\t\tconsult the documentation,\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<b>present_until</b> - if not null, then the method\n\t\t\t\t\tis scheduled to be removed at the given time (this\n\t\t\t\t\tis a string in <b>any</b> format, not necessarily a\n\t\t\t\t\tdate!).\n\t\t\t\t</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>admin_access</b> - <b>true</b> if you have administrative\n\t\t\taccess to this method.</p>\n\t\t\t\n\t\t\t<p>You need to sign the request with your Consumer Key in order\n\t\t\tto access this field.</p>\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>is_internal</b> - <b>true</b> if this method is intended to be used only internally,\n\t\t\tby USOS API itself. This implies that it is in permanent BETA mode, and it can be altered\n\t\t\tor removed at any time.</p>\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

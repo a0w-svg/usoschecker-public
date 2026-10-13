@@ -1,0 +1,46 @@
+{
+  "name": "services/oauth/proxy",
+  "short_name": "proxy",
+  "description": "\t\n\t<p>Make a method call with <b>weakened permissions</b>. This method is\n\tprimarily intended for Administrative Consumers, but regular consumers\n\tmay also find it useful.</p>\n\t\n\t<p>Having &quot;to much&quot; permissions is not always a good thing. In many\n\tcases, you'd like the method to return only <i>these</i> results which\n\t<i>your user</i> has access to, <b>not you</b>. For example, if you are\n\tan Administrative Consumer and you try to access the <b>email</b> field\n\tof the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/users/#user\">user</a> method, then you will\n<i>always</i> get the user X's email, even when the email should\n<i>not</i> be displayed to <b>your user</b> Y. However, if you repeat\nthe same request via the the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy\">proxy</a>\nmethod, then you will get the email <i>only</i> when your user is\n<i>allowed</i> to see it. <b>In many cases this is exactly what you\nwant!</b></p>\n\n<p><b>In fact, we strongly encourage all Administrative Consumers to\nmake all their requests via the proxy method.</b></p>\n\n<p>The proxy method is also very useful when you're implementing a\n<b>public AJAX proxy</b> (e.g. if you're programming in JavaScript, or\nyou use libraries like\n\n<a href=\"https://github.com/MUCI/jquery-usos\">jQuery-USOS</a>).\n\nYour users will be able to access their own personal data via your\nproxy, but they won't be able to access any private consumer-related\ndata of yours (the exact definition of &quot;private consumer-related data&quot;\nis yet undocumented, but we try to use common sense; HTTP 400 error\nwill be thrown when you try to access such data via the proxy method).\n<b>Make sure your proxy is guarded against CSRF attacks!</b></p>\n\n<p>From your point of view, this method will make the underlying method\nperceive your request as if it was made by a non-administrative,\nanonymous consumer with lower permissions:</p>\n\n<ul>\n<li>\nIf your request is an administrative one, then it will &quot;stop\nbeing&quot; administrative. That is, the underlying method will\nperceive it as a regular request. (This also means, that you\ncan't call administrative methods via the <b>proxy</b> method.)\n</li>\n<li>\nThe list of scopes you've originally been given access to\nwill be limited to the list provided in the <b>scopes</b>\nparameter.\n</li>\n</ul>\n\n<p>Note, that if you're an Administrative Consumer, then you still can\nuse the <b>as_user_id</b> parameter when calling the <b>proxy</b>\nmethod, but obviously you can't use it in the <b>parameters</b>\ndictionary (since you won't have the permissions to do so).</p>\n",
+  "brief_description": "Make a request with weakened permissions",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "method",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tThe name of the underlying method you'd like to call. Start with\n\t&quot;services/&quot;.\n"
+    },
+    {
+      "name": "parameters",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "{}",
+      "description": "\t\n\tJSON-formatted dictionary of <i>paramName-value</i> pairs to be passed\n\tas parameters to the underlying method. All values should be unicode\n\tstrings.\n"
+    },
+    {
+      "name": "scopes",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(none)",
+      "description": "\t\n\t<p>Pipe-separated list of scopes, <b>or</b> an extra keyword\n\t<b>&quot;all&quot;</b> to denote the set of all available scopes.</p>\n\t\n\t<p>It is <i>not</i> an error to include scopes which you do not have\n\taccess to. We will simply compute a common part (intersection) of your\n\tactual scopes and the scopes included here.</p>\n\t\n\t<p>Since scopes are permissions granted by users, you must perform your\n\trequest in a user context in order for this to work. You must supply\n\teither an Access Token or the <b>as_user_id</b> parameter.</p>\n"
+    }
+  ],
+  "returns": "\t\n\t<p>We will return whatever response we get from the underlying\n\tmethod.</p>\n\t\n\t<p>Note that currently, in case of an error, there is no simple way for\n\tyou to determine which method caused the error to be thrown - the\n\t<b>proxy</b> method or the underlying method. However, the\n\t<b>proxy</b> method returns error responses only in quite obvious\n\tcases, so you should be fine.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,56 @@
+{
+  "name": "services/housing/unused_assignment_ids",
+  "short_name": "unused_assignment_ids",
+  "description": "\n\n        <p>Get a list of assignment IDs which were not checked-in yet. The list\n        if filtered by dormitory and allocation period.</p>\n\n        <p>This method can be used by dormitory administrators to find the\n        users who didn't check in into the dormitory. Only dormitory admins\n        may access this list.</p>\n    ",
+  "brief_description": "\nGet a list of assignments which were not checked-in yet.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#unused_assignment_ids",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "dorm_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "allocation_period_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>ID of an allocation period.</p>"
+    },
+    {
+      "name": "dormitory_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>ID of a dormitory.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>Unordered list of assignment IDs.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

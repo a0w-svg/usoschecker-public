@@ -1,0 +1,72 @@
+{
+  "name": "services/slips/slipquestions",
+  "short_name": "slipquestions",
+  "description": "\t\n\t<p>Get information on multiple slipquestions.</p>\n",
+  "brief_description": "Get information on multiple slipquestions",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestions",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "sq_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Pipe-separated list of slipquestion IDs.</p>\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|question_id",
+      "description": "\t\n\tAs in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion\">slipquestion</a> method.\n"
+    },
+    {
+      "name": "question_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|question",
+      "description": "\t\n\tDeprecated. As in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion\">slipquestion</a>\nmethod.\n"
+    },
+    {
+      "name": "slip_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id",
+      "description": "\t\n\tDeprecated/ As in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion\">slipquestion</a>\nmethod.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary. Slipquestion IDs will be mapped to keys of this\n\tdictionary. Each value will be a dictionary of the same structure as\n\tdescribed in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion\">slipquestion</a>\nmethod.</p>\n\n<p>For all invalid references, the value will be <b>null</b> (instead\nof a dictionary).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

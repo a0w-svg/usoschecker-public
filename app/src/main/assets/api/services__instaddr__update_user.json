@@ -1,0 +1,54 @@
+{
+  "name": "services/instaddr/update_user",
+  "short_name": "update_user",
+  "description": "\n\n        <p>Update user institutional addresses.</p>\n\n        <p>Currently calling this method with access token causes a <b>method_forbidden</b>\n        error.</p>\n    ",
+  "brief_description": "\nUpdate user institutional addresses.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#update_user",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>User ID.</p>"
+    },
+    {
+      "name": "inst_address_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>List of institutional address IDs.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n    An empty dictionary returned if the method has been executed successfully.\n    Some keys may be added in the future.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

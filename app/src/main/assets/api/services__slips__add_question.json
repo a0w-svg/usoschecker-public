@@ -1,0 +1,56 @@
+{
+  "name": "services/slips/add_question",
+  "short_name": "add_question",
+  "description": "\t\n\t<p>Add a new question to a template.</p>\n\t\n\t<p>Note, that your user has to hold proper privileges in order for you\n\tto use this method. However, if he does not, you will still receive a\n\tHTTP 200 response (see &quot;returns&quot; section).</p>\n",
+  "brief_description": "Add a new question to a template",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#add_question",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "tpl_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>ID of the template to which you want to add the question.</p>\n"
+    },
+    {
+      "name": "question",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>The question. This should be short, but unambiguous, preferably\n\t20-50 characters. The current limit is 100. It also must end with a\n\tquestion mark.</p>\n\t\n\t<p>Note, that there are no multiple fields for multiple languages here.\n\tLanguage is left for the user to choose. In other words, if the user\n\tever needs to create a multilingual template, he will need to create\n\ttwo separate templates and describe when to use which.</p>\n\t\n\t<p>Note, that if your question is too long or otherwise &quot;incorrect&quot;,\n\tyou will still receive a HTTP 200 response (see &quot;returns&quot; section).</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true, &quot;question_id&quot;: &quot;&lt;id of the new question&gt;&quot;}</code></p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

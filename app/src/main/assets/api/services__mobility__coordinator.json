@@ -1,0 +1,150 @@
+{
+  "name": "services/mobility/coordinator",
+  "short_name": "coordinator",
+  "description": "<p>\nMobilities that  access token issuer may access as coordinator</p>",
+  "brief_description": "\nMobilities that  access token issuer may access as coordinator",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#coordinator",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|user|faculty|term|state|role|receiving_institution|why_cannot_create_la|esi|start_date|end_date|extended_date|isced_code|declared_language|declared_language_level|contact_person",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector must contain subset of\n    <b>primary</b> fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#mobility'>mobility</a> method.\n</p>\n        "
+    },
+    {
+      "name": "la_status",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nOne of following values ..."
+    },
+    {
+      "name": "latest_version_status",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nOne of following values ..."
+    },
+    {
+      "name": "faculty_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nID of a faculty"
+    },
+    {
+      "name": "country_name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nCountry of mobility"
+    },
+    {
+      "name": "receiving_institution_name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nName of receiving institution"
+    },
+    {
+      "name": "term_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nTerm of mobility"
+    },
+    {
+      "name": "isced",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nErasmus code"
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nUser ID of a student"
+    },
+    {
+      "name": "supervisor_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nUser ID of supervisor"
+    },
+    {
+      "name": "organizational_supervisor_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nOne of following values"
+    },
+    {
+      "name": "order_by",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\nOne of following values"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    },
+    {
+      "name": "page",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\npage number - use only together with per_page parameter."
+    },
+    {
+      "name": "per_page",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nIf this parameted is used. Instead of usual result,paged version will be returned. Result will be dictionary of following fields:count - number of elemensts in regular result, num_pages - number of pages, object_list - list of items from original result from selected page"
+    }
+  ],
+  "returns": "\nList of mobilities",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

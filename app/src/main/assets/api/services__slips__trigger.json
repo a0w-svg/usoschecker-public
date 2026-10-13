@@ -1,0 +1,73 @@
+{
+  "name": "services/slips/trigger",
+  "short_name": "trigger",
+  "description": "\n\n        <p>Get information on a single \"question trigger\".</p>\n\n        <p>\"Question triggers\" are provided by the system itself; users are not\n        allowed to create new triggers, nor change the existing ones. Slip\n        admins can apply these triggers to their questions - this will cause\n        the question to have some additional \"magical\" properties (which are\n        described in the <b>description</b> field of the trigger).</p>\n    ",
+  "brief_description": "\nGet information on a single \"question trigger\".",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#trigger",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "trigger_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p>ID of the trigger.</p>\n\n            <p>Many of the IDs are not backward-compatible. They may either\n            disappear or change their meaning at any time. You should avoid\n            hardcoding IDs in your code. Use the\n            <a href='https://usosapps.vistula.edu.pl/developers/api/services/slips/#trigger_index'>trigger_index</a> method\n            instead.</p>\n        "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    the ID of the trigger;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    A LangDict object with the name of the trigger.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description_html</b> - A LangDict object with detailed description of the properties of this trigger.</p>\n\n                \n\n                <p>This description will be formatted in HTML, but only the\n                basic HTML tags will be used (e.g. <code>&lt;p&gt;</code>,\n                <code>&lt;ul&gt;</code>).</p>\n\n                <p><b>Important:</b> This description is visible only to the\n                slip admins. You will also need the <b>slips_admin</b> scope to\n                access it.</p>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nthe ID of the trigger",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\n\n                A LangDict object with the name of the trigger.\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description_html",
+      "description": "\n\n                <p>This description will be formatted in HTML, but only the\n                basic HTML tags will be used (e.g. <code>&lt;p&gt;</code>,\n                <code>&lt;ul&gt;</code>).</p>\n\n                <p><b>Important:</b> This description is visible only to the\n                slip admins. You will also need the <b>slips_admin</b> scope to\n                access it.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

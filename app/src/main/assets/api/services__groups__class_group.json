@@ -1,0 +1,111 @@
+{
+  "name": "services/groups/class_group",
+  "short_name": "class_group",
+  "description": "<p>\nGet information on a given group.</p>",
+  "brief_description": "\nGet information on a given group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#class_group",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of course unit"
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nGroup number"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "course_unit_id|number",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>course_unit_id</b> -\n                    ID of the course unit related to the group,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    number of the group unique with regard to the course unit,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>url</b> -\n                    group homepage URL (or null if none),;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    a LangDict;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>literature</b> -\n                    a LangDict object.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>course_unit</b> - Class unit related to this class group.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_unit'>services/courses/course_unit</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>lecturers</b> - group lecturers.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>participants</b> - group participants.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "course_unit_id",
+      "description": "\nID of the course unit related to the group,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number",
+      "description": "\nnumber of the group unique with regard to the course unit,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "url",
+      "description": "\ngroup homepage URL (or null if none),",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\na LangDict",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "literature",
+      "description": "\na LangDict object",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_unit",
+      "description": "\nClass unit related to this class group",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "lecturers",
+      "description": "\ngroup lecturers",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "participants",
+      "description": "\ngroup participants",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

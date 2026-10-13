@@ -1,0 +1,142 @@
+{
+  "name": "services/crstests/grade_node",
+  "short_name": "grade_node",
+  "description": "\t\n\tGet detailed information about some <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#GradeNode\">GradeNode</a>.\n",
+  "brief_description": "Get a GradeNode.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#grade_node",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "crstests",
+      "grades"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tnode ID"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "node_id",
+      "description": "\tNode's ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "root_id",
+      "description": "\tID of root node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "parent_id",
+      "description": "\tID of parent node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "order",
+      "description": "\tinteger, used to sort children",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\tLangDict object - name of the node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "visible_for_students",
+      "description": "\tboolean - if true marks and points of this node are visible to students",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\tThis fields will be equal to &quot;grade&quot;",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grade_type",
+      "description": "\tDictionary with single key 'id'.\n\tSame as 'grade_type_id' parameter of the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade_type\">grade_type</a> method.\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "my_permissions",
+      "description": "\tList of PermissionObjects representing permissions of of the access token issuer",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "permissions",
+      "description": "\tDictionary mapping userIDs to list of PermissionObjects.\n\tEach such list contains PermissionObjects for a particular user.\n\tOnly ids of users that have ReadPerm permission in the root will be present in this dictionary",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "dependencies",
+      "description": "\tA dictionary mapping node IDs to handles(see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>)",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "variables",
+      "description": "\tstring, variables used in the algorithm (see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>)",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "algorithm",
+      "description": "\tstring, algorithm (see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>)",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "algorithm_description",
+      "description": "\tLangDict object - description of the algorithm (see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>)",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

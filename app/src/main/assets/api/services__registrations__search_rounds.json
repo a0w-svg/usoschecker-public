@@ -1,0 +1,78 @@
+{
+  "name": "services/registrations/search_rounds",
+  "short_name": "search_rounds",
+  "description": "\n\n    Get all registrations rounds for selected faculty and date range\n    <strong>not longer than month</strong>\n    ",
+  "brief_description": "\nSearch for registrations rounds in calendar",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/registrations/#search_rounds",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "start_date",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nRound that ends after selected date will be returned"
+    },
+    {
+      "name": "end_date",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nRound that starts before selected date will be returned.Note that maximal allowed period is one month"
+    },
+    {
+      "name": "faculty_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nID of faculty that registration rounds should be returned"
+    },
+    {
+      "name": "user_related",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\nOnly registrations related to user"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|status|registration_mode|start_date|end_date",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/registrations/#registration_round'>registration_round</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nList of registrations rounds objects",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>params_invalid</b> - parameters start_date and end_date have invalid values.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>session_not_found</b> -\n                                end_date must follow start_date;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>too_long_date_range</b> -\n                                date range must be not longer than one month.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

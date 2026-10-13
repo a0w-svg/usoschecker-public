@@ -1,0 +1,4 @@
+<resources>
+    <string name="background_check">Sprawdzanie w tle</string>
+    <string name="selected_upload">Wybrano plik · %1$d bajtów</string>
+</resources>

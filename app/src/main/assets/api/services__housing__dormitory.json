@@ -1,0 +1,85 @@
+{
+  "name": "services/housing/dormitory",
+  "short_name": "dormitory",
+  "description": "<p>\nGet information on a single dormitory.</p>",
+  "brief_description": "\nGet information on a single dormitory.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormitory",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "dormitory_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            ID of a dormitory.\n        "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of this dormitory;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    name of a dormitory, a LangDict object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>short_name</b> -\n                    a LangDict object with a very short \"code\" of thedormitory, can be empty (!);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_manage</b> -\n                    boolean; <b>true</b> if the requesting user has permissions to manage this dormitory;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>dormrooms</b> - a list of dormrooms available in this dormitory, or <b>null</b> if you don't have the access to see it.</p>\n\n                \n\n                <p>Every element on this list is of the same format as the one\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormroom'>dormroom</a>\n                method. You can use a <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to access\n                more subfields.</p>\n\n                <p>You will need the <b>dorm_admin</b> scope in order to access\n                this field. If you do have the scope, but your user doesn't\n                have proper permissions, you will receive <b>null</b> here.</p>\n\n                <p>The list will be ordered by room number.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormroom'>dormroom</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of this dormitory",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nname of a dormitory, a LangDict object",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "short_name",
+      "description": "\na LangDict object with a very short \"code\" of thedormitory, can be empty (!)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_manage",
+      "description": "\nboolean; <b>true</b> if the requesting user has permissions to manage this dormitory",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "dormrooms",
+      "description": "\n\n                <p>Every element on this list is of the same format as the one\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormroom'>dormroom</a>\n                method. You can use a <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to access\n                more subfields.</p>\n\n                <p>You will need the <b>dorm_admin</b> scope in order to access\n                this field. If you do have the scope, but your user doesn't\n                have proper permissions, you will receive <b>null</b> here.</p>\n\n                <p>The list will be ordered by room number.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

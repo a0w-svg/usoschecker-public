@@ -1,0 +1,46 @@
+{
+  "name": "services/blobbox/consumer",
+  "short_name": "consumer",
+  "description": "\tGet consumer's storage usage statistics.",
+  "brief_description": "Get consumer's storage usage statistics.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#consumer",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "hard_count|hard_vsize",
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are\n\tdescribed in the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of selected fields and their values.</p>\n\t<p>Available fields:</p>\n\t<ul>\n\t\t<li>\n\t\t\t<b>all_count</b> - total number of blobs currently held under\n\t\t\tyour ownership,\n\t\t</li>\n\t\t<li>\n\t\t\t<b>hard_count</b> - number of your blobs which, based on your\n\t\t\texpiry preferences, <b>cannot</b> be deleted right now,\n\t\t</li>\n\t\t<li>\n\t\t\t<b>soft_count</b> - number of your blobs which have passed the\n\t\t\tlimit set upon them with the <b>min_age</b> parameter, but have\n\t\t\tnot yet been deleted (these blobs may be deleted at any\n\t\t\tmoment),\n\t\t</li>\n\t\t<li>\n\t\t\t<b>all_vsize</b> - total size of all your blobs (in bytes),\n\t\t</li>\n\t\t<li><b>hard_vsize</b> - total size of all your hard blobs,</li>\n\t\t<li><b>soft_vsize</b> - total size of all your soft blobs.</li>\n\t\t<li>\n\t\t\t<p><b>all_blob_ids</b> - the list of all your blobs (their\n\t\t\tIDs).</p>\n\t\t\t<p><b>Note:</b> You should store all needed blob IDs locally\n\t\t\t(in your own database). These fields (<i>*_blob_ids</i>) are\n\t\t\tintended to be used for integrity checks only. The output can\n\t\t\tbe huge at times!</p>\n\t\t</li>\n\t\t<li><b>hard_blob_ids</b> - the list of all your hard blobs.</li>\n\t\t<li><b>soft_blob_ids</b> - the list of all your soft blobs,</li>\n\t</ul>\n\t\n\t<p><b>vsize</b> stands for <b>virtual size</b> - the sum of lengths of\n\tyour blobs. The amount of physical storage which is actually used for\n\tyour data may vary, depending on the underlying implementation and\n\tsystem settings.</p>\n\t\n\t<p>I.e. if you upload the same blob 100 times, each weighting 1 MB, you\n\twill get 100 blob_ids and your <i>all_vsize</i> will increase by 100\n\tMB. However, internally the file will be stored only once. Similarly,\n\twe may also compress your blobs before storing, etc.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

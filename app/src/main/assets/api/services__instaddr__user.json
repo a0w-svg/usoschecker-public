@@ -1,0 +1,54 @@
+{
+  "name": "services/instaddr/user",
+  "short_name": "user",
+  "description": "\n\n        <p>Get a list of institutional addresses assigned to the user. Such addresses may\n        be used in <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/'>services/mailclient</a> module to send email messages.</p>\n    ",
+  "brief_description": "\nGet user's institutional addresses.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#user",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|email",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector must contain subset of\n    <b>primary</b> fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#inst_address'>inst_address</a> method.\n</p>\n        "
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(access token issuer)",
+      "description": "\n<p>ID of a user.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A list of dictionaries describing institutional addresses\n        (as returned by <a href='https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#inst_address'>inst_address</a> method).</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

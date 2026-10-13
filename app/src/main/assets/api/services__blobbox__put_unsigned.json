@@ -1,0 +1,46 @@
+{
+  "name": "services/blobbox/put_unsigned",
+  "short_name": "put_unsigned",
+  "description": "\t\n\t<p>This method <b>does not</b> put the blob into the database. It does\n\thowever temporarily save the file and wait for you to complete the put\n\toperation. In order for such data to become a &quot;fully qualified&quot; blob,\n\tyou need to call the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_sha1\">put_sha1</a>\nmethod afterwards.</p>\n\n<p>This method does not require OAuth signatures, so you could use it\nto upload files directly from your user's browser. However you would\nalso need to find a way to retrieve SHA1 of the uploaded file from\nyour user's browser which is tricky... Probably it would be easier for\nyou to simply store the file temporarily on your server, and then use\nthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put\">put</a> to store it.</p>\n\n<p><b>Important:</b> You have to call the\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_sha1\">put_sha1</a> method shortly after\nfinishing the file upload. Otherwise, your file will be deleted.</p>\n",
+  "brief_description": "Upload data using form-data encoding.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_unsigned",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "data",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tThe file to be uploaded. Your request <b>has to</b> use\n\t<b>multipart/form-data</b> encoding and the <b>data</b> key must have a\n\t&quot;filename&quot; in its Content-Disposition header.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Currently, this method always returns the same value: a dictionary\n\twith single <b>success</b> key with the value of <b>true</b>.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

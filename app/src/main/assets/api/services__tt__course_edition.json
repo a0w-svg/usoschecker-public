@@ -1,0 +1,78 @@
+{
+  "name": "services/tt/course_edition",
+  "short_name": "course_edition",
+  "description": "\t\n\tGet all activities related to a specified course edition. This includes ALL activities of\n\tALL class groups of this course.\n",
+  "brief_description": "Get all activities related to a specified course edition.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#course_edition",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the course."
+    },
+    {
+      "name": "term_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the term during which the course edition is run."
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "today",
+      "description": "\t\n\tA date string, yyyy-mm-dd format. A first (earliest) day to include\n\tin the results.\n"
+    },
+    {
+      "name": "days",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "7",
+      "description": "\t\n\tNumber of days (starting with <b>start</b>) to include in the\n\tresults. No more than 7 is allowed.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "start_time|end_time|name",
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of Activity objects, as in the <a href=\"#classgroup\">classgroup</a> method.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

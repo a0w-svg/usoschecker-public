@@ -1,0 +1,56 @@
+{
+  "name": "services/adm_documents/generate_code",
+  "short_name": "generate_code",
+  "description": "<p>\nGenerate receive code and send it by e-mail.</p>",
+  "brief_description": "\nGenerate receive code and send it by e-mail.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/adm_documents/#generate_code",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "adm_documents"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\ndocument ID"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\ne-mail language, one of <b>pl</b>, <b>en</b>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following structure:</p>\n        <ul>\n            <li><b>email</b> - e-mail address, which will receive the message with code</li>\n            <li><b>date</b> - timestamp of code sending</li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

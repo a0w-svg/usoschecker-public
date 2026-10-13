@@ -1,0 +1,64 @@
+{
+  "name": "services/slips/update_slipquestion",
+  "short_name": "update_slipquestion",
+  "description": "\t\n\t<p>Change attributes of an existing slipquestion object. The set of\n\tattributes which you can change depends on the roles of your user\n\twithin the slip.</p>\n\t\n\t<p>Note, that your user has to hold proper privileges in order for you\n\tto use this method. However, if he does not, you will still receive a\n\tHTTP 200 response (see &quot;returns&quot; section).</p>\n\t\n\t<p><b>Important:</b> Please note the difference between:</p>\n\t\n\t<ul>\n\t\t<li>passing the parameter with an empty string value - in this case\n\t\t\twe will try to set the value of the appropriate field to an empty\n\t\t\tstring,</li>\n\t\t\n\t\t<li>not passing the parameter at all - in this case the current\n\t\t\tstate of the field will not be changed.</li>\n\t</ul>\n",
+  "brief_description": "Edit an existing slipquestion object",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#update_slipquestion",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "sq_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the slipquestion been edited.\n"
+    },
+    {
+      "name": "answer",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New answer to the question. Setting this to empty string will remove\n\tthe previous answer.</p>\n\t\n\t<p>Please note, that when you're allowing your user to answer, you\n\tshould present him with <b>quick_answers</b> too (see the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method.</p>\n"
+    },
+    {
+      "name": "extra_answerers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tNew value of extra_answerers field. Pipe-separated list of user IDs.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true}</code></p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

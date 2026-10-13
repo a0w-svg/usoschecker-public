@@ -1,0 +1,78 @@
+{
+  "name": "services/tt/classgroup",
+  "short_name": "classgroup",
+  "description": "\t\n\tGet activities related to single class group. Usually one class group meets up once a week\n\tat specified hours, but there's no any real rule for that.\n",
+  "brief_description": "Get activities related to single class group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#classgroup",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of class group's &quot;parent&quot; course unit."
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tGroup number of the class."
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "today",
+      "description": "\t\n\tA date string, yyyy-mm-dd format. A first (earliest) day to include\n\tin the results.\n"
+    },
+    {
+      "name": "days",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "7",
+      "description": "\t\n\tNumber of days (starting with <b>start</b>) to include in the\n\tresults. No more than 7 is allowed.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "start_time|end_time|name",
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of Activity objects.</p>\n\t<p>\n\tEach Activity object is a dictionary of fields. There are different types of Activity\n\tobjects, these are the fields <b>they all have in common</b>:\n</p>\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>type</b> - type of activity. Currently there are three possible values:\n\t\t\t<b>classgroup</b>, <b>classgroup2</b>, <b>meeting</b> or <b>exam</b>.</p>\n\t\t\t\n\t\t\t<p><b><u>Important</u></b>: more activity types may be introduced in the future.\n\t\t\tYour application should expect that.</p>\n\t\t</li>\n\t\t<li>\n\t\t\t<b>start_time</b> - datetime string (&quot;yyyy-mm-dd hh:mm:ss&quot; format, local time),\n\t\t\tindicates the moment in time when the activity starts,\n\t\t</li>\n\t\t<li>\n\t\t\t<b>end_time</b> - datetime string (&quot;yyyy-mm-dd hh:mm:ss&quot; format, local time),\n\t\t\tindicates the moment in time when the activity ends.\n\t\t</li>\n\t\t<li>\n\t\t\t<b>name</b> - a LangDict object with a generic name for this activity - use it\n\t\t\twhenever you don't want to, or don't know how to build your own (i.e. when you\n\t\t\treceive an unknown activity type).\n\t\t</li>\n\t\t<li>\n\t\t\t<b>url</b> - a generic URL for this activity <b>OR null</b>, if there is no such\n\t\t\tURL.\n\t\t</li>\n\t</ul>\n\t\n\t<p>Depending on <b>type</b> of the activity, some &quot;extra&quot; fields become available:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>If type equals &quot;classgroup&quot;:</b></p>\n\t\t\t\n\t\t\t<p>Such activity data is derived from some complex data structures describing class\n\t\t\tgroups and their meeting schedules (you may see the derivation path on this\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/static/85131d20/diagrams/classgroup-activities.gif\" class=\"diagram\">diagram</a>). Specific activity dates are determined\n\t\tautomatically by taking into account the frequency of classes and days off. <b>Be\n\t\taware:</b> for classes with frequency &quot;other&quot; or &quot;once&quot; there is no way do determine\n\t\ta specific date. For such cases all possible days in an academic term will be\n\t\treturned.</p>\n\t\t\n\t\t<p>Following &quot;extra&quot; fields are available:</p>\n\t\t<ul>\n\t\t\t<li><b>course_id</b> - ID o a course of this class,</li>\n\t\t\t<li><b>course_name</b> - a LangDict object with the name of a course,</li>\n\t\t\t<li>\n\t\t\t\t<b>classtype_name</b> - a LangDict object with the name of a class type\n\t\t\t\t(example: {&quot;pl&quot;: &quot;Wyklad&quot;, &quot;en&quot;: &quot;Lecture&quot;}),\n\t\t\t</li>\n\t\t\t<li>\n\t\t\t\t<b>lecturer_ids</b> - list of user IDs, these reference the staff members\n\t\t\t\twhich are the lecturers of this class (warning: for backward compatibility,\n\t\t\t\tthis will be a list of integers, not strings!),\n\t\t\t</li>\n\t\t\t<li><b>group_number</b> - group number of this class,</li>\n\t\t\t<li>\n\t\t\t\t<b>classgroup_profile_url</b> - URL of a &quot;profile page&quot; of this class group\n\t\t\t\t(a page users can get more info on this specific class),\n\t\t\t</li>\n\t\t\t<li>\n\t\t\t\t<b>building_name</b> - a LangDict object with the name of a building,\n\t\t\t\t<b>or empty LangDict</b> if unknown,\n\t\t\t</li>\n\t\t\t<li class=\"grey\"><b>building_id</b> - building ID, or <b>null</b> if unknown,</li>\n\t\t\t<li>\n\t\t\t\t<b>room_number</b> - number of the room (e.x. &quot;203B&quot;), or\n\t\t\t\t<b>empty string</b> if unknown,\n\t\t\t</li>\n\t\t\t<li class=\"grey\"><b>room_id</b> - room ID, or <b>null</b> if unknown</li>\n\t\t\t<li class=\"grey\"><b>unit_id</b> - ID of a course unit.</li>\n\t\t\t<li class=\"grey\"><b>classtype_id</b> - ID of a &quot;class type&quot; entity.</li>\n\t\t\t<li class=\"grey\">\n\t\t\t\t<b>cgwm_id</b> - ID of a &quot;class group weekly meeting&quot; entity.\n\t\t\t</li>\n\t\t\t<li class=\"grey\">\n\t\t\t\t<b>frequency</b> - string, a &quot;frequency code&quot;, indicates frequency of\n\t\t\t\tclasses. Possible values include: every_fortnight, every_fortnight_odd,\n\t\t\t\tevery_fortnight_even, every_month, every_week, every_working_day,\n\t\t\t\tevery_weekend, every_day, other, once (other codes may be added in future,\n\t\t\t\tbe prepared for this!). USOS API uses this frequency to determine specific\n\t\t\t\tactivity dates. Despite that it is a good practice to inform users of classes\n\t\t\t\tfrequency. For some types of frequency (ex. other, once) it is not possible\n\t\t\t\tto determine a specific date (see method description).\n\t\t\t</li>\n\t\t</ul>\n\t</li>\n</ul>\n<ul>\n\t<li>\n\t\t<p><b>If type equals &quot;classgroup2&quot;:</b></p>\n\t\t\n\t\t<p>This type looks almost like &quot;classgroup&quot;, but the data is collected by other\n\t\tmeans (<a href=\"https://usosapps.vistula.edu.pl/static/85131d20/diagrams/classgroup2-activities.gif\" class=\"diagram\">diagram</a>). Activities of this type are\n\t<b>confirmed meetings</b> (unlike &quot;classgroup&quot; activities, they are NOT\n\tautomatically generated).</p>\n\t\n\t<p>Following &quot;extra&quot; fields are available:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\tall extra fields mentioned in the &quot;classgroup&quot; section <u>except</u> the\n\t\t\t<b>frequency</b> field,\n\t\t</li>\n\t\t<li class=\"grey\">\n\t\t\t<b>sm_id</b> - ID of a &quot;single meeting&quot; entity.\n\t\t</li>\n\t</ul>\n</li>\n</ul>\n<ul>\n<li>\n\t<p><b>If type equals &quot;meeting&quot;:</b></p>\n\t\n\t<p>This type of activity is not related to any specific class group, but some other\n\tmethods (like the <a href=\"#room\">room</a> method) may include it in the result.</p>\n\t\n\t<p>Following &quot;extra&quot; fields are available:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<b>related_user_ids</b> - list of IDs of users (most probably, staff\n\t\t\tmembers) which are the best estimation of who can be contacted in regard of\n\t\t\tthis activity.\n\t\t</li>\n\t</ul>\n</li>\n<li>\n\t<p><b>If type equals &quot;exam&quot;:</b></p>\n\t\n\t<p>\n\tThis type of activity is related to course exams. Related data may be retrieved\n\tusing module <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/exams/\">services/exams</a>.\n</p>\n\n<p>Following &quot;extra&quot; fields are available:</p>\n\n<ul>\n\t<li><b>course_id</b> - ID o a course of this class,</li>\n\t<li><b>course_name</b> - a LangDict object with the name of a course,</li>\n\t<li><b>group_number</b> - group number of this exam,</li>\n\t<li><b>slot_number</b> - if student is registered to particular slot,\n\t\tits number is returned, or null in any other case</li>\n\t<li class=\"grey\"><b>building_id</b> - building ID, or <b>null</b> if unknown,</li>\n\t<li>\n\t\t<b>building_name</b> - a LangDict object with the name of a building,\n\t\t<b>or empty LangDict</b> if unknown,\n\t</li>\n\t<li>\n\t\t<b>room_number</b> - number of the room (e.x. &quot;203B&quot;), or\n\t\t<b>empty string</b> if unknown,\n\t</li>\n\t<li class=\"grey\"><b>room_id</b> - room ID, or <b>null</b> if unknown</li>\n</ul>\n</li>\n</ul>\n\n<p>Please note, that you <b>may</b> receive more fields than you specified. Still, you\n<b>may not</b> expect to receive fields you did not specify.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

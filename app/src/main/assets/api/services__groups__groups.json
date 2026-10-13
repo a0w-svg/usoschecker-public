@@ -1,0 +1,54 @@
+{
+  "name": "services/groups/groups",
+  "short_name": "groups",
+  "description": "\t\n\t<p>Get information on multiple groups.</p>\n\t<p>This method is similar to the <a href=\"#group\">group</a> method, but it\n\tworks with multiple groups. It also has a <b>limited fields support</b>.</p>\n",
+  "brief_description": "Get information on multiple groups.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#groups",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "group_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tPipe-separated list of pairs identyfing groups (in the following format:\n\t&quot;(<b>course_unit_id</b>,<b>group_number</b>)|...&quot;)."
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tPipe-separated list of fields\n\t(as in the <a href=\"#group\">group</a> method). Only <b>primary</b> fields\n\tare allowed."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary: your <b>group_ids</b> will be mapped to dictionary's keys, and\n\teach value will contain the description of a group, as defined in\n\tthe <a href=\"#group\">group</a> method.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

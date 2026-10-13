@@ -1,0 +1,131 @@
+{
+  "name": "services/statements/statement",
+  "short_name": "statement",
+  "description": "\n\n        <p>Get information of a single statement.</p>\n        <p>Note that either <code>statement_id</code> or <code>statement_code</code> <strong>and</strong> <code>version</code> must be passed,\n        but not both.</p>\n    ",
+  "brief_description": "\nGet information of a single statement.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/statements/#statement",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "statement_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the statement"
+    },
+    {
+      "name": "statement_code",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\ncode of the statement"
+    },
+    {
+      "name": "version",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nversion of the statement"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|title|content",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n<p>A dictionary of selected fields and their values.</p><p>Available fields:</p>\n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the statement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>code</b> -\n                    code of the statement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>version</b> -\n                    version of the statement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title</b> -\n                    LangDict, statement title;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>content</b> -\n                    LangDict, statement content;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>statement_type</b> - statement type.</p>\n\n                \n\n                <p>Possible values:</p>\n                <ul>\n                    <li><p><b>clause</b></p></li>\n                    <li><p><b>rules</b></p></li>\n                    <li><p><b>pledge</b></p></li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>effect_start_date</b> -\n                    date in which statement start to be in effect;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>effect_end_date</b> -\n                    date from which statement is no longer in effect;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_be_rejected</b> -\n                    boolean, indicates if user is allowed to reject the statement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - An associated faculty.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>statement_not_found</b> -\n                                statement was not found.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>param_invalid</b> - parameter has invalid value.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>id_and_statement_code_together</b> -\n                                both id and statement_code were specified.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>param_missing</b> - parameter is missing.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>no_id</b> -\n                                either statement_id or statement_code and version must be passed;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>no_statement_code</b> -\n                                version was passed, but no statement_code;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>no_version</b> -\n                                statement_code was passed, but no version.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the statement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "code",
+      "description": "\ncode of the statement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "version",
+      "description": "\nversion of the statement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title",
+      "description": "\nLangDict, statement title",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "content",
+      "description": "\nLangDict, statement content",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "statement_type",
+      "description": "\n\n                <p>Possible values:</p>\n                <ul>\n                    <li><p><b>clause</b></p></li>\n                    <li><p><b>rules</b></p></li>\n                    <li><p><b>pledge</b></p></li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "effect_start_date",
+      "description": "\ndate in which statement start to be in effect",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "effect_end_date",
+      "description": "\ndate from which statement is no longer in effect",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_be_rejected",
+      "description": "\nboolean, indicates if user is allowed to reject the statement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nAn associated faculty",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

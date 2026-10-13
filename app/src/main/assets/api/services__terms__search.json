@@ -1,0 +1,62 @@
+{
+  "name": "services/terms/search",
+  "short_name": "search",
+  "description": "\n\n        <p><b>Search for terms</b> matching the given query and/or\n        filters.</p>\n\n        <p>By default, this method will search among all terms. If\n        you'd like to search only in a limited subset of them, then try using\n        some of the optional parameters.</p>\n    ",
+  "brief_description": "\nSearch for terms.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/terms/#search",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "query",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>The search query. Query is not tokenized and (as a whole) is\n                matched against any part of term name or id. Proper\n                tokenization will likely be added in the future.</p>\n\n                <p>Returns all terms that satisfy other criteria if\n                omitted.</p>\n            "
+    },
+    {
+      "name": "min_finish_date",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Date string (YYYY-MM-DD). If given, then only those terms\n                which <b>are finished on this day (inclusive), or later</b>,\n                will be returned.</p>\n            "
+    },
+    {
+      "name": "max_start_date",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Date string (YYYY-MM-DD). If given, then only those terms\n                which <b>start on this day (inclusive), or earlier</b>, will be\n                returned.</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>List of terms objects as defined in the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/terms/#term'>term</a> method.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,71 @@
+{
+  "name": "services/events/registered_fcm_tokens",
+  "short_name": "registered_fcm_tokens",
+  "description": "\nList your (user) registered FCM instances.",
+  "brief_description": "\nList your (user) registered FCM instances.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events/#registered_fcm_tokens",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "instance_id|instance_name|fcm_registration_token",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A list of registered FCM instances - dictionaries with the selected\n        fields and their values.</p>\n\n        <p>Available fields include:</p>\n        \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>instance_id</b> -\n                    ID of the FCM instance;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>instance_name</b> -\n                    User-readable name of the instance;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>fcm_registration_token</b> -\n                    FCM client instance ID token;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>last_success</b> -\n                    Last update timestamp.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "instance_id",
+      "description": "\nID of the FCM instance",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "instance_name",
+      "description": "\nUser-readable name of the instance",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "fcm_registration_token",
+      "description": "\nFCM client instance ID token",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "last_success",
+      "description": "\nLast update timestamp",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

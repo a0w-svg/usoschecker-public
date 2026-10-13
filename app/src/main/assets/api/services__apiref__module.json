@@ -1,0 +1,46 @@
+{
+  "name": "services/apiref/module",
+  "short_name": "module",
+  "description": "\t\n\t<p>Get information on a given USOS API module.</p>\n\t<p>Modules are like folders - they group methods and other modules\n\trelated to one topic.</p>\n",
+  "brief_description": "Get information on a given USOS API module.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apiref/#module",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "name",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tName of a module (begins with &quot;services/&quot;).\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tA dictionary of the following structure:\n\t<ul>\n\t\t<li><b>name</b> - name of the module,</li>\n\t\t<li><b>title</b> - title of the module,</li>\n\t\t<li>\n\t\t\t<b>brief_description</b> - currently, this is an even briefer\n\t\t\tversion of the title (the name of the field is misleading,\n\t\t\tas it currently does NOT contain a description, but it might\n\t\t\tin the future),\n\t\t</li>\n\t\t<li><b>description</b> - HTML-formatted description of module topics and contents,</li>\n\t\t<li><b>submodules</b> - list of (fully-qualified) names of modules enclosed\n\t\t\twithin this module,</li>\n\t\t<li><b>methods</b> - list of (fully-qualified) names of methods enclosed\n\t\t\twithin this module.</li>\n\t\t<li><b>beta</b> - True if module is beta (Some methods in module may be changed\n\t\t\t(backward incompatible).</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

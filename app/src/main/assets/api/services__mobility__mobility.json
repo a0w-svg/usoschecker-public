@@ -1,0 +1,193 @@
+{
+  "name": "services/mobility/mobility",
+  "short_name": "mobility",
+  "description": "<p>\nObject describing student's mobility</p>",
+  "brief_description": "\nObject describing student's mobility",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#mobility",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a mobility"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|user|faculty|term|state|role|receiving_institution|why_cannot_create_la|esi|start_date|end_date|extended_date|isced_code|declared_language|declared_language_level|contact_person|learning_agreements|application_programme|application_year_of_study|student_programme|year_of_study|supervisor|organizational_supervisor",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a mobility;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - Student whose that mobility is.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - Sending faculty related to mobility.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term</b> - Academic term of mobility.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/terms/#term'>services/terms/term</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>state</b> - Current state of a mobility.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>in_preparation</b></p></li>\n<li><p><b>active</b></p></li>\n<li><p><b>reserve</b></p></li>\n<li><p><b>resignation</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>role</b> -\n                    one of following values: student, coordinator;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>receiving_institution</b> - Details of receiving institution.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#institution'>institution</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>why_cannot_create_la</b> -\n                    langidct with information of user;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>esi</b> -\n                    European Student Identifier of a student;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>start_date</b> -\n                    Mobility start date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end_date</b> -\n                    Mobility end date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>extended_date</b> -\n                    Date that mobility is extended or shortened;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>isced_code</b> -\n                    ISCED code;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>declared_language</b> -\n                    Language;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>declared_language_level</b> -\n                    Language level;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>contact_person</b> - Contact person.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#external_user'>external_user</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>learning_agreements</b> - list of LA object related to mobility.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#la'>la</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>application_programme</b> - Student's programme declared at application stage.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>services/progs/student_programme</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>application_year_of_study</b> -\n                    Year of study declared at application stage;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_programme</b> - Student's programme related to mobility.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>services/progs/student_programme</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>year_of_study</b> -\n                    Year of study on mobility;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>supervisor</b> - Supervisor of a mobility.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>organizational_supervisor</b> - Supervisor of a mobility.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a mobility",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nStudent whose that mobility is",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nSending faculty related to mobility",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term",
+      "description": "\nAcademic term of mobility",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "state",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>in_preparation</b></p></li>\n<li><p><b>active</b></p></li>\n<li><p><b>reserve</b></p></li>\n<li><p><b>resignation</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "role",
+      "description": "\none of following values: student, coordinator",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "receiving_institution",
+      "description": "\nDetails of receiving institution",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "why_cannot_create_la",
+      "description": "\nlangidct with information of user",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "esi",
+      "description": "\nEuropean Student Identifier of a student",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start_date",
+      "description": "\nMobility start date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end_date",
+      "description": "\nMobility end date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "extended_date",
+      "description": "\nDate that mobility is extended or shortened",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "isced_code",
+      "description": "\nISCED code",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "declared_language",
+      "description": "\nLanguage",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "declared_language_level",
+      "description": "\nLanguage level",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "contact_person",
+      "description": "\nContact person",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "learning_agreements",
+      "description": "\nlist of LA object related to mobility",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "application_programme",
+      "description": "\nStudent's programme declared at application stage",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "application_year_of_study",
+      "description": "\nYear of study declared at application stage",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "student_programme",
+      "description": "\nStudent's programme related to mobility",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "year_of_study",
+      "description": "\nYear of study on mobility",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "supervisor",
+      "description": "\nSupervisor of a mobility",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "organizational_supervisor",
+      "description": "\nSupervisor of a mobility",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

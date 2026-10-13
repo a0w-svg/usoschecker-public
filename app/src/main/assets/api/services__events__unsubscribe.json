@@ -1,0 +1,62 @@
+{
+  "name": "services/events/unsubscribe",
+  "short_name": "unsubscribe",
+  "description": "\n\n        <p>Unsubscribe from previously subscribed event notifications.</p>\n\n        <p>The parameters you pass to this method form a filter. This filter\n        will be used to search your (the Consumer's) subscriptions. The ones\n        that match the filter will be deleted.</p>\n    ",
+  "brief_description": "\nUnsubscribe from event notifications.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events/#unsubscribe",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nThe ID of a subscription."
+    },
+    {
+      "name": "event_type",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nThe event type of a subscription."
+    },
+    {
+      "name": "callback_url",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nThe callback URL of a subscription."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nEmpty dictionary.",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>subscriptions_not_found</b> -\n                                There are no subscriptions matching criteria.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

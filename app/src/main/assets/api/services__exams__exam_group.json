@@ -1,0 +1,93 @@
+{
+  "name": "services/exams/exam_group",
+  "short_name": "exam_group",
+  "description": "\nGet information on a given exam group. Note that slot's attendees will be returned only\n         for trusted consumer keys",
+  "brief_description": "\nGet information on a given exam group",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/exams/#exam_group",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "exam_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an exam"
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nNumber of an exam group"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "exam_id|number|exam_start|exam_end",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>exam_id</b> -\n                    ID of an Exam,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    number of this group within the Exam,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>exam_start</b> -\n                    a DateTime string, indicates when the examination starts,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>exam_end</b> -\n                    a DateTime string, indicates when the examination ends,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attendees</b> - List of exam group attendees.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_forbidden</b> - access to list of attendees is forbidden.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>coordinator_only</b> -\n                                only coordinator has access to all exam attendees;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>examiner_only</b> -\n                                only examiner or coordinator has access to attendees.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "exam_id",
+      "description": "\n ID of an Exam,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number",
+      "description": "\n number of this group within the Exam,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "exam_start",
+      "description": "\n a DateTime string, indicates when the examination starts,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "exam_end",
+      "description": "\n a DateTime string, indicates when the examination ends,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "attendees",
+      "description": "\nList of exam group attendees",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

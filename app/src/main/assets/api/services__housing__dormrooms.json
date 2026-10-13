@@ -1,0 +1,56 @@
+{
+  "name": "services/housing/dormrooms",
+  "short_name": "dormrooms",
+  "description": "<p>\nGet information on multiple dormitory rooms.</p>",
+  "brief_description": "\nGet information on multiple dormitory rooms.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormrooms",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "dorm_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "dormroom_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Pipe-separated list of dormitory room IDs.\n        "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormroom'>dormroom</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary. Your <b>dormroom_ids</b> will be its keys. Values will\n        be <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormroom'>dormroom</a> objects, or\n        <b>null</b>s, if no dormroom by such ID was found OR your user doesn't\n        have proper permissions to see it.\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

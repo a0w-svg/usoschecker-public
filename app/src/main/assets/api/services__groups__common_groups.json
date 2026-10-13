@@ -1,0 +1,75 @@
+{
+  "name": "services/groups/common_groups",
+  "short_name": "common_groups",
+  "description": "\n\n        <p>Get a list of common classgroups of two users.</p>\n\n        <p>One of these users is the issuer of your Access Token, the other is\n        the one provided in the <b>user_id</b> parameter. This method will\n        return all the classgroups that these two users have both participated\n        or lectured at. Some extra metadata will be returned along the\n        classgroups (see the returns section).</p>\n    ",
+  "brief_description": "\nGet a list of common classgroups of two users",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#common_groups",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "studies"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the \"other\" user"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A list of dictionaries. Each dictionary will contain the following\n        fields:</p>\n\n        \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>group</b> - a classgroup object.</p>\n\n                \n\n                <p>Use a <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to indicate which fields of\n                the <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#group'>group</a> object you\n                want. You may access only the primary fields.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#group'>group</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>my_role</b> - Access Token's issuer's role in this classgroup.</p>\n\n                \n\n                <p>Either <b>participant</b> or <b>lecturer</b>.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>his_role</b> - other user's role in this classgroup.</p>\n\n                \n\n                <p>Either <b>participant</b> or <b>lecturer</b>.</p>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "group",
+      "description": "\n\n                <p>Use a <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to indicate which fields of\n                the <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#group'>group</a> object you\n                want. You may access only the primary fields.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "my_role",
+      "description": "\n\n                <p>Either <b>participant</b> or <b>lecturer</b>.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "his_role",
+      "description": "\n\n                <p>Either <b>participant</b> or <b>lecturer</b>.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

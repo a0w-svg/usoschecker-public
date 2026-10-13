@@ -1,0 +1,56 @@
+{
+  "name": "services/mailclient/send_message",
+  "short_name": "send_message",
+  "description": "\n\n        <p>Send a given message. Following conditions must be all true in order to be able to send\n        the message:</p>\n        <ul>\n            <li>\n                <p>subject must not be empty;</p>\n            </li>\n            <li>\n                <p>content must not be empty;</p>\n            </li>\n            <li>\n                <p>recipients list must not be outdated (see <b>recipients_valid</b> field in the\n                <b>returns</b> section of <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#message'>message</a>\n                method);</p>\n            </li>\n            <li>\n                <p>recipients list must not be empty, even if <b>send_to_myself</b> is set to\n                <b>true</b>;</p>\n            </li>\n            <li>\n                <p>access to institutional address (if used) could not be revoked;</p>\n            </li>\n            <li>\n                <p>message must have status <b>draft</b>.</p>\n            </li>\n        </ul>\n    ",
+  "brief_description": "\nSend a message.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#send_message",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "message_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Message ID.</p>"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\n\n        <p>Language of headers and signatures added by USOS API to the message before\n        sending. Accepted values are <b>pl</b> and <b>en</b>.</p>\n    "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n    An empty dictionary returned if the method has been executed successfully.\n    Some keys may be added in the future.\n",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_forbidden</b> - access to institutional address denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>inst_address_unassigned</b> -\n                                institutional address was not assigned to you.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - message is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>addresses_limit_exceeded</b> -\n                                maximum number of addresses exceeded;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>content_required</b> -\n                                message content is empty;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>draft_required</b> -\n                                message is not a draft;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>recipients_outdated</b> -\n                                list of recipients is outdated;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>recipients_required</b> -\n                                list of recipients is empty;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>subject_required</b> -\n                                message subject is empty.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                message could not be found; <b>param_name</b> is equal to <b>message_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

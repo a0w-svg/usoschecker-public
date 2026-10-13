@@ -1,0 +1,56 @@
+{
+  "name": "services/crstests/root_nodes",
+  "short_name": "root_nodes",
+  "description": "\t\n\tGet detailed information on multiple <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#RootNode\">RootNodes</a>.\n",
+  "brief_description": "Get multiple RootNodes.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_nodes",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "[str]",
+      "default_value": null,
+      "description": "\tPipe-separated list of root node IDs."
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of fields, same as in <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_node\">root_node</a>.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tA dictionary: your <b>root_ids</b> will be mapped to dictionary's keys, and\n\teach value will contain the description of a root node, as defined in\n\tthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_node\">root_node</a>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

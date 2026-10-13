@@ -1,0 +1,62 @@
+{
+  "name": "services/events/register_fcm_token",
+  "short_name": "register_fcm_token",
+  "description": "\n\n        <p>Register Firebase token for receiving events.</p>\n\n        <p>When a new event happens to user who called this method, USOS API\n        will send message to all FCM instances the user registered.</p>\n    ",
+  "brief_description": "\nRegister instance ID.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events/#register_fcm_token",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fcm_registration_token",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nFirebase Cloud Messaging client token"
+    },
+    {
+      "name": "instance_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>ID of the FCM instance.</p>\n\n            <p>If there exists instance tied to the user with this ID, it will\n            be replaced. You can use this field to avoid situation, when one\n            device registers the same FCM token twice, so it receives each\n            message twice. If you don't specify this field, a new FCM instance\n            with no ID will be created.</p>\n            "
+    },
+    {
+      "name": "instance_name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nUser-readable name of the instance."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nEmpty dictionary.",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

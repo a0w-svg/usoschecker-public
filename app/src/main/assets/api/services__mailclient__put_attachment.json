@@ -1,0 +1,80 @@
+{
+  "name": "services/mailclient/put_attachment",
+  "short_name": "put_attachment",
+  "description": "\n\n        <p>Upload an attachment.</p>\n\n        <p>This method works only with messages with status <b>draft</b>.</p>\n    ",
+  "brief_description": "\nUpload an attachment.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#put_attachment",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "message_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Message ID.</p>"
+    },
+    {
+      "name": "data",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p>The file to be attached.<p>\n\n            <p><b>Important:</b> Currently there are no size limits for the\n            attachments, but they might be in the future! However, you may\n            assume that the maximum allowed size for a single attachment will\n            never drop below 100 MB.</p>\n        "
+    },
+    {
+      "name": "filename",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n\n                <p>The name of a file. No more than 100 characters. If omitted, the value will be\n                taken from <b>data</b> field, but still character limit is implied.</p>\n            "
+    },
+    {
+      "name": "content_type",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n\n                <p>Uploaded file content type. If you omit this argument, USOS API will try to\n                guess it.</p>\n            "
+    },
+    {
+      "name": "description",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n<p>Attachment description. No more than 200 characters.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following structure:</p>\n        <ul>\n            <li>\n                <p><b>attachment_id</b> - attachment ID.</p>\n            </li>\n        </ul>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - message is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>attachment_limit_exceeded</b> -\n                                maximum number of attachments for non-administrative consumers (10) exceeded.;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>draft_required</b> -\n                                message is not a draft.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                message could not be found; <b>param_name</b> is equal to <b>message_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,91 @@
+{
+  "name": "services/crstests/duplicate_subtree",
+  "short_name": "duplicate_subtree",
+  "description": "\t\n\tDuplicates a subtree of the test.\n\tThe duplicated subtree has the same parent as the base subtree. The order of the root of the new subtree\n\tis highest possible i.e. it is added as the last child to the parent.\n\t<br/> <b>Please note:</b>\n\t<ul>\n\t\t<li>This methods can't duplicate whole trees i.e. You can't pass id of some root as 'node_id' parameter</li>\n\t\t<li>Only structure, properties, and permissions are duplicated, grades and points are not duplicated</li>\n\t</ul>\n",
+  "brief_description": "Duplicate a subtree.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#duplicate_subtree",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": [
+      "adm_documents",
+      "cards",
+      "change_all_preferences",
+      "crstests",
+      "dorm_admin",
+      "edit_user_attrs",
+      "email",
+      "events",
+      "grades",
+      "grades_write",
+      "mailclient",
+      "mobile_numbers",
+      "offline_access",
+      "other_emails",
+      "payments",
+      "personal",
+      "photo",
+      "placement_tests",
+      "session_debugging_perms",
+      "slips",
+      "slips_admin",
+      "staff_perspective",
+      "student_exams",
+      "student_exams_write",
+      "studies",
+      "surveys_filling",
+      "surveys_reports",
+      "theses_protocols_write"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the node which is the root of the subtree we want to duplicate."
+    },
+    {
+      "name": "name_pl",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the root of the duplicated subtree (in polish)."
+    },
+    {
+      "name": "name_en",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the root of the duplicated subtree (in english)."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tDictionary with only one key 'id'.\n\tID of the newly created root of the duplicated subtree (not the root of the whole tree).\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

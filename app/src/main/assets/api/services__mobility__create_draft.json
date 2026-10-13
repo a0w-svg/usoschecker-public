@@ -1,0 +1,62 @@
+{
+  "name": "services/mobility/create_draft",
+  "short_name": "create_draft",
+  "description": "<p>\nCreate new version of LA</p>",
+  "brief_description": "\nCreate new version of LA",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#create_draft",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "la_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a LA"
+    },
+    {
+      "name": "copy_from_final_version",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\nset to true if components for new version should be copied from final one"
+    },
+    {
+      "name": "copy_from",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nVersion that components will be copied from"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nID of created version of LA",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

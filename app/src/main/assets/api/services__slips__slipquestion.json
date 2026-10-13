@@ -1,0 +1,72 @@
+{
+  "name": "services/slips/slipquestion",
+  "short_name": "slipquestion",
+  "description": "\t\n\t<p>Get information on a single slipquestion.</p>\n\t\n\t<p><i>Clarification:</i> A &quot;slipquestion&quot; is an entity that binds slips\n\tand questions. In other words, all questions included in the slip are\n\trepresented as &quot;slipquestion&quot; entities (some of these questions are\n\tanswered, some are not).</p>\n",
+  "brief_description": "Get information on a single slipquestion",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#slipquestion",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "sq_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the slipquestion.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|question_id",
+      "description": "\t\n\tPipe-separated list of fields described in the <b>returns</b> section.\n"
+    },
+    {
+      "name": "slip_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead (e.g.\n<code>fields=slip[id]</code>).</p>\n\n<p>Pipe-separated list of fields to be returned in the <b>slip</b>\nfield. See the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method for the\nlist of available fields.</p>\n"
+    },
+    {
+      "name": "question_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|question",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead.</p>\n\n<p>Pipe-separated list of fields to be returned in the <b>question</b>\nfield. See the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method for\nthe list of available fields.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of selected fields and their values.</p>\n\t<p>Available fields:</p>\n\t<ul>\n\t\t<li><b>id</b> - ID of the slipquestion,</li>\n\t\t<li><b>slip_id</b> - ID of the slip the question &quot;is on&quot;,</li>\n\t\t<li>\n\t\t\t<b>slip</b> - a slip object, as it would be returned by the\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method.\n\t</li>\n\t<li>\n\t\t<b>question_id</b> - ID of the question the slip &quot;includes&quot;,\n\t</li>\n\t<li>\n\t\t<b>question</b> - the question object, as it would be returned\n\t\tby the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method.\n</li>\n<li>\n\t<b>extra_answerers</b> - the list of user objects (with\n\t&quot;id|first_name|last_name&quot; fields). These users have been\n\tspecified as extra answerers to this question. That is,\n\tthey are appended to the list of default answerers defined for\n\tthis question (see <b>answerers</b> field in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method.\n</li>\n<li>\n<b>answerer</b> - a user object <b>or null</b>. If the question\nhas been answered, it will contain an object describing the\nuser who had answered it (with &quot;id|first_name|last_name&quot;\nfields)\n</li>\n<li>\n<b>answerer_user_id</b> - as above, but only user's ID will be\nreturned (string or null).\n</li>\n<li>\n<b>answer</b> - string <b>or null</b>. This is the actual\nanswer to the question. It can be any string. If the question\nis not answered, it will be <b>null</b>.\n</li>\n<li>\n<p><b>answer_status</b> - automatically computed status of the\nanswer. One of the following values:</p>\n\n<ul>\n\t<li><b>pending</b> - the question is not answered,</li>\n\t<li>\n\t\t<b>cleared</b> - the question is answered and the\n\t\tanswer &quot;is positive&quot; (the exact meaning of &quot;being\n\t\tpositive&quot; depends on the question),\n\t</li>\n\t<li>\n\t\t<b>rejected</b> - the question is answered and the\n\t\tanswer &quot;is negative&quot; (the exact meaning of &quot;being\n\t\tnegative&quot; depends on the question),\n\t</li>\n\t<li>\n\t\t<b>unclear</b> - the question is answered, but we\n\t\tcannot determine whether the answer is positive or\n\t\tnegative.\n\t</li>\n</ul>\n\n<p>Currently this status is computed by matching the answer\nagains <b>regexp_cleared</b> and <b>regexp_rejected</b>\nexpressions defined in the question. However, you should not\nassume that this algorithm will not change (you should ask USOS\nAPI for the value of this status instead of computing it\nyourself).</p>\n</li>\n<li>\n<b>date_answered</b> - a datetime string <b>or null</b>; if the\nquestion was answered, it will contain the exact date and time\nwhen it was answered.\n</li>\n<li>\n<b>can_i_answer</b> - boolean, indicates if the current user is\nallowed to post the answer to this slipquestion.\n</li>\n<li>\n<b>why_cant_i_answer</b> - LangDict or null; if the current\nuser cannot post the answer, it will briefly explain why. This\nis intended to be displayed for the users.\n</li>\n<li>\n<b>can_i_remove_answer</b> - boolean, indicates if the current\nuser is allowed to remove the answer to this slipquestion (so\nthat it can be answered again, by someone else).\n</li>\n<li>\n<b>why_cant_i_remove_answer</b> - LangDict or null; if the\ncurrent user cannot remove the answer, it will briefly explain\nwhy. This is intended to be displayed for the users.\n</li>\n<li>\n<b>can_i_change_extra_answerers</b> - boolean, indicates if the\ncurrent user is allowed to edit the list of extra answerers.\n</li>\n<li>\n<b>why_cant_i_change_extra_answerers</b> - LangDict or null; if\nthe current user cannot change extra answerers, it will briefly\nexplain why. This is intended to be displayed for the users.\n</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

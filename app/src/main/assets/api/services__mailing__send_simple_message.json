@@ -1,0 +1,102 @@
+{
+  "name": "services/mailing/send_simple_message",
+  "short_name": "send_simple_message",
+  "description": "\t\n\tSend an email message, to any given email address(es).\n\tUSOS API will automatically set all headers, apply word-wrap and append\n\tUSOS signature and/or comments.\n",
+  "brief_description": "Send an email message.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailing/#send_simple_message",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "subject",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tSubject of the message (no more than 200 characters)."
+    },
+    {
+      "name": "content",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tContent of the message (no more than 15000 characters)."
+    },
+    {
+      "name": "recipients",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of email addresses - recipients of the message.\n"
+    },
+    {
+      "name": "from_name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "USOS",
+      "description": "\t\n\tName to be inserted into the From header (no more than 100 characters).\n"
+    },
+    {
+      "name": "content_format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "plain",
+      "description": "\t\n\t<p>Type of <b>content</b> argument. Valid ones:</p>\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>plain</b> - plain text (MIME text/plain)</p>\n\t\t\t<p>USOS API will apply word-wrap.</p>\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>html</b> - text with HTML markup (MIME text/html)</p>\n\t\t\t<p>USOS API will try to repair broken HTML. Some elements (\n\t\t\tscripts,\n\t\t\tembedded objects, frames, forms) will be removed due to security reasons.</p>\n\t\t</li>\n\t</ul>\n"
+    },
+    {
+      "name": "from_email",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tEmail to be inserted into the From header (no more than 100 characters).\n\tValid only is passed along the <b>from_name</b> argument. If not given,\n\tthis will be a default no-reply address.\n"
+    },
+    {
+      "name": "send_summary_to",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tEmail address. If given, USOS API will send a summary report to this address.\n\tThis report will contain any errors USOS API encountered while\n\tsending the message. Original message content and recipients might be included.\n\tThese reports might be split in several parts.\n"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\t\n\t<p>Either <b>pl</b> or <b>en</b> - the language, in which USOS API will\n\tgenerate headers and signatures that might be added to your\n\tmessage prior to the sending. This will also be the language in which\n\tthe optional summary report will be generated.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>The method returns a dictionary of the following structure:</p>\n\t<ul>\n\t\t<li>\n\t\t\t<b>success</b> - currently always true (\n\t\t\tif something goes wrong,\n\t\t\tyou will get a HTTP 400 error),\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>message_id</b> - an unique message ID generated for your message.</p>\n\t\t\t<p>Message IDs might be used to check the status of the message.\n\t\t\tPlease note, that messages are kept for a period of <b>7 days</b>.\n\t\t\tAfter this time, you won't be able to reference your message.</p>\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

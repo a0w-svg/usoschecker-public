@@ -1,0 +1,48 @@
+{
+  "name": "services/crstests/user_points",
+  "short_name": "user_points",
+  "description": "\t\n\tGet points which a token issuer got in nodes specified by node_ids parameter.\n\tPlease see the note about automatic grading (<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>).\n",
+  "brief_description": "Get points of a student.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#user_points",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tPipe-separated list of node ids.\n\tAll the node_ids supplied should belong to one test tree.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tList of <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#TestPointsObject\">TestPointsObject</a>.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

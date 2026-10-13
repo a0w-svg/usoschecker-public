@@ -1,0 +1,169 @@
+{
+  "name": "services/mobility/component",
+  "short_name": "component",
+  "description": "<p>\nReturn specified component data</p>",
+  "brief_description": "\nReturn specified component data",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#component",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a component"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|la_version_id|number|type|course|points_count|points_type|la_table|los_id|los_code|course_name|loi_id|courses_time|ects_credits|recognition_conditions|short_description|added_reason|removed_reason|changes_description",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a component;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>la_version_id</b> -\n                    ID of a version where component was provided;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    Number of a component. Note that next version of same component keeps its number;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> - Type of component.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>points</b></p></li>\n<li><p><b>internal_course</b></p></li>\n<li><p><b>external_course</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course</b> - Course selected..</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course'>services/courses/course</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>points_count</b> -\n                    Points of component;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>points_type</b> - Points type of component.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#points_type'>points_type</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>la_table</b> - LA table type.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>A</b></p></li>\n<li><p><b>B</b></p></li>\n<li><p><b>C</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>los_id</b> -\n                    Learning opportunity specification ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>los_code</b> -\n                    Learning opportunity specification code (component's code);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_name</b> -\n                    Name of course from receiving faculty;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>loi_id</b> -\n                    Id of learning opportunity instance;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>courses_time</b> -\n                    String describing period of course e.g. 1/2;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>ects_credits</b> -\n                    Number of ECTS credits for a course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>recognition_conditions</b> -\n                    String with description of recognition conditions;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>short_description</b> -\n                    String with short description of component;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>added_reason</b> - reason object or null.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#change_reason'>change_reason</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>removed_reason</b> - reason object or null.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#change_reason'>change_reason</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>changes_description</b> -\n                    short description of changes.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a component",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "la_version_id",
+      "description": "\nID of a version where component was provided",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number",
+      "description": "\nNumber of a component. Note that next version of same component keeps its number",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>points</b></p></li>\n<li><p><b>internal_course</b></p></li>\n<li><p><b>external_course</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course",
+      "description": "\nCourse selected.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "points_count",
+      "description": "\nPoints of component",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "points_type",
+      "description": "\nPoints type of component",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "la_table",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>A</b></p></li>\n<li><p><b>B</b></p></li>\n<li><p><b>C</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "los_id",
+      "description": "\nLearning opportunity specification ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "los_code",
+      "description": "\nLearning opportunity specification code (component's code)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_name",
+      "description": "\nName of course from receiving faculty",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "loi_id",
+      "description": "\nId of learning opportunity instance",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "courses_time",
+      "description": "\nString describing period of course e.g. 1/2",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "ects_credits",
+      "description": "\nNumber of ECTS credits for a course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "recognition_conditions",
+      "description": "\nString with description of recognition conditions",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "short_description",
+      "description": "\nString with short description of component",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "added_reason",
+      "description": "\nreason object or null",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "removed_reason",
+      "description": "\nreason object or null",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "changes_description",
+      "description": "\nshort description of changes",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

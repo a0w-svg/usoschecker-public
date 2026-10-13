@@ -1,0 +1,97 @@
+{
+  "name": "services/statements/statement_declaration",
+  "short_name": "statement_declaration",
+  "description": "<p>\nGet single statement declaration.</p>",
+  "brief_description": "\nGet single statement declaration.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/statements/#statement_declaration",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "declaration_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of declaration"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n<p>A dictionary of selected fields and their values.</p><p>Available fields:</p>\n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the declaration;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>statement</b> - statement regarding declaration.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/statements/#statement'>statement</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decision_date</b> -\n                    date when decision about statement was made by user or <b>null</b> when user has not decided yet;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decision</b> - user decision about statement.</p>\n\n                \n\n                <p>Possible values:</p>\n                <ul>\n                    <li><p><b>no_decision_yet</b> - user has not decided yet</p></li>\n                    <li><p><b>accepted</b> - user has accepted statement</p></li>\n                    <li><p><b>rejected</b> - user has rejected statement</p></li>\n                    <li><p><b>waived</b> - user does not have to decide</p></li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>students_programme</b> - programme related to the statement or <b>null</b> when the statement is not related to any programme.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>services/progs/student_programme</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decision_deadline</b> -\n                    date until when user has to make declaration or <b>null</b> if not specified;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>effect_end_date</b> -\n                    date when declaration is no longer under effect or <b>null</b> if not specified.</p>\n            \n            \n        </li>\n        \n    </ul>\n",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the declaration",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "statement",
+      "description": "\nstatement regarding declaration",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "decision_date",
+      "description": "\ndate when decision about statement was made by user or <b>null</b> when user has not decided yet",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "decision",
+      "description": "\n\n                <p>Possible values:</p>\n                <ul>\n                    <li><p><b>no_decision_yet</b> - user has not decided yet</p></li>\n                    <li><p><b>accepted</b> - user has accepted statement</p></li>\n                    <li><p><b>rejected</b> - user has rejected statement</p></li>\n                    <li><p><b>waived</b> - user does not have to decide</p></li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "students_programme",
+      "description": "\nprogramme related to the statement or <b>null</b> when the statement is not related to any programme",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "decision_deadline",
+      "description": "\ndate until when user has to make declaration or <b>null</b> if not specified",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "effect_end_date",
+      "description": "\ndate when declaration is no longer under effect or <b>null</b> if not specified",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

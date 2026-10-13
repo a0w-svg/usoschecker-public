@@ -1,0 +1,54 @@
+{
+  "name": "services/news/articles",
+  "short_name": "articles",
+  "description": "<p>\nRetrieve multiple articles by their IDs.</p>",
+  "brief_description": "\nRetrieve multiple articles by their IDs.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/news/#articles",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "article_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                Pipe-separated list of article IDs to be retrieved.\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|author|publication_date|title|headline_html",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/news/#article'>article</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary that will map your <b>article_ids</b> to article\n        objects, as defined in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/news/#aricle'>aricle</a>\n        method.</p>\n\n        <p>If the article cannot be found, or you don't have access to it, then\n        the ID you have supplied will still be present in this response, but\n        the value mapped to it will be <b>null</b> (instead of an object).</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

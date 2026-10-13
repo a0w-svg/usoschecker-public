@@ -1,0 +1,56 @@
+{
+  "name": "services/attendance/attendance_lists",
+  "short_name": "attendance_lists",
+  "description": "<p>\nGet information of multiple attendance lists.</p>",
+  "brief_description": "\nGet information of multiple attendance lists.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/attendance/#attendance_lists",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "staff_perspective"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "list_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPipe-separated list of attendance list IDs."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/attendance/#attendance_list'>attendance_list</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary: your <b>list_ids</b> will be mapped to dictionary's\n        keys, and each value will contain the description of one attendance list, as\n        defined in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/attendance/#attendance_list'>attendance_list</a>\n        method.</p>\n\n        <p>For invalid <b>list_ids</b> (attendance lists which do not exist) <b>null</b>\n        will be returned (instead of the attendance list object).</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

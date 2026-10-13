@@ -1,0 +1,59 @@
+{
+  "name": "services/photos/can_see_photo",
+  "short_name": "can_see_photo",
+  "description": "\n\n        <p>Check if the user's photo can be displayed.</p>\n\n        <p>More precisely, this method checks if the photo of the user with given\n        <b>user_id</b> exists <u>and</u> the requester has sufficient permissions\n        to view this photo. The \"requester\" can be both a user (if you provide\n        an Access Token) or the Consumer (if you don't provide the Access Token).\n        This method can be even called anonymously! (Some of the users agree to\n        share their photo publicly with anyone.)</p>\n\n        <p>If you use the Access Token, then you probably should also acquire\n        the <b>photo</b> scope from the user. You might be able to see more\n        photos this way.</p>\n\n        <p>Please note, that - in most cases - there is no clear way for you to\n        distinguish between situations when (a) you cannot view the photo, and\n        (b) when the photo does not exist.</p>\n    ",
+  "brief_description": "\nCheck if one user can view other user's photo.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/photos/#can_see_photo",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(access token issuer)",
+      "description": "\nID of a user."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of following fields and their values:\n                    \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>can_see_photo</b> -\n                    a boolean, true if and only if photo of user with given ID exists <b>and</b> requester has access\n                to display this photo;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>errors</b> - a list of dictionaries. Empty list will be returned if <b>can_see_photo</b> equals to true.</p>\n\n                \n\n                Each dictionary has following structure:\n                <ul>\n                    <li><b>error</b> - a name of error. At this moment two kinds of errors may appear. <p>Possible values: <b>object_forbidden</b>, <b>photo_not_found</b>.</p>\n                        It is guaranteed that an error <b>object_forbidden</b> will be placed at the beginning of <b>errors</b> list\n                        only if this error is raised.\n                    </li>\n                    <li><b>message</b> - a description of error.</li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                user could not be found; <b>param_name</b> is equal to <b>user_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "can_see_photo",
+      "description": "\n\n                a boolean, true if and only if photo of user with given ID exists <b>and</b> requester has access\n                to display this photo\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "errors",
+      "description": "\n\n                Each dictionary has following structure:\n                <ul>\n                    <li><b>error</b> - a name of error. At this moment two kinds of errors may appear. <p>Possible values: <b>object_forbidden</b>, <b>photo_not_found</b>.</p>\n                        It is guaranteed that an error <b>object_forbidden</b> will be placed at the beginning of <b>errors</b> list\n                        only if this error is raised.\n                    </li>\n                    <li><b>message</b> - a description of error.</li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

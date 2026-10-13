@@ -1,0 +1,65 @@
+{
+  "name": "services/events/subscriptions",
+  "short_name": "subscriptions",
+  "description": "<p>\nLists your (the consumer) subscriptions.</p>",
+  "brief_description": "\nLists your (the consumer) subscriptions.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events/#subscriptions",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|event_type|callback_url",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A list of subscription objects - dictionaries with the selected\n        fields and their values.</p>\n\n        <p>Available fields include:</p>\n        \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    string; the ID of this subscription;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>event_type</b> -\n                    the event type associated with this subscription;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>callback_url</b> -\n                    the callback URL to be notified when events happen.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nstring; the ID of this subscription",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "event_type",
+      "description": "\nthe event type associated with this subscription",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "callback_url",
+      "description": "\nthe callback URL to be notified when events happen",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

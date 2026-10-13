@@ -1,0 +1,145 @@
+{
+  "name": "services/examrep2/student_grade",
+  "short_name": "student_grade",
+  "description": "<p>\nGet information about single user's grade</p>",
+  "brief_description": "\nGet information about single user's grade",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#student_grade",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "grades"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "examrep_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of exam report"
+    },
+    {
+      "name": "examrep_session_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nNumber of exam report session"
+    },
+    {
+      "name": "student_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of student"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "grade_value|comment|private_comment|user",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>grade_value</b> - Grade value, may be null.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#grade_value'>grade_value</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    Comment for student;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>private_comment</b> -\n                    Comment for graders;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - Graded student.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grader</b> - User who was last editing grade.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>last_updated</b> -\n                    Datetime of last edition of grade;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_editable</b> -\n                    True if access token issuer has write access to grade;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>resignation</b> -\n                    True if student resigned from passing course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>inactive_links</b> -\n                    True if course is linked to inactive course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>why_cannot_edit</b> -\n                    If is_editable is not true, one of following values will be returned:resignation, inactive_links, inactive_links_only;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>date_acquisition</b> -\n                    datetime of grade acquisition.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>examrep_session</b> - Exam report session.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep_session'>examrep_session</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "grade_value",
+      "description": "\nGrade value, may be null",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\nComment for student",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "private_comment",
+      "description": "\nComment for graders",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nGraded student",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grader",
+      "description": "\nUser who was last editing grade",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "last_updated",
+      "description": "\nDatetime of last edition of grade",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_editable",
+      "description": "\nTrue if access token issuer has write access to grade",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "resignation",
+      "description": "\nTrue if student resigned from passing course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "inactive_links",
+      "description": "\nTrue if course is linked to inactive course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "why_cannot_edit",
+      "description": "\nIf is_editable is not true, one of following values will be returned:resignation, inactive_links, inactive_links_only",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "date_acquisition",
+      "description": "\ndatetime of grade acquisition",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "examrep_session",
+      "description": "\nExam report session",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

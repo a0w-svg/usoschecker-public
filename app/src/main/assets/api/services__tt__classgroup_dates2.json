@@ -1,0 +1,62 @@
+{
+  "name": "services/tt/classgroup_dates2",
+  "short_name": "classgroup_dates2",
+  "description": "\t\n\t<p>Other methods have a limit workspan of 7 days. This one does not,\n\tbut it is limited to a single classgroup (and it takes no\n\ttimeframe-related arguments). It gives you a full list of activities\n\trelated to a single classgroup.</p>\n",
+  "brief_description": "Get all activities related to a class group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#classgroup_dates2",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of class group's &quot;parent&quot; course unit."
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tGroup number of the class."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "start_time|end_time|name",
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of Activity objects, as in the\n\t<a href=\"#classgroup\">classgroup</a> method.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

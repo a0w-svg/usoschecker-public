@@ -1,0 +1,38 @@
+{
+  "name": "services/feedback/status",
+  "short_name": "status",
+  "description": "\n\n        <p>This module is in early BETA state. As such, it is not enabled by\n        default. You should allowed the users to submit feedback only when it\n        is enabled!</p>\n    ",
+  "brief_description": "\nGet the module status.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/feedback/#status",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following format:</p>\n\n        <ul>\n            <li><b>enabled</b> - boolean, <b>true</b> if the module is enabled,\n            and there is a chance that the submitted reports are read by\n            someone.</li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

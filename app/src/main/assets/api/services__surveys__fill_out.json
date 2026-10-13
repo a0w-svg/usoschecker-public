@@ -1,0 +1,68 @@
+{
+  "name": "services/surveys/fill_out",
+  "short_name": "fill_out",
+  "description": "\n\n        <p>Post a survey result in the name of a user.</p>\n    ",
+  "brief_description": "\nPost a survey result in the name of a user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/surveys/#fill_out",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "surveys_filling"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "survey_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the survey."
+    },
+    {
+      "name": "answers",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p>A JSON-formatted object, mapping question IDs to their answers:\n            {\"question1_id\": \"possible_answer_id\", \"question2_id\":\n            \"possible_answer_id\"}.</p>\n\n            <p>Note, that all values of this objects are strings (because the\n            IDs of possible answers are strings).</p>\n        "
+    },
+    {
+      "name": "comment",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                An optional comment to be submitted along the answer.\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n    An empty dictionary returned if the method has been executed successfully.\n    Some keys may be added in the future.\n",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_forbidden</b> - access to object denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>already_answered</b> -\n                                survey was already answered;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>not_entitled_to_fill_out</b> -\n                                user is not entitled to fill out this survey.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>comment_too_long</b> -\n                                comment cannot exceed 3000 characters;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>invalid_answer</b> -\n                                answer outside of possible answers scope for the question;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>no_answers</b> -\n                                to save survey results at least one question has to be answered.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>survey_not_found</b> -\n                                referenced survey does not exist.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": {
+    "deprecated_by": "services/surveys/fill_out2",
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

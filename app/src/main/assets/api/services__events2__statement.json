@@ -1,0 +1,133 @@
+{
+  "name": "services/events2/statement",
+  "short_name": "statement",
+  "description": "<p>\nGet statement</p>",
+  "brief_description": "\nGet statement",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events2/#statement",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a statement"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|primary_group|title|content|is_calendar|location|start|end|send_after|sent_at|is_personal|statement_type",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a statement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>primary_group</b> - Group of users that statement is addressed to.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#primary_group'>services/prgroups/primary_group</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title</b> -\n                    Langdict object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>content</b> -\n                    Langdict object;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_calendar</b> -\n                    True if statement should be displayed in calendar;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>location</b> -\n                    Dict of following values: city, address, geo_lat, geo_long;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>start</b> -\n                    Datetime with start;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end</b> -\n                    Datetime with end;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>send_after</b> -\n                    Date of publication;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>sent_at</b> -\n                    Date of publication;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_personal</b> -\n                    true if statement is personalized statement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>statement_type</b> -\n                    one of following values: news, statement;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>recipients</b> - List of recipients.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a statement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "primary_group",
+      "description": "\nGroup of users that statement is addressed to",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title",
+      "description": "\nLangdict object",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "content",
+      "description": "\nLangdict object",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_calendar",
+      "description": "\nTrue if statement should be displayed in calendar",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "location",
+      "description": "\nDict of following values: city, address, geo_lat, geo_long",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start",
+      "description": "\nDatetime with start",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end",
+      "description": "\nDatetime with end",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "send_after",
+      "description": "\nDate of publication",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "sent_at",
+      "description": "\nDate of publication",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_personal",
+      "description": "\ntrue if statement is personalized statement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "statement_type",
+      "description": "\none of following values: news, statement",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "recipients",
+      "description": "\nList of recipients",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

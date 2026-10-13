@@ -1,0 +1,94 @@
+{
+  "name": "services/mailing/send_simple_by_template",
+  "short_name": "send_simple_by_template",
+  "description": "\t\n\t<p>Send multiple messages using a template.</p>\n\t<p>This method calls send_simple_message multiple times, each time with\n\tdifferent contents, derived from a given simple template. All messages\n\twill be from the &quot;USOS Notifier&quot; address.</p>\n",
+  "brief_description": "Send multiple messages using a template.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailing/#send_simple_by_template",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "subject_template",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tSubject of the message, might include template placeholders (see below).\n\tThe length of each subject (after template substitution) might not exceed\n\t200 characters.\n"
+    },
+    {
+      "name": "content_template",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Content of the message, might include template placeholders.\n\tThe length of each message content (after template substitution) might not\n\texceed 15000 characters.</p>\n\t<p><b>Template placeholders</b> are substrings in a form of <b>{var_name}</b>.\n\tSuch strings will be replaced with the content of the <b>var_name</b> variable,\n\twhich you will provide below (<b>recipients</b> argument).</p>\n\t<p>Keep in mind, that in order to use curly braces signs in your templates,\n\tyou will need to escape them with one more curly brace (&quot;{{&quot;\n\tand &quot;}}&quot;). See\n\t<a href=\"http://docs.python.org/library/string.html#formatexamples\">here</a>\nfor more info on Python format strings.</p>\n"
+    },
+    {
+      "name": "recipients",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>JSON-formatted, UTF-8 encoded <b>list of dictionaries</b>. Each dictionary\n\trepresents one recipient and has the following structure:</p>\n\t<ul>\n\t\t<li><b>email</b> - email address of the recipient,</li>\n\t\t<li><b>vars</b> - a dictionary of template placeholder substitutions\n\t\t\tfor this recipient (<b>var_name</b> -&gt; replacement).</li>\n\t</ul>\n"
+    },
+    {
+      "name": "from_name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "USOS",
+      "description": "\t\n\tName to be inserted into the From header (no more than 100 characters).\n"
+    },
+    {
+      "name": "from_email",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tEmail to be inserted into the From header (no more than 100 characters).\n\tValid only is passed along the <b>from_name</b> argument. If not given,\n\tthis will be a default no-reply address.\n"
+    },
+    {
+      "name": "send_summary_to",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tEmail address. If given, USOS API will send a summary report to this address.\n\tThis report will contain any errors USOS API encountered while\n\tsending the message. Original message content and recipients might be included.\n\tThese reports might be split in several parts.\n"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\t\n\t<p>Either <b>pl</b> or <b>en</b> - the language, in which USOS API will\n\tgenerate headers and signatures that might be added to your\n\tmessage prior to the sending. This will also be the language in which\n\tthe optional summary report will be generated.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of message IDs generated for your messages (one for each of the\n\trecipients).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

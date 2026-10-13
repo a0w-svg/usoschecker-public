@@ -1,0 +1,107 @@
+{
+  "name": "services/registrations/registration_course",
+  "short_name": "registration_course",
+  "description": "<p>\nGet details of course related to registrations</p>",
+  "brief_description": "\nGet details of course related to registrations",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/registrations/#registration_course",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "registration_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nRegistration id"
+    },
+    {
+      "name": "course_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nCourse id"
+    },
+    {
+      "name": "term_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nTerm id"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "course_id|term_id|status|limits",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>registration_id</b> -\n                    Registration id;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_id</b> -\n                    Course id;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term_id</b> -\n                    Term id;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    A string;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>limits</b> -\n                    Registration limits;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>www_instance</b> -\n                    WWW instance code this registration belongs to.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "registration_id",
+      "description": "\nRegistration id",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_id",
+      "description": "\nCourse id",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term_id",
+      "description": "\nTerm id",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\nA string",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "limits",
+      "description": "\nRegistration limits",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "www_instance",
+      "description": "\nWWW instance code this registration belongs to",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

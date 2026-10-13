@@ -1,0 +1,129 @@
+{
+  "name": "services/examrep2/examrep_session",
+  "short_name": "examrep_session",
+  "description": "<p>\nGet info about exam report session.</p>",
+  "brief_description": "\nGet info about exam report session.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep_session",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "examrep_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an exam report"
+    },
+    {
+      "name": "examrep_session_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nnumber of exam report session"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "examrep_id|number|status|description|deadline|is_open",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>examrep_id</b> -\n                    ID of exam report;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    number of exam session;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    exam session's status;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    description of an exam session (LangDict object);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>deadline</b> -\n                    a datetime string, date when exam session becomes expired;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_open</b> -\n                    true if exam session is not expired yet, and has status allowing edition.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_acquisition_date_required</b> -\n                    true if setting grades for this exam session requires passing acquisition date.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>all_grades</b> - List of all grades in this exam report that access token issuer can read..</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#student_grade'>student_grade</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n            <p>\n                <em>Additional permissions note</em>: Access token with extra scope <strong>grades</strong> is needed, and SSL connection is required.\n            </p>\n            \n        </li>\n        \n        <li >\n            \n                <p><b>issuer_grade</b> - Access token issuer grade.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#user_grade'>user_grade</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n            <p>\n                <em>Additional permissions note</em>: Access token with extra scope <strong>grades</strong> is needed, and SSL connection is required.\n            </p>\n            \n        </li>\n        \n        <li >\n            \n                <p><b>read_access</b> - Access for read grades in this exam report session.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep_session_access'>examrep_session_access</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>write_access</b> - Access for write grades in this exam report session.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep_session_access'>examrep_session_access</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "examrep_id",
+      "description": "\nID of exam report",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number",
+      "description": "\nnumber of exam session",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\nexam session's status",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\ndescription of an exam session (LangDict object)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "deadline",
+      "description": "\na datetime string, date when exam session becomes expired",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_open",
+      "description": "\ntrue if exam session is not expired yet, and has status allowing edition.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_acquisition_date_required",
+      "description": "\ntrue if setting grades for this exam session requires passing acquisition date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "all_grades",
+      "description": "\nList of all grades in this exam report that access token issuer can read.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "issuer_grade",
+      "description": "\nAccess token issuer grade",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "read_access",
+      "description": "\nAccess for read grades in this exam report session",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "write_access",
+      "description": "\nAccess for write grades in this exam report session",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

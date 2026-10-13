@@ -1,0 +1,78 @@
+{
+  "name": "services/tt/classgroups",
+  "short_name": "classgroups",
+  "description": "\t\n\tGet activities related to given user's study. This means, that if the user is also a staff\n\tmember, then this method will NOT include entries related to his staff-activities.\n",
+  "brief_description": "Get activities related to given class groups.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#classgroups",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "classgroup_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of class group IDs. Since there's no such thing as a class group ID\n\t(each class group is identified by two columns, not one!), we have to develop one for the\n\tpurpose of this argument. Class group ID is &quot;unit_id|group_number&quot;, where unit_id and\n\tgroup_number are keys which identify the class group (you'll get something like\n\t&quot;unit|group|unit|group|...&quot; etc.).\n"
+    },
+    {
+      "name": "partial",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\t\n\tIf set to <b>true</b>, response will be wrapped with PartialResponse object. This will allow\n\tinvalid references to be treated as warnings, instead of errors.\n"
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "today",
+      "description": "\t\n\tA date string, yyyy-mm-dd format. A first (earliest) day to include\n\tin the results.\n"
+    },
+    {
+      "name": "days",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "7",
+      "description": "\t\n\tNumber of days (starting with <b>start</b>) to include in the\n\tresults. No more than 7 is allowed.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "start_time|end_time|name",
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of Activity objects, as in the <a href=\"#classgroup\">classgroup</a> method.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

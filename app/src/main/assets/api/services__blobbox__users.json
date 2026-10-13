@@ -1,0 +1,54 @@
+{
+  "name": "services/blobbox/users",
+  "short_name": "users",
+  "description": "\t\n\t<p>Get storage usage statistics grouped by users. Note, that\n\tuser stats <b>do not</b> include blobs uploaded by other consumers!\n\tYou have access only to stats related to your application.</p>\n",
+  "brief_description": "Get storage usage statistics for given users.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#users",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of user IDs (no more than 500).\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "hard_count|hard_vsize",
+      "description": "\t\n\tPipe-separated list of fields (as in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#consumer\">consumer</a> method).\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary. User IDs will be mapped to keys of this dictionary.\n\tEach value will be a dictionary of the same structure as the one\n\treturned in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#consumer\">consumer</a> method. However, all\nthe values will be computed against blobs uploaded by matched users\nonly.</p>\n\n<p>For all invalid references (unknown user IDs), the value will be\n<b>null</b>.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

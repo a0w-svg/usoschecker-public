@@ -1,0 +1,40 @@
+{
+  "name": "services/mailclient/message_address_limit",
+  "short_name": "message_address_limit",
+  "description": "<p>\nGet the maximum number of recipient addresses allowed</p>",
+  "brief_description": "\nGet the maximum number of recipient addresses allowed",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#message_address_limit",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>Returns the dictionary with one key <b>limit</b> and one value —\n        the current value of the recipient address limit used in methods:\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#send_message'>send_message</a>,\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#create_and_send_message'>create_and_send_message</a> and\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#refresh_recipients'>refresh_recipients</a>.\n        If this value is <b>null</b>, then there is no limit.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

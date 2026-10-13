@@ -1,0 +1,54 @@
+{
+  "name": "services/prgroups/create_descriptor",
+  "short_name": "create_descriptor",
+  "description": "<p>\nCreate a descriptor of primary groups.</p>",
+  "brief_description": "\nCreate a descriptor of primary groups.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#create_descriptor",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "source",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>An XML representation of the descriptor.</p>"
+    },
+    {
+      "name": "dry_run",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n<p>Validate submitted arguments, but do not perform any persistent changes.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following structure:</p>\n        <ul>\n            <li>\n                <p><b>descriptor_id</b> - created descriptor ID.</p>\n\n                <p>This key will be available even if you set <b>dry_run</b> argument to\n                <b>true</b> - in this case the value is just extracted from\n                the source of the descriptor.</p>\n            </li>\n        </ul>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>id_duplicated</b> -\n                                descriptor ID is already in use;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>parse_error</b> -\n                                descriptor source could not be parsed; an additional key <b>parse_messages</b> with the list of parse error messages will be provided.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

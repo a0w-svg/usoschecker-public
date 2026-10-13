@@ -1,0 +1,145 @@
+{
+  "name": "services/registrations/registration_round",
+  "short_name": "registration_round",
+  "description": "<p>\nGet registration round details</p>",
+  "brief_description": "\nGet registration round details",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/registrations/#registration_round",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nRegistration round id"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|status|registration_mode|start_date|end_date",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Registration round ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict, registration name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - Status of the round.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>active</b></p></li>\n<li><p><b>preparing</b></p></li>\n<li><p><b>closed</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>registration_mode</b> - Registration mode.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>double_for_courses</b> - two-step for courses</p></li>\n<li><p><b>double_for_group_with_ask</b> - two-step for groups by asking</p></li>\n<li><p><b>double_group_manual</b> - two-step for groups without approval</p></li>\n<li><p><b>direct_for__courses_and_groups</b> - direct for courses and groups</p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>start_date</b> -\n                    datetime, round start;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end_date</b> -\n                    datetime, round end;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>selection_limit</b> -\n                    integer, number of choices in this round;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_dedicated</b> -\n                    boolean, is round dedicated;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_overflow_allowed</b> -\n                    boolean, is overflow allowed;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_exchange</b> -\n                    boolean, is this round a group exchange one;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_only_entitled</b> -\n                    boolean, is round only for students with permissions;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>rank_code</b> -\n                    Code of rank used in this round;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>ranking</b> - ranking.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/registrations/#ranking'>ranking</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_processed</b> -\n                    boolean, is round processed.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>registration</b> - Related registration.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/registrations/#registration'>registration</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nRegistration round ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict, registration name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>active</b></p></li>\n<li><p><b>preparing</b></p></li>\n<li><p><b>closed</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registration_mode",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>double_for_courses</b> - two-step for courses</p></li>\n<li><p><b>double_for_group_with_ask</b> - two-step for groups by asking</p></li>\n<li><p><b>double_group_manual</b> - two-step for groups without approval</p></li>\n<li><p><b>direct_for__courses_and_groups</b> - direct for courses and groups</p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start_date",
+      "description": "\ndatetime, round start",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end_date",
+      "description": "\ndatetime, round end",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "selection_limit",
+      "description": "\ninteger, number of choices in this round",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_dedicated",
+      "description": "\nboolean, is round dedicated",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_overflow_allowed",
+      "description": "\nboolean, is overflow allowed",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_exchange",
+      "description": "\nboolean, is this round a group exchange one",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_only_entitled",
+      "description": "\nboolean, is round only for students with permissions",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "rank_code",
+      "description": "\nCode of rank used in this round",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "ranking",
+      "description": "\nranking",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_processed",
+      "description": "\nboolean, is round processed",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registration",
+      "description": "\nRelated registration",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

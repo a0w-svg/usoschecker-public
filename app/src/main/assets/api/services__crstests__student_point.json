@@ -1,0 +1,99 @@
+{
+  "name": "services/crstests/student_point",
+  "short_name": "student_point",
+  "description": "<p>\nGet points which token issuer got in node specified by node_id parameter</p>",
+  "brief_description": "\nGet points which token issuer got in node specified by node_id parameter",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#student_point",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nThe node id."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "points|comment|grader|last_changed",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>points</b> -\n                    number of points;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>automatic_points</b> -\n                    If points are set by automatic grading, this field contains number of points returned by algorithm;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    comment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grader</b> - User that was last who edited points.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student</b> - Student whoose points are.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user2'>services/users/user2</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>last_changed</b> -\n                    Date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_editable</b> -\n                    True if access token issuer has permissions allowing edit this points.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_forbidden</b> - access to object denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>not_visible_for_students</b> -\n                                Currently data are not visible for students.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "points",
+      "description": "\nnumber of points",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "automatic_points",
+      "description": "\nIf points are set by automatic grading, this field contains number of points returned by algorithm ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\ncomment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grader",
+      "description": "\nUser that was last who edited points",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student",
+      "description": "\nStudent whoose points are",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "last_changed",
+      "description": "\nDate",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_editable",
+      "description": "\nTrue if access token issuer has permissions allowing edit this points",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

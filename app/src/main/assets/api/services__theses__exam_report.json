@@ -1,0 +1,81 @@
+{
+  "name": "services/theses/exam_report",
+  "short_name": "exam_report",
+  "description": "<p>\nGet diploma exam report.</p>",
+  "brief_description": "\nGet diploma exam report.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/theses/#exam_report",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "staff_perspective"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "report_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the report"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|status",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n<p>A dictionary of selected fields and their values.</p><p>Available fields:</p>\n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the exam;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict, exam name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - status of the exam.</p>\n\n                \n\n                <p>Possible values:</p>\n                <ul>\n                    <li><p><b>passed</b> - exam was passed;</p></li>\n                    <li><p><b>failed</b> - exam was failed;</p></li>\n                    <li><p><b>did_not_sit</b> - examinee did not sit without justification;</p></li>\n                    <li><p><b>in_progress</b> - exam is currently in progress;</p></li>\n                    <li><p><b>grading</b> - exam is completed, but grading has not completed;</p></li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>theses</b> - list of theses defended in exam.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/theses/#thesis'>thesis</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>report_not_found</b> -\n                                exam report was not found.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the exam",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict, exam name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n                <p>Possible values:</p>\n                <ul>\n                    <li><p><b>passed</b> - exam was passed;</p></li>\n                    <li><p><b>failed</b> - exam was failed;</p></li>\n                    <li><p><b>did_not_sit</b> - examinee did not sit without justification;</p></li>\n                    <li><p><b>in_progress</b> - exam is currently in progress;</p></li>\n                    <li><p><b>grading</b> - exam is completed, but grading has not completed;</p></li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "theses",
+      "description": "\nlist of theses defended in exam",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

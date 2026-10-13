@@ -1,0 +1,86 @@
+{
+  "name": "services/fac/search",
+  "short_name": "search",
+  "description": "\t\n\t<p>Search for faculties matching given query and conditions.</p>\n\t\n\t<p>By default, this method will search among only such faculties which\n\twere marked as &quot;publicly visible&quot;. See <b>visibility</b> parameter.</p>\n",
+  "brief_description": "Search among faculties.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fac/#search",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "lang",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tCode of the preferred language. This usually should match the language\n\tof your user interface.\n"
+    },
+    {
+      "name": "query",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tThe query to search with. Part of faculty's name or code, etc.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|match",
+      "description": "\t\n\t<p>Pipe-separated list of fields. All fields described in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty\">faculty</a> method are allowed <b>plus one more</b>:\n</p>\n\n<ul>\n\t<li><b>match</b> - HTML string. It will include faculty's name, but\n\t\tit may also contain other data (such as faculty's code). Fragments\n\t\tthat have matched your <b>query</b> will be highlighted with a\n\t\t&lt;b&gt; tag.</li>\n</ul>\n"
+    },
+    {
+      "name": "visibility",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "public",
+      "description": "\t\n\t<p>One of the following values:</p>\n\t<ul>\n\t\t<li>\n\t\t\t<b>public</b> - search among only such faculties which were\n\t\t\tmarked as &quot;publicly visible&quot;,\n\t\t</li>\n\t\t<li>\n\t\t\t<b>all</b> - search among all faculties.\n\t\t</li>\n\t</ul>\n"
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "6",
+      "description": "\t\n\tThe number of search results to return.\n\tThe maximum allowed value of num is 20.\n"
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\t\n\t<p>Indicates the first matching search result that should be\n\tincluded in the response. This parameter uses a zero-based index,\n\tmeaning the first result is 0, the second result is 1 and so\n\tforth.</p>\n\t<p>Note, that no more than 100 search results\n\twill ever be returned for any query, even if more than 100\n\tmatches were found. If you need more, than\n\tprobably you're looking at a wrong method. Contact us if you're not\n\tsure.</p>\n\t\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>items</b> - a list of matching faculties. The length of\n\t\t\tthis list is limited to <b>num</b> items. You can access\n\t\t\tmore results by specifying the <b>start</b> parameter.</p>\n\t\t\t\n\t\t\t<p>Items on the list are dictionaries of selected fields.</p>\n\t\t</li>\n\t\t<li>\n\t\t\t<b>next_page</b> - boolean, indicates if there is a next page\n\t\t\tof results for this query.\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,87 @@
+{
+  "name": "services/instaddr/inst_address",
+  "short_name": "inst_address",
+  "description": "<p>\nGet information on a given institutional address.</p>",
+  "brief_description": "\nGet information on a given institutional address.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#inst_address",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "inst_address_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Institutional address ID.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|email",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    institutional address ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    name of the institutional address (a LangDict object);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>email</b> -\n                    institutional address email;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - faculty of the institutional address.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>assigned_users</b> - list of users that can send messages from this institutional address.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                institutional address could not be found; <b>param_name</b> is equal to <b>inst_address_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\ninstitutional address ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nname of the institutional address (a LangDict object)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "email",
+      "description": "\ninstitutional address email",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nfaculty of the institutional address",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "assigned_users",
+      "description": "\nlist of users that can send messages from this institutional address",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

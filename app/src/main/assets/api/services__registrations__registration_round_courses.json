@@ -1,0 +1,109 @@
+{
+  "name": "services/registrations/registration_round_courses",
+  "short_name": "registration_round_courses",
+  "description": "<p>\nGet list of course registration entries for specific registration round.</p>",
+  "brief_description": "\nGet list of course registration entries for specific registration round.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/registrations/#registration_round_courses",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "registration_round_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nRegistration round ID"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "course|term_id|status|limits|is_linkage_required|registrations_count",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n<p>List of courses in specific registration round.</p><p>Available fields:</p>\n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>course</b> - Course object.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course'>services/courses/course</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term_id</b> -\n                    ID of term;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - status of course registration.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>register_and_unregister</b> - user can register to and unregister from course</p></li>\n<li><p><b>unregister_only</b> - user can only unregister from course</p></li>\n<li><p><b>closed</b> - the registration is closed</p></li>\n<li><p><b>register_only</b> - user can only register to course</p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>limits</b> -\n                    integer, registration limits;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_linkage_required</b> -\n                    boolean, is linkage required;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>registrations_count</b> -\n                    number of currently registered users;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user_registration_status</b> - status of user registration.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>accepted</b> - user's application was accepted</p></li>\n<li><p><b>ask</b> - user has applied for the course</p></li>\n<li><p><b>refused_permanently</b> - user's application was refused permanently</p></li>\n<li><p><b>refused</b> - user's application was refused</p></li>\n<li><p><b>not_concerning</b> - user is registered</p></li>\n<li><p><b>cancelled</b> - user is signed out from the course (has withdrawn an accepted application)</p></li>\n<li><p><b>cancelled_ask</b> - user has withdrawn an application</p></li><li><p><b>null</b> - user did not try to register to the course</p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user_choice_number</b> -\n                    number of choice if registration requires priorities and user\n                has registered to the course or else <b>null</b>;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_registration_valid</b> - boolean, is registration correctly defined.</p>\n\n                \nRegistration will fail if trying registration is not defined correctly.\n\n                \n            \n            \n        </li>\n        \n    </ul>\n",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "course",
+      "description": "\nCourse object",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term_id",
+      "description": "\nID of term",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>register_and_unregister</b> - user can register to and unregister from course</p></li>\n<li><p><b>unregister_only</b> - user can only unregister from course</p></li>\n<li><p><b>closed</b> - the registration is closed</p></li>\n<li><p><b>register_only</b> - user can only register to course</p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "limits",
+      "description": "\ninteger, registration limits",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_linkage_required",
+      "description": "\nboolean, is linkage required",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "registrations_count",
+      "description": "\nnumber of currently registered users",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user_registration_status",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>accepted</b> - user's application was accepted</p></li>\n<li><p><b>ask</b> - user has applied for the course</p></li>\n<li><p><b>refused_permanently</b> - user's application was refused permanently</p></li>\n<li><p><b>refused</b> - user's application was refused</p></li>\n<li><p><b>not_concerning</b> - user is registered</p></li>\n<li><p><b>cancelled</b> - user is signed out from the course (has withdrawn an accepted application)</p></li>\n<li><p><b>cancelled_ask</b> - user has withdrawn an application</p></li><li><p><b>null</b> - user did not try to register to the course</p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user_choice_number",
+      "description": "\n\n                number of choice if registration requires priorities and user\n                has registered to the course or else <b>null</b>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_registration_valid",
+      "description": "\nRegistration will fail if trying registration is not defined correctly.",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,109 @@
+{
+  "name": "services/crstests/task_node_details",
+  "short_name": "task_node_details",
+  "description": "<p>\nDetails of a task node</p>",
+  "brief_description": "\nDetails of a task node",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#task_node_details",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a node"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "points_min|points_max|points_precision|dependencies|variables|algorithm|algorithm_description",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>points_min</b> -\n                    Float - minimal number of points.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>points_max</b> -\n                    Float - maximal number of points.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>points_precision</b> -\n                    Precision that should be used when displaying points from this node.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>dependencies</b> -\n                    A dictionary mapping node IDs to handles(see algorithm note);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>variables</b> -\n                    string, variables used in the algorithm (see algorithm note);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>algorithm</b> -\n                    string, algorithm (see algorithm note);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>algorithm_description</b> -\n                    LangDict object - description of the algorithm (see algorithm note);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>students_points</b> - access token issuer points.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#student_point'>student_point</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>all_students_points</b> - List of all points.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/crstests/#student_point'>student_point</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "points_min",
+      "description": "\nFloat - minimal number of points.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "points_max",
+      "description": "\nFloat - maximal number of points.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "points_precision",
+      "description": "\nPrecision that should be used when displaying points from this node.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "dependencies",
+      "description": "\nA dictionary mapping node IDs to handles(see algorithm note)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "variables",
+      "description": "\nstring, variables used in the algorithm (see algorithm note)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "algorithm",
+      "description": "\nstring, algorithm (see algorithm note)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "algorithm_description",
+      "description": "\nLangDict object - description of the algorithm (see algorithm note)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "students_points",
+      "description": "\naccess token issuer points",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "all_students_points",
+      "description": "\nList of all points",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

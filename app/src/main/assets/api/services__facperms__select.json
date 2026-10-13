@@ -1,0 +1,95 @@
+{
+  "name": "services/facperms/select",
+  "short_name": "select",
+  "description": "\n\n        <p>Perform a SELECT on the user-faculty-permission rows.</p>\n\n        <p>You may wonder why this module uses a SQL-like interface (which is\n        uncommon in USOS API). This seems practical in this particular case.\n        There are three separate entities joined here (user, faculty and\n        permission class). This interface allows you to choose various sets of\n        data with just a single method, e.g.:</p>\n\n        <ul>\n            <li>Show all the permissions granted to a single user.</li>\n            <li>\n                Show all the users which have been granted a specified\n                permission.\n            </li>\n            <li>\n                Show all the faculties in which the given permission is in\n                effect for the given user. (If you want the subfaculties\n                included too, then you should probably have a look at the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/facperms/#effective_fac_ids'>effective_fac_ids</a>\n                method.)\n            </li>\n            <li>Etc.</li>\n        </ul>\n\n        <p>See also <a href='https://usosapps.vistula.edu.pl/static/85131d20/diagrams/facperms.gif' class='diagram'>this diagram</a>.</p>\n    ",
+  "brief_description": "\nPerform a SELECT on the user-faculty-permission rows.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/facperms/#select",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "fpclass_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>Pipe-separated list of faculty permission class IDs. If given,\n            then only such rows will be returned which contain any of the given\n            IDs.</p>\n\n            <p>The validity of these references is validated lazily. This means\n            that you won't get a HTTP 400 error if you provide an invalid\n            reference here.</p>\n        "
+    },
+    {
+      "name": "user_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>Pipe-separated list of user IDs. If given, then only such rows\n            will be returned which contain any of the given IDs.</p>\n\n            <p>The validity of these references is validated lazily. This means\n            that you won't get a HTTP 400 error if you provide an invalid\n            reference here.</p>\n        "
+    },
+    {
+      "name": "fac_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>Pipe-separated list of faculty IDs. If given, then only such\n            rows will be returned which contain any of the given IDs.</p>\n\n            <p>The validity of these references is validated lazily. This means\n            that you won't get a HTTP 400 error if you provide an invalid\n            reference here.</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>Unordered <u>list</u> of dictionaries. Each dictionary will contain\n        the fields you have asked for in the <b>fields</b> parameter. Available\n        fields:</p>\n\n        \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>fpclass</b> - the object with the faculty permission class description.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/facperms/#fpclass'>fpclass</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - the object with the user description.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> -\n                    the object with the faculty description;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>with_subfaculties</b> -\n                    Boolean. True if the permission is propagated to all the\n                subfaculties of the selected faculty..</p>\n            \n            \n        </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "fpclass",
+      "description": "\nthe object with the faculty permission class description",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nthe object with the user description",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nthe object with the faculty description",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "with_subfaculties",
+      "description": "\n\n                Boolean. True if the permission is propagated to all the\n                subfaculties of the selected faculty.\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

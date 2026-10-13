@@ -1,0 +1,62 @@
+{
+  "name": "services/slips/template",
+  "short_name": "template",
+  "description": "\t\n\t<p>Get information on a given template.</p>\n",
+  "brief_description": "Get information on a given template",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#template",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "tpl_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the template.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "name",
+      "description": "\t\n\tPipe-separated list of fields described in the <b>returns</b> section.\n"
+    },
+    {
+      "name": "question_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id|question",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead (e.g.\n<code>fields=questions[id|question]</code>).</p>\n\n<p>Which fields should be included in the each of the question objects\nlisted in the <b>questions</b> field? You have to include 'questions'\nin your <b>fields</b> in order for this parameter to work.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of selected fields and their values.</p>\n\t<p>Available fields:</p>\n\t<ul>\n\t\t<li><b>id</b> - ID of the template,</li>\n\t\t<li>\n\t\t\t<b>name</b> - the name of the template, in plaintext (note,\n\t\t\tthat this is NOT a LangDict object),\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>lang</b> - ISO 639-1 language code, the language in which\n\t\t\tthe template was defined.</p>\n\t\t\t\n\t\t\t<p><b>Important:</b> Currently there are only two values in use\n\t\t\t(<b>pl</b> and <b>en</b>), but it may change in the future.\n\t\t\tYour application must be prepared to receive other language\n\t\t\tcodes.</p>\n\t\t</li>\n\t\t<li>\n\t\t\t<b>desc_for_issuers</b> - plaintext, possibly multiline\n\t\t\tdescription of the template, to be displayed for the slip\n\t\t\tissuers (other users may find it irrelevant or misleading),\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>fac</b> - faculty with which the template is bound, a\n\t\t\tdictionary of the following structure:</p>\n\t\t\t\n\t\t\t<ul>\n\t\t\t\t<li><b>id</b> - ID of the faculty,</li>\n\t\t\t\t<li>\n\t\t\t\t\t<b>name</b> - a LangDict object with the faculty name.\n\t\t\t\t</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>state</b> - state code of this template. One of the\n\t\t\tfollowing values:</p>\n\t\t\t\n\t\t\t<ul>\n\t\t\t\t<li>\n\t\t\t\t\t<b>draft</b> - Only template editors can see draft\n\t\t\t\t\ttemplates. Once out of this state, the template cannot\n\t\t\t\t\treturn to it.\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<b>active</b> - Issuers can issue slips using this\n\t\t\t\t\ttemplate. Template editors can still change a template\n\t\t\t\t\tafter it is published.\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<b>obsolete</b> - Issuers may still see this template\n\t\t\t\t\t(view its structure, answerers, etc.), but cannot issue\n\t\t\t\t\tnew slips anymore. It can be moved back to an &quot;active&quot;\n\t\t\t\t\tstate. Template editors can still change a template\n\t\t\t\t\tafter it was marked obsolete.\n\t\t\t\t</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t<li>\n\t\t\t<b>can_i_issue</b> - boolean, indicates if the current user is\n\t\t\tallowed to issue a new slip using this template. Access Token\n\t\t\tand the 'slips' scope is required to access this field.\n\t\t</li>\n\t\t<li>\n\t\t\t<b>why_cant_i_issue</b> - LangDict or null; if the current user\n\t\t\tcannot issue the slip, it will briefly explain why. This is\n\t\t\tintended to be displayed for the users.\n\t\t</li>\n\t\t<li>\n\t\t\t<b>can_i_edit</b> - boolean, indicates if the current user is\n\t\t\tallowed to edit this template. Access Token and the\n\t\t\t'slips_admin' scope is required to access this field.\n\t\t</li>\n\t\t<li>\n\t\t\t<b>why_cant_i_edit</b> - LangDict or null, if the current user\n\t\t\tcannot edit the slip, it will briefly explain why. This is\n\t\t\tintended to be displayed for the users.\n\t\t</li>\n\t\t<li>\n\t\t\t<b>can_i_delete</b> - boolean, indicates if the current user is\n\t\t\tallowed to delete this template. Access Token and the\n\t\t\t'slips_admin' scope is required to access this field.\n\t\t</li>\n\t\t<li>\n\t\t\t<b>why_cant_i_delete</b> - LangDict or null, if the current\n\t\t\tuser cannot delete the slip, it will briefly explain why. This\n\t\t\tis intended to be displayed for the users.\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>questions</b> - a list of questions. Each question is an\n\t\t\tobject of the structure described in the\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method.</p>\n\t</li>\n\t<li>\n\t\t<p><b>slips_stats</b> - a dictionary of the following\n\t\tstructure:</p>\n\t\t\n\t\t<ul>\n\t\t\t<li>\n\t\t\t\t<b>active</b> - number of active slips of this\n\t\t\t\ttemplate,\n\t\t\t</li>\n\t\t\t<li>\n\t\t\t\t<b>closed</b> - number of closed slips of this\n\t\t\t\ttemplate.\n\t\t\t</li>\n\t\t</ul>\n\t</li>\n\t<li>\n\t\t<p><b>connected_tpl_ids</b> - IDs of the templates which have\n\t\tbeen connected to this template (are issued together with its\n\t\tslips).</p>\n\t</li>\n\t<li>\n\t\t<p><b>connected_tpl_ids_deep</b> - this is similar to\n\t\t<b>connected_tpl_ids</b>, but the list is aggregated\n\t\trecursively - i.e. all indirect connections will also be\n\t\tincluded (This graph is not a DAG, it may contain cycles!).</p>\n\t\t\n\t\t<p>Note: Whenever a clearance slip is issued using a template,\n\t\tall questions from its connected templates are also included in\n\t\tthis slip. The graph can be altered later in time, but the\n\t\tquestions bound to the issued slip will remain unchanged.</p>\n\t</li>\n\t<li>\n\t\t<p><b>coordinators</b> - a list of people designated to\n\t\tcoordinate this template. It should be displayed to the\n\t\ttemplate issuers, so that they may contact each other\n\t\teasily.</p>\n\t\t\n\t\t<p>Each item on the list is a\n\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/users/#user\">user</a> object (with id,\n\tfirst_name and last_name fields).</p>\n\t\n\t<p>Currently, all the people allowed to edit the template are\n\tconsidered its coordinators. This may change in future\n\tthough!</p>\n</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

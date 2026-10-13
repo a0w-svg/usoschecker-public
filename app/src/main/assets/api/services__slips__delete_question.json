@@ -1,0 +1,48 @@
+{
+  "name": "services/slips/delete_question",
+  "short_name": "delete_question",
+  "description": "\t\n\t<p>Delete a question from within a template.</p>\n\t\n\t<p><b>Important:</b> Only some question can be directly deleted\n\t(currently, only the ones contained within draft templates). Other\n\tshould be marked as obsolete and wait to be garbage-collected. You can\n\tuse the <b>can_i_delete</b> field of the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method to check if the\nquestion can be deleted.</p>\n",
+  "brief_description": "Delete a question from the template",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#delete_question",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "question_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the question to be deleted.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true}</code></p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

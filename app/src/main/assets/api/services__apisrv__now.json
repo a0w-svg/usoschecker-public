@@ -1,0 +1,38 @@
+{
+  "name": "services/apisrv/now",
+  "short_name": "now",
+  "description": "\t\n\tGet the current USOS API time. Your application might call it\n\tperiodically in order to determine time offset of our clocks.\n\tExact timing matters in some cases (like when a registration\n\tstarts).\n",
+  "brief_description": "Get current USOS API time.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apisrv/#now",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tA DateTime string (first 19 characters), <b>followed by</b> a dot and a 6-digit\n\tfractional part of a second (&quot;yyyy-mm-dd hh:mm:ss.dddddd&quot;). This represents the\n\tcurrent USOS API server local time (all DateTime strings API methods return are\n\tin local time, unless stated otherwise).\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,94 @@
+{
+  "name": "services/courses/search",
+  "short_name": "search",
+  "description": "\t\n\t<p>Search for courses matching given query.</p>\n",
+  "brief_description": "Search for courses.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/courses/#search",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "lang",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tA code of the preferred language (&quot;pl&quot; or &quot;en&quot;). It will influence\n\tthe order and other display properties of the returned matches.\n"
+    },
+    {
+      "name": "name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tCourse name (or part of it). USOS API will match this against names\n\tand IDs of courses.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "course_id|match",
+      "description": "\t\n\t<p>Pipe-separated list of fields.\n\tSee the <b>returned value</b> section below for the list of available fields.</p>\n"
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "6",
+      "description": "\t\n\tIdentifies the number of search results to return. The maximum\n\tvalue of num is 20.\n"
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\t\n\t<p>Indicates the first matching result that should be included in\n\tthe search results. This parameter uses a zero-based index, meaning\n\tthe first result is 0, the second result is 1 and so forth.</p>\n\t\n\t<p>Note, that no more than 100 search result will ever be returned\n\tfor any query, even if more than 100 matches were found. If you need\n\tmore, than probably you're looking at a wrong method.\n\t<a href=\"/developers/api/contact/\">Contact\nus</a> if you're not sure.</p>\n"
+    },
+    {
+      "name": "fac_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tA faculty ID. If given, it restricts the search to courses run by this\n\tfaculty.\n"
+    },
+    {
+      "name": "fac_deep",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\t\n\tBoolean. Valid only when used along with the fac_id parameter.\n\tBy default, fac_id restricts the search to courses run ONLY by\n\ta given faculty. Set fac_deep to &quot;true&quot; in order to also include\n\tcourses run by subfaculties of this faculty.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>items</b> - a list of matching courses. The length of\n\t\t\tthis list is limited to <b>num</b> items. You can access\n\t\t\tfurther results by specifing the <b>start</b> parameter.</p>\n\t\t\t\n\t\t\t<p>Each item on this list is a dictionary of <b>selected fields</b>.\n\t\t\tOnly primary fields described in the <a href=\"#course\">course</a> method\n\t\t\tare allowed <b>plus two more</b>:</p>\n\t\t\t<ul>\n\t\t\t\t<li><b>course_id</b> - same as <b>id</b>. Left for backward compatibility.</li>\n\t\t\t\t<li><p><b>match</b> - a string with matching fragments\n\t\t\t\t\thighlighted with HTML &lt;b&gt; tag. Language used in\n\t\t\t\t\tconstruction of this string may vary - you <b>may\n\t\t\t\t\tnot</b> assume it will always be your preferred\n\t\t\t\t\tlanguage. It also <b>may</b> include the course ID (if\n\t\t\t\t\twe think it's relevant).</p>\n\t\t\t\t</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t\n\t\t<li>\n\t\t\t<b>next_page</b> - boolean, indicates if there is a next page\n\t\t\tof results for this query.\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

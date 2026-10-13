@@ -1,0 +1,107 @@
+{
+  "name": "services/apisrv/installation",
+  "short_name": "installation",
+  "description": "\n\n        <p>Get some basic information on this USOS API installation.</p>\n    ",
+  "brief_description": "\nGet information on this USOS API installation.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apisrv/#installation",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "base_url|version|machine_version|usos_schema_version|institution_name|contact_emails",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>base_url</b> - base URL of this installation.</p>\n\n                \n\n                For backward compatibility, this will always start with the\n                \"http://\" protocol. You <b>should</b> use \"https://\" in your\n                method calls though!\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>version</b> - a \"version string\" of this USOS API installation.</p>\n\n                \n\n                <p>The structure of this string is undocumented. It may contain\n                anything (e.g. an information that the version is unknown). It\n                is designed to be understood by humans, not machines. Compare\n                this to <b>machine_version</b> field.</p>\n\n                <p>Some possible values (this may change in time!):</p>\n\n                <ul>\n                    <li><code>5.2.0.0-3, 63432a1 (2012-07-03)</code></li>\n                    <li><code>5.2.0.0-3 (2012-07-03)</code></li>\n                    <li><code>5.2.0.0-3, 63432a1, dirty</code></li>\n                    <li><code>5.2.0.0-unknown</code></li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>machine_version</b> - machine-readable version, in 0.0.0.0-0 format.</p>\n\n                \n\n                <p>This value is suitable to be read by machines. We can\n                guarantee that it matches the following regular expression:\n                <code>[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+</code> (for example\n                \"6.2.10.0-13\"). This string won't always be as accurate as the\n                one in the <b>version</b> field, but it will be supplied in a\n                documented and backward-compatible way, thus allowing an easy\n                way of feature-detection for external applications.</p>\n\n                <p>You may assume that if a non-beta feature is implemented in\n                version X, then the same feature will also work (in\n                backward-compatible manner) on all versions higher than X. Keep\n                in mind that you need to use a customized comparison method for\n                these strings (it is invalid to compare versions strings\n                lexicographically).</p>\n\n                <p>We cannot guarantee that all USOS API versions will come in\n                this format in the future, but we do guarantee that this field\n                will always return values in this particular format. If USOS\n                API switches its versioning scheme, then this field will get\n                deprecated, and simply keep returning the version string\n                matching the last of the USOS API versions which has been\n                released in this format.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>usos_schema_version</b> -\n                    version string of the USOS database used by this installation;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>institution_name</b> -\n                    a LangDict object with the name of the institution which is the owner of this installation, <b>or null</b> if it is unknown;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>institution</b> - the \"primary\" faculty object.</p>\n\n                \n\n                <p>This will contain a single selected faculty object, as\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a>\n                method. This primary institution faculty is also often a common\n                ancestor of most of the faculties is the faculty forest (but\n                sometimes it is not).</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>contact_emails</b> -\n                    a list of strings, email addresses of local USOS API administrators.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>schac_id</b> - unique institution ID in SCHAC format.</p>\n\n                \n\n                SCHAC ID consists of the primary institution domain name,\n                stripped of any \"www.\" prefixes, etc.\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>mcards_support</b> -\n                    True if mCards (mLegitymacje) are supported;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>mobile_usos_support</b> -\n                    True if Mobile USOS is supported.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "base_url",
+      "description": "\n\n                For backward compatibility, this will always start with the\n                \"http://\" protocol. You <b>should</b> use \"https://\" in your\n                method calls though!\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "version",
+      "description": "\n\n                <p>The structure of this string is undocumented. It may contain\n                anything (e.g. an information that the version is unknown). It\n                is designed to be understood by humans, not machines. Compare\n                this to <b>machine_version</b> field.</p>\n\n                <p>Some possible values (this may change in time!):</p>\n\n                <ul>\n                    <li><code>5.2.0.0-3, 63432a1 (2012-07-03)</code></li>\n                    <li><code>5.2.0.0-3 (2012-07-03)</code></li>\n                    <li><code>5.2.0.0-3, 63432a1, dirty</code></li>\n                    <li><code>5.2.0.0-unknown</code></li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "machine_version",
+      "description": "\n\n                <p>This value is suitable to be read by machines. We can\n                guarantee that it matches the following regular expression:\n                <code>[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+</code> (for example\n                \"6.2.10.0-13\"). This string won't always be as accurate as the\n                one in the <b>version</b> field, but it will be supplied in a\n                documented and backward-compatible way, thus allowing an easy\n                way of feature-detection for external applications.</p>\n\n                <p>You may assume that if a non-beta feature is implemented in\n                version X, then the same feature will also work (in\n                backward-compatible manner) on all versions higher than X. Keep\n                in mind that you need to use a customized comparison method for\n                these strings (it is invalid to compare versions strings\n                lexicographically).</p>\n\n                <p>We cannot guarantee that all USOS API versions will come in\n                this format in the future, but we do guarantee that this field\n                will always return values in this particular format. If USOS\n                API switches its versioning scheme, then this field will get\n                deprecated, and simply keep returning the version string\n                matching the last of the USOS API versions which has been\n                released in this format.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "usos_schema_version",
+      "description": "\nversion string of the USOS database used by this installation",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "institution_name",
+      "description": "\na LangDict object with the name of the institution which is the owner of this installation, <b>or null</b> if it is unknown",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "institution",
+      "description": "\n\n                <p>This will contain a single selected faculty object, as\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a>\n                method. This primary institution faculty is also often a common\n                ancestor of most of the faculties is the faculty forest (but\n                sometimes it is not).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "contact_emails",
+      "description": "\na list of strings, email addresses of local USOS API administrators.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "schac_id",
+      "description": "\n\n                SCHAC ID consists of the primary institution domain name,\n                stripped of any \"www.\" prefixes, etc.\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "mcards_support",
+      "description": "\nTrue if mCards (mLegitymacje) are supported",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "mobile_usos_support",
+      "description": "\nTrue if Mobile USOS is supported",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

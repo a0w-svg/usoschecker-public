@@ -1,0 +1,109 @@
+{
+  "name": "services/geo/room",
+  "short_name": "room",
+  "description": "<p>\nGet information on a given room.</p>",
+  "brief_description": "\nGet information on a given room.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/geo/#room",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "room_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the room."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|number|building_id|building_name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    room ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    string, a room number (e.x. \"104B\");</p>\n            \n            \n        </li>\n        \n        <li class='deprecated'>\n            \n                <p><b>building_id</b> - ID of a parent building.</p>\n\n                \n\n                    This field is deprecated. You are advised to use the\n                    <b>building</b> field instead.\n                \n\n                \n            \n            \n        </li>\n        \n        <li class='deprecated'>\n            \n                <p><b>building_name</b> - a LangDict object with the name of a parent building.</p>\n\n                \n\n                    This field is deprecated. You are advised to use the\n                    <b>building</b> field instead.\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>building</b> - Building where the room is located.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/geo/#building2'>building2</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> - type of the room.</p>\n\n                \n\n                <p>Currently two values are possible:</p>\n                <ul>\n                    <li><b>D</b> - didactics room,</li>\n                    <li><b>P</b> - staff member's office.</li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>capacity</b> -\n                    approximate number of people that would fit into the room <b>or null</b> if this number is unknown;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attributes</b> - attributes of the room.</p>\n\n                \n\n                <p>A dictionary of the following structure:</p>\n                <ul>\n                    <li><b>id</b> - ID of the attribute</li>\n                    <li><b>description</b> - langdict, description of the attribute</li>\n                    <li><b>count</b> - count of objects in the room described by the attribute\n                    <b>or null</b> if this number is unknown or does not apply.\n                </ul>\n                \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>staff</b> - List of people assigned to this room.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n            <p>\n                <em>Additional permissions note</em>: Consumer key is required.\n            </p>\n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>room_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nroom ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number",
+      "description": "\nstring, a room number (e.x. \"104B\")",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "building_id",
+      "description": "\n\n                    This field is deprecated. You are advised to use the\n                    <b>building</b> field instead.\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "building_name",
+      "description": "\n\n                    This field is deprecated. You are advised to use the\n                    <b>building</b> field instead.\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "building",
+      "description": "\nBuilding where the room is located",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\n\n                <p>Currently two values are possible:</p>\n                <ul>\n                    <li><b>D</b> - didactics room,</li>\n                    <li><b>P</b> - staff member's office.</li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "capacity",
+      "description": "\napproximate number of people that would fit into the room <b>or null</b> if this number is unknown",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "attributes",
+      "description": "\n\n                <p>A dictionary of the following structure:</p>\n                <ul>\n                    <li><b>id</b> - ID of the attribute</li>\n                    <li><b>description</b> - langdict, description of the attribute</li>\n                    <li><b>count</b> - count of objects in the room described by the attribute\n                    <b>or null</b> if this number is unknown or does not apply.\n                </ul>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "staff",
+      "description": "\nList of people assigned to this room",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

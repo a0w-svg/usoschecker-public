@@ -1,0 +1,70 @@
+{
+  "name": "services/groups/lecturer",
+  "short_name": "lecturer",
+  "description": "\tGet public list of groups lectured by given staff member. Public means, that you may\n\tanonymously access such activities of ALL staff members, you don't need their approval for this\n\t(teachers' schedules are publicly available).",
+  "brief_description": "Get public list of groups lectured by given staff member.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#lecturer",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of fields\n\t(as in the <a href=\"#group\">group</a> method). Only <b>primary</b> fields\n\tare allowed.\n"
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": "access token issuer.",
+      "description": "\tID of a user."
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\t\n\tEither <b>pl</b> or <b>en</b> - resulting list of groups will be sorted by the course name\n\tin the specified language.\n"
+    },
+    {
+      "name": "active_terms",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\t\n\t<p>Return only these groups which are related to the currently active academic terms.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>The same as defined in <a href=\"#participant\">participant</a> method.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

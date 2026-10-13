@@ -1,0 +1,153 @@
+{
+  "name": "services/geo/building2",
+  "short_name": "building2",
+  "description": "<p>\nGet information on a given building</p>",
+  "brief_description": "\nGet information on a given building",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/geo/#building2",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "building_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the building."
+    },
+    {
+      "name": "langpref",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "en",
+      "description": "\n\n                A code of the preferred language (\"pl\" or \"en\"). It may\n                influence the order of data and other display properties of the\n                returned fields.\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|location",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    building ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict object with the building's name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>profile_url</b> -\n                    building's USOSweb URL;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>postal_address</b> -\n                    string; short, plain-text postal address of the building, <b>or null</b> if the address is unknown;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>campus_name</b> - a LangDict object with the name of the building's campus, or <b>null</b> if the building is not part of any campus (or the data is missing).</p>\n\n                \n\n                    <p>In general, campus name should be short (~20\n                    characters), but some institutions don't follow that\n                    guideline (e.g. names contain lists of streets, etc.).</p>\n                \n\n                \n            \n            \n        </li>\n        \n        <li class='deprecated'>\n            \n                <p><b>erp_id</b> - Building's ERP id.</p>\n\n                \n\n                    This field has been replaced by <b>hr_id</b> field.\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>hr_id</b> -\n                    Building's HR ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>location</b> - geographical location of the building <b>or null</b> if location is unknown.</p>\n\n                \n\n                    <p>Location is presented in a form of a dictionary with two\n                    fields:</p>\n\n                    <ul>\n                        <li><b>long</b> - longitude, a floating point number,\n                        measured in degrees (east - positive),</li>\n\n                        <li><b>lat</b> - latitude, a floating point number,\n                        measured in degrees (north - positive).</li>\n                    </ul>\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>marker_style</b> - <span class='beta-icon'>BETA</span> suggested map marker style.</p>\n\n                \n\n                    <p>Some institutions may suggest specific styles for the\n                    markers used on the map of their buildings. This object\n                    describes these suggestions.</p>\n\n                    <p>Currently, only one subfield is present - <b>color</b>.\n                    It contains a suggested color for the marker in a\n                    hexadecimal RGB format, e.g. <code>#000000</code> for\n                    black.</p>\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>phone_numbers</b> - list of strings, each string represents one phone number specified for this building (in undocumented format).</p>\n\n                \n\n                    <p>Note, that this field is dynamically calculated. We \"guess\"\n                    which phone numbers are best suited to be returned here (if\n                    there are too many, then we try to pick one or two we think\n                    best).</p>\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>static_map_urls</b> - Maps showing the building's location.</p>\n\n                \n\n                    <p>A set of map images, showing the surroundings of the\n                    building (with the building marked in the center). Use the {%\n                    subfield_selector %} to choose the map size(s).</p>\n\n                    <p>Currently available subfields:</p>\n\n                    <ul>\n                        <li><b>100x100</b> - 100px x 100px,</li>\n                        <li><b>200x200</b> - 200px x 200px,</li>\n                        <li><b>300x300</b> - 300px x 300px,</li>\n                        <li><b>400x200</b> - 400px x 200px,</li>\n                        <li><b>600x300</b> - 600px x 300px,</li>\n                        <li><b>800x400</b> - 800px x 400px,</li>\n                        <li><b>1000x250</b> - 1000px x 250px.</li>\n                    </ul>\n\n                    <p>Every one of these fields may contain <b>null</b> and you\n                    should be prepared for that (some buildings don't have a\n                    location).</p>\n\n                    <p>Even when it's not null, the URL is <b>NOT</b> guaranteed to\n                    be valid. For example, if our tile-map backend fails on us,\n                    then the URL will lead you to a HTTP 404 page. We will try to\n                    return <b>null</b> if we expect the URL to be invalid, but we\n                    do not guarantee this.</p>\n\n                    <p>The image which the URL points to, <b>should</b> be cached\n                    according to its <i>Cache-Control</i> and <i>Expires</i>\n                    headers. If you're displaying the image in a browser then you\n                    don't have to worry about the caching yourself (the browser\n                    will cache it for you).</p>\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>photo_urls</b> - URLs of the photo of building.</p>\n\n                \n\n                <p>The URLs of the photo of the building, in various\n                dimensions, <b>or a set URLs of placeholder images</b> if this\n                building does not have a photo. Use the <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to\n                choose the wanted size/dimensions of the building.</p>\n\n                <p>Currently available subfields:</p>\n\n                <ul>\n                    <li>\n                        <p><b>screen</b> - full-screen version of the photo, the\n                        dimensions are undocumented and may vary on building\n                        and/or USOS API version (since screens are getting\n                        bigger in time).</p>\n                    </li>\n                </ul>\n\n                <p>The image which the URL points to, <b>should</b> be cached\n                according to its <i>Cache-Control</i> and <i>Expires</i>\n                headers. If you're displaying the image in a browser then you\n                don't have to worry about the caching yourself (the browser\n                will cache it for you).</p>\n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>related_faculties</b> - list of faculties related to this building.</p>\n\n                \n\n                    <p>Each item on the list is a faculty object, as defined in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. You can use\n                    the <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to access specific faculty\n                    fields.</p>\n\n                    <p>If you supply <b>name</b> as one of the subfields, then\n                    the faculties on this list will be ordered by name (see also\n                    the <b>langpref</b> parameter). This behavior may change (e.g.\n                    we may decide to put more important faculties up front).</p>\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>all_phone_numbers</b> - List of all phone numbers associated with a building.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/phones/#phone_number'>services/phones/phone_number</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>rooms</b> - List of all rooms associated with a building.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/geo/#room'>room</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>building_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nbuilding ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict object with the building's name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "profile_url",
+      "description": "\nbuilding's USOSweb URL",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "postal_address",
+      "description": "\nstring; short, plain-text postal address of the building, <b>or null</b> if the address is unknown",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "campus_name",
+      "description": "\n\n                    <p>In general, campus name should be short (~20\n                    characters), but some institutions don't follow that\n                    guideline (e.g. names contain lists of streets, etc.).</p>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "erp_id",
+      "description": "\n\n                    This field has been replaced by <b>hr_id</b> field.\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "hr_id",
+      "description": "\nBuilding's HR ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "location",
+      "description": "\n\n                    <p>Location is presented in a form of a dictionary with two\n                    fields:</p>\n\n                    <ul>\n                        <li><b>long</b> - longitude, a floating point number,\n                        measured in degrees (east - positive),</li>\n\n                        <li><b>lat</b> - latitude, a floating point number,\n                        measured in degrees (north - positive).</li>\n                    </ul>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "marker_style",
+      "description": "\n\n                    <p>Some institutions may suggest specific styles for the\n                    markers used on the map of their buildings. This object\n                    describes these suggestions.</p>\n\n                    <p>Currently, only one subfield is present - <b>color</b>.\n                    It contains a suggested color for the marker in a\n                    hexadecimal RGB format, e.g. <code>#000000</code> for\n                    black.</p>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "phone_numbers",
+      "description": "\n\n                    <p>Note, that this field is dynamically calculated. We \"guess\"\n                    which phone numbers are best suited to be returned here (if\n                    there are too many, then we try to pick one or two we think\n                    best).</p>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "static_map_urls",
+      "description": "\n\n                    <p>A set of map images, showing the surroundings of the\n                    building (with the building marked in the center). Use the {%\n                    subfield_selector %} to choose the map size(s).</p>\n\n                    <p>Currently available subfields:</p>\n\n                    <ul>\n                        <li><b>100x100</b> - 100px x 100px,</li>\n                        <li><b>200x200</b> - 200px x 200px,</li>\n                        <li><b>300x300</b> - 300px x 300px,</li>\n                        <li><b>400x200</b> - 400px x 200px,</li>\n                        <li><b>600x300</b> - 600px x 300px,</li>\n                        <li><b>800x400</b> - 800px x 400px,</li>\n                        <li><b>1000x250</b> - 1000px x 250px.</li>\n                    </ul>\n\n                    <p>Every one of these fields may contain <b>null</b> and you\n                    should be prepared for that (some buildings don't have a\n                    location).</p>\n\n                    <p>Even when it's not null, the URL is <b>NOT</b> guaranteed to\n                    be valid. For example, if our tile-map backend fails on us,\n                    then the URL will lead you to a HTTP 404 page. We will try to\n                    return <b>null</b> if we expect the URL to be invalid, but we\n                    do not guarantee this.</p>\n\n                    <p>The image which the URL points to, <b>should</b> be cached\n                    according to its <i>Cache-Control</i> and <i>Expires</i>\n                    headers. If you're displaying the image in a browser then you\n                    don't have to worry about the caching yourself (the browser\n                    will cache it for you).</p>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "photo_urls",
+      "description": "\n\n                <p>The URLs of the photo of the building, in various\n                dimensions, <b>or a set URLs of placeholder images</b> if this\n                building does not have a photo. Use the <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to\n                choose the wanted size/dimensions of the building.</p>\n\n                <p>Currently available subfields:</p>\n\n                <ul>\n                    <li>\n                        <p><b>screen</b> - full-screen version of the photo, the\n                        dimensions are undocumented and may vary on building\n                        and/or USOS API version (since screens are getting\n                        bigger in time).</p>\n                    </li>\n                </ul>\n\n                <p>The image which the URL points to, <b>should</b> be cached\n                according to its <i>Cache-Control</i> and <i>Expires</i>\n                headers. If you're displaying the image in a browser then you\n                don't have to worry about the caching yourself (the browser\n                will cache it for you).</p>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "related_faculties",
+      "description": "\n\n                    <p>Each item on the list is a faculty object, as defined in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. You can use\n                    the <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to access specific faculty\n                    fields.</p>\n\n                    <p>If you supply <b>name</b> as one of the subfields, then\n                    the faculties on this list will be ordered by name (see also\n                    the <b>langpref</b> parameter). This behavior may change (e.g.\n                    we may decide to put more important faculties up front).</p>\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "all_phone_numbers",
+      "description": "\nList of all phone numbers associated with a building",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "rooms",
+      "description": "\nList of all rooms associated with a building",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

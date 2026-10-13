@@ -1,0 +1,167 @@
+{
+  "name": "services/surveys/survey",
+  "short_name": "survey",
+  "description": "\n\n        <p>Get a single survey (either general or course survey).</p>\n    ",
+  "brief_description": "\nGet a single survey.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/surveys/#survey",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "survey_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>ID of the survey.</p>\n\n                <p>You may notice that this ID is constructed from a set of\n                survey attributes, but you should not construct it by yourself,\n                as its structure is subject to change. Use dedicated methods\n                (eg. <a href='https://usosapps.vistula.edu.pl/developers/api/services/surveys/#surveys_to_fill'>surveys_to_fill</a>) to obtain\n                proper survey IDs.</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|survey_type|name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of selected fields: </p>\n        \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Id of the survey;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>survey_type</b> - string, type of the survey.</p>\n\n                \n\n            <p>This will be one of the two values: \"course\" or \"general\".\n            See module's introduction for details on differences between\n            those two!</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> - LangDict object, name of the survey.</p>\n\n                \n\n            <p>This is supposed to be displayed as the \"header\" of this\n            survey. The contents are plaint-text, they cannot contain HTML.\n            Clients SHOULD escape HTML control characters before embedding\n            this title on a web page.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>headline_html</b> - string, additional HTML headline for this survey.</p>\n\n                \n\n            <p>This is supposed to be displayed below the survey name.\n            It contains a short description of the survey. It MAY contain\n            user-provided HTML, so client developers SHOULD expect anything\n            here (including XSS vectors).</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>start_date</b> - datetime string <b>or null</b>.</p>\n\n                \n\n            <p>This indicates the time when collecting the answers starts.\n            It MAY be null, in which case this time is in the past, but its\n            exact value is unknown.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>end_date</b> - datetime string <b>or null</b>.</p>\n\n                \n\n            <p>This indicates the time when collecting the answers ends.\n            It MAY be null, in which case this time is in the future, but\n            its exact value is unknown.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_fill_out</b> - Can I fill out this survey?.</p>\n\n                \n\n            True, if the requesting user is entitled to fill out this\n            survey. Note, that once the user has filled it out, he is no\n            longer entitled to fill it out.\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>did_i_fill_out</b> - Did I already fill out this survey?.</p>\n\n                \n\n            True, if requesting user already filled out this survey, false\n            otherwise.\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>group</b> - A group the survey refers to (null for general surveys).</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#group'>services/groups/group</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>groups_conducted</b> - List of groups.</p>\n\n                \n\n            If the method is invoked by a lecturer being evaluated by\n            this survey, then this field will contain a list of groups\n            conducted by this lecturer (and which also being surveyed). If\n            this is a general survey, then this list will always be empty.\n        \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#group'>services/groups/group</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>lecturer</b> - Lecturer being evaluated by this survey, or <b>null</b> in case of general surveys.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - Faculty that defined the survey.</p>\n\n                \n\n            You can use primary subfields from the\n            <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>programme</b> - The programme which the survey refers to, or <b>null</b> for course surveys or general surveys that are not carried out in context of a specific programme..</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#programme'>services/progs/programme</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>filled_out_count</b> - integer <b>or null</b>.</p>\n\n                \n\n            <p>If the requesting user has access to survey results (see\n            <b>can_i_view_results</b> field), then this field will contain\n            the number of times this survey has been filled out. Otherwise,\n            it will contain <b>null</b>.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>entitled_count</b> - integer <b>or null</b>.</p>\n\n                \n\n            <p>If the requesting user has access to survey results (see\n            <b>can_i_view_results</b> field), then this field will contain\n            a total number of users entitled to fill out this survey. Note,\n            that this number is NOT decremented after a user fills out the\n            survey.</p>\n\n            <p>Otherwise, it will contain <b>null</b>.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_view_results</b> - boolean, indicates if the requesting user is entitled to view results of this survey.</p>\n\n                \n\n            <p>Currently, survey results consist of the number of entitled\n            users (<b>entitled_count</b>), and number of students who\n            filled out the survey (<b>filled_out_count</b>), but more\n            fields may come in the future.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>why_cant_i_view_results</b> - LangDict object <b>or null</b>.</p>\n\n                \n\n            <p>If <b>can_i_view_results</b> is false, then this will\n            contain a LangDict object with an explanation why the\n            requesting user can't see results of this survey.</p>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>questions</b> - List of survey questions.</p>\n\n                \n\n            <p>This list is ordered and it has a tree-like structure. Every\n            question on this list is an object of the following structure:</p>\n\n            <ul>\n                \n    <li><b>id</b> - string, an ID of the question,</li>\n    <li>\n        <b>number</b> - string, a chapter-like label to be used for\n        question numbering.</p>\n\n        <p>These values are not supplied by users, they are instead\n        dynamically generated by USOS API. They will always come in\n        form of <code>\"N.N.N\"</code>, where each N is an integer,\n        and the number of dots is equal to the value of\n        <b>level</b> field (e.g. \"1\" or \"1.2\").</p>\n    </li>\n    <li>\n        <p><b>level</b> - integer, a 0-based level/indent of the\n        question (for example, in case of \"1.2\" number, this will\n        be 1),</p>\n\n        <p>Clients may assume that these levels will be consistent,\n        and that they will describe a tree (in a DFS-order). The\n        level of first question will always be zero (note, that\n        other entries also MAY have the zero level).</p>\n    </li>\n    <li>\n        <b>display_text_html</b> - string, the content of the\n        question. It may contain any content, including\n        user-provided HTML, so your application should consider\n        this data unsafe (e.g. prone to XSS attacks),\n    </li>\n    <li>\n        <p><b>possible_answers</b> - a <b>list</b> of objects, each\n        describing an answer.</p>\n\n        <p>Each answer will have the following structure:</p>\n\n        <ul>\n            <li>\n                <b>id</b> - string, an ID of a possible answer,\n            </li>\n            <li>\n                <b>display_text_html</b> - string, content of the\n                answer. It may contain any content, including\n                user-provided HTML, so your application should\n                consider this data unsafe (e.g. prone to XSS\n                attacks),\n            </li>\n        </ul>\n    </li>\n\n            </ul>\n        \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nId of the survey",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "survey_type",
+      "description": "\n\n            <p>This will be one of the two values: \"course\" or \"general\".\n            See module's introduction for details on differences between\n            those two!</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\n\n            <p>This is supposed to be displayed as the \"header\" of this\n            survey. The contents are plaint-text, they cannot contain HTML.\n            Clients SHOULD escape HTML control characters before embedding\n            this title on a web page.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "headline_html",
+      "description": "\n\n            <p>This is supposed to be displayed below the survey name.\n            It contains a short description of the survey. It MAY contain\n            user-provided HTML, so client developers SHOULD expect anything\n            here (including XSS vectors).</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "start_date",
+      "description": "\n\n            <p>This indicates the time when collecting the answers starts.\n            It MAY be null, in which case this time is in the past, but its\n            exact value is unknown.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "end_date",
+      "description": "\n\n            <p>This indicates the time when collecting the answers ends.\n            It MAY be null, in which case this time is in the future, but\n            its exact value is unknown.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_fill_out",
+      "description": "\n\n            True, if the requesting user is entitled to fill out this\n            survey. Note, that once the user has filled it out, he is no\n            longer entitled to fill it out.\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "did_i_fill_out",
+      "description": "\n\n            True, if requesting user already filled out this survey, false\n            otherwise.\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "group",
+      "description": "\nA group the survey refers to (null for general surveys)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "groups_conducted",
+      "description": "\n\n            If the method is invoked by a lecturer being evaluated by\n            this survey, then this field will contain a list of groups\n            conducted by this lecturer (and which also being surveyed). If\n            this is a general survey, then this list will always be empty.\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "lecturer",
+      "description": "\nLecturer being evaluated by this survey, or <b>null</b> in case of general surveys",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\n\n            You can use primary subfields from the\n            <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "programme",
+      "description": "\nThe programme which the survey refers to, or <b>null</b> for course surveys or general surveys that are not carried out in context of a specific programme.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "filled_out_count",
+      "description": "\n\n            <p>If the requesting user has access to survey results (see\n            <b>can_i_view_results</b> field), then this field will contain\n            the number of times this survey has been filled out. Otherwise,\n            it will contain <b>null</b>.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "entitled_count",
+      "description": "\n\n            <p>If the requesting user has access to survey results (see\n            <b>can_i_view_results</b> field), then this field will contain\n            a total number of users entitled to fill out this survey. Note,\n            that this number is NOT decremented after a user fills out the\n            survey.</p>\n\n            <p>Otherwise, it will contain <b>null</b>.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_view_results",
+      "description": "\n\n            <p>Currently, survey results consist of the number of entitled\n            users (<b>entitled_count</b>), and number of students who\n            filled out the survey (<b>filled_out_count</b>), but more\n            fields may come in the future.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "why_cant_i_view_results",
+      "description": "\n\n            <p>If <b>can_i_view_results</b> is false, then this will\n            contain a LangDict object with an explanation why the\n            requesting user can't see results of this survey.</p>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "questions",
+      "description": "\n\n            <p>This list is ordered and it has a tree-like structure. Every\n            question on this list is an object of the following structure:</p>\n\n            <ul>\n                \n    <li><b>id</b> - string, an ID of the question,</li>\n    <li>\n        <b>number</b> - string, a chapter-like label to be used for\n        question numbering.</p>\n\n        <p>These values are not supplied by users, they are instead\n        dynamically generated by USOS API. They will always come in\n        form of <code>\"N.N.N\"</code>, where each N is an integer,\n        and the number of dots is equal to the value of\n        <b>level</b> field (e.g. \"1\" or \"1.2\").</p>\n    </li>\n    <li>\n        <p><b>level</b> - integer, a 0-based level/indent of the\n        question (for example, in case of \"1.2\" number, this will\n        be 1),</p>\n\n        <p>Clients may assume that these levels will be consistent,\n        and that they will describe a tree (in a DFS-order). The\n        level of first question will always be zero (note, that\n        other entries also MAY have the zero level).</p>\n    </li>\n    <li>\n        <b>display_text_html</b> - string, the content of the\n        question. It may contain any content, including\n        user-provided HTML, so your application should consider\n        this data unsafe (e.g. prone to XSS attacks),\n    </li>\n    <li>\n        <p><b>possible_answers</b> - a <b>list</b> of objects, each\n        describing an answer.</p>\n\n        <p>Each answer will have the following structure:</p>\n\n        <ul>\n            <li>\n                <b>id</b> - string, an ID of a possible answer,\n            </li>\n            <li>\n                <b>display_text_html</b> - string, content of the\n                answer. It may contain any content, including\n                user-provided HTML, so your application should\n                consider this data unsafe (e.g. prone to XSS\n                attacks),\n            </li>\n        </ul>\n    </li>\n\n            </ul>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": {
+    "deprecated_by": "services/views/survey2",
+    "present_until": null,
+    "reason": "\nThis method does not support some surveys (e.g. surveys with open questions) and\nwill treat them as non-existent.\n"
+  },
+  "is_internal": false
+}

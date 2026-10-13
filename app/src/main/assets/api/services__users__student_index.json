@@ -1,0 +1,97 @@
+{
+  "name": "services/users/student_index",
+  "short_name": "student_index",
+  "description": "\n\n        <p>\n            Retrieve lists of students, grouped by various criteria.\n        </p>\n\n        <p>The results of this method may vary on the permissions and roles of\n        your user. If you don't have proper permissions, then empty list of\n        results will be returned (no error will be raised). Currently, all\n        requests with any valid Access Token have access to everything, but\n        this is likely to change in the near future.</p>\n\n        <p>Note that you can use <b>programme_ids</b> or <b>country_id</b>,\n        but not both (they're mutually exclusive)!</p>\n    ",
+  "brief_description": "\nRetrieve lists of students.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#student_index",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "programme_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Pipe-separated list of programme IDs (usually a single\n                programme). Students of these programmes will be returned.</p>\n            "
+    },
+    {
+      "name": "country_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>\n                    <b>If you are an Administrative Consumer</b>, then you can use this method\n                    to retrieve all the students which have the nationality of the given country.\n                    Supply a single ISO 3166-1 alpha-2 code in this parameter.\n                </p>\n                <p>\n                    <b>If you have an Access Token</b>, then you can also use the special \"mine\" value,\n                    which will return the students of the same nationality as your user has.\n                    This will also work with non-administrative consumers, however the results\n                    can be very limited, depending on your scopes and the preferences of your\n                    user and other users of the same nationality (some students may agree\n                    to share more data than others).\n                </p>\n\n                <p><b>Important:</b> This parameter is designed for mobility applications and\n                it won't work for the Polish nationality. You will receive an empty response\n                if you supply 'PL', or when your user is Polish.</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "users|next_page|total",
+      "description": "\n\n                <p>Or, more precisely:\n                <b>users[id|first_name|last_name]|next_page|total</b></p>\n\n                <p>A selector of result fields you are interested in.\n                \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n            "
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "20",
+      "description": "\n\n                <p>The maximum number of items to return on one \"page\". The\n                maximum allowed value of num is 100.</p>\n            "
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\n\n                <p>Zero-based offset of the first item that should be included\n                in the response. (Or, in other words, the number of items to\n                strip from the beginning of the items-list.)</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>users</b> - a list of users which have matched your query.</p>\n\n                \n\n                <p>The length of this list is limited to <b>num</b> items. You\n                can access further results by specifying the <b>start</b>\n                argument. (The list is ordered by name.)</p>\n\n                <p>Each item on this list is a dictionary of the structure\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a>\n                method. You may access more fields with a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a>).</p>\n            </ul>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>next_page</b> -\n                    boolean, indicates if there is a next page of results for this\n                query;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>total</b> -\n                    integer, total number of matched items.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "users",
+      "description": "\n\n                <p>The length of this list is limited to <b>num</b> items. You\n                can access further results by specifying the <b>start</b>\n                argument. (The list is ordered by name.)</p>\n\n                <p>Each item on this list is a dictionary of the structure\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>user</a>\n                method. You may access more fields with a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a>).</p>\n            </ul>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "next_page",
+      "description": "\n\n                boolean, indicates if there is a next page of results for this\n                query\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "total",
+      "description": "\n\n                integer, total number of matched items\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

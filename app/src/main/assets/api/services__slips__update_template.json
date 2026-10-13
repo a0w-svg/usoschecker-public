@@ -1,0 +1,104 @@
+{
+  "name": "services/slips/update_template",
+  "short_name": "update_template",
+  "description": "\t\n\t<p>Change attributes of an existing slip template. To edit template's\n\tquestions, use <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#add_question\">add_question</a> and\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#update_question\">update_question</a> methods.</p>\n\n<p>Note, that your user has to hold proper privileges in order for you\nto use this method. However, if he does not, you will still receive a\nHTTP 200 response (see &quot;returns&quot; section).</p>\n\n<p><b>Important:</b> Please note the difference between:</p>\n\n<ul>\n<li>passing the parameter with an empty string value - in this case\n\twe will try to set the value of the appropriate field to an empty\n\tstring,</li>\n\n<li>not passing the parameter at all - in this case the current\n\tstate of the field will not be changed.</li>\n</ul>\n",
+  "brief_description": "Edit an existing slip template",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#update_template",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "tpl_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the template been edited.\n"
+    },
+    {
+      "name": "fac_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New faculty ID. For more information see\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#create_template\">create_template</a> method. If not\ngiven, faculty ID will not change.</p>\n"
+    },
+    {
+      "name": "name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New template name. For more information see\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#create_template\">create_template</a> method.</p>\n"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New template language. For more information see\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#create_template\">create_template</a> method.</p>\n"
+    },
+    {
+      "name": "state",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Code of the new state for this template. One of the values described\n\t<b>state</b> field in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#template\">template</a>\nmethod.</p>\n"
+    },
+    {
+      "name": "desc_for_issuers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tAdditional description for the issuers. This should be filled in case\n\tof templates which require some extra action while being issued. E.g.\n\tif the issuer needs to include some questions which are not included by\n\tdefault, or to define extra answerers, etc.\n"
+    },
+    {
+      "name": "questions_order",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tIf given, it must be a pipe-separated list of question IDs. All of\n\tthese questions must belong to this template. Questions will be\n\treordered according to the order in which they appeared in your list.\n\tIf the template contains more questions than you supplied, they will be\n\tmoved to the end of the list.\n"
+    },
+    {
+      "name": "connected_tpl_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>If given, it must be a pipe-separated list of template IDs. If\n\tgiven, it will <b>replace</b> the current values of\n\t<b>connected_tpl_ids</b> field. If you provide an empty string, all\n\tthe connections will be <b>removed</b>!</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true}</code></p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

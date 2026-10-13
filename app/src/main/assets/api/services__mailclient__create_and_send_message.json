@@ -1,0 +1,120 @@
+{
+  "name": "services/mailclient/create_and_send_message",
+  "short_name": "create_and_send_message",
+  "description": "\n\n        <p>Send simple plain text message in the name of a user.</p>\n\n        <p>This method bypasses the \"regular\" way of using the mailclient\n        module. Instead of requiring you to create the message first (via the\n        create_message method), and sending it afterwards (via the send_message\n        method), it allows you to do both - create it and send it - in a single\n        request. You will need to meet all requirements described in both of\n        these methods, otherwise the new message won't be sent (nor saved).</p>\n\n        <p>Unlike most other methods in this module, this method is accessible\n        to regular consumers - you don't need to be an administrative consumer\n        in order to use it. In a long run, more mailclient methods may become\n        accessible to the public, but - at this moment - only this method\n        is.</p>\n\n        <p>Note, that this method may put some additional restrictions upon you\n        and your users to prevent abuse (i.e. mass mailing). If we detect\n        possible abuse, <b>PotentialSpam</b> error may be raised. Eventually,\n        both you (the consumer), or your user, may be banned from sending\n        messages (resulting in <b>UserBanned</b> and <b>ConsumerBanned</b>\n        errors respectively).</p>\n    ",
+  "brief_description": "\nCreate and send a simple message.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#create_and_send_message",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "subject",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>Subject of the message. No more than\n                200 characters.</p>\n            "
+    },
+    {
+      "name": "content",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>Content of the message. No more than\n                15000 characters.</p>\n            "
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\n\n        <p>Language of headers and signatures added by USOS API to the message before\n        sending. Accepted values are <b>pl</b> and <b>en</b>.</p>\n    "
+    },
+    {
+      "name": "primary_group_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>List of primary group IDs that should be included in recipients list.</p>"
+    },
+    {
+      "name": "custom_group_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>List of custom group IDs should be included in recipients list.</p>"
+    },
+    {
+      "name": "user_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>List of user IDs that should be included in recipients list.</p>"
+    },
+    {
+      "name": "emails",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>List of email addresses that are part of this group.</p>"
+    },
+    {
+      "name": "send_summary",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n\n                <p>Should the summary report (as described in\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailing/#send_simple_message'>services/mailing/send_simple_message</a>\n                method) be sent to the user?</p>\n            "
+    },
+    {
+      "name": "send_to_myself",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n<p>Should the copy of the message be sent to the user?</p>"
+    },
+    {
+      "name": "content_format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "plain",
+      "description": "\n<p>Format of the message content.</p><p>Possible values: <b>plain</b>, <b>html</b>.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>Dictionary with a single <b>message_id</b> key - the ID of the newly\n        sent message. In case of bad request, you will get HTTP 400 with error\n        description.</p>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - message is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>addresses_limit_exceeded</b> -\n                                maximum number of addresses exceeded;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>consumer_banned</b> -\n                                application was banned from sending messages;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>content_required</b> -\n                                message content is empty;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>potential_spam</b> -\n                                message was rejected as potential spam;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>recipients_required</b> -\n                                list of recipients is empty;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>subject_required</b> -\n                                message subject is empty;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>user_banned</b> -\n                                you were banned from sending messages.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                custom group could not be found; <b>param_name</b> is equal to <b>custom_group_ids</b>;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                primary group could not be found; <b>param_name</b> is equal to <b>primary_group_ids</b>;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                user could not be found; <b>param_name</b> is equal to <b>user_ids</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,97 @@
+{
+  "name": "services/progs/student_programme",
+  "short_name": "student_programme",
+  "description": "\n\n        <p>Get information on a given student programme.</p>\n\n        <p>Visibility of the fields depends on many variables which are not\n        publicly documented. However, some general rules apply:</p>\n\n        <ul>\n            <li>You should always provide an Access Token (if you have\n            one).</p>\n\n            <li>If you want to have access to more objects and fields, then you\n            should probably ask your users for the <b>studies</b> scope.</li>\n\n            <li>Active students are \"more visible\" than inactive ones (more\n            fields can be read without the Access Token).</li>\n\n            <li>Staff members have \"more access\" than users outside of\n            staff. (However, you might need to gain access to some specific\n            scopes before you'll be able to see it.)</li>\n        </ul>\n    ",
+  "brief_description": "\nGet information on a given student programme.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "student_programme_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>ID of a student programme.</p>\n\n                <p>If the student programme does not exist <b>or you don't\n                have the access to view it</b>, you will get a HTTP 400\n                response.</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|programme",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of the student programme.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> -\n                    an object describing the user of this student_programme;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>programme</b> - an object describing the programme.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#programme'>programme</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - status of the student programme.</p>\n\n                \n\n            <p>If you don't have access to read this field, you will receive\n            <b>null</b>. If you do have access, then it will be a string - one\n            of the following codes:</p>\n\n            <ul>\n                <li>\n                    <b>active</b> - the student is currently studying on this\n                    programme,\n                </li>\n                <li>\n                    <b>cancelled</b> - the student has been removed from this\n                    programme,\n                </li>\n                <li>\n                    <b>graduated_end_of_study</b> - the student has\n                    successfully graduated the programme, and the programme\n                    <b>doesn't</b> end with a diploma exam,\n                </li>\n                <li>\n                    <b>graduated_before_diploma</b> - the student has\n                    successfully graduated the programme, and the programme\n                    <b>does</b> end with a diploma exam, but the student\n                    <b>didn't</b> pass this exam yet,\n                </li>\n                <li>\n                    <b>graduated_diploma</b> - the student has successfully\n                    graduated the programme, and the programme <b>does</b> end\n                    with a diploma exam, and the student <b>did</b> pass this\n                    exam.\n                </li>\n            </ul>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>admission_date</b> -\n                    date of admission of a student on this programme <b>or null</b>\n                if it is unknown <u><b>or</b></u> you don't have access to see\n                this field;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>stages</b> -\n                    List of stages for acquired progamms;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_primary</b> -\n                    True if this programme is marked as his/her primary programme.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>student_programme_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of the student programme.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nan object describing the user of this student_programme",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "programme",
+      "description": "\n\n                an object describing the programme\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n            <p>If you don't have access to read this field, you will receive\n            <b>null</b>. If you do have access, then it will be a string - one\n            of the following codes:</p>\n\n            <ul>\n                <li>\n                    <b>active</b> - the student is currently studying on this\n                    programme,\n                </li>\n                <li>\n                    <b>cancelled</b> - the student has been removed from this\n                    programme,\n                </li>\n                <li>\n                    <b>graduated_end_of_study</b> - the student has\n                    successfully graduated the programme, and the programme\n                    <b>doesn't</b> end with a diploma exam,\n                </li>\n                <li>\n                    <b>graduated_before_diploma</b> - the student has\n                    successfully graduated the programme, and the programme\n                    <b>does</b> end with a diploma exam, but the student\n                    <b>didn't</b> pass this exam yet,\n                </li>\n                <li>\n                    <b>graduated_diploma</b> - the student has successfully\n                    graduated the programme, and the programme <b>does</b> end\n                    with a diploma exam, and the student <b>did</b> pass this\n                    exam.\n                </li>\n            </ul>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "admission_date",
+      "description": "\n\n                date of admission of a student on this programme <b>or null</b>\n                if it is unknown <u><b>or</b></u> you don't have access to see\n                this field\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "stages",
+      "description": "\n\n                List of stages for acquired progamms\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_primary",
+      "description": "\nTrue if this programme is marked as his/her primary programme",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

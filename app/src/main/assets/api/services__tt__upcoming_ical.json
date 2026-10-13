@@ -1,0 +1,46 @@
+{
+  "name": "services/tt/upcoming_ical",
+  "short_name": "upcoming_ical",
+  "description": "\n\n        <p>Get iCalendar file with the user's upcoming events.</p>\n\n        <p>This method can be accessed anonymouosly so that it can be used with\n        the <a href='http://en.wikipedia.org/wiki/Webcal'>webcal\n        scheme</a>. If you don't have the <b>key</b>, then it has to be\n        accessed with the Access Token and the \"studies\" scope.</p>\n\n        <p>Upcoming events include only those events which are in near future.\n        Events in the past and events in the far future will not be included.\n        The exact definition of \"near future\" is left undocumented (and may\n        change in time).</p>\n    ",
+  "brief_description": "\nGet iCalendar file with the user's upcoming events",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#upcoming_ical",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            ID of the user. (If you use an Access Token, then it has to match\n            this user.)\n        "
+    },
+    {
+      "name": "lang",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Preferred language of the calendar and its entries. This should be\n            either <b>pl</b> or <b>en</b>.\n        "
+    },
+    {
+      "name": "key",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>Optional secret key generated for this user. Use the\n            <a href='https://usosapps.vistula.edu.pl/developers/api/services/tt/#upcoming_share'>upcoming_share</a> method to retrieve\n            it.</p>\n\n            <p>If <b>key</b> is provided, then no other authentication is\n            required. If you have the key, then you may access this method\n            anonymously.</p>\n        "
+    }
+  ],
+  "returns": "\n\n        <p>HTTP 200 response with the iCalendar file.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

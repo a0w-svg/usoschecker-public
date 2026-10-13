@@ -1,0 +1,141 @@
+{
+  "name": "services/mailclient/message",
+  "short_name": "message",
+  "description": "<p>\nGet information on a given message.</p>",
+  "brief_description": "\nGet information on a given message.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#message",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "message_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Message ID.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|subject",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    message ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>from_inst_address</b> - dictionary describing institutional address, which this message will be sent\n                    from, or <b>null</b> if user's email address should be used instead.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#inst_address'>services/instaddr/inst_address</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>subject</b> -\n                    subject of the message;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - status of the message.</p>\n\n                \n\n                    <p>Possible values:</p>\n                    <ul>\n                        <li>\n                            <p><b>draft</b> - message is a draft;</p>\n                        </li>\n                        <li>\n                            <p><b>pending</b> - <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#send_message'>send_message</a>\n                            has been called, but a sending process has not finished yet;</p>\n                        </li>\n                        <li>\n                            <p><b>error</b> - the sending process has been completed, but\n                            USOS API encountered problems for some of the recipients;</p>\n                        </li>\n                        <li>\n                            <p><b>sent</b> - the message has been successfully sent to all\n                            recipients.</p>\n                        </li>\n                    </ul>\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>date</b> -\n                    the date of last modification; in case of sent messages\n                    this will be the date the message was sent.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>send_summary</b> -\n                    true if the summary report (as described in\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailing/#send_simple_message'>services/mailing/send_simple_message</a> method)\n                    should be sent to the user, false otherwise;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>send_to_myself</b> -\n                    true if the copy of the message be sent to the user, false otherwise;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>content</b> -\n                    content of the message;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>content_format</b> -\n                    format of the message content - either <b>plain</b> or <b>html</b>;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attachments_lifetime</b> -\n                    the number of days the attachments are available for;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>recipients_valid</b> -\n                    is the list of recipients up-to-date? (always true for sent messages);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>recipients_count</b> -\n                    the total number of recipients of the message; this includes users who do\n                    not have an email address;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>emails_count</b> -\n                    the number of recipients the message will be (or was) really sent; this\n                    excludes users who do not have an email address;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attachments</b> - a list of dictionaries describing message attachments.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#attachment'>attachment</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                message could not be found; <b>param_name</b> is equal to <b>message_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nmessage ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "from_inst_address",
+      "description": "\n\n                    dictionary describing institutional address, which this message will be sent\n                    from, or <b>null</b> if user's email address should be used instead\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "subject",
+      "description": "\nsubject of the message",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n                    <p>Possible values:</p>\n                    <ul>\n                        <li>\n                            <p><b>draft</b> - message is a draft;</p>\n                        </li>\n                        <li>\n                            <p><b>pending</b> - <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#send_message'>send_message</a>\n                            has been called, but a sending process has not finished yet;</p>\n                        </li>\n                        <li>\n                            <p><b>error</b> - the sending process has been completed, but\n                            USOS API encountered problems for some of the recipients;</p>\n                        </li>\n                        <li>\n                            <p><b>sent</b> - the message has been successfully sent to all\n                            recipients.</p>\n                        </li>\n                    </ul>\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "date",
+      "description": "\n\n                    the date of last modification; in case of sent messages\n                    this will be the date the message was sent\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "send_summary",
+      "description": "\n\n                    true if the summary report (as described in\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailing/#send_simple_message'>services/mailing/send_simple_message</a> method)\n                    should be sent to the user, false otherwise\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "send_to_myself",
+      "description": "\ntrue if the copy of the message be sent to the user, false otherwise",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "content",
+      "description": "\ncontent of the message",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "content_format",
+      "description": "\nformat of the message content - either <b>plain</b> or <b>html</b>",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "attachments_lifetime",
+      "description": "\nthe number of days the attachments are available for",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "recipients_valid",
+      "description": "\nis the list of recipients up-to-date? (always true for sent messages)",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "recipients_count",
+      "description": "\n\n                    the total number of recipients of the message; this includes users who do\n                    not have an email address\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "emails_count",
+      "description": "\n\n                    the number of recipients the message will be (or was) really sent; this\n                    excludes users who do not have an email address\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "attachments",
+      "description": "\n\n                    a list of dictionaries describing message attachments\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,169 @@
+{
+  "name": "services/meetings/participant",
+  "short_name": "participant",
+  "description": "\nGet information about meeting participant.",
+  "brief_description": "\nGet information about meeting participant.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/meetings/#participant",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "participant_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nParticipant ID"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Participant ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_external</b> - boolean, is participant from outside of university?.</p>\n\n                \n\n                Participant is defined as from outside of university if they were\n                registered with name and email instead of USOS user record.\n                See also <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#sign_up_non_usos_person'>sign_up_non_usos_person</a>.\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - user participant or <b>null</b> if participant is external (as defined in <b>is_external</b> field).</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>meeting_date</b> - meeting date for this participant entry.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#meeting_date'>meeting_date</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>external_first_name</b> -\n                    first name of externally registered participant or <b>null</b> if participant is not external;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>external_last_name</b> -\n                    first name of externally registered participant or <b>null</b> if participant is not external;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>external_email</b> -\n                    email address of externally registered participant or <b>null</b> if participant is not external or email was not provided;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>external_contact</b> -\n                    extra contact data of externally registered participant or <b>null</b> if participant is not external or extra contact data was not provided;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> - registration status.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>accepted</b> - user is accepted to meeting</p></li>\n<li><p><b>waiting</b> - user is waiting for acceptance</p></li>\n<li><p><b>rejected</b> - user has been rejected</p></li>\n<li><p><b>token_created</b> - registration token has been generated</p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_reserve</b> -\n                    boolean, is user on reserve list?;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>lecturer_actions</b> -\n                    allowed actions for lecturer;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user_actions</b> -\n                    allowed actions for user;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>public_notes</b> - list of note instances which have a public note for participant.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#note'>note</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>private_notes</b> - list of note instances which have a private note for participant.</p>\n\n                \nNote that this field can be only accessed by meeting lecturer. Otherwise it will always return empty list.\n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#note'>note</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>substantiation</b> - substantiation for meeting or <b>null</b> if no substantiation was provided.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#substantiation'>substantiation</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>rejection_substantiation</b> - substantiation for rejection or <b>null</b> if no substantiation was provided.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#substantiation'>substantiation</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>substantiation_message</b> -\n                    custom substantiation message or <b>null</b> if it was not provided;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>rejection_substantiation_message</b> -\n                    custom substantiation rejection message or <b>null</b> if it was not provided;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number_in_queue</b> -\n                    integer, position of user in meeting queue or <b>null</b> if user is rejected.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nParticipant ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_external",
+      "description": "\n\n                Participant is defined as from outside of university if they were\n                registered with name and email instead of USOS user record.\n                See also <a href='https://usosapps.vistula.edu.pl/developers/api/services/meetings/#sign_up_non_usos_person'>sign_up_non_usos_person</a>.\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nuser participant or <b>null</b> if participant is external (as defined in <b>is_external</b> field)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "meeting_date",
+      "description": "\nmeeting date for this participant entry",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "external_first_name",
+      "description": "\nfirst name of externally registered participant or <b>null</b> if participant is not external",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "external_last_name",
+      "description": "\nfirst name of externally registered participant or <b>null</b> if participant is not external",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "external_email",
+      "description": "\nemail address of externally registered participant or <b>null</b> if participant is not external or email was not provided",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "external_contact",
+      "description": "\nextra contact data of externally registered participant or <b>null</b> if participant is not external or extra contact data was not provided",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>accepted</b> - user is accepted to meeting</p></li>\n<li><p><b>waiting</b> - user is waiting for acceptance</p></li>\n<li><p><b>rejected</b> - user has been rejected</p></li>\n<li><p><b>token_created</b> - registration token has been generated</p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_reserve",
+      "description": "\nboolean, is user on reserve list?",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "lecturer_actions",
+      "description": "\nallowed actions for lecturer",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user_actions",
+      "description": "\nallowed actions for user",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "public_notes",
+      "description": "\nlist of note instances which have a public note for participant",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "private_notes",
+      "description": "\nNote that this field can be only accessed by meeting lecturer. Otherwise it will always return empty list.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "substantiation",
+      "description": "\nsubstantiation for meeting or <b>null</b> if no substantiation was provided",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "rejection_substantiation",
+      "description": "\nsubstantiation for rejection or <b>null</b> if no substantiation was provided",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "substantiation_message",
+      "description": "\ncustom substantiation message or <b>null</b> if it was not provided",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "rejection_substantiation_message",
+      "description": "\ncustom substantiation rejection message or <b>null</b> if it was not provided",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number_in_queue",
+      "description": "\ninteger, position of user in meeting queue or <b>null</b> if user is rejected",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

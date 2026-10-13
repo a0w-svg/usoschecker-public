@@ -1,0 +1,97 @@
+{
+  "name": "services/phones/select",
+  "short_name": "select",
+  "description": "\n\n        <p>Get the phone numbers bound to the given entities.</p>\n\n        <p>You can retrieve the phone numbers of multiple entities at the same\n        time, but <b>all of these entities must be of the same class</b>. So,\n        for example, if you want to get the numbers of faculties X and Y, and\n        of the user Z, then you must call this method twice - once with the\n        <code>fac_id=X|Y</code> parameter, and then again with\n        <code>user_id=Z</code>.</p>\n\n        <p>Note, that although all the parameters are optional, you still must\n        use at least one of them in order to get the results. The IDs of the\n        entities are not validated (empty lists will be returned for\n        non-existing entities).</p>\n    ",
+  "brief_description": "\nGet the phone numbers bound to the given entities.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/phones/#select",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "number|comment",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "fac_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>List of faculty IDs.</p>\n        "
+    },
+    {
+      "name": "user_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>List of user IDs. Note, that this method will return only\n            <b>personal</b> phone numbers of these users. If you are looking\n            for offical, work-related phone numbers of staff members, then you\n            should use the <b>phone_numbers</b> field of the\n            <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method.</p>\n        "
+    },
+    {
+      "name": "building_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>List of building IDs.</p>\n        "
+    },
+    {
+      "name": "dorm_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>List of dormitory IDs.</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary with all the entity IDs mapped to its keys. For every\n        key, its value will contain the (unordered) <b>list</b> of phone\n        numbers associated with the entity by this ID. Each phone number will\n        be represented as a dictionary of the following structure:</p>\n\n        \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>number</b> - a string with the phone number, exactly as it is stored in the database.</p>\n\n                \n\n                <p>Please note, that it may contain spaces, dashes, parentheses\n                and various other special characters, and sometimes even notes\n                with complex utf-8 characters! This field is not guaranteed to\n                contain a valid phone number (although it should!).</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    a LangDict object, optional comment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type_id</b> - string with a \"phone type code\".</p>\n\n                \n\n                <p>This used to indicate the type of the phone number (e.g.\n                \"STA\" for landline, \"KOM\" for mobile, \"FAX\" for fax), but it is\n                quite obsolete nowadays (and purposefully underdocumented). Our\n                advice is not to use this field.</p>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "number",
+      "description": "\n\n                <p>Please note, that it may contain spaces, dashes, parentheses\n                and various other special characters, and sometimes even notes\n                with complex utf-8 characters! This field is not guaranteed to\n                contain a valid phone number (although it should!).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\na LangDict object, optional comment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type_id",
+      "description": "\n\n                <p>This used to indicate the type of the phone number (e.g.\n                \"STA\" for landline, \"KOM\" for mobile, \"FAX\" for fax), but it is\n                quite obsolete nowadays (and purposefully underdocumented). Our\n                advice is not to use this field.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

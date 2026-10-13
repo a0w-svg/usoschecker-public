@@ -1,0 +1,144 @@
+{
+  "name": "services/slips/search_slips",
+  "short_name": "search_slips",
+  "description": "\t\n\t<p>This method allows you to search among the list of all issued slips\n\twhich your user has access to. You can use various filters in your\n\tsearch - they should allow you to use this method in many contexts.</p>\n\t\n\t<p><b>Note:</b> Slips visibility may depends on the scopes the user has\n\tprovided access to you.</p>\n",
+  "brief_description": "Search among the issued slips",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#search_slips",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "langpref",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tA code of the preferred language (&quot;pl&quot; or &quot;en&quot;). It may influence the\n\torder and other display properties of the returned matches.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\t\n\tPipe-separated list of slip fields you'd like to receive along the\n\tresults. See the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method for the\nlist of valid values.\n"
+    },
+    {
+      "name": "tpl_fields",
+      "is_required": false,
+      "is_deprecated": true,
+      "type": "",
+      "default_value": "id",
+      "description": "\t\n\t<p>Deprecated. Use a <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> instead (e.g.\n<code>fields=template[id]</code>).</p>\n\n<p>Pipe-separated list of template fields you'd like to receive in the\n<b>template</b> field. See the\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#template\">template</a> method for the valid\nvalues.</p>\n"
+    },
+    {
+      "name": "my_role",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(all possible roles)",
+      "description": "\t\n\t<p>Pipe-separated list of user roles, as defined in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method. If given, the results\nwill contain only these slips in which the current user &quot;has&quot; <i>at\nleast one</i> of the referenced roles.</p>\n\n<p><i>Note:</i> Some roles (i.e. &quot;template_admin&quot;) require access to\nhigher scopes (&quot;slips_admin&quot;) in order for the slips to become\nvisible.</p>\n"
+    },
+    {
+      "name": "issued_by",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of user IDs. If given, the results will contain\n\tonly these slips which were issued <b>by</b> one of the referenced\n\tusers (the possible issuers of the slip).\n"
+    },
+    {
+      "name": "issued_for",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of user IDs. If given, the results will contain\n\tonly these slips which were issued <b>for</b> one of the referenced\n\tusers (the possible clients of the slip).\n"
+    },
+    {
+      "name": "state",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of slip states. If given, the results will contain\n\tonly these slips which are in any of these states.\n"
+    },
+    {
+      "name": "tpl_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of template IDs. If given, the results will contain\n\tonly these slips which were issued using any of the given templates.\n"
+    },
+    {
+      "name": "fac_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of faculty IDs. If given, the results will contain\n\tonly these slips which were issued using a template bound to any of\n\tthe given faculties.\n"
+    },
+    {
+      "name": "programme_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of study programme IDs. If given, the results will\n\tcontain only these slips which were bound to any of the given study\n\tprogrammes.\n"
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "6",
+      "description": "\t\n\tThe number of search results to return. The maximum allowed value is\n\t100.\n"
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\t\n\tThe index of the first matching search result that is to be included\n\tin the response (zero-based).\n"
+    },
+    {
+      "name": "order_by",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "-date_created",
+      "description": "\t\n\t<p>Pipe-separated list of fields to order by. This must be a subset of\n\twhat you have given in your <b>fields</b> parameter. Each field\n\treference might be preceded with a dash to indicate descending order.\n\tCurrently allowed fields to order by:</p>\n\t\n\t<ul>\n\t\t<li><b>state</b>,</li>\n\t\t<li><b>date_created</b>.</li>\n\t</ul>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>items</b> - a list of matching slips. Each item is a slip\n\t\t\tobject, as returned by the\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#slip\">slip</a> method. It will contain\n\t\tall the fields requested with the <b>fields</b> parameter (only\n\t\t<b>id</b> by default).</p>\n\t</li>\n\t<li>\n\t\t<b>next_page</b> - boolean, indicates if there is a next page\n\t\tof results for this query.\n\t</li>\n\t<li>\n\t\t<b>total</b> - integer, a total number of matched items; if the\n\t\tnumber of matched items is huge, then USOS API may return an\n\t\tapproximate count (especially if <b>start</b> is equal to 0).\n\t</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

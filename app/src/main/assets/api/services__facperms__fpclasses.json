@@ -1,0 +1,54 @@
+{
+  "name": "services/facperms/fpclasses",
+  "short_name": "fpclasses",
+  "description": "\n\n        <p>Get information on multiple faculty permission classes.</p>\n    ",
+  "brief_description": "\nGet information on multiple permission classes.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/facperms/#fpclasses",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fpclass_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Pipe-separated list of faculty permission class IDs.\n        "
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/facperms/#fpclass'>fpclass</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary: your <b>fpclass_ids</b> will be mapped to dictionary's\n        keys, and each value will contain the description of one permission\n        class, as defined in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/facperms/#fpclass'>fpclass</a>\n        method.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

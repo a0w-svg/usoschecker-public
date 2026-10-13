@@ -1,0 +1,107 @@
+{
+  "name": "services/credits/student_programme",
+  "short_name": "student_programme",
+  "description": "\t\n\tReturns dictionary with numbers of credits used on specified student programme\n",
+  "brief_description": "Get sums of credits used on the given student programme.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/credits/#student_programme",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "students_programme_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "int",
+      "default_value": null,
+      "description": "\t\n\tID of students programme.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "students_programme_id",
+      "description": "\tID of students_programme",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "used_external_credits",
+      "description": "\tECTS used on previous programs in the framework of this eligibility",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "course_credits",
+      "description": "\tECTS used on the selected program - courses",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "external_course_credits",
+      "description": "\tECTS used on the selected program - external courses",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "decisions_credits",
+      "description": "\tECTS used on the selected program - decisions",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "paid_by_ministry",
+      "description": "\tDictionary describing in details ECTS points paid by ministry",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "paid_by_university",
+      "description": "\tDictionary describing in details ECTS points paid by university",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "paid_by_student",
+      "description": "\tDictionary describing in details ECTS points paid by student",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "paid_by_no_one",
+      "description": "\tDictionary describing in details ECTS points paid by no one",
+      "is_primary": false,
+      "is_secondary": false
+    },
+    {
+      "name": "diploma_credits",
+      "description": "\tECTS used on diploma and final exam",
+      "is_primary": false,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

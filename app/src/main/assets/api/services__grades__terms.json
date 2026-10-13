@@ -1,0 +1,81 @@
+{
+  "name": "services/grades/terms",
+  "short_name": "terms",
+  "description": "<p>\nGet grades of a user on given terms</p>",
+  "brief_description": "\nGet grades of a user on given terms",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/grades/#terms",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "grades"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "term_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\npipe-separated list of academic term ids"
+    },
+    {
+      "name": "course_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\npipe-separated list of course ids to limit results further"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "value_symbol|passes|value_description|exam_id|exam_session_number",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector must contain subset of\n    <b>primary</b> fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade'>grade</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        Multilevel dictionary mapping term_id and course_id to object returned by\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#exam'>exam</a>.\n        If term_id given in the term_ids param does not exist it will be mapped to Null.\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "course_grades",
+      "description": "\n\n            Dictionary describing grades related to course edition's main exam. Returned\n            dictionary will have structure as defined\n            in <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#exam'>exam</a> method,\n            or null if course edition is not related with any exam report\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_units_grades",
+      "description": "\n\n            Dictionary mapping course unit ID that are related to exam report\n            to dictionaries describing exam grades\n            as defined in <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#exam'>exam</a> method\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": {
+    "deprecated_by": "services/grades/terms2",
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

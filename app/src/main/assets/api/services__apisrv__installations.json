@@ -1,0 +1,38 @@
+{
+  "name": "services/apisrv/installations",
+  "short_name": "installations",
+  "description": "\t\n\t<p>Get a list of all public USOS API installation servers (including\n\tthis one).</p>\n\t\n\t<p>There are many institutions that use USOS API. Each of them\n\thas it's own database and it's own USOS API server. This method\n\tallows you to access a list of all public USOS API servers.</p>\n",
+  "brief_description": "Get a list of all public USOS API installations.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apisrv/#installations",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of dictionaries, each dictionary in of the same structure\n\tthat the one returned in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/apisrv/#installation\">installation</a> method, but the number\nof fields is limited to the following:</p>\n\n<ul>\n\t<li><b>base_url</b></li>\n\t<li><b>version</b></li>\n\t<li><b>institution_name</b></li>\n\t<li><b>contact_emails</b></li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

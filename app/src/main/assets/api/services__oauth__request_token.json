@@ -1,0 +1,38 @@
+{
+  "name": "services/oauth/request_token",
+  "short_name": "request_token",
+  "description": "\t\n\t<p>Get a new unauthorized OAuth Request Token. This token is bound to\n\tthe Consumer it was issued to. It has a short expiration date and\n\tcan be used in one way only - first it has to get authorized by\n\tthe user, then it has to be exchanged for an Access Token.</p>\n",
+  "brief_description": "Get a new unauthorized OAuth Request Token.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/oauth/#request_token",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "oauth_callback",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>An URI which you want a User to be redirected to after a\n\tsuccessful Request Token Authorization (see &quot;authorize&quot; method).\n\tIf the client is unable to receive callbacks, the parameter\n\tmust be set to &quot;oob&quot;, USOS API will provide a user with a\n\tPIN code in this case.</p>\n\t\n\t<p>Also note, that some URI schemes are not allowed here for security\n\treasons. If you're developing a mobile application and you want to\n\tuse a custom scheme, then we advise you to use a scheme unique to your\n\tapplication (e.g. your Android package name).</p>\n\t\n\t<p>Consult <a href=\"http://oauth.net/documentation/spec/\">OAuth\ndocumentation</a> for details.</p>\n"
+    },
+    {
+      "name": "scopes",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\t\n\t<p>Pipe-separated list of scope keys. Indicates your application requirements\n\tfor User's resources access.</p>\n\t<p>This is an USOS API specific argument, it is not part of OAuth standard.\n\tYou should be able to use it along with existing OAuth libraries - just\n\tincorporate it into the base Request Token URL.</p>\n\t<p>See <a href=\"/developers/api/authorization/%23scopes\">here</a>\nfor the list of all available scope keys.</p>\n<p>Please note, that the Access Token you receive in the end of this authorization\nprocess, will also allow you access all the scopes which the user has granted your\napplication access in all <b>previous</b> authorization requests.</p>\n"
+    }
+  ],
+  "returns": "\t\n\t<p>Standard OAuth 1.0a Token response - a string in a form-encoded format:</p>\n\t<pre>oauth_token=...&amp;oauth_token_secret=...&amp;oauth_callback_confirmed=true</pre>\n\t<p>You <b>must</b> be prepared that there might be more parameters returned\n\tin the future (you should ignore them gracefully).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

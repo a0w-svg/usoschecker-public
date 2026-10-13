@@ -1,0 +1,87 @@
+{
+  "name": "services/payments/installment",
+  "short_name": "installment",
+  "description": "<p>\nAn installment object</p>",
+  "brief_description": "\nAn installment object",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/payments/#installment",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "payments"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "installment_plan_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an installment plan"
+    },
+    {
+      "name": "number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nnumber of installment"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of following fields and their values:\n                    \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>amount</b> -\n                    amount of an installment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>payment_date</b> -\n                    a payment date;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    a langdict object with description;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>installment_plan_id</b> -\n                    ID of a plan;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number</b> -\n                    number of installment.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "amount",
+      "description": "\namount of an installment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "payment_date",
+      "description": "\na payment date",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\na langdict object with description",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "installment_plan_id",
+      "description": "\nID of a plan",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number",
+      "description": "\nnumber of installment",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

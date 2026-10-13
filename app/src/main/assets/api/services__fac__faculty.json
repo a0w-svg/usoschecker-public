@@ -1,0 +1,54 @@
+{
+  "name": "services/fac/faculty",
+  "short_name": "faculty",
+  "description": "\t\n\tGet information on a given faculty.\n",
+  "brief_description": "Get information on a given faculty.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fac_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the faculty. If it doesn't exist, you will get a HTTP 400 error.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\t\n\tPipe-separated list of fields you're interested in. This must be a\n\tsubset of keys described in the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the fields you have supplied in your <b>fields</b>\n\tparameter. Available fields are:</p>\n\t\n\t<ul>\n\t\t<li><b>id</b> - the ID of faculty,</li>\n\t\t<li>\n\t\t\t<b>name</b> - a LangDict object with the name of the faculty,\n\t\t</li>\n\t\t<li><b>profile_url</b> - faculty's USOSweb URL,</li>\n\t\t<li><b>homepage_url</b> - faculty's home page URL,</li>\n\t\t<li>\n\t\t\t<b>phone_numbers</b> - a list of strings, each string represents\n\t\t\tone phone number of this faculty (in undocumented format),\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>phone_numbers2</b> - a list of objects, each object represents\n\t\t\tone phone number of this faculty.</p>\n\t\t\t\n\t\t\t<p>Currently available subfields:</p>\n\t\t\t\n\t\t\t<ul>\n\t\t\t\t<li><b>comment</b> - phone number comment (might be null),</li>\n\t\t\t\t<li><b>number</b> - string with phone number (in undocumented\n\t\t\t\t\tformat),</li>\n\t\t\t\t<li><b>type</b> - type of phone number.</li>\n\t\t\t</ul>\n\t\t</li>\n\t\t<li>\n\t\t\t<b>postal_address</b> - string; short, plain-text postal\n\t\t\taddress of the faculty <b>or null</b> if address is unknown,\n\t\t</li>\n\t\t<li>\n\t\t\t<b>email</b> - string: faculty's email address.\n\t\t</li>\n\t\t<li>\n\t\t\t<b>is_public</b> - boolean; indicates if this faculty should be\n\t\t\tshown to an &quot;average user&quot;. There are many faculties which serve\n\t\t\tpurely administrative purpose and are of no interest to most of\n\t\t\tthe users. E.g. USOSweb displays only those faculties which are\n\t\t\tmarked as public.\n\t\t</li>\n\t\t<li>\n\t\t\t<p><b>stats</b> - various faculty statistics. You need to use a\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> to access these values!</p>\n\t\t\n\t\t<p><b>Important:</b> These values are approximate and can be\n\t\t<b>null</b>. Null means that we cannot determine the value at\n\t\tthe moment (or you don't have access to see it).</p>\n\t\t\n\t\t<ul>\n\t\t\t<li><b>course_count</b> - total number of courses organized\n\t\t\t\tby this faculty and its subfaculties,</li>\n\t\t\t\n\t\t\t<li><b>programme_count</b> - total number of programmes run\n\t\t\t\tby this faculty and its subfaculties,</li>\n\t\t\t\n\t\t\t<li><b>staff_count</b> - total number of staff members\n\t\t\t\temployed by this faculty and its subfaculties,</li>\n\t\t\t\n\t\t\t<li><b>subfaculty_count</b> - total number of subfaculties\n\t\t\t\tof this faculty, including all the descendant faculties\n\t\t\t\t(subfaculties of the subfaculties),</li>\n\t\t\t\n\t\t\t<li><b>public_subfaculty_count</b> - as above, but only\n\t\t\t\tpublic faculties will count (in most of the cases you\n\t\t\t\tprobably should use this one, instead of the one\n\t\t\t\tabove!).</li>\n\t\t</ul>\n\t</li>\n\t<li>\n\t\t<p><b>path</b> - a list of ancestor faculties, starting from\n\t\tthe root, and not including <i>this</i> faculty. For root\n\t\tfaculties, this list will be empty.</p>\n\t\t\n\t\t<p>Each item on this list is a faculty object, as returned by\n\t\tthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty\">faculty</a> method. You must\n\tuse the <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> to supply the list of fields\nwhich you require. You can use only a subset of faculty fields\nin this subfield selector: only <b>id</b>, <b>name</b> and\n<b>profile_url</b> are allowed.</p>\n</li>\n<li>\n<p><b>static_map_urls</b> - various maps of the surrounds of\nthe faculty compound (with the faculty marked, if possible).\nUse the <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> to choose the map size(s).</p>\n\n<p>Currently available subfields:</p>\n\n<ul>\n<li><b>100x100</b> - 100px x 100px,</li>\n<li><b>200x200</b> - 200px x 200px,</li>\n<li><b>300x300</b> - 300px x 300px,</li>\n<li><b>400x200</b> - 400px x 200px,</li>\n<li><b>600x300</b> - 600px x 300px,</li>\n<li><b>800x400</b> - 800px x 400px,</li>\n<li><b>1000x250</b> - 1000px x 250px.</li>\n</ul>\n\n<p>Every one of these fields may contain <b>null</b> and you\nshould be prepared for that (some faculties simply don't have\nany exact location).</p>\n\n<p>Even when it's not null, the URL is <b>NOT</b> guaranteed to\nbe valid. For example, if our tile-map backend fails on us,\nthen the URL will lead you to a HTTP 404 page. We will try to\nreturn <b>null</b> if we expect the URL to be invalid, but we\ndo not guarantee this.</p>\n\n<p>The image which the URL points to, <b>should</b> be cached\naccording to its <i>Cache-Control</i> and <i>Expires</i>\nheaders. If you're displaying the image in a browser then you\ndon't have to worry about the caching yourself (the browser\nwill cache it for you).</p>\n</li>\n<li>\n<p><b>logo_urls</b> - the URLs of the logo of the faculty, in various\ndimensions, <b>or a set URLs of placeholder images</b> if this\nfaculty does not have a logo. Use the <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> to\nchoose the wanted size/dimensions of the logo.</p>\n\n<p>Currently available subfields:</p>\n\n<ul>\n<li><b>50x50</b> - 50px x 50px,</li>\n<li><b>100x100</b> - 100px x 100px,</li>\n<li><b>200x200</b> - 200px x 200px,</li>\n<li>\n<p><b>screen</b> - full-screen version of the logo, the\ndimensions are undocumented and may vary on faculty\nand/or USOS API version (since screens are getting\nbigger in time).</p>\n\n<p>Note, that in some rare cases, this image can be\nactually smaller than the others. This happens when we\ndon't have a high resolution logo of a faculty and the\noriginal has to be enlarged in order to fit into\n<b>200x200</b> dimensions, etc.</p>\n</li>\n</ul>\n\n<p>The image which the URL points to, <b>should</b> be cached\naccording to its <i>Cache-Control</i> and <i>Expires</i>\nheaders. If you're displaying the image in a browser then you\ndon't have to worry about the caching yourself (the browser\nwill cache it for you).</p>\n</li>\n<li>\n<p><b>cover_urls</b> - the URLs of the cover of the faculty, in\nvarious dimensions, <b>or a set of nulls</b> if this faculty\ndoes not have a cover. Use the <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields\">subfield selector</a> to choose\nthe wanted size/dimensions of the cover.</p>\n\n<p>Currently available subfields:</p>\n\n<ul>\n<li><b>400x200</b> - 400px x 200px,</li>\n<li><b>1000x250</b> - 1000px x 250px,</li>\n<li><b>1000x350</b> - 1000px x 350px,</li>\n<li>\n<p><b>screen</b> - full-screen version of the cover; the\nexact dimensions are undocumented and may vary on\nfaculty and/or USOS API version (since screens are\ngetting bigger in time).</p>\n\n<p>Note, that in some rare cases, this image can be\nactually smaller than the others. This happens when we\ndon't have a high resolution cover of a faculty and the\noriginal has to be enlarged in order to fit into\n<b>400x200</b> dimensions, etc.</p>\n</li>\n</ul>\n\n<p>The image which the URL points to, <b>should</b> be cached\naccording to its <i>Cache-Control</i> and <i>Expires</i>\nheaders. If you're displaying the image in a browser then you\ndon't have to worry about the caching yourself (the browser\nwill cache it for you).</p>\n</li>\n<li>\n<p><b>pdf_factsheet_url</b> - string <b>or null</b>; If not\nnull, then it will contain a publicly accessible URL of the\nfaculty's PDF factsheet (a collection of information for\nincoming mobility students, and external IRO staff\nmembers).</p>\n</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

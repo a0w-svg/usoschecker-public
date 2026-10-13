@@ -1,0 +1,57 @@
+{
+  "name": "services/crstests/update_points",
+  "short_name": "update_points",
+  "description": "\t\n\tThis method enables a lecturer to give and change already given points in a particular node.\n\tPlease see the note about automatic grading (<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#algorithm_note\">algorithm note</a>).\n",
+  "brief_description": "Give points to students.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#update_points",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "staff_perspective",
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "new_points",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tDictionary mapping from student ids to dictionaries of the following structure\n\t(these fields  match the fields of the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#TestPointsObject\">TestPointsObject</a> object):\n<ul>\n\t<li> <b>public_comment</b> - Comment intended to be viewed by the student (maximal length is 300\n\t\tcharacters)</li>\n\t<li> <b>points</b> - number of points given to the student</li>\n\t\n\t<li> <b>last_changed</b> -\n\t\tThis field is used to prevent simultaneous update of points by two graders.\n\t\tIt should be set to the 'last_changed' field You should previously fetch,\n\t\tor null if You believe a points for this student haven't been given yet.\n\t\t\n\t\tSo the workflow to use this method is:\n\t\tFirstly fetch available points to retrieve 'last_changed' fields.\n\t\tThen try to update points using the 'last_changed' values You fetched.\n\t</li>\n</ul>\n"
+    },
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the task node."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tIf the method succeeds a dictionary with single key 'success' and value true will be returned.\n\tIn case of the failure i.e. You are trying to modify grades that were modified in the meantime\n\t('last_changed' parameters didn't match) we will respond with HTTP 400.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

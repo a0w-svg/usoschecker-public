@@ -1,0 +1,78 @@
+{
+  "name": "services/facperms/replace",
+  "short_name": "replace",
+  "description": "<p>\nINSERT new or UPDATE existing user-faculty-permission row.</p>",
+  "brief_description": "\nINSERT new or UPDATE existing user-faculty-permission row.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/facperms/#replace",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fpclass_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Faculty permission class ID.\n        "
+    },
+    {
+      "name": "user_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            User ID.\n        "
+    },
+    {
+      "name": "fac_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Faculty ID.\n        "
+    },
+    {
+      "name": "with_subfaculties",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            By default, the permissions are propagated down the tree of\n            facultues. Set this to <b>false</b> if you want the permission to\n            effect only this single faculty (without its subfaculties).\n        "
+    },
+    {
+      "name": "auto_remove_redundant",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\n\n            <p>By default, if the change would have rendered some of the\n            existing permissions <i>redundant</i>, then the change will be\n            aborted (with a proper user message).</p>\n\n            <p>Set this to <b>true</b> if you'd like all the redundant entries\n            removed instead.</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p><code>{\"success\": true, \"existed\": false}</code> if the insert\n        succeeded.</p>\n\n        <p><code>{\"success\": true, \"existed\": true}</code> if the exact same\n        row was already present and it was updated.</p>\n\n        <p>In case of failure, use the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages'>user_messages field</a>\n        to display a proper message for the user.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,46 @@
+{
+  "name": "services/blobbox/delete",
+  "short_name": "delete",
+  "description": "\tDelete a blob (or multiple blobs).",
+  "brief_description": "Delete a blob (or multiple blobs).",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#delete",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of blob IDs (no more than 500). You may only\n\tdelete blobs which you have uploaded yourself. All other blob IDs\n\twill be <b>ignored</b>.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t<ul>\n\t\t<li>\n\t\t\t<p><b>matched</b> - list of blob IDs which were actually\n\t\t\tdeleted (they still existed and were owned by you).</p>\n\t\t\t<p>Note, that if you set expiry times for your blobs, then they\n\t\t\tmight have been deleted automatically before you called this\n\t\t\tmethod.</p>\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,46 @@
+{
+  "name": "services/events/test_my_fcm",
+  "short_name": "test_my_fcm",
+  "description": "\n\n        Test your FCM instances by sending a notification with supplied message. The notification payload will be\n        consistent with a real notification.\n    ",
+  "brief_description": "\nSend a notification to your FCM instances",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events/#test_my_fcm",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "message",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nA message payload to send in the notification"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nAn empty dictionary.",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,103 @@
+{
+  "name": "services/registrations/ranking",
+  "short_name": "ranking",
+  "description": "<p>\nGet details of specified ranking</p>",
+  "brief_description": "\nGet details of specified ranking",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/registrations/#ranking",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "ranking_code",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nRanking code"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "code|name|description",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>code</b> -\n                    Code;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    LangDict, ranking name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    LangDict, description;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_summary</b> -\n                    is summary;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_group_flag</b> -\n                    Course group flag;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>ranking_code</b> -\n                    Ranking code;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - An associated faculty.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>precision</b> -\n                    Precision.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "code",
+      "description": "\nCode",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nLangDict, ranking name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\nLangDict, description",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_summary",
+      "description": "\nis summary",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_group_flag",
+      "description": "\nCourse group flag",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "ranking_code",
+      "description": "\nRanking code",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nAn associated faculty",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "precision",
+      "description": "\nPrecision",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,81 @@
+{
+  "name": "services/guide/chapter",
+  "short_name": "chapter",
+  "description": "\n\n        <p>Allows to get an university guide chapter by its id.</p>\n    ",
+  "brief_description": "\nGet a single university guide chapter info.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/guide/#chapter",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "chapter_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nId of the guide chapter. You may think of chapters as of categories\n                    that group pages on similar topic."
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\n\n                <p>A code of the preferred language (\"pl\" or \"en\"). It may\n                influence the order of pages in the chapter.</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|title",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of selected fields: </p>\n        \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Id of the guide chapter;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title</b> -\n                    Title of the guide chapter as a langdict\n                                    (you can use it eg. as a tab name);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>pages</b> - Pages that belong to the chapter.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/guide/#page'>page</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nId of the guide chapter",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title",
+      "description": "\nTitle of the guide chapter as a langdict\n                                    (you can use it eg. as a tab name)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "pages",
+      "description": "\nPages that belong to the chapter",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

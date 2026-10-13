@@ -1,0 +1,46 @@
+{
+  "name": "services/terms/terms",
+  "short_name": "terms",
+  "description": "\tGet information on multiple terms.",
+  "brief_description": "Get information on multiple terms.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/terms/#terms",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "term_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tPipe-separated list of Academic Term IDs."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary. Your term_ids will be mapped to the keys of this dictionary,\n\teach value will contain a dictionary describing a term (as defined\n\tin the <a href=\"#term\">term</a> method). If term does not exist,\n\tit's key will be mapped to null.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

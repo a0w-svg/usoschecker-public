@@ -1,0 +1,151 @@
+{
+  "name": "services/mobility/decision",
+  "short_name": "decision",
+  "description": "<p>\nGed decision</p>",
+  "brief_description": "\nGed decision",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#decision",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a decision"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|students_programme|stage|term|state|decision_type|decision_date|deadline_date|substate|why_cannot_import|comment|is_empty|external_courses|decision_points|decisions_courses",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a decision;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>students_programme</b> - Students programme.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>services/progs/student_programme</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>stage</b> - Stage.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#stage'>services/progs/stage</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term</b> - Term.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/terms/#term'>services/terms/term</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>state</b> -\n                    State of decision;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decision_type</b> -\n                    Kind;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decision_date</b> -\n                    Date of decision;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>deadline_date</b> -\n                    Date of decision;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>substate</b> -\n                    sub state;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>mobility</b> - mobility.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#mobility'>mobility</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>why_cannot_import</b> -\n                    null if can import, langdict with reason otherwise;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>comment</b> -\n                    Comment of decision;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_empty</b> -\n                    true if decision is empty.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>external_courses</b> - External courses of decision.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#external_course'>external_course</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decision_points</b> - Points of decision.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#decision_points'>decision_points</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decisions_courses</b> - Courses of decision.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#decisions_course'>decisions_course</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a decision",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "students_programme",
+      "description": "\nStudents programme",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "stage",
+      "description": "\nStage",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term",
+      "description": "\nTerm",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "state",
+      "description": "\nState of decision",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "decision_type",
+      "description": "\nKind",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "decision_date",
+      "description": "\nDate of decision",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "deadline_date",
+      "description": "\nDate of decision",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "substate",
+      "description": "\nsub state",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "mobility",
+      "description": "\nmobility",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "why_cannot_import",
+      "description": "\nnull if can import, langdict with reason otherwise",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "comment",
+      "description": "\nComment of decision",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_empty",
+      "description": "\ntrue if decision is empty",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "external_courses",
+      "description": "\nExternal courses of decision",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "decision_points",
+      "description": "\nPoints of decision",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "decisions_courses",
+      "description": "\nCourses of decision",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

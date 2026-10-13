@@ -1,0 +1,70 @@
+{
+  "name": "services/progs/student",
+  "short_name": "student",
+  "description": "\n\n        <p>This is similar to the <b>student_programmes</b> field of the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method, but allows you to\n        explicitly decide if you want only the active student programmes.</p>\n    ",
+  "brief_description": "\nGet information on student programmes of a given user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/progs/#student",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(access token issuer)",
+      "description": "\n<p>ID of a user.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|programme",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>student_programme</a> method.\n</p>\n        "
+    },
+    {
+      "name": "active_only",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "true",
+      "description": "\n\n                <p>By default, you will get only student programmes with the\n                status equal to <b>active</b> or\n                <b>graduated_before_diploma</b>. Set this to <b>false</b> if\n                you want to include all student programmes. Please note, that\n                only these student programmes which you have access to will be\n                included. And even if you have access to a student programme,\n                some of its fields may still be hidden (see the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>student_programme</a> method for\n                details).</p>\n            "
+    },
+    {
+      "name": "old_programs",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "true",
+      "description": "\nGet only programs which ended in past "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>List of <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>student_programme</a>\n        objects.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

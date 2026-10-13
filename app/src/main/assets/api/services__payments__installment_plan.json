@@ -1,0 +1,73 @@
+{
+  "name": "services/payments/installment_plan",
+  "short_name": "installment_plan",
+  "description": "<p>\nInstallments plans</p>",
+  "brief_description": "\nInstallments plans",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/payments/#installment_plan",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "payments"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "installment_plan_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a plan"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of following fields and their values:\n                    \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a plan;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_default</b> -\n                    True if selected plan is default one;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>currency</b> -\n                    currency of a plan;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>installments</b> - List of installments associated with plan.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/payments/#installment'>installment</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a plan",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_default",
+      "description": "\nTrue if selected plan is default one",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "currency",
+      "description": "\ncurrency of a plan",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "installments",
+      "description": "\nList of installments associated with plan",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

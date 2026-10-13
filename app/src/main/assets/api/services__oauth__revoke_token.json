@@ -1,0 +1,30 @@
+{
+  "name": "services/oauth/revoke_token",
+  "short_name": "revoke_token",
+  "description": "\t\n\t<p>Revoke an existing Access Token. You need to sign your request with\n\tthe Access Token you'd like revoked. You won't be able to use this\n\tAccess Token after it's revoked.</p>\n\t\n\t<p>Please note, that this does not sign out the user from USOS. It\n\tsimply revokes a single Access Token. By default, the authorization\n\tconsent is also preserved, so you are able to generate a new Access\n\tToken without the need for the user to log in and authorize your app\n\tagain.</p>\n",
+  "brief_description": "Revoke an existing Access Token",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/oauth/#revoke_token",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "deauthorize",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\t\n\t<p><span class=\"beta-icon\">BETA</span> Set this to <b>true</b> if you\n\twant not only to revoke the given Access Token, but also revoke\n\t<b>all</b> Access Tokens bound to your Consumer Key <b>and</b> all\n\tsaved authorization data for your Consumer Key.</p>\n\t\n\t<p>Please note, that the preferred way of deauthorizing apps is\n\trefering the user to the USOSapps main page.</p>\n"
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true}</code>, or a HTTP 400 response in case of\n\terror.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

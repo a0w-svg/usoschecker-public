@@ -1,0 +1,64 @@
+{
+  "name": "services/attendance/create_from_tt",
+  "short_name": "create_from_tt",
+  "description": "<p>\nCreate new attendance lists from group meetings.</p>",
+  "brief_description": "\nCreate new attendance lists from group meetings.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/attendance/#create_from_tt",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "staff_perspective"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "course_unit_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of course unit"
+    },
+    {
+      "name": "group_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nGroup number"
+    },
+    {
+      "name": "default_mode",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Mode of meetings in the classgroup, as described in <a href='https://usosapps.vistula.edu.pl/developers/api/services/attendance/#attendance_list'>attendance_list</a>\n            <p>Possible values: <b>intramural</b>, <b>remote</b>, <b>hybrid</b>.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n            <p>An empty dictionary if the entries were successfully created.</p>\n        ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>no_students</b> -\n                                the group does not have any participants.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>group_not_found</b> -\n                                specified course group does not exist or user is not its lecturer;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>meeting_not_found</b> -\n                                specified course group has no meetings.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

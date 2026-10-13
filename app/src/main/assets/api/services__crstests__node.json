@@ -1,0 +1,66 @@
+{
+  "name": "services/crstests/node",
+  "short_name": "node",
+  "description": "\t\n\tThis method can be used to fetch whole subtree of a test, or only a node with its direct subnodes,\n\tsee <b>return</b> section for more information.\n",
+  "brief_description": "Get nodes",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#node",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the subtree root.\n\t<br/>\n\t<p><em>\n\t\tPlease note that this node doesn't have to be a <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#RootNode\">RootNode</a>.\n</em></p>\n"
+    },
+    {
+      "name": "recursive",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "bool",
+      "default_value": null,
+      "description": "\tboolean - if true the whole subtree will be returned,\n\totherwise only direct subnodes will be returned"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>\n\tLet's name a node with ID = node_id a current node.\n\tA dictionary describing the current node will be returned.\n\tThis dictionary will be equal to the dictionary You would get by calling one of the methods:\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_node\">root_node</a>,  <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#task_node\">task_node</a>,\n<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#grade_node\">grade_node</a>,  <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#folder_node\">folder_node</a> with\nthe <strong>fields</strong> parameter limited to those fields that are defined for each specific method.\nExcept that this dictionary may contain one additional field <strong>subnodes</strong>\n(only if 'subnodes' is in <strong>fields</strong>) - a list of dictionaries,\neach representing a subnode of the current node. If <strong>recursive</strong> is set to true than those dictionaries\nalso contain a <strong>subnodes</strong> field. You can get the details of a whole subtree that way.\nMoreover the dictionaries in the <strong>subnodes</strong> field will be sorted by the order key\n(see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#ordering\">ordering</a>);\n</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": {
+    "deprecated_by": "services/crstests/node2",
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

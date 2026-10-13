@@ -1,0 +1,30 @@
+{
+  "name": "services/blobbox/get",
+  "short_name": "get",
+  "description": "\tGet the contents of a blob.",
+  "brief_description": "Get the contents of a blob.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#get",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tBlob ID. You may only read blobs which you have access to (see the\n\t<b>read_access</b> parameter in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a>\nmethod). Unaccessible blobs will appear as inexistent.\n"
+    }
+  ],
+  "returns": "\t\n\t<p>HTTP 200 response with raw contents of the blob.</p>\n\t<p>If the blob does not exist (or you do not have access to it), we\n\twill respond with a HTTP 400 error.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

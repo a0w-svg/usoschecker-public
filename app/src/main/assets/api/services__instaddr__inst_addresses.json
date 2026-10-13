@@ -1,0 +1,54 @@
+{
+  "name": "services/instaddr/inst_addresses",
+  "short_name": "inst_addresses",
+  "description": "<p>\nGet information on multiple institutional addresses.</p>",
+  "brief_description": "\nGet information on multiple institutional addresses.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#inst_addresses",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "inst_address_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>List of institutional address IDs.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|email",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section\n    of <a href='https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#inst_address'>inst_address</a> method.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary mapping institutional address IDs to dictionaries describing the addresses\n        (as returned by <a href='https://usosapps.vistula.edu.pl/developers/api/services/instaddr/#inst_address'>inst_address</a> method).\n        If specified address could not be found, <b>null</b> is returned instead of\n        a dictionary.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

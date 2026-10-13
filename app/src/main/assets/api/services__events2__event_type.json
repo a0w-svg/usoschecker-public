@@ -1,0 +1,109 @@
+{
+  "name": "services/events2/event_type",
+  "short_name": "event_type",
+  "description": "<p>\nGet information about event type</p>",
+  "brief_description": "\nGet information about event type",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events2/#event_type",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an event"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|description|is_enabled|is_mandatory|send_by_default",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Unique ID of event type;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    Name of event type;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    Description of event type;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_enabled</b> -\n                    True if sending of this kind of events is enabled;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_mandatory</b> -\n                    If true, student cannot disable receiving events of this type;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>send_by_default</b> -\n                    If true, user that will receive this kind of events by default;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>default_message</b> -\n                    If defined this message will be used as default.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>channels</b> - List of related channels.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/events2/#event_channel'>event_channel</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>schedules</b> - Schedules related to channells.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/events2/#event_type_schedule'>event_type_schedule</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nUnique ID of event type",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nName of event type",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\nDescription of event type",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_enabled",
+      "description": "\nTrue if sending of this kind of events is enabled",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_mandatory",
+      "description": "\nIf true, student cannot disable receiving events of this type",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "send_by_default",
+      "description": "\nIf true, user that will receive this kind of events by default",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "default_message",
+      "description": "\nIf defined this message will be used as default",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "channels",
+      "description": "\nList of related channels",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "schedules",
+      "description": "\nSchedules related to channells",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

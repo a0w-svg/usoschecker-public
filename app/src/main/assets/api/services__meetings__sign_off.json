@@ -1,0 +1,54 @@
+{
+  "name": "services/meetings/sign_off",
+  "short_name": "sign_off",
+  "description": "<p>\nSign off from specific meeting date</p>",
+  "brief_description": "\nSign off from specific meeting date",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/meetings/#sign_off",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "meeting_date_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nMeeting date ID"
+    },
+    {
+      "name": "message_lang_code",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\nLanguage code for message about changing the order in the list<p>Possible values: <b>pl</b>, <b>en</b>.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nEmpty dict on success.",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>meeting_subscription_exception</b> - Error regarding meeting subscription.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>meeting_date_has_started</b> -\n                                Meeting date has already started;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>user_not_registered</b> -\n                                User is not registered to meeting.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

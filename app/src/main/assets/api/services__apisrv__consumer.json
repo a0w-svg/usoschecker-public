@@ -1,0 +1,46 @@
+{
+  "name": "services/apisrv/consumer",
+  "short_name": "consumer",
+  "description": "\t\n\t<p>Get information on the Consumer.</p>\n\t\n\t<p>Currently, you can use this method only to get information on a\n\tsingle Consumer - yourself. Simply sign your request with OAuth in\n\torder to verify who you are. You may also pass an Access Token along to\n\tget some extra information on the permissions granted to you by the\n\tuser.</p>\n\t\n\t<p><b>Important:</b> You are allowed to call this method via the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy\">proxy</a> method, but only the\n<b>token_scopes</b> field will be available (provided that your\nproxy is signing requests with Access Tokens, if it is not, then you\nwill get <b>null</b>). Make sure you're asking only for the\n<b>token_scopes</b> field, otherwise you will get an error.</p>\n",
+  "brief_description": "Get information on the Consumer.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/apisrv/#consumer",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of fields you're interested with.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of fields you have asked for. Available fields are:</p>\n\t\n\t<ul>\n\t\t<li><b>name</b> - the application name you have provided when you\n\t\t\thave registered for your Consumer Key,</li>\n\t\t\n\t\t<li><b>url</b> - the application URL which you have provided when\n\t\t\tyou have registered for your Consumer Key <b>or null</b> if you\n\t\t\tdidn't provide any,</li>\n\t\t\n\t\t<li><b>email</b> - the email address you have provided when you\n\t\t\thave registered for your Consumer Key,</li>\n\t\t\n\t\t<li><b>date_registered</b> - datetime string, the date when you\n\t\t\thave registered your Consumer Key,</li>\n\t\t\n\t\t<li><b>administrative_methods</b> - the list of names of USOS API\n\t\t\tmethods you've been granted administrative access to,</li>\n\t\t\n\t\t<li><b>token_scopes</b> - the list of scopes which the user have\n\t\t\tgranted you access to <b>or null</b> if you didn't provide an\n\t\t\tAccess Token with your request.</li>\n\t\t\n\t\t<li><b>is_verified</b> - whether you are marked as verified.</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,105 @@
+{
+  "name": "services/news/search",
+  "short_name": "search",
+  "description": "<p>\nSearch for articles with simple filters.</p>",
+  "brief_description": "\nSearch for articles with simple filters.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/news/#search",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "from_date",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Datetime string. If given, then only those articles which\n                have publication date <b>greater or equal</b> to this date,\n                will be returned.</p>\n            "
+    },
+    {
+      "name": "facpattern",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>Optional filter of faculties in the \"facpattern\" format, as\n                described in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#resolve_facpattern'>services/fac/resolve_facpattern</a>\n                method. If given, then only such news which belong to the\n                faculties matching this pattern will be returned.</p>\n            "
+    },
+    {
+      "name": "category_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n                <p>The list of article category IDs. If given, then only such\n                articles which are in one of the specified categories, will\n                be returned. Existing categories may be retrieved via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/news/#category_index'>category_index</a> method.</p>\n            "
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "6",
+      "description": "\n\n                <p>The number of articles to return. The maximum allowed value\n                is 100.</p>\n            "
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\n\n                <p>The index of the first matching article that is to be\n                included in the response (zero-based).</p>\n            "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "items[article[id]]|next_page|total",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following structure:</p>\n        \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>items</b> - a list of matching articles. The length of this list is limited\n                    to <b>num</b> items. You can access further results by specifing\n                    the <b>start</b> argument.</p>\n\n                \nEach item on this list is a dictionary of the following structure\n                    (more keys may be added in the future):\n                    <ul>\n                        <li><b>article</b> - article object as described\n                            in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/news/#article'>article</a> method</li>\n                    </ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>next_page</b> -\n                    boolean, indicates if there is a next page of results;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>total</b> -\n                    integer, a total number of matched items;\n                     if the number of matched items is huge, then USOS API may return\n                     an approximate count (especially if <b>start</b> is equal to 0).</p>\n            \n            \n        </li>\n        \n    </ul>\n\n    ",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "items",
+      "description": "\nEach item on this list is a dictionary of the following structure\n                    (more keys may be added in the future):\n                    <ul>\n                        <li><b>article</b> - article object as described\n                            in the <a href='https://usosapps.vistula.edu.pl/developers/api/services/news/#article'>article</a> method</li>\n                    </ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "next_page",
+      "description": "\nboolean, indicates if there is a next page of results",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "total",
+      "description": "\ninteger, a total number of matched items;\n                     if the number of matched items is huge, then USOS API may return\n                     an approximate count (especially if <b>start</b> is equal to 0)",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

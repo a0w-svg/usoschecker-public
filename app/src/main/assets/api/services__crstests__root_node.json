@@ -1,0 +1,135 @@
+{
+  "name": "services/crstests/root_node",
+  "short_name": "root_node",
+  "description": "\t\n\tGet detailed information about some <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#RootNode\">RootNode</a>.\n",
+  "brief_description": "Get description of a RootNode.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#root_node",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tnode ID"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "node_id",
+      "description": "\tNode's ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "root_id",
+      "description": "\tID of root node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "parent_id",
+      "description": "\tID of parent node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "order",
+      "description": "\tinteger, used to sort children",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\tLangDict object - name of the node",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "visible_for_students",
+      "description": "\tboolean - if true marks and points of this node are visible to students",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\tThis field will be equal to &quot;root&quot;",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "public",
+      "description": "\tBoolean - If a root is a root of a template then this fields is not null. If it is true\n\tthen other users will be allowed to read this template.\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "limit_to_groups",
+      "description": "\t\n\tIf requested root is a template then this fields will be equal to null. If it is not a template and\n\trequested root is not limited to groups then this field will be equal to false.\n\tOtherwise it will be a list of dictionaries representing all the groups this test is limited to. The structure of\n\tthese dictionaries will be:\n\t<ul>\n\t\t<li><b>course_unit_id</b>- course unit ID</li>\n\t\t<li><b>group_number</b>- group number</li>\n\t</ul>\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_edition",
+      "description": "\t\n\tIf this tree is a template, then this fields will be equal to null.\n\tOtherwise it will be a dictionary representing a course edition, same format as result of\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_edition\">course_edition</a> method. Following keys will be present:\n'course_id', 'course_name', 'term_id', 'homepage_url', 'profile_url'\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\t\n\tLangDict object with description of the test that this root represents.\n",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "my_permissions",
+      "description": "\tList of PermissionObjects representing permissions of of the access token issuer",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "permissions",
+      "description": "\tDictionary mapping userIDs to list of PermissionObjects.\n\tEach such list contains PermissionObjects for a particular user.\n\tOnly ids of users that have ReadPerm permission in the root will be present in this dictionary",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

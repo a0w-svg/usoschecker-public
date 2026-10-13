@@ -1,0 +1,113 @@
+{
+  "name": "services/prgroups/primary_group",
+  "short_name": "primary_group",
+  "description": "<p>\nGet information on a given primary group.</p>",
+  "brief_description": "\nGet information on a given primary group.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#primary_group",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "studies"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "primary_group_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Primary group ID. Note that an empty string is a valid ID value.</p>"
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(unused)",
+      "description": "\n\n        <p>ID of a user whose group contents should be returned. This argument may be used only\n        by users with proper administrative privileges.</p>\n    "
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    primary group ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>access</b> - user access level - can be either <b>full</b> or <b>partial</b>.</p>\n\n                \n\n                    If <b>user_id</b> argument is provided, an additional <b>none</b> value may\n                    be returned in case the referenced user does not have currently access to\n                    the group.\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>auto_assigned</b> - if access is \"full\" and access is assigned automatically.</p>\n\n                \n\n                    If <b>user_id</b> argument is provided, an additional <b>none</b> value may\n                    be returned in case the referenced user does not have currently access to\n                    the group.\n                \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>admin_access</b> -\n                    administrator access level - can be either <b>full</b> or <b>partial</b>;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    a LangDict object with the group name.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>subgroups</b> - list of dictionaries describing subgroups.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#primary_group'>primary_group</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>subgroups_deep</b> - List of subgroups. Note that subgroups will also have their <b>subgroups_deep</b> field filled using the same subselector..</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#primary_group'>primary_group</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>users</b> - list of dictionaries describing users that belong to this group or <b>null</b> if\n                you do not have full access to the group.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                primary group could not be found; <b>param_name</b> is equal to <b>primary_group_id</b>;</p>\n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                user could not be found; <b>param_name</b> is equal to <b>user_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nprimary group ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "access",
+      "description": "\n\n                    If <b>user_id</b> argument is provided, an additional <b>none</b> value may\n                    be returned in case the referenced user does not have currently access to\n                    the group.\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "auto_assigned",
+      "description": "\n\n                    If <b>user_id</b> argument is provided, an additional <b>none</b> value may\n                    be returned in case the referenced user does not have currently access to\n                    the group.\n                ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "admin_access",
+      "description": "\n\n                administrator access level - can be either <b>full</b> or <b>partial</b>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\na LangDict object with the group name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "subgroups",
+      "description": "\n\n                list of dictionaries describing subgroups\n            ",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "subgroups_deep",
+      "description": "\n\n                List of subgroups. Note that subgroups will also have their <b>subgroups_deep</b> field filled using the same subselector.\n            ",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "users",
+      "description": "\n\n                list of dictionaries describing users that belong to this group or <b>null</b> if\n                you do not have full access to the group\n            ",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

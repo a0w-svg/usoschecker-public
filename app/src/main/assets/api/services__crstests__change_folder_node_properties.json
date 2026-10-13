@@ -1,0 +1,89 @@
+{
+  "name": "services/crstests/change_folder_node_properties",
+  "short_name": "change_folder_node_properties",
+  "description": "\t\n\tChanges properties of a <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#FolderNode\">FolderNode</a>.\n<br/> <b>Please note:</b> only properties present in the parameters of this method will be changed\n(other properties will remain unchanged).\n",
+  "brief_description": "Change properties of a FolderNode.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#change_folder_node_properties",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "staff_perspective",
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tnode ID"
+    },
+    {
+      "name": "name_pl",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the node (in polish)."
+    },
+    {
+      "name": "name_en",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the node (in english)."
+    },
+    {
+      "name": "visible_for_students",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "bool",
+      "default_value": null,
+      "description": "\tboolean, if true the results from this node will be visible to students"
+    },
+    {
+      "name": "description_pl",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tDescription of the node (in polish)"
+    },
+    {
+      "name": "description_en",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tDescription of the node (in english)"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tCurrently, this method always returns the same value: a dictionary with single success key with value of true.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

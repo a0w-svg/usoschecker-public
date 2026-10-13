@@ -1,0 +1,103 @@
+{
+  "name": "services/theses/thesis",
+  "short_name": "thesis",
+  "description": "\n\n        <p>Get information on a single thesis.</p>\n    ",
+  "brief_description": "\nGet information on a single thesis.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/theses/#thesis",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "ths_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>ID of the thesis.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|type|title",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    the ID of the thesis;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type</b> - thesis type.</p>\n\n                \n\n                <p>One of the following values: <b>doctoral</b>, <b>master</b>,\n                <b>licentiate</b>, <b>engineer</b> or <b>postgraduate</b>.\n                Other types may come in the future, you must be ready for them\n                (for example, you should display them as \"unknown types\").</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>title</b> - string (<b>not</b> a LangDict). The primary title of the\n                thesis.</p>\n\n                \n\n                <p>Most of USOS entities have at most two names - in Polish and\n                in English. However, theses may have as much as three different\n                titles. This is the <b>primary</b> title. Other titles (in\n                Polish and in English) can be found in the <b>titles</b>\n                fields.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>titles</b> -\n                    LangDict object. Polish and English names of the thesis;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>language</b> - dictionary. Language of thesis.</p>\n\n                \n\n                <p>The dictionary currently contains these subfields:</p>\n                <ul>\n                    <li>\n                        <p><b>code</b> - language code. Note that these codes are set internally by university.</p>\n                    </li>\n                    <li>\n                        <p><b>iso_code</b> - language code, as specified in ISO 6391, or null if not set.</p>\n                    </li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>authors</b> - a list of thesis authors.</p>\n\n                \n\n                <p>Each element of this list is a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> object. You can use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to ask for specific user fields (the\n                default is <b>id|first_name|last_name</b>).</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>supervisors</b> - a list of thesis supervisors.</p>\n\n                \n\n                <p>Each element of this list is a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> object. You can use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to ask for specific user fields (the\n                default is <b>id|first_name|last_name</b>).</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - the faculty to which this thesis has been submitted to.</p>\n\n                \n\n                <p>This an an object in the formated described in the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. You can use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to ask for specific faculty fields (the\n                default is <b>id|name</b>).</p>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nthe ID of the thesis",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type",
+      "description": "\n\n                <p>One of the following values: <b>doctoral</b>, <b>master</b>,\n                <b>licentiate</b>, <b>engineer</b> or <b>postgraduate</b>.\n                Other types may come in the future, you must be ready for them\n                (for example, you should display them as \"unknown types\").</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "title",
+      "description": "\n\n                <p>Most of USOS entities have at most two names - in Polish and\n                in English. However, theses may have as much as three different\n                titles. This is the <b>primary</b> title. Other titles (in\n                Polish and in English) can be found in the <b>titles</b>\n                fields.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "titles",
+      "description": "\nLangDict object. Polish and English names of the thesis",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "language",
+      "description": "\n\n                <p>The dictionary currently contains these subfields:</p>\n                <ul>\n                    <li>\n                        <p><b>code</b> - language code. Note that these codes are set internally by university.</p>\n                    </li>\n                    <li>\n                        <p><b>iso_code</b> - language code, as specified in ISO 6391, or null if not set.</p>\n                    </li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "authors",
+      "description": "\n\n                <p>Each element of this list is a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> object. You can use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to ask for specific user fields (the\n                default is <b>id|first_name|last_name</b>).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "supervisors",
+      "description": "\n\n                <p>Each element of this list is a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> object. You can use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to ask for specific user fields (the\n                default is <b>id|first_name|last_name</b>).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\n\n                <p>This an an object in the formated described in the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. You can use a\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to ask for specific faculty fields (the\n                default is <b>id|name</b>).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

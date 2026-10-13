@@ -1,0 +1,97 @@
+{
+  "name": "services/pit/pit",
+  "short_name": "pit",
+  "description": "\n<p>Get PIT data</p><p>Note that user has access only to his documents</p>",
+  "brief_description": "\nGet PIT details.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/pit/#pit",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPIT's ID"
+    },
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    PIT's ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>type_code</b> -\n                    string, the official code/ID of the type of this PIT declaration; every PIT declaration has its type, these types (and its codes) are defined by the Polish government;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - PIT's owner.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>year</b> -\n                    Tax year of PIT declaration.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    Status of document. Possible values: in_preparation, in_preparation_confirmation_required, ready, in_delivery, sent, corrected;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>document_id</b> -\n                    ID of document;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>delivery_confirmation_date</b> -\n                    If delivery is confirmed, data in USOS API format is returned..</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nPIT's ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "type_code",
+      "description": "\nstring, the official code/ID of the type of this PIT declaration; every PIT declaration has its type, these types (and its codes) are defined by the Polish government",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nPIT's owner",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "year",
+      "description": "\n Tax year of PIT declaration.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\nStatus of document. Possible values: in_preparation, in_preparation_confirmation_required, ready, in_delivery, sent, corrected",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "document_id",
+      "description": "\nID of document",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "delivery_confirmation_date",
+      "description": "\nIf delivery is confirmed, data in USOS API format is returned.",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

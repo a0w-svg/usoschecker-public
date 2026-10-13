@@ -1,0 +1,70 @@
+{
+  "name": "services/fileshare/create_link",
+  "short_name": "create_link",
+  "description": "\t\n\t\n\t<p>Publish a file using an existing blob for its contents. If you\n\thaven't uploaded the contents of your file yet, you must do so using\n\tthe <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put\">services/blobbox/put</a> method.</p>\n\n<p>This method will provide with a special, publicly accessible URL\nwhich you can pass on to your users.</p>\n\n<p><b>Important:</b> You should not assume, that the link will be a\ndirect link to the file. We may choose to display some additional\nscreens (e.g. a security warning) before we allow the user to view the\nfile. As such, the URL is not meant to be used in some contexts, i.e.\nHTML &lt;img src=&quot;&quot;&gt; elements.</p>\n\n",
+  "brief_description": "Publish a file using an existing blob.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#create_link",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t\n\t<p>ID of the blob which holds the contents of your file. It must exist\n\tand you must be the owner of this blob.</p>\n\t\n\t<p>It should be saved with public read access rights (if it isn't, you\n\twill still get the link, but users won't be able to download the\n\tfile).</p>\n\t\n\t<p>When blob expires, users will be redirected to your custom 404 page\n\t(see the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/fileshare/#set_404\">set_404</a> method for details).</p>\n\n"
+    },
+    {
+      "name": "filename",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t\n\t<p>Blobs don't have names. How do you want to name your file?</p>\n\t\n\t<p>You <b>don't need</b> to get rid of spaces and/or special national\n\tcharacters. Most browsers can handle them properly (they get them\n\treplaced with characters compatible with their OS). However, you should\n\tmake sure that your filename:</p>\n\t\n\t<ul>\n\t\t<li>does not begin with a dot,</li>\n\t\t<li>does not exceed 255 characters in length.</li>\n\t</ul>\n\t\n\t<p>USOS API will take care of the rest of difficult cases (if it\n\tdoesn't,\n\t<a href=\"/developers/api/contact/\">contact\nthe developers</a>). Note, that during the process, your filename may\nget changed (invalid characters replaced, etc.).</p>\n\n"
+    },
+    {
+      "name": "content_type",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t\n\t<p>If you know the right content type of the file, you may pass it\n\there.</p>\n\t\n\t<p>Note, that many browsers <b>guess</b> content type correctly, based\n\ton the file extension (USOS API also <b>may</b> attempt to guess).</p>\n\t\n"
+    },
+    {
+      "name": "prefer_save",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "false",
+      "description": "\t\n\t\n\t<p>By default, user's browser selects appropriate action based on file\n\textension (and/or content type). Usually leaving this decision for the\n\tbrowser is <b>the best you can do</b>. However, if you really think the\n\tuser should <i>save</i> the file (as opposed to <i>viewing</i> it),\n\tthen set this parameter to <b>true</b>.</p>\n\t\n\t<p>Note, that this is only a hint. In the future, we may ignore this\n\tparameter completely or we may let the users choose the action for\n\tthemselves.</p>\n\t\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t<ul>\n\t\t<li>\n\t\t\t\n\t\t\t<p><b>link</b> - an URL which you should pass on to your users\n\t\t\tin order for them to download the file.</p>\n\t\t\t\n\t\t\t<p>As said before, you <b>should not</b> assume that the link\n\t\t\twill be a direct link to the file. Also note, that the link\n\t\t\twill expire along with its blob.</p>\n\t\t\t\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

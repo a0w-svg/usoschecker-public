@@ -1,0 +1,65 @@
+{
+  "name": "services/crstests/change_folder_node_permissions",
+  "short_name": "change_folder_node_permissions",
+  "description": "\t\n\tChanges permissions in a <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#FolderNode\">FolderNode</a>.\n<br/><p>For each pair (user_id, perms) present in the <b>set</b> parameter this method will set permissions of\nuser with ID = user_id to perms. </p>\n<p>\nFor each pair (user_id, perms) present in th <b>remove_from_subtree</b> parameter this method will remove all\npermissions in the perms list for user with ID = user_id in the subtree of referenced node.</p>\n",
+  "brief_description": "Change FolderNode permissions.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#change_folder_node_permissions",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "staff_perspective",
+      "crstests"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tnode ID"
+    },
+    {
+      "name": "set",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tDictionary mapping from user ID to lists of PermissionsObjects\n"
+    },
+    {
+      "name": "remove_from_subtree",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tDictionary mapping from user ID to lists of PermissionsObjects\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tCurrently, this method always returns the same value: a dictionary with single success key with value of true.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

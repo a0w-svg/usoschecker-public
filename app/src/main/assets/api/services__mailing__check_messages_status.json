@@ -1,0 +1,46 @@
+{
+  "name": "services/mailing/check_messages_status",
+  "short_name": "check_messages_status",
+  "description": "\t\n\t<p>Check for the status of a previously sent messages.</p>\n\t<p>When you've used a method like <a href=\"#send_simple_message\">send_simple_message</a>,\n\tyou have not - strictly speaking - &quot;sent&quot; the message. You have enqueued it\n\tto be sent. USOS API will try to send this message as fast as possible.\n\tYou may check for the status of this operation here.</p>\n",
+  "brief_description": "Check status of a messages.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailing/#check_messages_status",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "message_ids",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Pipe-separated list of email addresses - recipients of the message IDs.\n\tYou will need to sign your request with the same\n\tConsumer Key as the one you signed the original sending request with.</p>\n\t<p>Please note, that currently messages are kept for a period of <b>7 days</b>.\n\tAfter this time, you won't be able to reference your message.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>Returns a dictionary where your <b>message_ids</b> will be mapped to a dictionary of the\n\tfollowing structure</p>\n\t<ul>\n\t\t<li>\n\t\t\t<b>sent</b> - the number of recipients to which the message was correctly sent\n\t\t</li>\n\t\t\n\t\t<li>\n\t\t\t<b>errors</b> - the number of recipients to which message was not sent,\n\t\t\tbecause an error occured while sending\n\t\t</li>\n\t\t\n\t\t<li>\n\t\t\t<b>pending</b> - the number of recipients to which the message was not already send\n\t\t</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

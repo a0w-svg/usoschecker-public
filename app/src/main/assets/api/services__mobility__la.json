@@ -1,0 +1,151 @@
+{
+  "name": "services/mobility/la",
+  "short_name": "la",
+  "description": "<p>\nLearning agreement</p>",
+  "brief_description": "\nLearning agreement",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#la",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a Learning Agreement"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|mobility_id|mobility_type|academic_year|eqf_level|learning_outcomes_url|provisions_url|versions|final_version|allowed_actions|latest_significant_version_id|date_created|technical_info|status|decision_to_link|decision",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a LA;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>mobility_id</b> -\n                    ID of a mobility;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>mobility_type</b> - Type of a mobility that LA is created for.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>semester</b></p></li>\n<li><p><b>blended</b></p></li>\n<li><p><b>doctoral</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>academic_year</b> -\n                    Academic year of a mobility;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>eqf_level</b> -\n                    level of studies;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>learning_outcomes_url</b> -\n                    URL providing learning outcomes;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>provisions_url</b> -\n                    URL providing regulations according to not passed courses;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>versions</b> - List of versions.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#la_version'>la_version</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>final_version</b> - Visualisation of a final version.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#la_version'>la_version</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>allowed_actions</b> - List of allowed actions - one of following values: create_draft, delete_draft.</p>\n\n                \n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>create_draft</b></p></li>\n<li><p><b>copy_draft</b></p></li>\n<li><p><b>delete_la</b></p></li>\n<li><p><b>create_cnr</b></p></li>\n<li><p><b>create_decision</b></p></li>\n</ul>\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>latest_significant_version_id</b> -\n                    ID o latest significant version;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>date_created</b> -\n                    Datetime string with creation time;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>technical_info</b> -\n                    Technical informations about Learning Agreement, usefull in contact with helpdesks;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    statis of LA.</p>\n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>decision_to_link</b> - Decision that can be linked with LA instead of creating new one.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#decision'>decision</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>decision</b> - Decision related to LA.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mobility/#decision'>decision</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a LA",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "mobility_id",
+      "description": "\nID of a mobility",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "mobility_type",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>semester</b></p></li>\n<li><p><b>blended</b></p></li>\n<li><p><b>doctoral</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "academic_year",
+      "description": "\nAcademic year of a mobility",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "eqf_level",
+      "description": "\nlevel of studies",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "learning_outcomes_url",
+      "description": "\nURL providing learning outcomes",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "provisions_url",
+      "description": "\nURL providing regulations according to not passed courses",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "versions",
+      "description": "\nList of versions ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "final_version",
+      "description": "\nVisualisation of a final version",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "allowed_actions",
+      "description": "\n\n            <p>Possible values:</p>\n            <ul>\n        \n<li><p><b>create_draft</b></p></li>\n<li><p><b>copy_draft</b></p></li>\n<li><p><b>delete_la</b></p></li>\n<li><p><b>create_cnr</b></p></li>\n<li><p><b>create_decision</b></p></li>\n</ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "latest_significant_version_id",
+      "description": "\nID o latest significant version",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "date_created",
+      "description": "\nDatetime string with creation time",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "technical_info",
+      "description": "\nTechnical informations about Learning Agreement, usefull in contact with helpdesks",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\nstatis of LA",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "decision_to_link",
+      "description": "\nDecision that can be linked with LA instead of creating new one",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "decision",
+      "description": "\nDecision related to LA",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,62 @@
+{
+  "name": "services/geo/staticmap",
+  "short_name": "staticmap",
+  "description": "\n\n        <p>Get a static map image of the surroundings of a given point.</p>\n\n        <p><b>This method uses external OpenStreetMap tile servers.</b> Please\n        keep the following in mind:</p>\n\n        <ul>\n            <li>You <b>must</b> comply with OSM's\n            <a href='http://wiki.openstreetmap.org/wiki/Tile_usage_policy'>tile\n            usage policy</a> before you use this method as a proxy.</li>\n\n            <li>USOS API \"signs\" all requests with the URL of this USOS API\n            installation (in the <b>User-Agent</b> header). Don't abuse the OSM\n            project via USOS API - it may cause your USOS API installation to\n            be blocked by OSM (based on either IP and/or User-Agent).</li>\n\n            <li>All downloaded tiles are cached. All static maps are generated\n            with the cached tiles. There is no way for you to skip this\n            behavior and \"refresh\" the cache. If you feel it's necessary to\n            clear the cache, please\n            <a href='/developers/api/contact/'>contact</a>\n            USOS API administrators.</li>\n\n            <li>Currently, if something goes wrong with the tile download, we\n            will <b>also</b> cache such response (we won't repeat the\n            download). Even if the tile server was down only for only a couple\n            of seconds, we will not query it again for some time. During this\n            period, you will receive HTTP 404 response instead of your static\n            map.</li>\n\n            <li>If this is read by anyone from OSM: If you feel there's any\n            abuse, please\n            <a href='/developers/api/contact/'>contact\n            us</a>.</li>\n        </ul>\n\n        <p>This method was not checked to work in edge cases. Keep your queries\n        \"rational\".</p>\n    ",
+  "brief_description": "\nGet a map of the surroundings of a given point",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/geo/#staticmap",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "lat",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>Latitude of the image center.</p>\n            "
+    },
+    {
+      "name": "long",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>Longitude of the image center.</p>\n            "
+    },
+    {
+      "name": "zoom",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "15",
+      "description": "\n\n                <p>Zoom level to use (0..18).</p>\n            "
+    },
+    {
+      "name": "width",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "200",
+      "description": "\n\n                <p>The width of the result image, in pixels (1..800).</p>\n            "
+    },
+    {
+      "name": "height",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "200",
+      "description": "\n\n                <p>The height of the result image, in pixels (1..800).</p>\n            "
+    }
+  ],
+  "returns": "\n\n        <ul>\n            <li>HTTP 404 response, if some of the required tiles could not be\n            fetched.</li>\n\n            <li>If successful, a HTTP 200 response with the image. Currently,\n            the image is returned in JPEG format, but this may change without\n            notice. You should be ready to handle other common formats, like\n            PNG or GIF.</li>\n        </ul>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

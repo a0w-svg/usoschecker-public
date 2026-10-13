@@ -1,0 +1,56 @@
+{
+  "name": "services/attendance/change_list_mode",
+  "short_name": "change_list_mode",
+  "description": "<p>\nChange mode of attendance list. This requires no set attendance for that list.</p>",
+  "brief_description": "\nChange mode of attendance list. This requires no set attendance for that list.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/attendance/#change_list_mode",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "staff_perspective"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "list_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of attendance list"
+    },
+    {
+      "name": "mode",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            Mode of meeting, as described in <a href='https://usosapps.vistula.edu.pl/developers/api/services/attendance/#attendance_list'>attendance_list</a>\n            <p>Possible values: <b>intramural</b>, <b>remote</b>, <b>hybrid</b>.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n<p>Empty dict on success.</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>has_entries</b> -\n                                the attendance list has entries.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>attendance_list_not_found</b> -\n                                attendance list does not exist.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

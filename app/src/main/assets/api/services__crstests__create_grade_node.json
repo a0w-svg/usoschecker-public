@@ -1,0 +1,107 @@
+{
+  "name": "services/crstests/create_grade_node",
+  "short_name": "create_grade_node",
+  "description": "\t\n\tCreates a <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#GradeNode\">GradeNode</a> with the specified parameters. <br/>\nIf you won't provide <b>name_pl</b> parameter, the default value = &quot;Nowa Ocena&quot;\nwill be used.\n",
+  "brief_description": "Creates a GradeNode",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#create_grade_node",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": [
+      "adm_documents",
+      "cards",
+      "change_all_preferences",
+      "crstests",
+      "dorm_admin",
+      "edit_user_attrs",
+      "email",
+      "events",
+      "grades",
+      "grades_write",
+      "mailclient",
+      "mobile_numbers",
+      "offline_access",
+      "other_emails",
+      "payments",
+      "personal",
+      "photo",
+      "placement_tests",
+      "session_debugging_perms",
+      "slips",
+      "slips_admin",
+      "staff_perspective",
+      "student_exams",
+      "student_exams_write",
+      "studies",
+      "surveys_filling",
+      "surveys_reports",
+      "theses_protocols_write"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "parent_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the parent node for our new node. The type of this node must be root or folder."
+    },
+    {
+      "name": "grade_type",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the grade type.\n\tSame as 'grade_type_id' parameter of the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade_type\">grade_type</a> method.\n"
+    },
+    {
+      "name": "name_pl",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the node (in polish)."
+    },
+    {
+      "name": "name_en",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tName of the node (in english)."
+    },
+    {
+      "name": "order",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tinteger - order (see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/crstests/#ordering\">ordering</a>)"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tDictionary with only one key 'id'.\n\tID of the newly created GradeNode.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

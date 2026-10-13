@@ -1,0 +1,79 @@
+{
+  "name": "services/grades/grade_type",
+  "short_name": "grade_type",
+  "description": "<p>\nGet info about grade type.</p>",
+  "brief_description": "\nGet info about grade type.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade_type",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "ignored",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "grade_type_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nIdentifier of the type."
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|is_current",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Identifier of the grade type;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    a LangDict object with the grade type name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_current</b> -\n                    True if grade type is current;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>values</b> - Array of dictionaries that describe grades.</p>\n\n                \n\n                Dictionaries have following structure:\n                <ul>\n                    <li>symbol - e.g. 5, ZAL</li>\n                    <li>passes - boolean, true if student passes course with this grade.</li>\n                    <li>decimal_value - numerical value of the grade.</li>\n                    <li>name - a LangDict object with the grade name</li>\n                    <li>order_key - int used for ordering grades (should not be displayed for users)\n                    </li>\n                </ul>\n        \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist; <b>param_name</b> is equal to <b>id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nIdentifier of the grade type",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\na LangDict object with the grade type name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_current",
+      "description": "\nTrue if grade type is current",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "values",
+      "description": "\n\n                Dictionaries have following structure:\n                <ul>\n                    <li>symbol - e.g. 5, ZAL</li>\n                    <li>passes - boolean, true if student passes course with this grade.</li>\n                    <li>decimal_value - numerical value of the grade.</li>\n                    <li>name - a LangDict object with the grade name</li>\n                    <li>order_key - int used for ordering grades (should not be displayed for users)\n                    </li>\n                </ul>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

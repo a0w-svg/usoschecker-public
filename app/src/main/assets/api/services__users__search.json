@@ -1,0 +1,79 @@
+{
+  "name": "services/users/search",
+  "short_name": "search",
+  "description": "\n\n        <p>Why deprecated? Because you can get more features and -\n        in some cases - achieve better performance by using the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#search2'>search2</a> method.</p>\n\n        <p>Search for users matching given query. <b>All</b> users are taken\n        into consideration (students, ex-students, staff, etc.). If you'd like\n        to limit your search - use one of the other methods.</p>\n    ",
+  "brief_description": "\nSearch among all users.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#search",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "name",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>The search query. The most obvious value for this field is the\n            user's name, but we'll try to be smart about it (for example, it\n            allows you to find a student by his/her student number, etc.).</p>\n        "
+    },
+    {
+      "name": "num",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "6",
+      "description": "\n\n            <p>The number of search results to return. The maximum allowed\n            value of num is 20.</p>\n        "
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "0",
+      "description": "\n\n            <p>Indicates the first matching search result that should be\n            included in the response. This parameter uses a zero-based index,\n            meaning the first result is 0, the second result is 1 and so\n            forth.</p>\n\n            <p>Note, that no more than 100 search result will ever be returned\n            for any query, even if more than 100 matches were found. If you need\n            more, than probably you're looking at a wrong method. Contact us if\n            you're not sure.</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of following fields and their values:\n                    \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>items</b> - a list of matching users. The length of this list is limited to <b>num</b> items.\n            You can access further results by specifing the <b>start</b> argument.</p>\n\n                \n\n            Each item on this list is a dictionary of the following structure:\n            <ul>\n                <li><b>user_id</b> - ID of a user,</li>\n                <li>\n                    <p><b>match</b> - user's name, with matching fragments\n                    highlighted with HTML &lt;b&gt; tag. For example, is you searched for \"kowal\", then\n                    <i>match</i> might be \"Jan &lt;b&gt;Kowal&lt;/b&gt;ski\",</p>\n                </li>\n                <li><b>active_student_programmes</b> - only active student's programmes, same format as in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student'>services/progs/student</a> method,</li>\n                <li><b>active_employment_functions</b> - only active employment functions, same format as in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#employment_functions'>employment_functions</a> method.</li>\n            </ul>\n        \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>next_page</b> -\n                    boolean, indicates if there is a next page of results for this query.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "items",
+      "description": "\n\n            Each item on this list is a dictionary of the following structure:\n            <ul>\n                <li><b>user_id</b> - ID of a user,</li>\n                <li>\n                    <p><b>match</b> - user's name, with matching fragments\n                    highlighted with HTML &lt;b&gt; tag. For example, is you searched for \"kowal\", then\n                    <i>match</i> might be \"Jan &lt;b&gt;Kowal&lt;/b&gt;ski\",</p>\n                </li>\n                <li><b>active_student_programmes</b> - only active student's programmes, same format as in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student'>services/progs/student</a> method,</li>\n                <li><b>active_employment_functions</b> - only active employment functions, same format as in the\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#employment_functions'>employment_functions</a> method.</li>\n            </ul>\n        ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "next_page",
+      "description": "\nboolean, indicates if there is a next page of results for this query",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": {
+    "deprecated_by": "services/users/search2",
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

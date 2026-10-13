@@ -1,0 +1,152 @@
+{
+  "name": "services/slips/update_question",
+  "short_name": "update_question",
+  "description": "\t\n\t<p>Edit an existing question of a template.</p>\n\t\n\t<p>Note, that your user has to hold proper privileges in order for you\n\tto use this method. However, if he does not, you will still receive a\n\tHTTP 200 response (see &quot;returns&quot; section).</p>\n\t\n\t<p>Also note, that this method may return errors regarding fields not\n\texplicitly provided in the request. In particular, if you change value\n\tof one field which puts it in conflict with some other field, then this\n\tmethod may report an error in the other field (not the one you have\n\tjust changed).</p>\n",
+  "brief_description": "Edit an existing question",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#update_question",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "question_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>ID of the question.</p>\n"
+    },
+    {
+      "name": "question",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New question content. For more information see\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#add_question\">add_question</a> method. If not given,\nquestion content will not change.</p>\n\n<p><b>Important:</b> If the template is no longer in a <b>draft</b>\nstate, then it is crucial that you ask your user if the new content\nof the question changed the <u>meaning</u> of the question. See\n<b>is_meaning_changed</b>.</p>\n"
+    },
+    {
+      "name": "desc_for_answerers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>New content of the additional description for the answerers. For\n\tmore information see <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a>\nmethod. If not given, the description will not change.</p>\n"
+    },
+    {
+      "name": "is_meaning_changed",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "true",
+      "description": "\t\n\t<p>Boolean. This should be supplied by user, whenever he edits the\n\tquestion content of a non-draft template. One of the two values:</p>\n\t\n\t<ul>\n\t\t<li><b>false</b> - The meaning was not changed. That is, all the\n\t\t\tanswers to this question remain correct. Every answerer would\n\t\t\tanswer exactly the same to the new question as he did answer to\n\t\t\tthe old one.</li>\n\t\t\n\t\t<li><b>true</b> - The meaning might have been changed. Some\n\t\t\tanswerers might have answered differently to the new question than\n\t\t\tthey did answer to the old one.</li>\n\t</ul>\n\t\n\t<p><b>Important:</b> If the meaning is changed, we may decide that the\n\tquestion should be forked into two questions, instead of being changed.\n\tIn such case:</p>\n\t\n\t<ul>\n\t\t<li>\n\t\t\tA new question will be created. An exact copy of the old one.\n\t\t</li>\n\t\t<li>The old question will be marked as obsolete.</li>\n\t\t<li>\n\t\t\tAll changes submitted in your query will be applied to both\n\t\t\tquestions (except the <b>question</b> value which will be\n\t\t\tapplied only to the new one).\n\t\t</li>\n\t\t<li>\n\t\t\tYou will receive an additional <b>question_id</b> in your\n\t\t\tresult. This is the ID of the new question (the one with the\n\t\t\tactually changed <b>question</b> field).\n\t\t</li>\n\t\t<li>\n\t\t\tYou should inform your user of what happened.\n\t\t</li>\n\t</ul>\n"
+    },
+    {
+      "name": "answerers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Pipe-separated list of user IDs. This is the default set of people\n\tallowed to answer this question.</p>\n\t\n\t<p>Only template editors are allowed to change this set. However, slip\n\tissuers may be allowed to define extra answerers for some questions.\n\tSee <b>can_issuers_assign_answerers</b> parameter for more\n\tinformation.</p>\n"
+    },
+    {
+      "name": "is_included_by_default",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tBoolean. If given, changes the value of the\n\t<b>is_included_by_default</b> field described in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method.\n"
+    },
+    {
+      "name": "can_client_answer",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tBoolean. As above. See the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a>\nmethod for more information on these fields.\n"
+    },
+    {
+      "name": "can_issuers_answer",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tBoolean. As above.\n"
+    },
+    {
+      "name": "can_issuers_assign_answerers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tBoolean. As above.\n"
+    },
+    {
+      "name": "is_obsolete",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tBoolean. As above.\n"
+    },
+    {
+      "name": "regexp_cleared",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tString. As above.\n"
+    },
+    {
+      "name": "regexp_rejected",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tString. As above.\n"
+    },
+    {
+      "name": "quick_answers",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tString. As above.\n"
+    },
+    {
+      "name": "trigger_ids",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of trigger IDs. If given, it will cause the of\n\t<b>triggers</b> field (described in the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/slips/#question\">question</a> method) to change\nappropriately.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true}</code></p>\n\t\n\t<p>If your request was successful <b>AND</b> the edit caused a new\n\tquestion to be &quot;forked&quot;, then the <b>question_id</b> of this new\n\t(forked) question will be included in the returned dictionary.</p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

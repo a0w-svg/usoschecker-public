@@ -1,0 +1,123 @@
+{
+  "name": "services/mobility/external_course",
+  "short_name": "external_course",
+  "description": "<p>\nExternal course</p>",
+  "brief_description": "\nExternal course",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#external_course",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a course"
+    },
+    {
+      "name": "decision_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a decision"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|name|term|is_passed|code|ects_credits|status|grade|grades_count|grades_sum",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of a course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>name</b> -\n                    name of a course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term</b> - term of a course.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/terms/#term'>services/terms/term</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_passed</b> -\n                    True if course is passed;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>code</b> -\n                    Code of the course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>ects_credits</b> -\n                    Number of ects credits;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    Status of a course;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grade</b> -\n                    Grade;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grades_count</b> -\n                    Grades count;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grades_sum</b> -\n                    Grades sum.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of a course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "name",
+      "description": "\nname of a course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term",
+      "description": "\nterm of a course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_passed",
+      "description": "\nTrue if course is passed",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "code",
+      "description": "\nCode of the course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "ects_credits",
+      "description": "\nNumber of ects credits",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\nStatus of a course",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grade",
+      "description": "\nGrade",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grades_count",
+      "description": "\nGrades count",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "grades_sum",
+      "description": "\nGrades sum",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,64 @@
+{
+  "name": "services/slips/create_template",
+  "short_name": "create_template",
+  "description": "\t\n\t<p>Create a new slip template. You have to have some active slip\n\ttemplates before you can create actual slips.</p>\n\t\n\t<p>Note, that your user has to hold proper privileges in order for you\n\tto use this method. However, if he does not, you will still receive a\n\tHTTP 200 response (see &quot;returns&quot; section).</p>\n",
+  "brief_description": "Create a new slip template",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/slips/#create_template",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "slips_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "fac_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>ID of the faculty. Each template has to be bound to a single\n\tfaculty.</p>\n"
+    },
+    {
+      "name": "name",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Name for your template. This should be short, but unambiguous,\n\tpreferably 20-30 characters. The current limit is 75.</p>\n\t\n\t<p>The template editors can freely choose the language in which they\n\twant to create their templates. Most clearance slips need to be defined\n\tin one language only.</p>\n\t\n\t<p>Note, that if it's too long or otherwise &quot;incorrect&quot;, you will still\n\treceive a HTTP 200 response (see &quot;returns&quot; section).</p>\n"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\t\n\t<p>Language which will be used within the template. All the questions\n\tand answers should also be given in the language given here.</p>\n\t\n\t<p>Currently, only two values are allowed: <b>pl</b> or <b>en</b>.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p><code>{&quot;success&quot;: true, &quot;tpl_id&quot;: &quot;&lt;id of the new\n\t\ttemplate&gt;&quot;}</code></p>\n\t\n\t<p>In case of failure, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages\">user_messages field</a>\nto display a proper message for the user.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

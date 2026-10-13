@@ -1,0 +1,159 @@
+{
+  "name": "services/courses/course_edition",
+  "short_name": "course_edition",
+  "description": "<p>\nGet information on a given course edition.</p>",
+  "brief_description": "\nGet information on a given course edition.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_edition",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "optional",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "course_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a course"
+    },
+    {
+      "name": "term_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an academic term"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "course_id|course_name|term_id|user_groups",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>course_id</b> -\n                    ID of a parent course,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_name</b> -\n                    a LangDict object with the name of a parent\n                course,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>term_id</b> -\n                    ID of a term,;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>homepage_url</b> -\n                    course edition's homepage URL (or null if none),;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>profile_url</b> -\n                    course's profile URL (or null if none).;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>coordinators</b> -\n                    an array  of dictionaries describing coordinators\n                of this course edition; each dictionary contains fields from\n                <strong>primary</strong> section in users/user method;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>lecturers</b> -\n                    an array  of dictionaries describing lecturers\n                of this course edition; each dictionary contains fields from\n                <strong>primary</strong> section in users/user method;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>passing_status</b> -\n                    one of following values: passed, failed, not_yet_passed;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user_groups</b> - Access token issuer's groups.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/groups/#group'>services/groups/group</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n            <p>\n                <em>Additional permissions note</em>: Access token is required, and SSL connection is required.\n            </p>\n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n            <li>\n                <p>Secondary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>description</b> -\n                    a LangDict object.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>bibliography</b> -\n                    a LangDict object.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>notes</b> -\n                    a LangDict object.;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_units_ids</b> -\n                    an array of course edition's units IDs;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>participants</b> -\n                    an array  of dictionaries describing listeners\n                of this course edition; each dictionary contains fields from\n                <strong>primary</strong> section in users/user method;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>grades</b> - Access token issuer's grades.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/grades/#grade'>services/grades/grade</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>attributes</b> - additional attributes assigned to this course edition.</p>\n\n                \n\n                    <p>A list of dictionaries sorted in the order they should be presented\n                    to the user. Each dictionary will contain the following fields:</p>\n\n                    <ul>\n                        <li><b>name</b> - a LangDict object, a name of this attribute,</li>\n                        <li>\n                            <p><b>values</b> - a <b>list</b> of LangDict objects, which represent\n                            the content of this attribute.</p>\n\n                            <p>If the list contains only a single element, the you may assume that\n                            it's safe to display it as a paragraph. If it contains many elements,\n                            then you should display them a separate list entries (e.g. using\n                            bullets).</p>\n                        </li>\n                    </ul>\n                \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_forbidden</b> - access to object denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>participants</b> -\n                                access token issuer doesn't have access to list of participants.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> - some of the referenced objects do not exist.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>course_edition</b> -\n                                referenced course edition does not exist.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "course_id",
+      "description": "\nID of a parent course,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_name",
+      "description": "\na LangDict object with the name of a parent\n                course,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "term_id",
+      "description": "\nID of a term,",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "homepage_url",
+      "description": "\ncourse edition's homepage URL (or null if none),",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "profile_url",
+      "description": "\ncourse's profile URL (or null if none).",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "coordinators",
+      "description": "\nan array  of dictionaries describing coordinators\n                of this course edition; each dictionary contains fields from\n                <strong>primary</strong> section in users/user method",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "lecturers",
+      "description": "\nan array  of dictionaries describing lecturers\n                of this course edition; each dictionary contains fields from\n                <strong>primary</strong> section in users/user method",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "passing_status",
+      "description": "\none of following values: passed, failed, not_yet_passed",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user_groups",
+      "description": "\nAccess token issuer's groups",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "description",
+      "description": "\na LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "bibliography",
+      "description": "\na LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "notes",
+      "description": "\na LangDict object.",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "course_units_ids",
+      "description": "\nan array of course edition's units IDs",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "participants",
+      "description": "\nan array  of dictionaries describing listeners\n                of this course edition; each dictionary contains fields from\n                <strong>primary</strong> section in users/user method",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "grades",
+      "description": "\nAccess token issuer's grades",
+      "is_primary": false,
+      "is_secondary": true
+    },
+    {
+      "name": "attributes",
+      "description": "\n\n                    <p>A list of dictionaries sorted in the order they should be presented\n                    to the user. Each dictionary will contain the following fields:</p>\n\n                    <ul>\n                        <li><b>name</b> - a LangDict object, a name of this attribute,</li>\n                        <li>\n                            <p><b>values</b> - a <b>list</b> of LangDict objects, which represent\n                            the content of this attribute.</p>\n\n                            <p>If the list contains only a single element, the you may assume that\n                            it's safe to display it as a paragraph. If it contains many elements,\n                            then you should display them a separate list entries (e.g. using\n                            bullets).</p>\n                        </li>\n                    </ul>\n                ",
+      "is_primary": false,
+      "is_secondary": true
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

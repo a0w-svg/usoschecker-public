@@ -1,0 +1,54 @@
+{
+  "name": "services/blobbox/blob",
+  "short_name": "blob",
+  "description": "\tGet information on a given blob.",
+  "brief_description": "Get information on a given blob.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#blob",
+  "auth_options": {
+    "consumer": "required",
+    "token": "ignored",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "blob_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\t<p>Blob ID. You may get information <i>only</i> on blobs which were\n\tuploaded by yourself (using your consumer key). All foreign blobs will\n\tappear as inexistent.</p>\n\t<p>If you want to get <b>the content</b> of the blob, use the\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#get\">get</a> method.</p>\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(all)",
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are\n\tdescribed in the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of selected fields and their values.</p>\n\t<p>Available fields:</p>\n\t<ul>\n\t\t<li><b>size</b> - size of the blob, in bytes,</li>\n\t\t<li>\n\t\t\t<b>user_id</b> - user ID whose Access Token was used when\n\t\t\tuploading the blob, or <b>null</b> when the blob has not been\n\t\t\tbound to any user,\n\t\t</li>\n\t\t<li>\n\t\t\t<b>read_access</b> - as described in the\n\t\t\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method,\n\t</li>\n\t<li>\n\t\t<b>date_created</b> - datetime string, the time when the blob\n\t\twas first created,\n\t</li>\n\t<li>\n\t\t<b>date_last_read</b> - datetime string, the time when the blob\n\t\twas last read (a <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#get\">get</a> method was used\n\ton it), or <b>null</b> when it hasn't been read yet,\n</li>\n<li>\n\t<b>times_read</b> - total number of times the blob was read (a\n\t<a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#get\">get</a> method was used on it),\n</li>\n<li>\n<b>expires_after</b> - datetime string, the time after which\nthe blob <b>might</b> get automatically deleted (it is not safe\nto access it afterwards), or <b>null</b> when blob in not meant\nto be automatically deleted (it can still be deleted manually).\n</li>\n<li>\n<b>expires_before</b> - datetime string, the time after which\nthe blob <b>will</b> be deleted, no matter what (unless the\nexpiry dates get changed), or <b>null</b> when the expiry date\nwas not set.\n</li>\n</ul>\n<p>If the blob does not exist (or you don't own it), you will get a\nHTTP 400 error.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

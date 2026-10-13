@@ -1,0 +1,93 @@
+{
+  "name": "services/mailclient/cases_categories",
+  "short_name": "cases_categories",
+  "description": "<p>\nGet emails of cases categories.</p>",
+  "brief_description": "\nGet emails of cases categories.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#cases_categories",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "active_only",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "true",
+      "description": "\nFilter only to active emails"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|email|email_description|is_active|faculty",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n<p>List of dictionaries of selected fields and their values.</p><p>Available fields: \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Id;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>email</b> -\n                    Email;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>email_description</b> -\n                    LangDict, email description;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>is_active</b> -\n                    boolean, is email active;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>faculty</b> - an associated faculty.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/fac/#faculty'>services/fac/faculty</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>case_category</b> - dictionary describing case category.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#case_category'>case_category</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nId",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "email",
+      "description": "\nEmail",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "email_description",
+      "description": "\nLangDict, email description",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "is_active",
+      "description": "\nboolean, is email active",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "faculty",
+      "description": "\nan associated faculty",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "case_category",
+      "description": "\ndictionary describing case category",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

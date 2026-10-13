@@ -1,0 +1,38 @@
+{
+  "name": "services/courses/classtypes_index",
+  "short_name": "classtypes_index",
+  "description": "\tGet a list of all possible class types.",
+  "brief_description": "Get a list of all possible class types.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/courses/#classtypes_index",
+  "auth_options": {
+    "consumer": "ignored",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary. IDs of class types will be mapped to keys of this dictionary.\n\tEach value will contain a description of one class type. Each description is\n\ta dictionary of the following structure (currently only one field):</p>\n\t<ul>\n\t\t<li><b>name</b> - a LangDict object with the name of the class type.</li>\n\t</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

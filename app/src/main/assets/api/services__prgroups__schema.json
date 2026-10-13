@@ -1,0 +1,21 @@
+{
+  "name": "services/prgroups/schema",
+  "short_name": "schema",
+  "description": "<p>\nGet a schema of descriptors of primary groups.</p>",
+  "brief_description": "\nGet a schema of descriptors of primary groups.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/prgroups/#schema",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [],
+  "returns": "\n\n        <p>An XML Schema file.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

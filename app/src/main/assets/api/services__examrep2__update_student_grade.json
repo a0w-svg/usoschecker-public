@@ -1,0 +1,104 @@
+{
+  "name": "services/examrep2/update_student_grade",
+  "short_name": "update_student_grade",
+  "description": "<p>\nUpdate user's grade.</p>",
+  "brief_description": "\nUpdate user's grade.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#update_student_grade",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "grades_write"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "student_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of user whoose grade will be updated"
+    },
+    {
+      "name": "examrep_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an exam"
+    },
+    {
+      "name": "examrep_session_number",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nnumber of exam session"
+    },
+    {
+      "name": "value_symbol",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nSymbolic value of a grade"
+    },
+    {
+      "name": "comment",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPublic comment"
+    },
+    {
+      "name": "private_comment",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nPrivate comment"
+    },
+    {
+      "name": "date_modified",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nDate used to avoid concurrency problems. If you expect\n         that grade doesn't exist in database you should pass empty string."
+    },
+    {
+      "name": "date_acquisition",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                Date of grade acquisition. This field is optional, however you may sometimes be forced\n                to input the date (if the grade doesn't exist and the exam session requires this date, see\n                <b>is_acquisition_date_required</b> field of <a href='https://usosapps.vistula.edu.pl/developers/api/services/examrep2/#examrep_session'>examrep_session</a>\n                method).\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nEmpty dict on success",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_forbidden</b> - access to object denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>grade_forbidden</b> -\n                                access token issuer does not have access to grade;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>grade_write_forbidden</b> -\n                                Access token issuer is not permitted to update grades. Permission rules:\n        <ul>\n            <li> course coordinator may update all grades; </li>\n            <li> lecturer may update grates in course unit exam report for participants\n                of lectured groups.</li>\n        </ul>\n        You need to use another methods to check if user has permissions.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>exam_session_expired</b> -\n                                Exam session is currently expired. Updating grades is prohibited;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>invalid_exam_status</b> -\n                                Exam session is not in the state that allows grade modifications.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>grade_not_editable</b> -\n                                Grade is not editable due to resignations, inactive links etc.;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>invalid_value</b> -\n                                Grade has invalid value. If this error is returned, 'grades' is set to dictionary\n        mapping user IDs to dictionaries describing errors;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>missing_acquisition_date</b> -\n                                Acquisition date is required for this protocol, but was not set;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>updated_concurrently</b> -\n                                Some grade was to be changed concurrently. If this error is returned 'grades' is set to\n        dictionary mapping user IDs to results of method services/grades/grade for all passed\n        grades.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

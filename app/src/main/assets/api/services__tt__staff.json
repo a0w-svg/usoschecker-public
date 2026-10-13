@@ -1,0 +1,70 @@
+{
+  "name": "services/tt/staff",
+  "short_name": "staff",
+  "description": "\t\n\tGet public activities related to given staff member. Public means, that you may anonymously\n\taccess such activities of ALL staff members, you don't need their approval for this\n\t(teachers' schedules are publicly available).\n",
+  "brief_description": "Get public staff member's activities.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/tt/#staff",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "optional",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of a staff member. Required, if you don't sign your request with a proper Access Token.\n"
+    },
+    {
+      "name": "start",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "today",
+      "description": "\t\n\tA date string, yyyy-mm-dd format. A first (earliest) day to include\n\tin the results.\n"
+    },
+    {
+      "name": "days",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "7",
+      "description": "\t\n\tNumber of days (starting with <b>start</b>) to include in the\n\tresults. No more than 7 is allowed.\n"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "start_time|end_time|name",
+      "description": "\t\n\tPipe-separated list of informational fields/sections you're\n\tinterested in. This must be any subset of keys, which are described\n\tin the <b>returns</b> section.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A list of Activity objects, as in the <a href=\"#classgroup\">classgroup</a> method.</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

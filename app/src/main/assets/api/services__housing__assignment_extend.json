@@ -1,0 +1,56 @@
+{
+  "name": "services/housing/assignment_extend",
+  "short_name": "assignment_extend",
+  "description": "\n\n        <p>Extend assignment's expiry date.</p>\n\n        <p>Dormitory administrators are allowed to extend expiry dates of\n        assignments which <b>have</b> an expiry date.</p>\n\n        <p>If you don't know what expiry date is, please see the\n        <b>expiry_date</b> field in the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#assignment'>assignment</a> method.</p>\n    ",
+  "brief_description": "\nExtend assignment's expiry date.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#assignment_extend",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "dorm_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "assignment_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of an unused assignment"
+    },
+    {
+      "name": "new_expiry_date",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                <p>Datetime string. New expiry date.</p>\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>Returns <code>{\"success\": true}</code> on success. Raises HTTP 400\n        (with user_messages) on failure.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

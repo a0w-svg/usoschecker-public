@@ -1,0 +1,56 @@
+{
+  "name": "services/mailclient/refresh_recipients",
+  "short_name": "refresh_recipients",
+  "description": "\n\n        <p>Regenerate recipients list based on recipient group contents.</p>\n\n        <p>Depending on complexity of message recpients group, this method may take longer time to\n        complete. You should take this into account and probably call this method asynchronously in\n        your application.</p>\n\n        <p>This method works only with messages with status <b>draft</b>.</p>\n    ",
+  "brief_description": "\nRegenerate recipients list.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailclient/#refresh_recipients",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "mailclient"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "message_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n<p>Message ID.</p>"
+    },
+    {
+      "name": "email_source",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "primary_only",
+      "description": "\nChoose which email addresses will be used to send a message. Possible choices:\n        <ul>\n            <li>primary_only (default) - user's primary email;\n            <li>alt_only - user's alternative email (see method <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> for details);\n            <li>primary_preferred - if user doesn't have a primary email, alternative will be used;\n            <li>alt_preferred - if user doesn't have an alternative email, primary will be used\n        </ul>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n    An empty dictionary returned if the method has been executed successfully.\n    Some keys may be added in the future.\n",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - message is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>addresses_limit_exceeded</b> -\n                                maximum number of addresses exceeded;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>draft_required</b> -\n                                message is not a draft;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>recipients_group_modified</b> -\n                                recipients group has been modified concurrently.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                message could not be found; <b>param_name</b> is equal to <b>message_id</b>.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

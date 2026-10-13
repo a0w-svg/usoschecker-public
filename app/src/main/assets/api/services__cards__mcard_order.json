@@ -1,0 +1,103 @@
+{
+  "name": "services/cards/mcard_order",
+  "short_name": "mcard_order",
+  "description": "<p>\nGet details of mStudentCard order</p>",
+  "brief_description": "\nGet details of mStudentCard order",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/cards/#mcard_order",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "cards"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "order_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nIdentifier of an order"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|order_date|status|token|distribution_pass|student_number|expiration_date",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    Id of an order;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>order_date</b> -\n                    Datetime string with time of order;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>status</b> -\n                    one of following values: pending, in_progress, ready_to_receive, error, received, revoked;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>token</b> -\n                    If order has status 'ready' token for mObywatel app will be returned;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>distribution_pass</b> -\n                    If order has status 'ready' distribution password will be returned;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_number</b> -\n                    Student number related to mcard;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>expiration_date</b> -\n                    Expiration date of mcard.</p>\n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nId of an order",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "order_date",
+      "description": "\nDatetime string with time of order",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "status",
+      "description": "\none of following values: pending, in_progress, ready_to_receive, error, received, revoked",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "token",
+      "description": "\nIf order has status 'ready' token for mObywatel app will be returned",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "distribution_pass",
+      "description": "\nIf order has status 'ready' distribution password will be returned",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_number",
+      "description": "\nStudent number related to mcard",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "expiration_date",
+      "description": "\nExpiration date of mcard",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": {
+    "deprecated_by": "services/cards/mcard_order2",
+    "present_until": null,
+    "reason": null
+  },
+  "is_internal": false
+}

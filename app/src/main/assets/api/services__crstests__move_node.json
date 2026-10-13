@@ -1,0 +1,91 @@
+{
+  "name": "services/crstests/move_node",
+  "short_name": "move_node",
+  "description": "\t\n\tYou can use this method to move whole subtree.\n",
+  "brief_description": "Move a node.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#move_node",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": [
+      "adm_documents",
+      "cards",
+      "change_all_preferences",
+      "crstests",
+      "dorm_admin",
+      "edit_user_attrs",
+      "email",
+      "events",
+      "grades",
+      "grades_write",
+      "mailclient",
+      "mobile_numbers",
+      "offline_access",
+      "other_emails",
+      "payments",
+      "personal",
+      "photo",
+      "placement_tests",
+      "session_debugging_perms",
+      "slips",
+      "slips_admin",
+      "staff_perspective",
+      "student_exams",
+      "student_exams_write",
+      "studies",
+      "surveys_filling",
+      "surveys_reports",
+      "theses_protocols_write"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the node to move."
+    },
+    {
+      "name": "new_parent_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tID of the new parent of the moved node.\n\t<b>Please note:</b> the new parent can't belong to subtree You try to move\n"
+    },
+    {
+      "name": "new_order",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tNew order of the moved node."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tCurrently, this method always returns the same value: a dictionary with single success key with value of true.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

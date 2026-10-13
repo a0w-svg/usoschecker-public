@@ -1,0 +1,54 @@
+{
+  "name": "services/mobility/update_status",
+  "short_name": "update_status",
+  "description": "<p>\nUpdate status</p>",
+  "brief_description": "\nUpdate status",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mobility/#update_status",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "version_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of a LA version"
+    },
+    {
+      "name": "status",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nstatus that should be set<p>Possible values: <b>new</b>, <b>coordinator_edits</b>, <b>student_approved</b>, <b>coordinator_approved</b>, <b>approved_locally</b>, <b>approved</b>, <b>cancelled</b>, <b>rejected</b>, <b>virtual</b>.</p>"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\nnull",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

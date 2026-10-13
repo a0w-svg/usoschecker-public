@@ -1,0 +1,133 @@
+{
+  "name": "services/cards/student_card_data",
+  "short_name": "student_card_data",
+  "description": "<p>\nGet data required to write new structure on ELS card</p>",
+  "brief_description": "\nGet data required to write new structure on ELS card",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/cards/#student_card_data",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "certificate|system_key|card_key|structure|expiration_date|date_of_write|student_number|can_be_written|card",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nID of a card"
+    },
+    {
+      "name": "contact_chip_uid",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nUnique ID of integrated circuit card"
+    },
+    {
+      "name": "contactless_chip_uid",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nUnique ID of contacless smart card"
+    },
+    {
+      "name": "barcode_number",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\nBarcode printed on a card"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>certificate</b> -\n                    Certificate in structure's signature;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>system_key</b> -\n                    Key used in structure's signature;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>card_key</b> -\n                    Key that allows write data on a card;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>structure</b> -\n                    Structure that is written or has to be written on a card;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>expiration_date</b> -\n                    Expiration date of a structure;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>date_of_write</b> -\n                    Date of write of a structure;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_number</b> -\n                    Student number printed on a card;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_be_written</b> -\n                    True if new structure may be written on a card;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>card</b> - Card object related.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/cards/#card'>card</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>object_not_found</b> -\n                some of the referenced objects do not exist.</p>\n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "certificate",
+      "description": "\nCertificate in structure's signature",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "system_key",
+      "description": "\nKey used in structure's signature",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "card_key",
+      "description": "\nKey that allows write data on a card",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "structure",
+      "description": "\nStructure that is written or has to be written on a card",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "expiration_date",
+      "description": "\nExpiration date of a structure",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "date_of_write",
+      "description": "\nDate of write of a structure",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_number",
+      "description": "\nStudent number printed on a card",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_be_written",
+      "description": "\nTrue if new structure may be written on a card",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "card",
+      "description": "\nCard object related",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

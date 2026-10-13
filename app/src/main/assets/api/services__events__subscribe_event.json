@@ -1,0 +1,62 @@
+{
+  "name": "services/events/subscribe_event",
+  "short_name": "subscribe_event",
+  "description": "\n\n        <p>Subscribe for event notifications of a certain type.</p>\n\n        <p>This method should be called only once (per Consumer, per event\n        type). Refer to the module's documentation for detailed explanation of\n        the entire subscription and notification-sending flow.</p>\n    ",
+  "brief_description": "\nSubscribe for event notifications.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/events/#subscribe_event",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "event_type",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nThe type of event notification that you want to subscribe for.<p>Possible values: <b>crstests/user_grade</b>, <b>crstests/user_point</b>, <b>grades/grade</b>.</p>"
+    },
+    {
+      "name": "callback_url",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                The URL of your server. The notifications will be sent to this\n                URL as events occur.\n            "
+    },
+    {
+      "name": "verify_token",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n                The string that will be passed as an additional query parameter\n                to your URL during the verification.\n            "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of the following structure:</p>\n\n        <ul>\n            <li><b>id</b> - string, the ID of newly created subscription.</li>\n        </ul>\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>method_forbidden</b> - access to method denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>too_many_subscription_requests</b> -\n                                You need to wait before you make another subscription request.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>object_invalid</b> - object is in invalid state.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>subscription_duplicated</b> -\n                                A subscription for this consumer and event type already exists.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n        <li>\n            \n                <p><b>param_invalid</b> - parameter has invalid value.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>failed_challenge</b> -\n                                Callback URL failed challenge;</p>\n                            \n                        </li>\n                        \n                        <li>\n                            \n                                <p><b>request_timeout</b> -\n                                Didn't get a response for challenge request in time.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

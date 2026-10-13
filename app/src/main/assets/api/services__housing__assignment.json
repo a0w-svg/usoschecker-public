@@ -1,0 +1,141 @@
+{
+  "name": "services/housing/assignment",
+  "short_name": "assignment",
+  "description": "\n\n        <p>Get data on a given assignment.</p>\n\n        <p>Currently, only dormitory administrators can access assignment data.\n        If your user doesn't have proper permissions, then assignments will\n        appear as nonexistent.</p>\n\n        <p>Please note, that <b>assignments</b> are a subset of\n        <b>dorm applications</b>. (Dorm applications are currently not exposed\n        via USOS API, but they're role is explained in the module header.)</p>\n    ",
+  "brief_description": "\nGet data on a given assignment.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/housing/#assignment",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": [
+      "dorm_admin"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "assignment_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\nID of the assignment/application"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    ID of this assignment;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>user</b> - the user who is applying for a room in dormitory.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#user'>services/users/user</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>dormitory</b> - the dormitory applied for.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormitory'>dormitory</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>resident_type</b> - a resident type the user has been recognised as.</p>\n\n                \n\n                <p>Note that in case of resident_type requested, but\n                 not provided in Assignment model (it is not an obligatory\n                  field in USOS), blank result is returned.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#resident_type'>resident_type</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>dormroom_type</b> - the room type which the user has been assigned.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#dormroom_type'>dormroom_type</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>allocation_period</b> - an allocation period during which this assignment was created.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#allocation_period'>allocation_period</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>number_of_places</b> - number of places awarded to the user.</p>\n\n                \n\n                <p>One person can live at only one dormitory at a time.\n                However, in some cases (e.g. families with children) more\n                than one place can be awarded to one user. In that case,\n                <b>number_of_places</b> field will have a value greater than\n                one.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>assigned_from</b> - a datetime string; start date of the assignment.</p>\n\n                \n\n                <p>This indicates the <b>earliest possible date</b> at which\n                the user is allowed to checked in.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>expiry_date</b> - a datetime string <b>or null</b>, latest date for check-in.</p>\n\n                \n\n                <p>This indicates the <b>latest possible date</b> at which the\n                user is required to check in.</p>\n\n                <p>Assignments may have an expiry date. If they do, then the\n                user cannot be checked-in after that date passes, and his\n                place may be reassigned to some other user.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_extend</b> - boolean; indicates if the requester is allowed to extend the expiry date of this assignment.</p>\n\n                \n\n                <p>Currently, only dormitory administrators are allowed to\n                extend expiry dates via USOS API.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>why_cant_i_extend</b> - LangDict or <b>null</b>.</p>\n\n                \n\n                <p>If the requester is not allowed to extend the expiry date\n                of this assignment, this field will briefly explain why. This\n                is intended to be displayed for the users.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>assigned_to</b> - a datetime string; end date of the assignment.</p>\n\n                \n\n                <p>This indicates the <b>latest possible date</b> at which the\n                user is required to check out.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>trustee_name</b> - a LangDict object.</p>\n\n                \n\n                <p>Assignments are always awarded by somebody. This field may\n                give a clue on who or what this somebody is.</p>\n\n                <p>Some examples of common values:</p>\n\n                <ul>\n                    <li>Department of Physics,</li>\n                    <li>International Students Office pool,</li>\n                    <li>Rector's pool.</li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>residences</b> - list; a history of residence registrations.</p>\n\n                \n\n                <p>One assignment can be checked-in and checked-out multiple\n                times within the assignment period. The history of these\n                operations is recorded and can be retrieved with this\n                field.</p>\n\n                <p>This field will contain a list of all associated\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#residence'>residence</a> objects,\n                ordered by check-in dates.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#residence'>residence</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nID of this assignment",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "user",
+      "description": "\nthe user who is applying for a room in dormitory",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "dormitory",
+      "description": "\nthe dormitory applied for",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "resident_type",
+      "description": "\n\n                <p>Note that in case of resident_type requested, but\n                 not provided in Assignment model (it is not an obligatory\n                  field in USOS), blank result is returned.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "dormroom_type",
+      "description": "\nthe room type which the user has been assigned",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "allocation_period",
+      "description": "\nan allocation period during which this assignment was created",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "number_of_places",
+      "description": "\n\n                <p>One person can live at only one dormitory at a time.\n                However, in some cases (e.g. families with children) more\n                than one place can be awarded to one user. In that case,\n                <b>number_of_places</b> field will have a value greater than\n                one.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "assigned_from",
+      "description": "\n\n                <p>This indicates the <b>earliest possible date</b> at which\n                the user is allowed to checked in.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "expiry_date",
+      "description": "\n\n                <p>This indicates the <b>latest possible date</b> at which the\n                user is required to check in.</p>\n\n                <p>Assignments may have an expiry date. If they do, then the\n                user cannot be checked-in after that date passes, and his\n                place may be reassigned to some other user.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_extend",
+      "description": "\n\n                <p>Currently, only dormitory administrators are allowed to\n                extend expiry dates via USOS API.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "why_cant_i_extend",
+      "description": "\n\n                <p>If the requester is not allowed to extend the expiry date\n                of this assignment, this field will briefly explain why. This\n                is intended to be displayed for the users.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "assigned_to",
+      "description": "\n\n                <p>This indicates the <b>latest possible date</b> at which the\n                user is required to check out.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "trustee_name",
+      "description": "\n\n                <p>Assignments are always awarded by somebody. This field may\n                give a clue on who or what this somebody is.</p>\n\n                <p>Some examples of common values:</p>\n\n                <ul>\n                    <li>Department of Physics,</li>\n                    <li>International Students Office pool,</li>\n                    <li>Rector's pool.</li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "residences",
+      "description": "\n\n                <p>One assignment can be checked-in and checked-out multiple\n                times within the assignment period. The history of these\n                operations is recorded and can be retrieved with this\n                field.</p>\n\n                <p>This field will contain a list of all associated\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/housing/#residence'>residence</a> objects,\n                ordered by check-in dates.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

@@ -1,0 +1,78 @@
+{
+  "name": "services/blobbox/put_sha1",
+  "short_name": "put_sha1",
+  "description": "\t\n\t<p>Put a text blob into the database, using a SHA-1 hash.</p>\n\t\n\t<p>Usually you will use this method after you upload a file with\n\t<b>put_unsigned</b>. However, you may also attempt to use this method\n\tif you have a reason to suspect that your content may already\n\texist (or it existed recently) in our blobbox database. USOS API\n\twill try to find the content and if it succeeds, it will be linked\n\tto a new blob ID.</p>\n\t\n\t<p>Please include an Access Token if you have one\n\t(<a href=\"#why_use_access_tokens\">why?</a>)</p>\n",
+  "brief_description": "Put a blob into the database, using a SHA-1 hash.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_sha1",
+  "auth_options": {
+    "consumer": "required",
+    "token": "optional",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "sha1",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tSHA-1 hash of the data to be stored.\n"
+    },
+    {
+      "name": "datasize",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tLength of the data, in bytes (for some extra security).\n"
+    },
+    {
+      "name": "read_access",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "consumer",
+      "description": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n"
+    },
+    {
+      "name": "min_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "none",
+      "description": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n"
+    },
+    {
+      "name": "max_age",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "none",
+      "description": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tSame as in the <a href=\"https://usosapps.vistula.edu.pl/developers/api/services/blobbox/#put_text\">put_text</a> method.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

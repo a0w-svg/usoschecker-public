@@ -1,0 +1,38 @@
+{
+  "name": "services/mailing/system_status",
+  "short_name": "system_status",
+  "description": "\tGet information on the status of the mailing module.",
+  "brief_description": "Get information on the status of the module.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/mailing/#system_status",
+  "auth_options": {
+    "consumer": "optional",
+    "token": "ignored",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary of the following structure:</p>\n\t<ul>\n\t\t<li><b>total_pending_message_count</b> - number of all unsent messages in\n\t\t\tthe queue (this includes all messages from all the consumers),</li>\n\t\t<li><b>my_pending_message_count</b> - number of unsent messages enqueued\n\t\t\tby the consumer who's making the request; this key will be present only\n\t\t\tif the request is signed with the consumer key.</li>\n\t\t<li><b>daemon_running</b> - true if email sending daemon is running correctly,\n\t\t\tfalse otherwise</li>\n\t</ul>\n\t<p>Please note, that each recipient of one message is counted separately (i.e.\n\tif you send one message to 3 recipients, then the number of total unsent messages\n\twill increase by 3).</p>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

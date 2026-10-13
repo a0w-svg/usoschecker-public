@@ -1,0 +1,55 @@
+{
+  "name": "services/photos/my_photo_visibility",
+  "short_name": "my_photo_visibility",
+  "description": "<p>\nGet information on the visibility of the user's photo.</p>",
+  "brief_description": "\nGet information on the visibility of the user's photo.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/photos/#my_photo_visibility",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "required",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": [
+      "photo"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "desc_for_user",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n                    <p>A dictionary of selected fields and their values.</p>\n                    <p>Available fields:\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>desc_for_user</b> - Response to the question: \"<i>Who can see my photo?</i>\".</p>\n\n                \n\n                <p>A LangDict object. A short paragraph of text (one or two\n                sentences). It is intended to be read by the user himself (that\n                is, the user who <b>is</b> on the photo). You should not\n                display it to any other users.</p>\n\n                <p>Keep in mind that the underlying permissions model can\n                change in such a way that the <b>level</b> field becomes\n                deprecated. The <b>desc_for_user</b> description however - will\n                stay up-to-date. Consider using it instead of parsing the\n                <b>level</b> on your own!</p>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n</p>",
+  "errors": "",
+  "result_fields": [
+    {
+      "name": "desc_for_user",
+      "description": "\n\n                <p>A LangDict object. A short paragraph of text (one or two\n                sentences). It is intended to be read by the user himself (that\n                is, the user who <b>is</b> on the photo). You should not\n                display it to any other users.</p>\n\n                <p>Keep in mind that the underlying permissions model can\n                change in such a way that the <b>level</b> field becomes\n                deprecated. The <b>desc_for_user</b> description however - will\n                stay up-to-date. Consider using it instead of parsing the\n                <b>level</b> on your own!</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

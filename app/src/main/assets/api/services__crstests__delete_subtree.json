@@ -1,0 +1,75 @@
+{
+  "name": "services/crstests/delete_subtree",
+  "short_name": "delete_subtree",
+  "description": "\t\n\tThis methods deletes a subtree rooted in some supplied node.\n\tAll the data of the nodes in the deleted subtree will be also erased.\n",
+  "brief_description": "Delete a subtree of test.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/crstests/#delete_subtree",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": true,
+    "ssl_required": false,
+    "scopes": [
+      "adm_documents",
+      "cards",
+      "change_all_preferences",
+      "crstests",
+      "dorm_admin",
+      "edit_user_attrs",
+      "email",
+      "events",
+      "grades",
+      "grades_write",
+      "mailclient",
+      "mobile_numbers",
+      "offline_access",
+      "other_emails",
+      "payments",
+      "personal",
+      "photo",
+      "placement_tests",
+      "session_debugging_perms",
+      "slips",
+      "slips_admin",
+      "staff_perspective",
+      "student_exams",
+      "student_exams_write",
+      "studies",
+      "surveys_filling",
+      "surveys_reports",
+      "theses_protocols_write"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "node_id",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tID of the root of the subtree to delete."
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\tCurrently, this method always returns the same value: a dictionary with single success key with value of true.\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

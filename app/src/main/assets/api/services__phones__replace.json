@@ -1,0 +1,78 @@
+{
+  "name": "services/phones/replace",
+  "short_name": "replace",
+  "description": "\n\n        <p>Replace all phone numbers bound to the given entity.</p>\n\n        <p>This is a simple method allowing you to edit phone numbers of\n        various entities. It has a limited functionality, but is quite easy to\n        implement and should be enough in most cases. If you need extended\n        funtionality, please\n        <a href='/developers/api/contact/'>contact\n        us</a>.</p>\n\n        <p>Unlike the <b>select</b> method, this method works with only a\n        single entity. That is, if you want to change the numbers of two users,\n        then you will have to call this method twice.</p>\n\n        <p>The changes made by this method are atomic - if any of the numbers\n        fails to be saved, then none of them will be saved (nor the previous\n        set of numbers will be removed).</p>\n\n        <p>Before each <b>replace</b>, it is advised to make the <b>select</b>\n        call in order to make sure that your user sees the fresh content!</p>\n    ",
+  "brief_description": "\nReplace all phone numbers bound to the given entity.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/phones/#replace",
+  "auth_options": {
+    "administrative_only": true,
+    "token": "ignored",
+    "consumer": "required",
+    "ssl_required": true,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "data",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\n\n            <p>JSON-encoded list with the descriptions of all the numbers\n            to be saved.</p>\n\n            <p>The format of this list is very similar to the one described in\n            the <a href='https://usosapps.vistula.edu.pl/developers/api/services/phones/#select'>select</a> method. Each entry\n            on the list must be a dictionary, and:</p>\n\n            <ul>\n                <li>It <u>must</u> contain the <b>number</b> and <b>comment</b>\n                fields, as described in the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/phones/#select'>select</a> method. Please note,\n                that currently only the Polish part of the <b>comment</b>'s\n                LangDict is stored (entries in other languages will be\n                ignored).</li>\n\n                <li>It <u>may</u> contain the <b>type_id</b> field. If not\n                given, then the value will be guessed (the guess is not\n                guaranteed to be accurate). Also note, that <b>type_id</b>\n                might be deprecated some time in the future - after this time\n                its value will be silently ignored.</li>\n            </ul>\n\n            <p>Note, that there might be some additional and undocumented\n            restrictions. For example, some special characters could not be\n            accepted in the <b>number</b> field, or the length of the\n            <b>comment</b> could not exceed certain length. If the provided\n            data fails these restrictions, then the error response will contain\n            an appropriate message for the user.</p>\n        "
+    },
+    {
+      "name": "fac_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>The ID of the faculty the numbers of which you want to edit.</p>\n        "
+    },
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>The ID of the user the numbers of which you want to edit.</p>\n\n            <p>Note, that you can edit only <b>personal</b> phone numbers using\n            this method. If you are looking for a way to edit official,\n            work-related phone numbers of the staff members, then you should\n            use the <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#change'>services/users/change</a> method.</p>\n        "
+    },
+    {
+      "name": "building_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>The ID of the building the numbers of which you want to\n            edit.</p>\n        "
+    },
+    {
+      "name": "dorm_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(empty string)",
+      "description": "\n\n            <p>The ID of the dormitory the numbers of which you want to\n            edit.</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>In case of success, HTTP 200 response with the <code>{\"success\":\n        true}</code> content will be returned.</p>\n\n        <p>In case of failure, use the\n        <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/errors/#user_messages'>user_messages field</a>\n        to display a proper message for the user.</p>\n    ",
+  "errors": "",
+  "result_fields": [],
+  "beta": true,
+  "deprecated": null,
+  "is_internal": false
+}

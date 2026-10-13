@@ -1,0 +1,283 @@
+{
+  "name": "services/users/user",
+  "short_name": "user",
+  "description": "<p>\nGet information on a given user.</p>",
+  "brief_description": "\nGet information on a given user.",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/users/#user",
+  "auth_options": {
+    "administrative_only": false,
+    "token": "optional",
+    "consumer": "required",
+    "ssl_required": false,
+    "scopes": []
+  },
+  "arguments": [
+    {
+      "name": "user_id",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "(access token issuer)",
+      "description": "\n<p>ID of a user.</p>"
+    },
+    {
+      "name": "fields",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "id|first_name|last_name",
+      "description": "\n\n            <p><a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>\n            Selector</a> of result fields you are interested in. \n    \n    The selector  may contain any subset of fields, which are\n    described in the <b>returns</b> section.\n</p>\n        "
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\n<p>Format in which to return values. See <a\n            href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/'>\n            supported output formats</a>.</p>"
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "",
+      "description": "\n<p>Required only if you've chosen <b>jsonp</b> as a return format.</p>"
+    }
+  ],
+  "returns": "\n\n        <p>A dictionary of selected fields and their values or <b>null</b> if\n        user with given ID does not exist.</p>\n\n        <p>Each dictionary contains following fields:</p>\n\n        \n    \n    <ul>\n        \n            <li>\n                <p>Primary:</p>\n                \n    \n    \n    <ul>\n        \n        <li >\n            \n                <p><b>id</b> -\n                    user's ID;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>first_name</b> -\n                    user's first name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>middle_names</b> - user's middle name(s), separated with spaces, or <b>null</b>\n                if the user has no middle name(s).</p>\n\n                \n\n                <p>In most cases, this will be a single name, but not always.\n                See <a href='http://en.wikipedia.org/wiki/Middle_name'>here</a>\n                for the details.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>last_name</b> -\n                    user's last name;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>previous_names</b> - a list of user's previous names.</p>\n\n                \n\n                <p>A history of changes to the user's name.\n                Every element is a dictionary with three fields:\n                <b>first_name</b>, <b>last_name</b> and <b>until</b>\n                - a date on which the name was changed. The names are\n                ordered by date, starting with the most recent.</p>\n                <p>An empty list indicates that the user has either never\n                changed his/her name, or that he/she had disallowed the name history\n                to be viewed by you (that is, either the issuer of the Access Token,\n                or the Consumer, if you're not using an Access Token).</p>\n                <p>Use an Access Token with the <b>personal</b> scope.\n                (Or, acquire Administrative access.)</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>sex</b> -\n                    capital M for male, F for female;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>titles</b> - user's academic titles, to be displayed along his name.</p>\n\n                \n\n                <p>A dictionary with two fields: <b>before</b> and\n                <b>after</b>. Both fields can be either plain-text string or\n                <b>null</b>. In some contexts it is customary to display these\n                titles before and after the user's name.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_status</b> - integer (0, 1 or 2), or <b>null</b>.</p>\n\n                \n\n                <p>This indicates the user's status of \"being a student\". The\n                meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>null</b> - This means that you are not allowed to\n                        access the student status of this user. (You may need\n                        to provide an Access Token to access such values.)\n                    </li>\n                    <li>\n                        <b>0</b> - The user is not, and never was, a student\n                        on any of the study programmes of this university.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an \"inactive student\". That is,\n                        currently he's not studying, but he was an active\n                        student in the past.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active student.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>staff_status</b> - integer (0, 1 or 2).</p>\n\n                \n\n                <p>This indicates the user's status of \"being a staff member\".\n                The meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>0</b> - The user is currently not a staff member.\n                        He might have been a staff member once, but he is not\n                        now.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an employed staff member, but he\n                        is not an academic teacher.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active academic teacher.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>email_access</b> - <span class='beta-icon'>BETA</span> indicates, if (and how) <i>your user X</i> can access the email address of <i>this user Y</i>.</p>\n\n                \n\n                <p><b>Important:</b> This is a <b>BETA</b> field and it is\n                provided primarily for administrative consumers. In most cases,\n                you will want to use the <b>email</b> and <b>email_url</b>\n                fields. You will need the <b>email_access</b> field only if you\n                want to create a custom implementation of the page provided in\n                <b>email_url</b> field.</p>\n\n                <p>Please note, that the fact that user X can access user Y's\n                email, does not mean that <i>you</i> (the Consumer) can. Even\n                if this field returns <b>plaintext</b>, you still may get\n                <b>null</b> in the <b>email</b> field if you don't have the\n                proper scopes!</p>\n\n                <p>If you don't provide an Access Token, then our user X will\n                be an anonymous, external user (such users usually don't see\n                much).</p>\n\n                <p>This field may return any of the following values:</p>\n\n                <ul>\n                    <li><b>no_email</b> - user Y has no email address,\n                    therefore nobody can access it.</li>\n\n                    <li><b>no_access</b> - user Y has an email address, but\n                    user X cannot access it.</li>\n\n                    <li>\n                        <p><b>require_captcha</b> - user Y has an email address\n                        and user X can access it, but we will first need to\n                        make sure that he's not a robot.</p>\n\n                        <p>If you're a regular Consumer, then you cannot access\n                        such email yourself, but you should point your user to\n                        the URL provided in the <b>email_url</b> field. We will\n                        verify that user X is not a robot and reveal the email\n                        address afterwards.</p>\n\n                        <p>If you're an Administrative Consumer, then you\n                        <i>can</i> access the <b>email</b> field, but you\n                        <b>may not</b> display this email to user X, until you\n                        have verified that he's not a robot. You can implement\n                        your own captchas, or you can use the <b>email_url</b>\n                        field, as regular Consumers do.</p>\n                    </li>\n\n                    <li><b>plaintext</b> - user Y has an email address, and\n                    user X is allowed to view it in plaintext. If you have\n                    asked for the right scopes, then you should be able to\n                    access it via the <b>email</b> field.</li>\n                </ul>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>email</b> - user's email address, or <b>null</b> if it is unknown <u>or</u>\n                you (or your user) don't have access to see it in plaintext.</p>\n\n                \n\n                <p>You will need the <b>email</b> scope to access the email\n                address of your user (the issuer of your Access Token).\n                You will need the <b>other_emails</b> scope to access email\n                addresses of other users.</p>\n\n                <p><b>Important:</b> Administrative calls have access to all\n                the emails, regardless of their visibility. You <b>must</b> use\n                the <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method, or\n                interpret the <b>email_access</b> field properly, before you\n                show this email to your users!</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>email_url</b> - URL of the page with the user's email, or <b>null</b> if the user does not have an email.</p>\n\n                \n\n                <p>Whenever you cannot access the user's email via the\n                <b>email</b> field, you can display this link instead. We may\n                need to authenticate the user and verify that he's not a robot\n                before we display the email to him.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>has_email</b> - boolean; true, if we know the user's email address.</p>\n\n                \n\n                <p>In some cases (e.g. when using the mailing module) it may be\n                desirable for you to know if we actually possess the email\n                address of the user. We won't necessarily share it with you,\n                but we can tell you whether we have it or not.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>homepage_url</b> -\n                    user's homepage URL (or null if none);</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>profile_url</b> -\n                    user's usosweb profile URL;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>phone_numbers</b> - a list of strings (phone numbers).</p>\n\n                \n\n                <p>Each string is a single contact phone number. These are\n                purely academic-related contact numbers and the list will be\n                always empty for non-academic users.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>mobile_numbers</b> - a list of strings, or <b>an empty list</b> if don't you have\n                access to view this field.</p>\n\n                \n\n                <p>Each string is a single mobile phone number. These are\n                personal phone numbers, which can be used e.g. for SMS\n                notifications. You may assume that these numbers are ordered\n                user's by preference. We don't guarantee neither if the number\n                is up-to-date, nor that it is in any commonly recognizable\n                format.</p>\n\n                <p>You will require the <b>mobile_numbers</b> scope in order to\n                access user's mobile numbers. If you don't have it, you will\n                most probably get an empty list here.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>office_hours</b> - LangDict object with plain text strings.</p>\n\n                \n\n                This field contains information on the time spans during which\n                a teacher is available to meet with students in his or her\n                office. It may also contain information on holiday plans. It\n                will always be empty for non-staff members. Usually it is short\n                (one sentence), but in some cases it might contain multiple\n                paragraphs of text.\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>interests</b> - LangDict object with plain text strings.</p>\n\n                \n\n                Currently, this field will always be empty for all non-staff\n                members. Contains a description of the user's fields of\n                interest.\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>has_photo</b> - boolean, indicates if the user has a photo.</p>\n\n                \n\n                <p>Or, to be more precise, the value of <b>true</b>\n                indicates that the user both <b>has</b> the photo\n                <b>and</b> he/she had allowed the photo to be viewed by you\n                (that is, either the issuer of the Access Token, or the\n                Consumer, if you're not using an Access Token).</p>\n\n                <p>Please note, that currently this field ignores administrative\n                permissions. That is, even if you call this method directly\n                with an Administrative Consumer Key, you may still be denied\n                access to the photo, as any regular Consumer might.</p>\n\n                <p>If you want to get more information as to the\n                <i>reason</i> why you can't see the photo, try using the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/photos/#can_see_photo'>services/photos/can_see_photo</a>\n                method.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>photo_urls</b> - A dictionary with user's photo URLs..</p>\n\n                \n\n                <p>Don't be misled by the plural. Currently, our users have\n                only a single photo each, but it can be delivered in\n                various sizes (hence urls, not url). Use the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to get the size(s) you need (by\n                default, you will get <b>50x50</b>).</p>\n\n                <p>Each field contains an URL pointing to an image scaled\n                to different dimensions:</p>\n\n                <ul>\n                    <li><b>50x50</b> - 50px x 50px,</li>\n                    <li><b>100x100</b> - 100px x 100px,</li>\n                    <li><b>100x125</b> - 100px x 125px,</li>\n                    <li><b>200x200</b> - 200px x 200px,</li>\n                    <li><b>200x250</b> - 200px x 250px,</li>\n                    <li><b>400x400</b> - 400px x 400px,</li>\n                    <li><b>400x500</b> - 400px x 500px,</li>\n                    <li><b>original</b> - the original size.</li>\n                </ul>\n\n                <p>Please note, that we don't require you to have any\n                additional scopes or permissions in order to access this\n                field. You will <b>always</b> find a valid image URL here,\n                <u>but</u> most of those images may be blank (depending on\n                your permissions and scopes).</p>\n\n                <p><b>Important:</b> The URL is valid only at the time when\n                you are asking for it. You should not cache it. You must\n                ask for this URL every time you want to display it.</p>\n\n                <p>On the other hand, the image which the URL points to,\n                <b>can</b> (and should) be cached according to its <i\n                >Cache-Control</i> and <i>Expires</i> headers. If you're\n                displaying the image in a browser then you don't have to\n                worry about the caching yourself (the browser will cache it\n                for you).</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_number</b> - either string, or <b>null</b>.</p>\n\n                \n\n                <p>If you got a string, then it's the primary student number\n                of this user.</p>\n\n                <p>If it's <b>null</b>, then either the user is not a student,\n                <u>or</u> you don't have access to view his/her student\n                number.</p>\n\n                <p>Note, that you may increase your chances of getting a\n                non-null value by asking your user for the <b>studies</b> and\n                <b>staff_perspective</b> scopes.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>pesel</b> - either string, or <b>null</b>.</p>\n\n                \n\n                <p>The PESEL number of the user. If the PESEL number is\n                unknown, or you don't have the access to view it, you will get\n                a <b>null</b> here.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>birth_date</b> - either string, or <b>null</b>.</p>\n\n                \n\n                <p>If birth date is known and you have the necessary\n                permissions to see it, then it will be returned in the\n                \"yyyy-mm-dd\" format. Otherwise, this will be <b>null</b>.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>revenue_office_id</b> - either string, or <b>null</b>.</p>\n\n                \n\n                <p>If revenue office is not known or you don't have the necessary\n                permissions to see it, you will get <b>null</b> here.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>citizenship</b> - object, or <b>null</b>.</p>\n\n                \n\n                <p>If citizenship is known and you have the necessary\n                permissions to access it, then an object of the following\n                format will be returned:</p>\n\n                <ul>\n                    <li><b>id</b> - an ISO 3166-1 code of the country (these\n                    codes are always in upper-case!).</li>\n                </ul>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>room</b> - the user's office room, or <b>null</b>.</p>\n\n                \n\n                <p>Note, that only staff members have office rooms (and only\n                some of them).</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/geo/#room'>services/geo/room</a> method. See its <b>returns</b> section\n                    for possible subfields\n                    (only <b>primary</b> are allowed).</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>student_programmes</b> - student programmes of given user.</p>\n\n                \n\n                <p>The field will contain student programmes viewable by the\n                issuer of your Access Token. This may include inactive student\n                programmes too. The results may be affected by your access to\n                the <b>studies</b> and/or <b>staff_perspective</b> scopes.</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/progs/#student_programme'>services/progs/student_programme</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>employment_functions</b> - current employment functions of given user.</p>\n\n                \n\n                <p>To access past employments, see\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#employment_functions'>employment_functions</a>\n                method. (The format is the same.)</p>\n            \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#employment_functions'>employment_functions</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>employment_positions</b> - employment positions of given user.</p>\n\n                \n\n                \n                    <p>This field references objects returned by\n                    <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#employment_positions'>employment_positions</a> method. See its <b>returns</b> section\n                    for possible subfields.</p>\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>course_editions_conducted</b> - <span class='beta-icon'>BETA</span> a list of active course editions conducted by the user.</p>\n\n                \n\n                <p>A list of objects that describe course_edition.\n                It <b>differs</b> from\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_edition'>services/courses/course_edition</a> object.</p>\n\n                <p>Currently a <b>fixed</b> set of subfields will be returned:\n                <code>id|course[id|name]|term[id|name]</code>. You cannot\n                access other subfields via this method.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>postal_addresses</b> - a list of personal postal addresses.</p>\n\n                \n\n                <p>Every item on the list will have the following fields:</p>\n\n                <ul>\n                    <li>\n                        <b>type</b> - this will be either <b>primary</b>,\n                        <b>residence</b>, <b>correspondence</b>, or\n                        <b>other</b>. However, clients MUST be prepared that\n                        more types of addresses may be used here in the future\n                        (e.g. treat them as <b>other</b>).\n                    </li>\n                    <li>\n                        <b>type_name</b> - a LangDict object with a short name\n                        of the address type, e.g. \"Address of residence\".\n                    </li>\n                    <li>\n                        <b>address</b> - string; short, plain-text postal\n                        address\n                    </li>\n                </ul>\n\n                <p>Please note, that you will need as least the <b>personal</b>\n                scope if you want this list to be not empty.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>alt_email</b> - alternative email address, or <b>null</b>.</p>\n\n                \n\n                <p>Users are allowed to supply alternative (usually private)\n                email addresses. These addresses are not used in general, and\n                currently they can be accessed only by the user himself (this\n                may change in future).</p>\n\n                <p>You will also need both the <b>email</b> and <b>personal</b>\n                scopes to access this field. If you don't have these\n                permissions you will always get <b>null</b>.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>can_i_debug</b> - <span class='beta-icon'>BETA</span> boolean, <b>true</b> if the issuer of your Access Token should be allowed to debug sessions of <i>this</i> user.</p>\n\n                \n\n                <p>This field is for Administrative Consumers only. There is\n                a number of users which are allowed to debug sessions as other\n                users (in other words, they can sign in to various applications\n                as selected other users). You can use this USOS API method to\n                help you judge if your user should be allowed to do that.</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>external_ids</b> -\n                    Dictionary following structure:<ul><li>orcid - User's ORCID idientifier. See <a href='https://orcid.org/'>orcid.org</a> for more details.</li><li>pbn_id - User's PBN ID</li></ul>;</p>\n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>phd_student_status</b> - integer (0, 1 or 2).</p>\n\n                \n\n            This indicates the user's status of \"being a student of phd programme.\n            The meaning of the possible values is same as student_status.\n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>library_card_id</b> - either string, or <b>null</b>.</p>\n\n                \n\n                <p>The library card ID of the user. If the ID is\n                unknown, or you don't have the access to view it, you will get\n                a <b>null</b> here.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            \n\n                \n            \n            \n        </li>\n        \n        <li >\n            \n                <p><b>birth_certificate_data</b> - object, or <b>null</b>.</p>\n\n                \n\n                <p>If the user has opted to use a preferred name and/or sex,\n                this field contains their personal data (name, second name(s),\n                surname and sex) as it appears in their official documents.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            \n\n                \n            \n            \n        </li>\n        \n    </ul>\n\n            </li>\n        \n    </ul>\n\n    ",
+  "errors": "\n\n    \n    \n    <ul>\n        \n        <li>\n            \n                <p><b>field_forbidden</b> - access to field denied.</p>\n\n                \n\n                \n                    <p>Possible reasons:</p>\n                    <ul>\n                        \n                        <li>\n                            \n                                <p><b>user_unauthorized</b> -\n                                access token issuer does not have permission to retrieve value of this field, because it refers to other user.</p>\n                            \n                        </li>\n                        \n                    </ul>\n                \n            \n        </li>\n        \n    </ul>\n",
+  "result_fields": [
+    {
+      "name": "id",
+      "description": "\nuser's ID",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "first_name",
+      "description": "\nuser's first name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "middle_names",
+      "description": "\n\n                <p>In most cases, this will be a single name, but not always.\n                See <a href='http://en.wikipedia.org/wiki/Middle_name'>here</a>\n                for the details.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "last_name",
+      "description": "\nuser's last name",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "previous_names",
+      "description": "\n\n                <p>A history of changes to the user's name.\n                Every element is a dictionary with three fields:\n                <b>first_name</b>, <b>last_name</b> and <b>until</b>\n                - a date on which the name was changed. The names are\n                ordered by date, starting with the most recent.</p>\n                <p>An empty list indicates that the user has either never\n                changed his/her name, or that he/she had disallowed the name history\n                to be viewed by you (that is, either the issuer of the Access Token,\n                or the Consumer, if you're not using an Access Token).</p>\n                <p>Use an Access Token with the <b>personal</b> scope.\n                (Or, acquire Administrative access.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "sex",
+      "description": "\ncapital M for male, F for female",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "titles",
+      "description": "\n\n                <p>A dictionary with two fields: <b>before</b> and\n                <b>after</b>. Both fields can be either plain-text string or\n                <b>null</b>. In some contexts it is customary to display these\n                titles before and after the user's name.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_status",
+      "description": "\n\n                <p>This indicates the user's status of \"being a student\". The\n                meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>null</b> - This means that you are not allowed to\n                        access the student status of this user. (You may need\n                        to provide an Access Token to access such values.)\n                    </li>\n                    <li>\n                        <b>0</b> - The user is not, and never was, a student\n                        on any of the study programmes of this university.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an \"inactive student\". That is,\n                        currently he's not studying, but he was an active\n                        student in the past.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active student.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "staff_status",
+      "description": "\n\n                <p>This indicates the user's status of \"being a staff member\".\n                The meaning of the possible values is as follows:</p>\n\n                <ul>\n                    <li>\n                        <b>0</b> - The user is currently not a staff member.\n                        He might have been a staff member once, but he is not\n                        now.\n                    </li>\n                    <li>\n                        <b>1</b> - The user is an employed staff member, but he\n                        is not an academic teacher.\n                    </li>\n                    <li>\n                        <b>2</b> - The user is an active academic teacher.\n                    </li>\n                </ul>\n\n                <p>Please note, that usually you won't have any use for this\n                field. If you are an Administrative Consumer, then you should\n                make your requests via the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method - this way,\n                USOS API will do all the heavy lifting regarding data access\n                issues.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "email_access",
+      "description": "\n\n                <p><b>Important:</b> This is a <b>BETA</b> field and it is\n                provided primarily for administrative consumers. In most cases,\n                you will want to use the <b>email</b> and <b>email_url</b>\n                fields. You will need the <b>email_access</b> field only if you\n                want to create a custom implementation of the page provided in\n                <b>email_url</b> field.</p>\n\n                <p>Please note, that the fact that user X can access user Y's\n                email, does not mean that <i>you</i> (the Consumer) can. Even\n                if this field returns <b>plaintext</b>, you still may get\n                <b>null</b> in the <b>email</b> field if you don't have the\n                proper scopes!</p>\n\n                <p>If you don't provide an Access Token, then our user X will\n                be an anonymous, external user (such users usually don't see\n                much).</p>\n\n                <p>This field may return any of the following values:</p>\n\n                <ul>\n                    <li><b>no_email</b> - user Y has no email address,\n                    therefore nobody can access it.</li>\n\n                    <li><b>no_access</b> - user Y has an email address, but\n                    user X cannot access it.</li>\n\n                    <li>\n                        <p><b>require_captcha</b> - user Y has an email address\n                        and user X can access it, but we will first need to\n                        make sure that he's not a robot.</p>\n\n                        <p>If you're a regular Consumer, then you cannot access\n                        such email yourself, but you should point your user to\n                        the URL provided in the <b>email_url</b> field. We will\n                        verify that user X is not a robot and reveal the email\n                        address afterwards.</p>\n\n                        <p>If you're an Administrative Consumer, then you\n                        <i>can</i> access the <b>email</b> field, but you\n                        <b>may not</b> display this email to user X, until you\n                        have verified that he's not a robot. You can implement\n                        your own captchas, or you can use the <b>email_url</b>\n                        field, as regular Consumers do.</p>\n                    </li>\n\n                    <li><b>plaintext</b> - user Y has an email address, and\n                    user X is allowed to view it in plaintext. If you have\n                    asked for the right scopes, then you should be able to\n                    access it via the <b>email</b> field.</li>\n                </ul>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "email",
+      "description": "\n\n                <p>You will need the <b>email</b> scope to access the email\n                address of your user (the issuer of your Access Token).\n                You will need the <b>other_emails</b> scope to access email\n                addresses of other users.</p>\n\n                <p><b>Important:</b> Administrative calls have access to all\n                the emails, regardless of their visibility. You <b>must</b> use\n                the <a href='https://usosapps.vistula.edu.pl/developers/api/services/oauth/#proxy'>services/oauth/proxy</a> method, or\n                interpret the <b>email_access</b> field properly, before you\n                show this email to your users!</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "email_url",
+      "description": "\n\n                <p>Whenever you cannot access the user's email via the\n                <b>email</b> field, you can display this link instead. We may\n                need to authenticate the user and verify that he's not a robot\n                before we display the email to him.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "has_email",
+      "description": "\n\n                <p>In some cases (e.g. when using the mailing module) it may be\n                desirable for you to know if we actually possess the email\n                address of the user. We won't necessarily share it with you,\n                but we can tell you whether we have it or not.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "homepage_url",
+      "description": "\nuser's homepage URL (or null if none)",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "profile_url",
+      "description": "\nuser's usosweb profile URL",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "phone_numbers",
+      "description": "\n\n                <p>Each string is a single contact phone number. These are\n                purely academic-related contact numbers and the list will be\n                always empty for non-academic users.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "mobile_numbers",
+      "description": "\n\n                <p>Each string is a single mobile phone number. These are\n                personal phone numbers, which can be used e.g. for SMS\n                notifications. You may assume that these numbers are ordered\n                user's by preference. We don't guarantee neither if the number\n                is up-to-date, nor that it is in any commonly recognizable\n                format.</p>\n\n                <p>You will require the <b>mobile_numbers</b> scope in order to\n                access user's mobile numbers. If you don't have it, you will\n                most probably get an empty list here.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "office_hours",
+      "description": "\n\n                This field contains information on the time spans during which\n                a teacher is available to meet with students in his or her\n                office. It may also contain information on holiday plans. It\n                will always be empty for non-staff members. Usually it is short\n                (one sentence), but in some cases it might contain multiple\n                paragraphs of text.\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "interests",
+      "description": "\n\n                Currently, this field will always be empty for all non-staff\n                members. Contains a description of the user's fields of\n                interest.\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "has_photo",
+      "description": "\n\n                <p>Or, to be more precise, the value of <b>true</b>\n                indicates that the user both <b>has</b> the photo\n                <b>and</b> he/she had allowed the photo to be viewed by you\n                (that is, either the issuer of the Access Token, or the\n                Consumer, if you're not using an Access Token).</p>\n\n                <p>Please note, that currently this field ignores administrative\n                permissions. That is, even if you call this method directly\n                with an Administrative Consumer Key, you may still be denied\n                access to the photo, as any regular Consumer might.</p>\n\n                <p>If you want to get more information as to the\n                <i>reason</i> why you can't see the photo, try using the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/photos/#can_see_photo'>services/photos/can_see_photo</a>\n                method.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "photo_urls",
+      "description": "\n\n                <p>Don't be misled by the plural. Currently, our users have\n                only a single photo each, but it can be delivered in\n                various sizes (hence urls, not url). Use the\n                <a href='https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/#fields'>subfield selector</a> to get the size(s) you need (by\n                default, you will get <b>50x50</b>).</p>\n\n                <p>Each field contains an URL pointing to an image scaled\n                to different dimensions:</p>\n\n                <ul>\n                    <li><b>50x50</b> - 50px x 50px,</li>\n                    <li><b>100x100</b> - 100px x 100px,</li>\n                    <li><b>100x125</b> - 100px x 125px,</li>\n                    <li><b>200x200</b> - 200px x 200px,</li>\n                    <li><b>200x250</b> - 200px x 250px,</li>\n                    <li><b>400x400</b> - 400px x 400px,</li>\n                    <li><b>400x500</b> - 400px x 500px,</li>\n                    <li><b>original</b> - the original size.</li>\n                </ul>\n\n                <p>Please note, that we don't require you to have any\n                additional scopes or permissions in order to access this\n                field. You will <b>always</b> find a valid image URL here,\n                <u>but</u> most of those images may be blank (depending on\n                your permissions and scopes).</p>\n\n                <p><b>Important:</b> The URL is valid only at the time when\n                you are asking for it. You should not cache it. You must\n                ask for this URL every time you want to display it.</p>\n\n                <p>On the other hand, the image which the URL points to,\n                <b>can</b> (and should) be cached according to its <i\n                >Cache-Control</i> and <i>Expires</i> headers. If you're\n                displaying the image in a browser then you don't have to\n                worry about the caching yourself (the browser will cache it\n                for you).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_number",
+      "description": "\n\n                <p>If you got a string, then it's the primary student number\n                of this user.</p>\n\n                <p>If it's <b>null</b>, then either the user is not a student,\n                <u>or</u> you don't have access to view his/her student\n                number.</p>\n\n                <p>Note, that you may increase your chances of getting a\n                non-null value by asking your user for the <b>studies</b> and\n                <b>staff_perspective</b> scopes.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "pesel",
+      "description": "\n\n                <p>The PESEL number of the user. If the PESEL number is\n                unknown, or you don't have the access to view it, you will get\n                a <b>null</b> here.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "birth_date",
+      "description": "\n\n                <p>If birth date is known and you have the necessary\n                permissions to see it, then it will be returned in the\n                \"yyyy-mm-dd\" format. Otherwise, this will be <b>null</b>.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "revenue_office_id",
+      "description": "\n\n                <p>If revenue office is not known or you don't have the necessary\n                permissions to see it, you will get <b>null</b> here.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "citizenship",
+      "description": "\n\n                <p>If citizenship is known and you have the necessary\n                permissions to access it, then an object of the following\n                format will be returned:</p>\n\n                <ul>\n                    <li><b>id</b> - an ISO 3166-1 code of the country (these\n                    codes are always in upper-case!).</li>\n                </ul>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "room",
+      "description": "\n\n                <p>Note, that only staff members have office rooms (and only\n                some of them).</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "student_programmes",
+      "description": "\n\n                <p>The field will contain student programmes viewable by the\n                issuer of your Access Token. This may include inactive student\n                programmes too. The results may be affected by your access to\n                the <b>studies</b> and/or <b>staff_perspective</b> scopes.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "employment_functions",
+      "description": "\n\n                <p>To access past employments, see\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/users/#employment_functions'>employment_functions</a>\n                method. (The format is the same.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "employment_positions",
+      "description": "\nemployment positions of given user",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "course_editions_conducted",
+      "description": "\n\n                <p>A list of objects that describe course_edition.\n                It <b>differs</b> from\n                <a href='https://usosapps.vistula.edu.pl/developers/api/services/courses/#course_edition'>services/courses/course_edition</a> object.</p>\n\n                <p>Currently a <b>fixed</b> set of subfields will be returned:\n                <code>id|course[id|name]|term[id|name]</code>. You cannot\n                access other subfields via this method.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "postal_addresses",
+      "description": "\n\n                <p>Every item on the list will have the following fields:</p>\n\n                <ul>\n                    <li>\n                        <b>type</b> - this will be either <b>primary</b>,\n                        <b>residence</b>, <b>correspondence</b>, or\n                        <b>other</b>. However, clients MUST be prepared that\n                        more types of addresses may be used here in the future\n                        (e.g. treat them as <b>other</b>).\n                    </li>\n                    <li>\n                        <b>type_name</b> - a LangDict object with a short name\n                        of the address type, e.g. \"Address of residence\".\n                    </li>\n                    <li>\n                        <b>address</b> - string; short, plain-text postal\n                        address\n                    </li>\n                </ul>\n\n                <p>Please note, that you will need as least the <b>personal</b>\n                scope if you want this list to be not empty.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "alt_email",
+      "description": "\n\n                <p>Users are allowed to supply alternative (usually private)\n                email addresses. These addresses are not used in general, and\n                currently they can be accessed only by the user himself (this\n                may change in future).</p>\n\n                <p>You will also need both the <b>email</b> and <b>personal</b>\n                scopes to access this field. If you don't have these\n                permissions you will always get <b>null</b>.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "can_i_debug",
+      "description": "\n\n                <p>This field is for Administrative Consumers only. There is\n                a number of users which are allowed to debug sessions as other\n                users (in other words, they can sign in to various applications\n                as selected other users). You can use this USOS API method to\n                help you judge if your user should be allowed to do that.</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "external_ids",
+      "description": "\nDictionary following structure:<ul><li>orcid - User's ORCID idientifier. See <a href='https://orcid.org/'>orcid.org</a> for more details.</li><li>pbn_id - User's PBN ID</li></ul>",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "phd_student_status",
+      "description": "\n\n            This indicates the user's status of \"being a student of phd programme.\n            The meaning of the possible values is same as student_status.",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "library_card_id",
+      "description": "\n\n                <p>The library card ID of the user. If the ID is\n                unknown, or you don't have the access to view it, you will get\n                a <b>null</b> here.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    },
+    {
+      "name": "birth_certificate_data",
+      "description": "\n\n                <p>If the user has opted to use a preferred name and/or sex,\n                this field contains their personal data (name, second name(s),\n                surname and sex) as it appears in their official documents.</p>\n\n                <p>You must use the Access Token with the <b>personal</b> scope\n                in order to get a non-null value. (Or, acquire Administrative\n                access.)</p>\n            ",
+      "is_primary": true,
+      "is_secondary": false
+    }
+  ],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

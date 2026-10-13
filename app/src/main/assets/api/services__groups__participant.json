@@ -1,0 +1,64 @@
+{
+  "name": "services/groups/participant",
+  "short_name": "participant",
+  "description": "\t\n\t<p>Get groups related to given user's study.</p>\n\t<p>This means, that if the user is also a staff member, then this method will NOT include\n\tentries related to his staff-activities.</p>\n",
+  "brief_description": "Get groups related to given user's study",
+  "ref_url": "https://usosapps.vistula.edu.pl/developers/api/services/groups/#participant",
+  "auth_options": {
+    "consumer": "required",
+    "token": "required",
+    "administrative_only": false,
+    "ssl_required": false,
+    "scopes": [
+      "studies"
+    ]
+  },
+  "arguments": [
+    {
+      "name": "fields",
+      "is_required": true,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\t\n\tPipe-separated list of fields\n\t(as in the <a href=\"#group\">group</a> method). Only <b>primary</b> fields\n\tare allowed.\n"
+    },
+    {
+      "name": "lang",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "pl",
+      "description": "\t\n\tEither <b>pl</b> or <b>en</b> - resulting list of groups will be sorted by the course name\n\tin the specified language.\n"
+    },
+    {
+      "name": "active_terms",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "boolean",
+      "default_value": "false",
+      "description": "\t\n\t<p>Return only these groups which are related to the currently active academic terms.</p>\n"
+    },
+    {
+      "name": "format",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": "json",
+      "description": "\tFormat in which to return values. See                     <a href=\"https://usosapps.vistula.edu.pl/developers/api/definitions/datatypes/\">supported output formats</a>."
+    },
+    {
+      "name": "callback",
+      "is_required": false,
+      "is_deprecated": false,
+      "type": "",
+      "default_value": null,
+      "description": "\tRequired only if you've chosen <b>jsonp</b> as a return format."
+    }
+  ],
+  "returns": "\t\n\t<p>A dictionary with the following fields:</p>\n\t<ul>\n\t\t<li><p><strong>groups</strong> -\n\t\t\ta dictionary mapping an Academic Term to\n\t\t\tan array of dictionaries as defined in\n\t\t\tthe <a href=\"#group\">group</a> method sorted by the course name in the specified\n\t\t\tlanguage.</p>\n\t\t</li>\n\t\t<li><p><strong>terms</strong> -\n\t\t\ta list of academic terms referenced (by ID) in the exams section sorted\n\t\t\tanti-chronologically. Format will be the same as in the\n\t\t\t<a href=\"../terms/#terms\">terms/terms</a> method.</p>\n\t</li>\n</ul>\n",
+  "errors": "",
+  "result_fields": [],
+  "beta": false,
+  "deprecated": null,
+  "is_internal": false
+}

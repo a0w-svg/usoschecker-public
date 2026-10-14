@@ -1,5 +1,135 @@
 # Validation — 2026-10-13
 
+## Task tools, class actions and nullable sync responses — 2026-10-13
+
+- Task priorities, notes, note search, persistent sorting, completion progress and
+  deletion undo. Legacy tasks default to normal priority. Undo preserves existing
+  entries and checks both account identity and the 200-task limit.
+- Scrollable task editor and filter rows with 48 dp minimum button height;
+  class details offer task creation and a system share chooser. Dashboard opens
+  the actual date of the next lesson.
+- Explicit JSON null grade collections and optional date/comment fields are handled
+  without rejecting valid responses. Missing fields and wrong types still fail.
+  Android JSONObject null-string behavior has its own regression test.
+- Sync failures include their stage; HTTP failures also identify the method.
+  Wrapped errors retain authorization/retry classification. Error descriptions
+  can be copied without exposing response bodies or tokens.
+- All 51 JVM tests passed (44 core + 7 app transport/snapshot tests).
+- All 22 Android instrumentation tests passed on Android 16 with `-PisolatedTests`.
+  The initial run encountered an existing account and failed demo fixture assumptions;
+  a separate `.qa` installation was then used. Non-QA tests now skip populated stores.
+- Final task flow was additionally rerun after UI/preference changes.
+- APK and Android lint built successfully; no lint errors.
+- Deliverable: dist/usoschecker-improved-debug.apk (standard package pl.vistula.checker).
+- Visually inspected task list/editor previews in build/task-priority-preview.png
+  and build/task-editor-preview.png; dialog surface colors now follow the green palette.
+- Private-account sync was not exercised. Null parsing is a concrete compatibility
+  fix for the reported incomplete-response message, but its exact cause on the
+  user's account requires a refresh using the updated app and its stage diagnostics.
+
+## API handling and catalog UX — 2026-10-13
+
+- JSON/form OAuth error classification, exact expired-token detection, nonretryable
+  authorization errors, HTTP 408/429/5xx retry classification and Retry-After parsing.
+- Sync preserves saved data and records server cooldowns; account recovery guidance
+  and last-attempt timestamps are visible on Start.
+- Explorer honors ignored-token metadata, rejects injected OAuth parameters and
+  unsupported multipart/method requests, normalizes MIME types and clears stale exports.
+- Persistent offline API favorites/filter, inline required-field errors and retained
+  parameters with an explicit response-panel error after a failed request.
+- All 40 JVM tests passed: 36 core plus 4 transport tests using simulated HTTP connections.
+  Transport tests cover form POST, ignored tokens, retry headers, redacted failures,
+  local validation and connection cleanup. No private API requests were made.
+- Debug APK, Android test APK and lint built successfully. Android lint has no errors.
+- Added favorites instrumentation coverage; device tests were not run because adb
+  reported no connected device. UI rendering and real account OAuth remain unverified.
+- APK: app/build/outputs/apk/debug/app-debug.apk.
+
+## Calendar timeline and complete multi-week loading — 2026-10-13
+
+- Day time grid with week/day selection, full-range agenda, overlap lanes, event details,
+  current-time marker, jump-to-now control and current-lecture cards with remaining minutes.
+- Exact meeting start/end timestamps are stored; legacy snapshots remain readable.
+- Default range: eight weeks from the current Monday; load-more extends to twelve/sixteen weeks.
+- All seven-day pages are fetched, with at most three concurrent requests and week progress.
+  Unexpected repeated/out-of-range pages fail validation. Any failed page retains the previous snapshot.
+- Routine cache reads are silent; current indicators update on minute changes without resetting scroll.
+- Debug build and all 32 core tests passed. Tests include all 8/16 pages, later-page failure,
+  repeated first-week rejection, overnight/current-time boundaries and moved meeting dates.
+- The clean Android regression run passed all 18 cases on a fresh CodexCalendar AVD.
+  Layout geometry and affected calendar/search flows were additionally tested after visual sizing repair.
+- Android lint: 0 errors, 12 advisory warnings.
+- Final artifact: dist/usoschecker-calendar-debug.apk.
+- Screenshots: build/calendar-header-preview.png and build/calendar-timeline-preview.png.
+- Private account pagination was not verified against a real USOS account. The API can return
+  empty future weeks; loaded-range labels indicate requested/saved coverage, not a guarantee of classes.
+
+## Lecturer names — 2026-10-13
+
+- Timetable sync collects unique lecturer IDs from all four weeks and resolves first_name
+  and last_name through services/users/users in batches of at most 50.
+- Names appear in the timetable, upcoming-class dashboard, search and calendar description.
+- Unavailable/null user records retain an explicit ID fallback; incomplete responses fail
+  the sync so the previous snapshot is retained.
+- Debug APK and instrumentation APK built; all 24 JVM tests passed, including 3 new
+  tests for name parsing, lecturer-ID deduplication, null values and order-independent display.
+- Android lint: 0 errors, 11 advisory warnings.
+- Added Android coverage for batch resolution, incomplete directory response, dashboard/search,
+  and lecturer names in calendar exports. These updated Android tests compiled but were not run
+  in this change: the existing AVD was already in use and disallowed a simultaneous read-only
+  instance. The existing emulator session was left unchanged.
+- Actual lecturer lookup against a private USOS account requires a connected account and was
+  not exercised here. Existing snapshots gain names after the next successful refresh.
+
+## Student tools expansion — 2026-10-13
+
+- Semester filtering and summaries of visible numeric grades (unweighted, non-official).
+- Visible timetable export to .ics via the system document picker, with stable event IDs,
+  escaped/folded UTF-8 text, Warsaw-to-UTC conversion, and saved pending export during recreation.
+- Task editing, text search, open/completed/today/overdue filters, and dashboard deadline preview.
+- Debug APK and instrumentation APK built; all 21 core tests passed (14 existing + 7 student tools).
+- All 14 emulator tests passed on Android 16, including semester summaries, task editing/filtering,
+  dashboard deadlines, and a real calendar file write with an intercepted document-picker result.
+- Android lint: 0 errors, 11 advisory warnings about target SDK and dependency versions.
+- Tests now start with a fresh activity task to avoid carrying saved demo navigation between cases.
+- Calendar export is a static snapshot; importing/updating it in third-party calendar apps was not tested.
+- Private account/OAuth operations still require validation with real user credentials.
+
+## Material redesign — verified on Android emulator
+
+- Material 3 toolbar, icon bottom navigation (Start / Oceny / Plan / Zmiany / Więcej),
+  side drawer, outlined text inputs, Material buttons/dialogs and settings switch.
+- Separate grades and timetable destinations; dashboard statistics and upcoming class.
+- Personal tasks: due date, completion/reopening, deletion, encrypted local storage;
+  demo tasks remain separate from real data.
+- Debug build and all 14 core tests passed.
+- All 11 Android instrumentation tests passed on Medium_Phone_API_36.0 (Android 16),
+  including actual bottom-navigation clicks, catalog pagination, search/date filters,
+  task creation/completion, demo isolation, encryption, failed-sync preservation,
+  bundled metadata, and anonymous public API request.
+- Android lint: 0 errors, 10 warnings (target SDK and dependency update advisories).
+- Visually inspected the rendered dashboard, timetable and drawer on the emulator.
+  Screenshots: build/material-home.png, build/material-plan.png, build/material-drawer.png.
+- The earlier sections below are historical; the current device tests were executed,
+  unlike the original build's compile-only verification.
+- Private OAuth/account requests and real notification delivery still need account validation.
+
+## Current workspace improvements — 2026-10-13
+
+- API catalog now exposes all results with "show more" and preserves search and filters.
+- Student data and history have case-insensitive search with result counts and empty states.
+- Timetable supports today / next seven days / full snapshot; dates use Europe/Warsaw.
+- Grade cards show semester IDs when available; data screen shows last successful fetch time.
+- Routine reloads skip active text input, avoid rebuilding unchanged data, and retain scroll position.
+- Compatibility overloads preserve the extended record/parser APIs; malformed grades and duplicate meetings are rejected.
+- Verified with the current Gradle wrapper: core tests (14, zero failures), debug APK,
+  instrumentation APK compilation, and Android lint all passed.
+- Added instrumentation coverage for catalog pagination, retained search, student data search,
+  timetable ranges, and history before/after search. Device tests were not executed:
+  adb reports no connected device or emulator.
+- Earlier validation details below describe the original build and its toolchain/hash,
+  not the APK rebuilt from the current workspace.
+
 ## Passed
 
 - Gradle 8.11.1 / JDK 17 build: `:core:test :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug`.

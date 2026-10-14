@@ -38,17 +38,23 @@ final class Repository {
             JSONObject user = new JSONObject(new UsosClient(s).get("services/users/user", Map.of("fields", "id|first_name|last_name")));
             s.put("user", user.getString("first_name") + " " + user.getString("last_name"));
             s.remove("requestToken"); s.remove("requestSecret"); s.remove("snapshot"); s.remove("history");
+            s.remove("retryAt"); s.remove("authorizationError");
             s.put("enabled", true).put("error", ""); vault.write(s);
         }
     }
     List<Change> sync(boolean manual) throws Exception {
         return sync(manual, s -> new UsosClient(s).snapshot());
     }
+    List<Change> syncWithProgress(boolean manual, java.util.function.Consumer<String> progress) throws Exception {
+        return sync(manual, s -> new UsosClient(s, progress).snapshot());
+    }
     interface SnapshotSource { Snapshot fetch(JSONObject state) throws Exception; }
     List<Change> sync(boolean manual, SnapshotSource source) throws Exception {
         synchronized (LOCK) {
             JSONObject s = vault.read();
             if (s.optString("token").isEmpty() || (!manual && !s.optBoolean("enabled"))) return List.of();
+            if (s.optLong("retryAt") > System.currentTimeMillis()) throw new IllegalStateException("USOS prosi o przerwę w żądaniach. Spróbuj po "
+                + java.time.Instant.ofEpochMilli(s.getLong("retryAt")).atZone(UsosClient.ZONE).format(java.time.format.DateTimeFormatter.ofPattern("dd.MM HH:mm:ss")) + ".");
             s.put("attemptAt", System.currentTimeMillis()); vault.write(s);
             try {
                 Snapshot previous = s.optJSONObject("snapshot") == null ? null : Snapshot.from(s.getJSONObject("snapshot"));
@@ -60,16 +66,26 @@ final class Repository {
                 for (Change c : changes) { if (history.length() < 200) history.put(c.json()); }
                 if (oldHistory != null) for (int i = 0; i < oldHistory.length() && history.length() < 200; i++) history.put(oldHistory.get(i));
                 s.put("history", history).put("snapshot", current.json()).put("successAt", now).put("error", "");
+                s.remove("retryAt"); s.remove("authorizationError");
                 vault.write(s); return changes;
             } catch (Exception e) {
                 s.put("error", message(e));
-                if (e instanceof UsosClient.ApiException && ((UsosClient.ApiException) e).authorization) s.put("enabled", false);
+                Exception cause = cause(e);
+                if (cause instanceof UsosClient.ApiException && ((UsosClient.ApiException) cause).authorization) s.put("enabled", false);
+                if (cause instanceof UsosClient.ApiException) {
+                    UsosClient.ApiException failure = (UsosClient.ApiException) cause;
+                    s.put("retryAt", failure.retryAt).put("authorizationError", failure.authorization);
+                }
                 vault.write(s); throw e;
             }
         }
     }
     void disconnect() { synchronized (LOCK) { vault.clear(); } }
+    static Exception cause(Exception e) {
+        return e instanceof UsosClient.SyncException && e.getCause() instanceof Exception ? (Exception) e.getCause() : e;
+    }
     static String message(Exception e) {
+        if (e instanceof UsosClient.SyncException) return "Etap: " + ((UsosClient.SyncException) e).stage + "\n" + message(cause(e));
         if (e instanceof java.net.UnknownHostException) return "Brak połączenia z USOS. Sprawdź dostęp do internetu.";
         if (e instanceof java.net.SocketTimeoutException) return "USOS nie odpowiedział na czas. Spróbuj ponownie.";
         if (e instanceof JSONException || e instanceof java.time.format.DateTimeParseException)

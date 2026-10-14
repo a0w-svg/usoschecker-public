@@ -1,4 +1,11 @@
 <resources>
+    <string name="choose_date_short">Data</string>
+    <string name="task_deleted">Zadanie usunięte</string>
+    <string name="undo">Cofnij</string>
     <string name="background_check">Sprawdzanie w tle</string>
     <string name="selected_upload">Wybrano plik · rozmiar: %1$d B</string>
+    <string name="task_due_date">Termin: %1$s</string>
+    <string name="loading">Wczytywanie…</string>
+    <string name="api_sending">Wysyłanie żądania…</string>
+    <string name="api_failed">Żądanie nie powiodło się.\n%1$s\n\nParametry zostały zachowane. Popraw je lub wykonaj żądanie ponownie.</string>
 </resources>

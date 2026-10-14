@@ -1,0 +1,5 @@
+<resources>
+    <item name="task_title" type="id" />
+    <item name="task_notes" type="id" />
+    <item name="task_priority" type="id" />
+</resources>

@@ -22,7 +22,8 @@ public final class SyncWorker extends Worker {
             notifyChanges(getApplicationContext(), changes);
             return Result.success();
         } catch (Exception e) {
-            if (e instanceof UsosClient.ApiException && !((UsosClient.ApiException) e).retryable) return Result.failure();
+            Exception cause = Repository.cause(e);
+            if (cause instanceof UsosClient.ApiException && !((UsosClient.ApiException) cause).retryable) return Result.failure();
             return getRunAttemptCount() < 3 ? Result.retry() : Result.failure();
         }
     }

@@ -7,10 +7,87 @@ Projekt można otworzyć bezpośrednio w **Android Studio**: wybierz katalog zaw
 `settings.gradle`, wykonaj Gradle Sync i uruchom konfigurację `app`.
 Dokładne kroki: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
 
+## Nawigacja i wygląd
+
+Material 3: ikony i etykiety w dolnym pasku **Start / Oceny / Plan / Zmiany / Więcej**,
+menu boczne otwierane przyciskiem w górnym pasku, obrysowane pola formularzy,
+przełącznik Material i spójne przyciski. Menu inspirowane dziennikiem ucznia;
+konto USOS i katalog API dostępne w **Więcej** oraz w menu bocznym.
+
+Start pokazuje liczbę ocen, zajęć dzisiaj, otwartych zadań i najbliższe zajęcia
+według zapisanego planu. **Zadania** pozwalają dodawać własne wpisy z terminem,
+oznaczać je jako ukończone, przywracać i usuwać. To osobista lista bez powiadomień
+o terminie i bez synchronizacji z uczelnią. Zadania są szyfrowane razem z lokalnymi
+danymi; odłączenie konta usuwa je wraz z magazynem. Zadania demonstracyjne są
+oddzielne i nie zapisują się w prawdziwym magazynie.
+
+Oceny, plan i historia mają wyszukiwanie. Plan można zawęzić do dzisiaj lub
+najbliższych siedmiu dni. Katalog API udostępnia wszystkie wyniki przyciskiem
+„Pokaż kolejne metody”.
+
+## Nowe narzędzia studenckie
+
+- Zadania mają priorytet niski / normalny / wysoki, notatkę do 2000 znaków i sortowanie
+  według terminu, priorytetu lub nazwy. Ukończone wpisy pozostają na końcu, a wybór
+  sortowania jest zapamiętywany. Wyszukiwanie obejmuje również notatki.
+- Pasek postępu pokazuje ukończone zadania. Po usunięciu dostępne jest „Cofnij” przez
+  10 sekund; przywracanie zachowuje treść, priorytet, termin i stan ukończenia.
+- Szczegóły zajęć umożliwiają utworzenie zadania z nazwą przedmiotu i otwarcie
+  systemowego wyboru aplikacji do udostępnienia informacji o zajęciach.
+- Start otwiera plan w dniu najbliższych zajęć. Filtry przewijają się poziomo,
+  mają przyciski o wysokości co najmniej 48 dp i widoczny stan wyboru.
+- Błędy synchronizacji wskazują etap operacji i metodę API. Opis można skopiować
+  z okna błędu; tokeny i surowe odpowiedzi serwera nie są dołączane.
+- Puste kolekcje ocen oraz opcjonalne daty i komentarze zwracane jako JSON `null`
+  nie przerywają synchronizacji. Brak wymaganych pól lub nieprawidłowy typ danych
+  nadal zatrzymuje zapis, zachowując poprzedni zestaw danych.
+
+- Oceny: filtr semestru, podsumowanie aktualnie widocznych wpisów, liczba ocen liczbowych
+  i pozostałych, prosta średnia oraz minimum i maksimum. Średnia nie uwzględnia wag ani ECTS;
+  obejmuje wpisy z różnych terminów egzaminów i nie jest oficjalną średnią uczelni.
+- Plan: eksport widocznych zajęć do pliku .ics przez systemowy wybór pliku. Wyszukiwanie
+  i zakres dat ograniczają eksport. Godziny są przeliczane z Europe/Warsaw do UTC.
+  Zapisany plik jest kopią danych, nie subskrypcją ani automatyczną synchronizacją kalendarza.
+- Zadania: edycja treści i terminu, wyszukiwanie, filtry otwarte / ukończone / dzisiaj /
+  po terminie. Ukończenie zadania pozostaje zachowane po edycji.
+- Start: trzy najbliższe otwarte zadania z oznaczeniem dzisiejszych i zaległych terminów.
+
+## Kalendarz i aktualne zajęcia
+
+Plan ma pasek wyboru dni tygodnia i strzałki zmiany tygodnia. Widok „Oś dnia”
+pokazuje zajęcia na siatce godzinowej, rozdziela nakładające się spotkania na kolumny
+i zaznacza aktualną godzinę. Dotknięcie zajęć otwiera pełne szczegóły. Przycisk
+„Przejdź do teraz” przewija siatkę do bieżącej godziny. Widok „Agenda · cały plan”
+pokazuje wszystkie pobrane tygodnie, grupując zajęcia według dnia.
+
+Na ekranie Start i w planie dzisiejszego dnia widać „TRWAJĄ TERAZ”, prowadzącego,
+salę i pozostały czas. Początek zajęć jest włączony do przedziału, koniec wyłączony;
+terminy orientacyjne nie są przedstawiane jako potwierdzone aktualne zajęcia.
+Wskazanie korzysta z ostatniego zapisu USOS, nie z informacji o faktycznej obecności.
+Prawdziwy plan przechowuje dokładne czasy początku i końca; starsze zapisy pozostają czytelne.
+
+Domyślnie aplikacja pobiera osiem tygodni od poniedziałku bieżącego tygodnia.
+„Wczytaj kolejne 4 tygodnie” rozszerza zakres do maksymalnie szesnastu tygodni.
+Maksymalnie trzy zapytania do USOS działają równocześnie, a pasek operacji pokazuje
+postęp tygodni i pobieranie prowadzących. Błąd dowolnej strony pozostawia stary
+plan w całości. Data w nagłówku oznacza rzeczywiście zapisany zakres; brak zajęć
+w danym tygodniu może oznaczać pustą odpowiedź USOS. Odczyty zapisu w tle nie
+blokują formularzy ani nie pokazują paska ładowania; zegar aktualizuje się co minutę.
+
 ## Funkcje
 
+- Katalog API: ulubione metody zapisywane na telefonie oraz filtr „Ulubione”, działające offline.
+  Zmiana ulubionych nie kasuje wpisanych parametrów. Lista zawiera tylko nazwy metod;
+  nie przechowuje odpowiedzi ani danych uwierzytelniających.
+- Obsługa błędów API: rozpoznawanie JSON i formularzy OAuth, rozróżnienie wygasłej sesji
+  od błędnego podpisu, podpowiedzi przy wymaganych polach i zachowanie parametrów po błędzie.
+  Nowe żądanie unieważnia poprzednią odpowiedź do eksportu.
+- Synchronizacja respektuje nagłówek `Retry-After` (sekundy lub data HTTP). Start pokazuje
+  ostatnią próbę i czas kolejnego dozwolonego sprawdzenia. Wygasła sesja wstrzymuje
+  monitorowanie i pokazuje skrót do ustawień konta.
+
 - Monitor ocen: nowe, zmienione i usunięte oceny; wartość, komentarz, termin egzaminu i czas modyfikacji z API.
-- Monitor planu na następne 28 dni: dodanie/usunięcie zajęć, godziny, sala, budynek i identyfikatory prowadzących.
+- Monitor planu na 8 tygodni (rozszerzalny do 16 tygodni): dodanie/usunięcie zajęć, godziny, sala, budynek i imiona i nazwiska prowadzących (lub ID, jeśli USOS nie udostępnia danych osoby).
 - Historia ostatnich 200 zmian z wartościami przed/po i czasem wykrycia w strefie Europe/Warsaw.
 - Ręczne odświeżanie i WorkManager w tle co 15, 30, 60 lub 120 minut.
 - Powiadomienia bez ujawniania ocen na ekranie blokady; zgoda na Androidzie 13+.
@@ -53,7 +130,7 @@ oficjalna dokumentacja zaleca serwerowy pośrednik OAuth.
   Interwał to częstotliwość zamówiona, nie gwarantowana. Monitorowanie nie jest usługą push uczelni.
 - Oceny pochodzą z semestrów zwróconych przez `courses/user` z `active_terms_only=false`
   oraz `grades/terms2`. Nie obejmują wyników pojedynczych sprawdzianów z modułu `crstests`.
-- Plan pobierany jest w czterech żądaniach po siedem dni do `tt/student`. Porównujemy tylko
+- Plan pobierany jest w ośmiu żądaniach po siedem dni (do szesnastu po rozszerzeniu zakresu) do `tt/student`. Porównujemy tylko
   wspólny zakres kolejnych pobrań: wejście nowego dnia w zakres i zakończenie starego dnia
   nie tworzą fałszywych powiadomień.
 - Identyfikator `sm_id` pozwala rozpoznać przeniesienie potwierdzonego spotkania.
@@ -83,6 +160,15 @@ Na podłączonym telefonie/emulatorze:
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
+Aby uruchomić testy w osobnej instalacji i zachować konto aplikacji na emulatorze:
+
+```sh
+./gradlew -PisolatedTests :app:connectedDebugAndroidTest
+```
+
+Opcja dodaje sufiks `.qa` do identyfikatora debugowej aplikacji. Zwykłe budowanie
+nie używa tego sufiksu. Testy demo wymagają instalacji bez połączonego konta.
+
 Testy JVM sprawdzają podpis OAuth z opublikowanym wektorem, kodowanie, parsowanie odpowiedzi,
 punkt odniesienia, zmiany ocen/sali/godzin, czas źródłowy, przesuwanie okna planu,
 odrzucanie niepełnych danych i serializację. Testy Android sprawdzają przepływ demo,
@@ -94,6 +180,16 @@ Odświeżenie publicznej dokumentacji (Python 3, internet; bez klucza):
 ```sh
 python3 scripts/refresh_api_catalog.py
 ```
+
+## Prowadzący zajęcia
+
+Plan pobiera identyfikatory prowadzących z tt/student, a następnie zbiorczo pobiera
+first_name i last_name przez users/users. Powtarzające się identyfikatory z czterech
+tygodni planu są łączone; zapytania obejmują do 50 osób. Nazwiska są widoczne w planie,
+podglądzie najbliższych zajęć, wyszukiwaniu i opisie eksportu .ics.
+Jeżeli USOS zwraca null dla danej osoby, widoczne jest jej ID. Błąd sieci lub niepełna
+odpowiedź nie zatwierdza nowego zapisu danych. Po aktualizacji wybierz „Sprawdź teraz”,
+aby uzupełnić prowadzących w istniejącym planie.
 
 ## Źródła API
 

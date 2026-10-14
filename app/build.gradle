@@ -1,5 +1,13 @@
 plugins { id 'com.android.application' }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { instr -> localProperties.load(instr) }
+}
+def usosKey = localProperties.getProperty('usos.consumer.key', '')
+def usosSecret = localProperties.getProperty('usos.consumer.secret', '')
+
 android {
     namespace 'pl.vistula.checker'
     compileSdk 35
@@ -10,6 +18,17 @@ android {
         versionCode 1
         versionName '1.0.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        buildConfigField "String", "USOS_KEY", "\"${usosKey}\""
+        buildConfigField "String", "USOS_SECRET", "\"${usosSecret}\""
+    }
+    buildFeatures {
+        buildConfig = true
+    }
+    buildTypes {
+        debug {
+            // Optional separate installation for regression tests; keep personal account data intact.
+            if (project.hasProperty('isolatedTests')) applicationIdSuffix '.qa'
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -20,9 +39,15 @@ android {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation project(':core')
+    implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.work:work-runtime:2.10.1'
     implementation 'androidx.core:core:1.15.0'
+    implementation 'androidx.browser:browser:1.8.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
     androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.6.1'
     androidTestImplementation 'androidx.test:rules:1.6.1'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
 }

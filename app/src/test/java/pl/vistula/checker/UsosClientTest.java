@@ -78,19 +78,69 @@ public class UsosClientTest {
         java.util.concurrent.atomic.AtomicInteger pages = new java.util.concurrent.atomic.AtomicInteger();
         UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
             Connection connection = new Connection();
-            if (address.contains("courses/user")) connection.body = "{\"course_editions\":{\"2026Z\":[{\"course_id\":\"FIN\",\"course_name\":{\"pl\":\"Finanse\"}}]}}";
+            if (address.contains("courses/user_ects_points")) connection.body = "{}";
+            else if (address.contains("courses/user")) connection.body = "{\"course_editions\":{\"2026Z\":[{\"course_id\":\"FIN\",\"course_name\":{\"pl\":\"Finanse\"}}]}}";
             else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":null,\"course_units_grades\":{}}}}";
             else if (address.contains("tt/student")) { connection.body = "[]"; pages.incrementAndGet(); }
-            else throw new AssertionError("Unexpected request");
+            else if (address.contains("terms/terms") || address.contains("payments/") || address.contains("theses/user") || address.contains("news/search")) connection.body = "[]";
+            else if (address.contains("crstests/user")) connection.body = "[]";
+            else throw new AssertionError("Unexpected request: " + address);
             return connection;
         });
         assertTrue(client.snapshot().records.isEmpty());
         assertEquals(8, pages.get());
     }
+    @Test public void completeSnapshotParsesEctsAndAttachesToGradeRecord() throws Exception {
+        UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
+            Connection connection = new Connection();
+            if (address.contains("courses/user_ects_points")) connection.body = "{\"2026Z\":{\"FIN\":\"5.0\"}}";
+            else if (address.contains("courses/user")) connection.body = "{\"course_editions\":{\"2026Z\":[{\"course_id\":\"FIN\",\"course_name\":{\"pl\":\"Finanse\"}}]}}";
+            else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[{\"1\":{\"exam_id\":10,\"exam_session_number\":1,\"value_symbol\":\"4.5\",\"date_modified\":\"2026-10-14 12:00:00\",\"comment\":null}}],\"course_units_grades\":{}}}}";
+            else if (address.contains("tt/student")) connection.body = "[]";
+            else if (address.contains("terms/terms") || address.contains("payments/") || address.contains("theses/user") || address.contains("news/search")) connection.body = "[]";
+            else if (address.contains("crstests/user")) connection.body = "[]";
+            else throw new AssertionError("Unexpected request: " + address);
+            return connection;
+        });
+        pl.vistula.checker.core.Snapshot snapshot = client.snapshot();
+        assertEquals(1, snapshot.records.size());
+        pl.vistula.checker.core.Record grade = snapshot.records.get("grade:10:1");
+        assertNotNull(grade);
+        assertEquals(5.0, grade.ects, 0.0001);
+    }
+    @Test public void completeSnapshotLoadsTermsPaymentsThesesAndTests() throws Exception {
+        UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
+            Connection connection = new Connection();
+            if (address.contains("courses/user_ects_points")) connection.body = "{}";
+            else if (address.contains("courses/user")) connection.body = "{\"course_editions\":{\"2026Z\":[{\"course_id\":\"FIN\",\"course_name\":{\"pl\":\"Finanse\"}}]}}";
+            else if (address.contains("terms/terms")) connection.body = "{\"2026Z\":{\"name\":{\"pl\":\"Semestr zimowy\"},\"start_date\":\"2026-10-01\",\"end_date\":\"2027-02-15\"}}";
+            else if (address.contains("payments/user_accounts")) connection.body = "[{\"account_number\":\"PL999\",\"name\":\"Subkonto czesnego\",\"currency\":\"PLN\"}]";
+            else if (address.contains("payments/user_payments")) connection.body = "[{\"id\":\"p1\",\"total_amount\":850.0,\"currency\":\"PLN\",\"description\":{\"pl\":\"Czesne\"},\"state\":\"unsettled\",\"payment_deadline\":\"2026-10-31\"}]";
+            else if (address.contains("theses/user")) connection.body = "[{\"title\":{\"pl\":\"System wykrywania anomalii\"},\"status\":{\"pl\":\"W toku\"}}]";
+            else if (address.contains("crstests/user")) connection.body = "[{\"id\":\"t1\",\"course_id\":\"FIN\",\"name\":{\"pl\":\"Kolokwium 1\"},\"points\":18.0,\"max_points\":20.0}]";
+            else if (address.contains("news/search")) connection.body = "{\"items\":[{\"article\":{\"id\":\"n1\",\"title\":{\"pl\":\"Inauguracja roku\"},\"publication_date\":\"2026-10-01\"}}]}";
+            else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[],\"course_units_grades\":{}}}}";
+            else if (address.contains("tt/student")) connection.body = "[]";
+            else throw new AssertionError("Unexpected request: " + address);
+            return connection;
+        });
+        pl.vistula.checker.core.Snapshot snapshot = client.snapshot();
+        assertEquals(1, snapshot.terms.size());
+        assertEquals("Semestr zimowy", snapshot.terms.get("2026Z").name);
+        assertNotNull(snapshot.payments);
+        assertEquals("PL999", snapshot.payments.accounts.get(0).bankAccountNumber);
+        assertNotNull(snapshot.thesis);
+        assertEquals("System wykrywania anomalii", snapshot.thesis.title);
+        assertEquals(1, snapshot.tests.size());
+        assertEquals("Kolokwium 1", snapshot.tests.get(0).testName);
+        assertEquals(1, snapshot.news.size());
+        assertEquals("Inauguracja roku", snapshot.news.get(0).title);
+    }
     @Test public void malformedGradesReportTheirStageWithoutExposingResponseBodies() throws Exception {
         UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
             Connection connection = new Connection();
-            connection.body = address.contains("courses/user") ? "{\"course_editions\":{\"2026Z\":[]}}" : "private-response";
+            if (address.contains("courses/user_ects_points")) connection.body = "{}";
+            else connection.body = address.contains("courses/user") ? "{\"course_editions\":{\"2026Z\":[]}}" : "private-response";
             return connection;
         });
         try { client.snapshot(); fail("Expected invalid grades"); }
@@ -109,5 +159,52 @@ public class UsosClientTest {
             assertTrue(cause.authorization); assertFalse(cause.retryable);
             assertTrue(Repository.message(failure).contains("services/courses/user"));
         }
+    }
+    @Test public void paymentScopeMissingIsCapturedGracefullyInSnapshot() throws Exception {
+        UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
+            Connection connection = new Connection();
+            if (address.contains("courses/user_ects_points")) connection.body = "{}";
+            else if (address.contains("courses/user")) connection.body = "{\"course_editions\":{\"2026Z\":[{\"course_id\":\"FIN\",\"course_name\":{\"pl\":\"Finanse\"}}]}}";
+            else if (address.contains("terms/terms")) connection.body = "{\"2026Z\":{\"name\":{\"pl\":\"Semestr zimowy\"},\"start_date\":\"2026-10-01\",\"end_date\":\"2027-02-15\"}}";
+            else if (address.contains("payments/")) {
+                connection.status = 403;
+                connection.body = "{\"message\":\"User has not granted access to scope 'payments'\"}";
+            }
+            else if (address.contains("theses/user") || address.contains("news/search")) connection.body = "[]";
+            else if (address.contains("crstests/user")) connection.body = "[]";
+            else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[],\"course_units_grades\":{}}}}";
+            else if (address.contains("tt/student")) connection.body = "[]";
+            return connection;
+        });
+        pl.vistula.checker.core.Snapshot snapshot = client.snapshot();
+        assertNotNull(snapshot.payments);
+        assertTrue(snapshot.payments.scopeMissing);
+        assertTrue(snapshot.payments.statusNotice.contains("payments"));
+    }
+    @Test public void beginSanitizesDirtyScopesWithoutEmptyTokens() throws Exception {
+        String[] captured = {""};
+        UsosClient client = new UsosClient(credentials(), msg -> {}, address -> {
+            captured[0] = address;
+            Connection c = new Connection();
+            c.body = "oauth_token=tok1&oauth_token_secret=sec1&oauth_callback_confirmed=true";
+            return c;
+        });
+        Map<String, String> res = client.begin(" grades | | studies||offline_access| ");
+        assertEquals("tok1", res.get("oauth_token"));
+        assertTrue(captured[0].contains("scopes=grades%7Cstudies%7Coffline_access"));
+        assertFalse(captured[0].contains("%7C%7C"));
+    }
+    @Test public void finishStripsWhitespaceFromPinVerifier() throws Exception {
+        String[] captured = {""};
+        UsosClient client = new UsosClient(credentials(), msg -> {}, address -> {
+            captured[0] = address;
+            Connection c = new Connection();
+            c.body = "oauth_token=accTok&oauth_token_secret=accSec";
+            return c;
+        });
+        JSONObject state = new JSONObject().put("requestToken", "reqT").put("requestSecret", "reqS");
+        Map<String, String> res = client.finish(state, " 1234 5678 \n");
+        assertEquals("accTok", res.get("oauth_token"));
+        assertTrue(captured[0].contains("oauth_verifier=12345678"));
     }
 }

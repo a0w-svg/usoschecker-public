@@ -105,6 +105,14 @@ import pl.vistula.checker.core.Record;
 import pl.vistula.checker.core.Snapshot;
 import pl.vistula.checker.core.TaskTools;
 import pl.vistula.checker.core.UsosParser;
+import pl.vistula.checker.core.PaymentInfo;
+import pl.vistula.checker.core.AcademicTerm;
+import pl.vistula.checker.core.ThesisInfo;
+import pl.vistula.checker.core.CourseTestRecord;
+import pl.vistula.checker.core.GpaCalculator;
+import pl.vistula.checker.core.IcsExporter;
+import pl.vistula.checker.core.NewsArticle;
+import pl.vistula.checker.core.ScheduleConflictDetector;
 
 public final class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private static final int INK = Color.rgb(27, 37, 32), GREEN = Color.rgb(23, 107, 87);
@@ -122,6 +130,8 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
     private TextView progress;
     private boolean demo, demoChanged, busy;
     private int tab;
+    private double simTargetGpa = 4.50;
+    private double simRemainingEcts = 30.0;
     private String filter = "wszystkie", dataFilter = "ocena";
     private String dataQuery = "", historyQuery = "", planRange = "all";
     private String gradeQuery = "", gradeType = "all", gradeOrder = "name";
@@ -129,6 +139,8 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
     private String semester = "", taskFilter = "all", taskQuery = "", pendingCalendar;
     private String taskOrder = "due";
     private String calendarDate = "", calendarMode = "list";
+    private String newsQuery = "";
+    private String attendanceFilter = "all";
     private int demoPlanDays = 56;
     private long renderedMinute;
     private boolean loadingState;
@@ -145,7 +157,7 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable refresh = new Runnable() {
         @Override public void run() {
-            if (!busy && currentMethod == null && tab != 4 && tab != 3 && !(getCurrentFocus() instanceof EditText)) load();
+            if (!busy && currentMethod == null && tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12 && !(getCurrentFocus() instanceof EditText)) load();
             handler.postDelayed(this, 30000);
         }
     };
@@ -167,10 +179,15 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
             semester = bundle.getString("semester", ""); taskFilter = bundle.getString("taskFilter", "all");
             taskQuery = bundle.getString("taskQuery", ""); pendingCalendar = bundle.getString("pendingCalendar");
             taskOrder = bundle.getString("taskOrder", "due");
+            newsQuery = bundle.getString("newsQuery", "");
+            attendanceFilter = bundle.getString("attendanceFilter", "all");
             try { demoTasks = new JSONArray(bundle.getString("demoTasks", "[]")); } catch (JSONException ignored) {}
             apiQuery = bundle.getString("apiQuery", ""); apiLimit = bundle.getInt("apiLimit", 60);
             apiFavoritesOnly = bundle.getBoolean("apiFavoritesOnly");
+            simTargetGpa = bundle.getDouble("simTargetGpa", 4.50);
+            simRemainingEcts = bundle.getDouble("simRemainingEcts", 30.0);
         } else if (getIntent().getBooleanExtra("showHistory", false)) tab = 1;
+        else if (getIntent().hasExtra("tab")) tab = getIntent().getIntExtra("tab", 0);
         root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setBackgroundColor(BG);
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             androidx.core.graphics.Insets bars = insets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
@@ -206,9 +223,9 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
         LinearLayout header = new LinearLayout(this); header.setOrientation(LinearLayout.VERTICAL); header.setPadding(dp(24), dp(48), dp(24), dp(24));
         add(header, "Vistula", 28, INK, true); add(header, "Twój asystent uczelni", 14, MUTED, false);
         sideMenu.addHeaderView(header);
-        int[] sections = {0, 2, 5, 1, 7, 4, 3};
-        String[] names = {"Start", "Oceny", "Plan zajęć", "Historia zmian", "Zadania", "Konto i ustawienia", "Katalog API"};
-        int[] sectionIcons = {R.drawable.ic_nav_home, R.drawable.ic_nav_grades, R.drawable.ic_nav_plan, R.drawable.ic_nav_history, R.drawable.ic_nav_tasks, R.drawable.ic_nav_account, R.drawable.ic_nav_api};
+        int[] sections = {0, 2, 5, 1, 11, 12, 9, 8, 7, 10, 4, 3};
+        String[] names = {"Start", "Oceny", "Plan zajęć", "Historia zmian", "Komunikaty uczelni", "Licznik nieobecności", "Kalkulator średniej", "Płatności", "Zadania", "Niezbędnik i Kampus", "Konto i profil", "Katalog API"};
+        int[] sectionIcons = {R.drawable.ic_nav_home, R.drawable.ic_nav_grades, R.drawable.ic_nav_plan, R.drawable.ic_nav_history, R.drawable.ic_nav_news, R.drawable.ic_nav_attendance, R.drawable.ic_nav_grades, R.drawable.ic_nav_more, R.drawable.ic_nav_tasks, R.drawable.ic_nav_home, R.drawable.ic_nav_account, R.drawable.ic_nav_api};
         for (int i = 0; i < sections.length; i++) sideMenu.getMenu().add(0, 200 + sections[i], i, names[i]).setIcon(sectionIcons[i]).setCheckable(true);
         sideMenu.setNavigationItemSelectedListener(item -> { if (busy) return false; navigate(item.getItemId() - 200); drawer.closeDrawers(); return true; });
         DrawerLayout.LayoutParams drawerParams = new DrawerLayout.LayoutParams(dp(300), -1); drawerParams.gravity = GravityCompat.START;
@@ -220,19 +237,29 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
     }
     @Override public void onSaveInstanceState(Bundle out) {
         out.putBoolean("apiFavoritesOnly", apiFavoritesOnly);
+        out.putDouble("simTargetGpa", simTargetGpa);
+        out.putDouble("simRemainingEcts", simRemainingEcts);
         super.onSaveInstanceState(out); out.putBoolean("demo", demo); out.putBoolean("demoChanged", demoChanged); out.putInt("tab", tab);
         out.putString("filter", filter); out.putString("dataFilter", dataFilter);
         out.putString("semester", semester); out.putString("taskFilter", taskFilter); out.putString("taskQuery", taskQuery);
         out.putString("taskOrder", taskOrder);
         out.putString("calendarDate", calendarDate); out.putString("calendarMode", calendarMode); out.putInt("demoPlanDays", demoPlanDays);
         out.putString("pendingCalendar", pendingCalendar);
+        out.putString("newsQuery", newsQuery);
+        out.putString("attendanceFilter", attendanceFilter);
         out.putString("demoTasks", demoTasks.toString());
         out.putString("dataQuery", dataQuery); out.putString("historyQuery", historyQuery); out.putString("planRange", planRange);
         out.putString("gradeQuery", gradeQuery); out.putString("gradeType", gradeType); out.putString("gradeOrder", gradeOrder);
         out.putBoolean("gradeFiltersExpanded", gradeFiltersExpanded);
         out.putString("apiQuery", apiQuery); out.putInt("apiLimit", apiLimit);
     }
-    @Override protected void onResume() { super.onResume(); handler.removeCallbacks(refresh); handler.postDelayed(refresh, 30000); if (content != null && !busy && tab != 4 && tab != 3) load(); }
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent.getBooleanExtra("showHistory", false)) navigate(1);
+        else if (intent.hasExtra("tab")) navigate(intent.getIntExtra("tab", 0));
+    }
+    @Override protected void onResume() { super.onResume(); handler.removeCallbacks(refresh); handler.postDelayed(refresh, 30000); if (content != null && !busy && tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12) load(); }
     @Override protected void onPause() { super.onPause(); handler.removeCallbacks(refresh); }
     @Override protected void onDestroy() { super.onDestroy(); handler.removeCallbacks(refresh); io.shutdown(); }
     private void ensureSchedule() {
@@ -303,11 +330,11 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
         if (currentMethod != null || isDestroyed()) return;
         renderedMinute = System.currentTimeMillis() / 60000;
         content.removeAllViews();
-        int selected = tab == 3 || tab == 4 || tab == 7 ? 6 : tab;
+        int selected = tab == 3 || tab == 4 || tab == 7 || tab == 8 || tab == 9 || tab == 10 || tab == 11 || tab == 12 ? 6 : tab;
         navigation.getMenu().findItem(100 + selected).setChecked(true);
         for (int i = 0; i < sideMenu.getMenu().size(); i++) sideMenu.getMenu().getItem(i).setChecked(sideMenu.getMenu().getItem(i).getItemId() == 200 + tab);
-        String[] titles = {"Start", "Historia zmian", "Oceny", "Katalog API", "Konto", "Plan zajęć", "Więcej", "Zadania"};
-        toolbar.setTitle(titles[tab]); toolbar.setSubtitle(demo ? "Konto demonstracyjne" : connected() ? state.optString("user", "USOS Vistula") : "USOS Vistula");
+        String[] titles = {"Start", "Historia zmian", "Oceny", "Katalog API", "Konto i profil", "Plan zajęć", "Więcej", "Zadania", "Płatności i subkonto", "Kalkulator średniej", "Niezbędnik i Kampus", "Komunikaty uczelni", "Licznik nieobecności"};
+        toolbar.setTitle(tab < titles.length ? titles[tab] : "USOS Vistula"); toolbar.setSubtitle(demo ? "Konto demonstracyjne" : connected() ? state.optString("user", "USOS Vistula") : "USOS Vistula");
         try {
             if (demo) note(content, "TRYB DEMO · przykładowe dane, bez połączenia z USOS", GREEN);
             switch (tab) {
@@ -319,6 +346,11 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
                 case 5: dataFilter = "plan"; calendar(); break;
                 case 6: more(); break;
                 case 7: tasks(); break;
+                case 8: paymentsView(); break;
+                case 9: gpaSimulatorView(); break;
+                case 10: campusGuideView(); break;
+                case 11: newsView(); break;
+                case 12: attendanceView(); break;
             }
         } catch (Exception e) { note(content, Repository.message(e), Color.rgb(167, 49, 49)); }
         updateBusy(busy);
@@ -328,10 +360,15 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
     }
     private void more() {
         title("Więcej", "Wszystkie narzędzia w jednym miejscu.");
-        content.addView(button("Zadania", () -> navigate(7), true));
-        content.addView(button("Konto", () -> navigate(4), false));
-        content.addView(button("API", () -> navigate(3), false));
-        note(content, "Zadania zapisujesz dla siebie na telefonie. Oceny i plan pochodzą z USOS.", MUTED);
+        content.addView(button("Komunikaty i aktualności uczelni", () -> navigate(11), true));
+        content.addView(button("Licznik nieobecności na zajęciach", () -> navigate(12), true));
+        content.addView(button("Kalkulator średniej i stypendium", () -> navigate(9), false));
+        content.addView(button("Płatności i subkonto", () -> navigate(8), false));
+        content.addView(button("Niezbędnik studenta i kampus", () -> navigate(10), false));
+        content.addView(button("Zadania", () -> navigate(7), false));
+        content.addView(button("Konto i profil", () -> navigate(4), false));
+        content.addView(button("Katalog USOS API", () -> navigate(3), false));
+        note(content, "Zadania i licznik nieobecności zapisujesz dla siebie na telefonie. Oceny, plan i płatności pochodzą z USOS.", MUTED);
     }
     private JSONArray personalTasks() { return demo ? demoTasks : state.optJSONArray("tasks") == null ? new JSONArray() : state.optJSONArray("tasks"); }
     private void dashboard(JSONObject d) throws Exception {
@@ -644,6 +681,60 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
       this.add(hero, "TWÓJ ASYSTENT UCZELNI", 11, Color.rgb(124, 219, 192), true);
       this.add(hero, "Dobry dzień zaczyna się tutaj.", 26, -1, true);
       this.add(hero, LocalDate.now(UsosClient.ZONE).format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("pl-PL"))), 15, Color.rgb(209, 221, 233), false);
+      JSONObject rawSnap = d.optJSONObject("snapshot");
+      if (rawSnap != null) {
+         Snapshot snap = Snapshot.from(rawSnap);
+         LocalDate today = LocalDate.now(UsosClient.ZONE);
+         AcademicTerm currentTerm = null;
+         for (AcademicTerm t : snap.terms.values()) {
+            if (t.isCurrent(today)) { currentTerm = t; break; }
+         }
+         if (currentTerm == null && !snap.terms.isEmpty()) currentTerm = snap.terms.values().iterator().next();
+         if (currentTerm != null) {
+            LinearLayout termBox = this.card(this.content, Color.rgb(238, 245, 242));
+            this.add(termBox, "KALENDARZ AKADEMICKI", 11, GREEN, true);
+            this.add(termBox, currentTerm.name, 17, INK, true);
+            long days = currentTerm.daysRemaining(today);
+            String termInfo = days >= 0 ? "Do końca semestru: " + days + " dni · koniec: " + currentTerm.endDate : "Zakończony: " + currentTerm.endDate;
+            this.add(termBox, termInfo, 13, MUTED, false);
+         }
+         if (snap.payments != null) {
+            double unpaid = snap.payments.totalUnpaidAmount();
+            if (unpaid > 0 || snap.payments.hasOverdue()) {
+               LinearLayout payBox = this.card(this.content, snap.payments.hasOverdue() ? Color.rgb(255, 240, 240) : Color.WHITE);
+               this.add(payBox, snap.payments.hasOverdue() ? "PŁATNOŚCI · WYMAGANA UWAGA" : "PŁATNOŚCI I CZESNE", 11, snap.payments.hasOverdue() ? Color.rgb(160, 48, 40) : GREEN, true);
+               this.add(payBox, String.format(Locale.forLanguageTag("pl-PL"), "Do zapłaty: %.2f PLN", unpaid), 19, INK, true);
+               if (!snap.payments.accounts.isEmpty()) {
+                  this.add(payBox, "Subkonto: " + snap.payments.accounts.get(0).bankAccountNumber, 13, MUTED, false);
+               }
+               payBox.addView(this.button("Zobacz harmonogram opłat", () -> this.navigate(8), false));
+            }
+         }
+          List<ScheduleConflictDetector.Conflict> conflicts = ScheduleConflictDetector.findConflicts(snap.records.values());
+          if (!conflicts.isEmpty()) {
+             LinearLayout conflictBox = this.card(this.content, Color.rgb(255, 243, 224));
+             this.add(conflictBox, "KOLIZJE W PLANIE ZAJĘĆ (" + conflicts.size() + ")", 11, Color.rgb(217, 119, 6), true);
+             this.add(conflictBox, "Wykryto nakładające się zajęcia!", 17, INK, true);
+             this.add(conflictBox, conflicts.get(0).description(), 13, INK, false);
+             if (conflicts.size() > 1) {
+                this.note(conflictBox, "+ " + (conflicts.size() - 1) + " innych kolizji w pobranym planie.", MUTED);
+             }
+             conflictBox.addView(this.button("Pokaż kolizję w planie zajęć", () -> {
+                calendarDate = conflicts.get(0).first.date;
+                calendarMode = "day";
+                this.navigate(5);
+             }, false));
+          }
+          if (snap.news != null && !snap.news.isEmpty()) {
+             NewsArticle top = snap.news.get(0);
+             LinearLayout newsBox = this.card(this.content, Color.WHITE);
+             this.add(newsBox, "KOMUNIKATY I AKTUALNOŚCI UCZELNI", 11, GREEN, true);
+             this.add(newsBox, top.title, 17, INK, true);
+             if (!top.headline.isEmpty()) this.add(newsBox, top.headline, 13, MUTED, false);
+             this.add(newsBox, top.publicationDate + (!top.author.isEmpty() ? " · " + top.author : ""), 12, GREEN, false);
+             newsBox.addView(this.button("Wszystkie komunikaty (" + snap.news.size() + ")", () -> this.navigate(11), false));
+          }
+      }
       this.dashboard(d);
       this.deadlinePreview();
       this.heading("Stan monitorowania");
@@ -678,8 +769,13 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
       JSONArray rows = d.optJSONArray("history");
       this.heading("Ostatnie zmiany");
       if (rows != null && rows.length() != 0) {
-         for(int i = 0; i < Math.min(3, rows.length()); ++i) {
-            this.changeCard(Change.from(rows.getJSONObject(i)));
+         List<Change> recent = new ArrayList<>();
+         for(int i = 0; i < rows.length(); ++i) {
+            recent.add(Change.from(rows.getJSONObject(i)));
+         }
+         recent.sort((a, b) -> Long.compare(b.effectiveTimestamp(), a.effectiveTimestamp()));
+         for(int i = 0; i < Math.min(3, recent.size()); ++i) {
+            this.changeCard(recent.get(i));
          }
 
          this.content.addView(this.button("Otwórz całą historię", () -> {
@@ -702,11 +798,15 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
          this.demoChanged = true;
          this.tab = 1;
          this.render();
+         pl.vistula.checker.widget.TodayScheduleWidget.updateAll(this);
+         pl.vistula.checker.widget.QuickStatusWidget.updateAll(this);
       } else {
          int position = scroll.getScrollY(); boolean first = state.optJSONObject("snapshot") == null;
          this.task(() -> {
             List<Change> changes = this.repository.syncWithProgress(true, message -> runOnUiThread(() -> { if (!isDestroyed()) progress.setText(message); }));
             SyncWorker.notifyChanges(this, changes);
+            pl.vistula.checker.widget.TodayScheduleWidget.updateAll(this);
+            pl.vistula.checker.widget.QuickStatusWidget.updateAll(this);
             return new SyncResult(this.repository.read(), changes.size(), first);
          }, (result) -> {
             this.state = result.state;
@@ -719,13 +819,13 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
    }
 
    private void history() throws Exception {
-      this.title("Historia zmian", "Kiedy aplikacja zauważyła różnicę w USOS.");
+      this.title("Historia zmian", "Daty publikacji ocen i zmian pobrane z USOS.");
       this.chips(new String[]{"wszystkie", "ocena", "plan"}, new String[]{"Wszystkie", "Oceny", "Plan"}, this.filter, (value) -> {
          this.filter = value;
          this.render();
       });
       JSONArray history = this.display().optJSONArray("history");
-      List<Change> rows = new ArrayList();
+      List<Change> rows = new ArrayList<>();
       if (history != null) {
          for(int i = 0; i < history.length(); ++i) {
             Change c = Change.from(history.getJSONObject(i));
@@ -733,6 +833,7 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
                rows.add(c);
             }
          }
+         rows.sort((a, b) -> Long.compare(b.effectiveTimestamp(), a.effectiveTimestamp()));
       }
 
       EditText search = this.field(this.content, "Szukaj przedmiotu lub zmiany…", this.historyQuery, false);
@@ -744,7 +845,14 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
          int count = 0;
 
          for(Change c : rows) {
-            if (this.matches(this.historyQuery, c.title, c.before, c.after, c.action)) {
+            if (this.matches(this.historyQuery, c.title, c.before, c.after, c.action, c.sourceTime, c.date,
+                  c.beforeDate, c.afterDate,
+                  c.optMeta("courseId"), c.optMeta("room"), c.optMeta("lecturers"), c.optMeta("comment"), c.optMeta("valueDescription"), c.optMeta("term"),
+                  c.optBeforeMeta("room"), c.optAfterMeta("room"),
+                  c.optBeforeMeta("comment"), c.optAfterMeta("comment"),
+                  c.optBeforeMeta("valueDescription"), c.optAfterMeta("valueDescription"),
+                  c.optBeforeMeta("lecturers"), c.optAfterMeta("lecturers"),
+                  c.optBeforeMeta("building"), c.optAfterMeta("building"))) {
                this.changeCard(list, c);
                ++count;
             }
@@ -773,23 +881,422 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
       this.changeCard(this.content, c);
    }
 
+   private TextView badge(LinearLayout parent, String text, int bg, int fg) {
+      TextView t = new TextView(this);
+      t.setText(text);
+      t.setTextSize(11);
+      t.setTextColor(fg);
+      t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+      t.setPadding(dp(10), dp(4), dp(10), dp(4));
+      GradientDrawable d = new GradientDrawable();
+      d.setColor(bg);
+      d.setCornerRadius(dp(8));
+      t.setBackground(d);
+      LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-2, -2);
+      p.bottomMargin = dp(8);
+      p.rightMargin = dp(6);
+      parent.addView(t, p);
+      return t;
+   }
+
    private void changeCard(LinearLayout parent, Change c) {
       LinearLayout box = this.card(parent, -1);
-      this.add(box, (c.kind.equals("ocena") ? "OCENA" : "PLAN ZAJĘĆ") + "  ·  " + c.action, 11, GREEN, true);
+
+      // Nagłówek: kategoria + plakietka akcji
+      LinearLayout topBar = new LinearLayout(this);
+      topBar.setOrientation(LinearLayout.HORIZONTAL);
+      topBar.setGravity(Gravity.CENTER_VERTICAL);
+
+      int actionBg, actionFg;
+      String actionText;
+      if (c.action.equals("Dodano")) {
+         actionBg = Color.rgb(232, 245, 233);
+         actionFg = Color.rgb(27, 94, 32);
+         actionText = "+ DODANO";
+      } else if (c.action.equals("Usunięto")) {
+         actionBg = Color.rgb(255, 235, 238);
+         actionFg = Color.rgb(183, 28, 28);
+         actionText = "− USUNIĘTO";
+      } else {
+         actionBg = Color.rgb(238, 242, 255);
+         actionFg = Color.rgb(49, 46, 129);
+         actionText = "Δ ZMIENIONO";
+      }
+      badge(topBar, (c.kind.equals("ocena") ? "OCENA" : "PLAN ZAJĘĆ"), Color.rgb(241, 245, 249), GREEN);
+      badge(topBar, actionText, actionBg, actionFg);
+      box.addView(topBar);
+
       this.add(box, c.title, 18, INK, true);
-      if (!c.before.isEmpty()) {
-         this.add(box, "Wcześniej: " + c.before, 14, MUTED, false);
+
+      String courseId = c.optMeta("courseId");
+      String term = c.optMeta("term");
+      if (!courseId.isEmpty() || !term.isEmpty()) {
+         String sub = (!courseId.isEmpty() ? "Kod: " + courseId : "") + (!courseId.isEmpty() && !term.isEmpty() ? "  ·  " : "") + (!term.isEmpty() ? "Semestr: " + term : "");
+         this.add(box, sub, 12, MUTED, false);
       }
 
-      if (!c.after.isEmpty()) {
-         this.add(box, "Teraz: " + c.after, 14, INK, false);
+      // Wyróżnienia konkretnych różnic wykrytych z USOS API (ocena, zaliczenie, sala, godziny, prowadzący itp.)
+      LinearLayout tags = new LinearLayout(this);
+      tags.setOrientation(LinearLayout.HORIZONTAL);
+      boolean hasTags = false;
+
+      String diffGrade = c.optMeta("diffGrade");
+      if (!diffGrade.isEmpty()) {
+         badge(tags, "Ocena: " + diffGrade, Color.rgb(227, 242, 253), Color.rgb(13, 71, 161));
+         hasTags = true;
+      }
+      String diffPasses = c.optMeta("diffPasses");
+      if (!diffPasses.isEmpty()) {
+         badge(tags, "Zaliczenie: " + diffPasses, Color.rgb(255, 243, 224), Color.rgb(230, 81, 0));
+         hasTags = true;
+      } else if (c.getPasses() != null) {
+         boolean passes = c.getPasses();
+         badge(tags, passes ? "Zaliczono" : "Brak zaliczenia", passes ? Color.rgb(232, 245, 233) : Color.rgb(255, 235, 238), passes ? Color.rgb(27, 94, 32) : Color.rgb(183, 28, 28));
+         hasTags = true;
+      }
+      String diffRoom = c.optMeta("diffRoom");
+      if (!diffRoom.isEmpty()) {
+         badge(tags, "Sala: " + diffRoom, Color.rgb(255, 243, 224), Color.rgb(230, 81, 0));
+         hasTags = true;
+      }
+      String diffTime = c.optMeta("diffTime");
+      if (!diffTime.isEmpty()) {
+         badge(tags, "Godziny: " + diffTime, Color.rgb(227, 242, 253), Color.rgb(13, 71, 161));
+         hasTags = true;
+      }
+      String diffDate = c.optMeta("diffDate");
+      if (!diffDate.isEmpty()) {
+         badge(tags, "Termin zajęć: " + diffDate, Color.rgb(232, 245, 233), Color.rgb(27, 94, 32));
+         hasTags = true;
+      }
+      String diffGroup = c.optMeta("diffGroup");
+      if (!diffGroup.isEmpty()) {
+         badge(tags, "Grupa: " + diffGroup, Color.rgb(243, 229, 245), Color.rgb(74, 20, 140));
+         hasTags = true;
+      }
+      String diffLecturers = c.optMeta("diffLecturers");
+      if (!diffLecturers.isEmpty()) {
+         badge(tags, "Prowadzący: " + diffLecturers, Color.rgb(232, 245, 233), Color.rgb(27, 94, 32));
+         hasTags = true;
+      }
+      String diffBuilding = c.optMeta("diffBuilding");
+      if (!diffBuilding.isEmpty()) {
+         badge(tags, "Budynek: " + diffBuilding, Color.rgb(241, 245, 249), INK);
+         hasTags = true;
+      }
+      String diffClassType = c.optMeta("diffClassType");
+      if (!diffClassType.isEmpty()) {
+         badge(tags, "Forma: " + diffClassType, Color.rgb(241, 245, 249), INK);
+         hasTags = true;
+      }
+      String diffComment = c.optMeta("diffComment");
+      if (!diffComment.isEmpty()) {
+         badge(tags, "Komentarz: " + diffComment, Color.rgb(255, 248, 225), Color.rgb(191, 54, 12));
+         hasTags = true;
+      }
+      String diffEcts = c.optMeta("diffEcts");
+      if (!diffEcts.isEmpty()) {
+         badge(tags, "ECTS: " + diffEcts, Color.rgb(241, 245, 249), INK);
+         hasTags = true;
+      } else if (!Double.isNaN(c.getEcts())) {
+         badge(tags, String.format(Locale.forLanguageTag("pl-PL"), "%.0f ECTS", c.getEcts()), Color.rgb(241, 245, 249), INK);
+         hasTags = true;
+      }
+      if (hasTags) {
+         HorizontalScrollView scrollTags = new HorizontalScrollView(this);
+         scrollTags.setHorizontalScrollBarEnabled(false);
+         scrollTags.addView(tags);
+         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+         lp.bottomMargin = dp(8);
+         box.addView(scrollTags, lp);
       }
 
-      this.add(box, "Wykryto: " + this.timestamp(c.detectedAt), 12, MUTED, false);
-      if (!c.sourceTime.isEmpty()) {
-         this.add(box, "Modyfikacja w USOS: " + c.sourceTime + " (Warszawa)", 12, MUTED, false);
+      // Panel 1: PRZED ZMIANĄ (Wcześniej) wraz z pełnymi danymi i datą z USOS
+      this.stateBlock(box, "PRZED ZMIANĄ (Wcześniej)", Color.rgb(75, 85, 99),
+         Color.rgb(243, 244, 246), Color.rgb(55, 65, 81), Color.rgb(249, 250, 251),
+         c.beforeDate, c.before, c.beforeMeta,
+         c.action.equals("Dodano") ? "(Brak wcześniejszego wpisu — pozycja dodana do USOS)" : "(Brak danych)");
+
+      // Panel 2: PO ZMIANIE (Teraz) wraz z pełnymi danymi i datą z USOS
+      if (c.action.equals("Usunięto")) {
+         this.stateBlock(box, "PO ZMIANIE (Teraz)", Color.rgb(185, 28, 28),
+            Color.rgb(254, 226, 226), Color.rgb(153, 27, 27), Color.rgb(254, 242, 242),
+            c.afterDate, c.after, c.afterMeta,
+            "(Wpis został wycofany / usunięty z USOS)");
+      } else {
+         this.stateBlock(box, "PO ZMIANIE (Teraz)", GREEN,
+            Color.rgb(220, 252, 231), Color.rgb(22, 101, 52), Color.rgb(240, 253, 244),
+            c.afterDate, c.after, c.afterMeta,
+            "(Brak danych)");
       }
 
+      this.add(box, "Wykryto przez aplikację: " + this.timestamp(c.detectedAt), 12, MUTED, false);
+
+      Button detailsBtn = button("Pełne szczegóły z USOS API (Audyt)", () -> this.showChangeDetails(c), false);
+      detailsBtn.setMinHeight(dp(42));
+      detailsBtn.setTextSize(13);
+      box.addView(detailsBtn);
+   }
+
+   private LinearLayout stateBlock(LinearLayout parent, String title, int titleColor,
+                                   int pillBg, int pillFg, int boxBg,
+                                   String dateText, String valueText, JSONObject meta,
+                                   String emptyPlaceholder) {
+      LinearLayout b = new LinearLayout(this);
+      b.setOrientation(LinearLayout.VERTICAL);
+      b.setPadding(dp(14), dp(12), dp(14), dp(12));
+      GradientDrawable shape = new GradientDrawable();
+      shape.setColor(boxBg);
+      shape.setCornerRadius(dp(14));
+      shape.setStroke(dp(1), Color.rgb(222, 229, 225));
+      b.setBackground(shape);
+      LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+      lp.bottomMargin = dp(10);
+      parent.addView(b, lp);
+
+      LinearLayout head = new LinearLayout(this);
+      head.setOrientation(LinearLayout.VERTICAL);
+
+      TextView tPill = new TextView(this);
+      tPill.setText(title);
+      tPill.setTextSize(10);
+      tPill.setTextColor(pillFg);
+      tPill.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+      tPill.setPadding(dp(8), dp(3), dp(8), dp(3));
+      GradientDrawable pillDrawable = new GradientDrawable();
+      pillDrawable.setColor(pillBg);
+      pillDrawable.setCornerRadius(dp(6));
+      tPill.setBackground(pillDrawable);
+      LinearLayout.LayoutParams pillLp = new LinearLayout.LayoutParams(-2, -2);
+      pillLp.bottomMargin = dp(6);
+      head.addView(tPill, pillLp);
+
+      TextView tDate = new TextView(this);
+      if (dateText != null && !dateText.trim().isEmpty()) {
+         tDate.setText("Data w USOS: " + formatUsosDate(dateText));
+         tDate.setTextColor(titleColor);
+      } else {
+         tDate.setText(emptyPlaceholder != null ? emptyPlaceholder : "Brak daty w USOS");
+         tDate.setTextColor(MUTED);
+      }
+      tDate.setTextSize(11);
+      tDate.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+      LinearLayout.LayoutParams dateLp = new LinearLayout.LayoutParams(-1, -2);
+      dateLp.bottomMargin = dp(8);
+      head.addView(tDate, dateLp);
+      b.addView(head);
+
+      if (valueText != null && !valueText.trim().isEmpty()) {
+         TextView tVal = text(valueText, 14, INK, true);
+         LinearLayout.LayoutParams valLp = new LinearLayout.LayoutParams(-1, -2);
+         valLp.bottomMargin = dp(6);
+         b.addView(tVal, valLp);
+      } else if (emptyPlaceholder != null) {
+         TextView tEmpty = text(emptyPlaceholder, 13, MUTED, false);
+         LinearLayout.LayoutParams emptyLp = new LinearLayout.LayoutParams(-1, -2);
+         emptyLp.bottomMargin = dp(6);
+         b.addView(tEmpty, emptyLp);
+      }
+
+      if (meta != null && meta.length() > 0) {
+         String valDesc = meta.optString("valueDescription", "");
+         if (!valDesc.isEmpty()) addMiniMeta(b, "Opis w USOS:", valDesc);
+         if (meta.has("passes")) {
+            boolean passes = meta.optBoolean("passes");
+            addMiniMeta(b, "Status zaliczenia:", passes ? "Zaliczono (TAK)" : "Brak zaliczenia (NIE)");
+         }
+         if (meta.has("ects")) {
+            double ects = meta.optDouble("ects", Double.NaN);
+            if (!Double.isNaN(ects)) addMiniMeta(b, "Punkty ECTS:", String.format(Locale.forLanguageTag("pl-PL"), "%.1f", ects));
+         }
+         if (meta.has("countsIntoAverage")) {
+            boolean avg = meta.optBoolean("countsIntoAverage");
+            addMiniMeta(b, "Średnia ocen:", avg ? "Wliczana" : "Niewliczana");
+         }
+         String sessionNum = meta.optString("sessionNumber", "");
+         if (!sessionNum.isEmpty()) {
+            addMiniMeta(b, "Termin egzaminu:", "Termin " + sessionNum + (sessionNum.equals("1") ? " (podstawowy)" : " (poprawkowy)"));
+         }
+         String examId = meta.optString("examId", "");
+         if (!examId.isEmpty()) addMiniMeta(b, "Protokół USOS:", "#" + examId);
+         String gradeTypeId = meta.optString("gradeTypeId", "");
+         if (!gradeTypeId.isEmpty()) addMiniMeta(b, "Skala ocen:", gradeTypeId);
+         String dateAcq = meta.optString("dateAcquisition", "");
+         if (!dateAcq.isEmpty()) addMiniMeta(b, "Data uzyskania:", formatUsosDate(dateAcq));
+         String modAuthor = meta.optString("modificationAuthor", "");
+         if (!modAuthor.isEmpty()) addMiniMeta(b, "Autor zmiany:", "ID " + modAuthor);
+         String comment = meta.optString("comment", "");
+         if (!comment.isEmpty() && (valueText == null || !valueText.contains(comment))) {
+            addMiniMeta(b, "Komentarz:", comment);
+         }
+
+         String classType = meta.optString("classType", "");
+         String room = meta.optString("room", "");
+         String bld = meta.optString("building", "");
+         String grp = meta.optString("groupNumber", "");
+         String lec = meta.optString("lecturers", "");
+         String freq = meta.optString("frequency", "");
+         String startTime = meta.optString("startTime", "");
+         String endTime = meta.optString("endTime", "");
+         String classDate = meta.optString("date", "");
+
+         if (!classType.isEmpty()) addMiniMeta(b, "Forma zajęć:", classType);
+         if (!room.isEmpty() || !bld.isEmpty()) {
+            addMiniMeta(b, "Miejsce:", (!room.isEmpty() ? "Sala " + room : "") + (!room.isEmpty() && !bld.isEmpty() ? " · " : "") + bld);
+         }
+         if (!grp.isEmpty()) addMiniMeta(b, "Grupa:", "Grupa " + grp);
+         if (!lec.isEmpty()) addMiniMeta(b, "Prowadzący:", lec);
+         if (!freq.isEmpty()) addMiniMeta(b, "Częstotliwość:", freq);
+         if (!classDate.isEmpty()) addMiniMeta(b, "Dzień zajęć:", formatUsosDate(classDate));
+         if (!startTime.isEmpty() && !endTime.isEmpty()) {
+            String sH = startTime.length() >= 16 ? startTime.substring(11, 16) : startTime;
+            String eH = endTime.length() >= 16 ? endTime.substring(11, 16) : endTime;
+            addMiniMeta(b, "Godziny:", sH + " – " + eH);
+         }
+      }
+
+      return b;
+   }
+
+   private void addMiniMeta(LinearLayout parent, String label, String value) {
+      TextView t = new TextView(this);
+      t.setText(Html.fromHtml("<b>" + label + "</b> " + value, Html.FROM_HTML_MODE_LEGACY));
+      t.setTextSize(12);
+      t.setTextColor(INK);
+      t.setLineSpacing(dp(2), 1f);
+      LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+      lp.bottomMargin = dp(3);
+      parent.addView(t, lp);
+   }
+
+   private void showChangeDetails(Change c) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("═══════════════════════════════════\n");
+      sb.append("  INFORMACJE O ZMIANIE\n");
+      sb.append("═══════════════════════════════════\n");
+      sb.append("Przedmiot: ").append(c.title).append("\n");
+      sb.append("Kategoria: ").append(c.kind.equals("ocena") ? "Ocena" : "Plan zajęć").append("\n");
+      sb.append("Typ operacji: ").append(c.action).append("\n");
+      String courseId = c.optMeta("courseId");
+      if (!courseId.isEmpty()) sb.append("Kod przedmiotu: ").append(courseId).append("\n");
+      String term = c.optMeta("term");
+      if (!term.isEmpty()) sb.append("Semestr: ").append(term).append("\n");
+      sb.append("Wykryto w aplikacji: ").append(timestamp(c.detectedAt)).append("\n\n");
+
+      sb.append("───────────────────────────────────\n");
+      sb.append("  WYKRYTE RÓŻNICE (DIFF)\n");
+      sb.append("───────────────────────────────────\n");
+      boolean hasDiffs = false;
+      for (String key : new String[]{"diffGrade", "diffPasses", "diffRoom", "diffTime", "diffDate", "diffLecturers", "diffGroup", "diffBuilding", "diffClassType", "diffComment", "diffEcts"}) {
+         String val = c.optMeta(key);
+         if (!val.isEmpty()) {
+            sb.append("• ").append(diffLabel(key)).append(": ").append(val).append("\n");
+            hasDiffs = true;
+         }
+      }
+      if (!hasDiffs) sb.append("• Brak pojedynczych różnic atrybutów\n");
+      sb.append("\n");
+
+      sb.append("───────────────────────────────────\n");
+      sb.append("  STAN PRZED ZMIANĄ (WCZEŚNIEJ)\n");
+      sb.append("───────────────────────────────────\n");
+      if (c.before.isEmpty() && c.beforeDate.isEmpty() && (c.beforeMeta == null || c.beforeMeta.length() == 0)) {
+         sb.append("(Brak wcześniejszego wpisu — pozycja została dodana do USOS)\n\n");
+      } else {
+         sb.append("Data w USOS: ").append(c.beforeDate.isEmpty() ? "(brak daty)" : formatUsosDate(c.beforeDate)).append("\n");
+         if (!c.before.isEmpty()) sb.append("Wartość: ").append(c.before.replace("\n", "\n         ")).append("\n");
+         appendMetaAudit(sb, c.beforeMeta, c.kind);
+         sb.append("\n");
+      }
+
+      sb.append("───────────────────────────────────\n");
+      sb.append("  STAN PO ZMIANIE (TERAZ)\n");
+      sb.append("───────────────────────────────────\n");
+      if (c.after.isEmpty() && c.afterDate.isEmpty() && (c.afterMeta == null || c.afterMeta.length() == 0)) {
+         sb.append("(Wpis wycofany / usunięty z USOS)\n\n");
+      } else {
+         sb.append("Data w USOS: ").append(c.afterDate.isEmpty() ? "(brak daty)" : formatUsosDate(c.afterDate)).append("\n");
+         if (!c.after.isEmpty()) sb.append("Wartość: ").append(c.after.replace("\n", "\n         ")).append("\n");
+         appendMetaAudit(sb, c.afterMeta, c.kind);
+         sb.append("\n");
+      }
+
+      new MaterialAlertDialogBuilder(this)
+         .setTitle("Szczegóły z USOS API")
+         .setMessage(sb.toString())
+         .setPositiveButton("Zamknij", null)
+         .show();
+   }
+
+   private void appendMetaAudit(StringBuilder sb, JSONObject m, String kind) {
+      if (m == null || m.length() == 0) return;
+      if (kind.equals("ocena")) {
+         if (!m.optString("valueSymbol", "").isEmpty()) sb.append("• Symbol oceny (value_symbol): ").append(m.optString("valueSymbol")).append("\n");
+         if (!m.optString("valueDescription", "").isEmpty()) sb.append("• Słowny opis (value_description): ").append(m.optString("valueDescription")).append("\n");
+         if (m.has("passes")) sb.append("• Status zaliczenia (passes): ").append(m.optBoolean("passes") ? "TAK (zaliczono)" : "NIE (brak zaliczenia)").append("\n");
+         if (m.has("ects")) {
+            double e = m.optDouble("ects", Double.NaN);
+            if (!Double.isNaN(e)) sb.append("• Punkty ECTS: ").append(String.format(Locale.forLanguageTag("pl-PL"), "%.1f", e)).append("\n");
+         }
+         if (m.has("countsIntoAverage")) sb.append("• Wliczanie do średniej (counts_into_average): ").append(m.optBoolean("countsIntoAverage") ? "TAK" : "NIE").append("\n");
+         if (!m.optString("sessionNumber", "").isEmpty()) sb.append("• Numer terminu (exam_session_number): ").append(m.optString("sessionNumber")).append("\n");
+         if (!m.optString("examId", "").isEmpty()) sb.append("• ID protokołu USOS (exam_id): ").append(m.optString("examId")).append("\n");
+         if (!m.optString("gradeTypeId", "").isEmpty()) sb.append("• Skala ocen (grade_type_id): ").append(m.optString("gradeTypeId")).append("\n");
+         if (!m.optString("dateAcquisition", "").isEmpty()) sb.append("• Data uzyskania (date_acquisition): ").append(m.optString("dateAcquisition")).append("\n");
+         if (!m.optString("dateModified", "").isEmpty()) sb.append("• Data modyfikacji (date_modified): ").append(m.optString("dateModified")).append("\n");
+         if (!m.optString("modificationAuthor", "").isEmpty()) sb.append("• Autor modyfikacji (modification_author): ID ").append(m.optString("modificationAuthor")).append("\n");
+         if (!m.optString("comment", "").isEmpty()) sb.append("• Komentarz (comment): ").append(m.optString("comment")).append("\n");
+      } else {
+         if (!m.optString("classType", "").isEmpty()) sb.append("• Forma zajęć (classtype_name): ").append(m.optString("classType")).append("\n");
+         if (!m.optString("classTypeId", "").isEmpty()) sb.append("• ID formy zajęć (classtype_id): ").append(m.optString("classTypeId")).append("\n");
+         if (!m.optString("room", "").isEmpty()) sb.append("• Numer sali (room_number): ").append(m.optString("room")).append("\n");
+         if (!m.optString("roomId", "").isEmpty()) sb.append("• ID sali (room_id): ").append(m.optString("roomId")).append("\n");
+         if (!m.optString("building", "").isEmpty()) sb.append("• Budynek (building_name): ").append(m.optString("building")).append("\n");
+         if (!m.optString("buildingId", "").isEmpty()) sb.append("• ID budynku (building_id): ").append(m.optString("buildingId")).append("\n");
+         if (!m.optString("groupNumber", "").isEmpty()) sb.append("• Numer grupy (group_number): ").append(m.optString("groupNumber")).append("\n");
+         if (!m.optString("unitId", "").isEmpty()) sb.append("• ID jednostki (unit_id): ").append(m.optString("unitId")).append("\n");
+         if (!m.optString("lecturers", "").isEmpty()) sb.append("• Prowadzący (lecturer_ids): ").append(m.optString("lecturers")).append("\n");
+         if (!m.optString("frequency", "").isEmpty()) sb.append("• Częstotliwość (frequency): ").append(m.optString("frequency")).append("\n");
+         if (!m.optString("type", "").isEmpty()) sb.append("• Typ wpisu w USOS (type): ").append(m.optString("type")).append("\n");
+         if (!m.optString("smId", "").isEmpty()) sb.append("• ID zajęć sm_id: ").append(m.optString("smId")).append("\n");
+         if (!m.optString("cgwmId", "").isEmpty()) sb.append("• ID cgwm_id: ").append(m.optString("cgwmId")).append("\n");
+         if (!m.optString("startTime", "").isEmpty()) sb.append("• Godzina rozpoczęcia (start_time): ").append(m.optString("startTime")).append("\n");
+         if (!m.optString("endTime", "").isEmpty()) sb.append("• Godzina zakończenia (end_time): ").append(m.optString("endTime")).append("\n");
+         if (!m.optString("date", "").isEmpty()) sb.append("• Data zajęć (date): ").append(m.optString("date")).append("\n");
+         if (!m.optString("url", "").isEmpty()) sb.append("• URL: ").append(m.optString("url")).append("\n");
+         if (!m.optString("profileUrl", "").isEmpty()) sb.append("• Profil grupy URL: ").append(m.optString("profileUrl")).append("\n");
+      }
+   }
+
+   private String diffLabel(String key) {
+      switch (key) {
+         case "diffGrade": return "Ocena";
+         case "diffPasses": return "Status zaliczenia";
+         case "diffRoom": return "Sala";
+         case "diffTime": return "Godziny zajęć";
+         case "diffDate": return "Termin zajęć";
+         case "diffLecturers": return "Prowadzący";
+         case "diffGroup": return "Grupa";
+         case "diffBuilding": return "Budynek";
+         case "diffClassType": return "Forma zajęć";
+         case "diffComment": return "Komentarz";
+         case "diffEcts": return "Punkty ECTS";
+         default: return key;
+      }
+   }
+
+   private String formatUsosDate(String source) {
+      if (source == null || source.trim().isEmpty()) return "";
+      String trimmed = source.trim();
+      try {
+         LocalDateTime dt = LocalDateTime.parse(trimmed, UsosParser.TIME);
+         return dt.format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", Locale.forLanguageTag("pl-PL")));
+      } catch (Exception ignored) {}
+      try {
+         LocalDate d = LocalDate.parse(trimmed);
+         return d.format(DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.forLanguageTag("pl-PL")));
+      } catch (Exception ignored) {}
+      return trimmed;
    }
 
     private String shortDate(LocalDate date) { return date.format(DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.forLanguageTag("pl-PL"))); }
@@ -807,6 +1314,18 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
         if (selected.isBefore(start)) selected = start; if (selected.isAfter(end)) selected = end;
         calendarDate = selected.toString(); final LocalDate day = selected;
         note(content, "Wczytany zakres: " + shortDate(start) + " – " + shortDate(end), GREEN);
+        if (!snapshot.terms.isEmpty()) {
+            AcademicTerm active = null;
+            for (AcademicTerm t : snapshot.terms.values()) {
+                if (t.isCurrent(today)) { active = t; break; }
+            }
+            if (active != null) {
+                LinearLayout termBanner = card(content, Color.rgb(238, 245, 242));
+                add(termBanner, active.name, 16, INK, true);
+                long left = active.daysRemaining(today);
+                add(termBanner, "Pozostało " + left + " dni semestru · koniec: " + active.endDate, 13, GREEN, false);
+            }
+        }
         List<LessonTime> all = LessonTime.sorted(snapshot.records.values());
         LocalDate week = day.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LinearLayout arrows = new LinearLayout(this);
@@ -871,7 +1390,7 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
                     list.addView(timeline); daySummary(list, visible, day);
                 } else {
                     for (LessonTime lesson : visible) {
-                        lessonCard(list, lesson);
+                        lessonCard(list, lesson, hasConflict(lesson, all));
                         if (lesson.start.toLocalDate().isBefore(day)) note(list, "Zajęcia rozpoczęły się poprzedniego dnia.", MUTED);
                     }
                     daySummary(list, visible, day);
@@ -886,7 +1405,7 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
                         if (!date.isEmpty()) daySummary(list, visible, LocalDate.parse(date));
                         date = headingDay.toString(); add(list, headingDay.format(DateTimeFormatter.ofPattern("EEEE, dd.MM", Locale.forLanguageTag("pl-PL"))), 18, INK, true);
                     }
-                    lessonCard(list, lesson);
+                    lessonCard(list, lesson, hasConflict(lesson, all));
                 }
                 if (!date.isEmpty()) daySummary(list, visible, LocalDate.parse(date));
                 if (visible.isEmpty()) {
@@ -895,8 +1414,9 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
                     if (!dataQuery.trim().isEmpty()) box.addView(button("Wyczyść wyszukiwanie planu", () -> { dataQuery = ""; render(); }, false));
                 }
             }
-            Button export = button("Eksportuj widoczny plan (.ics)", () -> exportPlan(exported), false); export.setEnabled(!exported.isEmpty()); list.addView(export);
-            note(list, "Eksport obejmuje widoczne zajęcia. Plik jest kopią planu.", MUTED);
+            Button export = button("Zapisz plik kalendarza (.ics)", () -> exportPlan(exported), false); export.setEnabled(!exported.isEmpty()); list.addView(export);
+            Button share = button("Udostępnij do Kalendarza / Aplikacji", () -> sharePlan(exported), false); share.setEnabled(!exported.isEmpty()); list.addView(share);
+            note(list, "Eksport obejmuje widoczne zajęcia. Plik możesz zaimportować do Google Calendar, Outlooka lub aplikacji systemowej.", MUTED);
         };
         watchSearch(search, value -> { dataQuery = value; populate.run(); }); populate.run();
         content.addView(nextClass);
@@ -912,10 +1432,26 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
         }, true));
         note(content, "Plan pochodzi z ostatniego pobrania. Pusty dzień oznacza brak zajęć w zapisanych danych; zakres możesz rozszerzyć przyciskiem wczytania kolejnych tygodni.", MUTED);
     }
+    private boolean hasConflict(LessonTime lesson, List<LessonTime> all) {
+        if (lesson == null || all == null) return false;
+        for (LessonTime other : all) {
+            if (other != lesson && lesson.start.toLocalDate().equals(other.start.toLocalDate())
+                && lesson.start.isBefore(other.end) && other.start.isBefore(lesson.end)) {
+                return true;
+            }
+        }
+        return false;
+    }
     private void lessonCard(LinearLayout parent, LessonTime lesson) {
+        lessonCard(parent, lesson, false);
+    }
+    private void lessonCard(LinearLayout parent, LessonTime lesson, boolean conflict) {
         LinearLayout box = card(parent, Color.WHITE); add(box, lesson.record.title, 18, INK, true);
         DateTimeFormatter clock = DateTimeFormatter.ofPattern("HH:mm");
         add(box, lesson.start.format(clock) + " – " + lesson.end.format(clock) + (lesson.end.toLocalDate().isAfter(lesson.start.toLocalDate()) ? " · następny dzień" : ""), 20, GREEN, true);
+        if (conflict) {
+            note(box, "⚠️ KOLIZJA · Nakłada się z innymi zajęciami w tym samym czasie!", Color.rgb(217, 119, 6));
+        }
         String[] lines = lesson.record.value.split("\n", 2); if (lines.length > 1) add(box, lines[1], 14, MUTED, false);
         if (lesson.current(Instant.now()) && !lesson.tentative()) {
             note(box, "TRWAJĄ TERAZ", GREEN);
@@ -935,6 +1471,7 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
     }
    private void data() throws Exception {
       JSONObject d = display(); heading("Twoje oceny");
+      content.addView(button("Kalkulator średniej i symulator stypendium", () -> navigate(9), true));
       note(content, "Aktualność danych: " + timestamp(d.optLong("successAt")), MUTED);
       if (!demo && !state.optString("error").isEmpty()) note(content, state.optString("error"), Color.rgb(160, 48, 40));
       JSONObject raw = d.optJSONObject("snapshot");
@@ -965,6 +1502,25 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
          List<Record> visible = GradeBrowser.select(snapshot.records.values(), semester, gradeType, gradeOrder, gradeQuery);
          for (List<Record> group : GradeBrowser.groups(visible)) gradeCourseCard(list, group);
          gradeSummary(list, visible);
+         if (snapshot.tests != null && !snapshot.tests.isEmpty()) {
+            heading("Sprawdziany i kolokwia");
+            for (CourseTestRecord ctr : snapshot.tests) {
+               LinearLayout testBox = card(list, Color.WHITE);
+               add(testBox, ctr.testName, 17, INK, true);
+               add(testBox, ctr.courseName, 13, GREEN, true);
+               if (ctr.maxPoints > 0) {
+                  add(testBox, String.format(Locale.forLanguageTag("pl-PL"), "Punkty: %.1f / %.1f (%.1f%%)", ctr.points, ctr.maxPoints, ctr.percentage()), 15, INK, false);
+               } else if (!Double.isNaN(ctr.points) && ctr.points > 0) {
+                  add(testBox, String.format(Locale.forLanguageTag("pl-PL"), "Punkty: %.1f", ctr.points), 15, INK, false);
+               }
+               if (!ctr.grade.isEmpty()) {
+                  add(testBox, "Ocena: " + ctr.grade, 14, GREEN, true);
+               }
+               if (!ctr.date.isEmpty()) {
+                  add(testBox, "Termin sprawdzianu: " + ctr.date, 12, MUTED, false);
+               }
+            }
+         }
          resetGrades.setVisibility(!semester.isEmpty() || !gradeType.equals("all") || !gradeQuery.trim().isEmpty() ? View.VISIBLE : View.GONE);
          if (visible.isEmpty()) {
             LinearLayout box = card(list, Color.WHITE);
@@ -1051,6 +1607,9 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
       header.addView(text("Podsumowanie ocen", 16, INK, true), new LinearLayout.LayoutParams(0, -2, 1));
       Button help = button("?", () -> {
          String statistics = summary.numeric == 0 ? "Brak ocen liczbowych.\n\n" : String.format(Locale.forLanguageTag("pl-PL"), "Średnia: %.2f\nMinimum: %.2f · maksimum: %.2f\n\n", summary.average, summary.min, summary.max);
+         if (!Double.isNaN(summary.ectsAverage)) {
+            statistics += String.format(Locale.forLanguageTag("pl-PL"), "Średnia ważona ECTS: %.2f\nSuma punktów ECTS: %.1f\n\n", summary.ectsAverage, summary.totalEcts);
+         }
          new MaterialAlertDialogBuilder(this).setTitle("Podsumowanie ocen").setMessage(statistics
             + "Podsumowanie obejmuje tylko widoczne wpisy po wyszukiwaniu i filtrach. Symbole będące liczbami (np. 4,5) tworzą prostą średnią, bez wag i punktów ECTS. Różne terminy egzaminów pozostają osobnymi wpisami. Symbole opisowe i oznaczenia takie jak 4+ nie wchodzą do średniej. To nie jest oficjalna średnia uczelni.").setPositiveButton("Rozumiem", null).show();
       }, false);
@@ -1061,29 +1620,103 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
       average.setPadding(0, 0, dp(16), 0); values.addView(average, new LinearLayout.LayoutParams(-2, -2));
       LinearLayout counts = new LinearLayout(this); counts.setOrientation(LinearLayout.VERTICAL);
       counts.addView(text(summary.numeric == 0 ? "Brak ocen liczbowych" : "Prosta średnia", 12, INK, false));
+      if (!Double.isNaN(summary.ectsAverage)) {
+         counts.addView(text(String.format(Locale.forLanguageTag("pl-PL"), "Średnia ważona ECTS: %.2f (%.0f ECTS)", summary.ectsAverage, summary.totalEcts), 13, GREEN, true));
+      }
       counts.addView(text("Liczbowe: " + summary.numeric + "\nPozostałe: " + summary.other, 13, MUTED, false));
       values.addView(counts, new LinearLayout.LayoutParams(0, -2, 1)); box.addView(values);
-      note(box, "Średnia nieważona · nieoficjalna", MUTED);
+      box.addView(button("Kalkulator średniej i stypendium", () -> gradeSimulatorDialog(summary), false));
+      note(box, "Średnia nieważona oraz ważona ECTS · kalkulator stypendialny", MUTED);
+   }
+
+   private void gradeSimulatorDialog(GradeSummary summary) {
+      LinearLayout dialogLayout = new LinearLayout(this);
+      dialogLayout.setOrientation(LinearLayout.VERTICAL);
+      dialogLayout.setPadding(dp(24), dp(16), dp(24), dp(8));
+
+      double currentAvg = Double.isNaN(summary.ectsAverage) ? summary.average : summary.ectsAverage;
+      String currentAvgStr = Double.isNaN(currentAvg) ? "brak" : String.format(Locale.forLanguageTag("pl-PL"), "%.2f", currentAvg);
+
+      TextView currentLabel = text("Aktualna średnia: " + currentAvgStr, 14, INK, true);
+      dialogLayout.addView(currentLabel);
+
+      EditText targetField = field(dialogLayout, "Docelowa średnia (np. 4.50)", "4.50", false);
+      EditText countField = field(dialogLayout, "Liczba nowych ocen (do średniej prostej)", "2", false);
+      countField.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+
+      EditText ectsField = field(dialogLayout, "Punkty ECTS nowego kursu (do ważonej)", "6", false);
+      ectsField.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+      TextView resultView = text("Wpisz parametry i zobacz wymagane oceny.", 13, GREEN, true);
+      resultView.setPadding(0, dp(8), 0, dp(16));
+      dialogLayout.addView(resultView);
+
+      Runnable compute = () -> {
+         try {
+            double target = Double.parseDouble(targetField.getText().toString().replace(',', '.'));
+            int count = Integer.parseInt(countField.getText().toString());
+            double reqSimple = summary.requiredAverage(target, count);
+
+            double ectsPoints = Double.parseDouble(ectsField.getText().toString().replace(',', '.'));
+            double reqEcts = summary.requiredEctsGrade(target, ectsPoints);
+
+            StringBuilder sb = new StringBuilder();
+            if (!Double.isNaN(reqSimple)) {
+               sb.append(String.format(Locale.forLanguageTag("pl-PL"), "Średnia prosta: z kolejnych %d ocen potrzebujesz średniej %.2f", count, reqSimple));
+               if (reqSimple > 5.0) sb.append(" (niemożliwe w obecnym semestrze, max 5.0!)");
+               else if (reqSimple <= 3.0) sb.append(" (cel osiągnięty nawet przy ocenie 3.0)");
+            }
+            if (!Double.isNaN(reqEcts) && !Double.isNaN(summary.ectsAverage)) {
+               if (sb.length() > 0) sb.append("\n\n");
+               sb.append(String.format(Locale.forLanguageTag("pl-PL"), "Średnia ważona ECTS: z przedmiotu za %.0f ECTS potrzebujesz oceny %.2f", ectsPoints, reqEcts));
+               if (reqEcts > 5.0) sb.append(" (wymaga oceny > 5.0)");
+               else if (reqEcts <= 3.0) sb.append(" (cel osiągnięty przy ocenie 3.0)");
+            }
+            resultView.setText(sb.toString());
+         } catch (Exception e) {
+            resultView.setText("Wpisz prawidłowe liczby (np. cel: 4.50, oceny: 2, ECTS: 6)");
+         }
+      };
+
+      targetField.addTextChangedListener(new TextWatcher() {
+         public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+         public void onTextChanged(CharSequence s, int start, int before, int count) { compute.run(); }
+         public void afterTextChanged(Editable s) {}
+      });
+      countField.addTextChangedListener(new TextWatcher() {
+         public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+         public void onTextChanged(CharSequence s, int start, int before, int count) { compute.run(); }
+         public void afterTextChanged(Editable s) {}
+      });
+      ectsField.addTextChangedListener(new TextWatcher() {
+         public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+         public void onTextChanged(CharSequence s, int start, int before, int count) { compute.run(); }
+         public void afterTextChanged(Editable s) {}
+      });
+      compute.run();
+
+      new MaterialAlertDialogBuilder(this)
+         .setTitle("Symulator średniej i stypendium")
+         .setView(dialogLayout)
+         .setPositiveButton("Zamknij", null)
+         .show();
    }
    private void exportPlan(List<Record> rows) {
-      List<Record> visible = new ArrayList();
-
-      for(Record row : rows) {
+      List<Record> visible = new ArrayList<>();
+      for (Record row : rows) {
          if (StudentSearch.matches(this.dataQuery, row.title, row.value, row.term, row.date)) {
             visible.add(row);
          }
       }
-
       if (visible.isEmpty()) {
          this.error("Brak widocznych zajęć do eksportu.");
       } else {
          try {
-            String calendar = CalendarExport.create(visible, Instant.now());
-            if (calendar.getBytes(StandardCharsets.UTF_8).length > 200000) {
+            String calendar = IcsExporter.export(visible, "Plan zajęć Vistula");
+            if (calendar.getBytes(StandardCharsets.UTF_8).length > 500000) {
                this.error("Plan jest zbyt duży. Zawęź zakres dat lub wyszukiwanie.");
                return;
             }
-
             this.pendingCalendar = calendar;
             this.startActivityForResult((new Intent("android.intent.action.CREATE_DOCUMENT")).setType("text/calendar").addCategory("android.intent.category.OPENABLE").putExtra("android.intent.extra.TITLE", "vistula-plan-" + LocalDate.now(UsosClient.ZONE) + ".ics"), 23);
          } catch (ActivityNotFoundException var5) {
@@ -1092,7 +1725,29 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
          } catch (IllegalArgumentException e) {
             this.error(Repository.message(e));
          }
+      }
+   }
 
+   private void sharePlan(List<Record> rows) {
+      List<Record> visible = new ArrayList<>();
+      for (Record row : rows) {
+         if (StudentSearch.matches(this.dataQuery, row.title, row.value, row.term, row.date)) {
+            visible.add(row);
+         }
+      }
+      if (visible.isEmpty()) {
+         this.error("Brak widocznych zajęć do udostępnienia.");
+         return;
+      }
+      try {
+         String calendar = IcsExporter.export(visible, "Plan zajęć Vistula");
+         Intent send = new Intent(Intent.ACTION_SEND);
+         send.setType("text/calendar");
+         send.putExtra(Intent.EXTRA_SUBJECT, "Plan zajęć Vistula (" + visible.size() + " zajęć)");
+         send.putExtra(Intent.EXTRA_TEXT, calendar);
+         startActivity(Intent.createChooser(send, "Udostępnij lub dodaj do kalendarza"));
+      } catch (Exception e) {
+         this.error("Brak aplikacji do udostępnienia kalendarza.");
       }
    }
 
@@ -1123,7 +1778,7 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
    }
 
    private void account() {
-      this.title("Konto i ustawienia", "Akademia Finansów i Biznesu Vistula");
+      this.title("Konto i profil", "Akademia Finansów i Biznesu Vistula");
       if (this.demo) {
          this.content.addView(this.button("Zakończ tryb demonstracyjny", () -> {
             this.demo = false;
@@ -1131,10 +1786,59 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
          }, true));
       }
 
+      if (this.connected() || this.demo) {
+         JSONObject d = null;
+         try { d = this.display(); } catch (Exception ignored) {}
+         JSONObject raw = d != null ? d.optJSONObject("snapshot") : null;
+         Snapshot snapshot = null;
+         if (raw != null) {
+            try { snapshot = Snapshot.from(raw); } catch (Exception ignored) {}
+         }
+
+         LinearLayout profile = this.card(this.content, -1);
+         this.add(profile, "KARTA STUDENTA", 11, GREEN, true);
+         String userName = this.demo ? "Jan Kowalski" : this.state.optString("user", "Student USOS");
+         this.add(profile, userName, 22, INK, true);
+         String studentNr = this.demo ? "34589" : this.state.optString("studentNumber", "");
+         if (!studentNr.isEmpty()) this.add(profile, "Nr albumu: " + studentNr, 15, INK, true);
+         String email = this.demo ? "j.kowalski@vistula.edu.pl" : this.state.optString("email", "");
+         if (!email.isEmpty()) this.add(profile, "Email: " + email, 14, MUTED, false);
+         String program = this.demo ? "Informatyka, studia I stopnia" : this.state.optString("program", "");
+         if (!program.isEmpty()) this.add(profile, "Kierunek: " + program, 14, INK, false);
+         String stage = this.demo ? "Semestr 5 · Studia stacjonarne" : this.state.optString("stage", "");
+         if (!stage.isEmpty()) this.add(profile, "Etap: " + stage, 13, MUTED, false);
+         String admission = this.demo ? "2024-10-01" : this.state.optString("admissionDate", "");
+         if (!admission.isEmpty()) this.add(profile, "Data przyjęcia: " + admission, 12, MUTED, false);
+
+         if (snapshot != null && snapshot.thesis != null && snapshot.thesis.hasThesis()) {
+            this.add(profile, "PRACA DYPLOMOWA", 11, GREEN, true);
+            this.add(profile, snapshot.thesis.title, 15, INK, true);
+            if (!snapshot.thesis.status.isEmpty()) this.add(profile, "Status: " + snapshot.thesis.status, 13, MUTED, false);
+            if (!snapshot.thesis.supervisors.isEmpty()) this.add(profile, "Promotor: " + snapshot.thesis.supervisors, 13, MUTED, false);
+            if (!snapshot.thesis.reviewers.isEmpty()) this.add(profile, "Recenzent: " + snapshot.thesis.reviewers, 13, MUTED, false);
+         }
+
+         LinearLayout secBadge = new LinearLayout(this);
+         secBadge.setGravity(Gravity.CENTER_VERTICAL);
+         TextView badgeText = this.text("BEZPIECZNY SEJF SPRZĘTOWY", 10, GREEN, true);
+         badgeText.setPadding(this.dp(8), this.dp(4), this.dp(8), this.dp(4));
+         GradientDrawable badgeBg = new GradientDrawable();
+         badgeBg.setColor(Color.rgb(232, 243, 236));
+         badgeBg.setCornerRadius(this.dp(8));
+         badgeText.setBackground(badgeBg);
+         secBadge.addView(badgeText);
+         profile.addView(secBadge);
+         this.note(profile, "Szyfrowanie Android Keystore (AES-256-GCM). Wszystkie dane przechowywane wyłącznie lokalnie.", MUTED);
+      }
+
       if (this.connected()) {
          LinearLayout box = this.card(this.content, -1);
-         this.add(box, this.state.optString("user", "Konto USOS"), 19, INK, true);
-         this.add(box, "Zgoda OAuth: " + this.state.optString("scopes", "grades|studies|offline_access"), 13, MUTED, false);
+         this.add(box, "Ustawienia synchronizacji USOS", 19, INK, true);
+         String authorizedScopes = this.state.optString("scopes", "grades|studies|payments|offline_access");
+         this.add(box, "Zgoda OAuth: " + authorizedScopes, 13, MUTED, false);
+         if (!authorizedScopes.contains("payments")) {
+            this.note(box, "Uwaga: Twoje konto nie posiada zakresu 'payments'. Subkonta i harmonogram płatności nie będą pobierane dopóki nie odłączysz konta i nie połączysz go ponownie z zakresem 'payments'.", Color.rgb(180, 110, 0));
+         }
          MaterialSwitch toggle = new MaterialSwitch(this);
          toggle.setText(string.background_check);
          toggle.setTextColor(INK);
@@ -1193,37 +1897,58 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
          LinearLayout box = this.card(this.content, -1);
          this.add(box, "Połącz z USOS", 20, INK, true);
          this.add(box, "Wpisz klucz aplikacji z USOSapps. Hasło uczelniane podajesz wyłącznie na stronie uczelni w przeglądarce.", 14, MUTED, false);
-         EditText key = this.field(box, "Consumer Key", "", false);
-         EditText secret = this.field(box, "Consumer Secret", "", true);
-         EditText scopes = this.field(box, "Zakresy zgody OAuth (oddzielone |)", this.state.optString("scopes", "grades|studies|offline_access"), false);
-         this.add(box, "Monitor wymaga grades, studies i offline_access. Inne zakresy dodaj tylko dla metod, których chcesz używać w katalogu API.", 12, MUTED, false);
+         String buildKey = BuildConfig.USOS_KEY != null ? BuildConfig.USOS_KEY.trim() : "";
+         String buildSecret = BuildConfig.USOS_SECRET != null ? BuildConfig.USOS_SECRET.trim() : "";
+         String defaultKey = this.state.optString("key", buildKey);
+         if (defaultKey.isEmpty()) defaultKey = buildKey;
+         String defaultSecret = this.state.optString("secret", buildSecret);
+         if (defaultSecret.isEmpty()) defaultSecret = buildSecret;
+
+         EditText key = this.field(box, "Consumer Key", defaultKey, false);
+         EditText secret = this.field(box, "Consumer Secret", defaultSecret, true);
+         if (!buildKey.isEmpty()) {
+            this.note(box, "Wczytano klucz aplikacji (Consumer Key & Secret) z pliku local.properties.", GREEN);
+         }
+         EditText scopes = this.field(box, "Zakresy zgody OAuth (oddzielone |)", this.state.optString("scopes", "grades|studies|payments|offline_access"), false);
+         this.add(box, "Monitor wymaga grades, studies, payments i offline_access. Inne zakresy dodaj tylko dla metod, których chcesz używać w katalogu API.", 12, MUTED, false);
          box.addView(this.button("1. Zaloguj w przeglądarce", () -> {
             String k = key.getText().toString().trim();
+            if (k.isEmpty()) k = buildKey;
             String sec = secret.getText().toString().trim();
+            if (sec.isEmpty()) sec = buildSecret;
             String sc = scopes.getText().toString().trim();
             if (!k.isEmpty() && !sec.isEmpty()) {
-               Set<String> requested = new HashSet(Arrays.asList(sc.split("\\|")));
-               if (!requested.containsAll(List.of("grades", "studies", "offline_access"))) {
-                  this.error("Dodaj wymagane zakresy: grades|studies|offline_access.");
-               } else {
-                  this.task(() -> {
-                     this.repository.begin(k, sec, sc);
-                     return this.repository.read();
-                  }, (s) -> {
-                     this.state = s;
-                     this.render();
-                     this.browser("https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" + OAuth.encode(s.getString("requestToken")) + "&interactivity=confirm_user");
-                  });
+               List<String> cleanScopes = new ArrayList<>();
+               for (String part : sc.split("\\|")) {
+                  String trimmed = part.trim();
+                  if (!trimmed.isEmpty() && !cleanScopes.contains(trimmed)) {
+                     cleanScopes.add(trimmed);
+                  }
                }
+               if (!cleanScopes.contains("grades")) cleanScopes.add("grades");
+               if (!cleanScopes.contains("studies")) cleanScopes.add("studies");
+               if (!cleanScopes.contains("offline_access")) cleanScopes.add("offline_access");
+               final String normalizedScopes = String.join("|", cleanScopes);
+
+               final String finalK = k;
+               final String finalSec = sec;
+               this.task(() -> {
+                  this.repository.begin(finalK, finalSec, normalizedScopes);
+                  return this.repository.read();
+               }, (s) -> {
+                  this.state = s;
+                  this.render();
+                  this.browser("https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" + OAuth.encode(s.getString("requestToken")));
+               });
             } else {
-               this.error("Wpisz Consumer Key i Consumer Secret. Rejestrację klucza możesz wykonać później.");
+               this.error("Wpisz Consumer Key i Consumer Secret (lub podaj je w pliku local.properties).");
             }
          }, true));
          if (!this.state.optString("requestToken").isEmpty()) {
             this.add(box, "Po zaakceptowaniu zgody skopiuj kod PIN z USOS i wróć do aplikacji.", 14, MUTED, false);
             EditText pin = this.field(box, "PIN autoryzacji z USOS", "", true);
             box.addView(this.button("2. Potwierdź PIN i połącz", () -> {
-               String value = pin.getText().toString().trim();
+               String value = pin.getText().toString().trim().replaceAll("\\s+", "");
                if (value.isEmpty()) {
                   this.error("Wpisz kod PIN wyświetlony przez USOS.");
                } else {
@@ -1244,7 +1969,7 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
                   });
                }
             }, true));
-            box.addView(this.button("Wróć do autoryzacji w przeglądarce", () -> this.browser("https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" + OAuth.encode(this.state.optString("requestToken")) + "&interactivity=confirm_user"), false));
+            box.addView(this.button("Wróć do autoryzacji w przeglądarce", () -> this.browser("https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" + OAuth.encode(this.state.optString("requestToken"))), false));
          }
 
          this.content.addView(this.button("Uruchom tryb demonstracyjny", () -> {
@@ -1255,11 +1980,62 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
       }
 
       LinearLayout notices = this.card(this.content, -1);
-      this.add(notices, "Powiadomienia", 18, INK, true);
-      this.add(notices, NotificationManagerCompat.from(this).areNotificationsEnabled() ? "System zezwala na powiadomienia." : "Powiadomienia są wyłączone. Historia nadal zapisuje zmiany.", 14, MUTED, false);
-      notices.addView(this.button("Ustawienia powiadomień", this::requestNotifications, false));
-      this.add(notices, "Tokeny i historia są szyfrowane na telefonie. Aplikacja nie przechowuje hasła do uczelni i nie ma własnego serwera.", 13, MUTED, false);
-      this.add(notices, "Czas prezentowany w strefie Europe/Warsaw. Historia: 200 wpisów. Plan: 8–16 tygodni. Oceny: semestry zwrócone dla konta przez USOS.", 12, MUTED, false);
+      this.add(notices, "Powiadomienia i alerty", 18, INK, true);
+      this.add(notices, NotificationManagerCompat.from(this).areNotificationsEnabled() ? "System zezwala na powiadomienia." : "Powiadomienia są wyłączone w systemie. Włącz je, aby otrzymywać alerty o nowych ocenach i zmianach sal.", 14, MUTED, false);
+      notices.addView(this.button("Ustawienia powiadomień w systemie", this::requestNotifications, false));
+      notices.addView(this.button("Wyślij testowe powiadomienie o ocenach", () -> {
+         NotificationHelper.sendTestNotification(this);
+         Toast.makeText(this, "Wysłano testowe powiadomienie", Toast.LENGTH_SHORT).show();
+      }, false));
+
+      SharedPreferences toolsPrefs = getSharedPreferences("student_tools", MODE_PRIVATE);
+      boolean remindersOn = toolsPrefs.getBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, false);
+      int reminderMin = toolsPrefs.getInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, 15);
+
+      LinearLayout reminderRow = new LinearLayout(this);
+      reminderRow.setOrientation(LinearLayout.VERTICAL);
+      reminderRow.setPadding(0, dp(8), 0, dp(4));
+
+      MaterialSwitch reminderSwitch = new MaterialSwitch(this);
+      reminderSwitch.setText("Przypomnienia przed rozpoczęciem zajęć");
+      reminderSwitch.setChecked(remindersOn);
+      reminderSwitch.setTextColor(INK);
+      reminderSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
+          toolsPrefs.edit().putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, isChecked).apply();
+          if (isChecked) {
+              ClassReminderReceiver.scheduleNext(this);
+              Toast.makeText(this, "Włączono przypomnienia przed zajęciami", Toast.LENGTH_SHORT).show();
+          } else {
+              ClassReminderReceiver.cancel(this);
+              Toast.makeText(this, "Wyłączono przypomnienia przed zajęciami", Toast.LENGTH_SHORT).show();
+          }
+          render();
+      });
+      reminderRow.addView(reminderSwitch);
+
+      if (remindersOn) {
+          note(reminderRow, "Wyprzedzenie powiadomienia przed zajęciami:", MUTED);
+          chips(new String[]{"15", "30", "45"}, new String[]{"15 minut przed", "30 minut przed", "45 minut przed"}, String.valueOf(reminderMin), val -> {
+              int min = Integer.parseInt(val);
+              toolsPrefs.edit().putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, min).apply();
+              ClassReminderReceiver.scheduleNext(this);
+              render();
+          });
+      }
+      notices.addView(reminderRow);
+
+      this.note(notices, "Dedykowane kanały: Oceny (wysoki priorytet z dźwiękiem), Plan zajęć oraz Przypomnienia.", MUTED);
+
+      LinearLayout widgetsCard = this.card(this.content, -1);
+      this.add(widgetsCard, "Widgety na ekranie głównym", 18, INK, true);
+      this.add(widgetsCard, "Dostępne są 2 interaktywne widgety na pulpit telefonu:\n1. Plan zajęć na dziś (najbliższe zajęcia, sala, czas, odliczanie)\n2. Karta Studenta i oceny (średnia ważona ECTS, status czesnego)\n\nAby je dodać, przytrzymaj palec na pustym miejscu ekranu głównego telefonu i wybierz „Widżety → Vistula”.", 13, MUTED, false);
+      widgetsCard.addView(this.button("Zaktualizuj dane na widgetach", () -> {
+         pl.vistula.checker.widget.TodayScheduleWidget.updateAll(this);
+         pl.vistula.checker.widget.QuickStatusWidget.updateAll(this);
+         Toast.makeText(this, "Zaktualizowano widgety", Toast.LENGTH_SHORT).show();
+      }, false));
+
+      this.note(this.content, "Tokeny i historia są szyfrowane sprzętowo (Android Keystore). Aplikacja nie przechowuje hasła do uczelni i nie korzysta z pośredniczących serwerów.", MUTED);
       this.content.addView(this.button("Otwórz USOSapps Vistuli", () -> this.browser("https://usosapps.vistula.edu.pl/"), false));
    }
 
@@ -1269,6 +2045,30 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
       this.chips(new String[]{"all", "favorites"}, new String[]{"Wszystkie metody", "Ulubione"}, apiFavoritesOnly ? "favorites" : "all", value -> {
          apiFavoritesOnly = value.equals("favorites"); apiLimit = 60; render();
       });
+      this.heading("Szybki dostęp do kluczowych usług");
+      String[] quickMethods = {
+         "services/users/user", "services/grades/terms2", "services/tt/student",
+         "services/payments/user_accounts", "services/payments/user_payments", "services/theses/user", "services/crstests/user", "services/terms/terms"
+      };
+      String[] quickLabels = {
+         "Profil studenta", "Oceny semestralne", "Plan zajęć",
+         "Subkonta bankowe", "Należności i raty", "Prace dyplomowe", "Kolokwia i testy", "Semestry i kalendarz"
+      };
+      LinearLayout quickScrollLayout = new LinearLayout(this);
+      HorizontalScrollView quickScroll = new HorizontalScrollView(this);
+      quickScroll.setHorizontalScrollBarEnabled(false);
+      quickScroll.addView(quickScrollLayout);
+      for (int i = 0; i < quickMethods.length; i++) {
+         final String qm = quickMethods[i];
+         Button qb = this.button(quickLabels[i], () -> this.showMethod(qm), false);
+         qb.setTextSize(12); qb.setSingleLine(true);
+         LinearLayout.LayoutParams qp = new LinearLayout.LayoutParams(-2, -2);
+         qp.rightMargin = this.dp(6);
+         quickScrollLayout.addView(qb, qp);
+      }
+      LinearLayout.LayoutParams qsp = new LinearLayout.LayoutParams(-1, -2);
+      qsp.bottomMargin = this.dp(12);
+      this.content.addView(quickScroll, qsp);
       EditText search = this.field(this.content, "Szukaj metody, modułu lub opisu…", this.apiQuery, false);
       final LinearLayout list = new LinearLayout(this);
       list.setOrientation(LinearLayout.VERTICAL);
@@ -1429,9 +2229,13 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
                this.exportResponse = null;
                result.setText(R.string.api_sending);
                this.task(() -> {
-                  JSONObject credentials = this.repository.read();
+                  JSONObject credentials = new JSONObject(this.repository.read().toString());
                   if (this.demo) {
                      credentials = new JSONObject();
+                  }
+                  if (credentials.optString("key").isEmpty() && BuildConfig.USOS_KEY != null && !BuildConfig.USOS_KEY.isEmpty()) {
+                     credentials.put("key", BuildConfig.USOS_KEY.trim());
+                     credentials.put("secret", BuildConfig.USOS_SECRET != null ? BuildConfig.USOS_SECRET.trim() : "");
                   }
 
                   return (new UsosClient(credentials)).explore(metadata, values, method, this.uploadBytes, "upload.bin");
@@ -1653,9 +2457,14 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
         else startActivity(new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName()));
     }
     private void browser(String address) {
-        Uri uri = Uri.parse(address);
-        if (!"https".equals(uri.getScheme()) || !"usosapps.vistula.edu.pl".equals(uri.getHost())) { error("Adres spoza USOS Vistuli."); return; }
-        try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (ActivityNotFoundException e) { error("Zainstaluj przeglądarkę, aby otworzyć USOS."); }
+        if (address == null || address.trim().isEmpty()) return;
+        Uri uri = Uri.parse(address.trim());
+        String scheme = uri.getScheme();
+        if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
+            error("Nieprawidłowy adres URL: " + address);
+            return;
+        }
+        try { startActivity(new Intent(Intent.ACTION_VIEW, uri)); } catch (ActivityNotFoundException e) { error("Zainstaluj przeglądarkę, aby otworzyć link."); }
     }
     private void error(String message) {
         new MaterialAlertDialogBuilder(this).setTitle("Nie udało się wykonać operacji").setMessage(message).setPositiveButton("OK", null)
@@ -1735,5 +2544,571 @@ public final class MainActivity extends androidx.appcompat.app.AppCompatActivity
         return millis == 0 ? "Jeszcze nie sprawdzano" : Instant.ofEpochMilli(millis).atZone(UsosClient.ZONE)
             .format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", Locale.forLanguageTag("pl-PL")));
     }
+    private void paymentsView() throws Exception {
+        title("Płatności i subkonto", "Subkonta bankowe i harmonogram należności USOS");
+        JSONObject d = display();
+        note(content, "Aktualność danych: " + timestamp(d.optLong("successAt")), MUTED);
+        JSONObject raw = d.optJSONObject("snapshot");
+        if (raw == null) {
+            empty("Brak pobranych danych", "Połącz konto i odśwież dane.");
+            content.addView(button(connected() ? "Odśwież dane" : "Połącz konto", () -> { if (connected()) sync(); else navigate(4); }, true));
+            return;
+        }
+        Snapshot snapshot = Snapshot.from(raw);
+        PaymentInfo payments = snapshot.payments;
+
+        String authorizedScopes = this.state.optString("scopes", "");
+        boolean hasPaymentsScope = Arrays.asList(authorizedScopes.split("\\|")).contains("payments");
+        boolean scopeMissing = (payments != null && payments.scopeMissing)
+            || (connected() && !authorizedScopes.isEmpty() && !hasPaymentsScope);
+
+        if (scopeMissing) {
+            LinearLayout warnBox = card(content, Color.rgb(255, 248, 230));
+            add(warnBox, "BRAK ZAKRESU PŁATNOŚCI W OAUTH", 11, Color.rgb(180, 110, 0), true);
+            add(warnBox, "Wymagane uprawnienie 'payments'", 17, INK, true);
+            note(warnBox, "Twoje połączone konto USOS ma aktualnie uprawnienia: [" + (authorizedScopes.isEmpty() ? "brak danych" : authorizedScopes) + "]. Moduł finansów uczelni (indywidualne subkonta bankowe, harmonogram rat i czesne) wymaga zgody na zakres 'payments'.", INK);
+            note(warnBox, "Aby pobierać dane o płatnościach, przejdź do ekranu Konto, odłącz konto i połącz je ponownie z zakresem: grades|studies|payments|offline_access.", MUTED);
+            warnBox.addView(button("Przejdź do ustawień konta", () -> navigate(4), true));
+        }
+
+        if (payments == null || (payments.accounts.isEmpty() && payments.installments.isEmpty())) {
+            if (!scopeMissing) {
+                empty("Brak danych finansowych", "Brak zarejestrowanych należności ani indywidualnych subkont w systemie USOS dla Twojego profilu studenta. Wszelkie opłaty są rozliczone na bieżąco.");
+                content.addView(button("Odśwież dane z USOS", this::sync, false));
+            }
+            return;
+        }
+
+        if (!payments.accounts.isEmpty()) {
+            heading("Subkonta bankowe studenta");
+            for (PaymentInfo.Account acc : payments.accounts) {
+                LinearLayout box = card(content, Color.WHITE);
+                add(box, acc.name.isEmpty() ? "Subkonto indywidualne" : acc.name, 18, INK, true);
+                if (!acc.faculty.isEmpty()) {
+                    add(box, "Wydział: " + acc.faculty, 13, MUTED, false);
+                }
+                if (!acc.accountOwner.isEmpty()) {
+                    add(box, "Właściciel: " + acc.accountOwner, 13, MUTED, false);
+                }
+                add(box, acc.bankAccountNumber, 16, GREEN, true);
+                if (!acc.swift.isEmpty()) {
+                    add(box, "SWIFT / BIC: " + acc.swift, 12, MUTED, false);
+                }
+                if (acc.balance != 0) {
+                    add(box, String.format(Locale.forLanguageTag("pl-PL"), "Saldo konta: %.2f %s", acc.balance, acc.currency), 13, MUTED, false);
+                }
+                box.addView(button("Kopiuj numer subkonta (IBAN)", () -> {
+                    android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    if (clipboard != null) {
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Subkonto USOS", acc.bankAccountNumber.replaceAll("\\s+", "")));
+                        Toast.makeText(this, "Numer subkonta skopiowany do schowka", Toast.LENGTH_SHORT).show();
+                    }
+                }, false));
+            }
+        }
+
+        if (!payments.installments.isEmpty()) {
+            heading("Harmonogram należności");
+            double totalUnpaid = payments.totalUnpaidAmount();
+            LinearLayout summaryBox = card(content, payments.hasOverdue() ? Color.rgb(255, 240, 240) : Color.rgb(238, 245, 242));
+            add(summaryBox, "STAN ROZLICZEŃ", 11, payments.hasOverdue() ? Color.rgb(160, 48, 40) : GREEN, true);
+            add(summaryBox, String.format(Locale.forLanguageTag("pl-PL"), "Łącznie do zapłaty: %.2f PLN", totalUnpaid), 22, INK, true);
+            note(summaryBox, payments.hasOverdue() ? "Uwaga: Część rat jest po terminie płatności!" : (totalUnpaid == 0 ? "Wszystkie należności są opłacone na bieżąco." : "Pamiętaj o terminowym regulowaniu rat."), payments.hasOverdue() ? Color.rgb(160, 48, 40) : MUTED);
+
+            for (PaymentInfo.Installment inst : payments.installments) {
+                LinearLayout instBox = card(content, Color.WHITE);
+                LinearLayout topRow = new LinearLayout(this);
+                topRow.setGravity(Gravity.CENTER_VERTICAL);
+                topRow.addView(text(inst.name, 17, INK, true), new LinearLayout.LayoutParams(0, -2, 1));
+                boolean paid = inst.isPaid();
+                boolean overdue = inst.isOverdue();
+                String statusLabel = paid ? "Opłacona" : (overdue ? "Po terminie" : (inst.status.isEmpty() ? "Do zapłaty" : inst.status));
+                int statusColor = paid ? GREEN : (overdue ? Color.rgb(160, 48, 40) : Color.rgb(180, 110, 0));
+                TextView statusBadge = text(statusLabel, 12, statusColor, true);
+                statusBadge.setPadding(dp(8), dp(4), dp(8), dp(4));
+                GradientDrawable badgeBg = new GradientDrawable();
+                badgeBg.setColor(paid ? Color.rgb(232, 243, 236) : (overdue ? Color.rgb(255, 235, 235) : Color.rgb(255, 248, 230)));
+                badgeBg.setCornerRadius(dp(8));
+                statusBadge.setBackground(badgeBg);
+                topRow.addView(statusBadge, new LinearLayout.LayoutParams(-2, -2));
+                instBox.addView(topRow);
+
+                add(instBox, String.format(Locale.forLanguageTag("pl-PL"), "Kwota: %.2f %s", inst.amount, inst.currency), 16, INK, false);
+                if (!inst.deadline.isEmpty()) {
+                    add(instBox, "Termin płatności: " + inst.deadline, 13, overdue ? Color.rgb(160, 48, 40) : MUTED, overdue);
+                }
+                if (!inst.paymentDate.isEmpty()) {
+                    add(instBox, "Data wpłaty: " + inst.paymentDate, 12, GREEN, false);
+                }
+                if (!inst.bankAccountNumber.isEmpty()) {
+                    add(instBox, "Konto do wpłaty: " + inst.bankAccountNumber, 13, MUTED, false);
+                    instBox.addView(button("Kopiuj konto dla tej raty", () -> {
+                        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                        if (clipboard != null) {
+                            clipboard.setPrimaryClip(ClipData.newPlainText("Konto wpłaty USOS", inst.bankAccountNumber.replaceAll("\\s+", "")));
+                            Toast.makeText(this, "Numer konta skopiowany do schowka", Toast.LENGTH_SHORT).show();
+                        }
+                    }, false));
+                }
+            }
+        }
+        content.addView(button("Odśwież płatności z USOS", this::sync, false));
+    }
+    private void gpaSimulatorView() throws Exception {
+        title("Kalkulator średniej i stypendium", "Symulacja ocen, progi stypendium rektora i wyróżnienia");
+        JSONObject d = display();
+        JSONObject raw = d.optJSONObject("snapshot");
+        if (raw == null) {
+            empty("Brak danych ocen", "Połącz konto lub włącz tryb demonstracyjny.");
+            content.addView(button(connected() ? "Odśwież oceny" : "Połącz konto", () -> { if (connected()) sync(); else navigate(4); }, true));
+            return;
+        }
+
+        Snapshot snapshot = Snapshot.from(raw);
+        GradeSummary summary = GradeSummary.of(snapshot.records.values());
+
+        LinearLayout currentCard = card(content, Color.rgb(238, 245, 242));
+        add(currentCard, "AKTUALNY STAN STUDIÓW", 11, GREEN, true);
+        double currentWeighted = !Double.isNaN(summary.ectsAverage) ? summary.ectsAverage : summary.average;
+        if (!Double.isNaN(summary.ectsAverage)) {
+            add(currentCard, String.format(Locale.forLanguageTag("pl-PL"), "Średnia ważona ECTS: %.2f", summary.ectsAverage), 24, INK, true);
+            add(currentCard, String.format(Locale.forLanguageTag("pl-PL"), "Zdobyte punkty ECTS: %.1f · średnia arytmetyczna: %.2f", summary.totalEcts, summary.average), 13, MUTED, false);
+        } else if (!Double.isNaN(summary.average)) {
+            add(currentCard, String.format(Locale.forLanguageTag("pl-PL"), "Średnia arytmetyczna: %.2f", summary.average), 24, INK, true);
+            add(currentCard, "Brak przypisanych wag ECTS przy części ocen.", 13, MUTED, false);
+        } else {
+            add(currentCard, "Brak ocen liczbowych", 20, INK, true);
+        }
+        add(currentCard, "Liczba wpisów w indeksie: " + (summary.numeric + summary.other) + " (w tym liczbowych: " + summary.numeric + ")", 12, MUTED, false);
+
+        LinearLayout scholarCard = card(content, Color.WHITE);
+        add(scholarCard, "Stypendium Rektora Vistula", 18, INK, true);
+        String scholarText = GpaCalculator.scholarshipStatus(currentWeighted);
+        boolean qualifiesScholar = currentWeighted >= GpaCalculator.SCHOLARSHIP_THRESHOLD;
+        add(scholarCard, scholarText, 15, qualifiesScholar ? GREEN : Color.rgb(180, 100, 0), true);
+        note(scholarCard, "Kwalifikacja do stypendium rektora dla najlepszych studentów wymaga w Vistuli średniej ważonej min. 4.50 oraz terminowego zaliczenia semestru.", MUTED);
+
+        LinearLayout honorsCard = card(content, Color.WHITE);
+        add(honorsCard, "Dyplom ukończenia studiów z wyróżnieniem", 18, INK, true);
+        String honorsText = GpaCalculator.honorsStatus(currentWeighted);
+        boolean qualifiesHonors = currentWeighted >= GpaCalculator.HONORS_THRESHOLD;
+        add(honorsCard, honorsText, 15, qualifiesHonors ? GREEN : MUTED, true);
+        note(honorsCard, "Zgodnie z Regulaminem Studiów Vistula wyróżnienie przysługuje przy średniej ze studiów min. 4.75 oraz ocenie bardzo dobrej (5.0) z pracy dyplomowej i egzaminu dyplomowego.", MUTED);
+
+        LinearLayout simCard = card(content, Color.WHITE);
+        add(simCard, "Symulator: jaki wynik musisz osiągnąć?", 18, INK, true);
+        note(simCard, "Wybierz cel i liczbę pozostałych punktów ECTS (np. 30 ECTS na kolejny semestr):", MUTED);
+
+        add(simCard, "Twój cel średniej:", 13, INK, true);
+        chips(new String[]{"4.50", "4.75", "4.80", "5.00"}, new String[]{"4.50 (Stypendium)", "4.75 (Wyróżnienie)", "4.80 (Max styp.)", "5.00 (Maksimum)"},
+            String.format(Locale.US, "%.2f", simTargetGpa), value -> {
+                try { simTargetGpa = Double.parseDouble(value); render(); } catch (Exception ignored) {}
+            });
+
+        add(simCard, "Pozostałe punkty ECTS do zdobycia:", 13, INK, true);
+        chips(new String[]{"15", "30", "45", "60"}, new String[]{"15 ECTS (pół semestru)", "30 ECTS (1 semestr)", "45 ECTS", "60 ECTS (cały rok)"},
+            String.format(Locale.US, "%.0f", simRemainingEcts), value -> {
+                try { simRemainingEcts = Double.parseDouble(value); render(); } catch (Exception ignored) {}
+            });
+
+        double currentEcts = !Double.isNaN(summary.totalEcts) && summary.totalEcts > 0 ? summary.totalEcts : 30.0;
+        GpaCalculator.SimulationResult sim = GpaCalculator.simulate(currentWeighted, currentEcts, simTargetGpa, simRemainingEcts);
+
+        LinearLayout simResultBox = card(simCard, sim.achievable ? Color.rgb(232, 243, 236) : Color.rgb(255, 238, 238));
+        add(simResultBox, sim.achievable ? "CEL MOŻLIWY DO OSIĄGNIĘCIA" : "CEL MATEMATYCZNIE NIEOSIĄGALNY", 11, sim.achievable ? GREEN : Color.rgb(160, 48, 40), true);
+        add(simResultBox, sim.statusMessage, 15, INK, true);
+        if (sim.achievable && sim.requiredGpa > 2.0 && sim.requiredGpa <= 5.0) {
+            add(simResultBox, String.format(Locale.forLanguageTag("pl-PL"), "Wymagana średnia z pozostałych egzaminów: %.2f", sim.requiredGpa), 16, GREEN, true);
+        }
+
+        content.addView(button("Przejdź do pełnej listy ocen", () -> navigate(2), false));
+    }
+
+    private void campusGuideView() {
+        title("Niezbędnik studenta & Kampus", "Najważniejsze działy, kontakty i lokalizacja Vistuli");
+
+        LinearLayout campusCard = card(content, Color.WHITE);
+        add(campusCard, "Kampus Uczelni Vistula", 18, INK, true);
+        add(campusCard, "ul. Stokłosy 3, 02-787 Warszawa", 15, GREEN, true);
+        add(campusCard, "Metro M1: stacja Stokłosy (wyjście w stronę ul. Stokłosy, 200 m pieszo)", 13, MUTED, false);
+        campusCard.addView(button("Nawiguj do kampusu (Google Maps)", () -> {
+            try {
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:52.158145,21.034326?q=Akademia+Finansów+i+Biznesu+Vistula,+ul.+Stokłosy+3,+Warszawa"));
+                startActivity(mapIntent);
+            } catch (Exception e) {
+                browser("https://maps.google.com/?q=Akademia+Finansów+i+Biznesu+Vistula,+Warszawa");
+            }
+        }, true));
+        campusCard.addView(button("Strona główna uczelni (vistula.edu.pl)", () -> browser("https://www.vistula.edu.pl/"), false));
+
+        LinearLayout dziekanatCard = card(content, Color.WHITE);
+        add(dziekanatCard, "Dziekanat (Pokój 118, parter)", 18, INK, true);
+        add(dziekanatCard, "Obsługa toku studiów, zaświadczenia, legitymacje, podania do Dziekana", 13, MUTED, false);
+        add(dziekanatCard, "Godziny otwarcia:\nPoniedziałek – Piątek: 09:00 – 16:00\nSobota – Niedziela (zjazdy): 08:30 – 15:30", 13, INK, false);
+        dziekanatCard.addView(button("Zadzwoń do Dziekanatu (+48 22 45 72 300)", () -> {
+            try { startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:+48224572300"))); } catch (Exception ignored) {}
+        }, false));
+        dziekanatCard.addView(button("Napisz do Dziekanatu (dziekanat@vistula.edu.pl)", () -> {
+            try { startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:dziekanat@vistula.edu.pl"))); } catch (Exception ignored) {}
+        }, false));
+
+        LinearLayout financeCard = card(content, Color.WHITE);
+        add(financeCard, "Dział Finansowy i Czesne (Pokój 120)", 18, INK, true);
+        add(financeCard, "Informacje o płatnościach, faktury, indywidualne subkonta studenta", 13, MUTED, false);
+        financeCard.addView(button("Zobacz Twoje subkonta i raty w aplikacji", () -> navigate(8), true));
+        financeCard.addView(button("Napisz do Finansów (finanse@vistula.edu.pl)", () -> {
+            try { startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:finanse@vistula.edu.pl"))); } catch (Exception ignored) {}
+        }, false));
+
+        LinearLayout libraryCard = card(content, Color.WHITE);
+        add(libraryCard, "Biblioteka Główna (Budynek Główny, Wejście C)", 18, INK, true);
+        add(libraryCard, "Wypożyczalnia, czytelnia ze strefą cichej nauki, dostęp do baz Springer, ScienceDirect, Legalis.", 13, MUTED, false);
+        libraryCard.addView(button("Napisz do Biblioteki (biblioteka@vistula.edu.pl)", () -> {
+            try { startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:biblioteka@vistula.edu.pl"))); } catch (Exception ignored) {}
+        }, false));
+
+        LinearLayout linksCard = card(content, Color.WHITE);
+        add(linksCard, "Regulaminy i procedury uczelni", 18, INK, true);
+        linksCard.addView(button("Regulamin studiów Vistula", () -> browser("https://www.vistula.edu.pl/student/strefa-studenta/regulaminy"), false));
+        linksCard.addView(button("Wzory podań do Dziekana", () -> browser("https://www.vistula.edu.pl/student/strefa-studenta/wzory-podan"), false));
+        linksCard.addView(button("Plany studiów i programy USOS", () -> browser("https://usosapps.vistula.edu.pl/"), false));
+    }
+
+    private void newsView() throws Exception {
+        JSONObject d = display();
+        title("Komunikaty uczelni", "Oficjalne ogłoszenia i zarządzenia Rektora AFiBV");
+        JSONObject raw = d.optJSONObject("snapshot");
+        Snapshot snapshot = raw != null ? Snapshot.from(raw) : null;
+        List<NewsArticle> articles = snapshot != null && snapshot.news != null ? snapshot.news : Collections.emptyList();
+
+        EditText search = searchField(content, "Szukaj w komunikatach…", newsQuery);
+        search.setContentDescription("Szukaj komunikatów po tytule, treści lub autorze");
+
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        content.addView(list);
+
+        Runnable populate = () -> {
+            list.removeAllViews();
+            String q = newsQuery.trim().toLowerCase(Locale.ROOT);
+            List<NewsArticle> filtered = new ArrayList<>();
+            for (NewsArticle a : articles) {
+                if (q.isEmpty() || a.title.toLowerCase(Locale.ROOT).contains(q)
+                    || a.headline.toLowerCase(Locale.ROOT).contains(q)
+                    || a.author.toLowerCase(Locale.ROOT).contains(q)) {
+                    filtered.add(a);
+                }
+            }
+
+            if (filtered.isEmpty()) {
+                LinearLayout emptyBox = card(list, Color.WHITE);
+                add(emptyBox, q.isEmpty() ? "Brak komunikatów w pamięci" : "Brak pasujących wyników", 17, INK, true);
+                note(emptyBox, q.isEmpty() ? "Wybierz „Odśwież komunikaty”, aby pobrać najnowsze ogłoszenia z USOS." : "Zmień frazę wyszukiwania.", MUTED);
+                if (!q.isEmpty()) {
+                    emptyBox.addView(button("Wyczyść wyszukiwanie", () -> { newsQuery = ""; render(); }, false));
+                }
+            } else {
+                note(list, "Liczba komunikatów: " + filtered.size(), MUTED);
+                for (NewsArticle a : filtered) {
+                    LinearLayout itemCard = card(list, Color.WHITE);
+                    add(itemCard, a.title, 18, INK, true);
+                    String meta = a.publicationDate + (!a.author.isEmpty() ? " · " + a.author : "");
+                    add(itemCard, meta, 13, GREEN, true);
+                    if (!a.headline.isEmpty()) {
+                        add(itemCard, a.headline, 14, INK, false);
+                    }
+                    itemCard.addView(button("Czytaj pełny komunikat", () -> showNewsDetails(a), false));
+                }
+            }
+        };
+
+        watchSearch(search, value -> { newsQuery = value; populate.run(); });
+        populate.run();
+
+        content.addView(button("Odśwież komunikaty z USOS", () -> {
+            if (demo) render(); else sync();
+        }, true));
+    }
+
+    private void showNewsDetails(NewsArticle article) {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(24), dp(8), dp(24), dp(8));
+
+        add(box, article.title, 20, INK, true);
+        String meta = article.publicationDate + (!article.author.isEmpty() ? " · " + article.author : "");
+        add(box, meta, 13, GREEN, true);
+
+        if (!article.headline.isEmpty()) {
+            add(box, article.headline, 15, INK, false);
+        }
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(box);
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+            .setView(scroll)
+            .setPositiveButton("Zamknij", null)
+            .setNeutralButton("Kopiuj treść", (dlg, which) -> {
+                android.content.ClipboardManager cb = getSystemService(android.content.ClipboardManager.class);
+                if (cb != null) {
+                    String text = article.title + "\n\n" + meta + "\n\n" + article.headline + (article.url.isEmpty() ? "" : "\n\n" + article.url);
+                    cb.setPrimaryClip(android.content.ClipData.newPlainText("Komunikat Vistula", text));
+                    Toast.makeText(this, "Skopiowano treść komunikatu", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        if (!article.url.isEmpty()) {
+            builder.setNegativeButton("Otwórz stronę", (dlg, which) -> browser(article.url));
+        }
+
+        builder.show();
+    }
+
+    private void attendanceView() throws Exception {
+        JSONObject d = display();
+        title("Licznik nieobecności", "Kontrola dozwolonych limitów opuszczeń zajęć");
+
+        SharedPreferences prefs = getSharedPreferences("attendance_tracker", MODE_PRIVATE);
+        JSONObject saved;
+        try { saved = new JSONObject(prefs.getString("data", "{}")); } catch (Exception e) { saved = new JSONObject(); }
+
+        JSONObject raw = d.optJSONObject("snapshot");
+        Snapshot snapshot = raw != null ? Snapshot.from(raw) : null;
+        Map<String, String> courses = new LinkedHashMap<>();
+
+        if (snapshot != null) {
+            for (Record r : snapshot.records.values()) {
+                String code = r.optMeta("courseId");
+                if (code.isEmpty()) code = r.title;
+                if (!courses.containsKey(code)) {
+                    courses.put(code, r.title);
+                }
+            }
+        }
+
+        boolean changed = false;
+        for (Map.Entry<String, String> entry : courses.entrySet()) {
+            if (!saved.has(entry.getKey())) {
+                JSONObject item = new JSONObject();
+                item.put("name", entry.getValue());
+                item.put("absences", 0);
+                item.put("limit", 2);
+                item.put("notes", "");
+                saved.put(entry.getKey(), item);
+                changed = true;
+            }
+        }
+        if (changed) {
+            prefs.edit().putString("data", saved.toString()).apply();
+        }
+
+        int totalCourses = 0, warningCount = 0, exceededCount = 0, totalAbsences = 0;
+        Iterator<String> keys = saved.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            JSONObject item = saved.optJSONObject(key);
+            if (item == null) continue;
+            totalCourses++;
+            int count = item.optInt("absences", 0);
+            int limit = item.optInt("limit", 2);
+            totalAbsences += count;
+            if (count >= limit) exceededCount++;
+            else if (count >= limit - 1 && limit > 1) warningCount++;
+        }
+
+        LinearLayout summaryBox = card(content, exceededCount > 0 ? Color.rgb(255, 238, 238) : (warningCount > 0 ? Color.rgb(255, 248, 230) : Color.rgb(232, 243, 236)));
+        add(summaryBox, exceededCount > 0 ? "PRZEKROCZONY LIMIT NIEOBECNOŚCI" : (warningCount > 0 ? "UWAGA NA LIMIT NIEOBECNOŚCI" : "STAN NIEOBECNOŚCI W NORMIE"), 11, exceededCount > 0 ? Color.rgb(160, 48, 40) : (warningCount > 0 ? Color.rgb(217, 119, 6) : GREEN), true);
+        String sumText = String.format(Locale.forLanguageTag("pl-PL"), "Śledzone przedmioty: %d · Suma opuszczeń: %d", totalCourses, totalAbsences);
+        add(summaryBox, sumText, 15, INK, true);
+        if (exceededCount > 0) {
+            note(summaryBox, "Liczba przedmiotów z przekroczonym limitem: " + exceededCount + "! Wymagany kontakt z prowadzącym lub Dziekanatem.", Color.rgb(160, 48, 40));
+        } else if (warningCount > 0) {
+            note(summaryBox, "Liczba przedmiotów na granicy limitu (zostało 1 opuszczenie): " + warningCount + ".", Color.rgb(217, 119, 6));
+        } else {
+            note(summaryBox, "Brak zagrożeń. Zgodnie z regulaminem studiów domyślny limit to 2 nieobecności bez usprawiedliwienia.", GREEN);
+        }
+
+        chips(new String[]{"all", "warning", "exceeded"}, new String[]{"Wszystkie (" + totalCourses + ")", "Ostrzeżenia (" + warningCount + ")", "Przekroczone (" + exceededCount + ")"}, attendanceFilter, value -> {
+            attendanceFilter = value;
+            render();
+        });
+
+        content.addView(button("Dodaj przedmiot ręcznie", () -> editCourseAttendance(null), true));
+
+        LinearLayout list = new LinearLayout(this);
+        list.setOrientation(LinearLayout.VERTICAL);
+        content.addView(list);
+
+        List<String> sortedKeys = new ArrayList<>();
+        keys = saved.keys();
+        while (keys.hasNext()) sortedKeys.add(keys.next());
+        final JSONObject finalSavedRef = saved;
+        sortedKeys.sort((a, b) -> {
+            JSONObject objA = finalSavedRef.optJSONObject(a);
+            JSONObject objB = finalSavedRef.optJSONObject(b);
+            String nameA = objA != null ? objA.optString("name", a) : a;
+            String nameB = objB != null ? objB.optString("name", b) : b;
+            return nameA.compareToIgnoreCase(nameB);
+        });
+
+        int shown = 0;
+        for (String code : sortedKeys) {
+            JSONObject item = saved.optJSONObject(code);
+            if (item == null) continue;
+            int count = item.optInt("absences", 0);
+            int limit = item.optInt("limit", 2);
+            String name = item.optString("name", code);
+            String notes = item.optString("notes", "");
+
+            if ("warning".equals(attendanceFilter) && (count < limit - 1 || count >= limit)) continue;
+            if ("exceeded".equals(attendanceFilter) && count < limit) continue;
+
+            shown++;
+            LinearLayout itemCard = card(list, Color.WHITE);
+            add(itemCard, name, 17, INK, true);
+            if (!code.equals(name)) note(itemCard, "Identyfikator: " + code, MUTED);
+
+            String badgeText;
+            int badgeColor;
+            if (count > limit) {
+                badgeText = count + " / " + limit + " · PRZEKROCZONO LIMIT (" + (count - limit) + " za dużo)";
+                badgeColor = Color.rgb(160, 48, 40);
+            } else if (count == limit) {
+                badgeText = count + " / " + limit + " · LIMIT WYCZERPANY";
+                badgeColor = Color.rgb(180, 83, 9);
+            } else if (count == limit - 1 && limit > 1) {
+                badgeText = count + " / " + limit + " · Zostało 1 opuszczenie";
+                badgeColor = Color.rgb(217, 119, 6);
+            } else {
+                badgeText = count + " / " + limit + " · Bezpiecznie (zostało " + (limit - count) + ")";
+                badgeColor = GREEN;
+            }
+            add(itemCard, badgeText, 14, badgeColor, true);
+
+            com.google.android.material.progressindicator.LinearProgressIndicator progress = new com.google.android.material.progressindicator.LinearProgressIndicator(this);
+            progress.setMax(limit > 0 ? limit : 1);
+            progress.setProgress(Math.min(count, limit));
+            progress.setTrackColor(Color.rgb(230, 235, 232));
+            progress.setIndicatorColor(badgeColor);
+            LinearLayout.LayoutParams pParams = new LinearLayout.LayoutParams(-1, dp(8));
+            pParams.bottomMargin = dp(14);
+            itemCard.addView(progress, pParams);
+
+            if (!notes.isEmpty()) {
+                add(itemCard, "Notatki:\n" + notes, 13, MUTED, false);
+            }
+
+            LinearLayout actions = new LinearLayout(this);
+            actions.setOrientation(LinearLayout.HORIZONTAL);
+
+            Button minusBtn = button("− 1", () -> {
+                int newCount = Math.max(0, count - 1);
+                try {
+                    item.put("absences", newCount);
+                    finalSavedRef.put(code, item);
+                    prefs.edit().putString("data", finalSavedRef.toString()).apply();
+                    render();
+                } catch (JSONException ignored) {}
+            }, false);
+            minusBtn.setEnabled(count > 0);
+
+            Button plusBtn = button("+ 1 nieobecność", () -> {
+                try {
+                    item.put("absences", count + 1);
+                    finalSavedRef.put(code, item);
+                    prefs.edit().putString("data", finalSavedRef.toString()).apply();
+                    render();
+                } catch (JSONException ignored) {}
+            }, true);
+
+            Button editBtn = button("Opcje", () -> editCourseAttendance(code), false);
+
+            LinearLayout.LayoutParams b1 = new LinearLayout.LayoutParams(0, -2, 1f); b1.setMarginEnd(dp(4));
+            LinearLayout.LayoutParams b2 = new LinearLayout.LayoutParams(0, -2, 2.2f); b2.setMarginEnd(dp(4));
+            LinearLayout.LayoutParams b3 = new LinearLayout.LayoutParams(0, -2, 1.2f);
+            actions.addView(minusBtn, b1);
+            actions.addView(plusBtn, b2);
+            actions.addView(editBtn, b3);
+            itemCard.addView(actions);
+        }
+
+        if (shown == 0) {
+            empty("Brak przedmiotów na wybranym filtrze", "Zmień filtr lub dodaj przedmiot ręcznie.");
+        }
+
+        note(content, "Dane licznika są zapisywane lokalnie na Twoim urządzeniu. W Vistuli standardowy limit nieobecności to 2 na przedmiot na semestr.", MUTED);
+    }
+
+    private void editCourseAttendance(String code) {
+        SharedPreferences prefs = getSharedPreferences("attendance_tracker", MODE_PRIVATE);
+        JSONObject saved;
+        try { saved = new JSONObject(prefs.getString("data", "{}")); } catch (Exception e) { saved = new JSONObject(); }
+        JSONObject existing = code != null ? saved.optJSONObject(code) : null;
+
+        LinearLayout form = new LinearLayout(this);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(dp(24), dp(8), dp(24), 0);
+
+        EditText nameField = field(form, "Nazwa przedmiotu", existing != null ? existing.optString("name", code) : "", false);
+        EditText limitField = field(form, "Limit nieobecności (domyślnie 2)", String.valueOf(existing != null ? existing.optInt("limit", 2) : 2), false);
+        limitField.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+
+        EditText notesField = field(form, "Notatki / Usprawiedliwienia (opcjonalnie)", existing != null ? existing.optString("notes", "") : "", false);
+        notesField.setSingleLine(false);
+        notesField.setMinLines(2);
+
+        ScrollView formScroll = new ScrollView(this);
+        formScroll.addView(form);
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+            .setTitle(existing == null ? "Dodaj przedmiot" : "Edycja: " + existing.optString("name", code))
+            .setView(formScroll)
+            .setNegativeButton("Anuluj", null)
+            .setPositiveButton("Zapisz", null);
+
+        if (existing != null) {
+            final JSONObject delSaved = saved;
+            builder.setNeutralButton("Usuń", (dlg, which) -> {
+                delSaved.remove(code);
+                prefs.edit().putString("data", delSaved.toString()).apply();
+                render();
+            });
+        }
+
+        AlertDialog dialog = builder.create();
+        final JSONObject finalSaved = saved;
+        dialog.setOnShowListener(v -> dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(b -> {
+            String name = nameField.getText().toString().trim();
+            if (name.isEmpty()) {
+                nameField.setError("Wpisz nazwę przedmiotu");
+                return;
+            }
+            int lim;
+            try {
+                lim = Integer.parseInt(limitField.getText().toString().trim());
+                if (lim < 1 || lim > 20) throw new NumberFormatException();
+            } catch (Exception e) {
+                limitField.setError("Podaj liczbę od 1 do 20");
+                return;
+            }
+            try {
+                String c = code != null ? code : name;
+                JSONObject item = existing != null ? existing : new JSONObject();
+                item.put("name", name);
+                item.put("limit", lim);
+                item.put("notes", notesField.getText().toString().trim());
+                if (!item.has("absences")) item.put("absences", 0);
+                finalSaved.put(c, item);
+                prefs.edit().putString("data", finalSaved.toString()).apply();
+                dialog.dismiss();
+                render();
+            } catch (JSONException ex) {
+                error(Repository.message(ex));
+            }
+        }));
+        dialog.show();
+    }
+
     private String plain(String html) { return Html.fromHtml(html, Html.FROM_HTML_MODE_COMPACT).toString().trim(); }
 }

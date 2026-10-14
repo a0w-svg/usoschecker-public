@@ -5,8 +5,24 @@ def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withInputStream { instr -> localProperties.load(instr) }
 }
-def usosKey = localProperties.getProperty('usos.consumer.key', '')
-def usosSecret = localProperties.getProperty('usos.consumer.secret', '')
+def usosKey = (localProperties.getProperty('usos.consumer.key')
+    ?: localProperties.getProperty('usos.key')
+    ?: localProperties.getProperty('apiKey')
+    ?: localProperties.getProperty('apikey')
+    ?: localProperties.getProperty('api.key')
+    ?: localProperties.getProperty('CONSUMER_KEY')
+    ?: '')?.trim()
+def usosSecret = (localProperties.getProperty('usos.consumer.secret')
+    ?: localProperties.getProperty('usos.secret')
+    ?: localProperties.getProperty('apiSecret')
+    ?: localProperties.getProperty('apisecret')
+    ?: localProperties.getProperty('api.secret')
+    ?: localProperties.getProperty('CONSUMER_SECRET')
+    ?: '')?.trim()
+
+def escapeBuildConfig(String val) {
+    return val == null ? '' : val.replace('\\', '\\\\').replace('"', '\\"')
+}
 
 android {
     namespace 'pl.vistula.checker'
@@ -18,8 +34,8 @@ android {
         versionCode 1
         versionName '1.0.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        buildConfigField "String", "USOS_KEY", "\"${usosKey}\""
-        buildConfigField "String", "USOS_SECRET", "\"${usosSecret}\""
+        buildConfigField "String", "USOS_KEY", "\"${escapeBuildConfig(usosKey)}\""
+        buildConfigField "String", "USOS_SECRET", "\"${escapeBuildConfig(usosSecret)}\""
     }
     buildFeatures {
         buildConfig = true

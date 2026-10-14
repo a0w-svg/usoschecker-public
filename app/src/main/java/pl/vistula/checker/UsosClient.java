@@ -8,9 +8,9 @@ import java.time.*;
 import java.util.*;
 import org.json.*;
 
-final class UsosClient {
-    static final String BASE = "https://usosapps.vistula.edu.pl/";
-    static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
+public final class UsosClient {
+    public static final String BASE = "https://usosapps.vistula.edu.pl/";
+    public static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
     private final String key, secret, token, tokenSecret;
     private final int planDays;
     private final java.util.function.Consumer<String> progress;
@@ -34,6 +34,7 @@ final class UsosClient {
         token = state.optString("token"); tokenSecret = state.optString("tokenSecret");
     }
     static final class ApiException extends IOException {
+        final int status;
         final boolean authorization;
         final boolean retryable;
         final long retryAt;
@@ -52,6 +53,7 @@ final class UsosClient {
                 : status == 408 ? "USOS nie zakończył żądania na czas. Spróbuj ponownie."
                 : status >= 500 ? "Serwer USOS jest chwilowo niedostępny (HTTP " + status + ")."
                 : "USOS odrzucił żądanie (HTTP " + status + ", " + failure.code + "). Sprawdź parametry i uprawnienia.");
+            this.status = status;
             authorization = failure.authorization;
             retryable = failure.retryable;
             retryAt = failure.retryAt;
@@ -134,13 +136,24 @@ final class UsosClient {
         return request("GET", endpoint, params, true, token, tokenSecret);
     }
     Map<String, String> begin(String scopes) throws Exception {
+        Map<String, String> params = new HashMap<>();
+        params.put("oauth_callback", "oob");
+        if (scopes != null && !scopes.trim().isEmpty()) {
+            List<String> list = new ArrayList<>();
+            for (String p : scopes.split("\\|")) {
+                String clean = p.trim();
+                if (!clean.isEmpty() && !list.contains(clean)) list.add(clean);
+            }
+            if (!list.isEmpty()) params.put("scopes", String.join("|", list));
+        }
         Map<String, String> result = OAuth.form(request("GET", "services/oauth/request_token",
-            Map.of("oauth_callback", "oob", "scopes", scopes), true, "", ""));
+            params, true, "", ""));
         if (!"true".equals(result.get("oauth_callback_confirmed"))) throw new IOException("USOS nie potwierdził protokołu OAuth 1.0a.");
         return result;
     }
     Map<String, String> finish(JSONObject state, String pin) throws Exception {
-        return OAuth.form(request("GET", "services/oauth/access_token", Map.of("oauth_verifier", pin), true,
+        String cleanPin = pin == null ? "" : pin.trim().replaceAll("\\s+", "");
+        return OAuth.form(request("GET", "services/oauth/access_token", Map.of("oauth_verifier", cleanPin), true,
             state.getString("requestToken"), state.getString("requestSecret")));
     }
     Response explore(JSONObject metadata, Map<String, String> params, String method, byte[] file, String filename) throws Exception {
@@ -174,18 +187,83 @@ final class UsosClient {
             "fields", "course_editions[course_id|course_name]"))).getJSONObject("course_editions");
         Map<String, String> names = UsosParser.courseNames(editions);
         List<String> terms = UsosParser.sortedKeys(editions);
+
+        reportProgress("Pobieranie punktów ECTS · courses/user_ects_points");
+        Map<String, Double> ectsPoints = Collections.emptyMap();
+        try {
+            String ectsRaw = get("services/courses/user_ects_points", Map.of());
+            ectsPoints = UsosParser.ectsPoints(new JSONObject(ectsRaw));
+        } catch (Exception ignored) {}
+
+        reportProgress("Pobieranie kalendarza semestrów · terms/terms");
+        try {
+            if (!terms.isEmpty()) {
+                String termsRaw = get("services/terms/terms", Map.of("term_ids", String.join("|", terms),
+                    "fields", "id|name|start_date|end_date|finish_date"));
+                s.terms.putAll(UsosParser.academicTerms(new JSONObject(termsRaw)));
+            }
+        } catch (Exception ignored) {}
+
+        reportProgress("Pobieranie subkont studenta · payments/user_accounts");
+        Object accountsRaw = null;
+        boolean paymentsScopeMissing = false;
+        String paymentsNotice = "";
+        try {
+            String accRaw = get("services/payments/user_accounts", Collections.emptyMap());
+            accountsRaw = new JSONTokener(accRaw).nextValue();
+        } catch (ApiException e) {
+            if (e.status == 403 || e.status == 401 || (e.getMessage() != null && e.getMessage().toLowerCase().contains("scope"))) {
+                paymentsScopeMissing = true;
+                paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
+            }
+        } catch (Exception ignored) {}
+
+        reportProgress("Pobieranie należności i rat · payments/user_payments");
+        Object paymentsRaw = null;
+        try {
+            String payRaw = get("services/payments/user_payments", Map.of("fields",
+                "id|description|type|state|account_number|payment_deadline|total_amount|saldo_amount|currency|chosen_installment_plan[id|currency|installments[amount|payment_date|description|number]]"));
+            paymentsRaw = new JSONTokener(payRaw).nextValue();
+        } catch (ApiException e) {
+            if (e.status == 403 || e.status == 401 || (e.getMessage() != null && e.getMessage().toLowerCase().contains("scope"))) {
+                paymentsScopeMissing = true;
+                paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
+            }
+        } catch (Exception ignored) {}
+
+        s.payments = UsosParser.payments(accountsRaw, paymentsRaw, paymentsScopeMissing, paymentsNotice);
+
+        reportProgress("Pobieranie prac dyplomowych · theses/user");
+        try {
+            String thesesRaw = get("services/theses/user", Map.of("fields", "id|title|status|supervisors[first_name|last_name]|reviewers[first_name|last_name]"));
+            s.thesis = UsosParser.thesis(new JSONTokener(thesesRaw).nextValue());
+        } catch (Exception ignored) {}
+
+        reportProgress("Pobieranie sprawdzianów cząstkowych · crstests/user");
+        try {
+            String testsRaw = get("services/crstests/user", Map.of("fields", "id|course_id|name|points|max_points|grade|date"));
+            s.tests.addAll(UsosParser.courseTests(new JSONTokener(testsRaw).nextValue(), names));
+        } catch (Exception ignored) {}
+
+        reportProgress("Pobieranie komunikatów uczelni · news/search");
+        try {
+            String newsRaw = get("services/news/search", Map.of("num", "10",
+                "fields", "items[article[id|title|publication_date|author[first_name|last_name]|headline_html]]"));
+            s.news.addAll(UsosParser.newsArticles(new JSONTokener(newsRaw).nextValue()));
+        } catch (Exception ignored) {}
+
         // Batch term IDs to avoid URL limits; every batch must succeed before commit.
         for (int i = 0; i < terms.size(); i += 8) {
             reportProgress("Pobieranie ocen · grades/terms2");
             List<String> batch = terms.subList(i, Math.min(terms.size(), i + 8));
             JSONObject grades = new JSONObject(get("services/grades/terms2", Map.of("term_ids", String.join("|", batch),
-                "fields", "exam_id|exam_session_number|value_symbol|date_modified|comment")));
+                "fields", "exam_id|exam_session_number|value_symbol|passes|value_description|counts_into_average|grade_type_id|date_modified|date_acquisition|modification_author|comment")));
             for (String term : batch) if (!grades.has(term) || grades.isNull(term)) throw new IOException("USOS zwrócił niepełny zestaw ocen.");
-            UsosParser.grades(s, grades, names);
+            UsosParser.grades(s, grades, names, ectsPoints);
         }
         List<JSONArray> weeks = TimetableLoader.load(start, planDays, (pageStart, days) ->
             new JSONArray(get("services/tt/student", Map.of("start", pageStart.toString(), "days", String.valueOf(days),
-                "fields", "type|start_time|end_time|name|unit_id|group_number|cgwm_id|sm_id|room_number|building_name|classtype_name|lecturer_ids|frequency"))), this::reportProgress);
+                "fields", "type|start_time|end_time|name|course_id|unit_id|group_number|cgwm_id|sm_id|room_number|room_id|building_name|building_id|classtype_name|classtype_id|lecturer_ids|frequency|url|classgroup_profile_url"))), this::reportProgress);
         reportProgress("Pobieranie nazwisk prowadzących · users/users");
         Map<String, String> lecturerNames = resolveLecturers(weeks, ids -> new JSONObject(get("services/users/users",
             Map.of("user_ids", String.join("|", ids), "fields", "first_name|last_name"))));

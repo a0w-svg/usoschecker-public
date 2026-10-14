@@ -51,6 +51,10 @@ najbliższych siedmiu dni. Katalog API udostępnia wszystkie wyniki przyciskiem
 - Zadania: edycja treści i terminu, wyszukiwanie, filtry otwarte / ukończone / dzisiaj /
   po terminie. Ukończenie zadania pozostaje zachowane po edycji.
 - Start: trzy najbliższe otwarte zadania z oznaczeniem dzisiejszych i zaległych terminów.
+- **Komunikaty uczelni**: oficjalne ogłoszenia i zarządzenia Rektora pobierane bezpośrednio z USOS API (`services/news/search`), z podglądem na ekranie Start, wyszukiwarką, autorem, datą publikacji i możliwością kopiowania lub otwierania w przeglądarce.
+- **Licznik nieobecności na zajęciach**: osobiste narzędzie studenta do kontroli limitu opuszczeń zajęć (domyślnie 2 w semestrze zgodnie z regulaminem Vistuli). Przedmioty są automatycznie wykrywane z planu i ocen; aplikacja ostrzega przed wyczerpaniem lub przekroczeniem limitu.
+- **Detektor kolizji w planie zajęć**: automatyczne wykrywanie nakładających się czasowo zajęć z alertem na ekranie głównym i bezpośrednim oznaczeniem w kalendarzu.
+- **Konfiguracja kluczy API**: obsługa `apiKey` i `apiSecret` w pliku `local.properties` (oraz `usos.key` / `usos.consumer.key`).
 
 ## Kalendarz i aktualne zajęcia
 
@@ -116,7 +120,7 @@ Transfery i pliki ograniczono do 8 MB, podgląd tekstowy do 100 000 znaków; eks
 5. Zezwól na powiadomienia. Pierwsze pobranie tworzy punkt odniesienia, kolejne zapisują różnice.
 
 Rejestracja klucza nie jest wykonywana przez aplikację. Klucz nie jest wpisany do kodu ani do APK.
-Domyślne zakresy to `grades|studies|offline_access`. Dla innych metod można dodać zakresy
+Domyślne zakresy to `grades|studies|payments|offline_access`. Zakres `payments` jest wymagany do pobierania subkont i harmonogramu płatności. Dla innych metod można dodać zakresy
 podane w katalogu przed logowaniem. Zmiana zakresów wymaga odłączenia konta i nowej autoryzacji.
 Nie należy publicznie rozpowszechniać wspólnego Consumer Secret w aplikacji mobilnej;
 wersja używa klucza podanego przez właściciela telefonu. Dla publikacji dla wielu osób

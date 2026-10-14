@@ -11,15 +11,19 @@ import androidx.work.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import pl.vistula.checker.core.Change;
+import pl.vistula.checker.widget.TodayScheduleWidget;
+import pl.vistula.checker.widget.QuickStatusWidget;
 
 public final class SyncWorker extends Worker {
     static final String NAME = "usos_periodic_sync";
-    static final String CHANNEL = "usos_changes";
     public SyncWorker(Context context, WorkerParameters params) { super(context, params); }
     @Override public Result doWork() {
         try {
-            List<Change> changes = new Repository(getApplicationContext()).sync(false);
-            notifyChanges(getApplicationContext(), changes);
+            Context context = getApplicationContext();
+            List<Change> changes = new Repository(context).sync(false);
+            NotificationHelper.notifyChanges(context, changes);
+            TodayScheduleWidget.updateAll(context);
+            QuickStatusWidget.updateAll(context);
             return Result.success();
         } catch (Exception e) {
             Exception cause = Repository.cause(e);
@@ -35,17 +39,6 @@ public final class SyncWorker extends Worker {
     }
     static void cancel(Context context) { WorkManager.getInstance(context).cancelUniqueWork(NAME); }
     static void notifyChanges(Context c, List<Change> changes) {
-        if (changes.isEmpty()) return;
-        if (Build.VERSION.SDK_INT >= 33 && c.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
-        NotificationManager manager = c.getSystemService(NotificationManager.class);
-        manager.createNotificationChannel(new NotificationChannel(CHANNEL, "Zmiany w USOS", NotificationManager.IMPORTANCE_DEFAULT));
-        Intent intent = new Intent(c, MainActivity.class).putExtra("showHistory", true);
-        PendingIntent pending = PendingIntent.getActivity(c, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(c, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notification).setContentTitle("Nowe zmiany w USOS")
-            .setContentText("Wykryto " + changes.size() + " zmian. Otwórz historię, aby zobaczyć szczegóły.")
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(pending).setAutoCancel(true);
-        try { NotificationManagerCompat.from(c).notify(1, notification.build()); }
-        catch (SecurityException ignored) { /* History remains available even if permission was revoked. */ }
+        NotificationHelper.notifyChanges(c, changes);
     }
 }

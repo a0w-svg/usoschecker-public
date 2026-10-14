@@ -23,6 +23,7 @@ public final class LessonTime {
         return new LessonTime(r, day.atTime(start), (end.isBefore(start) ? day.plusDays(1) : day).atTime(end));
     }
     public boolean current(Instant now) { return !now.isBefore(start.toInstant()) && now.isBefore(end.toInstant()); }
+    public boolean contains(Instant now) { return current(now); }
     public boolean tentative() { return record.value.contains("Termin orientacyjny"); }
     public boolean intersects(LocalDate date) {
         return start.toInstant().isBefore(date.plusDays(1).atStartOfDay(ZONE).toInstant())

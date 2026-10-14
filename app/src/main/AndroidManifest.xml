@@ -12,5 +12,39 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".widget.TodayScheduleWidget"
+            android:exported="true"
+            android:label="Plan zajęć na dziś">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="pl.vistula.checker.widget.REFRESH_TODAY_SCHEDULE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_today_schedule_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.QuickStatusWidget"
+            android:exported="true"
+            android:label="Karta Studenta i Oceny">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="pl.vistula.checker.widget.REFRESH_QUICK_STATUS" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_quick_status_info" />
+        </receiver>
+
+        <receiver
+            android:name=".ClassReminderReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="pl.vistula.checker.CLASS_REMINDER" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

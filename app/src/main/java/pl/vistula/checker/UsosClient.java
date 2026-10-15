@@ -1,6 +1,7 @@
 package pl.vistula.checker;
 
 import pl.vistula.checker.core.*;
+import pl.vistula.checker.core.Record;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -16,12 +17,12 @@ public final class UsosClient {
     private final java.util.function.Consumer<String> progress;
     interface ConnectionSource { HttpURLConnection open(String url) throws IOException; }
     private final ConnectionSource connections;
-    static final class Response {
-        final byte[] bytes;
-        final String mime;
-        Response(byte[] bytes, String mime) { this.bytes = bytes; this.mime = mime == null || mime.trim().isEmpty() ? "application/octet-stream" : mime.split(";", 2)[0].trim().toLowerCase(Locale.ROOT); }
-        boolean binary() { return !(mime.startsWith("text/") || mime.contains("json") || mime.contains("xml") || mime.contains("javascript")); }
-        String text() { return new String(bytes, StandardCharsets.UTF_8); }
+    public static final class Response {
+        public final byte[] bytes;
+        public final String mime;
+        public Response(byte[] bytes, String mime) { this.bytes = bytes; this.mime = mime == null || mime.trim().isEmpty() ? "application/octet-stream" : mime.split(";", 2)[0].trim().toLowerCase(Locale.ROOT); }
+        public boolean binary() { return !(mime.startsWith("text/") || mime.contains("json") || mime.contains("xml") || mime.contains("javascript")); }
+        public String text() { return new String(bytes, StandardCharsets.UTF_8); }
     }
     UsosClient(JSONObject state) { this(state, message -> {}); }
     UsosClient(JSONObject state, java.util.function.Consumer<String> progress) {
@@ -269,7 +270,48 @@ public final class UsosClient {
             Map.of("user_ids", String.join("|", ids), "fields", "first_name|last_name"))));
         reportProgress("Odczyt planu zajęć · tt/student");
         for (JSONArray rows : weeks) UsosParser.timetable(s, rows, lecturerNames);
+        enrichGradeUnits(s);
         return s;
+    }
+    private void enrichGradeUnits(Snapshot snapshot) {
+        List<String> unitIds = new ArrayList<>(snapshot.records.values().stream().filter(r -> r.kind.equals("ocena"))
+            .map(r -> r.optMeta("unitId")).filter(id -> !id.isEmpty()).collect(java.util.stream.Collectors.toCollection(TreeSet::new)));
+        JSONObject types = new JSONObject();
+        if (!unitIds.isEmpty()) {
+            reportProgress("Rozpoznawanie typów zajęć · courses/units");
+            try { types = new JSONObject(request("GET", "services/courses/classtypes_index", Map.of(), false, "", "")); }
+            catch (Exception ignored) {}
+        }
+        for (int i = 0; i < unitIds.size(); i += 50) {
+            List<String> batch = unitIds.subList(i, Math.min(i + 50, unitIds.size()));
+            try {
+                JSONObject units = new JSONObject(get("services/courses/units", Map.of("unit_ids", String.join("|", batch),
+                    "fields", "id|course_name|course_id|term_id|classtype_id|homepage_url|profile_url")));
+                for (Record grade : snapshot.records.values()) {
+                    JSONObject unit = units.optJSONObject(grade.optMeta("unitId"));
+                    if (!grade.kind.equals("ocena") || unit == null) continue;
+                    grade.metadata.put("unitData", new JSONObject(unit.toString()));
+                    String typeId = StudentServices.text(unit, "classtype_id");
+                    if (!typeId.isEmpty()) grade.metadata.put("classTypeId", typeId);
+                    JSONObject definition = types.optJSONObject(typeId);
+                    String name = definition == null ? "" : StudentServices.localized(definition.opt("name"));
+                    if (!name.isEmpty()) grade.metadata.put("classType", name).put("classTypeSource", "unit_api");
+                }
+            } catch (Exception ignored) { /* Grades remain readable with an explicit unknown-type label. */ }
+        }
+        // Resolve editor IDs independently; unavailable names never prevent a grade snapshot.
+        List<String> authors = new ArrayList<>(snapshot.records.values().stream().filter(r -> r.kind.equals("ocena"))
+            .map(r -> r.optMeta("modificationAuthor")).filter(id -> !id.isEmpty()).collect(java.util.stream.Collectors.toCollection(TreeSet::new)));
+        for (int i = 0; i < authors.size(); i += 50) {
+            try {
+                Map<String, String> names = UsosParser.lecturerNames(new JSONObject(get("services/users/users", Map.of(
+                    "user_ids", String.join("|", authors.subList(i, Math.min(i + 50, authors.size()))), "fields", "first_name|last_name"))));
+                for (Record grade : snapshot.records.values()) {
+                    String name = names.get(grade.optMeta("modificationAuthor"));
+                    if (name != null && !name.isEmpty()) grade.metadata.put("modificationAuthorName", name);
+                }
+            } catch (Exception ignored) {}
+        }
     }
     interface LecturerSource { JSONObject fetch(List<String> ids) throws Exception; }
     static Map<String, String> resolveLecturers(List<JSONArray> weeks, LecturerSource source) throws Exception {

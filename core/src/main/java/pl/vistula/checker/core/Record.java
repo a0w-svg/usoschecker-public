@@ -58,7 +58,17 @@ public final class Record {
         return value.equals(other.value) && title.equals(other.title) && sourceTime.equals(other.sourceTime)
             && date.equals(other.date) && (startTime.isEmpty() || other.startTime.isEmpty() || startTime.equals(other.startTime))
             && (endTime.isEmpty() || other.endTime.isEmpty() || endTime.equals(other.endTime))
-            && ((Double.isNaN(ects) && Double.isNaN(other.ects)) || Math.abs(ects - other.ects) < 0.0001);
+            && ((Double.isNaN(ects) && Double.isNaN(other.ects)) || Math.abs(ects - other.ects) < 0.0001)
+            && sameAcademicMetadata(other);
+    }
+    private boolean sameAcademicMetadata(Record other) {
+        if (!kind.equals("ocena")) return true;
+        for (String key : new String[]{"passes", "countsIntoAverage", "valueDescription", "gradeTypeId", "dateAcquisition", "modificationAuthor"}) {
+            // Added optional fields on an older saved record are enrichment, not a grade change.
+            if (!metadata.has(key) || !other.metadata.has(key)) continue;
+            if (!java.util.Objects.equals(metadata.opt(key), other.metadata.opt(key))) return false;
+        }
+        return true;
     }
     public String optMeta(String key) {
         return optMeta(key, "");

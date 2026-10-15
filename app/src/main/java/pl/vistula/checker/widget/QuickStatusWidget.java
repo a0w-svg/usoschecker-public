@@ -111,18 +111,18 @@ public class QuickStatusWidget extends AppWidgetProvider {
             GradeSummary summary = GradeSummary.of(snapshot.records.values());
             if (!Double.isNaN(summary.ectsAverage)) {
                 views.setTextViewText(R.id.widget_status_grade_value, String.format(Locale.forLanguageTag("pl-PL"), "%.2f", summary.ectsAverage));
-                String sub = summary.ectsAverage >= 4.50 ? String.format(Locale.forLanguageTag("pl-PL"), "Ważona (%.0f ECTS) ★ Styp.", summary.totalEcts) : String.format(Locale.forLanguageTag("pl-PL"), "Ważona (%.0f ECTS)", summary.totalEcts);
+                String sub = summary.ectsAverage >= 4.50 ? context.getString(R.string.widget_grade_sub_stipend, summary.totalEcts) : context.getString(R.string.widget_grade_sub_weighted, summary.totalEcts);
                 views.setTextViewText(R.id.widget_status_grade_sub, sub);
             } else if (!Double.isNaN(summary.average)) {
                 views.setTextViewText(R.id.widget_status_grade_value, String.format(Locale.forLanguageTag("pl-PL"), "%.2f", summary.average));
-                views.setTextViewText(R.id.widget_status_grade_sub, "Średnia prosta");
+                views.setTextViewText(R.id.widget_status_grade_sub, context.getString(R.string.widget_grade_sub_simple));
             } else {
                 views.setTextViewText(R.id.widget_status_grade_value, "—");
-                views.setTextViewText(R.id.widget_status_grade_sub, "Brak ocen");
+                views.setTextViewText(R.id.widget_status_grade_sub, context.getString(R.string.widget_grade_sub_none));
             }
         } else {
             views.setTextViewText(R.id.widget_status_grade_value, "—");
-            views.setTextViewText(R.id.widget_status_grade_sub, "Brak ocen");
+            views.setTextViewText(R.id.widget_status_grade_sub, context.getString(R.string.widget_grade_sub_none));
         }
 
         // Payments
@@ -131,15 +131,15 @@ public class QuickStatusWidget extends AppWidgetProvider {
             double unpaid = p.totalUnpaidAmount();
             views.setTextViewText(R.id.widget_status_payment_value, String.format(Locale.forLanguageTag("pl-PL"), "%.2f PLN", unpaid));
             if (p.hasOverdue()) {
-                views.setTextViewText(R.id.widget_status_payment_sub, "Zaległość po terminie!");
+                views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_overdue));
             } else if (unpaid == 0) {
-                views.setTextViewText(R.id.widget_status_payment_sub, "Wszystko opłacone");
+                views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_all_paid));
             } else {
-                views.setTextViewText(R.id.widget_status_payment_sub, "Do zapłaty");
+                views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_to_pay));
             }
         } else {
             views.setTextViewText(R.id.widget_status_payment_value, "0,00 PLN");
-            views.setTextViewText(R.id.widget_status_payment_sub, "Brak należności");
+            views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_none));
         }
 
         manager.updateAppWidget(appWidgetId, views);

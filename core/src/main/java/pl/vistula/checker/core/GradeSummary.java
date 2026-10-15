@@ -32,12 +32,13 @@ public final class GradeSummary {
             if (value == null) { other++; continue; }
             numeric++; sum += value; min = Math.min(min, value); max = Math.max(max, value); values.add(value);
 
-            if (!Double.isNaN(row.ects) && row.ects > 0) {
-                String courseKey = row.title + "\u0000" + row.term;
+            if (!Double.isNaN(row.ects) && row.ects > 0 && !Boolean.FALSE.equals(row.metadata.opt("countsIntoAverage"))) {
+                String courseKey = (row.optMeta("courseId").isEmpty() ? "title:" + row.title : "id:" + row.optMeta("courseId")) + "\u0000" + row.term;
                 CourseEctsGrade existing = courseGrades.get(courseKey);
-                // For weighted average across sessions of the same course edition, choose the highest passing/received grade
-                if (existing == null || value > existing.grade) {
-                    courseGrades.put(courseKey, new CourseEctsGrade(value, row.ects));
+                int scopeRank = "course".equals(row.optMeta("gradeScope")) || row.metadata.optBoolean("alsoCourseProtocol") ? 1 : 0;
+                // Descriptive estimate: prefer course protocols, then the highest visible entry in that scope.
+                if (existing == null || scopeRank > existing.scopeRank || (scopeRank == existing.scopeRank && value > existing.grade)) {
+                    courseGrades.put(courseKey, new CourseEctsGrade(value, row.ects, scopeRank));
                 }
             }
         }
@@ -60,7 +61,8 @@ public final class GradeSummary {
 
     private static final class CourseEctsGrade {
         final double grade, ects;
-        CourseEctsGrade(double grade, double ects) { this.grade = grade; this.ects = ects; }
+        final int scopeRank;
+        CourseEctsGrade(double grade, double ects, int scopeRank) { this.grade = grade; this.ects = ects; this.scopeRank = scopeRank; }
     }
 
     /**

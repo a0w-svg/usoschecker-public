@@ -1,12 +1,31 @@
 package pl.vistula.checker.core;
 
 import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import org.json.*;
 
 /** Local task operations preserve legacy entries and never mutate their source. */
 public final class TaskTools {
     private TaskTools() {}
     public static int priority(JSONObject task) { return Math.max(0, Math.min(2, task.optInt("priority", 1))); }
+    public static LocalDate dueDate(JSONObject task) {
+        try { return LocalDate.parse(task.optString("due")); }
+        catch (DateTimeParseException e) { return null; }
+    }
+    public static boolean matches(JSONObject task, String filter, String query, LocalDate today) {
+        if (!StudentSearch.matches(query == null ? "" : query, task.optString("title"), task.optString("notes"), task.optString("due"))) return false;
+        boolean done = task.optBoolean("done");
+        LocalDate due = dueDate(task);
+        switch (filter) {
+            case "open": return !done;
+            case "done": return done;
+            case "today": return !done && today.equals(due);
+            case "overdue": return !done && due != null && due.isBefore(today);
+            case "week": return !done && due != null && !due.isBefore(today) && due.isBefore(today.plusDays(7));
+            default: return true;
+        }
+    }
     public static List<JSONObject> sorted(JSONArray source, String order) throws JSONException {
         List<JSONObject> rows = new ArrayList<>();
         if (source != null) for (int i = 0; i < source.length(); i++) rows.add(source.getJSONObject(i));

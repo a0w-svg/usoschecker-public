@@ -167,18 +167,26 @@ public final class UsosParser {
                 if (edition == null) continue;
                 if (!edition.has("course_grades") || !edition.has("course_units_grades")) throw new JSONException("Niepełne dane ocen.");
                 if (!edition.isNull("course_grades"))
-                    readExams(s, edition.getJSONArray("course_grades"), course, names, term, ectsPoints);
+                    readExams(s, edition.getJSONArray("course_grades"), course, names, term, ectsPoints, null);
                 JSONObject units = edition.isNull("course_units_grades") ? null : edition.getJSONObject("course_units_grades");
                 if (units != null) {
                     for (String unit : sortedKeys(units)) {
                         if (!units.isNull(unit))
-                            readExams(s, units.getJSONArray(unit), course, names, term, ectsPoints);
+                            readExams(s, units.getJSONArray(unit), course, names, term, ectsPoints, unit);
                     }
                 }
             }
         }
     }
-    private static void readExams(Snapshot s, JSONArray exams, String course, Map<String, String> names, String term, Map<String, Double> ectsPoints) throws JSONException {
+    static String detectClassType(String unitId, String gradeTypeId, String comment, String description, String symbol, Snapshot s) {
+        if (s != null && unitId != null && !unitId.isEmpty()) {
+            String fromPlan = s.findClassTypeForUnit(unitId);
+            if (!fromPlan.isEmpty()) return fromPlan;
+        }
+        // grade_type_id identifies the grading scale, not the class type.
+        return "";
+    }
+    private static void readExams(Snapshot s, JSONArray exams, String course, Map<String, String> names, String term, Map<String, Double> ectsPoints, String unitId) throws JSONException {
         Double ectsVal = ectsPoints.get(term + "\0" + course);
         if (ectsVal == null) ectsVal = ectsPoints.get(course);
         double ects = ectsVal != null ? ectsVal : Double.NaN;
@@ -201,11 +209,18 @@ public final class UsosParser {
                 String value = symbol + " · termin " + number + (comment.isEmpty() ? "" : "\n" + comment);
 
                 JSONObject meta = new JSONObject();
+                meta.put("rawGrade", new JSONObject(g.toString()));
                 meta.put("courseId", course);
                 meta.put("examId", exam);
                 meta.put("sessionNumber", number);
                 meta.put("term", term);
                 meta.put("valueSymbol", symbol);
+                if (unitId != null && !unitId.isEmpty()) {
+                    meta.put("unitId", unitId);
+                    meta.put("gradeScope", "unit");
+                } else {
+                    meta.put("gradeScope", "course");
+                }
                 if (!modified.isEmpty()) meta.put("dateModified", modified);
                 if (g.has("passes") && !g.isNull("passes")) meta.put("passes", g.optBoolean("passes"));
                 JSONObject valDesc = g.optJSONObject("value_description");
@@ -221,11 +236,27 @@ public final class UsosParser {
                 if (!comment.isEmpty()) meta.put("comment", comment);
                 if (!Double.isNaN(ects)) meta.put("ects", ects);
 
+                String inferredType = detectClassType(unitId, gradeTypeId, comment, desc, symbol, s);
+                if (!inferredType.isEmpty()) meta.put("classType", inferredType).put("classTypeSource", "timetable");
+
                 Record r = new Record("grade:" + exam + ":" + number, "ocena", names.getOrDefault(course, course), value, modified, "", term, "", "", ects, meta);
                 // The same exam can be referenced by a course and its unit.
                 Record existing = s.records.get(r.id);
-                if (existing == null) s.add(r);
-                else if (!existing.same(r)) throw new IllegalArgumentException("Sprzeczne dane oceny: " + r.id);
+                if (existing == null) {
+                    s.add(r);
+                } else {
+                    if (!existing.same(r)) throw new IllegalArgumentException("Sprzeczne dane oceny: " + r.id);
+                    if (unitId != null && !unitId.isEmpty() && existing.optMeta("unitId").isEmpty()) {
+                        try {
+                            existing.metadata.put("alsoCourseProtocol", "course".equals(existing.optMeta("gradeScope")));
+                            existing.metadata.put("unitId", unitId);
+                            existing.metadata.put("gradeScope", "unit");
+                            if (!inferredType.isEmpty() && existing.optMeta("classType").isEmpty()) {
+                                existing.metadata.put("classType", inferredType);
+                            }
+                        } catch (JSONException ignored) {}
+                    }
+                }
             }
         }
     }
@@ -298,6 +329,7 @@ public final class UsosParser {
                     + (a.optString("frequency", "").equals("other") || a.optString("frequency", "").equals("once") ? "\nTermin orientacyjny" : "");
 
                 JSONObject meta = new JSONObject();
+                meta.put("rawLesson", new JSONObject(a.toString()));
                 String courseId = optionalText(a, "course_id");
                 if (!courseId.isEmpty()) meta.put("courseId", courseId);
                 if (!room.isEmpty()) meta.put("room", room);

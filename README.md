@@ -9,6 +9,12 @@ Dokładne kroki: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
 
 ## Nawigacja i wygląd
 
+**Nowe:** w **Więcej** dostępne są **Legitymacje** (karta fizyczna i status mLegitymacji)
+oraz **Dokumenty i decyzje** z pobieraniem dostępnych plików. Wymagane zakresy zgody
+to odpowiednio `cards` i `adm_documents`. Katalog obejmuje wszystkie 571 metod
+z publicznego indeksu, z wyborem modułu, polskim wyszukiwaniem i eksportem odpowiedzi.
+Szczegóły zmian i zasad działania: [CHANGES_STUDENT_SERVICES.md](CHANGES_STUDENT_SERVICES.md).
+
 Material 3: ikony i etykiety w dolnym pasku **Start / Oceny / Plan / Zmiany / Więcej**,
 menu boczne otwierane przyciskiem w górnym pasku, obrysowane pola formularzy,
 przełącznik Material i spójne przyciski. Menu inspirowane dziennikiem ucznia;

@@ -106,13 +106,13 @@ public class TodayScheduleWidget extends AppWidgetProvider {
                 views.setTextViewText(R.id.widget_term_text, snapshot.terms.values().iterator().next().name);
             }
         } else {
-            views.setTextViewText(R.id.widget_term_text, "Akademia Finansów i Biznesu Vistula");
+            views.setTextViewText(R.id.widget_term_text, context.getString(R.string.app_full_university_name));
         }
 
         if (snapshot == null || snapshot.records.isEmpty()) {
             views.setViewVisibility(R.id.widget_lesson_card, View.GONE);
             views.setViewVisibility(R.id.widget_empty_text, View.VISIBLE);
-            views.setTextViewText(R.id.widget_empty_text, demo ? "Brak zajęć w trybie demo." : "Połącz konto, aby zobaczyć plan.");
+            views.setTextViewText(R.id.widget_empty_text, demo ? context.getString(R.string.widget_empty_demo) : context.getString(R.string.widget_empty_connect));
             manager.updateAppWidget(appWidgetId, views);
             return;
         }
@@ -163,9 +163,9 @@ public class TodayScheduleWidget extends AppWidgetProvider {
             boolean isCurrent = highlight.contains(now);
             if (isFutureUpcoming) {
                 String dayStr = highlight.start.toLocalDate().format(DateTimeFormatter.ofPattern("EEE, d.MM", Locale.forLanguageTag("pl-PL"))).toUpperCase(Locale.forLanguageTag("pl-PL"));
-                views.setTextViewText(R.id.widget_lesson_status, "KOLEJNE: " + dayStr);
+                views.setTextViewText(R.id.widget_lesson_status, context.getString(R.string.widget_status_next, dayStr));
             } else {
-                views.setTextViewText(R.id.widget_lesson_status, isCurrent ? "TRWAJĄ TERAZ" : (highlight.start.toInstant().isAfter(now) ? "NAJBLIŻSZE DZISIAJ" : "DZISIAJ (ZAKOŃCZONE)"));
+                views.setTextViewText(R.id.widget_lesson_status, isCurrent ? context.getString(R.string.widget_status_ongoing) : (highlight.start.toInstant().isAfter(now) ? context.getString(R.string.widget_status_upcoming_today) : context.getString(R.string.widget_status_ended_today)));
             }
 
             String timeStr = highlight.start.toLocalTime().toString().substring(0, 5) + " – " + highlight.end.toLocalTime().toString().substring(0, 5);
@@ -180,14 +180,14 @@ public class TodayScheduleWidget extends AppWidgetProvider {
 
             String lecturers = highlight.record.optMeta("lecturers");
             if (isFutureUpcoming) {
-                views.setTextViewText(R.id.widget_lesson_extra, lecturers.isEmpty() ? "Dzisiaj brak zajęć · wolny dzień" : lecturers);
+                views.setTextViewText(R.id.widget_lesson_extra, lecturers.isEmpty() ? context.getString(R.string.widget_extra_day_off) : lecturers);
             } else {
-                views.setTextViewText(R.id.widget_lesson_extra, lecturers.isEmpty() ? "Dzisiaj w planie: " + todayLessons.size() + " zajęć" : lecturers);
+                views.setTextViewText(R.id.widget_lesson_extra, lecturers.isEmpty() ? context.getString(R.string.widget_extra_today_classes, todayLessons.size()) : lecturers);
             }
         } else {
             views.setViewVisibility(R.id.widget_lesson_card, View.GONE);
             views.setViewVisibility(R.id.widget_empty_text, View.VISIBLE);
-            views.setTextViewText(R.id.widget_empty_text, "Brak kolejnych zajęć w pobranym planie.");
+            views.setTextViewText(R.id.widget_empty_text, context.getString(R.string.widget_empty_no_more));
         }
 
         manager.updateAppWidget(appWidgetId, views);

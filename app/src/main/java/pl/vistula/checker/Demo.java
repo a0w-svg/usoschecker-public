@@ -23,7 +23,8 @@ public final class Demo {
             .put("courseId", "FIN-101").put("examId", "4201").put("sessionNumber", "1")
             .put("term", "2026Z").put("valueSymbol", "4,0").put("valueDescription", "dobry")
             .put("passes", true).put("countsIntoAverage", true).put("ects", 5.0)
-            .put("gradeTypeId", "OGOLNA").put("dateAcquisition", date + " 08:30:00")
+            .put("gradeTypeId", "OCENA").put("classType", "Wykład")
+            .put("dateAcquisition", date + " 08:30:00")
             .put("modificationAuthor", "1048");
         baseline.add(new Record("grade:demo:1", "ocena", "Podstawy finansów", "4,0 · termin 1", date + " 08:30:00", "", "2026Z", "", "", 5.0, gradeMetaOld));
 
@@ -39,10 +40,40 @@ public final class Demo {
             .put("courseId", "FIN-101").put("examId", "4201").put("sessionNumber", "1")
             .put("term", "2026Z").put("valueSymbol", "4,5").put("valueDescription", "bardzo dobry")
             .put("passes", true).put("countsIntoAverage", true).put("ects", 5.0)
-            .put("gradeTypeId", "OGOLNA").put("dateAcquisition", date + " 08:30:00")
+            .put("gradeTypeId", "OCENA").put("classType", "Wykład")
+            .put("dateAcquisition", date + " 08:30:00")
             .put("modificationAuthor", "1048")
             .put("comment", "Poprawa oceny po dodatkowym kolokwium");
         current.add(new Record("grade:demo:1", "ocena", "Podstawy finansów", "4,5 · termin 1\nPoprawa oceny po dodatkowym kolokwium", date + " 10:20:00", "", "2026Z", "", "", 5.0, gradeMetaNew));
+
+        JSONObject finCwMeta = new JSONObject()
+            .put("courseId", "FIN-101").put("examId", "4202").put("sessionNumber", "1")
+            .put("term", "2026Z").put("valueSymbol", "5,0").put("valueDescription", "bardzo dobry")
+            .put("passes", true).put("countsIntoAverage", true).put("ects", 2.0)
+            .put("gradeTypeId", "OCENA").put("classType", "Ćwiczenia")
+            .put("dateAcquisition", date + " 09:00:00").put("modificationAuthor", "1048")
+            .put("comment", "Zaliczenie ćwiczeń rachunkowych");
+        Record finCw = new Record("grade:demo:fin:cw", "ocena", "Podstawy finansów", "5,0 · termin 1\nZaliczenie ćwiczeń rachunkowych", date + " 09:00:00", "", "2026Z", "", "", 2.0, finCwMeta);
+        baseline.add(finCw); current.add(finCw);
+
+        JSONObject progLabMeta = new JSONObject()
+            .put("courseId", "INF-201").put("examId", "5101").put("sessionNumber", "1")
+            .put("term", "2026Z").put("valueSymbol", "5,0").put("valueDescription", "bardzo dobry")
+            .put("passes", true).put("countsIntoAverage", true).put("ects", 3.0)
+            .put("gradeTypeId", "OCENA").put("classType", "Laboratorium")
+            .put("dateAcquisition", date + " 11:00:00").put("modificationAuthor", "2031")
+            .put("comment", "Zaliczone projekty laboratoryjne 1–4");
+        Record progLab = new Record("grade:demo:prog:lab", "ocena", "Programowanie obiektowe", "5,0 · termin 1\nZaliczone projekty laboratoryjne 1–4", date + " 11:00:00", "", "2026Z", "", "", 3.0, progLabMeta);
+        baseline.add(progLab); current.add(progLab);
+
+        JSONObject progWykMeta = new JSONObject()
+            .put("courseId", "INF-201").put("examId", "5102").put("sessionNumber", "1")
+            .put("term", "2026Z").put("valueSymbol", "4,5").put("valueDescription", "bardzo dobry")
+            .put("passes", true).put("countsIntoAverage", true).put("ects", 3.0)
+            .put("gradeTypeId", "OCENA").put("classType", "Wykład")
+            .put("dateAcquisition", date + " 12:00:00").put("modificationAuthor", "2031");
+        Record progWyk = new Record("grade:demo:prog:wyk", "ocena", "Programowanie obiektowe", "4,5 · termin 1", date + " 12:00:00", "", "2026Z", "", "", 3.0, progWykMeta);
+        baseline.add(progWyk); current.add(progWyk);
 
         JSONObject planMetaNew = new JSONObject()
             .put("courseId", "STAT-202").put("room", "315").put("roomId", "R-315").put("building", "Budynek Główny").put("buildingId", "B-MAIN")
@@ -88,7 +119,8 @@ public final class Demo {
 
         List<CourseTestRecord> demoTests = List.of(
             new CourseTestRecord("test:1", "FIN-101", "Podstawy finansów", "Kolokwium 1 – Sprawozdawczość", 18.5, 20.0, "5.0", date.minusDays(6).toString()),
-            new CourseTestRecord("test:2", "STAT-202", "Statystyka opisowa", "Sprawdzian cząstkowy – Zmienne losowe", 14.0, 15.0, "4.5", date.minusDays(2).toString())
+            new CourseTestRecord("test:2", "STAT-202", "Statystyka opisowa", "Sprawdzian cząstkowy – Zmienne losowe", 14.0, 15.0, "4.5", date.minusDays(2).toString()),
+            new CourseTestRecord("test:3", "INF-201", "Programowanie obiektowe", "Kolokwium laboratoryjne – Wzorce projektowe", 19.0, 20.0, "5.0", date.minusDays(4).toString())
         );
         baseline.tests.addAll(demoTests); current.tests.addAll(demoTests);
 

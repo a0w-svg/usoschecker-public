@@ -17,6 +17,16 @@ public final class Snapshot {
         if (records.putIfAbsent(r.id, r) != null)
             throw new IllegalArgumentException("USOS zwrócił powielony identyfikator danych.");
     }
+    public String findClassTypeForUnit(String unitId) {
+        if (unitId == null || unitId.isEmpty()) return "";
+        for (Record r : records.values()) {
+            if ("plan".equals(r.kind) && unitId.equals(r.optMeta("unitId"))) {
+                String type = r.optMeta("classType");
+                if (!type.isEmpty()) return type;
+            }
+        }
+        return "";
+    }
     public boolean covers(String date) { return date.compareTo(start) >= 0 && date.compareTo(end) < 0; }
     public JSONObject json() throws JSONException {
         JSONArray rows = new JSONArray();

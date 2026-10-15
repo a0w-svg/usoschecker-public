@@ -276,7 +276,6 @@ public final class ApiExplorerController {
         copyResponse.setEnabled(false);
 
         params.addView(UiHelper.button(activity, activity.getString(R.string.api_execute_btn), () -> {
-            lastResponse[0] = null; saveResponse.setEnabled(false); copyResponse.setEnabled(false);
             Map<String, String> values = new LinkedHashMap<>();
             for (Map.Entry<String, EditText> input : inputs.entrySet()) {
                 String value = input.getValue().getText().toString();
@@ -304,9 +303,14 @@ public final class ApiExplorerController {
                 .setMessage(activity.getString(R.string.api_confirm_msg, endpoint))
                 .setNegativeButton(activity.getString(R.string.btn_cancel), null)
                 .setPositiveButton(activity.getString(R.string.api_btn_execute), (dialog, which) -> {
+                    lastResponse[0] = null; saveResponse.setEnabled(false); copyResponse.setEnabled(false);
                     result.setText(R.string.api_sending);
                     callback.onExecuteRequest(metadata, values, method, selectedFile,
                         response -> {
+                            if (ApiCatalog.credentialResponse(endpoint)) {
+                                result.setText(endpoint.startsWith("services/cards/") ? R.string.api_activation_hidden : R.string.api_oauth_hidden);
+                                return;
+                            }
                             String formatted = response.binary()
                                 ? activity.getString(R.string.api_binary_response, response.mime, response.bytes.length)
                                 : new String(response.bytes, 0, Math.min(response.bytes.length, 100000), StandardCharsets.UTF_8);
@@ -315,11 +319,7 @@ public final class ApiExplorerController {
                                 if (parsed instanceof JSONObject) formatted = ((JSONObject) parsed).toString(2);
                                 else if (parsed instanceof JSONArray) formatted = ((JSONArray) parsed).toString(2);
                             } catch (JSONException ignored) {}
-                            if (endpoint.startsWith("services/oauth/") || endpoint.startsWith("services/oauth2/")) {
-                                formatted = activity.getString(R.string.api_oauth_hidden);
-                            } else {
-                                lastResponse[0] = response; saveResponse.setEnabled(true); copyResponse.setEnabled(!response.binary());
-                            }
+                            lastResponse[0] = response; saveResponse.setEnabled(true); copyResponse.setEnabled(!response.binary());
                             if (!response.binary() && (response.bytes.length > 100000 || formatted.length() > 100000)) {
                                 formatted = formatted.substring(0, Math.min(100000, formatted.length())) + activity.getString(R.string.api_preview_limited);
                             }

@@ -87,8 +87,10 @@ public final class GpaSimulatorController {
 
         UiHelper.add(activity, simCard, activity.getString(R.string.gpa_target_label), 13, UiHelper.INK, true);
         UiHelper.chips(activity, simCard,
-            new String[]{"4.50", "4.75", "4.80", "5.00"},
+            new String[]{"4.00", "4.25", "4.50", "4.75", "4.80", "5.00"},
             new String[]{
+                activity.getString(R.string.gpa_chip_target_400),
+                activity.getString(R.string.gpa_chip_target_425),
                 activity.getString(R.string.gpa_chip_target_450),
                 activity.getString(R.string.gpa_chip_target_475),
                 activity.getString(R.string.gpa_chip_target_480),
@@ -101,9 +103,11 @@ public final class GpaSimulatorController {
 
         UiHelper.add(activity, simCard, activity.getString(R.string.gpa_remaining_ects_label), 13, UiHelper.INK, true);
         UiHelper.chips(activity, simCard,
-            new String[]{"15", "30", "45", "60"},
+            new String[]{"10", "15", "20", "30", "45", "60"},
             new String[]{
+                activity.getString(R.string.gpa_chip_ects_10),
                 activity.getString(R.string.gpa_chip_ects_15),
+                activity.getString(R.string.gpa_chip_ects_20),
                 activity.getString(R.string.gpa_chip_ects_30),
                 activity.getString(R.string.gpa_chip_ects_45),
                 activity.getString(R.string.gpa_chip_ects_60)

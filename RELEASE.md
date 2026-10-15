@@ -1,0 +1,95 @@
+# Przygotowanie wydania
+
+Projekt wymaga JDK 21 oraz Android SDK Platform 36. Korzystaj z dołączonego wrappera Gradle.
+Kod aplikacji pozostaje zgodny z Androidem 8.0 (API 26) i nowszym; target SDK wynosi 36.
+Zmiana target SDK obejmuje obsługę przycisku i gestu Wstecz przez AndroidX.
+
+## Kontrola jakości
+
+W PowerShell, z katalogu projektu:
+
+```powershell
+.\tools\production-check.ps1
+# Pełny zestaw testów urządzenia, z odrębnymi danymi aplikacji QA:
+.\tools\production-check.ps1 -DeviceTests
+```
+
+Testy urządzenia wymagają uruchomionego emulatora lub urządzenia podłączonego przez ADB.
+Wersja QA ma identyfikator `pl.vistula.checker.qa` i nie nadpisuje danych zwykłej aplikacji.
+Nie dodawaj filtrów klas do pełnej kontroli: pominięte klasy nie oznaczają zaliczonego testu.
+Skrypt zatrzymuje wydanie przy niepowodzeniu testów, lint lub budowania.
+Sprawdza również liczbę wykonanych testów w raportach XML. Sam komunikat `BUILD SUCCESSFUL`
+przy braku uruchomionych testów nie jest uznawany za zaliczoną kontrolę.
+Przy `-DeviceTests` uruchamia także testy startu, nawigacji i manifestu w zoptymalizowanym
+wariancie `optimizedQa` (R8, bez debugowania). Ten wariant nadal ma osobny identyfikator QA
+i testowy podpis debug; służy wyłącznie do weryfikacji, nie do publikacji.
+Opcjonalny test rzeczywistego publicznego USOS uruchamia się osobno:
+
+```powershell
+.\gradlew.bat :app:connectedDebugAndroidTest -PisolatedTests -PliveApiTests '-Pandroid.testInstrumentationRunnerArguments.class=pl.vistula.checker.LiveUsosTest'
+```
+
+Ten test wymaga internetu i dostępności serwera uczelni. Jego źródła są dołączane tylko
+po podaniu `-PliveApiTests`, dlatego nie wchodzi do domyślnego zestawu.
+
+Raporty:
+
+- `core/build/reports/tests/test/index.html`
+- `app/build/reports/tests/testDebugUnitTest/index.html`
+- `app/build/reports/lint-results-release.html`
+- `app/build/reports/androidTests/connected/debug/index.html`
+- `app/build/reports/androidTests/connected/optimizedQa/index.html`
+
+## Konfiguracja produkcyjna
+
+Release ma wyłączone debugowanie i włączone R8 oraz redukcję zasobów.
+`verifyReleaseConfiguration` blokuje wyłączenie tych zabezpieczeń, wpisanie kluczy USOS
+do pól BuildConfig lub skonfigurowanie release z kluczem podpisującym debug.
+Reguła R8 zachowuje nazwę i konstruktor pracownika WorkManager, także dla zadań
+zaplanowanych przed aktualizacją aplikacji, oraz konstruktor jego bazy Room tworzony przez refleksję.
+Wariant QA zachowuje dodatkowo API tracing i Kotlin stdlib współdzielone z osobno optymalizowanym runnerem testów;
+ta reguła testowa nie jest dodawana do produkcyjnego release.
+
+Lokalne Consumer Key/Secret z `local.properties` są dostępne wyłącznie w zwykłym debug.
+Release oraz debug z `-PisolatedTests` mają te pola puste. W wydaniu produkcyjnym właściciel
+telefonu podaje dane przez ekran konta. Tokeny i dane użytkownika trafiają do szyfrowanego
+magazynu Android Keystore; kopie zapasowe i transfer magazynu na inne urządzenie są wyłączone.
+Nie umieszczaj wspólnego Consumer Secret w APK, zasobach ani konfiguracji CI.
+Dla modelu dystrybucji ze wspólnym sekretem potrzebna jest uzgodniona z uczelnią architektura
+serwerowa; obfuskacja nie ukrywa sekretu przed osobą posiadającą APK.
+
+Debugowy FileProvider do testowania eksportu jest zdefiniowany tylko w `src/debug`.
+Nie powinien występować w manifeście wydania. Aplikacja produkcyjna nie zezwala na HTTP.
+Przedmioty bez ocen są zapisane oddzielnie od ocen: nie zwiększają średniej ani historii zmian ocen.
+
+## Artefakty i podpis
+
+Po zaliczeniu kontroli powstają:
+
+- APK: `app/build/outputs/apk/release/app-release-unsigned.apk`
+- AAB: `app/build/outputs/bundle/release/app-release.aab`
+- mapowanie R8: `app/build/outputs/mapping/release/mapping.txt`
+
+Domyślne artefakty release są **niepodpisane**. Zachowaj mapowanie dla każdej opublikowanej
+wersji, razem z jej `versionCode` i sumą SHA-256, aby móc odtworzyć stos błędu po obfuskacji.
+Podpisz finalny AAB w Android Studio przez **Generate Signed Bundle / APK**, używając własnego
+klucza przesyłania do Google Play. Aktualizacja istniejącej aplikacji wymaga właściwego klucza
+i większego `versionCode`; nie zastępuj go kluczem debug. Klucza ani haseł nie dodawaj do repozytorium.
+
+## Weryfikacja przed publiczną publikacją
+
+Automatyczne testy używają danych testowych i odpowiedzi HTTP z fixture. Nie potwierdzają
+działania konta studenta w rzeczywistym USOS ani wszystkich wersji Androida.
+Przed publicznym wydaniem sprawdź podpisany build na Androidzie 8 i Androidzie 16,
+logowanie z własnym kontem, odświeżenie ocen i planu, pracę po utracie sieci, odmowę zgody
+na powiadomienia, eksport dokumentu i powrót do aplikacji po ubiciu procesu.
+Test aktualizacji powinien zachować wcześniejszy szyfrowany magazyn i zaplanowane zadania.
+
+W Google Play uzupełnij politykę prywatności, deklarację Data safety oraz informacje
+o nieoficjalnym charakterze aplikacji. Opisz eksport i udostępnianie jako działania użytkownika;
+nie deklaruj certyfikacji ani audytu bezpieczeństwa na podstawie samych testów.
+
+Podstawa konfiguracji: [optymalizacja R8](https://developer.android.com/topic/performance/app-optimization/enable-app-optimization),
+[zmiany Androida 16](https://developer.android.com/about/versions/16/behavior-changes-16),
+[wymagania target API Google Play](https://support.google.com/googleplay/android-developer/answer/11926878),
+[ryzyko sekretów w APK](https://developer.android.com/privacy-and-security/risks/hardcoded-cryptographic-secrets).

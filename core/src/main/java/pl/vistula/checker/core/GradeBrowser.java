@@ -5,6 +5,18 @@ import java.util.*;
 /** Filters and groups grade entries without inferring academic pass/fail rules. */
 public final class GradeBrowser {
     private GradeBrowser() {}
+    public static List<Record> ungraded(Snapshot snapshot, String term, String type, String query) {
+        List<Record> result = new ArrayList<>();
+        if (!type.equals("all")) return result;
+        for (Record course : snapshot.courses) {
+            if (!course.term.equals(term)) continue;
+            boolean hasGrade = snapshot.records.values().stream().anyMatch(grade -> grade.kind.equals("ocena") && grade.term.equals(term)
+                && (!grade.optMeta("courseId").isEmpty() ? grade.optMeta("courseId").equals(course.optMeta("courseId")) : grade.title.equals(course.title)));
+            if (!hasGrade && StudentSearch.matches(query, course.title, course.term, course.optMeta("courseId"))) result.add(course);
+        }
+        result.sort(Comparator.comparing((Record course) -> course.title.toLowerCase(Locale.ROOT)).thenComparing(course -> course.id));
+        return result;
+    }
     public static String symbol(Record row) { return row.optMeta("valueSymbol").isEmpty() ? row.value.split("·", 2)[0].trim() : row.optMeta("valueSymbol"); }
     public static Double number(Record row) {
         String value = symbol(row).replace(',', '.');

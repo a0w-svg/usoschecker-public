@@ -38,8 +38,8 @@ public final class StudentCardsController {
             else {
                 String status = StudentServices.text(latest, "status"), id = StudentServices.text(latest, "id");
                 UiHelper.badge(activity, box, mobileStatus(activity, status), Color.rgb(214, 241, 229), UiHelper.GREEN);
-                line(activity, box, R.string.cards_order_date, StudentServices.text(latest, "order_date"));
-                line(activity, box, R.string.cards_expiration, StudentServices.text(latest, "expiration_date"));
+                line(activity, box, R.string.cards_order_date, HistoryScreenController.formatFullDate(StudentServices.text(latest, "order_date")));
+                line(activity, box, R.string.cards_expiration, HistoryScreenController.formatFullDate(StudentServices.text(latest, "expiration_date")));
                 if (status.equals("ready_to_receive") && !id.isEmpty()) box.addView(UiHelper.button(activity,
                     activity.getString(R.string.cards_activation), () -> activity.showMobileActivation(id), true));
                 if (!id.isEmpty() && data.optBoolean("revokeEligibilityKnown") && revokeReason.isEmpty() && !status.startsWith("revoked")) box.addView(UiHelper.button(activity,
@@ -48,7 +48,7 @@ public final class StudentCardsController {
             if (!orderReason.isEmpty()) UiHelper.note(activity, box, orderReason, UiHelper.MUTED);
             else if (data.optBoolean("orderEligibilityKnown")) box.addView(UiHelper.button(activity, activity.getString(R.string.cards_order), () -> activity.mobileCardAction(true, ""), false));
             if (!revokeReason.isEmpty()) UiHelper.note(activity, box, revokeReason, UiHelper.MUTED);
-            line(activity, box, R.string.cards_expected_expiration, StudentServices.text(data, "expected_expiration_date"));
+            line(activity, box, R.string.cards_expected_expiration, HistoryScreenController.formatFullDate(StudentServices.text(data, "expected_expiration_date")));
             UiHelper.note(activity, box, activity.getString(R.string.cards_activation_hint), UiHelper.MUTED);
             JSONArray orders = data.optJSONArray("orders");
             if (orders != null && orders.length() > 0) box.addView(UiHelper.button(activity,
@@ -63,8 +63,8 @@ public final class StudentCardsController {
             JSONObject order = orders.optJSONObject(i); if (order == null) continue;
             LinearLayout card = UiHelper.card(activity, body, Color.WHITE);
             UiHelper.add(activity, card, mobileStatus(activity, StudentServices.text(order, "status")), 18, UiHelper.INK, true);
-            line(activity, card, R.string.cards_order_date, StudentServices.text(order, "order_date"));
-            line(activity, card, R.string.cards_expiration, StudentServices.text(order, "expiration_date"));
+            line(activity, card, R.string.cards_order_date, HistoryScreenController.formatFullDate(StudentServices.text(order, "order_date")));
+            line(activity, card, R.string.cards_expiration, HistoryScreenController.formatFullDate(StudentServices.text(order, "expiration_date")));
             line(activity, card, R.string.cards_order_id, StudentServices.text(order, "id"));
         }
         android.widget.ScrollView scroll = UiHelper.dialogScroll(activity, body);
@@ -78,12 +78,13 @@ public final class StudentCardsController {
         UiHelper.add(activity, box, state.optString("user", activity.getString(R.string.cards_owner)), 23, Color.WHITE, true);
         if (!card.studentNumber.isEmpty()) UiHelper.add(activity, box, activity.getString(R.string.cards_student_number, card.studentNumber), 16, Color.WHITE, true);
         int statusColor = card.expired(today) ? Color.rgb(255, 183, 178) : Color.rgb(124, 219, 192);
+        String formattedExp = HistoryScreenController.formatFullDate(card.expires);
         String expiration = card.expires.isEmpty() ? activity.getString(R.string.cards_no_expiration)
-            : activity.getString(R.string.cards_expiration, card.expires);
+            : activity.getString(R.string.cards_expiration, formattedExp.isEmpty() ? card.expires : formattedExp);
         UiHelper.add(activity, box, expiration, 16, statusColor, true);
         if (card.expired(today)) UiHelper.note(activity, box, activity.getString(R.string.cards_expired), statusColor);
         else if (card.expiresSoon(today)) UiHelper.note(activity, box, activity.getString(R.string.cards_expires_soon), statusColor);
-        if (!card.issued.isEmpty()) UiHelper.note(activity, box, activity.getString(R.string.cards_issue_date, card.issued), Color.LTGRAY);
+        if (!card.issued.isEmpty()) UiHelper.note(activity, box, activity.getString(R.string.cards_issue_date, HistoryScreenController.formatFullDate(card.issued)), Color.LTGRAY);
         if (!card.type.isEmpty()) UiHelper.note(activity, box, activity.getString(R.string.cards_type, card.type), Color.LTGRAY);
         if (!card.barcode.isEmpty()) box.addView(UiHelper.button(activity, activity.getString(R.string.cards_show_number), () ->
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)

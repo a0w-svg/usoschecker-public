@@ -117,8 +117,11 @@ public final class HomeScreenController {
                         11, snap.payments.hasOverdue() ? Color.rgb(160, 48, 40) : UiHelper.GREEN, true);
                     UiHelper.add(activity, payBox, activity.getString(R.string.home_payments_due, unpaid), 19, UiHelper.INK, true);
                     if (!snap.payments.accounts.isEmpty()) {
-                        UiHelper.add(activity, payBox, activity.getString(R.string.home_payments_subaccount, snap.payments.accounts.get(0).bankAccountNumber), 13, UiHelper.MUTED, false);
+                        UiHelper.add(activity, payBox, activity.getString(R.string.home_payments_subaccount, PaymentsScreenController.formatIban(snap.payments.accounts.get(0).bankAccountNumber)), 13, UiHelper.MUTED, false);
                     }
+                    payBox.setClickable(true);
+                    payBox.setFocusable(true);
+                    payBox.setOnClickListener(v -> activity.navigate(8));
                     payBox.addView(UiHelper.button(activity, activity.getString(R.string.home_payments_btn), () -> activity.navigate(8), false));
                 }
             }
@@ -145,7 +148,11 @@ public final class HomeScreenController {
                 UiHelper.add(activity, newsBox, activity.getString(R.string.home_news_title), 11, UiHelper.GREEN, true);
                 UiHelper.add(activity, newsBox, top.title, 17, UiHelper.INK, true);
                 if (!top.headline.isEmpty()) UiHelper.add(activity, newsBox, top.headline, 13, UiHelper.MUTED, false);
-                UiHelper.add(activity, newsBox, top.publicationDate + (!top.author.isEmpty() ? " · " + top.author : ""), 12, UiHelper.GREEN, false);
+                String formattedPubDate = HistoryScreenController.formatFullDate(top.publicationDate);
+                UiHelper.add(activity, newsBox, (formattedPubDate.isEmpty() ? top.publicationDate : formattedPubDate) + (!top.author.isEmpty() ? " · " + top.author : ""), 12, UiHelper.GREEN, false);
+                newsBox.setClickable(true);
+                newsBox.setFocusable(true);
+                newsBox.setOnClickListener(v -> activity.navigate(11));
                 newsBox.addView(UiHelper.button(activity, activity.getString(R.string.home_news_all_btn, snap.news.size()), () -> activity.navigate(11), false));
             }
         }
@@ -251,6 +258,9 @@ public final class HomeScreenController {
             UiHelper.add(activity, box, UiHelper.shortDate(upcoming.start.toLocalDate()), 13, UiHelper.GREEN, true);
             UiHelper.add(activity, box, upcoming.record.value, 14, UiHelper.MUTED, false);
             LessonTime next = upcoming;
+            box.setClickable(true);
+            box.setFocusable(true);
+            box.setOnClickListener(v -> onLessonDetails.accept(next));
             box.addView(UiHelper.button(activity, activity.getString(R.string.btn_open_plan), () -> {
                 activity.setCalendarDate(next.start.toLocalDate().toString());
                 activity.setCalendarMode("day");
@@ -304,6 +314,9 @@ public final class HomeScreenController {
                     due.isBefore(today) ? Color.rgb(160, 48, 40) : UiHelper.GREEN, false);
             }
 
+            box.setClickable(true);
+            box.setFocusable(true);
+            box.setOnClickListener(v -> activity.navigate(7));
             box.addView(UiHelper.button(activity, activity.getString(R.string.home_open_tasks), () -> activity.navigate(7), false));
         }
     }

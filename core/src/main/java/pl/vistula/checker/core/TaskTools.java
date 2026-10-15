@@ -8,6 +8,22 @@ import org.json.*;
 /** Local task operations preserve legacy entries and never mutate their source. */
 public final class TaskTools {
     private TaskTools() {}
+    public static JSONArray save(JSONArray source, JSONObject replacement) throws JSONException {
+        String id = replacement.getString("id");
+        if (id.isEmpty() || replacement.optString("title").trim().isEmpty()
+                || replacement.optString("title").length() > 200 || replacement.optString("notes").length() > 2000)
+            throw new IllegalArgumentException("Nieprawidłowa treść zadania.");
+        JSONArray result = source == null ? new JSONArray() : new JSONArray(source.toString());
+        for (int i = 0; i < result.length(); i++) {
+            JSONObject entry = result.optJSONObject(i);
+            if (entry != null && id.equals(entry.optString("id"))) {
+                result.put(i, new JSONObject(replacement.toString()));
+                return result;
+            }
+        }
+        if (result.length() >= 200) throw new IllegalStateException("Limit 200 zadań. Usuń inny wpis, aby dodać zadanie.");
+        return result.put(new JSONObject(replacement.toString()));
+    }
     public static int priority(JSONObject task) { return Math.max(0, Math.min(2, task.optInt("priority", 1))); }
     public static LocalDate dueDate(JSONObject task) {
         try { return LocalDate.parse(task.optString("due")); }

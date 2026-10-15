@@ -91,7 +91,8 @@ public final class NewsScreenController {
                     MaterialButton btnRead = itemCard.findViewById(R.id.news_item_btn_read);
 
                     title.setText(a.title);
-                    String metaText = a.publicationDate + (!a.author.isEmpty() ? " · " + a.author : "");
+                    String formattedDate = HistoryScreenController.formatFullDate(a.publicationDate);
+                    String metaText = (!formattedDate.isEmpty() ? formattedDate : a.publicationDate) + (!a.author.isEmpty() ? " · " + a.author : "");
                     meta.setText(metaText);
 
                     if (!a.headline.isEmpty()) {
@@ -102,6 +103,8 @@ public final class NewsScreenController {
                     }
 
                     btnRead.setOnClickListener(v -> showNewsDetails(activity, a));
+                    itemCard.setClickable(true);
+                    itemCard.setOnClickListener(v -> showNewsDetails(activity, a));
                     list.addView(itemCard);
                 }
             }
@@ -122,8 +125,9 @@ public final class NewsScreenController {
         box.setPadding(UiHelper.dp(activity, 24), UiHelper.dp(activity, 8), UiHelper.dp(activity, 24), UiHelper.dp(activity, 8));
 
         UiHelper.add(activity, box, article.title, 20, UiHelper.INK, true);
-        String meta = article.publicationDate + (!article.author.isEmpty() ? " · " + article.author : "");
-        UiHelper.add(activity, box, meta, 13, UiHelper.GREEN, true);
+        String formattedDate = HistoryScreenController.formatFullDate(article.publicationDate);
+        String meta = (!formattedDate.isEmpty() ? formattedDate : article.publicationDate) + (!article.author.isEmpty() ? " · " + article.author : "");
+        UiHelper.add(activity, box, "📅 " + meta, 13, UiHelper.GREEN, true);
 
         if (!article.headline.isEmpty()) {
             UiHelper.add(activity, box, article.headline, 15, UiHelper.INK, false);

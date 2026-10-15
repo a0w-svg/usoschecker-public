@@ -14,10 +14,13 @@
         android:paddingBottom="8dp">
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/task_title_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="@string/tasks_dialog_title_hint"
+            app:counterEnabled="true"
+            app:counterMaxLength="200"
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
@@ -29,6 +32,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="56dp"
+                android:saveEnabled="false"
+                android:importantForAutofill="no"
+                android:inputType="textCapSentences"
+                android:imeOptions="actionNext|flagNoPersonalizedLearning"
+                android:maxLines="2"
                 android:textColor="#1B2520"
                 android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -38,6 +46,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="4dp"
             android:text="@string/tasks_dialog_priority_label"
+            android:labelFor="@id/task_input_priority"
             android:textColor="#596960"
             android:textSize="12sp" />
 
@@ -49,10 +58,13 @@
             android:minHeight="48dp" />
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/task_notes_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="@string/tasks_dialog_notes_hint"
+            app:counterEnabled="true"
+            app:counterMaxLength="2000"
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
@@ -64,6 +76,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine|textCapSentences"
+                android:saveEnabled="false"
+                android:importantForAutofill="no"
+                android:imeOptions="flagNoPersonalizedLearning"
                 android:maxLines="4"
                 android:minHeight="56dp"
                 android:minLines="2"

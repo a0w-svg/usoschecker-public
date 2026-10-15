@@ -25,4 +25,11 @@ public class ApiCatalogTest {
         assertEquals(java.util.List.of("cards"), ApiCatalog.missingScopes(metadata, "grades|old_cards"));
         assertTrue(ApiCatalog.missingScopes(metadata, "grades|cards").isEmpty());
     }
+    @Test public void credentialResponsesIncludeLegacyAndCurrentMobileActivationEndpoints() {
+        for (String method : java.util.List.of("services/cards/mcard", "services/cards/mcard2", "services/cards/mcard_order",
+                "services/cards/mcard_order2", "services/oauth/access_token", "services/oauth2/impersonated_token"))
+            assertTrue(method, ApiCatalog.credentialResponse(method));
+        assertFalse(ApiCatalog.credentialResponse("services/cards/user"));
+        assertFalse(ApiCatalog.credentialResponse("services/apisrv/installation"));
+    }
 }

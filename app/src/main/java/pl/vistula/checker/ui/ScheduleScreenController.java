@@ -39,6 +39,7 @@ import pl.vistula.checker.core.LessonTime;
 import pl.vistula.checker.core.PlanBrowser;
 import pl.vistula.checker.core.Record;
 import pl.vistula.checker.core.ScheduleConflictDetector;
+import pl.vistula.checker.core.ScheduleBreaks;
 import pl.vistula.checker.core.Snapshot;
 
 /**
@@ -165,23 +166,29 @@ public final class ScheduleScreenController {
             activity.setCalendarDate(date);
             onModeChanged.accept("day");
         });
-        EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.schedule_search_hint), activity.getCalendarQuery(), null, null);
+        EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.schedule_search_hint), activity.getCalendarQuery(), null, () -> activity.setCalendarQuery(""));
         LinearLayout results = new LinearLayout(activity);
         results.setOrientation(LinearLayout.VERTICAL);
         content.addView(results);
 
         List<LessonTime> allLessons = LessonTime.sorted(planRows);
-        Runnable populate = () -> renderResults(activity, results, allLessons, activeDate, calendarMode,
-            search.getText().toString(), conflictLessonKeys, onDateChanged, onModeChanged, listener);
-        UiHelper.watchSearch(search, value -> { activity.setCalendarQuery(value); populate.run(); });
-        populate.run();
+        Runnable[] populateRef = new Runnable[1];
+        populateRef[0] = () -> renderResults(activity, results, allLessons, activeDate, calendarMode,
+            search.getText().toString(), conflictLessonKeys, onDateChanged, onModeChanged, listener, () -> {
+                search.setText("");
+                activity.setCalendarQuery("");
+                populateRef[0].run();
+            });
+        UiHelper.watchSearch(search, value -> { activity.setCalendarQuery(value); populateRef[0].run(); });
+        populateRef[0].run();
         content.addView(UiHelper.button(activity, activity.getString(R.string.btn_refresh), onRefresh, false));
     }
 
     private static void renderResults(MainActivity activity, LinearLayout content, List<LessonTime> allLessons,
                                       LocalDate activeDate, String calendarMode, String query, Set<String> conflictLessonKeys,
                                       java.util.function.Consumer<String> onDateChanged,
-                                      java.util.function.Consumer<String> onModeChanged, ScheduleListener listener) {
+                                      java.util.function.Consumer<String> onModeChanged, ScheduleListener listener,
+                                      Runnable onClearSearch) {
         content.removeAllViews();
         List<LessonTime> visible = PlanBrowser.select(allLessons, activeDate, calendarMode, query);
         if (!calendarMode.equals("agenda") && !calendarMode.equals("week")) {
@@ -199,6 +206,9 @@ public final class ScheduleScreenController {
                     : calendarMode.equals("week") ? activity.getString(R.string.schedule_week_empty)
                     : calendarMode.equals("agenda") ? activity.getString(R.string.schedule_agenda_empty)
                     : activity.getString(R.string.schedule_no_classes));
+            if (!query.trim().isEmpty() && onClearSearch != null) {
+                content.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), onClearSearch, false));
+            }
             LessonTime nextAfter = null;
             for (LessonTime l : PlanBrowser.select(allLessons, activeDate, "agenda", query)) {
                 if (l.start.toLocalDate().isAfter(activeDate)) {
@@ -216,12 +226,25 @@ public final class ScheduleScreenController {
         } else {
             LocalDate currentSectionDay = null;
             LayoutInflater inflater = LayoutInflater.from(activity);
+            java.util.Map<Instant, ScheduleBreaks.Break> breaks = new java.util.HashMap<>();
 
             for (LessonTime lesson : visible) {
                 LocalDate lessonDay = calendarMode.equals("day") || calendarMode.equals("list") ? activeDate : lesson.start.toLocalDate();
                 if (!lessonDay.equals(currentSectionDay)) {
                     currentSectionDay = lessonDay;
                     UiHelper.heading(activity, content, lessonDay.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("pl-PL"))));
+                    breaks.clear();
+                    // Use the complete plan so a search cannot turn hidden meetings into free time.
+                    for (ScheduleBreaks.Break gap : ScheduleBreaks.inDay(allLessons, lessonDay)) breaks.put(gap.end.toInstant(), gap);
+                }
+
+                ScheduleBreaks.Break gap = breaks.remove(lesson.start.toInstant());
+                if (gap != null) {
+                    LinearLayout breakCard = UiHelper.card(activity, content, Color.rgb(240, 245, 241));
+                    breakCard.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), 0);
+                    UiHelper.add(activity, breakCard, activity.getString(R.string.schedule_break_title, gap.minutes), 14, UiHelper.GREEN, true);
+                    UiHelper.add(activity, breakCard, activity.getString(R.string.schedule_break_time,
+                        gap.start.format(DateTimeFormatter.ofPattern("HH:mm")), gap.end.format(DateTimeFormatter.ofPattern("HH:mm"))), 13, UiHelper.MUTED, false);
                 }
 
                 boolean isConflict = conflictLessonKeys.contains(lesson.record.id);
@@ -247,6 +270,9 @@ public final class ScheduleScreenController {
                 titleView.setText(lesson.record.title);
                 detailsView.setText(lesson.record.value);
 
+                card.setClickable(true);
+                card.setFocusable(true);
+                card.setOnClickListener(v -> showLessonDetails(activity, lesson, listener));
                 btnDetails.setOnClickListener(v -> showLessonDetails(activity, lesson, listener));
                 content.addView(card);
             }

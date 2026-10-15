@@ -129,7 +129,7 @@ public final class AccountScreenController {
 
             if (!program.isEmpty()) UiHelper.add(activity, profile, activity.getString(R.string.account_program, program), 14, UiHelper.INK, false);
             if (!stage.isEmpty()) UiHelper.add(activity, profile, activity.getString(R.string.account_stage, stage), 13, UiHelper.MUTED, false);
-            if (!admission.isEmpty()) UiHelper.add(activity, profile, activity.getString(R.string.account_admission_date, admission), 12, UiHelper.MUTED, false);
+            if (!admission.isEmpty()) UiHelper.add(activity, profile, activity.getString(R.string.account_admission_date, HistoryScreenController.formatFullDate(admission)), 12, UiHelper.MUTED, false);
 
             if (snapshot != null && snapshot.thesis != null && snapshot.thesis.hasThesis()) {
                 UiHelper.add(activity, profile, activity.getString(R.string.account_thesis_header), 11, UiHelper.GREEN, true);
@@ -267,9 +267,9 @@ public final class AccountScreenController {
             if (!state.optString("requestToken").isEmpty()) {
                 UiHelper.add(activity, box, activity.getString(R.string.pin_hint), 14, UiHelper.MUTED, false);
                 String initialPin = detectedPin != null ? detectedPin : "";
-                EditText pin = UiHelper.field(activity, box, activity.getString(R.string.account_pin_field_hint), initialPin, false);
+                EditText pin = UiHelper.field(activity, box, activity.getString(R.string.account_pin_field_hint), initialPin, true);
                 if (!initialPin.isEmpty()) {
-                    UiHelper.note(activity, box, String.format(activity.getString(R.string.pin_detected_clipboard), initialPin), UiHelper.GREEN);
+                    UiHelper.note(activity, box, activity.getString(R.string.pin_detected_clipboard), UiHelper.GREEN);
                 }
                 box.addView(UiHelper.button(activity, activity.getString(R.string.btn_paste_pin), () -> {
                     try {
@@ -279,7 +279,7 @@ public final class AccountScreenController {
                             if (item != null && item.getText() != null) {
                                 String clip = item.getText().toString().trim().replaceAll("\\s+", "");
                                 pin.setText(clip);
-                                Toast.makeText(activity, activity.getString(R.string.account_toast_pin_pasted, clip), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, R.string.account_toast_pin_pasted, Toast.LENGTH_SHORT).show();
                             }
                         }
                     } catch (Exception ignored) {}
@@ -325,6 +325,7 @@ public final class AccountScreenController {
             toolsPrefs.edit().putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, isChecked).apply();
             if (isChecked) {
                 ClassReminderReceiver.scheduleNext(activity);
+                if (!ClassReminderReceiver.canNotify(activity)) listener.onRequestNotifications();
                 Toast.makeText(activity, R.string.account_toast_reminders_enabled, Toast.LENGTH_SHORT).show();
             } else {
                 ClassReminderReceiver.cancel(activity);
@@ -335,6 +336,8 @@ public final class AccountScreenController {
         reminderRow.addView(reminderSwitch);
 
         if (remindersOn) {
+            if (!ClassReminderReceiver.canNotify(activity)) UiHelper.note(activity, reminderRow,
+                activity.getString(R.string.account_reminder_permission_missing), UiHelper.MUTED);
             UiHelper.note(activity, reminderRow, activity.getString(R.string.account_reminder_lead_time_label), UiHelper.MUTED);
             UiHelper.chips(activity, reminderRow,
                 new String[]{"15", "30", "45"},

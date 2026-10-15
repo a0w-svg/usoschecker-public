@@ -53,6 +53,34 @@ public class UsosClientTest {
         assertTrue(connection.sent.toString("UTF-8").contains("oauth_token=private-token"));
         assertTrue(connection.disconnected);
     }
+    @Test public void multipartCredentialsUseAuthorizationHeaderInsteadOfUrlOrBody() throws Exception {
+        Connection connection = new Connection();
+        String[] url = {""};
+        JSONObject credentials = credentials().put("secret", "consumer&secret").put("tokenSecret", "token/secret");
+        UsosClient client = new UsosClient(credentials, progress -> {}, address -> { url[0] = address; return connection; });
+        client.requestData("POST", "services/blobbox/put", Map.of("read_access", "consumer"), true,
+            "private-token", "token/secret", "test-file".getBytes(StandardCharsets.UTF_8), "upload.txt");
+        assertEquals(UsosClient.BASE + "services/blobbox/put?read_access=consumer", url[0]);
+        String header = connection.getRequestProperty("Authorization");
+        assertTrue(header.startsWith("OAuth "));
+        assertTrue(header.contains("oauth_signature_method=\"PLAINTEXT\""));
+        assertTrue(header.contains("oauth_token=\"private-token\""));
+        String signature = pl.vistula.checker.core.OAuth.encode("consumer&secret") + "&" + pl.vistula.checker.core.OAuth.encode("token/secret");
+        assertTrue(header.contains("oauth_signature=\"" + pl.vistula.checker.core.OAuth.encode(signature) + "\""));
+        assertTrue(connection.sent.toString("UTF-8").contains("test-file"));
+        assertFalse(connection.sent.toString("UTF-8").contains("oauth_"));
+        assertFalse(connection.getInstanceFollowRedirects());
+        assertTrue(connection.disconnected);
+    }
+    @Test public void unsignedMultipartDoesNotAcquireAnAuthorizationHeader() throws Exception {
+        Connection connection = new Connection();
+        UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
+            assertEquals(UsosClient.BASE + "services/blobbox/put_unsigned", address);
+            return connection;
+        });
+        client.requestData("POST", "services/blobbox/put_unsigned", Map.of(), false, "", "", new byte[]{1}, "upload.bin");
+        assertNull(connection.getRequestProperty("Authorization"));
+    }
     @Test public void formErrorsPreserveRetryInformationAndHideRawBody() throws Exception {
         Connection connection = new Connection(); connection.status = 429; connection.body = "oauth_problem=rate_limit&oauth_token=private-token";
         UsosClient client = new UsosClient(credentials(), progress -> {}, address -> connection);
@@ -87,7 +115,11 @@ public class UsosClientTest {
             else throw new AssertionError("Unexpected request: " + address);
             return connection;
         });
-        assertTrue(client.snapshot().records.isEmpty());
+        pl.vistula.checker.core.Snapshot snapshot = client.snapshot();
+        assertTrue(snapshot.records.isEmpty());
+        assertEquals(1, snapshot.courses.size());
+        assertEquals("Finanse", snapshot.courses.get(0).title);
+        assertEquals("2026Z", snapshot.courses.get(0).term);
         assertEquals(8, pages.get());
     }
     @Test public void completeSnapshotParsesEctsAndAttachesToGradeRecord() throws Exception {
@@ -193,6 +225,93 @@ public class UsosClientTest {
         assertEquals("tok1", res.get("oauth_token"));
         assertTrue(captured[0].contains("scopes=grades%7Cstudies%7Coffline_access"));
         assertFalse(captured[0].contains("%7C%7C"));
+    }
+    @Test public void paymentHttpFailuresAbortSnapshotWithTheirRetryAndAuthClassification() throws Exception {
+        for (String endpoint : List.of("payments/user_accounts", "payments/user_payments")) {
+            for (int status : new int[]{401, 429, 503}) {
+                UsosClient client = paymentFailureClient(endpoint, status,
+                    status == 401 ? "oauth_problem=token_expired" : "oauth_problem=api_error", false);
+                try { client.snapshot(); fail("Failed payment request must not produce an empty snapshot"); }
+                catch (UsosClient.SyncException failure) {
+                    UsosClient.ApiException cause = (UsosClient.ApiException) Repository.cause(failure);
+                    assertEquals(status, cause.status);
+                    assertTrue(failure.stage.contains(endpoint));
+                    assertEquals(status == 401, cause.authorization);
+                    assertEquals(status != 401, cause.retryable);
+                }
+            }
+        }
+    }
+    @Test public void paymentTransportAndMalformedResponseFailuresAbortSnapshot() throws Exception {
+        for (String endpoint : List.of("payments/user_accounts", "payments/user_payments")) {
+            try { paymentFailureClient(endpoint, 200, "", true).snapshot(); fail(); }
+            catch (UsosClient.SyncException failure) {
+                assertTrue(Repository.cause(failure) instanceof SocketTimeoutException);
+                assertTrue(failure.stage.contains(endpoint));
+            }
+            try { paymentFailureClient(endpoint, 200, "{", false).snapshot(); fail(); }
+            catch (UsosClient.SyncException failure) {
+                assertTrue(Repository.cause(failure) instanceof org.json.JSONException);
+            }
+        }
+    }
+    private UsosClient paymentFailureClient(String endpoint, int status, String body, boolean timeout) throws Exception {
+        return new UsosClient(credentials(), progress -> {}, address -> {
+            Connection connection = new Connection();
+            if (address.contains(endpoint)) {
+                if (timeout) throw new SocketTimeoutException("Simulated payment timeout");
+                connection.status = status;
+                connection.body = body;
+            } else if (address.contains("courses/user_ects_points")) connection.body = "{}";
+            else if (address.contains("courses/user")) connection.body = "{\"course_editions\":{}}";
+            else connection.body = "[]";
+            return connection;
+        });
+    }
+    @Test public void optionalModulesHonorSessionExpiryAndCooldownsBeforeMakingMoreRequests() throws Exception {
+        for (String endpoint : List.of("courses/user_ects_points", "terms/terms", "theses/user", "crstests/user", "news/search")) {
+            for (int status : new int[]{401, 429, 503}) {
+                boolean[] failed = {false};
+                UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
+                    assertFalse("Continued requests after optional-module failure", failed[0]);
+                    Connection connection = snapshotConnection(address);
+                    if (address.contains(endpoint)) {
+                        failed[0] = true;
+                        connection.status = status;
+                        connection.body = status == 401 ? "oauth_problem=token_expired" : "{}";
+                    }
+                    return connection;
+                });
+                try { client.snapshot(); fail("Optional-module failures must preserve the previous snapshot"); }
+                catch (UsosClient.SyncException failure) {
+                    UsosClient.ApiException cause = (UsosClient.ApiException) Repository.cause(failure);
+                    assertEquals(status, cause.status);
+                    assertEquals("services/" + endpoint, cause.endpoint);
+                    assertEquals(status == 401, cause.authorization);
+                    assertEquals(status != 401, cause.retryable);
+                }
+            }
+        }
+    }
+    @Test public void unavailableOptionalModulesStillAllowCoreSnapshot() throws Exception {
+        UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
+            Connection connection = snapshotConnection(address);
+            if (address.contains("courses/user_ects_points") || address.contains("terms/terms")
+                    || address.contains("theses/user") || address.contains("crstests/user") || address.contains("news/search")) {
+                connection.status = 403;
+                connection.body = "{}";
+            }
+            return connection;
+        });
+        assertTrue(client.snapshot().records.isEmpty());
+    }
+    private Connection snapshotConnection(String address) throws MalformedURLException {
+        Connection connection = new Connection();
+        if (address.contains("courses/user_ects_points")) connection.body = "{}";
+        else if (address.contains("courses/user")) connection.body = "{\"course_editions\":{\"2026Z\":[]}}";
+        else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{}}";
+        else connection.body = "[]";
+        return connection;
     }
     @Test public void finishStripsWhitespaceFromPinVerifier() throws Exception {
         String[] captured = {""};

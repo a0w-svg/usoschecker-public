@@ -73,7 +73,7 @@ public class ScreenRegressionTest {
         capture("changes-improved");
         search("315"); has("Statystyka opisowa"); absent("Podstawy finansów");
         search("no-such-change"); has(rule.getActivity().getString(R.string.history_no_match_title));
-        search(""); click(rule.getActivity().getString(R.string.history_action_modified));
+        search(""); click(rule.getActivity().getString(R.string.history_chip_modified, 2));
         has("Podstawy finansów"); has("Statystyka opisowa");
     }
     @Test public void timetableWeekSearchPersistsAcrossNavigation() throws Exception {

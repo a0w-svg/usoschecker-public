@@ -105,12 +105,14 @@ public class CoreTest {
         Record gradeNew = grade("5", "2026-10-13 11:30:00");
         Change update = new Change(gradeOld, gradeNew, 999999L);
         assertEquals("2026-10-13 11:30:00", update.sourceTime);
+        assertEquals("2026-10-13", update.date);
         assertNotEquals(999999L, update.effectiveTimestamp());
         assertTrue(update.effectiveTimestamp() > 0);
 
         Change deletion = new Change(gradeNew, null, 999999L);
         assertEquals("Usunięto", deletion.action);
         assertEquals("2026-10-13 11:30:00", deletion.sourceTime);
+        assertEquals("2026-10-13", deletion.date);
         assertEquals(update.effectiveTimestamp(), deletion.effectiveTimestamp());
 
         Record lesson = lesson("plan:99", "2026-10-15", "Sala 101");
@@ -121,22 +123,41 @@ public class CoreTest {
 
         Change roundtrip = Change.from(new JSONObject(update.json().toString()));
         assertEquals(update.sourceTime, roundtrip.sourceTime);
+        assertEquals(update.date, roundtrip.date);
         assertEquals(update.effectiveTimestamp(), roundtrip.effectiveTimestamp());
     }
 
     @Test public void changeCarriesRichApiMetadataAndDetectsSpecificDiffs() throws Exception {
         JSONObject oldMeta = new JSONObject().put("room", "204").put("lecturers", "Anna Kowalska").put("groupNumber", "1")
-            .put("startTime", "2026-10-15 09:00:00").put("endTime", "2026-10-15 10:30:00");
+            .put("startTime", "2026-10-15 09:00:00").put("endTime", "2026-10-15 10:30:00").put("valueDescription", "wykład");
         JSONObject newMeta = new JSONObject().put("room", "315").put("lecturers", "Jan Kowalski").put("groupNumber", "2")
-            .put("startTime", "2026-10-15 09:30:00").put("endTime", "2026-10-15 11:00:00");
+            .put("startTime", "2026-10-22 09:30:00").put("endTime", "2026-10-22 11:00:00").put("valueDescription", "ćwiczenia");
         Record rOld = new Record("plan:1", "plan", "Matematyka", "v1", "", "2026-10-15", "", "2026-10-15 09:00:00", "2026-10-15 10:30:00", Double.NaN, oldMeta);
-        Record rNew = new Record("plan:1", "plan", "Matematyka", "v2", "", "2026-10-15", "", "2026-10-15 09:30:00", "2026-10-15 11:00:00", Double.NaN, newMeta);
+        Record rNew = new Record("plan:1", "plan", "Matematyka", "v2", "", "2026-10-22", "", "2026-10-22 09:30:00", "2026-10-22 11:00:00", Double.NaN, newMeta);
 
         Change c = new Change(rOld, rNew, 1000L);
         assertEquals("204 → 315", c.optMeta("diffRoom"));
         assertEquals("Anna Kowalska → Jan Kowalski", c.optMeta("diffLecturers"));
         assertEquals("1 → 2", c.optMeta("diffGroup"));
         assertEquals("09:00–10:30 → 09:30–11:00", c.optMeta("diffTime"));
+        assertEquals("2026-10-15 → 2026-10-22", c.optMeta("diffDate"));
+        assertEquals("wykład → ćwiczenia", c.optMeta("diffValueDescription"));
+        assertEquals("2026-10-15", c.beforeDate);
+        assertEquals("2026-10-22", c.afterDate);
+        assertEquals("315", c.getRoom());
+        assertEquals("Jan Kowalski", c.getLecturers());
+        assertEquals("2", c.getGroupNumber());
+
+        // Test with startTime and ects on Record directly without metadata entries
+        Record rec1 = new Record("plan:2", "plan", "Fizyka", "v1", "", "2026-10-15", "2026Z", "2026-10-15 08:00:00", "2026-10-15 09:30:00", 3.0, new JSONObject());
+        Record rec2 = new Record("plan:2", "plan", "Fizyka", "v2", "", "2026-10-15", "2026Z", "2026-10-15 10:00:00", "2026-10-15 11:30:00", 5.0, new JSONObject());
+        Change cDirect = new Change(rec1, rec2, 1005L);
+        assertEquals("08:00–09:30 → 10:00–11:30", cDirect.optMeta("diffTime"));
+        assertEquals("3,0 → 5,0 ECTS", cDirect.optMeta("diffEcts"));
+        assertEquals(5.0, cDirect.getEcts(), 0.001);
+        assertEquals(3.0, cDirect.getBeforeEcts(), 0.001);
+        assertEquals(5.0, cDirect.getAfterEcts(), 0.001);
+        assertEquals("2026Z", cDirect.getTerm());
 
         JSONObject gradeJson = new JSONObject("""
             {"2026Z":{"INF":{"course_grades":[{"1":{"exam_id":501,"exam_session_number":1,"value_symbol":"5",
@@ -155,6 +176,7 @@ public class CoreTest {
         assertEquals(6.0, gradeRecord.metadata.optDouble("ects"), 0.001);
 
         Change gradeChange = new Change(null, gradeRecord, 2000L);
+        assertEquals("2026-10-14", gradeChange.date);
         assertEquals(Boolean.TRUE, gradeChange.getPasses());
         assertEquals(Boolean.TRUE, gradeChange.getCountsIntoAverage());
         assertEquals("bardzo dobry", gradeChange.optMeta("valueDescription"));
@@ -162,6 +184,7 @@ public class CoreTest {
         assertEquals(6.0, gradeChange.getEcts(), 0.001);
 
         Change restored = Change.from(new JSONObject(gradeChange.json().toString()));
+        assertEquals("2026-10-14", restored.date);
         assertEquals(Boolean.TRUE, restored.getPasses());
         assertEquals("bardzo dobry", restored.optMeta("valueDescription"));
     }

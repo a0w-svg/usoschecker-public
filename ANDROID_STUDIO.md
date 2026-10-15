@@ -4,15 +4,15 @@
    `settings.gradle`. If using the ZIP, extract it and open its `VistulaChecker` folder.
 2. Allow Gradle sync. The repository includes `gradlew`, `gradlew.bat` and the wrapper JAR.
 3. Under **Settings → Build, Execution, Deployment → Build Tools → Gradle**, select
-   **JDK 17** as Gradle JDK. The IDE can download it if it is not installed.
-4. Under **Tools → SDK Manager**, install **Android SDK Platform 35** and
-   **Android SDK Build-Tools 35.0.0**. Android Studio manages `local.properties` for your machine.
+   **JDK 21** as Gradle JDK. The IDE can download it if it is not installed.
+4. Under **Tools → SDK Manager**, install **Android SDK Platform 36** and the build tools
+   requested by Gradle. Android Studio manages `local.properties` for your machine.
 5. Select the **app** run configuration and your phone or an emulator running API 26 or newer.
 6. Click **Run ▶**. On the start screen choose **Zobacz wersję demonstracyjną** to use the
    application without registering an API key.
 
-Use Android Studio Meerkat Feature Drop (2024.3.2) or a later IDE version that supports
-Android Gradle Plugin 8.10.1. The Gradle wrapper version is 8.11.1.
+Use an Android Studio version compatible with Android Gradle Plugin 9.4.1.
+The checked-in Gradle wrapper version is 9.6.0. See [RELEASE.md](RELEASE.md) before publishing.
 
 To generate an APK from the IDE, choose **Build → Generate App Bundles or APKs → Generate APKs**
 (the wording may differ slightly between IDE versions). The debug APK appears at

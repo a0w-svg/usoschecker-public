@@ -6,6 +6,7 @@ Android 8.0 (API 26) lub nowszy. Nie jest oficjalną aplikacją uczelni.
 Projekt można otworzyć bezpośrednio w **Android Studio**: wybierz katalog zawierający
 `settings.gradle`, wykonaj Gradle Sync i uruchom konfigurację `app`.
 Dokładne kroki: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
+Przygotowanie wydania, kontrole jakości i podpisywanie: [RELEASE.md](RELEASE.md).
 
 ## Nawigacja i wygląd
 
@@ -48,9 +49,11 @@ najbliższych siedmiu dni. Katalog API udostępnia wszystkie wyniki przyciskiem
   nie przerywają synchronizacji. Brak wymaganych pól lub nieprawidłowy typ danych
   nadal zatrzymuje zapis, zachowując poprzedni zestaw danych.
 
-- Oceny: filtr semestru, podsumowanie aktualnie widocznych wpisów, liczba ocen liczbowych
-  i pozostałych, prosta średnia oraz minimum i maksimum. Średnia nie uwzględnia wag ani ECTS;
-  obejmuje wpisy z różnych terminów egzaminów i nie jest oficjalną średnią uczelni.
+- Oceny: rozwijane sekcje semestrów (domyślnie wszystkie rozwinięte), osobne podsumowania,
+  wyszukiwanie, filtry i sortowanie. Przedmioty bez ocen pozostają na liście z etykietą
+  „Brak ocen” po odświeżeniu danych. Nie wpływają na średnią ani historię zmian.
+  Prosta średnia obejmuje wpisy z różnych terminów egzaminów; szacunek ważony ECTS
+  pojawia się, gdy dostępne są odpowiednie dane. Nie są to oficjalne średnie uczelni.
 - Plan: eksport widocznych zajęć do pliku .ics przez systemowy wybór pliku. Wyszukiwanie
   i zakres dat ograniczają eksport. Godziny są przeliczane z Europe/Warsaw do UTC.
   Zapisany plik jest kopią danych, nie subskrypcją ani automatyczną synchronizacją kalendarza.
@@ -60,15 +63,14 @@ najbliższych siedmiu dni. Katalog API udostępnia wszystkie wyniki przyciskiem
 - **Komunikaty uczelni**: oficjalne ogłoszenia i zarządzenia Rektora pobierane bezpośrednio z USOS API (`services/news/search`), z podglądem na ekranie Start, wyszukiwarką, autorem, datą publikacji i możliwością kopiowania lub otwierania w przeglądarce.
 - **Licznik nieobecności na zajęciach**: osobiste narzędzie studenta do kontroli limitu opuszczeń zajęć (domyślnie 2 w semestrze zgodnie z regulaminem Vistuli). Przedmioty są automatycznie wykrywane z planu i ocen; aplikacja ostrzega przed wyczerpaniem lub przekroczeniem limitu.
 - **Detektor kolizji w planie zajęć**: automatyczne wykrywanie nakładających się czasowo zajęć z alertem na ekranie głównym i bezpośrednim oznaczeniem w kalendarzu.
-- **Konfiguracja kluczy API**: obsługa `apiKey` i `apiSecret` w pliku `local.properties` (oraz `usos.key` / `usos.consumer.key`).
+- **Konfiguracja kluczy API**: `apiKey` i `apiSecret` w `local.properties` (oraz `usos.key` / `usos.consumer.key`) są dostępne wyłącznie w zwykłym buildzie debug. Release i testy QA nie zawierają tych danych; klucze wpisuje się na ekranie konta.
 
 ## Kalendarz i aktualne zajęcia
 
-Plan ma pasek wyboru dni tygodnia i strzałki zmiany tygodnia. Widok „Oś dnia”
-pokazuje zajęcia na siatce godzinowej, rozdziela nakładające się spotkania na kolumny
-i zaznacza aktualną godzinę. Dotknięcie zajęć otwiera pełne szczegóły. Przycisk
-„Przejdź do teraz” przewija siatkę do bieżącej godziny. Widok „Agenda · cały plan”
-pokazuje wszystkie pobrane tygodnie, grupując zajęcia według dnia.
+Plan ma pasek wyboru dni tygodnia i strzałki zmiany tygodnia oraz widoki dnia, tygodnia
+i agendy. Karty pokazują godziny zajęć, konflikty i przerwy z długością oraz zakresem godzin.
+Przerwy są wyliczane z całego planu, także podczas wyszukiwania; ukryte zajęcia nie stają się
+czasem wolnym. Dotknięcie zajęć otwiera szczegóły. Agenda grupuje cały zapisany plan według dnia.
 
 Na ekranie Start i w planie dzisiejszego dnia widać „TRWAJĄ TERAZ”, prowadzącego,
 salę i pozostały czas. Początek zajęć jest włączony do przedziału, koniec wyłączony;
@@ -77,7 +79,7 @@ Wskazanie korzysta z ostatniego zapisu USOS, nie z informacji o faktycznej obecn
 Prawdziwy plan przechowuje dokładne czasy początku i końca; starsze zapisy pozostają czytelne.
 
 Domyślnie aplikacja pobiera osiem tygodni od poniedziałku bieżącego tygodnia.
-„Wczytaj kolejne 4 tygodnie” rozszerza zakres do maksymalnie szesnastu tygodni.
+Mechanizm pobierania obsługuje zakres do szesnastu tygodni.
 Maksymalnie trzy zapytania do USOS działają równocześnie, a pasek operacji pokazuje
 postęp tygodni i pobieranie prowadzących. Błąd dowolnej strony pozostawia stary
 plan w całości. Data w nagłówku oznacza rzeczywiście zapisany zakres; brak zajęć
@@ -91,7 +93,8 @@ blokują formularzy ani nie pokazują paska ładowania; zegar aktualizuje się c
   nie przechowuje odpowiedzi ani danych uwierzytelniających.
 - Obsługa błędów API: rozpoznawanie JSON i formularzy OAuth, rozróżnienie wygasłej sesji
   od błędnego podpisu, podpowiedzi przy wymaganych polach i zachowanie parametrów po błędzie.
-  Nowe żądanie unieważnia poprzednią odpowiedź do eksportu.
+  Potwierdzone nowe żądanie unieważnia poprzednią odpowiedź do eksportu; anulowanie
+  potwierdzenia i błędy formularza zachowują ostatni poprawny wynik.
 - Synchronizacja respektuje nagłówek `Retry-After` (sekundy lub data HTTP). Start pokazuje
   ostatnią próbę i czas kolejnego dozwolonego sprawdzenia. Wygasła sesja wstrzymuje
   monitorowanie i pokazuje skrót do ustawień konta.

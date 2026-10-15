@@ -1,4 +1,26 @@
 <resources>
+    <string name="grades_no_grade">Brak ocen</string>
+    <string name="grades_semester_no_grades">Brak ocen w tym semestrze.</string>
+    <string name="grades_semester_overview">Oceny według semestrów. Rozwiń wybrany semestr, aby zobaczyć szczegóły.</string>
+    <string name="grades_semester_unknown">Bez przypisanego semestru</string>
+    <string name="grades_semester_current">%1$s · aktualny semestr</string>
+    <string name="grades_semester_latest_hint">Brak dat aktualnego semestru w zapisanych danych. Rozwinięto najnowszy dostępny semestr.</string>
+    <string name="grades_semester_toggle">%1$s · wpisy: %2$d · %3$s</string>
+    <string name="grades_semester_expand">Rozwiń</string>
+    <string name="grades_semester_collapse">Zwiń</string>
+    <string name="grades_semester_empty">Brak ocen dla tego semestru przy wybranych filtrach.</string>
+    <string name="grades_unassigned_tests">Wyniki testów bez przypisanego semestru</string>
+    <string name="schedule_break_title">Przerwa · %1$d min</string>
+    <string name="schedule_break_time">%1$s – %2$s · Czas wolny między zajęciami</string>
+    <string name="reminder_unnamed_lesson">Zajęcia</string>
+    <string name="account_reminder_permission_missing">Przypomnienia są włączone, ale powiadomienia są zablokowane. Zezwól na nie w ustawieniach, aby otrzymywać alerty.</string>
+    <string name="notification_grade_added">Nowa ocena: %1$s</string>
+    <string name="notification_grade_removed">Usunięta ocena: %1$s</string>
+    <string name="notification_grade_modified">Zmieniona ocena: %1$s</string>
+    <string name="notification_grade_changes">Zmiany ocen w USOS (%1$d)</string>
+    <string name="notification_grade_changes_body">Wykryto %1$d zmian ocen. Sprawdź szczegóły.</string>
+    <string name="api_activation_hidden">Odpowiedź może zawierać token i hasło aktywacyjne mLegitymacji. Aby bezpiecznie je wyświetlić, otwórz ekran Legitymacje.</string>
+    <string name="error_invalid_document_uri">Wybrany plik nie jest dostępny przez dostawcę dokumentów. Wybierz go ponownie w systemowej aplikacji Pliki.</string>
     <!-- App & General -->
     <string name="app_name">Vistula</string>
     <string name="app_subtitle">Twój dzień na uczelni</string>
@@ -144,7 +166,7 @@
     <string name="btn_login_browser">1. Zaloguj w przeglądarce</string>
     <string name="btn_confirm_pin">2. Potwierdź PIN i połącz</string>
     <string name="btn_paste_pin">📋 Wklej PIN ze schowka</string>
-    <string name="pin_detected_clipboard">📋 Wykryto kod PIN ze schowka: %1$s</string>
+    <string name="pin_detected_clipboard">📋 Wykryto kod PIN ze schowka</string>
     <string name="pin_hint">Po zaakceptowaniu zgody skopiuj kod PIN z USOS i wróć do aplikacji.</string>
     <string name="btn_return_to_browser">Wróć do autoryzacji w przeglądarce</string>
     <string name="sync_settings_title">Ustawienia synchronizacji USOS</string>
@@ -196,6 +218,30 @@
     <string name="history_btn_simulate">Symuluj zmianę oceny i sali</string>
     <string name="history_details_title">Szczegóły zmiany</string>
     <string name="history_details_copy">Kopiuj szczegóły zmiany</string>
+    <string name="history_item_plan_date">Termin zajęć: %1$s</string>
+    <string name="history_item_plan_date_diff">Termin zajęć: %1$s → %2$s</string>
+    <string name="history_item_grade_date">Data oceny: %1$s</string>
+    <string name="history_chip_all">Wszystkie (%1$d)</string>
+    <string name="history_chip_grades">Oceny (%1$d)</string>
+    <string name="history_chip_plan">Plan (%1$d)</string>
+    <string name="history_chip_added">Dodano (%1$d)</string>
+    <string name="history_chip_modified">Zmieniono (%1$d)</string>
+    <string name="history_chip_removed">Usunięto (%1$d)</string>
+    <string name="history_diff_summary_title">Zmienione parametry:</string>
+    <string name="date_heading_today">Dzisiaj · %1$s</string>
+    <string name="date_heading_yesterday">Wczoraj · %1$s</string>
+    <string name="change_time">Godziny zajęć</string>
+    <string name="change_group">Grupa</string>
+    <string name="change_classtype">Typ zajęć</string>
+    <string name="change_passes">Status zaliczenia</string>
+    <string name="change_ects">Punkty ECTS</string>
+    <string name="change_grade">Wartość oceny</string>
+    <string name="change_counts_average">Wliczanie do średniej</string>
+    <string name="change_value_description">Opis oceny</string>
+    <string name="share_change_btn">Udostępnij tę zmianę</string>
+    <string name="share_change_title">Udostępnij szczegóły zmiany</string>
+    <string name="history_share_subject">Zmiana w USOS: %1$s (%2$s)</string>
+    <string name="history_share_footer">Wysłano z aplikacji Vistula Checker</string>
 
     <!-- Tasks Screen -->
     <string name="tasks_title">Twoje zadania</string>
@@ -506,14 +552,21 @@
     <string name="grades_sim_already_reached"> (cel osiągnięty nawet przy ocenie 3.0)</string>
     <string name="grades_sim_req_weighted">Średnia ważona ECTS: z przedmiotu za %1$.0f ECTS potrzebujesz oceny %2$.2f</string>
     <string name="grades_sim_input_error">Wpisz prawidłowe liczby (np. cel: 4.50, oceny: 2, ECTS: 6)</string>
+    <string name="gpa_chip_target_400">4.00</string>
+    <string name="gpa_chip_target_425">4.25</string>
     <string name="gpa_chip_target_450">4.50 (Stypendium)</string>
     <string name="gpa_chip_target_475">4.75 (Wyróżnienie)</string>
     <string name="gpa_chip_target_480">4.80 (Max styp.)</string>
     <string name="gpa_chip_target_500">5.00 (Maksimum)</string>
+    <string name="gpa_chip_ects_10">10 ECTS</string>
     <string name="gpa_chip_ects_15">15 ECTS (pół semestru)</string>
+    <string name="gpa_chip_ects_20">20 ECTS</string>
     <string name="gpa_chip_ects_30">30 ECTS (1 semestr)</string>
     <string name="gpa_chip_ects_45">45 ECTS</string>
     <string name="gpa_chip_ects_60">60 ECTS (cały rok)</string>
+    <string name="gpa_progress_title">Kwalifikacja do wyróżnień</string>
+    <string name="gpa_progress_scholarship">Stypendium Rektora (próg 4.50): %1$s</string>
+    <string name="gpa_progress_honors">Dyplom z wyróżnieniem (próg 4.75): %1$s</string>
     <string name="share_generated_by">Wygenerowano z aplikacji Vistula Checker</string>
     <string name="grades_all_terms">Wszystkie semestry</string>
     <string name="grades_empty_title">Brak danych w tym zakresie</string>
@@ -553,7 +606,7 @@
     <string name="account_oauth_consent">Zgoda OAuth: %1$s</string>
     <string name="account_toast_enter_credentials">Wpisz Consumer Key i Consumer Secret</string>
     <string name="account_pin_field_hint">PIN autoryzacji z USOS</string>
-    <string name="account_toast_pin_pasted">Wklejono PIN: %1$s</string>
+    <string name="account_toast_pin_pasted">Wklejono PIN</string>
     <string name="account_notices_heading">Powiadomienia i alerty</string>
     <string name="account_lead_time_15">15 minut przed</string>
     <string name="account_lead_time_30">30 minut przed</string>

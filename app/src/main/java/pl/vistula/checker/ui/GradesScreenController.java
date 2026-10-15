@@ -23,18 +23,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import pl.vistula.checker.MainActivity;
 import pl.vistula.checker.R;
 import pl.vistula.checker.core.CourseTestRecord;
 import pl.vistula.checker.core.GradeBrowser;
+import pl.vistula.checker.core.GradeSemesters;
 import pl.vistula.checker.core.GradeSummary;
 import pl.vistula.checker.core.Record;
 import pl.vistula.checker.core.Snapshot;
@@ -62,7 +60,7 @@ public final class GradesScreenController {
                               java.util.function.Consumer<String> onQueryChanged,
                               Runnable onResetFilters, Runnable onRefresh,
                               GradesListener listener) throws Exception {
-        UiHelper.title(activity, content, activity.getString(R.string.grades_heading), activity.getString(R.string.grades_overview_hint));
+        UiHelper.title(activity, content, activity.getString(R.string.grades_heading), activity.getString(R.string.grades_semester_overview));
         UiHelper.note(activity, content, activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(d.optLong("successAt"))), UiHelper.MUTED);
 
         if (!demo && !state.optString("error").isEmpty()) {
@@ -82,6 +80,9 @@ public final class GradesScreenController {
         }
 
         Snapshot snapshot = Snapshot.from(raw);
+        java.time.LocalDate today = java.time.LocalDate.now(pl.vistula.checker.UsosClient.ZONE);
+        String currentTerm = GradeSemesters.current(snapshot, today);
+        List<String> terms = GradeSemesters.ordered(snapshot, today);
         Button options = UiHelper.button(activity,
             filtersExpanded ? activity.getString(R.string.grades_filter_collapse) : activity.getString(R.string.grades_filter_expand),
             () -> onExpandToggled.accept(!filtersExpanded), false);
@@ -136,11 +137,27 @@ public final class GradesScreenController {
             list.removeAllViews();
             String currentQuery = search.getText().toString();
             List<Record> visible = GradeBrowser.select(snapshot.records.values(), semester, gradeType, gradeOrder, currentQuery, snapshot);
-            renderGradeSummary(activity, list, visible, state, semester);
-
             Set<String> renderedTestIds = new HashSet<>();
-            for (List<Record> group : GradeBrowser.groups(visible)) {
-                renderCourseGroup(activity, list, group, snapshot, renderedTestIds, listener);
+            int pendingCount = 0;
+            for (String term : terms) {
+                if (!semester.isEmpty() && !semester.equals(term)) continue;
+                List<Record> termRows = GradeSemesters.inTerm(visible, term);
+                List<Record> pendingCourses = GradeBrowser.ungraded(snapshot, term, gradeType, currentQuery);
+                pendingCount += pendingCourses.size();
+                String label = term.isEmpty() ? activity.getString(R.string.grades_semester_unknown)
+                    : snapshot.terms.containsKey(term) && !snapshot.terms.get(term).name.isEmpty() ? snapshot.terms.get(term).name : term;
+                if (term.equals(currentTerm)) label = activity.getString(R.string.grades_semester_current, label);
+                LinearLayout section = semesterSection(activity, list, term, label, termRows.size() + pendingCourses.size(), true);
+                renderGradeSummary(activity, section, termRows, state, label);
+                for (List<Record> group : GradeBrowser.groups(termRows))
+                    renderCourseGroup(activity, section, group, snapshot, renderedTestIds, listener);
+                for (Record course : pendingCourses) renderUngradedCourse(activity, section, course);
+                if (termRows.isEmpty() && pendingCourses.isEmpty()) {
+                    boolean hasGrades = snapshot.records.values().stream().anyMatch(row -> row.kind.equals("ocena") && row.term.equals(term));
+                    UiHelper.note(activity, section, activity.getString(hasGrades ? R.string.grades_semester_empty : R.string.grades_semester_no_grades), UiHelper.MUTED);
+                }
+                else if (!termRows.isEmpty()) UiHelper.note(activity, section, activity.getString(R.string.grades_count_summary,
+                    termRows.size(), GradeBrowser.groups(termRows).size()), UiHelper.MUTED);
             }
 
             if (snapshot.tests != null && !snapshot.tests.isEmpty()) {
@@ -154,9 +171,9 @@ public final class GradesScreenController {
                     }
                 }
                 if (!unassigned.isEmpty()) {
-                    UiHelper.heading(activity, list, activity.getString(R.string.grades_tests_heading));
+                    LinearLayout testsSection = semesterSection(activity, list, "\u0000tests", activity.getString(R.string.grades_unassigned_tests), unassigned.size(), false);
                     for (CourseTestRecord ctr : unassigned) {
-                        LinearLayout testBox = UiHelper.card(activity, list, Color.WHITE);
+                        LinearLayout testBox = UiHelper.card(activity, testsSection, Color.WHITE);
                         UiHelper.add(activity, testBox, ctr.testName, 17, UiHelper.INK, true);
                         UiHelper.add(activity, testBox, ctr.courseName, 13, UiHelper.GREEN, true);
                         if (ctr.maxPoints > 0) {
@@ -175,14 +192,13 @@ public final class GradesScreenController {
             }
 
             resetGrades.setVisibility(!semester.isEmpty() || !gradeType.equals("all") || !currentQuery.trim().isEmpty() || !gradeOrder.equals("name") ? View.VISIBLE : View.GONE);
-            if (visible.isEmpty()) {
+            if (visible.isEmpty() && pendingCount == 0 && (terms.isEmpty() || !currentQuery.trim().isEmpty())) {
                 LinearLayout box = UiHelper.card(activity, list, Color.WHITE);
                 UiHelper.add(activity, box,
                     currentQuery.trim().isEmpty() ? activity.getString(R.string.grades_empty_title) : activity.getString(R.string.grades_no_match),
                     17, UiHelper.INK, true);
                 UiHelper.note(activity, box, activity.getString(R.string.grades_no_match_hint), UiHelper.MUTED);
             }
-            UiHelper.note(activity, list, activity.getString(R.string.grades_count_summary, visible.size(), GradeBrowser.groups(visible).size()), UiHelper.MUTED);
         };
 
         UiHelper.watchSearch(search, value -> {
@@ -195,14 +211,53 @@ public final class GradesScreenController {
         content.addView(UiHelper.button(activity, activity.getString(R.string.grades_calc_button), () -> activity.navigate(9), false));
     }
 
+    private static void renderUngradedCourse(MainActivity activity, LinearLayout parent, Record course) {
+        View card = LayoutInflater.from(activity).inflate(R.layout.item_grade_card, parent, false);
+        ((TextView) card.findViewById(R.id.grade_item_course_name)).setText(course.title);
+        TextView badge = card.findViewById(R.id.grade_item_value_badge);
+        badge.setText(R.string.grades_no_grade);
+        badge.setTextSize(13);
+        badge.setTextColor(UiHelper.MUTED);
+        ((TextView) card.findViewById(R.id.grade_item_course_meta)).setText(course.optMeta("courseId"));
+        TextView ects = card.findViewById(R.id.grade_item_ects);
+        if (Double.isFinite(course.ects)) ects.setText(activity.getString(R.string.grade_ects_points,
+            String.format(Locale.forLanguageTag("pl-PL"), "%s", course.ects)));
+        else ects.setVisibility(View.GONE);
+        card.findViewById(R.id.grade_item_btn_details).setVisibility(View.GONE);
+        parent.addView(card);
+    }
+
+    private static LinearLayout semesterSection(MainActivity activity, LinearLayout parent, String key,
+                                                String title, int count, boolean defaultExpanded) {
+        LinearLayout section = new LinearLayout(activity);
+        section.setOrientation(LinearLayout.VERTICAL);
+        boolean[] expanded = {activity.gradeSemesterExpansion().getOrDefault(key, defaultExpanded)};
+        Button[] header = new Button[1];
+        Runnable update = () -> {
+            section.setVisibility(expanded[0] ? View.VISIBLE : View.GONE);
+            header[0].setText((expanded[0] ? "▾ " : "▸ ") + activity.getString(R.string.grades_semester_toggle,
+                title, count, activity.getString(expanded[0] ? R.string.grades_semester_collapse : R.string.grades_semester_expand)));
+            header[0].setContentDescription(activity.getString(R.string.grades_semester_toggle,
+                title, count, activity.getString(expanded[0] ? R.string.grades_semester_collapse : R.string.grades_semester_expand)));
+        };
+        header[0] = UiHelper.button(activity, "", () -> {
+            expanded[0] = !expanded[0];
+            activity.gradeSemesterExpansion().put(key, expanded[0]);
+            update.run();
+        }, false);
+        header[0].setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        header[0].setMaxLines(Integer.MAX_VALUE);
+        androidx.core.view.ViewCompat.setAccessibilityHeading(header[0], true);
+        parent.addView(header[0]);
+        parent.addView(section);
+        update.run();
+        return section;
+    }
+
     private static void renderSemesterPicker(MainActivity activity, LinearLayout content, Snapshot snapshot,
                                              String currentSemester, java.util.function.Consumer<String> onSelected) {
-        SortedSet<String> terms = new TreeSet<>(Comparator.reverseOrder());
-        for (Record row : snapshot.records.values()) {
-            if (row.kind.equals("ocena") && !row.term.isEmpty()) {
-                terms.add(row.term);
-            }
-        }
+        List<String> terms = new ArrayList<>(GradeSemesters.ordered(snapshot, java.time.LocalDate.now(pl.vistula.checker.UsosClient.ZONE)));
+        terms.remove("");
 
         final List<String> values = new ArrayList<>();
         values.add("");
@@ -271,6 +326,9 @@ public final class GradesScreenController {
         courseMeta.setText(meta);
 
         String ectsPoints = first.optMeta("ects");
+        if (ectsPoints.isEmpty() && !Double.isNaN(first.ects)) {
+            ectsPoints = first.ects == Math.floor(first.ects) ? String.format(Locale.forLanguageTag("pl-PL"), "%.0f", first.ects) : String.format(Locale.forLanguageTag("pl-PL"), "%.1f", first.ects);
+        }
         if (!ectsPoints.isEmpty()) {
             ectsView.setVisibility(View.VISIBLE);
             ectsView.setText(activity.getString(R.string.grade_ects_points, ectsPoints));
@@ -366,7 +424,7 @@ public final class GradesScreenController {
             String modTime = !r.sourceTime.isEmpty() ? r.sourceTime : r.optMeta("dateAcquisition");
             if (!modTime.isEmpty()) {
                 compDate.setVisibility(View.VISIBLE);
-                compDate.setText(modTime);
+                compDate.setText(HistoryScreenController.formatFullDate(modTime));
             } else {
                 compDate.setVisibility(View.GONE);
             }
@@ -382,7 +440,7 @@ public final class GradesScreenController {
                 boolean matchId = !courseId.isEmpty() && courseId.equalsIgnoreCase(ctr.courseId);
                 boolean matchName = !first.title.isEmpty() && (first.title.equalsIgnoreCase(ctr.courseName)
                     || (ctr.courseName != null && ctr.courseName.toLowerCase(Locale.ROOT).contains(first.title.toLowerCase(Locale.ROOT))));
-                if (matchId || matchName) {
+                if ((matchId || matchName) && first.term.equals(GradeSemesters.testTerm(snapshot, ctr))) {
                     matchedTests.add(ctr);
                     renderedTestIds.add(ctr.id);
                 }
@@ -471,7 +529,8 @@ public final class GradesScreenController {
             } catch (Exception ignored) {}
         }
         Set<String> courseIds = new HashSet<>(); for (Record row : rows) if (!row.optMeta("courseId").isEmpty()) courseIds.add(row.optMeta("courseId"));
-        for (CourseTestRecord test : snapshot.tests) if (courseIds.contains(test.courseId)) {
+        for (CourseTestRecord test : snapshot.tests) if (courseIds.contains(test.courseId)
+                && rows.get(0).term.equals(GradeSemesters.testTerm(snapshot, test))) {
             UiHelper.heading(activity, body, test.testName);
             try {
                 TextView text = UiHelper.text(activity, test.json().toString(2), 13, UiHelper.INK, false);

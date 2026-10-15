@@ -15,7 +15,7 @@
 
         <receiver
             android:name=".widget.TodayScheduleWidget"
-            android:exported="true"
+            android:exported="false"
             android:label="Plan zajęć na dziś">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -28,7 +28,7 @@
 
         <receiver
             android:name=".widget.QuickStatusWidget"
-            android:exported="true"
+            android:exported="false"
             android:label="Karta Studenta i Oceny">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

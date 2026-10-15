@@ -41,6 +41,27 @@ public final class UsosParser {
         object.keys().forEachRemaining(keys::add);
         Collections.sort(keys); return keys;
     }
+    public static List<Record> courseEditions(JSONObject editions, Map<String, Double> ectsPoints) throws JSONException {
+        List<Record> result = new ArrayList<>();
+        for (String term : sortedKeys(editions)) {
+            JSONArray rows = editions.optJSONArray(term);
+            if (rows == null) continue;
+            Set<String> seen = new HashSet<>();
+            for (int i = 0; i < rows.length(); i++) {
+                JSONObject course = rows.optJSONObject(i);
+                if (course == null) continue;
+                String id = optionalText(course, "course_id");
+                if (id.isEmpty() || !seen.add(id)) continue;
+                JSONObject translated = course.optJSONObject("course_name");
+                String title = translated == null ? id : language(translated);
+                if (title.isEmpty()) title = id;
+                double ects = ectsPoints.getOrDefault(term + "\0" + id, Double.NaN);
+                result.add(new Record("course:" + term + ":" + id, "przedmiot", title, "", "", "", term,
+                    "", "", ects, new JSONObject().put("courseId", id)));
+            }
+        }
+        return result;
+    }
 
     public static Map<String, Double> ectsPoints(JSONObject response) {
         Map<String, Double> map = new HashMap<>();
@@ -238,8 +259,13 @@ public final class UsosParser {
 
                 String inferredType = detectClassType(unitId, gradeTypeId, comment, desc, symbol, s);
                 if (!inferredType.isEmpty()) meta.put("classType", inferredType).put("classTypeSource", "timetable");
-
-                Record r = new Record("grade:" + exam + ":" + number, "ocena", names.getOrDefault(course, course), value, modified, "", term, "", "", ects, meta);
+                String gradeDate = "";
+                if (!modified.isEmpty() && modified.length() >= 10) {
+                    gradeDate = modified.substring(0, 10);
+                } else if (!dateAcq.isEmpty() && dateAcq.length() >= 10) {
+                    gradeDate = dateAcq.substring(0, 10);
+                }
+                Record r = new Record("grade:" + exam + ":" + number, "ocena", names.getOrDefault(course, course), value, modified, gradeDate, term, "", "", ects, meta);
                 // The same exam can be referenced by a course and its unit.
                 Record existing = s.records.get(r.id);
                 if (existing == null) {

@@ -7,3 +7,5 @@ local.properties
 *.keystore
 dist/
 __pycache__/
+**/bin/
+*.hprof

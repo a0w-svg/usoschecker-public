@@ -27,8 +27,14 @@ final class Vault {
         return (SecretKey) store.getKey(ALIAS, null);
     }
     JSONObject read() throws Exception {
-        if (!file.getBaseFile().exists()) return new JSONObject();
-        byte[] bytes = file.readFully();
+        byte[] bytes;
+        try { bytes = file.readFully(); }
+        catch (FileNotFoundException e) {
+            // Let AtomicFile recover its legacy backup before deciding this is a new store.
+            File base = file.getBaseFile();
+            if (!base.exists() && !new File(base.getPath() + ".bak").exists()) return new JSONObject();
+            throw e;
+        }
         if (bytes.length < 29 || bytes[0] != 1) throw new IOException("Nie można odczytać zapisanych danych.");
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         cipher.init(Cipher.DECRYPT_MODE, key(), new GCMParameterSpec(128, bytes, 1, 12));

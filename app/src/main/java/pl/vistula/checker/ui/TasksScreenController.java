@@ -61,22 +61,30 @@ public final class TasksScreenController {
             activity.getString(R.string.btn_add_task),
             () -> showTaskDialog(activity, null, "", rows.length(), callback), true));
 
-        int pending = 0;
+        LocalDate today = LocalDate.now(UsosClient.ZONE);
+        int pending = 0, doneCount = 0, todayCount = 0, weekCount = 0, overdueCount = 0;
         for (int i = 0; i < rows.length(); ++i) {
-            if (!rows.optJSONObject(i).optBoolean("done")) {
-                ++pending;
+            JSONObject t = rows.optJSONObject(i);
+            if (t == null) continue;
+            boolean done = t.optBoolean("done");
+            if (done) doneCount++; else pending++;
+            LocalDate due = TaskTools.dueDate(t);
+            if (!done && due != null) {
+                if (due.isBefore(today)) overdueCount++;
+                if (due.equals(today)) todayCount++;
+                if (!due.isBefore(today) && due.isBefore(today.plusDays(7))) weekCount++;
             }
         }
 
         UiHelper.note(activity, content,
-            activity.getString(R.string.tasks_summary, pending, (rows.length() - pending)),
+            activity.getString(R.string.tasks_summary, pending, doneCount),
             UiHelper.MUTED);
 
         if (rows.length() > 0) {
             LinearProgressIndicator completion = new LinearProgressIndicator(activity);
             completion.setMax(rows.length());
-            completion.setProgress(rows.length() - pending);
-            completion.setContentDescription(activity.getString(R.string.tasks_progress_desc, (rows.length() - pending), rows.length()));
+            completion.setProgress(doneCount);
+            completion.setContentDescription(activity.getString(R.string.tasks_progress_desc, doneCount, rows.length()));
             LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 8));
             cp.bottomMargin = UiHelper.dp(activity, 16);
             content.addView(completion, cp);
@@ -84,12 +92,20 @@ public final class TasksScreenController {
 
         UiHelper.chips(activity, content,
             new String[]{"all", "open", "done"},
-            new String[]{activity.getString(R.string.tasks_chip_all), activity.getString(R.string.tasks_chip_open), activity.getString(R.string.tasks_chip_done)},
+            new String[]{
+                activity.getString(R.string.tasks_chip_all) + " (" + rows.length() + ")",
+                activity.getString(R.string.tasks_chip_open) + " (" + pending + ")",
+                activity.getString(R.string.tasks_chip_done) + " (" + doneCount + ")"
+            },
             taskFilter, onFilterChanged);
 
         UiHelper.chips(activity, content,
             new String[]{"today", "week", "overdue"},
-            new String[]{activity.getString(R.string.tasks_chip_today), activity.getString(R.string.tasks_chip_week), activity.getString(R.string.tasks_chip_overdue)},
+            new String[]{
+                activity.getString(R.string.tasks_chip_today) + " (" + todayCount + ")",
+                activity.getString(R.string.tasks_chip_week) + " (" + weekCount + ")",
+                activity.getString(R.string.tasks_chip_overdue) + " (" + overdueCount + ")"
+            },
             taskFilter, onFilterChanged);
 
         UiHelper.note(activity, content, activity.getString(R.string.tasks_sort_note), UiHelper.MUTED);
@@ -110,7 +126,6 @@ public final class TasksScreenController {
         Runnable populate = () -> {
             list.removeAllViews();
             int count = 0;
-            LocalDate today = LocalDate.now(UsosClient.ZONE);
             LayoutInflater inflater = LayoutInflater.from(activity);
 
             for (JSONObject t : sorted) {
@@ -167,10 +182,17 @@ public final class TasksScreenController {
                     dueView.setText(statusText);
                     dueView.setTextColor(statusColor);
 
+                    card.setClickable(true);
+                    card.setFocusable(true);
+                    card.setOnClickListener(v -> showTaskDialog(activity, t, "", rows.length(), callback));
+
                     btnToggle.setText(done ? activity.getString(R.string.tasks_btn_mark_open) : activity.getString(R.string.tasks_btn_mark_done));
+                    btnToggle.setContentDescription(btnToggle.getText() + ": " + titleText);
                     btnToggle.setOnClickListener(v -> callback.onMutateTask(id, false));
 
                     btnEdit.setOnClickListener(v -> showTaskDialog(activity, t, "", rows.length(), callback));
+                    btnEdit.setContentDescription(activity.getString(R.string.tasks_btn_edit) + ": " + titleText);
+                    btnDelete.setContentDescription(activity.getString(R.string.tasks_btn_delete) + ": " + titleText);
 
                     btnDelete.setOnClickListener(v -> new MaterialAlertDialogBuilder(activity)
                         .setTitle(activity.getString(R.string.tasks_delete_dialog_title))
@@ -191,6 +213,14 @@ public final class TasksScreenController {
                 UiHelper.add(activity, emptyBox,
                     rows.length() == 0 ? activity.getString(R.string.tasks_empty_desc) : activity.getString(R.string.tasks_no_match_desc),
                     14, UiHelper.MUTED, false);
+                if (!search.getText().toString().trim().isEmpty()) {
+                    emptyBox.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), () -> {
+                        search.setText("");
+                        onQueryChanged.accept("");
+                    }, false));
+                } else if (!"all".equals(taskFilter)) {
+                    emptyBox.addView(UiHelper.button(activity, activity.getString(R.string.tasks_chip_all) + " (" + rows.length() + ")", () -> onFilterChanged.accept("all"), false));
+                }
             }
 
             UiHelper.note(activity, list, activity.getString(R.string.tasks_shown_count, count), UiHelper.MUTED);
@@ -240,8 +270,10 @@ public final class TasksScreenController {
             String title = name.getText() != null ? name.getText().toString().trim() : "";
             if (title.isEmpty()) {
                 name.setError(activity.getString(R.string.tasks_error_empty_title));
+                name.requestFocus();
             } else if (title.length() > 200) {
                 name.setError(activity.getString(R.string.tasks_error_title_length));
+                name.requestFocus();
             } else if (notes.getText() != null && notes.getText().length() > 2000) {
                 notes.setError(activity.getString(R.string.tasks_error_notes_length));
                 notes.requestFocus();

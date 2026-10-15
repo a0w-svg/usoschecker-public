@@ -86,6 +86,18 @@ public final class UsosClient {
                 values.put("oauth_signature", OAuth.encode(secret) + "&" + OAuth.encode(suppliedSecret));
             }
         }
+        String authorization = "";
+        if (file != null && signed) {
+            List<String> headers = new ArrayList<>();
+            Iterator<Map.Entry<String, String>> parameters = values.entrySet().iterator();
+            while (parameters.hasNext()) {
+                Map.Entry<String, String> parameter = parameters.next();
+                if (!parameter.getKey().startsWith("oauth_")) continue;
+                headers.add(OAuth.encode(parameter.getKey()) + "=\"" + OAuth.encode(parameter.getValue()) + "\"");
+                parameters.remove();
+            }
+            authorization = "OAuth " + String.join(", ", headers);
+        }
         String encoded = OAuth.query(values);
         boolean post = method.equals("POST");
         HttpURLConnection connection = connections.open(url + ((post && file == null) || encoded.isEmpty() ? "" : "?" + encoded));
@@ -94,6 +106,7 @@ public final class UsosClient {
         connection.setRequestMethod(method);
         connection.setRequestProperty("User-Agent", "VistulaChecker/1.0 (Android)");
         connection.setRequestProperty("Accept", "application/json, text/plain, */*");
+        if (!authorization.isEmpty()) connection.setRequestProperty("Authorization", authorization);
         try {
             if (post) {
                 connection.setDoOutput(true);
@@ -194,16 +207,17 @@ public final class UsosClient {
         try {
             String ectsRaw = get("services/courses/user_ects_points", Map.of());
             ectsPoints = UsosParser.ectsPoints(new JSONObject(ectsRaw));
-        } catch (Exception ignored) {}
+        } catch (Exception e) { optionalFailure(e); }
 
         reportProgress("Pobieranie kalendarza semestrów · terms/terms");
+        s.courses.addAll(UsosParser.courseEditions(editions, ectsPoints));
         try {
             if (!terms.isEmpty()) {
                 String termsRaw = get("services/terms/terms", Map.of("term_ids", String.join("|", terms),
                     "fields", "id|name|start_date|end_date|finish_date"));
                 s.terms.putAll(UsosParser.academicTerms(new JSONObject(termsRaw)));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) { optionalFailure(e); }
 
         reportProgress("Pobieranie subkont studenta · payments/user_accounts");
         Object accountsRaw = null;
@@ -213,11 +227,11 @@ public final class UsosClient {
             String accRaw = get("services/payments/user_accounts", Collections.emptyMap());
             accountsRaw = new JSONTokener(accRaw).nextValue();
         } catch (ApiException e) {
-            if (e.status == 403 || e.status == 401 || (e.getMessage() != null && e.getMessage().toLowerCase().contains("scope"))) {
+            if (e.status == 403 && !e.authorization) {
                 paymentsScopeMissing = true;
                 paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
-            }
-        } catch (Exception ignored) {}
+            } else throw e;
+        }
 
         reportProgress("Pobieranie należności i rat · payments/user_payments");
         Object paymentsRaw = null;
@@ -226,11 +240,11 @@ public final class UsosClient {
                 "id|description|type|state|account_number|payment_deadline|total_amount|saldo_amount|currency|chosen_installment_plan[id|currency|installments[amount|payment_date|description|number]]"));
             paymentsRaw = new JSONTokener(payRaw).nextValue();
         } catch (ApiException e) {
-            if (e.status == 403 || e.status == 401 || (e.getMessage() != null && e.getMessage().toLowerCase().contains("scope"))) {
+            if (e.status == 403 && !e.authorization) {
                 paymentsScopeMissing = true;
                 paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
-            }
-        } catch (Exception ignored) {}
+            } else throw e;
+        }
 
         s.payments = UsosParser.payments(accountsRaw, paymentsRaw, paymentsScopeMissing, paymentsNotice);
 
@@ -238,20 +252,20 @@ public final class UsosClient {
         try {
             String thesesRaw = get("services/theses/user", Map.of("fields", "id|title|status|supervisors[first_name|last_name]|reviewers[first_name|last_name]"));
             s.thesis = UsosParser.thesis(new JSONTokener(thesesRaw).nextValue());
-        } catch (Exception ignored) {}
+        } catch (Exception e) { optionalFailure(e); }
 
         reportProgress("Pobieranie sprawdzianów cząstkowych · crstests/user");
         try {
             String testsRaw = get("services/crstests/user", Map.of("fields", "id|course_id|name|points|max_points|grade|date"));
             s.tests.addAll(UsosParser.courseTests(new JSONTokener(testsRaw).nextValue(), names));
-        } catch (Exception ignored) {}
+        } catch (Exception e) { optionalFailure(e); }
 
         reportProgress("Pobieranie komunikatów uczelni · news/search");
         try {
             String newsRaw = get("services/news/search", Map.of("num", "10",
                 "fields", "items[article[id|title|publication_date|author[first_name|last_name]|headline_html]]"));
             s.news.addAll(UsosParser.newsArticles(new JSONTokener(newsRaw).nextValue()));
-        } catch (Exception ignored) {}
+        } catch (Exception e) { optionalFailure(e); }
 
         // Batch term IDs to avoid URL limits; every batch must succeed before commit.
         for (int i = 0; i < terms.size(); i += 8) {
@@ -273,14 +287,21 @@ public final class UsosClient {
         enrichGradeUnits(s);
         return s;
     }
-    private void enrichGradeUnits(Snapshot snapshot) {
+    private static void optionalFailure(Exception failure) throws Exception {
+        // Optional modules may be unavailable, but session expiry and server cooldowns apply to the whole sync.
+        if (failure instanceof ApiException) {
+            ApiException api = (ApiException) failure;
+            if (api.authorization || api.retryable || api.status == 401) throw api;
+        } else if (failure instanceof IOException) throw failure;
+    }
+    private void enrichGradeUnits(Snapshot snapshot) throws Exception {
         List<String> unitIds = new ArrayList<>(snapshot.records.values().stream().filter(r -> r.kind.equals("ocena"))
             .map(r -> r.optMeta("unitId")).filter(id -> !id.isEmpty()).collect(java.util.stream.Collectors.toCollection(TreeSet::new)));
         JSONObject types = new JSONObject();
         if (!unitIds.isEmpty()) {
             reportProgress("Rozpoznawanie typów zajęć · courses/units");
             try { types = new JSONObject(request("GET", "services/courses/classtypes_index", Map.of(), false, "", "")); }
-            catch (Exception ignored) {}
+            catch (Exception e) { optionalFailure(e); }
         }
         for (int i = 0; i < unitIds.size(); i += 50) {
             List<String> batch = unitIds.subList(i, Math.min(i + 50, unitIds.size()));
@@ -297,7 +318,7 @@ public final class UsosClient {
                     String name = definition == null ? "" : StudentServices.localized(definition.opt("name"));
                     if (!name.isEmpty()) grade.metadata.put("classType", name).put("classTypeSource", "unit_api");
                 }
-            } catch (Exception ignored) { /* Grades remain readable with an explicit unknown-type label. */ }
+            } catch (Exception e) { optionalFailure(e); }
         }
         // Resolve editor IDs independently; unavailable names never prevent a grade snapshot.
         List<String> authors = new ArrayList<>(snapshot.records.values().stream().filter(r -> r.kind.equals("ocena"))
@@ -310,7 +331,7 @@ public final class UsosClient {
                     String name = names.get(grade.optMeta("modificationAuthor"));
                     if (name != null && !name.isEmpty()) grade.metadata.put("modificationAuthorName", name);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) { optionalFailure(e); }
         }
     }
     interface LecturerSource { JSONObject fetch(List<String> ids) throws Exception; }

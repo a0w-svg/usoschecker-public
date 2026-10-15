@@ -152,6 +152,9 @@ public final class AttendanceScreenController {
 
             shown++;
             LinearLayout itemCard = UiHelper.card(activity, list, Color.WHITE);
+            itemCard.setClickable(true);
+            itemCard.setFocusable(true);
+            itemCard.setOnClickListener(v -> showEditCourseDialog(activity, code, requestRender));
             UiHelper.add(activity, itemCard, name, 17, UiHelper.INK, true);
             if (!code.equals(name)) UiHelper.note(activity, itemCard, activity.getString(R.string.attendance_course_id, code), UiHelper.MUTED);
 
@@ -224,6 +227,9 @@ public final class AttendanceScreenController {
             UiHelper.empty(activity, list,
                 activity.getString(R.string.attendance_empty_filter),
                 activity.getString(R.string.attendance_empty_desc));
+            if (!"all".equals(filter)) {
+                list.addView(UiHelper.button(activity, activity.getString(R.string.attendance_filter_all, totalCourses), () -> onFilterChanged.accept("all"), false));
+            }
         }
 
         UiHelper.note(activity, content, activity.getString(R.string.attendance_rule_footer), UiHelper.MUTED);

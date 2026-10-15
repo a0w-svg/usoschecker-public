@@ -5,6 +5,8 @@ import org.json.*;
 
 public final class Snapshot {
     public final Map<String, Record> records = new TreeMap<>();
+    // Enrolled course editions are separate from grades and never participate in grade diffs.
+    public final List<Record> courses = new ArrayList<>();
     public final String start, end;
     public PaymentInfo payments;
     public final Map<String, AcademicTerm> terms = new LinkedHashMap<>();
@@ -32,6 +34,9 @@ public final class Snapshot {
         JSONArray rows = new JSONArray();
         for (Record r : records.values()) rows.put(r.json());
         JSONObject o = new JSONObject().put("start", start).put("end", end).put("records", rows);
+        JSONArray courseRows = new JSONArray();
+        for (Record course : courses) courseRows.put(course.json());
+        o.put("courses", courseRows);
         if (payments != null) o.put("payments", payments.json());
         if (terms != null && !terms.isEmpty()) {
             JSONObject tObj = new JSONObject();
@@ -55,6 +60,8 @@ public final class Snapshot {
         Snapshot s = new Snapshot(o.getString("start"), o.getString("end"));
         JSONArray rows = o.getJSONArray("records");
         for (int i = 0; i < rows.length(); i++) s.add(Record.from(rows.getJSONObject(i)));
+        JSONArray courseRows = o.optJSONArray("courses");
+        if (courseRows != null) for (int i = 0; i < courseRows.length(); i++) s.courses.add(Record.from(courseRows.getJSONObject(i)));
         if (o.has("payments")) s.payments = PaymentInfo.from(o.optJSONObject("payments"));
         if (o.has("terms")) {
             JSONObject tObj = o.optJSONObject("terms");

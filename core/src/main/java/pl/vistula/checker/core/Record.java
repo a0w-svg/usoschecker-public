@@ -55,8 +55,9 @@ public final class Record {
             o.optJSONObject("metadata"));
     }
     public boolean same(Record other) {
+        boolean sameDate = date.equals(other.date) || (kind.equals("ocena") && (date.isEmpty() || other.date.isEmpty()));
         return value.equals(other.value) && title.equals(other.title) && sourceTime.equals(other.sourceTime)
-            && date.equals(other.date) && (startTime.isEmpty() || other.startTime.isEmpty() || startTime.equals(other.startTime))
+            && sameDate && (startTime.isEmpty() || other.startTime.isEmpty() || startTime.equals(other.startTime))
             && (endTime.isEmpty() || other.endTime.isEmpty() || endTime.equals(other.endTime))
             && ((Double.isNaN(ects) && Double.isNaN(other.ects)) || Math.abs(ects - other.ects) < 0.0001)
             && sameAcademicMetadata(other);

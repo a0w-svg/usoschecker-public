@@ -5,6 +5,26 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class TaskToolsTest {
+    @Test public void saveEnforcesLimitButAllowsEditingAtCapacity() throws Exception {
+        JSONArray rows = new JSONArray();
+        for (int i = 0; i < 200; i++) rows.put(task("" + i, "Old", "2026-10-13", 1, false));
+        JSONArray edited = TaskTools.save(rows, task("0", "Updated", "2026-10-13", 1, false));
+        assertEquals(200, edited.length());
+        assertEquals("Updated", edited.getJSONObject(0).getString("title"));
+        assertEquals("Old", rows.getJSONObject(0).getString("title"));
+        try { TaskTools.save(edited, task("extra", "Extra", "2026-10-13", 1, false)); fail(); }
+        catch (IllegalStateException expected) { assertEquals(200, edited.length()); }
+    }
+    @Test public void saveCopiesInputAndPreservesLegacyRows() throws Exception {
+        JSONObject replacement = task("new", "Title", "2026-10-13", 1, false);
+        JSONArray saved = TaskTools.save(new JSONArray().put("legacy"), replacement);
+        replacement.put("notes", "changed");
+        assertEquals("legacy", saved.getString(0));
+        assertEquals("Notatka", saved.getJSONObject(1).getString("notes"));
+    }
+    @Test(expected = IllegalArgumentException.class) public void saveRejectsOversizedNotes() throws Exception {
+        TaskTools.save(null, task("a", "Title", "2026-10-13", 1, false).put("notes", "x".repeat(2001)));
+    }
     private JSONObject task(String id, String title, String due, int priority, boolean done) throws Exception {
         return new JSONObject().put("id", id).put("title", title).put("due", due).put("priority", priority).put("done", done).put("notes", "Notatka");
     }

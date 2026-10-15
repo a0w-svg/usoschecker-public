@@ -32,12 +32,7 @@ public class QuickStatusWidget extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         if (ACTION_REFRESH.equals(intent.getAction())) {
-            new Thread(() -> {
-                try {
-                    new Repository(context).sync(false);
-                } catch (Exception ignored) {}
-                updateAll(context);
-            }).start();
+            pl.vistula.checker.SyncWorker.refreshFromWidget(context);
         }
     }
 

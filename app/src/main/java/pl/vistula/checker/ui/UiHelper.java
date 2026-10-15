@@ -86,9 +86,10 @@ public final class UiHelper {
         b.setText(label);
         b.setAllCaps(false);
         b.setTextSize(14);
-        b.setTextColor(primary ? Color.WHITE : GREEN);
+        int[][] states = {new int[]{-android.R.attr.state_enabled}, new int[]{}};
+        b.setTextColor(new ColorStateList(states, new int[]{MUTED, primary ? Color.WHITE : GREEN}));
         b.setCornerRadius(dp(context, 14));
-        b.setBackgroundTintList(ColorStateList.valueOf(primary ? GREEN : Color.rgb(232, 243, 236)));
+        b.setBackgroundTintList(new ColorStateList(states, new int[]{Color.rgb(230, 235, 231), primary ? GREEN : Color.rgb(232, 243, 236)}));
         b.setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10));
         b.setMinHeight(dp(context, 48));
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
@@ -109,6 +110,12 @@ public final class UiHelper {
         if (iconView != null) iconView.setText(icon);
         if (titleView != null) titleView.setText(title);
         if (subtitleView != null) subtitleView.setText(subtitle);
+
+        tile.setContentDescription(title + ". " + subtitle);
+        androidx.core.view.ViewCompat.setScreenReaderFocusable(tile, true);
+        if (iconView != null) iconView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        if (titleView != null) titleView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        if (subtitleView != null) subtitleView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
 
         tile.setOnClickListener(v -> action.run());
         parent.addView(tile);
@@ -131,6 +138,10 @@ public final class UiHelper {
         }
 
         card.setOnClickListener(onClickListener);
+        card.setContentDescription(title + ": " + count);
+        androidx.core.view.ViewCompat.setScreenReaderFocusable(card, true);
+        if (countView != null) countView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        if (titleView != null) titleView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         parent.addView(card);
         return card;
     }
@@ -144,10 +155,12 @@ public final class UiHelper {
 
     public static void heading(Context context, LinearLayout parent, String value) {
         add(context, parent, value, 20, INK, true);
+        androidx.core.view.ViewCompat.setAccessibilityHeading(parent.getChildAt(parent.getChildCount() - 1), true);
     }
 
     public static void title(Context context, LinearLayout parent, String value, String description) {
         add(context, parent, value, 28, INK, true);
+        androidx.core.view.ViewCompat.setAccessibilityHeading(parent.getChildAt(parent.getChildCount() - 1), true);
         add(context, parent, description, 14, MUTED, false);
     }
 
@@ -195,10 +208,16 @@ public final class UiHelper {
         e.setTextSize(14);
         e.setTextColor(INK);
         e.setSaveEnabled(false);
+        e.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
+        e.setImeOptions(e.getImeOptions() | android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
         wrapper.setSaveEnabled(false);
         e.setMinHeight(dp(context, 56));
         e.setInputType(InputType.TYPE_CLASS_TEXT | (password ? InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_TEXT_FLAG_MULTI_LINE));
         if (password) e.setTransformationMethod(PasswordTransformationMethod.getInstance());
+        if (password) {
+            e.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
+            e.setImeOptions(e.getImeOptions() | android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
+        }
         wrapper.addView(e, new LinearLayout.LayoutParams(-1, -2));
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
         p.bottomMargin = dp(context, 16);
@@ -209,9 +228,17 @@ public final class UiHelper {
     public static void copyToClipboard(Context context, String label, String text) {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard != null) {
-            clipboard.setPrimaryClip(ClipData.newPlainText(label, text));
+            clipboard.setPrimaryClip(privateClip(label, text));
             Toast.makeText(context, R.string.services_copied, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public static ClipData privateClip(String label, String text) {
+        ClipData clip = ClipData.newPlainText(label, text);
+        android.os.PersistableBundle extras = new android.os.PersistableBundle();
+        extras.putBoolean("android.content.extra.IS_SENSITIVE", true);
+        clip.getDescription().setExtras(extras);
+        return clip;
     }
 
     public static String initials(String name) {
@@ -280,9 +307,15 @@ public final class UiHelper {
         TextInputLayout wrapper = (TextInputLayout) parent.getChildAt(parent.getChildCount() - 1);
         wrapper.setEndIconMode(TextInputLayout.END_ICON_CLEAR_TEXT);
         wrapper.setEndIconContentDescription(context.getString(R.string.btn_clear_search));
+        if (onClear != null) {
+            wrapper.setEndIconOnClickListener(v -> {
+                input.setText("");
+                onClear.run();
+            });
+        }
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setSingleLine(true);
-        input.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        input.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH | android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
         input.setOnEditorActionListener((view, action, event) -> {
             if (action != android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) return false;
             android.view.inputmethod.InputMethodManager keyboard = context.getSystemService(android.view.inputmethod.InputMethodManager.class);
@@ -304,6 +337,10 @@ public final class UiHelper {
     }
 
     public static void browser(Context context, String address) {
+        if (!pl.vistula.checker.core.WebLinks.isWebUrl(address)) {
+            Toast.makeText(context, R.string.toast_cant_open_browser, Toast.LENGTH_SHORT).show();
+            return;
+        }
         try {
             androidx.browser.customtabs.CustomTabsIntent intent = new androidx.browser.customtabs.CustomTabsIntent.Builder()
                 .setShowTitle(true)

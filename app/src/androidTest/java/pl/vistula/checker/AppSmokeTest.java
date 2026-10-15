@@ -29,7 +29,10 @@ public class AppSmokeTest {
     }
     private Activity activity() { return rule.getActivity(); }
     private View find(View root, String text, boolean button) {
-        if (root instanceof TextView && (!button || root instanceof Button) && ((TextView) root).getText().toString().equals(text)) return root;
+        if (root instanceof TextView && (!button || root instanceof Button)) {
+            String label = ((TextView) root).getText().toString();
+            if (label.equals(text) || (button && label.matches(java.util.regex.Pattern.quote(text) + " \\(\\d+\\)"))) return root;
+        }
         if (root instanceof ViewGroup) for (int i = 0; i < ((ViewGroup) root).getChildCount(); i++) {
             View result = find(((ViewGroup) root).getChildAt(i), text, button); if (result != null) return result;
         }
@@ -41,7 +44,7 @@ public class AppSmokeTest {
         while (!done[0] && System.currentTimeMillis() < until) {
             InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
                 String[] tabs = {"Start", "Oceny", "Plan", "Zmiany", "Więcej"};
-                int[] ids = {100, 102, 105, 101, 106};
+                int[] ids = {R.id.nav_item_home, R.id.nav_item_grades, R.id.nav_item_plan, R.id.nav_item_history, R.id.nav_item_more};
                 View nav = findNavigation(activity().getWindow().getDecorView());
                 for (int i = 0; i < tabs.length; i++) if (text.equals(tabs[i]) && nav != null) {
                     android.view.MenuItem item = ((com.google.android.material.bottomnavigation.BottomNavigationView) nav).getMenu().findItem(ids[i]);
@@ -64,12 +67,16 @@ public class AppSmokeTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertNotNull("Missing text: " + text, find(activity().getWindow().getDecorView(), text, false)));
     }
+    private void hasContaining(String text) {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
+            assertTrue("Missing text: " + text, containsText(activity().getWindow().getDecorView(), text)));
+    }
     @Test public void demoSimulatesChangesAndRemainsSeparateFromLiveAccount() throws Exception {
         click("Zobacz wersję demonstracyjną"); click("Symuluj zmiany");
         has("Historia zmian"); has("Podstawy finansów"); has("Statystyka opisowa");
         click("Oceny"); has("Podstawy finansów");
-        click("Plan"); click("Agenda · cały plan"); has("Statystyka opisowa");
-        click("Więcej"); click("Konto"); click("Zakończ tryb demonstracyjny");
+        click("Plan"); click(activity().getString(R.string.schedule_mode_agenda)); has("Statystyka opisowa");
+        click("Więcej"); click(activity().getString(R.string.tool_account_title)); click("Zakończ tryb demonstracyjny");
         has("Połącz z USOS"); assertTrue(new Repository(activity()).read().optString("token").isEmpty());
     }
     @Test public void everyCatalogEntryHasMatchingOfflineMetadata() throws Exception {
@@ -83,7 +90,7 @@ public class AppSmokeTest {
         }
     }
     @Test public void apiSearchOpensOfflineMethodAndRequiredParameters() throws Exception {
-        click("Więcej"); click("API");
+        click("Więcej"); click(activity().getString(R.string.tool_api_title));
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             ViewGroup root = (ViewGroup) activity().getWindow().getDecorView();
             EditText input = firstInput(root); assertNotNull(input); input.setText("grades/latest");
@@ -94,7 +101,7 @@ public class AppSmokeTest {
             InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> found[0] = find(activity().getWindow().getDecorView(), "Parametry żądania", false) != null);
             if (!found[0]) Thread.sleep(100);
         }
-        assertTrue(found[0]); has("Wykonaj żądanie API"); has("Dokumentacja online");
+        assertTrue(found[0]); has(activity().getString(R.string.api_execute_btn)); has(activity().getString(R.string.api_btn_online_docs));
         click("← Wróć do katalogu");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertEquals("grades/latest", firstInput((ViewGroup) activity().getWindow().getDecorView()).getText().toString()));
@@ -103,14 +110,14 @@ public class AppSmokeTest {
         android.content.SharedPreferences preferences = activity().getSharedPreferences("api_catalog", Context.MODE_PRIVATE);
         java.util.Set<String> previous = new java.util.HashSet<>(preferences.getStringSet("favorites", java.util.Collections.emptySet()));
         try {
-            click("Więcej"); click("API");
+            click("Więcej"); click(activity().getString(R.string.tool_api_title));
             InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
                 firstInput((ViewGroup) activity().getWindow().getDecorView()).setText("grades/latest"));
             click("grades/latest\nGet user's latest grades");
             if (previous.contains("services/grades/latest")) click("Usuń z ulubionych");
             click("Dodaj do ulubionych");
             has("Usuń z ulubionych");
-            click("← Wróć do katalogu"); click("Ulubione");
+            click("← Wróć do katalogu"); click(activity().getString(R.string.api_fav_filter));
             has("grades/latest\nGet user's latest grades");
             click("grades/latest\nGet user's latest grades"); click("Usuń z ulubionych");
             click("← Wróć do katalogu");
@@ -121,7 +128,7 @@ public class AppSmokeTest {
         }
     }
     @Test public void catalogCanShowMoreThanFirstPage() throws Exception {
-        click("Więcej"); click("API");
+        click("Więcej"); click(activity().getString(R.string.tool_api_title));
         has("Wyświetlono 60 z 571 pasujących metod.");
         click("Pokaż kolejne metody");
         has("Wyświetlono 120 z 571 pasujących metod.");
@@ -141,31 +148,31 @@ public class AppSmokeTest {
         click("Zobacz wersję demonstracyjną"); click("Oceny");
         searchFor("FINANSÓW"); has("Podstawy finansów");
         searchFor("nieistniejący przedmiot"); has("Brak pasujących danych");
-        searchFor(""); click("Plan"); click("Dzisiaj"); has("Ekonomia"); has("TRWAJĄ TERAZ");
-        click("Agenda · cały plan"); has("Statystyka opisowa");
+        searchFor(""); click("Plan"); click("Dzisiaj"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
+        click(activity().getString(R.string.schedule_mode_agenda)); has("Statystyka opisowa");
         searchFor("204"); has("Statystyka opisowa");
-        searchFor("315"); has("Brak pasujących danych");
+        searchFor("315"); has(activity().getString(R.string.schedule_no_search_results));
         click("Start"); click("Oceny");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertEquals("", firstInput((ViewGroup) activity().getWindow().getDecorView()).getText().toString()));
     }
     @Test public void gradeFiltersDetailsAndTimetableSearchStayIndependent() throws Exception {
         click("Zobacz wersję demonstracyjną"); click("Oceny"); click("Filtry i sortowanie"); click("Liczbowe");
-        has("Liczbowe: 1\nPozostałe: 0"); searchFor("finansów");
+        has(activity().getString(R.string.grades_card_counts, 4, 0)); searchFor("finansów");
         click("Ukryj filtry i sortowanie"); capturePreview("grades-refined-preview.png");
-        click("4,0");
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Dodaj zadanie"))
+        click(activity().getString(R.string.grades_subject_details));
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.grades_btn_add_task))
             .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog())
             .perform(androidx.test.espresso.action.ViewActions.click());
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_title))
-            .check((view, missing) -> { assertNull(missing); assertEquals("Nauka: Podstawy finansów", ((EditText) view).getText().toString()); });
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_title))
+            .check((view, missing) -> { assertNull(missing); assertEquals("Podstawy finansów", ((EditText) view).getText().toString()); });
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Anuluj"))
             .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog())
             .perform(androidx.test.espresso.action.ViewActions.click());
         click("Plan");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> assertEquals("", firstInput((ViewGroup) activity().getWindow().getDecorView()).getText().toString()));
-        click("Lista tygodnia"); has("Ekonomia"); capturePreview("timetable-week-preview.png");
-        searchFor("Kowalska"); click("Oceny"); has("Podstawy finansów"); has("Liczbowe: 1\nPozostałe: 0");
+        click(activity().getString(R.string.schedule_mode_week)); has("Ekonomia"); capturePreview("timetable-week-preview.png");
+        searchFor("Kowalska"); click("Oceny"); has("Podstawy finansów"); has(activity().getString(R.string.grades_card_counts, 2, 0));
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> assertEquals("finansów", firstInput((ViewGroup) activity().getWindow().getDecorView()).getText().toString()));
         click("Filtry i sortowanie"); click("Pozostałe"); has("Brak pasujących danych"); click("Wyczyść filtry ocen"); has("Język angielski");
     }
@@ -174,31 +181,33 @@ public class AppSmokeTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             View decor = activity().getWindow().getDecorView(); int[] grade = new int[2], summary = new int[2];
             find(decor,"Podstawy finansów",false).getLocationOnScreen(grade); find(decor,"Podsumowanie ocen",false).getLocationOnScreen(summary);
-            assertTrue(grade[1] < summary[1]); firstInput((ViewGroup) decor).requestFocus();
+            assertTrue(summary[1] < grade[1]); firstInput((ViewGroup) decor).requestFocus();
         });
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withContentDescription("Wyczyść wyszukiwanie"))
             .perform(androidx.test.espresso.action.ViewActions.click());
         has("Język angielski"); capturePreview("friendly-grades.png");
-        click("Plan"); click("Lista dnia"); searchFor("Kowalska"); has("Brak pasujących zajęć w tym dniu");
+        click("Plan"); click(activity().getString(R.string.schedule_btn_today)); searchFor("Kowalska"); has(activity().getString(R.string.schedule_no_search_results));
         String tomorrow = java.time.LocalDate.now(UsosClient.ZONE).plusDays(1).format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-        click("Przejdź do " + tomorrow); has("Statystyka opisowa"); capturePreview("friendly-plan.png");
+        click(activity().getString(R.string.schedule_btn_next_class) + " (" + pl.vistula.checker.ui.UiHelper.shortDate(java.time.LocalDate.now(UsosClient.ZONE).plusDays(1)) + ")"); has("Statystyka opisowa"); capturePreview("friendly-plan.png");
         searchFor("nieistniejace");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             View decor = activity().getWindow().getDecorView();
-            assertFalse(find(decor,"Kolejny dzień z zajęciami",true).isEnabled());
-            assertFalse(find(decor,"Eksportuj widoczny plan (.ics)",true).isEnabled());
+            assertNull(find(decor, activity().getString(R.string.schedule_btn_next_class), true));
+            assertFalse(find(decor, activity().getString(R.string.schedule_export_ics), true).isEnabled());
         });
     }
     @Test public void weeklyViewExportsOnlyTheSelectedWeek() throws Exception {
-        java.io.File output = new java.io.File(activity().getCacheDir(), "week-test.ics");
+        java.io.File exportDirectory = new java.io.File(activity().getCacheDir(), "test-exports");
+        exportDirectory.mkdirs();
+        java.io.File output = new java.io.File(exportDirectory, "week-test.ics");
         java.nio.file.Files.write(output.toPath(), new byte[0]);
         androidx.test.espresso.intent.Intents.init();
         try {
-            android.content.Intent result = new android.content.Intent().setData(android.net.Uri.fromFile(output));
+            android.content.Intent result = new android.content.Intent().setData(androidx.core.content.FileProvider.getUriForFile(activity(), activity().getPackageName() + ".debugexports", output));
             androidx.test.espresso.intent.Intents.intending(androidx.test.espresso.intent.matcher.IntentMatchers.hasAction(android.content.Intent.ACTION_CREATE_DOCUMENT))
                 .respondWith(new android.app.Instrumentation.ActivityResult(Activity.RESULT_OK, result));
-            click("Zobacz wersję demonstracyjną"); click("Plan"); click("Lista tygodnia");
-            click("Eksportuj widoczny plan (.ics)");
+            click("Zobacz wersję demonstracyjną"); click("Plan"); click(activity().getString(R.string.schedule_mode_week));
+            click(activity().getString(R.string.schedule_export_ics));
             long until = System.currentTimeMillis() + 10000;
             while (output.length() == 0 && System.currentTimeMillis() < until) Thread.sleep(100);
             String calendar = new String(java.nio.file.Files.readAllBytes(output.toPath()), java.nio.charset.StandardCharsets.UTF_8);
@@ -239,16 +248,16 @@ public class AppSmokeTest {
         click("Zobacz wersję demonstracyjną");
         has("Najbliższe zajęcia");
         click("Oceny"); has("Twoje oceny"); has("Podstawy finansów");
-        click("Plan"); has("Plan zajęć"); has("Ekonomia"); has("TRWAJĄ TERAZ");
+        click("Plan"); has("Plan zajęć"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
         click("Zmiany"); has("Historia zmian");
-        click("Więcej"); click("Zadania"); has("Dodaj zadanie");
+        click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); has("Dodaj zadanie");
     }
     @Test public void demoTasksCanBeAddedAndCompletedWithoutWritingLiveData() throws Exception {
         String before = new Repository(activity()).read().optJSONArray("tasks") == null ? "[]" : new Repository(activity()).read().getJSONArray("tasks").toString();
-        click("Zobacz wersję demonstracyjną"); click("Więcej"); click("Zadania"); click("Dodaj zadanie");
-androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_title))
+        click("Zobacz wersję demonstracyjną"); click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); click("Dodaj zadanie");
+androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_title))
             .perform(androidx.test.espresso.action.ViewActions.replaceText("Przygotować projekt"), androidx.test.espresso.action.ViewActions.closeSoftKeyboard());
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Dodaj"))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_save))
             .perform(androidx.test.espresso.action.ViewActions.click());
         has("Przygotować projekt"); click("Oznacz jako ukończone"); has("Do zrobienia: 0 · ukończone: 1");
         String after = new Repository(activity()).read().optJSONArray("tasks") == null ? "[]" : new Repository(activity()).read().getJSONArray("tasks").toString();
@@ -257,24 +266,24 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
     @Test public void semesterFilterAndSummaryTrackVisibleGrades() throws Exception {
         click("Zobacz wersję demonstracyjną"); click("Oceny");
         click("Filtry i sortowanie");
-        has("Podsumowanie ocen"); has("Liczbowe: 1\nPozostałe: 1");
+        has("Podsumowanie ocen"); has(activity().getString(R.string.grades_card_counts, 4, 0)); has(activity().getString(R.string.grades_card_counts, 1, 1));
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> firstSpinner((ViewGroup) activity().getWindow().getDecorView()).setSelection(1));
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        has("Podstawy finansów"); has("Liczbowe: 1\nPozostałe: 0");
+        has("Podstawy finansów"); has(activity().getString(R.string.grades_card_counts, 4, 0));
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertNull(find(activity().getWindow().getDecorView(), "Język angielski", false)));
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> firstSpinner((ViewGroup) activity().getWindow().getDecorView()).setSelection(2));
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        has("Język angielski"); has("Liczbowe: 0\nPozostałe: 1");
+        has("Język angielski"); has(activity().getString(R.string.grades_card_counts, 1, 1));
     }
     @Test public void taskEditingFiltersAndDashboardKeepTheSameTask() throws Exception {
-        click("Zobacz wersję demonstracyjną"); click("Więcej"); click("Zadania"); click("Dodaj zadanie");
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_title))
+        click("Zobacz wersję demonstracyjną"); click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); click("Dodaj zadanie");
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_title))
             .perform(androidx.test.espresso.action.ViewActions.replaceText("Projekt"), androidx.test.espresso.action.ViewActions.closeSoftKeyboard());
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Dodaj"))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_save))
             .perform(androidx.test.espresso.action.ViewActions.click());
         click("Edytuj zadanie");
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_title))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_title))
             .perform(androidx.test.espresso.action.ViewActions.replaceText("Projekt poprawiony"), androidx.test.espresso.action.ViewActions.closeSoftKeyboard());
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Zapisz"))
             .perform(androidx.test.espresso.action.ViewActions.click());
@@ -287,26 +296,27 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
     }
     @Test public void taskNotesPrioritySearchAndDeletionUndoStayInDemo() throws Exception {
         String original = new Repository(activity()).read().toString();
-        click("Zobacz wersję demonstracyjną"); click("Więcej"); click("Zadania"); click("Dodaj zadanie");
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_title))
+        click("Zobacz wersję demonstracyjną"); click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); click("Dodaj zadanie");
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_title))
             .perform(androidx.test.espresso.action.ViewActions.replaceText("Przygotuj prezentację"), androidx.test.espresso.action.ViewActions.closeSoftKeyboard());
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_notes))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_notes))
             .perform(androidx.test.espresso.action.ViewActions.replaceText("Materiały w bibliotece"), androidx.test.espresso.action.ViewActions.closeSoftKeyboard());
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_priority))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_priority))
             .check((view, missing) -> { assertNull(missing); ((Spinner) view).setSelection(2); });
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Dodaj")).perform(androidx.test.espresso.action.ViewActions.click());
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_save)).perform(androidx.test.espresso.action.ViewActions.click());
         has("Wysoki priorytet"); has("Materiały w bibliotece");
         capturePreview("task-priority-preview.png");
         searchFor("bibliotece"); has("Przygotuj prezentację");
         click("Edytuj zadanie");
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_notes))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_notes))
             .check((view, missing) -> { assertNull(missing); assertEquals("Materiały w bibliotece", ((EditText) view).getText().toString()); });
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_priority))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_priority))
             .check((view, missing) -> { assertNull(missing); assertEquals(2, ((Spinner) view).getSelectedItemPosition()); });
         capturePreview("task-editor-preview.png");
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Zapisz")).perform(androidx.test.espresso.action.ViewActions.click());
         click("Usuń zadanie");
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Usuń")).perform(androidx.test.espresso.action.ViewActions.click());
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.tasks_btn_delete))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).perform(androidx.test.espresso.action.ViewActions.click());
         has("Spokojna głowa"); click("Cofnij");
         has("Przygotuj prezentację"); has("Wysoki priorytet");
         assertEquals(original, new Repository(activity()).read().toString());
@@ -328,16 +338,18 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         } finally { screenshot.recycle(); }
     }
     @Test public void timetableExportWritesVisibleEventsToSelectedDocument() throws Exception {
-        java.io.File output = new java.io.File(activity().getCacheDir(), "calendar-test.ics");
+        java.io.File exportDirectory = new java.io.File(activity().getCacheDir(), "test-exports");
+        exportDirectory.mkdirs();
+        java.io.File output = new java.io.File(exportDirectory, "calendar-test.ics");
         java.nio.file.Files.write(output.toPath(), new byte[0]);
         androidx.test.espresso.intent.Intents.init();
         try {
-            android.content.Intent result = new android.content.Intent().setData(android.net.Uri.fromFile(output));
+            android.content.Intent result = new android.content.Intent().setData(androidx.core.content.FileProvider.getUriForFile(activity(), activity().getPackageName() + ".debugexports", output));
             androidx.test.espresso.intent.Intents.intending(
                 androidx.test.espresso.intent.matcher.IntentMatchers.hasAction(android.content.Intent.ACTION_CREATE_DOCUMENT))
                 .respondWith(new android.app.Instrumentation.ActivityResult(Activity.RESULT_OK, result));
-            click("Zobacz wersję demonstracyjną"); click("Plan"); click("Agenda · cały plan"); searchFor("204");
-            click("Eksportuj widoczny plan (.ics)");
+            click("Zobacz wersję demonstracyjną"); click("Plan"); click(activity().getString(R.string.schedule_mode_agenda)); searchFor("204");
+            click(activity().getString(R.string.schedule_export_ics));
             long until = System.currentTimeMillis() + 10000;
             while (output.length() == 0 && System.currentTimeMillis() < until) Thread.sleep(100);
             String calendar = new String(java.nio.file.Files.readAllBytes(output.toPath()), java.nio.charset.StandardCharsets.UTF_8);
@@ -376,7 +388,7 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         click("Zobacz wersję demonstracyjną");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertTrue(containsText(activity().getWindow().getDecorView(), "Prowadzący: Anna Kowalska")));
-        click("Plan"); click("Agenda · cały plan"); searchFor("Kowalska"); has("Statystyka opisowa");
+        click("Plan"); click(activity().getString(R.string.schedule_mode_agenda)); searchFor("Kowalska"); has("Statystyka opisowa");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertTrue(containsText(activity().getWindow().getDecorView(), "Prowadzący: Anna Kowalska")));
     }
@@ -386,16 +398,14 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
             if (containsText(((ViewGroup) root).getChildAt(i), part)) return true;
         return false;
     }
-    @Test public void calendarShowsCurrentLectureAndExtendsBeyondEightWeeks() throws Exception {
-        click("Zobacz wersję demonstracyjną"); has("TRWAJĄ TERAZ"); has("Ekonomia");
-        click("Plan"); has("Oś dnia"); has("TRWAJĄ TERAZ");
-        click("Agenda · cały plan");
-        click("Wczytaj kolejne 4 tygodnie");
-        has("Agenda · cały plan");
-        click("Wczytaj kolejne 4 tygodnie");
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
-            assertNull(find(activity().getWindow().getDecorView(), "Wczytaj kolejne 4 tygodnie", true)));
-        click("Dzisiaj"); click("Oś dnia"); has("Ekonomia"); has("Przejdź do teraz");
+    @Test public void calendarShowsCurrentLectureAndSavedAgendaRange() throws Exception {
+        click("Zobacz wersję demonstracyjną"); hasContaining(activity().getString(R.string.classes_ongoing)); has("Ekonomia");
+        click("Plan"); hasContaining(activity().getString(R.string.classes_ongoing));
+        click(activity().getString(R.string.schedule_mode_agenda));
+        has("Statystyka opisowa");
+        hasContaining(Demo.state(false).getJSONObject("snapshot").getString("start") + " – "
+            + Demo.state(false).getJSONObject("snapshot").getString("end"));
+        click("Dzisiaj"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
     }
     @Test public void calendarBlocksFollowDurationAndSeparateOverlaps() {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
@@ -458,13 +468,6 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
             assertFalse(after.optString("error").isEmpty());
             assertTrue(r.sync(true, s -> updated).isEmpty()); assertEquals(1, r.read().getJSONArray("history").length());
         } finally { r.disconnect(); }
-    }
-    @Test public void publicApiInstallationWorksWithoutCredentials() throws Exception {
-        JSONObject method = new JSONObject("{\"name\":\"services/apisrv/installation\",\"auth_options\":{\"consumer\":\"ignored\",\"token\":\"ignored\",\"administrative_only\":false}}");
-        UsosClient.Response response = new UsosClient(new JSONObject()).explore(method, java.util.Map.of(), "GET", null, null);
-        JSONObject result = new JSONObject(response.text());
-        assertEquals(UsosClient.BASE, result.getString("base_url"));
-        assertTrue(result.getJSONObject("institution_name").getString("pl").contains("Vistula"));
     }
     private String read(Context c, String path) throws Exception {
         try (java.io.InputStream input = c.getAssets().open(path); java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {

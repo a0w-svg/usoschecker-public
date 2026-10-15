@@ -91,7 +91,7 @@ public final class PaymentsScreenController {
                 if (!acc.accountOwner.isEmpty()) {
                     UiHelper.add(activity, box, activity.getString(R.string.payments_owner, acc.accountOwner), 13, UiHelper.MUTED, false);
                 }
-                UiHelper.add(activity, box, acc.bankAccountNumber, 16, UiHelper.GREEN, true);
+                UiHelper.add(activity, box, formatIban(acc.bankAccountNumber), 16, UiHelper.GREEN, true);
                 if (!acc.swift.isEmpty()) {
                     UiHelper.add(activity, box, activity.getString(R.string.payments_swift, acc.swift), 12, UiHelper.MUTED, false);
                 }
@@ -101,7 +101,7 @@ public final class PaymentsScreenController {
                 box.addView(UiHelper.button(activity, activity.getString(R.string.payments_copy_iban), () -> {
                     ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(MainActivity.CLIPBOARD_SERVICE);
                     if (clipboard != null) {
-                        clipboard.setPrimaryClip(ClipData.newPlainText("Subkonto USOS", acc.bankAccountNumber.replaceAll("\\s+", "")));
+                        clipboard.setPrimaryClip(UiHelper.privateClip("Subkonto USOS", acc.bankAccountNumber.replaceAll("\\s+", "")));
                         Toast.makeText(activity, activity.getString(R.string.payments_iban_copied), Toast.LENGTH_SHORT).show();
                     }
                 }, false));
@@ -146,31 +146,59 @@ public final class PaymentsScreenController {
 
                 if (!inst.deadline.isEmpty()) {
                     deadline.setVisibility(View.VISIBLE);
-                    deadline.setText(activity.getString(R.string.payments_deadline, inst.deadline));
+                    deadline.setText(activity.getString(R.string.payments_deadline, HistoryScreenController.formatFullDate(inst.deadline)));
                     if (overdue) deadline.setTextColor(Color.rgb(160, 48, 40));
                 }
 
                 if (!inst.paymentDate.isEmpty()) {
                     paidDate.setVisibility(View.VISIBLE);
-                    paidDate.setText(activity.getString(R.string.payments_date_paid, inst.paymentDate));
+                    paidDate.setText(activity.getString(R.string.payments_date_paid, HistoryScreenController.formatFullDate(inst.paymentDate)));
                 }
 
                 if (!inst.bankAccountNumber.isEmpty()) {
                     account.setVisibility(View.VISIBLE);
-                    account.setText(activity.getString(R.string.payments_account_for_installment, inst.bankAccountNumber));
+                    account.setText(activity.getString(R.string.payments_account_for_installment, formatIban(inst.bankAccountNumber)));
                     btnCopy.setVisibility(View.VISIBLE);
-                    btnCopy.setOnClickListener(v -> {
+                    Runnable copyAction = () -> {
                         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(MainActivity.CLIPBOARD_SERVICE);
                         if (clipboard != null) {
-                            clipboard.setPrimaryClip(ClipData.newPlainText(activity.getString(R.string.payment_clipboard_label), inst.bankAccountNumber.replaceAll("\\s+", "")));
+                            clipboard.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.payment_clipboard_label), inst.bankAccountNumber.replaceAll("\\s+", "")));
                             Toast.makeText(activity, activity.getString(R.string.payments_account_copied), Toast.LENGTH_SHORT).show();
                         }
-                    });
+                    };
+                    btnCopy.setOnClickListener(v -> copyAction.run());
+                    instCard.setClickable(true);
+                    instCard.setFocusable(true);
+                    instCard.setOnClickListener(v -> copyAction.run());
                 }
 
                 content.addView(instCard);
             }
         }
         content.addView(UiHelper.button(activity, activity.getString(R.string.payments_refresh_btn), onRefresh, false));
+    }
+
+    public static String formatIban(String raw) {
+        if (raw == null) return "";
+        String clean = raw.replaceAll("\\s+", "");
+        if (clean.length() < 10) return raw;
+        StringBuilder sb = new StringBuilder();
+        int offset = 0;
+        if (clean.length() > 2 && Character.isLetter(clean.charAt(0)) && Character.isLetter(clean.charAt(1))) {
+            sb.append(clean, 0, 2);
+            offset = 2;
+            if (clean.length() >= 4) {
+                sb.append(" ").append(clean, 2, 4);
+                offset = 4;
+            }
+        } else if (clean.length() == 26) {
+            sb.append(clean, 0, 2);
+            offset = 2;
+        }
+        for (int i = offset; i < clean.length(); i += 4) {
+            if (sb.length() > 0) sb.append(" ");
+            sb.append(clean.substring(i, Math.min(i + 4, clean.length())));
+        }
+        return sb.toString();
     }
 }

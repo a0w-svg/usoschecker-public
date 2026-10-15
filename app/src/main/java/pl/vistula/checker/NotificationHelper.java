@@ -64,20 +64,22 @@ public final class NotificationHelper {
         if (!gradeChanges.isEmpty()) {
             Intent intent = new Intent(context, MainActivity.class)
                 .putExtra("tab", 2)
-                .putExtra("showHistory", true)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pending = PendingIntent.getActivity(context, 1, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0));
 
             Intent historyIntent = new Intent(context, MainActivity.class)
                 .putExtra("showHistory", true)
+                .putExtra("historyKind", "ocena")
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pendingHistory = PendingIntent.getActivity(context, 2, historyIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0));
 
             String title = gradeChanges.size() == 1
-                ? "Nowa ocena: " + gradeChanges.get(0).title
-                : "Nowe oceny w USOS (" + gradeChanges.size() + ")";
+                ? context.getString("Dodano".equals(gradeChanges.get(0).action) ? R.string.notification_grade_added
+                    : "Usunięto".equals(gradeChanges.get(0).action) ? R.string.notification_grade_removed : R.string.notification_grade_modified,
+                    gradeChanges.get(0).title)
+                : context.getString(R.string.notification_grade_changes, gradeChanges.size());
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_GRADES)
                 .setSmallIcon(R.drawable.ic_notification)
@@ -92,18 +94,21 @@ public final class NotificationHelper {
             if (gradeChanges.size() == 1) {
                 Change single = gradeChanges.get(0);
                 String desc = single.optMeta("valueDescription");
-                String text = single.after + (desc.isEmpty() ? "" : " (" + desc + ")") + (single.getEcts() > 0 ? " · " + single.getEcts() + " ECTS" : "");
-                builder.setContentText(text);
-                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(text + (single.sourceTime.isEmpty() ? "" : "\nCzas w USOS: " + single.sourceTime)));
+                String text = gradeValue(single) + (desc.isEmpty() ? "" : " (" + desc + ")") + (single.getEcts() > 0 ? " · " + single.getEcts() + " ECTS" : "");
+                String dateText = !single.date.isEmpty() ? single.date : (!single.sourceTime.isEmpty() ? single.sourceTime : "");
+                String formattedDate = pl.vistula.checker.ui.HistoryScreenController.formatFullDate(dateText);
+                builder.setContentText(text + (!formattedDate.isEmpty() ? " · " + formattedDate : ""));
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(text + (!formattedDate.isEmpty() ? "\nData wpisania: " + formattedDate : "") + (single.sourceTime.isEmpty() || single.sourceTime.equals(dateText) ? "" : "\nCzas w USOS: " + single.sourceTime)));
             } else {
                 NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle().setBigContentTitle(title);
                 for (int i = 0; i < Math.min(5, gradeChanges.size()); i++) {
                     Change g = gradeChanges.get(i);
-                    inbox.addLine(g.title + ": " + g.after);
+                    String gDate = pl.vistula.checker.ui.HistoryScreenController.formatFullDate(g.date);
+                    inbox.addLine(g.action + " · " + g.title + ": " + gradeValue(g) + (!gDate.isEmpty() ? " (" + gDate + ")" : ""));
                 }
                 if (gradeChanges.size() > 5) inbox.setSummaryText("+ jeszcze " + (gradeChanges.size() - 5) + " ocen");
                 builder.setStyle(inbox);
-                builder.setContentText("Otrzymano " + gradeChanges.size() + " nowych ocen. Sprawdź szczegóły.");
+                builder.setContentText(context.getString(R.string.notification_grade_changes_body, gradeChanges.size()));
             }
 
             try { manager.notify(10, builder.build()); } catch (SecurityException ignored) {}
@@ -113,7 +118,6 @@ public final class NotificationHelper {
         if (!scheduleChanges.isEmpty()) {
             Intent intent = new Intent(context, MainActivity.class)
                 .putExtra("tab", 5)
-                .putExtra("showHistory", true)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             PendingIntent pending = PendingIntent.getActivity(context, 3, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 23 ? PendingIntent.FLAG_IMMUTABLE : 0));
@@ -132,24 +136,45 @@ public final class NotificationHelper {
 
             if (scheduleChanges.size() == 1) {
                 Change single = scheduleChanges.get(0);
-                String diff = single.optMeta("diffRoom");
-                if (diff.isEmpty()) diff = single.optMeta("diffTime");
-                if (diff.isEmpty()) diff = single.action + ": " + single.title;
-                builder.setContentText(diff);
-                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(diff + "\n" + single.date));
+                List<String> diffList = new ArrayList<>();
+                if (!single.optMeta("diffDate").isEmpty()) diffList.add("Data: " + single.optMeta("diffDate"));
+                if (!single.optMeta("diffTime").isEmpty()) diffList.add("Godziny: " + single.optMeta("diffTime"));
+                if (!single.optMeta("diffRoom").isEmpty()) diffList.add("Sala: " + single.optMeta("diffRoom"));
+                if (!single.optMeta("diffLecturers").isEmpty()) diffList.add("Wykładowca: " + single.optMeta("diffLecturers"));
+                if (!single.optMeta("diffBuilding").isEmpty()) diffList.add("Budynek: " + single.optMeta("diffBuilding"));
+                if (!single.optMeta("diffGroup").isEmpty()) diffList.add("Grupa: " + single.optMeta("diffGroup"));
+                String diff = !diffList.isEmpty() ? String.join(" · ", diffList) : (single.action + ": " + single.title);
+
+                String dateText = !single.beforeDate.isEmpty() && !single.afterDate.isEmpty() && !single.beforeDate.equals(single.afterDate)
+                    ? pl.vistula.checker.ui.HistoryScreenController.formatFullDate(single.beforeDate) + " → " + pl.vistula.checker.ui.HistoryScreenController.formatFullDate(single.afterDate)
+                    : pl.vistula.checker.ui.HistoryScreenController.formatFullDate(single.date);
+                builder.setContentText(diff + (!dateText.isEmpty() ? " · " + dateText : ""));
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(diff + (!dateText.isEmpty() ? "\nTermin: " + dateText : "")));
             } else {
                 NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle().setBigContentTitle(title);
                 for (int i = 0; i < Math.min(5, scheduleChanges.size()); i++) {
                     Change s = scheduleChanges.get(i);
-                    inbox.addLine(s.action + ": " + s.title + " (" + s.date + ")");
+                    String sDate = !s.beforeDate.isEmpty() && !s.afterDate.isEmpty() && !s.beforeDate.equals(s.afterDate)
+                        ? pl.vistula.checker.ui.HistoryScreenController.formatFullDate(s.beforeDate) + " → " + pl.vistula.checker.ui.HistoryScreenController.formatFullDate(s.afterDate)
+                        : pl.vistula.checker.ui.HistoryScreenController.formatFullDate(s.date);
+                    String sDiff = s.optMeta("diffRoom");
+                    if (sDiff.isEmpty()) sDiff = s.optMeta("diffTime");
+                    if (sDiff.isEmpty()) sDiff = s.action;
+                    inbox.addLine(s.title + ": " + sDiff + (!sDate.isEmpty() ? " (" + sDate + ")" : ""));
                 }
                 if (scheduleChanges.size() > 5) inbox.setSummaryText("+ jeszcze " + (scheduleChanges.size() - 5) + " zmian");
                 builder.setStyle(inbox);
-                builder.setContentText("Wykryto zmiany sal lub godzin zajęć.");
+                builder.setContentText("Wykryto zmiany sal lub godzin zajęć (" + scheduleChanges.size() + ").");
             }
 
             try { manager.notify(20, builder.build()); } catch (SecurityException ignored) {}
         }
+    }
+
+    private static String gradeValue(Change change) {
+        if ("Usunięto".equals(change.action)) return change.before;
+        if ("Zmieniono".equals(change.action) && !change.before.equals(change.after)) return change.before + " → " + change.after;
+        return change.after;
     }
 
     public static void sendTestNotification(Context context) {

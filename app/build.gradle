@@ -26,16 +26,16 @@ def escapeBuildConfig(String val) {
 
 android {
     namespace 'pl.vistula.checker'
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId 'pl.vistula.checker'
         minSdk 26
-        targetSdk 35
+        targetSdk 36
         versionCode 1
         versionName '1.0.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        buildConfigField "String", "USOS_KEY", "\"${escapeBuildConfig(usosKey)}\""
-        buildConfigField "String", "USOS_SECRET", "\"${escapeBuildConfig(usosSecret)}\""
+        buildConfigField "String", "USOS_KEY", '""'
+        buildConfigField "String", "USOS_SECRET", '""'
     }
     buildFeatures {
         buildConfig = true
@@ -44,6 +44,26 @@ android {
         debug {
             // Optional separate installation for regression tests; keep personal account data intact.
             if (project.hasProperty('isolatedTests')) applicationIdSuffix '.qa'
+            if (!project.hasProperty('isolatedTests')) {
+                buildConfigField "String", "USOS_KEY", "\"${escapeBuildConfig(usosKey)}\""
+                buildConfigField "String", "USOS_SECRET", "\"${escapeBuildConfig(usosSecret)}\""
+            }
+        }
+        release {
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        if (project.hasProperty('optimizedQa')) {
+            optimizedQa {
+                initWith release
+                applicationIdSuffix '.qa'
+                signingConfig signingConfigs.debug
+                matchingFallbacks = ['release']
+                proguardFiles 'optimized-qa-rules.pro'
+                testProguardFiles 'test-rules.pro'
+            }
         }
     }
     compileOptions {
@@ -51,6 +71,31 @@ android {
         targetCompatibility JavaVersion.VERSION_17
         coreLibraryDesugaringEnabled true
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+    if (project.hasProperty('optimizedQa')) testBuildType 'optimizedQa'
+    if (project.hasProperty('liveApiTests')) sourceSets.androidTest.java.srcDir 'src/liveTest/java'
+}
+
+tasks.register('verifyReleaseConfiguration') {
+    group = 'verification'
+    description = 'Rejects release configurations that expose developer credentials or disable release protection.'
+    doLast {
+        def release = android.buildTypes.release
+        if (release.debuggable || !release.minifyEnabled || !release.shrinkResources)
+            throw new GradleException('Release must be non-debuggable with code and resource optimization enabled.')
+        ['USOS_KEY', 'USOS_SECRET'].each { name ->
+            def field = release.buildConfigFields[name] ?: android.defaultConfig.buildConfigFields[name]
+            if (field == null || field.value != '""')
+                throw new GradleException("Release must not contain embedded ${name}. Enter credentials through the account screen.")
+        }
+        if (release.signingConfig != null && release.signingConfig.name == 'debug')
+            throw new GradleException('Production release must not use the debug signing key.')
+    }
+}
+tasks.matching { it.name in ['assembleRelease', 'bundleRelease'] }.configureEach {
+    dependsOn tasks.named('verifyReleaseConfiguration')
 }
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'

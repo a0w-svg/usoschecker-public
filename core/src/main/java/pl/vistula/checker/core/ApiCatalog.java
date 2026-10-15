@@ -63,6 +63,11 @@ public final class ApiCatalog {
         return lower.contains("secret") || lower.contains("token") || lower.contains("password") || lower.contains("pass")
             || lower.equals("code") || lower.equals("pin") || lower.endsWith("_key") || lower.equals("certificate") || lower.equals("structure");
     }
+    public static boolean credentialResponse(String method) {
+        return "oauth".equals(module(method)) || "oauth2".equals(module(method))
+            || java.util.Set.of("services/cards/mcard", "services/cards/mcard2",
+                "services/cards/mcard_order", "services/cards/mcard_order2").contains(method);
+    }
     public static JSONObject restorableDrafts(JSONObject drafts) throws org.json.JSONException {
         JSONObject safe = new JSONObject();
         for (java.util.Iterator<String> methods = drafts.keys(); methods.hasNext();) {

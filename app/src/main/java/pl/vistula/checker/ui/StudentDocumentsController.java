@@ -18,7 +18,7 @@ public final class StudentDocumentsController {
         JSONObject entry = StudentCardsController.entry(services, "documents");
         StudentCardsController.status(activity, content, entry);
         JSONArray rows = entry.optJSONArray("data");
-        EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.documents_search), activity.getDocumentQuery(), null, null);
+        EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.documents_search), activity.getDocumentQuery(), null, () -> activity.setDocumentQuery(""));
         LinearLayout list = new LinearLayout(activity); list.setOrientation(LinearLayout.VERTICAL); content.addView(list);
         Runnable populate = () -> {
             list.removeAllViews(); int shown = 0;
@@ -31,8 +31,8 @@ public final class StudentDocumentsController {
                 UiHelper.add(activity, card, document.name.isEmpty() ? activity.getString(R.string.documents_unnamed) : document.name, 20, UiHelper.INK, true);
                 if (!document.status.isEmpty()) UiHelper.badge(activity, card, document.status, Color.rgb(214, 241, 229), UiHelper.GREEN);
                 if (!document.typeName.isEmpty()) UiHelper.note(activity, card, document.typeName, UiHelper.MUTED);
-                StudentCardsController.line(activity, card, R.string.documents_published, document.published);
-                StudentCardsController.line(activity, card, R.string.documents_delivered, document.delivered);
+                StudentCardsController.line(activity, card, R.string.documents_published, HistoryScreenController.formatFullDate(document.published));
+                StudentCardsController.line(activity, card, R.string.documents_delivered, HistoryScreenController.formatFullDate(document.delivered));
                 if (document.downloadable()) card.addView(UiHelper.button(activity, activity.getString(R.string.documents_download), () ->
                     activity.downloadStudentDocument("services/blobbox/get", "blob_id", document.blobId, document.name), true));
                 if (document.actions.contains("GET_UPO")) card.addView(UiHelper.button(activity, activity.getString(R.string.documents_upo), () ->
@@ -48,8 +48,16 @@ public final class StudentDocumentsController {
                 card.addView(UiHelper.button(activity, activity.getString(R.string.documents_details), () -> activity.openApiMethod(
                     "services/adm_documents/document", java.util.Map.of("id", document.id)), false));
             }
-            if (shown == 0) UiHelper.empty(activity, list, activity.getString(rows == null ? R.string.services_load_hint : R.string.documents_empty),
-                activity.getString(R.string.documents_empty_hint));
+            if (shown == 0) {
+                UiHelper.empty(activity, list, activity.getString(rows == null ? R.string.services_load_hint : R.string.documents_empty),
+                    activity.getString(R.string.documents_empty_hint));
+                if (!search.getText().toString().trim().isEmpty()) {
+                    list.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), () -> {
+                        search.setText("");
+                        activity.setDocumentQuery("");
+                    }, false));
+                }
+            }
             UiHelper.note(activity, list, activity.getString(R.string.documents_count, shown), UiHelper.MUTED);
         };
         UiHelper.watchSearch(search, query -> { activity.setDocumentQuery(query); populate.run(); });

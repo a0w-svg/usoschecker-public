@@ -20,8 +20,8 @@ public final class SyncWorker extends Worker {
     @Override public Result doWork() {
         try {
             Context context = getApplicationContext();
-            List<Change> changes = new Repository(context).sync(false);
-            NotificationHelper.notifyChanges(context, changes);
+            new Repository(context).syncAndNotify(false, message -> {});
+            ClassReminderReceiver.scheduleNext(context);
             TodayScheduleWidget.updateAll(context);
             QuickStatusWidget.updateAll(context);
             return Result.success();
@@ -37,7 +37,16 @@ public final class SyncWorker extends Worker {
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES).build();
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.UPDATE, work);
     }
-    static void cancel(Context context) { WorkManager.getInstance(context).cancelUniqueWork(NAME); }
+    static void cancel(Context context) {
+        WorkManager.getInstance(context).cancelUniqueWork(NAME);
+        WorkManager.getInstance(context).cancelUniqueWork("usos_widget_sync");
+    }
+    public static void refreshFromWidget(Context context) {
+        OneTimeWorkRequest work = new OneTimeWorkRequest.Builder(SyncWorker.class)
+            .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES).build();
+        WorkManager.getInstance(context).enqueueUniqueWork("usos_widget_sync", ExistingWorkPolicy.KEEP, work);
+    }
     static void notifyChanges(Context c, List<Change> changes) {
         NotificationHelper.notifyChanges(c, changes);
     }

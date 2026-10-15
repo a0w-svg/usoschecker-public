@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -103,6 +104,8 @@ public final class MainActivity extends AppCompatActivity {
     private String historyQuery = "";
     private String gradeQuery = "", gradeType = "all", gradeOrder = "name";
     private boolean gradeFiltersExpanded;
+    private final java.util.Map<String, Boolean> gradeSemesterExpansion = new java.util.HashMap<>();
+    public java.util.Map<String, Boolean> gradeSemesterExpansion() { return gradeSemesterExpansion; }
     private String semester = "", taskFilter = "all", taskQuery = "", pendingCalendar;
     private String taskOrder = "due";
     private String calendarDate = "", calendarMode = "list", calendarQuery = "";
@@ -142,6 +145,19 @@ public final class MainActivity extends AppCompatActivity {
             uploadBytes = ((PendingFiles) retained).upload;
         }
         repository = new Repository(this);
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() {
+                if (busy) return;
+                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) { drawer.closeDrawers(); return; }
+                if (currentMethod != null) { currentMethod = null; currentMethodJson = null; render(); }
+                else if (tab != 0) { tab = 0; render(); }
+                else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                    setEnabled(true);
+                }
+            }
+        });
         taskOrder = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due");
         gradeOrder = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name");
         calendarMode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list");
@@ -157,6 +173,9 @@ public final class MainActivity extends AppCompatActivity {
             gradeType = bundle.getString("gradeType", "all");
             gradeOrder = bundle.getString("gradeOrder", gradeOrder);
             gradeFiltersExpanded = bundle.getBoolean("gradeFiltersExpanded");
+            Bundle expandedTerms = bundle.getBundle("gradeSemesterExpansion");
+            if (expandedTerms != null) for (String term : expandedTerms.keySet())
+                gradeSemesterExpansion.put(term, expandedTerms.getBoolean(term));
             calendarDate = bundle.getString("calendarDate", "");
             calendarQuery = bundle.getString("calendarQuery", "");
             calendarMode = bundle.getString("calendarMode", calendarMode);
@@ -181,6 +200,7 @@ public final class MainActivity extends AppCompatActivity {
             simRemainingEcts = bundle.getDouble("simRemainingEcts", 30.0);
         } else if (getIntent().getBooleanExtra("showHistory", false)) {
             tab = 1;
+            filter = historyFilter(getIntent());
         } else if (getIntent().hasExtra("tab")) {
             tab = getIntent().getIntExtra("tab", 0);
         }
@@ -298,6 +318,10 @@ public final class MainActivity extends AppCompatActivity {
         out.putString("gradeType", gradeType);
         out.putString("gradeOrder", gradeOrder);
         out.putBoolean("gradeFiltersExpanded", gradeFiltersExpanded);
+        Bundle expandedTerms = new Bundle();
+        for (java.util.Map.Entry<String, Boolean> entry : gradeSemesterExpansion.entrySet())
+            expandedTerms.putBoolean(entry.getKey(), entry.getValue());
+        out.putBundle("gradeSemesterExpansion", expandedTerms);
         out.putString("apiQuery", apiQuery);
         out.putInt("apiLimit", apiLimit);
     }
@@ -305,12 +329,22 @@ public final class MainActivity extends AppCompatActivity {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if (intent.getBooleanExtra("showHistory", false)) navigate(1);
+        if (intent.getBooleanExtra("showHistory", false)) {
+            filter = historyFilter(intent);
+            historyQuery = "";
+            navigate(1);
+        }
         else if (intent.hasExtra("tab")) navigate(intent.getIntExtra("tab", 0));
+    }
+
+    private static String historyFilter(Intent intent) {
+        String kind = intent.getStringExtra("historyKind");
+        return "ocena".equals(kind) || "plan".equals(kind) ? kind : "wszystkie";
     }
 
     @Override protected void onResume() {
         super.onResume();
+        io.execute(() -> ClassReminderReceiver.scheduleNext(getApplicationContext()));
         handler.removeCallbacks(refresh);
         handler.postDelayed(refresh, 30000);
         if (content != null && !busy && tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12) load();
@@ -322,6 +356,10 @@ public final class MainActivity extends AppCompatActivity {
     @Override protected void onPause() {
         super.onPause();
         handler.removeCallbacks(refresh);
+    }
+    @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 10) io.execute(() -> ClassReminderReceiver.scheduleNext(getApplicationContext()));
     }
 
     @Override protected void onDestroy() {
@@ -410,7 +448,7 @@ public final class MainActivity extends AppCompatActivity {
                     GradesScreenController.render(this, content, display(), state, demo,
                         semester, gradeType, gradeOrder, gradeQuery, gradeFiltersExpanded,
                         exp -> { gradeFiltersExpanded = exp; render(); },
-                        sem -> { semester = sem; render(); },
+                        sem -> { semester = sem; if (!sem.isEmpty()) gradeSemesterExpansion.put(sem, true); render(); },
                         gt -> { gradeType = gt; render(); },
                         go -> {
                             gradeOrder = go;
@@ -420,6 +458,7 @@ public final class MainActivity extends AppCompatActivity {
                         gq -> { gradeQuery = gq; },
                         () -> {
                             semester = ""; gradeType = "all"; gradeQuery = ""; gradeOrder = "name";
+                            gradeSemesterExpansion.clear();
                             getSharedPreferences("student_tools", MODE_PRIVATE).edit().putString("gradeOrder", gradeOrder).apply();
                             render();
                         },
@@ -472,6 +511,7 @@ public final class MainActivity extends AppCompatActivity {
                                     return repository.read();
                                 }, s -> {
                                     state = s;
+                                    detectedPin = "";
                                     demo = false;
                                     tab = 0;
                                     ensureSchedule();
@@ -507,19 +547,35 @@ public final class MainActivity extends AppCompatActivity {
                                 task(() -> {
                                     SyncWorker.cancel(MainActivity.this);
                                     repository.disconnect();
+                                    ClassReminderReceiver.cancel(MainActivity.this);
+                                    androidx.core.app.NotificationManagerCompat.from(MainActivity.this).cancelAll();
+                                    pl.vistula.checker.widget.TodayScheduleWidget.updateAll(MainActivity.this);
+                                    pl.vistula.checker.widget.QuickStatusWidget.updateAll(MainActivity.this);
                                     return repository.read();
                                 }, s -> {
                                     state = s;
+                                    detectedPin = "";
+                                    apiDrafts = new JSONObject();
+                                    uploadBytes = null;
+                                    uploadMethod = null;
+                                    exportResponse = null;
+                                    pendingCalendar = null;
+                                    gradeSemesterExpansion.clear();
+                                    semester = "";
                                     demo = false;
                                     render();
                                 });
                             }
                             @Override public void onStartDemo() {
+                                gradeSemesterExpansion.clear();
+                                semester = "";
                                 demo = true;
                                 tab = 0;
                                 render();
                             }
                             @Override public void onEndDemo() {
+                                gradeSemesterExpansion.clear();
+                                semester = "";
                                 demo = false;
                                 render();
                             }
@@ -551,10 +607,7 @@ public final class MainActivity extends AppCompatActivity {
                             render();
                         },
                         tq -> { taskQuery = tq; },
-                        new TasksScreenController.TaskCallback() {
-                            @Override public void onSaveTask(JSONObject t) { savePersonalTask(t); }
-                            @Override public void onMutateTask(String id, boolean remove) { mutateTasks(id, remove); }
-                        });
+                        taskCallback());
                     break;
                 case 8:
                     PaymentsScreenController.render(this, content, display(), state, connected(), this::sync);
@@ -734,19 +787,35 @@ public final class MainActivity extends AppCompatActivity {
 
     public void editTask(JSONObject existing, String suggestedTitle) {
         TasksScreenController.showTaskDialog(this, existing, suggestedTitle, personalTasks().length(),
-            new TasksScreenController.TaskCallback() {
-                @Override public void onSaveTask(JSONObject t) { savePersonalTask(t); }
-                @Override public void onMutateTask(String id, boolean remove) { mutateTasks(id, remove); }
-            });
+            taskCallback());
+    }
+
+    private TasksScreenController.TaskCallback taskCallback() {
+        Repository.EditSession session = repository.editSession(state);
+        boolean wasDemo = demo;
+        return new TasksScreenController.TaskCallback() {
+            @Override public void onSaveTask(JSONObject t) {
+                if (demo != wasDemo) return;
+                savePersonalTask(t, session);
+            }
+            @Override public void onMutateTask(String id, boolean remove) {
+                if (demo != wasDemo) return;
+                mutateTasks(id, remove, session);
+            }
+        };
     }
 
     public void savePersonalTask(JSONObject entry) {
+        savePersonalTask(entry, repository.editSession(state));
+    }
+
+    private void savePersonalTask(JSONObject entry, Repository.EditSession session) {
         if (demo) {
-            demoTasks = savedTask(demoTasks, entry);
-            render();
+            try { demoTasks = TaskTools.save(demoTasks, entry); render(); }
+            catch (Exception e) { error(Repository.message(e)); }
         } else {
             task(() -> {
-                repository.update(s -> s.put("tasks", savedTask(s.optJSONArray("tasks"), entry)));
+                repository.update(session, s -> s.put("tasks", TaskTools.save(s.optJSONArray("tasks"), entry)));
                 return repository.read();
             }, result -> {
                 state = result;
@@ -756,6 +825,10 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     public void mutateTasks(String id, boolean remove) {
+        mutateTasks(id, remove, repository.editSession(state));
+    }
+
+    private void mutateTasks(String id, boolean remove, Repository.EditSession session) {
         JSONObject deleted = null;
         if (remove) {
             JSONArray current = personalTasks();
@@ -766,29 +839,28 @@ public final class MainActivity extends AppCompatActivity {
         }
         JSONObject undoEntry = deleted;
         boolean wasDemo = demo;
-        String accountToken = state.optString("token");
 
         if (demo) {
             try {
                 demoTasks = changedTasks(demoTasks, id, remove);
                 render();
-                if (undoEntry != null) offerTaskUndo(undoEntry, wasDemo, accountToken);
+                if (undoEntry != null) offerTaskUndo(undoEntry, wasDemo, session);
             } catch (JSONException e) {
                 error(Repository.message(e));
             }
         } else {
             task(() -> {
-                repository.update(s -> s.put("tasks", changedTasks(s.optJSONArray("tasks"), id, remove)));
+                repository.update(session, s -> s.put("tasks", changedTasks(s.optJSONArray("tasks"), id, remove)));
                 return repository.read();
             }, result -> {
                 state = result;
                 render();
-                if (undoEntry != null) offerTaskUndo(undoEntry, wasDemo, accountToken);
+                if (undoEntry != null) offerTaskUndo(undoEntry, wasDemo, session);
             });
         }
     }
 
-    private void offerTaskUndo(JSONObject entry, boolean wasDemo, String accountToken) {
+    private void offerTaskUndo(JSONObject entry, boolean wasDemo, Repository.EditSession session) {
         Snackbar.make(root, R.string.task_deleted, 10000).setAction(R.string.undo, view -> {
             if (busy || demo != wasDemo) return;
             if (wasDemo) {
@@ -796,34 +868,13 @@ public final class MainActivity extends AppCompatActivity {
                 catch (Exception e) { error(Repository.message(e)); }
             } else {
                 task(() -> {
-                    repository.update(s -> {
-                        if (!s.optString("token").equals(accountToken)) throw new IllegalStateException(getString(R.string.error_task_restore_account_changed));
+                    repository.update(session, s -> {
                         s.put("tasks", TaskTools.restore(s.optJSONArray("tasks"), entry));
                     });
                     return repository.read();
                 }, result -> { state = result; render(); });
             }
         }).show();
-    }
-
-    private JSONArray savedTask(JSONArray source, JSONObject replacement) {
-        JSONArray result = new JSONArray();
-        boolean found = false;
-        if (source != null) {
-            for (int i = 0; i < source.length(); ++i) {
-                try {
-                    JSONObject entry = source.getJSONObject(i);
-                    if (entry.getString("id").equals(replacement.getString("id"))) {
-                        result.put(replacement);
-                        found = true;
-                    } else {
-                        result.put(entry);
-                    }
-                } catch (JSONException ignored) {}
-            }
-        }
-        if (!found) result.put(replacement);
-        return result;
     }
 
     private JSONArray changedTasks(JSONArray source, String id, boolean remove) throws JSONException {
@@ -859,10 +910,10 @@ public final class MainActivity extends AppCompatActivity {
             int position = scroll.getScrollY();
             boolean first = state.optJSONObject("snapshot") == null;
             task(() -> {
-                List<Change> changes = repository.syncWithProgress(true, message -> runOnUiThread(() -> {
+                List<Change> changes = repository.syncAndNotify(true, message -> runOnUiThread(() -> {
                     if (!isDestroyed()) progress.setText(message);
                 }));
-                SyncWorker.notifyChanges(this, changes);
+                ClassReminderReceiver.scheduleNext(this);
                 pl.vistula.checker.widget.TodayScheduleWidget.updateAll(this);
                 pl.vistula.checker.widget.QuickStatusWidget.updateAll(this);
                 return new SyncResult(repository.read(), changes.size(), first);
@@ -989,7 +1040,7 @@ public final class MainActivity extends AppCompatActivity {
                     String clip = item.getText().toString().trim().replaceAll("\\s+", "");
                     if (clip.matches("^[a-zA-Z0-9]{6,16}$") && !clip.equals(detectedPin)) {
                         detectedPin = clip;
-                        Toast.makeText(this, "📋 Wykryto kod PIN w schowku: " + clip, Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, R.string.pin_detected_clipboard, Toast.LENGTH_LONG).show();
                         render();
                     }
                 }
@@ -1013,7 +1064,7 @@ public final class MainActivity extends AppCompatActivity {
         new MaterialAlertDialogBuilder(this).setTitle(R.string.error_dialog_title).setMessage(message).setPositiveButton(R.string.btn_ok, null)
             .setNeutralButton(R.string.error_dialog_copy, (dialog, which) -> {
                 android.content.ClipboardManager clipboard = getSystemService(android.content.ClipboardManager.class);
-                if (clipboard != null) clipboard.setPrimaryClip(android.content.ClipData.newPlainText(getString(R.string.error_clipboard_label), message));
+                if (clipboard != null) clipboard.setPrimaryClip(UiHelper.privateClip(getString(R.string.error_clipboard_label), message));
             }).show();
     }
 
@@ -1026,20 +1077,19 @@ public final class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override public void onBackPressed() {
-        if (busy) return;
-        if (drawer.isDrawerOpen(GravityCompat.START)) { drawer.closeDrawers(); return; }
-        if (currentMethod != null) { currentMethod = null; currentMethodJson = null; render(); }
-        else if (tab != 0) { tab = 0; render(); }
-        else super.onBackPressed();
-    }
-
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 23 && resultCode != RESULT_OK) pendingCalendar = null;
         if (requestCode == 22 && resultCode != RESULT_OK) exportResponse = null;
         if (resultCode == -1 && data != null && data.getData() != null) {
             Uri uri = data.getData();
+            if ((requestCode == 21 || requestCode == 22 || requestCode == 23)
+                    && (!"content".equals(uri.getScheme()) || uri.getAuthority() == null || uri.getAuthority().isEmpty())) {
+                if (requestCode == 22) exportResponse = null;
+                if (requestCode == 23) pendingCalendar = null;
+                error(getString(R.string.error_invalid_document_uri));
+                return;
+            }
             if (requestCode == 21 && currentMethod != null && currentMethod.equals(uploadMethod)) {
                 task(() -> {
                     try (InputStream input = getContentResolver().openInputStream(uri);
@@ -1062,7 +1112,7 @@ public final class MainActivity extends AppCompatActivity {
                 byte[] bytes = pendingCalendar.getBytes(StandardCharsets.UTF_8);
                 pendingCalendar = null;
                 task(() -> {
-                    try (OutputStream output = getContentResolver().openOutputStream(uri)) {
+                    try (OutputStream output = getContentResolver().openOutputStream(uri, "wt")) {
                         if (output == null) throw new IOException(getString(R.string.error_cant_open_file));
                         output.write(bytes);
                     }
@@ -1072,7 +1122,7 @@ public final class MainActivity extends AppCompatActivity {
                 byte[] bytes = exportResponse.bytes;
                 exportResponse = null;
                 task(() -> {
-                    try (OutputStream output = getContentResolver().openOutputStream(uri)) {
+                    try (OutputStream output = getContentResolver().openOutputStream(uri, "wt")) {
                         if (output == null) throw new IOException();
                         output.write(bytes);
                     }

@@ -61,7 +61,7 @@ android {
                 applicationIdSuffix '.qa'
                 signingConfig signingConfigs.debug
                 matchingFallbacks = ['release']
-                proguardFiles 'optimized-qa-rules.pro'
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'optimized-qa-rules.pro'
                 testProguardFiles 'test-rules.pro'
             }
         }

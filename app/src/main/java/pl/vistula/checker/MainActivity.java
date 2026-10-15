@@ -148,7 +148,7 @@ public final class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override public void handleOnBackPressed() {
                 if (busy) return;
-                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) { drawer.closeDrawers(); return; }
+                if (drawer != null && (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerVisible(GravityCompat.START))) { drawer.closeDrawers(); return; }
                 if (currentMethod != null) { currentMethod = null; currentMethodJson = null; render(); }
                 else if (tab != 0) { tab = 0; render(); }
                 else {

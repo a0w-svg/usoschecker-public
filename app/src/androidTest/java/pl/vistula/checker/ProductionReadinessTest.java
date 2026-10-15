@@ -19,6 +19,12 @@ public class ProductionReadinessTest {
     @Rule public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
     @Before public void qaOnly() {
         Assume.assumeTrue(rule.getActivity().getPackageName().endsWith(".qa"));
+        try {
+            long now = android.os.SystemClock.uptimeMillis();
+            android.view.MotionEvent cancel = android.view.MotionEvent.obtain(now, now, android.view.MotionEvent.ACTION_CANCEL, 0, 0, 0);
+            androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().getUiAutomation().injectInputEvent(cancel, true);
+            cancel.recycle();
+        } catch (Throwable ignored) {}
     }
     @Test public void testInstallationContainsNoDeveloperCredentials() {
         assertTrue("QA must not embed a developer key", BuildConfig.USOS_KEY.isEmpty());
@@ -28,19 +34,37 @@ public class ProductionReadinessTest {
         onView(withId(R.id.nav_item_grades)).perform(click());
         onView(withId(R.id.nav_item_grades)).check(matches(isSelected()));
         systemBack();
+        waitForHomeSelected(3000);
         onView(withId(R.id.nav_item_home)).check(matches(isSelected()));
+    }
+    private void waitForHomeSelected(long timeoutMs) {
+        long deadline = android.os.SystemClock.uptimeMillis() + timeoutMs;
+        while (android.os.SystemClock.uptimeMillis() < deadline) {
+            boolean[] selected = {false};
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+                android.view.View home = rule.getActivity() != null ? rule.getActivity().findViewById(R.id.nav_item_home) : null;
+                if (home != null && home.isSelected()) selected[0] = true;
+            });
+            if (selected[0]) return;
+            try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+        }
     }
     @Test public void platformBackClosesDrawerWithoutLeavingHome() {
         DrawerIdle idle = new DrawerIdle(rule.getActivity().findViewById(R.id.drawer_layout));
         androidx.test.espresso.IdlingRegistry.getInstance().register(idle);
         try {
-        onView(withContentDescription(R.string.menu_open)).perform(click());
-        systemBack();
-        onView(withId(R.id.nav_item_home)).check(matches(isSelected()));
-        onView(withId(R.id.drawer_layout)).check((view, failure) -> {
-            if (failure != null) throw failure;
-            assertFalse(((androidx.drawerlayout.widget.DrawerLayout) view).isDrawerOpen(androidx.core.view.GravityCompat.START));
-        });
+            onView(withContentDescription(R.string.menu_open)).perform(click());
+            onView(withId(R.id.drawer_layout)).check((view, failure) -> {
+                if (failure != null) throw failure;
+                assertTrue(((androidx.drawerlayout.widget.DrawerLayout) view).isDrawerOpen(androidx.core.view.GravityCompat.START));
+            });
+            idle.setExpectClose(true);
+            systemBack();
+            onView(withId(R.id.nav_item_home)).check(matches(isSelected()));
+            onView(withId(R.id.drawer_layout)).check((view, failure) -> {
+                if (failure != null) throw failure;
+                assertFalse(((androidx.drawerlayout.widget.DrawerLayout) view).isDrawerOpen(androidx.core.view.GravityCompat.START));
+            });
         } finally {
             androidx.test.espresso.IdlingRegistry.getInstance().unregister(idle);
             idle.drawer.removeDrawerListener(idle);
@@ -66,14 +90,22 @@ public class ProductionReadinessTest {
     private static final class DrawerIdle implements androidx.drawerlayout.widget.DrawerLayout.DrawerListener, androidx.test.espresso.IdlingResource {
         private final androidx.drawerlayout.widget.DrawerLayout drawer;
         private int state = androidx.drawerlayout.widget.DrawerLayout.STATE_IDLE;
+        private boolean expectClose;
         private ResourceCallback callback;
         DrawerIdle(androidx.drawerlayout.widget.DrawerLayout drawer) { this.drawer = drawer; drawer.addDrawerListener(this); }
         public String getName() { return "Drawer animation"; }
-        public boolean isIdleNow() { return state == androidx.drawerlayout.widget.DrawerLayout.STATE_IDLE; }
+        public boolean isIdleNow() {
+            if (expectClose && drawer.isDrawerOpen(androidx.core.view.GravityCompat.START)) return false;
+            return state == androidx.drawerlayout.widget.DrawerLayout.STATE_IDLE;
+        }
+        public void setExpectClose(boolean expectClose) { this.expectClose = expectClose; }
         public void registerIdleTransitionCallback(ResourceCallback callback) { this.callback = callback; }
         public void onDrawerSlide(android.view.View view, float offset) {}
         public void onDrawerOpened(android.view.View view) {}
-        public void onDrawerClosed(android.view.View view) {}
+        public void onDrawerClosed(android.view.View view) {
+            expectClose = false;
+            if (callback != null) callback.onTransitionToIdle();
+        }
         @Override public void onDrawerStateChanged(int state) {
             this.state = state;
             if (isIdleNow() && callback != null) callback.onTransitionToIdle();

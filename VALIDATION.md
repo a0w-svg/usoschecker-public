@@ -1,4 +1,29 @@
-# Validation — 2026-10-13
+# Validation — 2026-10-15
+
+## Production release preparation and automated QA verification — 2026-10-15
+
+- Complete release quality gate executed via `.\tools\production-check.ps1 -DeviceTests`:
+  - `:core:test`: 44 JVM tests passed (0 failures, 0 skipped).
+  - `:app:testDebugUnitTest`: 7 JVM tests passed (0 failures, 0 skipped).
+  - Total JVM tests: **51 passed**, 0 failures.
+  - `:app:lintRelease`: **0 errors** (all checks clean).
+  - `:app:verifyReleaseConfiguration`: verified release build type is non-debuggable, `minifyEnabled` and `shrinkResources` are true, `USOS_KEY` and `USOS_SECRET` BuildConfig fields are empty, and release does not use debug signing key.
+  - `:app:assembleRelease` & `:app:bundleRelease`: generated release APK and AAB.
+  - `:app:connectedDebugAndroidTest` (`-PisolatedTests`): all **42 device tests** passed on `Medium_Phone_API_36.0` (Android 16, API 36).
+  - `:app:connectedOptimizedQaAndroidTest` (`-PoptimizedQa`): all **4 device tests** in `ProductionReadinessTest` passed against the R8-optimized, non-debuggable build (`testInstallationContainsNoDeveloperCredentials`, `platformBackReturnsFromGradesToHomeOnAndroid16`, `platformBackClosesDrawerWithoutLeavingHome`, `manifestPreservesTransportAndStorageSafety`).
+- PowerShell script encoding fixed for seamless execution under Windows PowerShell 5.1 and modern PowerShell.
+- `package_android_studio.py` updated to package `RELEASE.md`, `tools/`, Proguard/R8 rules, and copy release APK, AAB, and R8 mapping to `dist/`.
+- Release deliverables:
+  - `dist/vistula-checker-release-unsigned.apk` (2 786 736 B)
+    SHA-256: `d15cbdf7b6b1668d90054b3a21311767f24adc979b44be4e12ad0ef6ae21814b`
+  - `dist/vistula-checker-release.aab` (3 395 199 B)
+    SHA-256: `7dfeac456b86780a5eb8e298bc0d0b0bc58473d079cb5fc1c7c9815881741780`
+  - `dist/mapping.txt` (12 972 045 B)
+    SHA-256: `cd09db64c23c11b5743f11766af7500c8459b401ccd0a52e619c808eec42bf7b`
+  - `dist/VistulaChecker-AndroidStudio.zip` (1 058 980 B)
+    SHA-256: `b85f14d8b0338c5e0f04229cfe451169ed716175f45e4397f6680df024807d59`
+
+
 
 ## Task tools, class actions and nullable sync responses — 2026-10-13
 

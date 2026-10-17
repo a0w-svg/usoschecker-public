@@ -16,6 +16,11 @@ import static androidx.test.espresso.matcher.ViewMatchers.*;
 
 @RunWith(AndroidJUnit4.class)
 public class ProductionReadinessTest {
+    @Test public void releaseWorkerRemainsConstructibleAfterOptimization() throws Exception {
+        java.lang.reflect.Constructor<?> constructor = Class.forName("pl.vistula.checker.ReleaseUpdateWorker")
+            .getConstructor(android.content.Context.class, androidx.work.WorkerParameters.class);
+        assertTrue(java.lang.reflect.Modifier.isPublic(constructor.getModifiers()));
+    }
     @Rule public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
     @Before public void qaOnly() {
         Assume.assumeTrue(rule.getActivity().getPackageName().endsWith(".qa"));

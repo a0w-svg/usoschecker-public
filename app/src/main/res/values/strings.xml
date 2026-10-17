@@ -760,4 +760,21 @@
     <string name="about_license_open">Przeczytaj licencję MIT</string>
     <string name="about_license_error">Nie udało się otworzyć licencji. Spróbuj ponownie.</string>
     <string name="about_license_scope">Licencja MIT dotyczy kodu aplikacji. Biblioteki i materiały zewnętrzne podlegają własnym licencjom.</string>
+    <string name="updates_title">Aktualizacje i nowości</string>
+    <string name="updates_channel">Nowe wersje aplikacji</string>
+    <string name="updates_available">Dostępna wersja %1$s</string>
+    <string name="updates_tap_notes">Zobacz nowości i pobierz aktualizację</string>
+    <string name="updates_notes_missing">Opis zmian jest dostępny na stronie wydania.</string>
+    <string name="updates_download">Pobierz z GitHuba</string>
+    <string name="updates_release_history">Historia wydań na GitHubie</string>
+    <string name="updates_notify_enabled">Powiadamiaj o nowych wersjach</string>
+    <string name="updates_notification_settings">Zezwolenie i ustawienia powiadomień</string>
+    <string name="updates_background_note">Sprawdzanie w tle raz dziennie, gdy jest internet, oraz przy uruchomieniu (nie częściej niż co 12 godzin). Android może opóźnić sprawdzenie. Wymagane jest zezwolenie na powiadomienia. Pobranie APK otwiera przeglądarkę; instalację zatwierdzasz samodzielnie.</string>
+    <string name="updates_installed_notes">Nowości w zainstalowanej wersji %1$s</string>
+    <string name="updates_check">Sprawdź teraz</string>
+    <string name="updates_checking">Sprawdzanie nowych wersji…</string>
+    <string name="updates_cached">Zapisany opis wydania. Naciśnij „Sprawdź teraz”, aby odświeżyć.</string>
+    <string name="updates_current">Masz aktualną wersję aplikacji.</string>
+    <string name="updates_not_checked">Sprawdź, czy jest dostępna nowsza wersja.</string>
+    <string name="updates_error">Nie udało się sprawdzić aktualizacji. Sprawdź połączenie i spróbuj później. Zapisane informacje pozostają dostępne.</string>
 </resources>

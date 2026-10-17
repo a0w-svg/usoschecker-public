@@ -3,6 +3,9 @@
     public <init>(android.content.Context, androidx.work.WorkerParameters);
 }
 # Room 2.6.1's transitive consumer rule keeps the class, but omits its reflective constructor.
+-keep class pl.vistula.checker.ReleaseUpdateWorker {
+    public <init>(android.content.Context, androidx.work.WorkerParameters);
+}
 -keep class androidx.work.impl.WorkDatabase_Impl {
     public <init>();
 }

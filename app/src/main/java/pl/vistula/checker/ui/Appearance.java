@@ -1,6 +1,7 @@
 package pl.vistula.checker.ui;
 
 import android.content.Context;
+import android.app.UiModeManager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -11,8 +12,31 @@ public final class Appearance {
     private Appearance() {}
 
     public static int mode(Context context) {
-        return context.getSharedPreferences("appearance", Context.MODE_PRIVATE)
-            .getInt("nightMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        Object stored = context.getSharedPreferences("appearance", Context.MODE_PRIVATE).getAll().get("nightMode");
+        return stored instanceof Integer && supported((Integer) stored)
+            ? (Integer) stored : AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+    }
+
+    private static boolean supported(int mode) {
+        return mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            || mode == AppCompatDelegate.MODE_NIGHT_NO || mode == AppCompatDelegate.MODE_NIGHT_YES;
+    }
+
+    /** Android 12+ persists this app-local choice for cold starts and the launch screen. */
+    public static void apply(Context context) {
+        int mode = mode(context);
+        UiModeManager manager = context.getSystemService(UiModeManager.class);
+        if (manager != null) {
+            // AUTO clears the package override, inheriting the phone's current configuration.
+            manager.setApplicationNightMode(mode == AppCompatDelegate.MODE_NIGHT_NO ? UiModeManager.MODE_NIGHT_NO
+                : mode == AppCompatDelegate.MODE_NIGHT_YES ? UiModeManager.MODE_NIGHT_YES : UiModeManager.MODE_NIGHT_AUTO);
+        }
+    }
+
+    public static void setMode(Context context, int mode) {
+        if (!supported(mode)) throw new IllegalArgumentException("Nieprawidłowy tryb wyglądu.");
+        context.getSharedPreferences("appearance", Context.MODE_PRIVATE).edit().putInt("nightMode", mode).apply();
+        apply(context);
     }
 
     public static void choose(AppCompatActivity activity) {
@@ -22,10 +46,8 @@ public final class Appearance {
         for (int i = 0; i < modes.length; i++) if (modes[i] == mode(activity)) selected = i;
         new MaterialAlertDialogBuilder(activity).setTitle(R.string.appearance_title)
             .setSingleChoiceItems(R.array.appearance_modes, selected, (dialog, which) -> {
-                activity.getSharedPreferences("appearance", Context.MODE_PRIVATE).edit()
-                    .putInt("nightMode", modes[which]).apply();
                 dialog.dismiss();
-                activity.getDelegate().setLocalNightMode(modes[which]);
+                setMode(activity, modes[which]);
             }).setNegativeButton(R.string.btn_close, null).show();
     }
 }

@@ -140,6 +140,7 @@ public final class MainActivity extends AppCompatActivity {
     @Override public void onCreate(Bundle bundle) {
         pl.vistula.checker.ui.Appearance.apply(this);
         super.onCreate(bundle);
+        ReleaseUpdateWorker.schedule(getApplicationContext());
         Object retained = getLastCustomNonConfigurationInstance();
         if (retained instanceof PendingFiles) {
             exportResponse = ((PendingFiles) retained).export;
@@ -284,6 +285,7 @@ public final class MainActivity extends AppCompatActivity {
                 return;
             }
             render();
+            showReleaseUpdatesIfRequested();
         });
     }
 
@@ -330,6 +332,7 @@ public final class MainActivity extends AppCompatActivity {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        showReleaseUpdatesIfRequested();
         if (intent.getBooleanExtra("showHistory", false)) {
             filter = historyFilter(intent);
             historyQuery = "";
@@ -341,6 +344,12 @@ public final class MainActivity extends AppCompatActivity {
     private static String historyFilter(Intent intent) {
         String kind = intent.getStringExtra("historyKind");
         return "ocena".equals(kind) || "plan".equals(kind) ? kind : "wszystkie";
+    }
+
+    private void showReleaseUpdatesIfRequested() {
+        if (!getIntent().getBooleanExtra(ReleaseUpdates.SHOW_UPDATES, false)) return;
+        getIntent().removeExtra(ReleaseUpdates.SHOW_UPDATES);
+        pl.vistula.checker.ui.ReleaseUpdatesDialog.show(this);
     }
 
     @Override protected void onResume() {
@@ -361,6 +370,7 @@ public final class MainActivity extends AppCompatActivity {
     @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 10) io.execute(() -> ClassReminderReceiver.scheduleNext(getApplicationContext()));
+        if (requestCode == 11) ReleaseUpdateWorker.schedule(getApplicationContext());
     }
 
     @Override protected void onDestroy() {

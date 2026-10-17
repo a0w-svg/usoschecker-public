@@ -21,6 +21,15 @@ Zasady publikacji na GitHubie, skanowanie sekretów i konfiguracja ochrony repoz
 
 ## Nawigacja i wygląd
 
+W **Więcej → Aktualizacje i nowości** oraz **Konto → Aktualizacje i nowości** znajdziesz
+opis zainstalowanej wersji (także offline), ręczne sprawdzanie nowych wydań i pobieranie
+APK z GitHuba. Powiadomienia o stabilnych wersjach są domyślnie włączone; można je
+wyłączyć niezależnie od synchronizacji USOS. Wymagają systemowego zezwolenia na
+powiadomienia. Aplikacja sprawdza publiczne GitHub Releases w tle raz dziennie i przy
+uruchomieniu (udane automatyczne sprawdzenia co najwyżej co 12 godzin). Android może
+opóźniać pracę w tle. Ta sama wersja nie jest zgłaszana ponownie po usunięciu
+powiadomienia. Instalację pobranego APK zatwierdza użytkownik.
+
 W **Więcej → Wygląd** oraz na ekranie **Konto → Wygląd** można wybrać motyw systemowy,
 który domyślnie automatycznie reaguje na zmianę motywu telefonu, lub wymusić motyw
 jasny albo **Ciemny OLED** z czarnym tłem. Wybór jest zapamiętywany na urządzeniu;

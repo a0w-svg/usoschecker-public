@@ -1,0 +1,5 @@
+• Powiadomienia o nowych stabilnych wersjach aplikacji z GitHub Releases.
+• Opis zmian i przycisk pobrania APK w sekcji „Aktualizacje i nowości”.
+• Automatyczne sprawdzanie w tle oraz ręczne „Sprawdź teraz”.
+• Osobna opcja włączania i wyłączania powiadomień o wersjach.
+• Działanie bez logowania do USOS; żadne dane konta nie są wysyłane do GitHuba.

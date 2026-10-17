@@ -17,6 +17,10 @@ public final class AppInfo {
         UiHelper.add(context, card, context.getString(R.string.about_title), 18, UiHelper.INK, true);
         UiHelper.add(context, card, context.getString(R.string.about_author), 14, UiHelper.INK, false);
         UiHelper.note(context, card, context.getString(R.string.about_version, BuildConfig.VERSION_NAME), UiHelper.MUTED);
+        if (context instanceof androidx.appcompat.app.AppCompatActivity) {
+            card.addView(UiHelper.button(context, context.getString(R.string.updates_title),
+                () -> ReleaseUpdatesDialog.show((androidx.appcompat.app.AppCompatActivity) context), false));
+        }
         UiHelper.note(context, card, context.getString(R.string.about_license), UiHelper.MUTED);
         card.addView(UiHelper.button(context, context.getString(R.string.about_license_open), () -> showLicense(context), false));
     }

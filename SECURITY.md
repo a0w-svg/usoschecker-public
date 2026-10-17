@@ -7,6 +7,14 @@ Każdy sekret umieszczony w APK można odczytać z pliku aplikacji.
 
 ## Kontrole lokalne
 
+Sprawdzanie aktualizacji korzysta wyłącznie z publicznego API GitHub Releases przez
+HTTPS, bez tokena i bez danych konta USOS. Wysyłany jest numer wersji aplikacji w
+User-Agent; GitHub widzi również adres IP połączenia. Odpowiedź ma limit rozmiaru i
+czasu pobrania, a przekierowania API są odrzucane. Link wydania i gotowego APK musi
+dokładnie wskazywać repozytorium publikacji. Opis zmian jest wyświetlany jako tekst,
+bez wykonywania HTML. APK jest pobierany w przeglądarce na żądanie użytkownika;
+system Android weryfikuje podpis przy instalacji aktualizacji.
+
 Wymagane: Python 3 i Git. Z katalogu projektu:
 
 ```powershell

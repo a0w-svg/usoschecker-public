@@ -35,7 +35,7 @@ public final class CalendarExport {
         return text.replace("\\", "\\\\").replace("\r\n", "\n").replace("\r", "\n")
             .replace("\n", "\\n").replace(";", "\\;").replace(",", "\\,");
     }
-    private static void line(StringBuilder out, String value) {
+    static void line(StringBuilder out, String value) {
         int octets = 0;
         for (int i = 0; i < value.length();) {
             int code = value.codePointAt(i); String unit = new String(Character.toChars(code));

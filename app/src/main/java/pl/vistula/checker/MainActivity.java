@@ -647,6 +647,9 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     public boolean isDemo() { return demo; }
+    public android.content.SharedPreferences attendancePreferences() {
+        return getSharedPreferences(demo ? "attendance_tracker_demo" : "attendance_tracker", MODE_PRIVATE);
+    }
     public void setDemo(boolean demo) { this.demo = demo; render(); }
 
     public String getCalendarDate() { return calendarDate; }

@@ -315,6 +315,8 @@ public final class AccountScreenController {
                     }
                 };
                 pin.setSingleLine(true);
+                // setSingleLine replaces the password transformation on Android.
+                pin.setTransformationMethod(android.text.method.PasswordTransformationMethod.getInstance());
                 pin.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE | android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
                 pin.setOnEditorActionListener((v, action, event) -> {
                     if (action != android.view.inputmethod.EditorInfo.IME_ACTION_DONE) return false;

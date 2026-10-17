@@ -49,7 +49,7 @@ public final class AttendanceScreenController {
             activity.getString(R.string.attendance_title),
             activity.getString(R.string.attendance_subtitle));
 
-        SharedPreferences prefs = activity.getSharedPreferences("attendance_tracker", Context.MODE_PRIVATE);
+        SharedPreferences prefs = activity.attendancePreferences();
         JSONObject saved;
         try { saved = new JSONObject(prefs.getString("data", "{}")); } catch (Exception e) { saved = new JSONObject(); }
 
@@ -271,7 +271,7 @@ public final class AttendanceScreenController {
     }
 
     public static void showEditCourseDialog(MainActivity activity, String code, Runnable onComplete) {
-        SharedPreferences prefs = activity.getSharedPreferences("attendance_tracker", Context.MODE_PRIVATE);
+        SharedPreferences prefs = activity.attendancePreferences();
         JSONObject saved;
         try { saved = new JSONObject(prefs.getString("data", "{}")); } catch (Exception e) { saved = new JSONObject(); }
         JSONObject existing = code != null ? saved.optJSONObject(code) : null;

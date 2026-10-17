@@ -5,6 +5,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class PlatonLinksTest {
+    @Test public void sessionKeysCannotBeSavedAsTaskLinks() {
+        for (String parameter : new String[]{"sesskey", "sid", "sessionid", "PHPSESSID", "JSESSIONID", "authorization"}) {
+            assertFalse(parameter, PlatonLinks.isTaskLink("https://platon.vistula.edu.pl/mod/assign/view.php?id=1&" + parameter + "=private"));
+            assertFalse(parameter, PlatonLinks.isTaskLink("https://platon.vistula.edu.pl/#" + parameter + "=private"));
+        }
+    }
     @Test public void acceptsOnlyPlatonHttpsLinksWithoutCredentials() {
         assertEquals("https://platon.vistula.edu.pl/", PlatonLinks.normalize(" HTTPS://PLATON.VISTULA.EDU.PL "));
         assertEquals("https://platon.vistula.edu.pl/test?id=12#task", PlatonLinks.normalize("https://platon.vistula.edu.pl/test?id=12#task"));

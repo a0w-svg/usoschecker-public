@@ -63,6 +63,16 @@ public class StorageReminderRegressionTest {
         vault.write(new JSONObject().put("token", "new-token"));
         assertEquals("new-token", vault.read().getString("token"));
     }
+    @Test public void disconnectClearsPreviousAccountsAttendance() throws Exception {
+        Repository repository = new Repository(context);
+        SharedPreferences prefs = context.getSharedPreferences("attendance_tracker", Context.MODE_PRIVATE);
+        prefs.edit().putString("data", "personal-attendance").putString("term", "2026Z").commit();
+        repository.update(state -> state.put("token", "fixture-token"));
+        repository.disconnect();
+        assertTrue(repository.read().optString("token").isEmpty());
+        assertFalse(prefs.contains("data"));
+        assertFalse(prefs.contains("term"));
+    }
 
     @Test public void corruptBackupIsNotMistakenForAnEmptyStore() throws Exception {
         Vault vault = new Vault(context);

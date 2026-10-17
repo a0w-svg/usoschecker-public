@@ -336,7 +336,7 @@ public final class ScheduleScreenController {
 
     private static void recordAbsenceForLesson(MainActivity activity, LessonTime lesson, ScheduleListener listener) {
         String courseTitle = lesson.record.title + " · " + pl.vistula.checker.core.AttendanceTracker.type(lesson.record);
-        SharedPreferences prefs = activity.getSharedPreferences("attendance_tracker", Context.MODE_PRIVATE);
+        SharedPreferences prefs = activity.attendancePreferences();
         int count;
         int limit = pl.vistula.checker.core.AttendanceTracker.LIMIT;
         try {

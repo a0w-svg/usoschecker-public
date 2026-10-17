@@ -82,6 +82,25 @@ public class AttendanceAndLoginUiTest {
             assertNotNull(find(attendance("exceeded"), "Cztery"));
         });
     }
+    @Test public void demoAttendanceDoesNotReadOrOverwritePersonalAttendance() {
+        main(() -> {
+            MainActivity activity = rule.getActivity();
+            String personal = new JSONObject().put("private", AttendanceTracker.item("Prywatny przedmiot", "A", "now", "Wykład").put("absences", 2)).toString();
+            prefs.edit().putString("data", personal).commit();
+            try {
+                activity.setDemo(true);
+                activity.attendancePreferences().edit().clear().commit();
+                assertNull(find(attendance("all"), "Prywatny przedmiot"));
+                activity.attendancePreferences().edit().putString("data", "{}").commit();
+                assertEquals(personal, prefs.getString("data", ""));
+                activity.setDemo(false);
+                assertSame(prefs, activity.attendancePreferences());
+            } finally {
+                activity.getSharedPreferences("attendance_tracker_demo", Context.MODE_PRIVATE).edit().clear().commit();
+                activity.setDemo(false);
+            }
+        });
+    }
     private LinearLayout account(JSONObject state) {
         LinearLayout content = new LinearLayout(rule.getActivity());
         AccountScreenController.render(rule.getActivity(), content, new JSONObject(), state, false, "", new AccountScreenController.AccountListener() {

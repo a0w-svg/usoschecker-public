@@ -1,5 +1,11 @@
 # Przygotowanie wydania
 
+Po każdym większym zestawie napraw publikujemy nowy GitHub Release. Dla napraw
+zwiększamy zwykle numer PATCH oraz zawsze `versionCode`. Nowe APK podpisujemy
+tym samym prywatnym kluczem co poprzednie wydanie, aby umożliwić aktualizację.
+Publikacja następuje po testach i wymaganym CI, ze sprawdzonego commita `main`;
+zawiera APK, źródła, sumy SHA-256 i opis napraw. Poprzednich wydań nie nadpisujemy.
+
 Publikacja źródeł na GitHubie: [SECURITY.md](SECURITY.md). Skrypt pakujący tworzy
 wyłącznie `dist/publication/VistulaChecker-AndroidStudio.zip`; nie dołącza binariów
 ani mapowania R8. Nie publikuj starszych APK debug przechowywanych w `dist`.

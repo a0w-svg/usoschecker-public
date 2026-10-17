@@ -36,7 +36,7 @@
             android:paddingTop="6dp"
             android:paddingEnd="12dp"
             android:paddingBottom="6dp"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/app_accent"
             android:textSize="22sp"
             android:textStyle="bold" />
     </LinearLayout>

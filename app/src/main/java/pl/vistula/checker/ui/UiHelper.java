@@ -49,12 +49,16 @@ public final class UiHelper {
             == android.content.res.Configuration.UI_MODE_NIGHT_YES;
     }
 
-    /** Adapt legacy screen colors without changing their meaning in the light theme. */
+    /** Resolve shared semantic colors consistently for XML and programmatic screens. */
     public static int foreground(Context context, int color) {
-        if (!isDark(context)) return color;
         if (color == INK) return context.getColor(R.color.app_ink);
         if (color == MUTED) return context.getColor(R.color.app_muted);
         if (color == GREEN) return context.getColor(R.color.app_accent);
+        if (color == Color.rgb(217, 119, 6) || color == Color.rgb(180, 83, 9))
+            return context.getColor(R.color.app_warning);
+        if (color == Color.rgb(160, 48, 40) || color == Color.rgb(167, 49, 49))
+            return context.getColor(R.color.app_error);
+        if (!isDark(context)) return color;
         // Keep status colors distinguishable and legible on dark cards.
         int surface = Color.rgb(24, 24, 24);
         for (int i = 0; i <= 20; i++) {
@@ -65,12 +69,26 @@ public final class UiHelper {
     }
 
     public static int background(Context context, int color) {
+        if (color == Color.WHITE) return context.getColor(R.color.app_card);
+        if (color == BG) return context.getColor(R.color.app_background);
+        if (color == INK) return context.getColor(R.color.app_brand_surface);
+        if (color == GREEN) return context.getColor(R.color.app_accent);
+        if (color == Color.rgb(232, 243, 236)) return context.getColor(R.color.app_button_surface);
+        if (color == Color.rgb(214, 241, 229)) return context.getColor(R.color.app_accent_container);
+        if (color == Color.rgb(240, 245, 241)) return context.getColor(R.color.app_surface_high);
         if (!isDark(context)) return color;
-        if (color == Color.WHITE || color == BG || color == INK) return Color.BLACK;
         // Pale information/status panels become subtle tinted surfaces.
         if (androidx.core.graphics.ColorUtils.calculateLuminance(color) > .5)
             return androidx.core.graphics.ColorUtils.blendARGB(Color.BLACK, color, .09f);
         return color;
+    }
+
+    /** Text for dynamically colored badges must contrast with their actual fill. */
+    public static int onColor(Context context, int fill) {
+        int ink = context.getColor(R.color.app_ink);
+        if (androidx.core.graphics.ColorUtils.calculateContrast(ink, fill) >= 4.5) return ink;
+        return androidx.core.graphics.ColorUtils.calculateContrast(Color.WHITE, fill)
+            >= androidx.core.graphics.ColorUtils.calculateContrast(Color.BLACK, fill) ? Color.WHITE : Color.BLACK;
     }
 
     public static int dp(Context context, int value) {
@@ -117,9 +135,11 @@ public final class UiHelper {
         b.setAllCaps(false);
         b.setTextSize(14);
         int[][] states = {new int[]{-android.R.attr.state_enabled}, new int[]{}};
-        b.setTextColor(new ColorStateList(states, new int[]{foreground(context, MUTED), primary ? Color.WHITE : foreground(context, GREEN)}));
+        b.setTextColor(new ColorStateList(states, new int[]{context.getColor(R.color.app_disabled_content),
+            context.getColor(primary ? R.color.app_on_accent : R.color.app_accent)}));
         b.setCornerRadius(dp(context, 14));
-        b.setBackgroundTintList(new ColorStateList(states, new int[]{background(context, Color.rgb(230, 235, 231)), primary ? GREEN : background(context, Color.rgb(232, 243, 236))}));
+        b.setBackgroundTintList(new ColorStateList(states, new int[]{context.getColor(R.color.app_disabled_surface),
+            context.getColor(primary ? R.color.app_accent : R.color.app_button_surface)}));
         b.setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10));
         b.setMinHeight(dp(context, 48));
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);

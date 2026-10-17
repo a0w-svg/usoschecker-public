@@ -320,6 +320,7 @@ public final class GradesScreenController {
         topBg.setColor(UiHelper.background(activity, topBgColor));
         topBg.setCornerRadius(UiHelper.dp(activity, 8));
         valueBadge.setBackground(topBg);
+        valueBadge.setTextColor(UiHelper.onColor(activity, UiHelper.background(activity, topBgColor)));
 
         String meta = (!first.term.isEmpty() ? activity.getString(R.string.grade_meta_term, first.term) : "")
             + (rows.size() > 1 ? " · " + activity.getString(R.string.grade_meta_count, rows.size()) : " · " + activity.getString(R.string.grade_meta_single));
@@ -412,6 +413,7 @@ public final class GradesScreenController {
             vBg.setColor(UiHelper.background(activity, vBgColor));
             vBg.setCornerRadius(UiHelper.dp(activity, 8));
             valBadge.setBackground(vBg);
+            valBadge.setTextColor(UiHelper.onColor(activity, UiHelper.background(activity, vBgColor)));
 
             String rComment = r.optMeta("comment");
             if (!rComment.isEmpty()) {

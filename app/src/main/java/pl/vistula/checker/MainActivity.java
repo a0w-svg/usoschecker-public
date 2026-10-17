@@ -138,7 +138,7 @@ public final class MainActivity extends AppCompatActivity {
     };
 
     @Override public void onCreate(Bundle bundle) {
-        getDelegate().setLocalNightMode(pl.vistula.checker.ui.Appearance.mode(this));
+        pl.vistula.checker.ui.Appearance.apply(this);
         super.onCreate(bundle);
         Object retained = getLastCustomNonConfigurationInstance();
         if (retained instanceof PendingFiles) {

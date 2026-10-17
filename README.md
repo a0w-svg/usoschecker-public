@@ -22,6 +22,7 @@ Zasady publikacji na GitHubie, skanowanie sekretów i konfiguracja ochrony repoz
 ## Nawigacja i wygląd
 
 W **Więcej → Wygląd** oraz na ekranie **Konto → Wygląd** można wybrać motyw systemowy,
+który domyślnie automatycznie reaguje na zmianę motywu telefonu, lub wymusić motyw
 jasny albo **Ciemny OLED** z czarnym tłem. Wybór jest zapamiętywany na urządzeniu;
 motyw systemowy automatycznie używa wariantu OLED w trybie ciemnym.
 

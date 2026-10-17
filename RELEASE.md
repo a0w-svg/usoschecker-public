@@ -16,6 +16,13 @@ Zmiana target SDK obejmuje obsługę przycisku i gestu Wstecz przez AndroidX.
 
 ## Kontrola jakości
 
+Obsługa motywu obejmuje domyślne dopasowanie do telefonu, ręczny wybór jasnego/OLED
+oraz zachowanie ustawienia po aktualizacji APK. `AppearanceRegressionTest` sprawdza
+zmianę motywu telefonu podczas pracy aplikacji i powrót z wyboru ręcznego do automatycznego.
+Osobna fixture w `app/src/upgradeTest` jest dołączana tylko z `-PupgradeTests`;
+uruchamiaj ją po aktualizacji odrębnej aplikacji QA przez `adb install -r`, z argumentem
+`upgradeTheme=light`, `dark` lub `system`. Nie odinstalowuj starego APK przed tym testem.
+
 W PowerShell, z katalogu projektu:
 
 ```powershell

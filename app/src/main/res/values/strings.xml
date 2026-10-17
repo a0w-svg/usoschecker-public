@@ -723,7 +723,7 @@
     <string name="schedule_overnight">Koniec następnego dnia</string>
     <string name="grades_overview_hint">Przedmioty, oceny i kolejne terminy. Wyszukuj także po kodzie przedmiotu.</string>
     <string name="appearance_title">Wygląd</string>
-    <string name="appearance_description">Motyw systemowy, jasny lub ciemny OLED</string>
+    <string name="appearance_description">Automatycznie według telefonu lub ręcznie: jasny / ciemny OLED</string>
     <string-array name="appearance_modes">
         <item>Systemowy</item>
         <item>Jasny</item>

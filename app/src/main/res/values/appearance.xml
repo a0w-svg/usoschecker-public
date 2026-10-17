@@ -1,0 +1,4 @@
+<resources>
+    <bool name="app_light_system_bars">true</bool>
+    <color name="app_on_accent">#FFFFFF</color>
+</resources>

@@ -13,6 +13,7 @@ public final class UsosClient {
     public static final String BASE = "https://usosapps.vistula.edu.pl/";
     public static final ZoneId ZONE = ZoneId.of("Europe/Warsaw");
     private final String key, secret, token, tokenSecret;
+    private final String scopes;
     private final int planDays;
     private final java.util.function.Consumer<String> progress;
     interface ConnectionSource { HttpURLConnection open(String url) throws IOException; }
@@ -33,6 +34,7 @@ public final class UsosClient {
         this.progress = progress; this.planDays = Math.min(112, Math.max(56, state.optInt("planDays", 56) / 7 * 7));
         key = state.optString("key"); secret = state.optString("secret");
         token = state.optString("token"); tokenSecret = state.optString("tokenSecret");
+        scopes = StudentServices.normalizeScopes(state.optString("scopes"));
     }
     static final class ApiException extends IOException {
         final int status;
@@ -103,6 +105,9 @@ public final class UsosClient {
         HttpURLConnection connection = connections.open(url + ((post && file == null) || encoded.isEmpty() ? "" : "?" + encoded));
         connection.setConnectTimeout(15000); connection.setReadTimeout(20000);
         connection.setInstanceFollowRedirects(false);
+        // Authenticated responses must not enter the platform HTTP cache.
+        connection.setUseCaches(false);
+        connection.setRequestProperty("Cache-Control", "no-store");
         connection.setRequestMethod(method);
         connection.setRequestProperty("User-Agent", "VistulaChecker/1.0 (Android)");
         connection.setRequestProperty("Accept", "application/json, text/plain, */*");
@@ -149,17 +154,20 @@ public final class UsosClient {
     String get(String endpoint, Map<String, String> params) throws Exception {
         return request("GET", endpoint, params, true, token, tokenSecret);
     }
+    static String profileFields(JSONObject state) {
+        String scopes = state.optString("scopes");
+        String fields = "id|first_name|last_name|student_status";
+        if (StudentServices.hasScope(scopes, "studies"))
+            fields += "|student_number|student_programmes[programme[name]|admission_date|stages|status]";
+        if (StudentServices.hasScope(scopes, "email")) fields += "|email";
+        if (StudentServices.hasScope(scopes, "photo")) fields += "|photo_urls[200x200]";
+        return fields;
+    }
     Map<String, String> begin(String scopes) throws Exception {
         Map<String, String> params = new HashMap<>();
         params.put("oauth_callback", "oob");
-        if (scopes != null && !scopes.trim().isEmpty()) {
-            List<String> list = new ArrayList<>();
-            for (String p : scopes.split("\\|")) {
-                String clean = p.trim();
-                if (!clean.isEmpty() && !list.contains(clean)) list.add(clean);
-            }
-            if (!list.isEmpty()) params.put("scopes", String.join("|", list));
-        }
+        String normalized = StudentServices.normalizeScopes(scopes);
+        if (!normalized.isEmpty()) params.put("scopes", normalized);
         Map<String, String> result = OAuth.form(request("GET", "services/oauth/request_token",
             params, true, "", ""));
         if (!"true".equals(result.get("oauth_callback_confirmed"))) throw new IOException("USOS nie potwierdził protokołu OAuth 1.0a.");
@@ -194,6 +202,10 @@ public final class UsosClient {
         catch (Exception e) { throw new SyncException(stage, e); }
     }
     private Snapshot fetchSnapshot() throws Exception {
+        for (String required : List.of("grades", "studies")) {
+            if (!StudentServices.hasScope(scopes, required)) throw new IllegalStateException(
+                "Brak zakresu zgody „" + required + "”. Połącz konto ponownie z zakresami grades|studies|offline_access.");
+        }
         LocalDate start = LocalDate.now(ZONE).with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         Snapshot s = new Snapshot(start.toString(), start.plusDays(planDays).toString());
         reportProgress("Pobieranie semestrów · courses/user");
@@ -219,33 +231,36 @@ public final class UsosClient {
             }
         } catch (Exception e) { optionalFailure(e); }
 
-        reportProgress("Pobieranie subkont studenta · payments/user_accounts");
         Object accountsRaw = null;
-        boolean paymentsScopeMissing = false;
-        String paymentsNotice = "";
-        try {
-            String accRaw = get("services/payments/user_accounts", Collections.emptyMap());
-            accountsRaw = new JSONTokener(accRaw).nextValue();
-        } catch (ApiException e) {
-            if (e.status == 403 && !e.authorization) {
-                paymentsScopeMissing = true;
-                paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
-            } else throw e;
+        boolean paymentsScopeMissing = !StudentServices.hasScope(scopes, "payments");
+        String paymentsNotice = paymentsScopeMissing
+            ? "Brak zgody na płatności (zakres 'payments'). Dodaj zakres i połącz konto ponownie." : "";
+        if (!paymentsScopeMissing) {
+            reportProgress("Pobieranie subkont studenta · payments/user_accounts");
+            try {
+                String accRaw = get("services/payments/user_accounts", Collections.emptyMap());
+                accountsRaw = new JSONTokener(accRaw).nextValue();
+            } catch (ApiException e) {
+                if (e.status == 403 && !e.authorization) {
+                    paymentsScopeMissing = true;
+                    paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
+                } else throw e;
+            }
         }
-
-        reportProgress("Pobieranie należności i rat · payments/user_payments");
         Object paymentsRaw = null;
-        try {
-            String payRaw = get("services/payments/user_payments", Map.of("fields",
-                "id|description|type|state|account_number|payment_deadline|total_amount|saldo_amount|currency|chosen_installment_plan[id|currency|installments[amount|payment_date|description|number]]"));
-            paymentsRaw = new JSONTokener(payRaw).nextValue();
-        } catch (ApiException e) {
-            if (e.status == 403 && !e.authorization) {
-                paymentsScopeMissing = true;
-                paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
-            } else throw e;
+        if (!paymentsScopeMissing) {
+            reportProgress("Pobieranie należności i rat · payments/user_payments");
+            try {
+                String payRaw = get("services/payments/user_payments", Map.of("fields",
+                    "id|description|type|state|account_number|payment_deadline|total_amount|saldo_amount|currency|chosen_installment_plan[id|currency|installments[amount|payment_date|description|number]]"));
+                paymentsRaw = new JSONTokener(payRaw).nextValue();
+            } catch (ApiException e) {
+                if (e.status == 403 && !e.authorization) {
+                    paymentsScopeMissing = true;
+                    paymentsNotice = "Brak uprawnień do modułu płatności (wymagany zakres 'payments').";
+                } else throw e;
+            }
         }
-
         s.payments = UsosParser.payments(accountsRaw, paymentsRaw, paymentsScopeMissing, paymentsNotice);
 
         reportProgress("Pobieranie prac dyplomowych · theses/user");

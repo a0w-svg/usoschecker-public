@@ -9,3 +9,24 @@ dist/
 __pycache__/
 **/bin/
 *.hprof
+
+# Credentials, signing material, private exports and compiled artifacts
+.env
+.env.*
+!.env.example
+*secrets.properties
+*signing.properties
+*key.properties
+*.pem
+*.key
+*.p12
+*.pfx
+*.class
+*.apk
+*.aab
+*.apks
+*.zip
+*.log
+captures/
+private/
+security-reports/

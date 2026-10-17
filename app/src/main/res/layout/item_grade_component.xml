@@ -30,7 +30,7 @@
             android:paddingTop="4dp"
             android:paddingEnd="10dp"
             android:paddingBottom="4dp"
-            android:textColor="#176B57"
+            android:textColor="@color/app_accent"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -56,7 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:textColor="#596960"
+        android:textColor="@color/app_muted"
         android:textSize="13sp" />
 
     <TextView
@@ -64,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:textColor="#1B2520"
+        android:textColor="@color/app_ink"
         android:textSize="13sp"
         android:visibility="gone" />
 
@@ -73,7 +73,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
-        android:textColor="#7A8B82"
+        android:textColor="@color/app_faint"
         android:textSize="11sp"
         android:visibility="gone" />
 </LinearLayout>

@@ -10,20 +10,20 @@
         android:id="@+id/main_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FAFCFA"
+        android:background="@color/app_background"
         android:orientation="vertical">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:background="#FAFCFA"
+            android:background="@color/app_background"
             app:navigationContentDescription="@string/menu_open"
             app:navigationIcon="@drawable/ic_nav_menu"
             app:subtitle="@string/app_subtitle"
-            app:subtitleTextColor="#596960"
+            app:subtitleTextColor="@color/app_muted"
             app:title="@string/app_name"
-            app:titleTextColor="#1B2520" />
+            app:titleTextColor="@color/app_ink" />
 
         <TextView
             android:id="@+id/progress_text"
@@ -34,7 +34,7 @@
             android:paddingEnd="24dp"
             android:paddingBottom="8dp"
             android:text="@string/sync_in_progress"
-            android:textColor="#176B57"
+            android:textColor="@color/app_accent"
             android:textSize="12sp"
             android:visibility="gone" />
 
@@ -66,7 +66,7 @@
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#F0F5F1"
+            android:background="@color/app_surface_high"
             app:itemHorizontalTranslationEnabled="false"
             app:labelVisibilityMode="labeled"
             app:menu="@menu/bottom_nav_menu" />

@@ -9,6 +9,7 @@ import java.time.*;
 import java.util.*;
 import java.util.function.Consumer;
 import pl.vistula.checker.core.LessonTime;
+import pl.vistula.checker.ui.UiHelper;
 
 /** Scrollable day grid with separate lanes for overlapping classes. */
 final class DayTimelineView extends FrameLayout {
@@ -46,7 +47,7 @@ final class DayTimelineView extends FrameLayout {
             group.add(item); groupEnd = Math.max(groupEnd, item.end);
             TextView block = new TextView(context); item.view = block;
             boolean current = item.lesson.current(Instant.now()) && !item.lesson.tentative();
-            block.setTextColor(Color.rgb(20, 64, 49)); block.setTextSize(12); block.setPadding(dp(8), dp(4), dp(6), dp(4));
+            block.setTextColor(UiHelper.foreground(context, Color.rgb(20, 64, 49))); block.setTextSize(12); block.setPadding(dp(8), dp(4), dp(6), dp(4));
             block.setGravity(Gravity.TOP); block.setEllipsize(android.text.TextUtils.TruncateAt.END);
             String hours = item.lesson.start.format(CLOCK) + " – " + item.lesson.end.format(CLOCK);
             String room = "";
@@ -57,7 +58,7 @@ final class DayTimelineView extends FrameLayout {
             if (height >= dp(72) && !room.isEmpty()) label += "\n" + room;
             block.setText(label); block.setMaxLines(height >= dp(72) ? 4 : height >= dp(42) ? 2 : 1);
             block.setContentDescription((current ? "Teraz. " : "") + item.lesson.record.title + ". " + item.lesson.record.value);
-            GradientDrawable background = new GradientDrawable(); background.setColor(current ? Color.rgb(190, 232, 211) : item.lesson.tentative() ? Color.rgb(251, 240, 217) : Color.rgb(232, 243, 236));
+            GradientDrawable background = new GradientDrawable(); background.setColor(UiHelper.background(context, current ? Color.rgb(190, 232, 211) : item.lesson.tentative() ? Color.rgb(251, 240, 217) : Color.rgb(232, 243, 236)));
             background.setCornerRadius(dp(10)); background.setStroke(dp(current ? 2 : 1), current ? Color.rgb(23, 107, 87) : item.lesson.tentative() ? Color.rgb(183, 141, 59) : Color.rgb(186, 210, 195));
             block.setBackground(background); block.setClickable(true); block.setFocusable(true);
             block.setOnClickListener(v -> click.accept(item.lesson)); addView(block);
@@ -90,13 +91,13 @@ final class DayTimelineView extends FrameLayout {
                 paint.setTextSize(11 * getResources().getDisplayMetrics().scaledDensity);
                 for (int hour = firstHour; hour <= lastHour; hour++) {
                     float y = dp((hour - firstHour) * HOUR_HEIGHT + 8);
-                    paint.setColor(Color.rgb(104, 119, 110)); canvas.drawText(hourLabels[hour - firstHour], dp(1), y + dp(4), paint);
-                    paint.setColor(Color.rgb(225, 232, 226)); paint.setStrokeWidth(dp(1)); canvas.drawLine(dp(GUTTER), y, getWidth(), y, paint);
+                    paint.setColor(UiHelper.foreground(getContext(), Color.rgb(104, 119, 110))); canvas.drawText(hourLabels[hour - firstHour], dp(1), y + dp(4), paint);
+                    paint.setColor(getContext().getColor(R.color.app_outline_soft)); paint.setStrokeWidth(dp(1)); canvas.drawLine(dp(GUTTER), y, getWidth(), y, paint);
                 }
             } else if (date.equals(LocalDate.now(LessonTime.ZONE))) {
                 float y = nowOffset();
                 if (y >= 0 && y <= getHeight()) {
-                    paint.setColor(Color.rgb(192, 49, 49)); paint.setStrokeWidth(dp(2));
+                    paint.setColor(UiHelper.foreground(getContext(), Color.rgb(192, 49, 49))); paint.setStrokeWidth(dp(2));
                     canvas.drawCircle(dp(GUTTER), y, dp(4), paint); canvas.drawLine(dp(GUTTER), y, getWidth(), y, paint);
                 }
             }

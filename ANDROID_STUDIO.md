@@ -7,7 +7,7 @@
    **JDK 21** as Gradle JDK. The IDE can download it if it is not installed.
 4. Under **Tools → SDK Manager**, install **Android SDK Platform 36** and the build tools
    requested by Gradle. Android Studio manages `local.properties` for your machine.
-5. Select the **app** run configuration and your phone or an emulator running API 26 or newer.
+5. Select the **app** run configuration and your phone or an emulator running API 31 (Android 12) or newer.
 6. Click **Run ▶**. On the start screen choose **Zobacz wersję demonstracyjną** to use the
    application without registering an API key.
 

@@ -1,0 +1,5 @@
+# Copy to local.properties (ignored by Git). Never put real values in this example.
+# sdk.dir=C:/Users/YOUR_USER/AppData/Local/Android/Sdk
+# Optional personal debug credentials; prefer entering them on the account screen.
+usos.consumer.key=
+usos.consumer.secret=

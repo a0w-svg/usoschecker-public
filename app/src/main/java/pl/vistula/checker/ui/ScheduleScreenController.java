@@ -335,50 +335,22 @@ public final class ScheduleScreenController {
     }
 
     private static void recordAbsenceForLesson(MainActivity activity, LessonTime lesson, ScheduleListener listener) {
-        String courseTitle = lesson.record.title;
-        String courseCode = lesson.record.optMeta("courseId");
-        if (courseCode.isEmpty()) courseCode = courseTitle;
-
+        String courseTitle = lesson.record.title + " · " + pl.vistula.checker.core.AttendanceTracker.type(lesson.record);
         SharedPreferences prefs = activity.getSharedPreferences("attendance_tracker", Context.MODE_PRIVATE);
-        JSONObject saved;
-        try { saved = new JSONObject(prefs.getString("data", "{}")); } catch (Exception e) { saved = new JSONObject(); }
-
-        JSONObject item = saved.optJSONObject(courseCode);
-        if (item == null) {
-            Iterator<String> it = saved.keys();
-            while (it.hasNext()) {
-                String k = it.next();
-                JSONObject obj = saved.optJSONObject(k);
-                if (obj != null && courseTitle.equalsIgnoreCase(obj.optString("name"))) {
-                    item = obj;
-                    courseCode = k;
-                    break;
-                }
-            }
-        }
-
-        if (item == null) {
-            item = new JSONObject();
-            try {
-                item.put("name", courseTitle);
-                item.put("absences", 0);
-                item.put("limit", 2);
-                item.put("notes", "");
-                saved.put(courseCode, item);
-            } catch (Exception ignored) {}
-        }
-
-        int count = item.optInt("absences", 0) + 1;
-        int limit = item.optInt("limit", 2);
+        int count;
+        int limit = pl.vistula.checker.core.AttendanceTracker.LIMIT;
         try {
-            item.put("absences", count);
-            String oldNotes = item.optString("notes", "");
-            String dateStamp = lesson.start.toLocalDate().toString() + " (" + lesson.start.toLocalTime().toString().substring(0, 5) + ")";
-            String newNotes = oldNotes.isEmpty() ? "Opuszczono: " + dateStamp : oldNotes + "\nOpuszczono: " + dateStamp;
-            item.put("notes", newNotes);
-            saved.put(courseCode, item);
-            prefs.edit().putString("data", saved.toString()).apply();
-        } catch (Exception ignored) {}
+            JSONObject raw = activity.display().optJSONObject("snapshot");
+            Snapshot snapshot = raw == null ? new Snapshot("", "") : Snapshot.from(raw);
+            JSONObject saved = pl.vistula.checker.core.AttendanceTracker.reconcile(new JSONObject(prefs.getString("data", "{}")), snapshot);
+            String id = pl.vistula.checker.core.AttendanceTracker.record(saved, snapshot, lesson.record);
+            JSONObject item = saved.getJSONObject(id);
+            count = item.optInt("absences");
+            prefs.edit().putString("data", saved.toString()).putString("term", item.optString("term")).putString("classType", "all").apply();
+        } catch (Exception e) {
+            Toast.makeText(activity, R.string.attendance_save_error, Toast.LENGTH_LONG).show();
+            return;
+        }
 
         if (count >= limit) {
             String alertMsg = count > limit

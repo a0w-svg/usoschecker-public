@@ -195,6 +195,7 @@ public class CoreTest {
              "installments":[{"id":"inst-1","name":{"pl":"Czesne semestr zimowy rata 1"},"amount":1250.0,"currency":"PLN","deadline":"2026-10-15","status":"unpaid"},
                             {"id":"inst-2","name":{"pl":"Czesne semestr zimowy rata 2"},"amount":1250.0,"currency":"PLN","deadline":"2026-11-15","status":"paid"}]}
             """);
+        raw.getJSONArray("installments").getJSONObject(0).put("deadline", java.time.LocalDate.now().plusDays(1).toString());
         PaymentInfo p = UsosParser.payments(raw);
         assertNotNull(p);
         assertEquals(1, p.accounts.size());

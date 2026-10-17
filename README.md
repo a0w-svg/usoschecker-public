@@ -1,14 +1,29 @@
 # Vistula · zmiany — aplikacja Android
 
 Natywna aplikacja w języku polskim dla Akademii Finansów i Biznesu Vistula.
-Android 8.0 (API 26) lub nowszy. Nie jest oficjalną aplikacją uczelni.
+Android 12 (API 31) lub nowszy. Nie jest oficjalną aplikacją uczelni.
+
+## Autor i licencja
+
+Autor: **a0w-svg**. Copyright © 2026 a0w-svg.
+
+Kod aplikacji jest udostępniany na licencji **MIT**. Pełny tekst znajduje się
+w pliku [LICENSE](LICENSE) oraz w aplikacji: **Więcej → O aplikacji** i **Konto → O aplikacji**.
+Biblioteki i materiały zewnętrzne podlegają własnym licencjom.
 
 Projekt można otworzyć bezpośrednio w **Android Studio**: wybierz katalog zawierający
 `settings.gradle`, wykonaj Gradle Sync i uruchom konfigurację `app`.
 Dokładne kroki: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
 Przygotowanie wydania, kontrole jakości i podpisywanie: [RELEASE.md](RELEASE.md).
 
+Zasady publikacji na GitHubie, skanowanie sekretów i konfiguracja ochrony repozytorium:
+[SECURITY.md](SECURITY.md). Szablon lokalnej konfiguracji: `local.properties.example`.
+
 ## Nawigacja i wygląd
+
+W **Więcej → Wygląd** oraz na ekranie **Konto → Wygląd** można wybrać motyw systemowy,
+jasny albo **Ciemny OLED** z czarnym tłem. Wybór jest zapamiętywany na urządzeniu;
+motyw systemowy automatycznie używa wariantu OLED w trybie ciemnym.
 
 **Nowe:** w **Więcej** dostępne są **Legitymacje** (karta fizyczna i status mLegitymacji)
 oraz **Dokumenty i decyzje** z pobieraniem dostępnych plików. Wymagane zakresy zgody
@@ -120,7 +135,8 @@ Transfery i pliki ograniczono do 8 MB, podgląd tekstowy do 100 000 znaków; eks
 
 ## Uruchomienie na telefonie
 
-1. Zainstaluj APK z `dist/vistula-checker-debug.apk` (jeśli dołączono gotowy build).
+1. Zbuduj aplikację lokalnie w Android Studio. Do publicznej dystrybucji przygotuj
+   podpisany release według [RELEASE.md](RELEASE.md); debug może zawierać lokalne klucze.
 2. Bez klucza wybierz **Zobacz wersję demonstracyjną**. Katalog i dokumentacja API działają offline.
 3. Aby pobierać prywatne dane, w **Konto** podaj własny `Consumer Key` i `Consumer Secret`
    z [USOSapps Vistuli](https://usosapps.vistula.edu.pl/developers/).

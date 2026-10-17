@@ -1,7 +1,11 @@
 # Przygotowanie wydania
 
+Publikacja źródeł na GitHubie: [SECURITY.md](SECURITY.md). Skrypt pakujący tworzy
+wyłącznie `dist/publication/VistulaChecker-AndroidStudio.zip`; nie dołącza binariów
+ani mapowania R8. Nie publikuj starszych APK debug przechowywanych w `dist`.
+
 Projekt wymaga JDK 21 oraz Android SDK Platform 36. Korzystaj z dołączonego wrappera Gradle.
-Kod aplikacji pozostaje zgodny z Androidem 8.0 (API 26) i nowszym; target SDK wynosi 36.
+Kod aplikacji pozostaje zgodny z Androidem 12 (API 31) i nowszym; target SDK wynosi 36.
 Zmiana target SDK obejmuje obsługę przycisku i gestu Wstecz przez AndroidX.
 
 ## Kontrola jakości
@@ -80,7 +84,7 @@ i większego `versionCode`; nie zastępuj go kluczem debug. Klucza ani haseł ni
 
 Automatyczne testy używają danych testowych i odpowiedzi HTTP z fixture. Nie potwierdzają
 działania konta studenta w rzeczywistym USOS ani wszystkich wersji Androida.
-Przed publicznym wydaniem sprawdź podpisany build na Androidzie 8 i Androidzie 16,
+Przed publicznym wydaniem sprawdź podpisany build na Androidzie 12 i Androidzie 16,
 logowanie z własnym kontem, odświeżenie ocen i planu, pracę po utracie sieci, odmowę zgody
 na powiadomienia, eksport dokumentu i powrót do aplikacji po ubiciu procesu.
 Test aktualizacji powinien zachować wcześniejszy szyfrowany magazyn i zaplanowane zadania.

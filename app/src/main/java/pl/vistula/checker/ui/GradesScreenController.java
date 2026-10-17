@@ -217,7 +217,7 @@ public final class GradesScreenController {
         TextView badge = card.findViewById(R.id.grade_item_value_badge);
         badge.setText(R.string.grades_no_grade);
         badge.setTextSize(13);
-        badge.setTextColor(UiHelper.MUTED);
+        badge.setTextColor(UiHelper.foreground(activity, UiHelper.MUTED));
         ((TextView) card.findViewById(R.id.grade_item_course_meta)).setText(course.optMeta("courseId"));
         TextView ects = card.findViewById(R.id.grade_item_ects);
         if (Double.isFinite(course.ects)) ects.setText(activity.getString(R.string.grade_ects_points,
@@ -317,7 +317,7 @@ public final class GradesScreenController {
         valueBadge.setTextSize(multipleEntries ? 13 : 22);
         int topBgColor = multipleEntries ? UiHelper.GREEN : getGradeBadgeColor(topRecord, topSymbol);
         GradientDrawable topBg = new GradientDrawable();
-        topBg.setColor(topBgColor);
+        topBg.setColor(UiHelper.background(activity, topBgColor));
         topBg.setCornerRadius(UiHelper.dp(activity, 8));
         valueBadge.setBackground(topBg);
 
@@ -388,10 +388,10 @@ public final class GradesScreenController {
 
             typeBadge.setText(badgeText);
             GradientDrawable tBg = new GradientDrawable();
-            tBg.setColor(badgeBgColor);
+            tBg.setColor(UiHelper.background(activity, badgeBgColor));
             tBg.setCornerRadius(UiHelper.dp(activity, 8));
             typeBadge.setBackground(tBg);
-            typeBadge.setTextColor(badgeTextColor);
+            typeBadge.setTextColor(UiHelper.foreground(activity, badgeTextColor));
 
             String sessionNum = r.optMeta("sessionNumber");
             if (sessionNum.isEmpty()) {
@@ -409,7 +409,7 @@ public final class GradesScreenController {
             valBadge.setText(sym);
             int vBgColor = getGradeBadgeColor(r, sym);
             GradientDrawable vBg = new GradientDrawable();
-            vBg.setColor(vBgColor);
+            vBg.setColor(UiHelper.background(activity, vBgColor));
             vBg.setCornerRadius(UiHelper.dp(activity, 8));
             valBadge.setBackground(vBg);
 

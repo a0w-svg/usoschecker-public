@@ -37,7 +37,7 @@
                 android:inputType="textCapSentences"
                 android:imeOptions="actionNext|flagNoPersonalizedLearning"
                 android:maxLines="2"
-                android:textColor="#1B2520"
+                android:textColor="@color/app_ink"
                 android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -47,7 +47,7 @@
             android:layout_marginBottom="4dp"
             android:text="@string/tasks_dialog_priority_label"
             android:labelFor="@id/task_input_priority"
-            android:textColor="#596960"
+            android:textColor="@color/app_muted"
             android:textSize="12sp" />
 
         <Spinner
@@ -82,7 +82,28 @@
                 android:maxLines="4"
                 android:minHeight="56dp"
                 android:minLines="2"
-                android:textColor="#1B2520"
+                android:textColor="@color/app_ink"
+                android:textSize="14sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="@string/tasks_platon_link_hint"
+            app:boxBackgroundMode="outline">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/task_input_platon_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="56dp"
+                android:inputType="textUri"
+                android:singleLine="true"
+                android:saveEnabled="false"
+                android:importantForAutofill="no"
+                android:imeOptions="actionDone|flagNoPersonalizedLearning"
+                android:textColor="@color/app_ink"
                 android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -95,9 +116,9 @@
             android:minHeight="48dp"
             android:text="@string/schedule_btn_choose_date"
             android:textAllCaps="false"
-            android:textColor="#176B57"
+            android:textColor="@color/app_accent"
             android:textSize="14sp"
-            app:backgroundTint="#E8F3EC"
+            app:backgroundTint="@color/app_button_surface"
             app:cornerRadius="14dp" />
     </LinearLayout>
 </ScrollView>

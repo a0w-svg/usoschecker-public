@@ -15,7 +15,7 @@
         android:id="@+id/news_item_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#1B2520"
+        android:textColor="@color/app_ink"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginBottom="6dp"
-        android:textColor="#176B57"
+        android:textColor="@color/app_accent"
         android:textSize="13sp"
         android:textStyle="bold" />
 
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:lineSpacingExtra="2dp"
-        android:textColor="#1B2520"
+        android:textColor="@color/app_ink"
         android:textSize="14sp"
         android:visibility="gone" />
 
@@ -48,8 +48,8 @@
         android:minHeight="48dp"
         android:text="@string/news_read_full"
         android:textAllCaps="false"
-        android:textColor="#176B57"
+        android:textColor="@color/app_accent"
         android:textSize="14sp"
-        app:backgroundTint="#E8F3EC"
+        app:backgroundTint="@color/app_button_surface"
         app:cornerRadius="14dp" />
 </LinearLayout>

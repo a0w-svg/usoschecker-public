@@ -30,11 +30,11 @@ public final class CampusGuideController {
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:52.158145,21.034326?q=Akademia+Finansów+i+Biznesu+Vistula,+ul.+Stokłosy+3,+Warszawa"));
                 activity.startActivity(mapIntent);
             } catch (Exception e) {
-                UiHelper.browser(activity, "https://maps.google.com/?q=Akademia+Finansów+i+Biznesu+Vistula,+Warszawa");
+                UiHelper.browser(activity, "https://www.google.com/maps/search/?api=1&query=Akademia%20Finans%C3%B3w%20i%20Biznesu%20Vistula%20Stok%C5%82osy%203%20Warszawa");
             }
         }, true));
         campusCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_btn_website),
-            () -> UiHelper.browser(activity, "https://www.vistula.edu.pl/"), false));
+            () -> UiHelper.browser(activity, "https://vistula.edu.pl/"), false));
 
         // Dziekanat
         LinearLayout dziekanatCard = UiHelper.card(activity, content, Color.WHITE);
@@ -86,10 +86,10 @@ public final class CampusGuideController {
         LinearLayout linksCard = UiHelper.card(activity, content, Color.WHITE);
         UiHelper.add(activity, linksCard, activity.getString(R.string.campus_rules_title), 18, UiHelper.INK, true);
         linksCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_rules_studies),
-            () -> UiHelper.browser(activity, "https://www.vistula.edu.pl/student/strefa-studenta/regulaminy"), false));
+            () -> UiHelper.browser(activity, "https://vistula.edu.pl/uczelnia/wazne-dokumenty"), false));
         linksCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_rules_templates),
-            () -> UiHelper.browser(activity, "https://www.vistula.edu.pl/student/strefa-studenta/wzory-podan"), false));
+            () -> UiHelper.browser(activity, "https://vistula.edu.pl/student/sprawy-studenckie"), false));
         linksCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_rules_programs),
-            () -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/"), false));
+            () -> UiHelper.browser(activity, "https://usosweb.vistula.edu.pl/"), false));
     }
 }

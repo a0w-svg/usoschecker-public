@@ -22,7 +22,7 @@
         android:layout_marginEnd="14dp"
         android:background="@drawable/widget_badge_bg"
         android:gravity="center"
-        android:textColor="#176B57"
+        android:textColor="@color/app_accent"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -36,7 +36,7 @@
             android:id="@+id/tool_tile_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#1B2520"
+            android:textColor="@color/app_ink"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -45,7 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:textColor="#596960"
+            android:textColor="@color/app_muted"
             android:textSize="12sp" />
     </LinearLayout>
 
@@ -55,6 +55,6 @@
         android:paddingStart="8dp"
         android:importantForAccessibility="no"
         android:text="›"
-        android:textColor="#596960"
+        android:textColor="@color/app_muted"
         android:textSize="22sp" />
 </LinearLayout>

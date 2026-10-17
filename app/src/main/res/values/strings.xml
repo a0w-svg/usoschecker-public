@@ -137,7 +137,7 @@
     <string name="tool_gpa_title">Kalkulator średniej i stypendium</string>
     <string name="tool_gpa_desc">Średnia ważona ECTS, cele i symulator stypendium rektora</string>
     <string name="tool_attendance_title">Licznik nieobecności na zajęciach</string>
-    <string name="tool_attendance_desc">Kontrola limitów 2 opuszczeń, ostrzeżenia i usprawiedliwienia</string>
+    <string name="tool_attendance_desc">Semestry i rodzaje zajęć · limit 3 nieobecności</string>
     <string name="tool_tasks_title">Zadania i terminy projektów</string>
     <string name="tool_tasks_desc">Osobisty planer kolokwiów, esejów i zadań z powiadomieniami</string>
     <string name="tool_payments_title">Płatności i subkonta USOS</string>
@@ -158,13 +158,13 @@
     <string name="keystore_badge">BEZPIECZNY SEJF SPRZĘTOWY</string>
     <string name="keystore_note">Szyfrowanie Android Keystore (AES-256-GCM). Wszystkie dane przechowywane wyłącznie lokalnie.</string>
     <string name="connect_usos_title">Połącz z USOS</string>
-    <string name="connect_usos_desc">Wpisz klucz aplikacji z USOSapps. Hasło uczelniane podajesz wyłącznie na stronie uczelni w przeglądarce.</string>
+    <string name="connect_usos_desc">Zaloguj się na stronie uczelni, zaakceptuj zgody i wklej otrzymany PIN. Hasło podajesz wyłącznie w przeglądarce.</string>
     <string name="btn_how_to_register">❓ Jak zarejestrować aplikację w USOSapps?</string>
     <string name="scope_recommended">⭐ Zalecany (oceny, plan, płatności)</string>
     <string name="scope_basic">Podstawowy (oceny i plan)</string>
     <string name="scope_complete">Rozszerzony (+dokumenty, foto, mail)</string>
-    <string name="btn_login_browser">1. Zaloguj w przeglądarce</string>
-    <string name="btn_confirm_pin">2. Potwierdź PIN i połącz</string>
+    <string name="btn_login_browser">1. Otwórz logowanie USOS</string>
+    <string name="btn_confirm_pin">2. Połącz konto</string>
     <string name="btn_paste_pin">📋 Wklej PIN ze schowka</string>
     <string name="pin_detected_clipboard">📋 Wykryto kod PIN ze schowka</string>
     <string name="pin_hint">Po zaakceptowaniu zgody skopiuj kod PIN z USOS i wróć do aplikacji.</string>
@@ -178,7 +178,7 @@
     <string name="demo_see_version">Zobacz wersję demonstracyjną</string>
     <string name="demo_plan_notice">Plan obejmuje 8 tygodni i można go rozszerzyć do 16 tygodni. Sprawdzanie w tle co %1$d min może być opóźnione przez Androida. Czas wykrycia nie oznacza czasu publikacji.</string>
     <string name="api_key_help_title">Jak uzyskać klucz aplikacji USOS?</string>
-    <string name="api_key_help_message">Aplikacja łączy się bezpośrednio z serwerem USOS Vistula z Twojego telefonu przez protokół OAuth 1.0a.\n\n1. Kliknij „Zarejestruj w USOSapps” poniżej.\n2. Zaloguj się danymi uczelnianymi Vistula.\n3. Wpisz dowolną nazwę (np. „Vistula Checker”).\n4. Zaznacz zakresy: Oceny (grades), Studia (studies), Płatności (payments) i Dostęp offline (offline_access).\n5. Zapisz i skopiuj Consumer Key oraz Consumer Secret.</string>
+    <string name="api_key_help_message">Klucz aplikacji dodajesz tylko raz.\n\n1. Otwórz formularz USOSapps Developers przyciskiem poniżej.\n2. Podaj nazwę aplikacji i swój e-mail, aby utworzyć klucz.\n3. Skopiuj Consumer Key i Consumer Secret do ustawień połączenia.\n4. Otwórz logowanie USOS, zaloguj się danymi uczelnianymi i zaakceptuj zgody.\n5. Wróć do aplikacji i wklej PIN.</string>
     <string name="btn_register_usosapps">Zarejestruj w USOSapps</string>
 
     <!-- Home Screen Extras -->
@@ -373,8 +373,8 @@
     <string name="campus_it_email">Napisz do Wsparcia IT (pomocit@vistula.edu.pl)</string>
     <string name="campus_rules_title">Regulaminy i procedury uczelni</string>
     <string name="campus_rules_studies">Regulamin studiów Vistula</string>
-    <string name="campus_rules_templates">Wzory podań do Dziekana</string>
-    <string name="campus_rules_programs">Plany studiów i programy USOS</string>
+    <string name="campus_rules_templates">Sprawy studenckie i wnioski</string>
+    <string name="campus_rules_programs">USOSweb – serwis studenta</string>
 
     <!-- News Screen -->
     <string name="news_title">Komunikaty uczelni</string>
@@ -394,14 +394,14 @@
 
     <!-- Attendance Tracker -->
     <string name="attendance_title">Licznik nieobecności</string>
-    <string name="attendance_subtitle">Kontrola dozwolonych limitów opuszczeń zajęć</string>
+    <string name="attendance_subtitle">Osobno dla każdego semestru i rodzaju zajęć · limit 3</string>
     <string name="attendance_status_exceeded">PRZEKROCZONY LIMIT NIEOBECNOŚCI</string>
     <string name="attendance_status_warning">UWAGA NA LIMIT NIEOBECNOŚCI</string>
     <string name="attendance_status_ok">STAN NIEOBECNOŚCI W NORMIE</string>
-    <string name="attendance_stats_summary">Śledzone przedmioty: %1$d · Suma opuszczeń: %2$d</string>
-    <string name="attendance_note_exceeded">Liczba przedmiotów z przekroczonym limitem: %1$d! Wymagany kontakt z prowadzącym lub Dziekanatem.</string>
-    <string name="attendance_note_warning">Liczba przedmiotów na granicy limitu (zostało 1 opuszczenie): %1$d.</string>
-    <string name="attendance_note_ok">Brak zagrożeń. Zgodnie z regulaminem studiów domyślny limit to 2 nieobecności bez usprawiedliwienia.</string>
+    <string name="attendance_stats_summary">Śledzone grupy zajęć: %1$d · Suma nieobecności: %2$d</string>
+    <string name="attendance_note_exceeded">Grupy zajęć z przekroczonym limitem: %1$d.</string>
+    <string name="attendance_note_warning">Grupy zajęć blisko limitu lub z wykorzystanym limitem: %1$d.</string>
+    <string name="attendance_note_ok">Nie przekroczono limitu 3 nieobecności dla żadnej z wybranych grup zajęć.</string>
     <string name="attendance_filter_all">Wszystkie (%1$d)</string>
     <string name="attendance_filter_warning">Ostrzeżenia (%1$d)</string>
     <string name="attendance_filter_exceeded">Przekroczone (%1$d)</string>
@@ -417,18 +417,18 @@
     <string name="attendance_btn_options">Opcje</string>
     <string name="attendance_empty_filter">Brak przedmiotów na wybranym filtrze</string>
     <string name="attendance_empty_desc">Zmień filtr lub dodaj przedmiot ręcznie.</string>
-    <string name="attendance_rule_footer">Dane licznika są zapisywane lokalnie na Twoim urządzeniu. W Vistuli standardowy limit nieobecności to 2 na przedmiot na semestr.</string>
+    <string name="attendance_rule_footer">Lokalny licznik: limit 3 nieobecności osobno dla przedmiotu, semestru i formy zajęć. Starsze wpisy bez tych informacji znajdziesz w „Do przypisania”.</string>
     <string name="attendance_dialog_add">Dodaj przedmiot</string>
     <string name="attendance_dialog_edit">Edycja: %1$s</string>
     <string name="attendance_dialog_name_hint">Nazwa przedmiotu</string>
-    <string name="attendance_dialog_limit_hint">Limit nieobecności (domyślnie 2)</string>
+    <string name="attendance_dialog_limit_hint">Limit nieobecności: 3</string>
     <string name="attendance_dialog_notes_hint">Notatki / Usprawiedliwienia (opcjonalnie)</string>
     <string name="attendance_dialog_delete">Usuń</string>
     <string name="attendance_dialog_error_name">Wpisz nazwę przedmiotu</string>
     <string name="attendance_dialog_error_limit">Podaj liczbę od 1 do 20</string>
     <string name="attendance_alert_title">⚠️ Uwaga na limit nieobecności!</string>
-    <string name="attendance_alert_msg_exceeded">Przekroczono dozwolony limit nieobecności! Wymagane usprawiedliwienie w Dziekanacie.</string>
-    <string name="attendance_alert_msg_reached">Wykorzystano cały dopuszczalny limit nieobecności (2 opuszczenia).</string>
+    <string name="attendance_alert_msg_exceeded">Przekroczono limit 3 nieobecności dla tego rodzaju zajęć w semestrze.</string>
+    <string name="attendance_alert_msg_reached">Wykorzystano limit 3 nieobecności dla tego rodzaju zajęć w semestrze.</string>
     <string name="attendance_alert_body">Zapisano nieobecność dla: %1$s.\n\nAktualna liczba opuszczeń: %2$d z dozwolonych %3$d.\n\n%4$s</string>
     <string name="attendance_alert_btn_open">Otwórz licznik</string>
     <string name="attendance_alert_btn_understand">Rozumiem</string>
@@ -581,7 +581,7 @@
     <string name="account_disconnect_title">Odłączyć konto?</string>
     <string name="account_disconnect_message">Tokeny, zapis ocen, plan, historia i własne zadania zostaną usunięte z tego telefonu. Zgodę dla aplikacji możesz odwołać również w USOSapps.</string>
     <string name="account_disconnect_btn">Odłącz</string>
-    <string name="account_scopes_hint">Monitor wymaga grades, studies, payments i offline_access. Inne zakresy dodaj tylko dla metod, których chcesz używać w katalogu API.</string>
+    <string name="account_scopes_hint">Oceny i plan wymagają grades i studies, a sprawdzanie w tle offline_access. Płatności są opcjonalne i wymagają payments. Adres e-mail wymaga email. Zmiana zakresów wymaga ponownego połączenia konta i zgody w USOS.</string>
     <string name="account_toast_enter_pin">Wpisz kod PIN wyświetlony przez USOS</string>
     <string name="account_notif_system_allowed">System zezwala na powiadomienia.</string>
     <string name="account_notif_system_blocked">Powiadomienia są wyłączone w systemie. Włącz je, aby otrzymywać alerty o nowych ocenach i zmianach sal.</string>
@@ -722,4 +722,42 @@
     <string name="schedule_agenda_empty">Brak zajęć w zapisanym planie.</string>
     <string name="schedule_overnight">Koniec następnego dnia</string>
     <string name="grades_overview_hint">Przedmioty, oceny i kolejne terminy. Wyszukuj także po kodzie przedmiotu.</string>
+    <string name="appearance_title">Wygląd</string>
+    <string name="appearance_description">Motyw systemowy, jasny lub ciemny OLED</string>
+    <string-array name="appearance_modes">
+        <item>Systemowy</item>
+        <item>Jasny</item>
+        <item>Ciemny OLED</item>
+    </string-array>
+    <string name="attendance_unassigned">Do przypisania</string>
+    <string name="attendance_semester">Semestr</string>
+    <string name="attendance_semester_hint">Kod semestru (np. 2026Z)</string>
+    <string name="attendance_semester_required">Wpisz kod semestru</string>
+    <string name="attendance_class_type">Rodzaj zajęć</string>
+    <string name="attendance_all_types">Wszystkie rodzaje</string>
+    <string name="attendance_unknown_type">Rodzaj do przypisania</string>
+    <string name="attendance_fixed_limit">Limit: 3 nieobecności na semestr dla każdego rodzaju zajęć.</string>
+    <string name="attendance_duplicate">Ten przedmiot i rodzaj zajęć ma już zapisane nieobecności w tym semestrze. Edytuj istniejący wpis.</string>
+    <string name="attendance_save_error">Nie udało się zapisać nieobecności. Spróbuj ponownie.</string>
+    <string name="login_settings">Ustawienia połączenia</string>
+    <string name="login_step_pin">Krok 2 z 2: wklej PIN ze strony USOS i połącz konto.</string>
+    <string name="login_ready">Klucz jest gotowy. Krok 1 z 2: otwórz logowanie USOS.</string>
+    <string name="login_setup">Jednorazowo dodaj klucz aplikacji poniżej. Następnie otwórz logowanie USOS.</string>
+    <string name="login_key_required">Wpisz Consumer Key</string>
+    <string name="login_secret_required">Wpisz Consumer Secret</string>
+    <string name="attendance_type_required">Wybierz rodzaj zajęć</string>
+    <string name="tasks_platon_title">Platon</string>
+    <string name="tasks_platon_desc">Otwórz platformę uczelni lub zapisz zadanie z terminem i linkiem do jego strony w Platonie.</string>
+    <string name="tasks_platon_open">Otwórz Platon</string>
+    <string name="tasks_platon_add">Dodaj zadanie z Platona</string>
+    <string name="tasks_platon_open_task">Otwórz zadanie w Platonie</string>
+    <string name="tasks_platon_link_hint">Link do zadania w Platonie (opcjonalnie)</string>
+    <string name="tasks_platon_invalid_link">Wklej link HTTPS z platon.vistula.edu.pl, bez danych logowania.</string>
+    <string name="about_title">O aplikacji</string>
+    <string name="about_author">Autor: a0w-svg</string>
+    <string name="about_version">Wersja %1$s</string>
+    <string name="about_license">Licencja MIT</string>
+    <string name="about_license_open">Przeczytaj licencję MIT</string>
+    <string name="about_license_error">Nie udało się otworzyć licencji. Spróbuj ponownie.</string>
+    <string name="about_license_scope">Licencja MIT dotyczy kodu aplikacji. Biblioteki i materiały zewnętrzne podlegają własnym licencjom.</string>
 </resources>

@@ -27,6 +27,10 @@ if ($DeviceTests) { $checks += ':app:connectedDebugAndroidTest' }
 
 Push-Location -LiteralPath $projectDirectory
 try {
+    & python (Join-Path $projectDirectory 'scripts/security_check.py')
+    if ($LASTEXITCODE -ne 0) { throw 'Kontrola bezpieczenstwa zrodel nie powiodla sie.' }
+    & python (Join-Path $projectDirectory 'scripts/security_check.py') --history
+    if ($LASTEXITCODE -ne 0) { throw 'Kontrola bezpieczenstwa historii nie powiodla sie.' }
     & (Join-Path $projectDirectory 'gradlew.bat') @checks
     if ($LASTEXITCODE -ne 0) { throw 'Kontrola wydania nie powiodla sie. Sprawdz raporty Gradle przed publikacja.' }
     if ($DeviceTests) {

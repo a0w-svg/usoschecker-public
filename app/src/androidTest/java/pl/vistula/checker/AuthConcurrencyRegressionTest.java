@@ -152,7 +152,13 @@ public class AuthConcurrencyRegressionTest {
 
     private void preparePending() throws Exception {
         repository.update(s -> s.put("key", "test-key").put("secret", "test-secret").put("authAttempt", "test-attempt")
-            .put("requestToken", "request-token").put("requestSecret", "request-secret"));
+            .put("requestToken", "request-token").put("requestSecret", "request-secret").put("scopes", "grades|studies|offline_access"));
+    }
+    @Test public void storedConsentMatchesNormalizedOAuthRequest() throws Exception {
+        repository.begin("test-key", "test-secret", " grades | | studies | grades | offline_access | ");
+        assertEquals("grades|studies|offline_access", repository.read().getString("scopes"));
+        repository.finish("1234");
+        assertEquals("grades|studies|offline_access", repository.read().getString("scopes"));
     }
     private Future<?> startBegin() throws Exception {
         blockedEndpoint = "oauth/request_token";

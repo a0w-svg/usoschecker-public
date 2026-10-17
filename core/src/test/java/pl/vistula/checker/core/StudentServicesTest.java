@@ -7,6 +7,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class StudentServicesTest {
+    @Test public void scopeNormalizationPreservesOnlyDistinctNonEmptyScopes() {
+        assertEquals("grades|studies|offline_access", StudentServices.normalizeScopes(" grades | | studies||grades|offline_access| "));
+        assertEquals("", StudentServices.normalizeScopes(null));
+        assertFalse(StudentServices.hasScope(null, "payments"));
+        assertFalse(StudentServices.hasScope("other_payments", "payments"));
+    }
     @Test public void nullableFieldsAndLanguageDictionariesRemainReadable() {
         assertEquals("", StudentServices.text(new JSONObject().put("id", JSONObject.NULL), "id"));
         assertEquals("Decyzja", StudentServices.localized(new JSONObject().put("pl", "Decyzja").put("en", "Decision")));

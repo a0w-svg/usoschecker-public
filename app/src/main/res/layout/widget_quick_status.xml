@@ -20,7 +20,7 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_notification"
-            android:tint="#176B57"
+            android:tint="@color/app_accent"
             android:contentDescription="@string/background_check" />
 
         <TextView
@@ -29,7 +29,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="Vistula · Karta Studenta"
-            android:textColor="#176B57"
+            android:textColor="@color/app_accent"
             android:textSize="13sp"
             android:textStyle="bold" />
 
@@ -39,7 +39,7 @@
             android:layout_height="36dp"
             android:background="@null"
             android:src="@drawable/ic_refresh"
-            android:tint="#176B57"
+            android:tint="@color/app_accent"
             android:contentDescription="@string/loading" />
     </LinearLayout>
 
@@ -52,7 +52,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="Jan Kowalski"
-        android:textColor="#1B2520"
+        android:textColor="@color/app_ink"
         android:textSize="15sp"
         android:textStyle="bold" />
 
@@ -64,7 +64,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="Nr albumu: 34589"
-        android:textColor="#596960"
+        android:textColor="@color/app_muted"
         android:textSize="11sp" />
 
     <!-- Two Metric Cards -->
@@ -89,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ŚREDNIA &amp; OCENY"
-                android:textColor="#176B57"
+                android:textColor="@color/app_accent"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
@@ -99,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="4.67"
-                android:textColor="#1B2520"
+                android:textColor="@color/app_ink"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -109,7 +109,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Średnia ważona ECTS"
-                android:textColor="#596960"
+                android:textColor="@color/app_muted"
                 android:textSize="10sp" />
         </LinearLayout>
 
@@ -128,7 +128,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PŁATNOŚCI"
-                android:textColor="#176B57"
+                android:textColor="@color/app_accent"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
@@ -138,7 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="0,00 PLN"
-                android:textColor="#1B2520"
+                android:textColor="@color/app_ink"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -148,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Wszystko opłacone"
-                android:textColor="#596960"
+                android:textColor="@color/app_muted"
                 android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
@@ -161,6 +161,6 @@
         android:layout_marginTop="6dp"
         android:gravity="center"
         android:text="Dotknij, aby otworzyć aplikację"
-        android:textColor="#176B57"
+        android:textColor="@color/app_accent"
         android:textSize="11sp" />
 </LinearLayout>

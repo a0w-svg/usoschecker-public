@@ -346,7 +346,7 @@ public final class ApiExplorerController {
         }
 
         content.addView(UiHelper.button(activity, activity.getString(R.string.api_btn_online_docs),
-            () -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/developers/api/" + metadata.optString("name").substring("services/".length(), metadata.optString("name").lastIndexOf('/')) + "/"), false));
+            () -> UiHelper.browser(activity, pl.vistula.checker.core.WebLinks.apiDocumentation(metadata.optString("name"))), false));
 
         UiHelper.note(activity, content,
             activity.getString(R.string.api_limits_note),

@@ -43,6 +43,36 @@ public final class UiHelper {
 
     private UiHelper() {}
 
+    public static boolean isDark(Context context) {
+        return (context.getResources().getConfiguration().uiMode
+            & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+            == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    /** Adapt legacy screen colors without changing their meaning in the light theme. */
+    public static int foreground(Context context, int color) {
+        if (!isDark(context)) return color;
+        if (color == INK) return context.getColor(R.color.app_ink);
+        if (color == MUTED) return context.getColor(R.color.app_muted);
+        if (color == GREEN) return context.getColor(R.color.app_accent);
+        // Keep status colors distinguishable and legible on dark cards.
+        int surface = Color.rgb(24, 24, 24);
+        for (int i = 0; i <= 20; i++) {
+            int candidate = androidx.core.graphics.ColorUtils.blendARGB(color, Color.WHITE, i / 20f);
+            if (androidx.core.graphics.ColorUtils.calculateContrast(candidate, surface) >= 4.5) return candidate;
+        }
+        return Color.WHITE;
+    }
+
+    public static int background(Context context, int color) {
+        if (!isDark(context)) return color;
+        if (color == Color.WHITE || color == BG || color == INK) return Color.BLACK;
+        // Pale information/status panels become subtle tinted surfaces.
+        if (androidx.core.graphics.ColorUtils.calculateLuminance(color) > .5)
+            return androidx.core.graphics.ColorUtils.blendARGB(Color.BLACK, color, .09f);
+        return color;
+    }
+
     public static int dp(Context context, int value) {
         return Math.round(value * context.getResources().getDisplayMetrics().density);
     }
@@ -51,7 +81,7 @@ public final class UiHelper {
         TextView t = new TextView(context);
         t.setText(value);
         t.setTextSize(size);
-        t.setTextColor(color);
+        t.setTextColor(foreground(context, color));
         t.setLineSpacing(dp(context, 3), 1f);
         if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         return t;
@@ -69,9 +99,9 @@ public final class UiHelper {
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(context, 20), dp(context, 20), dp(context, 20), dp(context, 12));
         GradientDrawable shape = new GradientDrawable();
-        shape.setColor(color);
+        shape.setColor(background(context, color));
         shape.setCornerRadius(dp(context, 20));
-        if (color == Color.WHITE) shape.setStroke(dp(context, 1), Color.rgb(224, 231, 225));
+        if (color == Color.WHITE || isDark(context)) shape.setStroke(dp(context, 1), context.getColor(R.color.app_outline_soft));
         box.setBackground(shape);
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
         p.bottomMargin = dp(context, 14);
@@ -87,9 +117,9 @@ public final class UiHelper {
         b.setAllCaps(false);
         b.setTextSize(14);
         int[][] states = {new int[]{-android.R.attr.state_enabled}, new int[]{}};
-        b.setTextColor(new ColorStateList(states, new int[]{MUTED, primary ? Color.WHITE : GREEN}));
+        b.setTextColor(new ColorStateList(states, new int[]{foreground(context, MUTED), primary ? Color.WHITE : foreground(context, GREEN)}));
         b.setCornerRadius(dp(context, 14));
-        b.setBackgroundTintList(new ColorStateList(states, new int[]{Color.rgb(230, 235, 231), primary ? GREEN : Color.rgb(232, 243, 236)}));
+        b.setBackgroundTintList(new ColorStateList(states, new int[]{background(context, Color.rgb(230, 235, 231)), primary ? GREEN : background(context, Color.rgb(232, 243, 236))}));
         b.setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10));
         b.setMinHeight(dp(context, 48));
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
@@ -131,7 +161,7 @@ public final class UiHelper {
 
         if (countView != null) {
             countView.setText(count);
-            countView.setTextColor(countColor);
+            countView.setTextColor(foreground(context, countColor));
         }
         if (titleView != null) {
             titleView.setText(title);
@@ -206,7 +236,7 @@ public final class UiHelper {
         TextInputEditText e = new TextInputEditText(wrapper.getContext());
         e.setText(value);
         e.setTextSize(14);
-        e.setTextColor(INK);
+        e.setTextColor(foreground(context, INK));
         e.setSaveEnabled(false);
         e.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
         e.setImeOptions(e.getImeOptions() | android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
@@ -263,11 +293,11 @@ public final class UiHelper {
         TextView t = new TextView(context);
         t.setText(text);
         t.setTextSize(11);
-        t.setTextColor(fg);
+        t.setTextColor(foreground(context, fg));
         t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         t.setPadding(dp(context, 10), dp(context, 4), dp(context, 10), dp(context, 4));
         GradientDrawable d = new GradientDrawable();
-        d.setColor(bg);
+        d.setColor(background(context, bg));
         d.setCornerRadius(dp(context, 8));
         t.setBackground(d);
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-2, -2);

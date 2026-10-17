@@ -34,6 +34,7 @@ import pl.vistula.checker.MainActivity;
 import pl.vistula.checker.R;
 import pl.vistula.checker.UsosClient;
 import pl.vistula.checker.core.TaskTools;
+import pl.vistula.checker.core.PlatonLinks;
 
 /**
  * Controller for rendering the Student Tasks Planner screen.
@@ -57,15 +58,24 @@ public final class TasksScreenController {
             activity.getString(R.string.tasks_title),
             activity.getString(R.string.tasks_subtitle));
 
+        LinearLayout platon = UiHelper.card(activity, content, Color.WHITE);
+        UiHelper.add(activity, platon, activity.getString(R.string.tasks_platon_title), 18, UiHelper.INK, true);
+        UiHelper.note(activity, platon, activity.getString(R.string.tasks_platon_desc), UiHelper.MUTED);
+        platon.addView(UiHelper.button(activity, activity.getString(R.string.tasks_platon_open),
+            () -> UiHelper.browser(activity, PlatonLinks.HOME), false));
+        platon.addView(UiHelper.button(activity, activity.getString(R.string.tasks_platon_add),
+            () -> showTaskDialog(activity, null, "", rows.length(), callback, true), false));
+
         content.addView(UiHelper.button(activity,
             activity.getString(R.string.btn_add_task),
             () -> showTaskDialog(activity, null, "", rows.length(), callback), true));
 
         LocalDate today = LocalDate.now(UsosClient.ZONE);
-        int pending = 0, doneCount = 0, todayCount = 0, weekCount = 0, overdueCount = 0;
+        int pending = 0, doneCount = 0, todayCount = 0, weekCount = 0, overdueCount = 0, platonCount = 0;
         for (int i = 0; i < rows.length(); ++i) {
             JSONObject t = rows.optJSONObject(i);
             if (t == null) continue;
+            if (PlatonLinks.isTaskLink(t.optString("platonUrl"))) platonCount++;
             boolean done = t.optBoolean("done");
             if (done) doneCount++; else pending++;
             LocalDate due = TaskTools.dueDate(t);
@@ -91,11 +101,12 @@ public final class TasksScreenController {
         }
 
         UiHelper.chips(activity, content,
-            new String[]{"all", "open", "done"},
+            new String[]{"all", "open", "done", "platon"},
             new String[]{
                 activity.getString(R.string.tasks_chip_all) + " (" + rows.length() + ")",
                 activity.getString(R.string.tasks_chip_open) + " (" + pending + ")",
-                activity.getString(R.string.tasks_chip_done) + " (" + doneCount + ")"
+                activity.getString(R.string.tasks_chip_done) + " (" + doneCount + ")",
+                activity.getString(R.string.tasks_platon_title) + " (" + platonCount + ")"
             },
             taskFilter, onFilterChanged);
 
@@ -148,12 +159,12 @@ public final class TasksScreenController {
                     MaterialButton btnDelete = card.findViewById(R.id.task_item_btn_delete);
 
                     title.setText(titleText);
-                    title.setTextColor(done ? UiHelper.MUTED : UiHelper.INK);
+                    title.setTextColor(UiHelper.foreground(activity, done ? UiHelper.MUTED : UiHelper.INK));
 
                     int prio = TaskTools.priority(t);
                     String[] prioLabels = {activity.getString(R.string.tasks_priority_low), activity.getString(R.string.tasks_priority_normal), activity.getString(R.string.tasks_priority_high)};
                     priority.setText(prioLabels[prio]);
-                    priority.setTextColor(prio == 2 && !done ? Color.rgb(160, 48, 40) : UiHelper.MUTED);
+                    priority.setTextColor(UiHelper.foreground(activity, prio == 2 && !done ? Color.rgb(160, 48, 40) : UiHelper.MUTED));
 
                     if (!notesText.isEmpty()) {
                         notes.setVisibility(View.VISIBLE);
@@ -180,7 +191,13 @@ public final class TasksScreenController {
                         statusColor = UiHelper.GREEN;
                     }
                     dueView.setText(statusText);
-                    dueView.setTextColor(statusColor);
+                    dueView.setTextColor(UiHelper.foreground(activity, statusColor));
+
+                    String platonUrl = t.optString("platonUrl");
+                    if (PlatonLinks.isTaskLink(platonUrl)) {
+                        ((LinearLayout) card).addView(UiHelper.button(activity, activity.getString(R.string.tasks_platon_open_task),
+                            () -> UiHelper.browser(activity, platonUrl), false), 1);
+                    }
 
                     card.setClickable(true);
                     card.setFocusable(true);
@@ -235,12 +252,19 @@ public final class TasksScreenController {
 
     public static void showTaskDialog(MainActivity activity, JSONObject existing, String suggestedTitle,
                                       int totalCount, TaskCallback callback) {
+        showTaskDialog(activity, existing, suggestedTitle, totalCount, callback, false);
+    }
+
+    private static void showTaskDialog(MainActivity activity, JSONObject existing, String suggestedTitle,
+                                      int totalCount, TaskCallback callback, boolean requirePlaton) {
         LayoutInflater inflater = LayoutInflater.from(activity);
         View dialogView = inflater.inflate(R.layout.dialog_task_input, null);
 
         TextInputEditText name = dialogView.findViewById(R.id.task_input_title);
         Spinner priority = dialogView.findViewById(R.id.task_input_priority);
         TextInputEditText notes = dialogView.findViewById(R.id.task_input_notes);
+        TextInputEditText platonUrl = dialogView.findViewById(R.id.task_input_platon_url);
+        platonUrl.setText(existing == null ? "" : existing.optString("platonUrl"));
         MaterialButton dateBtn = dialogView.findViewById(R.id.task_input_date_btn);
 
         name.setText(existing == null ? suggestedTitle : existing.optString("title"));
@@ -280,8 +304,17 @@ public final class TasksScreenController {
             } else if (existing == null && totalCount >= 200) {
                 name.setError(activity.getString(R.string.tasks_error_limit));
             } else {
+                String link;
+                try {
+                    link = PlatonLinks.normalize(platonUrl.getText() == null ? "" : platonUrl.getText().toString());
+                    if (requirePlaton && link.isEmpty()) throw new IllegalArgumentException();
+                } catch (IllegalArgumentException e) {
+                    platonUrl.setError(activity.getString(R.string.tasks_platon_invalid_link));
+                    platonUrl.requestFocus(); return;
+                }
                 try {
                     JSONObject entry = existing == null ? new JSONObject() : new JSONObject(existing.toString());
+                    if (link.isEmpty()) entry.remove("platonUrl"); else entry.put("platonUrl", link);
                     entry.put("id", existing == null ? UUID.randomUUID().toString() : existing.getString("id"))
                         .put("title", title)
                         .put("due", due[0].toString())

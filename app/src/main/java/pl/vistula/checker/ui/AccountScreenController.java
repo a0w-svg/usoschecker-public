@@ -68,6 +68,8 @@ public final class AccountScreenController {
         }
 
         boolean connected = !state.optString("token").isEmpty();
+        content.addView(UiHelper.button(activity, activity.getString(R.string.appearance_title),
+            () -> Appearance.choose(activity), false));
 
         if (connected || demo) {
             JSONObject raw = d != null ? d.optJSONObject("snapshot") : null;
@@ -93,7 +95,7 @@ public final class AccountScreenController {
             avatar.setGravity(Gravity.CENTER);
             GradientDrawable avatarBg = new GradientDrawable();
             avatarBg.setShape(GradientDrawable.OVAL);
-            avatarBg.setColor(UiHelper.GREEN);
+            avatarBg.setColor(UiHelper.background(activity, UiHelper.GREEN));
             avatar.setBackground(avatarBg);
             LinearLayout.LayoutParams avParams = new LinearLayout.LayoutParams(UiHelper.dp(activity, 52), UiHelper.dp(activity, 52));
             avParams.rightMargin = UiHelper.dp(activity, 14);
@@ -144,7 +146,7 @@ public final class AccountScreenController {
             TextView badgeText = UiHelper.text(activity, activity.getString(R.string.keystore_badge), 10, UiHelper.GREEN, true);
             badgeText.setPadding(UiHelper.dp(activity, 8), UiHelper.dp(activity, 4), UiHelper.dp(activity, 8), UiHelper.dp(activity, 4));
             GradientDrawable badgeBg = new GradientDrawable();
-            badgeBg.setColor(Color.rgb(232, 243, 236));
+            badgeBg.setColor(UiHelper.background(activity, Color.rgb(232, 243, 236)));
             badgeBg.setCornerRadius(UiHelper.dp(activity, 8));
             badgeText.setBackground(badgeBg);
             secBadge.addView(badgeText);
@@ -155,14 +157,14 @@ public final class AccountScreenController {
         if (connected) {
             LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
             UiHelper.add(activity, box, activity.getString(R.string.sync_settings_title), 19, UiHelper.INK, true);
-            String authorizedScopes = state.optString("scopes", "grades|studies|payments|offline_access");
+            String authorizedScopes = state.optString("scopes");
             UiHelper.add(activity, box, activity.getString(R.string.account_oauth_consent, authorizedScopes), 13, UiHelper.MUTED, false);
-            if (!authorizedScopes.contains("payments")) {
+            if (!pl.vistula.checker.core.StudentServices.hasScope(authorizedScopes, "payments")) {
                 UiHelper.note(activity, box, activity.getString(R.string.account_warn_no_payments_scope), Color.rgb(180, 110, 0));
             }
             MaterialSwitch toggle = new MaterialSwitch(activity);
             toggle.setText(R.string.background_check);
-            toggle.setTextColor(UiHelper.INK);
+            toggle.setTextColor(UiHelper.foreground(activity, UiHelper.INK));
             toggle.setChecked(state.optBoolean("enabled"));
             if (state.optBoolean("authorizationError")) {
                 toggle.setEnabled(false);
@@ -202,7 +204,6 @@ public final class AccountScreenController {
             LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
             UiHelper.add(activity, box, activity.getString(R.string.connect_usos_title), 20, UiHelper.INK, true);
             UiHelper.add(activity, box, activity.getString(R.string.connect_usos_desc), 14, UiHelper.MUTED, false);
-            box.addView(UiHelper.button(activity, activity.getString(R.string.btn_how_to_register), () -> showApiKeyHelpDialog(activity), false));
 
             String buildKey = BuildConfig.USOS_KEY != null ? BuildConfig.USOS_KEY.trim() : "";
             String buildSecret = BuildConfig.USOS_SECRET != null ? BuildConfig.USOS_SECRET.trim() : "";
@@ -211,19 +212,38 @@ public final class AccountScreenController {
             String defaultSecret = state.optString("secret", buildSecret);
             if (defaultSecret.isEmpty()) defaultSecret = buildSecret;
 
-            EditText key = UiHelper.field(activity, box, "Consumer Key", defaultKey, false);
-            EditText secret = UiHelper.field(activity, box, "Consumer Secret", defaultSecret, true);
+            boolean pending = !state.optString("requestToken").isEmpty();
+            boolean credentialsReady = !defaultKey.isEmpty() && !defaultSecret.isEmpty();
+            UiHelper.note(activity, box, activity.getString(pending ? R.string.login_step_pin :
+                credentialsReady ? R.string.login_ready : R.string.login_setup), UiHelper.MUTED);
+            LinearLayout setup = new LinearLayout(activity);
+            setup.setOrientation(LinearLayout.VERTICAL);
+            box.addView(setup);
+            setup.setVisibility(pending ? android.view.View.GONE : android.view.View.VISIBLE);
+            LinearLayout advanced = new LinearLayout(activity);
+            advanced.setOrientation(LinearLayout.VERTICAL);
+            setup.addView(advanced);
+            advanced.setVisibility(credentialsReady ? android.view.View.GONE : android.view.View.VISIBLE);
+            box.addView(UiHelper.button(activity, activity.getString(R.string.login_settings), () -> {
+                if (setup.getVisibility() == android.view.View.GONE) {
+                    setup.setVisibility(android.view.View.VISIBLE);
+                    advanced.setVisibility(android.view.View.VISIBLE);
+                } else advanced.setVisibility(advanced.getVisibility() == android.view.View.VISIBLE ? android.view.View.GONE : android.view.View.VISIBLE);
+            }, false));
+            advanced.addView(UiHelper.button(activity, activity.getString(R.string.btn_how_to_register), () -> showApiKeyHelpDialog(activity), false));
+            EditText key = UiHelper.field(activity, advanced, "Consumer Key", defaultKey, false);
+            EditText secret = UiHelper.field(activity, advanced, "Consumer Secret", defaultSecret, true);
             if (!buildKey.isEmpty()) {
-                UiHelper.note(activity, box, "Wczytano klucz aplikacji (Consumer Key & Secret) z pliku local.properties.", UiHelper.GREEN);
+                UiHelper.note(activity, advanced, "Wczytano klucz aplikacji (Consumer Key & Secret) z pliku local.properties.", UiHelper.GREEN);
             }
-            EditText scopes = UiHelper.field(activity, box, "Zakresy zgody OAuth (oddzielone |)", state.optString("scopes", "grades|studies|payments|cards|offline_access"), false);
+            EditText scopes = UiHelper.field(activity, advanced, "Zakresy zgody OAuth (oddzielone |)", state.optString("scopes", "grades|studies|payments|cards|offline_access"), false);
             HorizontalScrollView scopeScroll = new HorizontalScrollView(activity);
             scopeScroll.setHorizontalScrollBarEnabled(false);
             LinearLayout scopeRow = new LinearLayout(activity);
             scopeRow.setOrientation(LinearLayout.HORIZONTAL);
             Button b1 = UiHelper.button(activity, activity.getString(R.string.scope_recommended), () -> scopes.setText("grades|studies|payments|cards|offline_access"), false);
             Button b2 = UiHelper.button(activity, activity.getString(R.string.scope_basic), () -> scopes.setText("grades|studies|offline_access"), false);
-            Button b3 = UiHelper.button(activity, activity.getString(R.string.scope_complete), () -> scopes.setText("grades|studies|payments|cards|adm_documents|photo|events|mail|offline_access"), false);
+            Button b3 = UiHelper.button(activity, activity.getString(R.string.scope_complete), () -> scopes.setText("grades|studies|payments|cards|adm_documents|photo|events|email|offline_access"), false);
             b1.setMinHeight(UiHelper.dp(activity, 48)); b1.setTextSize(12);
             b2.setMinHeight(UiHelper.dp(activity, 48)); b2.setTextSize(12);
             b3.setMinHeight(UiHelper.dp(activity, 48)); b3.setTextSize(12);
@@ -239,11 +259,11 @@ public final class AccountScreenController {
             }, false);
             scopeRow.addView(cardsScopes, new LinearLayout.LayoutParams(-2, -2));
             scopeScroll.addView(scopeRow);
-            box.addView(scopeScroll);
-            UiHelper.add(activity, box, activity.getString(R.string.account_scopes_hint), 12, UiHelper.MUTED, false);
-            UiHelper.note(activity, box, activity.getString(R.string.services_scope_hint), UiHelper.MUTED);
+            advanced.addView(scopeScroll);
+            UiHelper.add(activity, advanced, activity.getString(R.string.account_scopes_hint), 12, UiHelper.MUTED, false);
+            UiHelper.note(activity, advanced, activity.getString(R.string.services_scope_hint), UiHelper.MUTED);
 
-            box.addView(UiHelper.button(activity, activity.getString(R.string.btn_login_browser), () -> {
+            setup.addView(UiHelper.button(activity, activity.getString(R.string.btn_login_browser), () -> {
                 String k = key.getText().toString().trim();
                 if (k.isEmpty()) k = buildKey;
                 String sec = secret.getText().toString().trim();
@@ -260,7 +280,9 @@ public final class AccountScreenController {
                     if (!cleanScopes.contains("offline_access")) cleanScopes.add("offline_access");
                     listener.onBeginOAuth(k, sec, String.join("|", cleanScopes));
                 } else {
-                    Toast.makeText(activity, R.string.account_toast_enter_credentials, Toast.LENGTH_SHORT).show();
+                    advanced.setVisibility(android.view.View.VISIBLE);
+                    if (k.isEmpty()) key.setError(activity.getString(R.string.login_key_required));
+                    if (sec.isEmpty()) secret.setError(activity.getString(R.string.login_secret_required));
                 }
             }, true));
 
@@ -284,14 +306,21 @@ public final class AccountScreenController {
                         }
                     } catch (Exception ignored) {}
                 }, false));
-                box.addView(UiHelper.button(activity, activity.getString(R.string.btn_confirm_pin), () -> {
+                Runnable confirmPin = () -> {
                     String value = pin.getText().toString().trim().replaceAll("\\s+", "");
                     if (value.isEmpty()) {
-                        Toast.makeText(activity, R.string.account_toast_enter_pin, Toast.LENGTH_SHORT).show();
+                        pin.setError(activity.getString(R.string.account_toast_enter_pin));
                     } else {
                         listener.onConfirmPin(value);
                     }
-                }, true));
+                };
+                pin.setSingleLine(true);
+                pin.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE | android.view.inputmethod.EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
+                pin.setOnEditorActionListener((v, action, event) -> {
+                    if (action != android.view.inputmethod.EditorInfo.IME_ACTION_DONE) return false;
+                    confirmPin.run(); return true;
+                });
+                box.addView(UiHelper.button(activity, activity.getString(R.string.btn_confirm_pin), confirmPin, true));
                 box.addView(UiHelper.button(activity, activity.getString(R.string.btn_return_to_browser),
                     () -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" + OAuth.encode(state.optString("requestToken"))), false));
             }
@@ -320,7 +349,7 @@ public final class AccountScreenController {
         MaterialSwitch reminderSwitch = new MaterialSwitch(activity);
         reminderSwitch.setText(activity.getString(R.string.account_reminder_switch_label));
         reminderSwitch.setChecked(remindersOn);
-        reminderSwitch.setTextColor(UiHelper.INK);
+        reminderSwitch.setTextColor(UiHelper.foreground(activity, UiHelper.INK));
         reminderSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
             toolsPrefs.edit().putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, isChecked).apply();
             if (isChecked) {
@@ -368,13 +397,14 @@ public final class AccountScreenController {
 
         UiHelper.note(activity, content, activity.getString(R.string.account_security_keystore_note), UiHelper.MUTED);
         content.addView(UiHelper.button(activity, activity.getString(R.string.account_btn_open_usosapps), () -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/"), false));
+        AppInfo.render(activity, content);
     }
 
     private static void showApiKeyHelpDialog(MainActivity activity) {
         new MaterialAlertDialogBuilder(activity)
             .setTitle(activity.getString(R.string.api_key_help_title))
             .setMessage(activity.getString(R.string.api_key_help_message))
-            .setPositiveButton(activity.getString(R.string.btn_register_usosapps), (d, w) -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/apps/new_app"))
+            .setPositiveButton(activity.getString(R.string.btn_register_usosapps), (d, w) -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/developers/"))
             .setNegativeButton(activity.getString(R.string.btn_close), null)
             .show();
     }

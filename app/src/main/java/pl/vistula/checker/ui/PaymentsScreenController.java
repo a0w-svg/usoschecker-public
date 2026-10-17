@@ -15,7 +15,6 @@ import com.google.android.material.button.MaterialButton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 import pl.vistula.checker.MainActivity;
@@ -55,7 +54,7 @@ public final class PaymentsScreenController {
         PaymentInfo payments = snapshot.payments;
 
         String authorizedScopes = state.optString("scopes", "");
-        boolean hasPaymentsScope = Arrays.asList(authorizedScopes.split("\\|")).contains("payments");
+        boolean hasPaymentsScope = pl.vistula.checker.core.StudentServices.hasScope(authorizedScopes, "payments");
         boolean scopeMissing = (payments != null && payments.scopeMissing)
             || (connected && !authorizedScopes.isEmpty() && !hasPaymentsScope);
 
@@ -136,9 +135,9 @@ public final class PaymentsScreenController {
                 int statusColor = paid ? UiHelper.GREEN : (overdue ? Color.rgb(160, 48, 40) : Color.rgb(180, 110, 0));
 
                 status.setText(statusLabel);
-                status.setTextColor(statusColor);
+                status.setTextColor(UiHelper.foreground(activity, statusColor));
                 GradientDrawable badgeBg = new GradientDrawable();
-                badgeBg.setColor(paid ? Color.rgb(232, 243, 236) : (overdue ? Color.rgb(255, 235, 235) : Color.rgb(255, 248, 230)));
+                badgeBg.setColor(UiHelper.background(activity, paid ? Color.rgb(232, 243, 236) : (overdue ? Color.rgb(255, 235, 235) : Color.rgb(255, 248, 230))));
                 badgeBg.setCornerRadius(UiHelper.dp(activity, 8));
                 status.setBackground(badgeBg);
 
@@ -147,7 +146,7 @@ public final class PaymentsScreenController {
                 if (!inst.deadline.isEmpty()) {
                     deadline.setVisibility(View.VISIBLE);
                     deadline.setText(activity.getString(R.string.payments_deadline, HistoryScreenController.formatFullDate(inst.deadline)));
-                    if (overdue) deadline.setTextColor(Color.rgb(160, 48, 40));
+                    if (overdue) deadline.setTextColor(UiHelper.foreground(activity, Color.rgb(160, 48, 40)));
                 }
 
                 if (!inst.paymentDate.isEmpty()) {

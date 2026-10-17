@@ -9,6 +9,61 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class UsosClientTest {
+    @Test public void basicConsentSkipsPaymentRequestsAndStillLoadsGradesAndPlan() throws Exception {
+        for (String scopes : List.of("grades|studies|offline_access", " grades | studies | other_payments | offline_access ")) {
+            java.util.concurrent.atomic.AtomicInteger planPages = new java.util.concurrent.atomic.AtomicInteger();
+            java.util.concurrent.atomic.AtomicInteger gradeRequests = new java.util.concurrent.atomic.AtomicInteger();
+            UsosClient client = new UsosClient(credentials().put("scopes", scopes), ignored -> {}, address -> {
+                assertFalse("No payment consent", address.contains("services/payments/"));
+                if (address.contains("grades/terms2")) gradeRequests.incrementAndGet();
+                if (address.contains("tt/student")) planPages.incrementAndGet();
+                return snapshotConnection(address);
+            });
+            pl.vistula.checker.core.Snapshot snapshot = client.snapshot();
+            assertTrue(snapshot.payments.scopeMissing);
+            assertTrue(snapshot.payments.statusNotice.contains("payments"));
+            assertEquals(1, gradeRequests.get());
+            assertEquals(8, planPages.get());
+        }
+    }
+    @Test public void missingCoreConsentAbortsBeforeNetworkRequests() throws Exception {
+        for (String scopes : List.of("", "studies|payments", "grades|payments")) {
+            UsosClient client = new UsosClient(credentials().put("scopes", scopes), ignored -> {}, address -> {
+                throw new AssertionError("Must preserve snapshot until core consent is available");
+            });
+            try { client.snapshot(); fail(); }
+            catch (UsosClient.SyncException failure) {
+                assertTrue(Repository.cause(failure) instanceof IllegalStateException);
+                assertTrue(Repository.message(failure).contains("zgody"));
+            }
+        }
+    }
+    @Test public void paymentConsentRejectedByServerSkipsRemainingPaymentRequests() throws Exception {
+        int[] deniedRequests = {0};
+        UsosClient client = new UsosClient(credentials(), ignored -> {}, address -> {
+            assertFalse(address.contains("payments/user_payments"));
+            Connection connection = snapshotConnection(address);
+            if (address.contains("payments/user_accounts")) {
+                deniedRequests[0]++;
+                connection.status = 403;
+            }
+            return connection;
+        });
+        assertTrue(client.snapshot().payments.scopeMissing);
+        assertEquals(1, deniedRequests[0]);
+    }
+    @Test public void profileFieldsFollowConsentAndMailIsNotEmailConsent() throws Exception {
+        String basic = UsosClient.profileFields(credentials().put("scopes", "grades|studies|mail|offline_access"));
+        assertTrue(basic.contains("student_number"));
+        assertFalse(basic.contains("email"));
+        assertFalse(basic.contains("photo_urls"));
+        String extended = UsosClient.profileFields(credentials().put("scopes", " studies | email | photo "));
+        assertTrue(extended.contains("|email"));
+        assertTrue(extended.contains("|photo_urls[200x200]"));
+        String unknown = UsosClient.profileFields(new JSONObject());
+        assertFalse(unknown.contains("student_programmes"));
+        assertFalse(unknown.contains("email"));
+    }
     private static class Connection extends HttpURLConnection {
         final ByteArrayOutputStream sent = new ByteArrayOutputStream();
         int status = 200;
@@ -26,7 +81,8 @@ public class UsosClientTest {
         @Override public OutputStream getOutputStream() { return sent; }
     }
     private JSONObject credentials() throws Exception {
-        return new JSONObject().put("key", "test-key").put("secret", "test-secret").put("token", "private-token").put("tokenSecret", "private-secret");
+        return new JSONObject().put("key", "test-key").put("secret", "test-secret").put("token", "private-token").put("tokenSecret", "private-secret")
+            .put("scopes", "grades|studies|payments|offline_access");
     }
     private JSONObject metadata(String consumer, String token) throws Exception {
         return new JSONObject().put("name", "services/apisrv/installation")
@@ -42,6 +98,13 @@ public class UsosClientTest {
         assertEquals("application/json", response.mime);
         assertFalse(response.binary());
         assertTrue(connection.disconnected);
+    }
+    @Test public void authenticatedResponsesCannotUseThePlatformCache() throws Exception {
+        Connection connection = new Connection();
+        UsosClient client = new UsosClient(credentials(), progress -> {}, address -> connection);
+        client.get("services/apisrv/installation", Map.of());
+        assertFalse(connection.getUseCaches());
+        assertEquals("no-store", connection.getRequestProperty("Cache-Control"));
     }
     @Test public void formPostKeepsParametersInBodyAndSignsPost() throws Exception {
         Connection connection = new Connection(); String[] url = {""};

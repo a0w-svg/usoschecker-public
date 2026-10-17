@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             android:text="@string/api_key_help_title"
-            android:textColor="#1B2520"
+            android:textColor="@color/app_ink"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:lineSpacingExtra="4dp"
             android:text="@string/api_key_help_message"
-            android:textColor="#596960"
+            android:textColor="@color/app_muted"
             android:textSize="14sp" />
     </LinearLayout>
 </ScrollView>

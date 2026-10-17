@@ -22,7 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="#176B57"
+            android:textColor="@color/app_accent"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:textColor="#1B2520"
+        android:textColor="@color/app_ink"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -58,7 +58,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="12dp"
         android:lineSpacingExtra="2dp"
-        android:textColor="#596960"
+        android:textColor="@color/app_muted"
         android:textSize="14sp" />
 
     <com.google.android.material.button.MaterialButton
@@ -70,8 +70,8 @@
         android:minHeight="48dp"
         android:text="@string/btn_class_details"
         android:textAllCaps="false"
-        android:textColor="#176B57"
+        android:textColor="@color/app_accent"
         android:textSize="14sp"
-        app:backgroundTint="#E8F3EC"
+        app:backgroundTint="@color/app_button_surface"
         app:cornerRadius="14dp" />
 </LinearLayout>

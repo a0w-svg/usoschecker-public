@@ -20,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="#1B2520"
+        android:textColor="@color/app_ink"
         android:textSize="30sp"
         android:textStyle="bold" />
 
@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:gravity="center"
-        android:textColor="#596960"
+        android:textColor="@color/app_muted"
         android:textSize="12sp"
         android:textStyle="bold" />
 </LinearLayout>

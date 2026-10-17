@@ -50,6 +50,7 @@ public final class Repository {
         synchronized (LOCK) { JSONObject state = vault.read(); operation.apply(state); vault.write(state); }
     }
     public void begin(String key, String secret, String scopes) throws Exception {
+        scopes = pl.vistula.checker.core.StudentServices.normalizeScopes(scopes);
         synchronized (AUTH_LOCK) {
             String attempt = UUID.randomUUID().toString();
             synchronized (LOCK) {
@@ -94,7 +95,7 @@ public final class Repository {
         Exception profileFailure = null;
         try {
             JSONObject user = new JSONObject(clients.create(connected).get("services/users/user",
-                Map.of("fields", "id|first_name|last_name|student_number|email|student_programmes[programme[name]|admission_date|stages|status]|student_status|photo_urls[200x200]")));
+                Map.of("fields", UsosClient.profileFields(connected))));
             UsosParser.UserProfile parsed = UsosParser.userProfile(user);
             profile.put("user", parsed.name.isEmpty() ? (user.optString("first_name") + " " + user.optString("last_name")).trim() : parsed.name);
             if (!parsed.studentNumber.isEmpty()) profile.put("studentNumber", parsed.studentNumber);
@@ -158,7 +159,7 @@ public final class Repository {
                 if (s.optString("studentNumber").isEmpty()) {
                     try {
                         JSONObject user = new JSONObject(new UsosClient(s).get("services/users/user",
-                            Map.of("fields", "id|first_name|last_name|student_number|email|student_programmes[programme[name]|admission_date|stages|status]|student_status|photo_urls[200x200]")));
+                            Map.of("fields", UsosClient.profileFields(s))));
                         UsosParser.UserProfile profile = UsosParser.userProfile(user);
                         if (!profile.name.isEmpty()) s.put("user", profile.name);
                         if (!profile.studentNumber.isEmpty()) s.put("studentNumber", profile.studentNumber);

@@ -52,6 +52,8 @@ public final class MoreScreenController {
             () -> activity.navigate(10));
 
         UiHelper.heading(activity, content, activity.getString(R.string.section_app));
+        UiHelper.toolTile(activity, content, "◐", activity.getString(R.string.appearance_title),
+            activity.getString(R.string.appearance_description), () -> Appearance.choose(activity));
         UiHelper.toolTile(activity, content, "👤",
             activity.getString(R.string.tool_account_title),
             activity.getString(R.string.tool_account_desc),
@@ -63,5 +65,6 @@ public final class MoreScreenController {
             () -> activity.navigate(3));
 
         UiHelper.note(activity, content, activity.getString(R.string.tools_privacy_note), UiHelper.MUTED);
+        AppInfo.render(activity, content);
     }
 }

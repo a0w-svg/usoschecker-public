@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
-        android:textColor="#1B2520"
+        android:textColor="@color/app_ink"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -23,6 +23,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="@string/app_assistant"
-        android:textColor="#596960"
+        android:textColor="@color/app_muted"
         android:textSize="14sp" />
 </LinearLayout>

@@ -1,22 +1,32 @@
 <resources>
-    <style name="AppThemeBase" parent="Theme.Material3.Light.NoActionBar">
+    <style name="AppThemeBase" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="fontFamily">sans-serif</item>
-        <item name="colorPrimary">#176B57</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="colorPrimaryContainer">#D6F1E5</item>
-        <item name="colorOnPrimaryContainer">#103E32</item>
-        <item name="colorSecondary">#52655B</item>
-        <item name="colorSecondaryContainer">#E0EDE5</item>
-        <item name="colorSurface">#FAFCFA</item>
-        <item name="colorSurfaceContainer">#F4F7F4</item>
-        <item name="colorSurfaceContainerHigh">#F0F5F1</item>
-        <item name="colorSurfaceContainerHighest">#E6EEE7</item>
-        <item name="colorOutline">#87968E</item>
-        <item name="colorOnSurface">#1B2520</item>
-        <item name="android:colorAccent">#176B57</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:statusBarColor">#FAFCFA</item>
-        <item name="android:navigationBarColor">#F0F5F1</item>
+        <item name="colorPrimary">@color/app_accent</item>
+        <item name="colorOnPrimary">@color/app_on_accent</item>
+        <item name="colorPrimaryContainer">@color/app_accent_container</item>
+        <item name="colorOnPrimaryContainer">@color/app_ink</item>
+        <item name="colorSecondary">@color/app_muted</item>
+        <item name="colorOnSecondary">@color/app_on_accent</item>
+        <item name="colorSecondaryContainer">@color/app_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/app_ink</item>
+        <item name="colorSurface">@color/app_background</item>
+        <item name="colorSurfaceContainer">@color/app_card</item>
+        <item name="colorSurfaceContainerHigh">@color/app_inner_surface</item>
+        <item name="colorSurfaceContainerHighest">@color/app_secondary_container</item>
+        <item name="colorOutline">@color/app_muted</item>
+        <item name="colorOutlineVariant">@color/app_outline_soft</item>
+        <item name="colorOnSurface">@color/app_ink</item>
+        <item name="colorOnSurfaceVariant">@color/app_muted</item>
+        <item name="colorError">@color/app_error</item>
+        <item name="android:colorBackground">@color/app_background</item>
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="android:colorAccent">@color/app_accent</item>
+        <item name="android:windowLightStatusBar">@bool/app_light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/app_light_system_bars</item>
+        <item name="android:statusBarColor">@color/app_background</item>
+        <item name="android:navigationBarColor">@color/app_surface_high</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowActionModeOverlay">true</item>
     </style>
     <style name="AppTheme" parent="AppThemeBase" />

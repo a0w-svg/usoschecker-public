@@ -35,8 +35,16 @@ public final class StudentServices {
         catch (DateTimeParseException e) { return null; }
     }
     public static boolean hasScope(String scopes, String scope) {
+        if (scopes == null) return false;
         for (String value : scopes.split("\\|")) if (scope.equals(value.trim())) return true;
         return false;
+    }
+    public static String normalizeScopes(String scopes) {
+        java.util.Set<String> values = new java.util.LinkedHashSet<>();
+        if (scopes != null) for (String value : scopes.split("\\|")) {
+            if (!value.trim().isEmpty()) values.add(value.trim());
+        }
+        return String.join("|", values);
     }
     public static final class Card {
         public final String id, type, studentNumber, barcode, issued, expires;

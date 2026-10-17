@@ -4,6 +4,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class WebLinksTest {
+    @Test public void documentationLinksIncludeServicesAndMethodAnchor() {
+        assertEquals("https://usosapps.vistula.edu.pl/developers/api/services/grades/#terms2", WebLinks.apiDocumentation("services/grades/terms2"));
+        assertEquals("https://usosapps.vistula.edu.pl/developers/api/services/oauth/#authorize", WebLinks.apiDocumentation("services/oauth/authorize"));
+        assertEquals("https://usosapps.vistula.edu.pl/developers/api/", WebLinks.apiDocumentation("javascript:bad"));
+    }
     @Test public void acceptsOrdinaryWebLinks() {
         assertTrue(WebLinks.isWebUrl("https://vistula.edu.pl/news?id=12#details"));
         assertTrue(WebLinks.isWebUrl("http://example.org/"));

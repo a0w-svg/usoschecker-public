@@ -23,6 +23,10 @@ wydanie z `/releases/latest`; powiadamia dopiero, gdy jest dostępny gotowy APK 
 `vX.Y.Z`. Wersje robocze i prerelease są pomijane. `ReleaseUpdatesRegressionTest`
 sprawdza powiadomienia, brak duplikatów, cache offline, harmonogram i ekran nowości;
 `AppReleaseTest` sprawdza numery wersji i odrzucanie obcych linków.
+Osobna fixture `ReleaseNotificationPermissionTest` wymaga `-PnotificationPermissionTests`:
+zainstaluj QA i test APK, odbierz `POST_NOTIFICATIONS` przez `adb shell pm revoke`
+przed startem instrumentacji, następnie uruchom tylko tę klasę. Test wymaga rzeczywiście
+odmówionego uprawnienia i sprawdza możliwość ponownego powiadomienia po jego udzieleniu.
 
 Obsługa motywu obejmuje domyślne dopasowanie do telefonu, ręczny wybór jasnego/OLED
 oraz zachowanie ustawienia po aktualizacji APK. `AppearanceRegressionTest` sprawdza

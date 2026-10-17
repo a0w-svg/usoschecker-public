@@ -105,7 +105,7 @@ public final class ReleaseUpdates {
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()
                 || manager.getNotificationChannel(CHANNEL).getImportance() == NotificationManager.IMPORTANCE_NONE) return;
         Intent intent = new Intent(context, MainActivity.class).putExtra(SHOW_UPDATES, true)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pending = PendingIntent.getActivity(context, NOTIFICATION_ID, intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         String notes = release.notes.isBlank() ? context.getString(R.string.updates_notes_missing) : release.notes;

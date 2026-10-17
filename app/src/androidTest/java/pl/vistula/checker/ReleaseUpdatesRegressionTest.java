@@ -162,35 +162,23 @@ public class ReleaseUpdatesRegressionTest {
         seed(release("9.0.0"), true);
         ReleaseUpdates.notifyAvailable(context, ReleaseUpdates.cached(context));
         Notification notification = posted();
-        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-            notification.contentIntent.send();
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-            onView(withText(R.string.updates_title)).check(matches(isDisplayed()));
-            onView(withSubstring("Nowe funkcje i poprawki testowe")).check(matches(isDisplayed()));
-            onView(withText(R.string.updates_check)).check(matches(isDisplayed()));
-        }
-    }
-
-    @Test public void blockedSystemNotificationsDoNotMarkTheVersionAsDelivered() throws Exception {
-        seed(release("9.0.0"), true);
+        android.app.UiAutomation ui = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         try {
-            shell("appops set " + context.getPackageName() + " POST_NOTIFICATION ignore");
-            assertFalse(androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled());
-            ReleaseUpdates.notifyAvailable(context, ReleaseUpdates.cached(context));
-            assertEquals("", ReleaseUpdates.preferences(context).getString("notified", ""));
+            // Supply the launch privilege a real System UI notification tap has.
+            ui.adoptShellPermissionIdentity("android.permission.START_ACTIVITIES_FROM_BACKGROUND");
+            android.os.Bundle options = null;
+            if (Build.VERSION.SDK_INT >= 34) options = android.app.ActivityOptions.makeBasic()
+                .setPendingIntentBackgroundActivityStartMode(android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle();
+            notification.contentIntent.send(context, 0, null, null, null, null, options);
+            onView(withText(R.string.updates_title)).inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).check(matches(isDisplayed()));
+            onView(withSubstring("Nowe funkcje i poprawki testowe")).inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).check(matches(isDisplayed()));
+            onView(withText(R.string.updates_check)).inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).check(matches(isDisplayed()));
         } finally {
-            shell("appops set " + context.getPackageName() + " POST_NOTIFICATION allow");
-        }
-        ReleaseUpdates.notifyAvailable(context, ReleaseUpdates.cached(context));
-        assertNotNull(posted());
-    }
-
-    private void shell(String command) throws Exception {
-        try (android.os.ParcelFileDescriptor descriptor = InstrumentationRegistry.getInstrumentation()
-                .getUiAutomation().executeShellCommand(command);
-                java.io.InputStream input = new android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor)) {
-            byte[] buffer = new byte[1024];
-            while (input.read(buffer) != -1) { }
+            ui.dropShellPermissionIdentity();
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+                for (android.app.Activity activity : androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry.getInstance()
+                        .getActivitiesInStage(androidx.test.runner.lifecycle.Stage.RESUMED)) activity.finish();
+            });
         }
     }
 

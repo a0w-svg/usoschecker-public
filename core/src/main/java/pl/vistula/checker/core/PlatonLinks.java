@@ -16,7 +16,7 @@ public final class PlatonLinks {
                     || value.length() > 2048 || uri.getRawPath().contains("\\")) throw new IllegalArgumentException();
             String query = uri.getRawQuery();
             String parameters = String.valueOf(uri.getQuery()) + "&" + String.valueOf(uri.getFragment());
-            if (parameters.toLowerCase(java.util.Locale.ROOT).matches("(?s).*(?:token|password|secret|ticket|session|code)=.*"))
+            if (parameters.toLowerCase(java.util.Locale.ROOT).matches("(?s).*(?:token|password|secret|ticket|session|code|sesskey|sid|sessionid|authorization)=.*"))
                 throw new IllegalArgumentException();
             return "https://platon.vistula.edu.pl" + (uri.getRawPath().isEmpty() ? "/" : uri.getRawPath())
                 + (query == null ? "" : "?" + query) + (uri.getRawFragment() == null ? "" : "#" + uri.getRawFragment());

@@ -16,6 +16,7 @@ public final class Repository {
     private static final Object AUTH_LOCK = new Object();
     private final Vault vault;
     private final Context context;
+    private final android.content.SharedPreferences attendance;
     private static final Map<String, Object> editEpochs = new HashMap<>();
     private final String storePath;
     public static final class EditSession {
@@ -30,7 +31,7 @@ public final class Repository {
     interface ClientFactory { UsosClient create(JSONObject state); }
     private final ClientFactory clients;
     public Repository(Context c) { this(c, UsosClient::new); }
-    Repository(Context c, ClientFactory clients) { vault = new Vault(c); this.clients = clients; context = c.getApplicationContext(); storePath = c.getNoBackupFilesDir().getAbsolutePath(); }
+    Repository(Context c, ClientFactory clients) { vault = new Vault(c); this.clients = clients; context = c.getApplicationContext(); storePath = c.getNoBackupFilesDir().getAbsolutePath(); attendance = c.getSharedPreferences("attendance_tracker", Context.MODE_PRIVATE); }
     public EditSession editSession(JSONObject displayedState) {
         synchronized (LOCK) { return new EditSession(editEpochs.computeIfAbsent(storePath, ignored -> new Object()), displayedState); }
     }
@@ -220,7 +221,11 @@ public final class Repository {
             if (!expected.optString(field).equals(current.optString(field))) return false;
         return !current.optString("token").isEmpty();
     }
-    public void disconnect() { synchronized (LOCK) { vault.clear(); editEpochs.put(storePath, new Object()); } }
+    public void disconnect() { synchronized (LOCK) {
+        vault.clear();
+        attendance.edit().clear().apply();
+        editEpochs.put(storePath, new Object());
+    } }
     static Exception cause(Exception e) {
         return e instanceof UsosClient.SyncException && e.getCause() instanceof Exception ? (Exception) e.getCause() : e;
     }

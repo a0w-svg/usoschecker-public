@@ -1,11 +1,12 @@
 package pl.vistula.checker.core;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public final class IcsExporter {
-    private static final DateTimeFormatter ICS_DATE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+    private static final DateTimeFormatter ICS_DATE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC);
 
     private IcsExporter() {}
 
@@ -24,15 +25,16 @@ public final class IcsExporter {
         sb.append("X-WR-TIMEZONE:Europe/Warsaw\r\n");
 
         List<LessonTime> lessons = LessonTime.sorted(records);
-        String dtstamp = ZonedDateTime.now(LessonTime.ZONE).format(ICS_DATE_TIME);
+        String dtstamp = ICS_DATE_TIME.format(Instant.now());
 
         for (LessonTime lt : lessons) {
             Record r = lt.record;
             sb.append("BEGIN:VEVENT\r\n");
             sb.append("UID:").append(escape(r.id)).append("@vistula.checker\r\n");
             sb.append("DTSTAMP:").append(dtstamp).append("\r\n");
-            sb.append("DTSTART;TZID=Europe/Warsaw:").append(lt.start.format(ICS_DATE_TIME)).append("\r\n");
-            sb.append("DTEND;TZID=Europe/Warsaw:").append(lt.end.format(ICS_DATE_TIME)).append("\r\n");
+            // UTC avoids relying on a missing VTIMEZONE definition in importing calendars.
+            sb.append("DTSTART:").append(ICS_DATE_TIME.format(lt.start)).append("\r\n");
+            sb.append("DTEND:").append(ICS_DATE_TIME.format(lt.end)).append("\r\n");
 
             String classType = r.optMeta("classType");
             String title = r.title + (!classType.isEmpty() ? " (" + classType + ")" : "");
@@ -56,12 +58,14 @@ public final class IcsExporter {
             if (desc.length() == 0) desc.append(r.value);
 
             sb.append("DESCRIPTION:").append(escape(desc.toString())).append("\r\n");
-            sb.append("STATUS:CONFIRMED\r\n");
+            sb.append(lt.tentative() ? "STATUS:TENTATIVE\r\n" : "STATUS:CONFIRMED\r\n");
             sb.append("END:VEVENT\r\n");
         }
 
         sb.append("END:VCALENDAR\r\n");
-        return sb.toString();
+        StringBuilder folded = new StringBuilder();
+        for (String line : sb.toString().split("\r\n")) CalendarExport.line(folded, line);
+        return folded.toString();
     }
 
     private static String escape(String s) {

@@ -1,19 +1,22 @@
 <resources>
-    <color name="app_accent">#80D9B9</color>
-    <color name="app_ink">#E8EEE9</color>
-    <color name="app_muted">#B0BDB5</color>
-    <color name="app_faint">#A4B3AA</color>
+    <color name="app_accent">#86D8B5</color>
+    <color name="app_ink">#E6EFE9</color>
+    <color name="app_muted">#ADBBB2</color>
+    <color name="app_faint">#92A69A</color>
     <color name="app_error">#FFB4AB</color>
-    <color name="app_outline_widget">#303A34</color>
-    <color name="app_accent_container">#10271F</color>
-    <color name="app_outline_soft">#303A34</color>
-    <color name="app_secondary_container">#15241C</color>
-    <color name="app_outline_inner">#27352D</color>
-    <color name="app_button_surface">#10231B</color>
-    <color name="app_mint_surface">#0B1912</color>
+    <color name="app_outline_widget">#34473B</color>
+    <color name="app_accent_container">#173C2B</color>
+    <color name="app_outline_soft">#2D3C33</color>
+    <color name="app_secondary_container">#14251C</color>
+    <color name="app_outline_inner">#26372D</color>
+    <color name="app_button_surface">#142C20</color>
+    <color name="app_mint_surface">#101F17</color>
     <color name="app_surface_high">#000000</color>
-    <color name="app_inner_surface">#080C09</color>
+    <color name="app_inner_surface">#101B14</color>
     <color name="app_background">#000000</color>
-    <color name="app_card">#000000</color>
-    <color name="app_brand_surface">#000000</color>
+    <color name="app_card">#0B120E</color>
+    <color name="app_brand_surface">#101F17</color>
+    <color name="app_warning">#F3C477</color>
+    <color name="app_disabled_content">#91A498</color>
+    <color name="app_disabled_surface">#1A2920</color>
 </resources>

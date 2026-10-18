@@ -77,7 +77,11 @@ public class ScreenRegressionTest {
         has("Podstawy finansów"); has("Statystyka opisowa");
     }
     @Test public void timetableWeekSearchPersistsAcrossNavigation() throws Exception {
-        main(() -> rule.getActivity().navigate(5));
+        // The demo statistics class is tomorrow, which belongs to the next week on Sundays.
+        main(() -> {
+            rule.getActivity().setCalendarDate(java.time.LocalDate.now(UsosClient.ZONE).plusDays(1).toString());
+            rule.getActivity().navigate(5);
+        });
         click(rule.getActivity().getString(R.string.schedule_mode_week));
         capture("timetable-improved");
         search("Kowalska"); has("Statystyka opisowa"); absent("Programowanie obiektowe");

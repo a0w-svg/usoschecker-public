@@ -1,4 +1,5 @@
 <resources>
+    <item name="schedule_current_lesson" type="id" />
     <item name="schedule_more" type="id" />
     <item name="schedule_swipe_content" type="id" />
     <item name="subject_view_more" type="id" />

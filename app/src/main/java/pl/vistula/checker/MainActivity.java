@@ -109,6 +109,7 @@ public final class MainActivity extends AppCompatActivity {
     private String semester = "", taskFilter = "all", taskQuery = "", pendingCalendar;
     private String taskOrder = "due";
     private String calendarDate = "", calendarMode = "list", calendarQuery = "";
+    private boolean focusCurrentSchedule;
     private String newsQuery = "";
     private String attendanceFilter = "all";
     private String documentQuery = "", apiModule = "";
@@ -207,6 +208,7 @@ public final class MainActivity extends AppCompatActivity {
             tab = getIntent().getIntExtra("tab", 0);
         }
 
+        focusCurrentSchedule = bundle == null && tab == 5;
         setContentView(R.layout.activity_main);
         drawer = findViewById(R.id.drawer_layout);
         root = findViewById(R.id.main_root);
@@ -388,17 +390,30 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     public void navigate(int target) {
+        navigate(target, true);
+    }
+    public void openScheduleDate(String date) {
+        calendarDate = date;
+        navigate(5, false);
+    }
+    private void navigate(int target, boolean focusCurrent) {
+        focusCurrentSchedule = focusCurrent && target == 5 && tab != 5;
         currentMethod = null;
         currentMethodJson = null;
         tab = target;
+        scroll.scrollTo(0, 0);
         render();
-        scroll.post(() -> scroll.scrollTo(0, 0));
     }
 
     public void render() {
         if (isDestroyed()) return;
         renderedMinute = System.currentTimeMillis() / 60000;
         content.removeAllViews();
+        setScheduleNavigation(null);
+        content.setPadding(UiHelper.dp(this, 20), UiHelper.dp(this, tab == 5 ? 0 : 12), UiHelper.dp(this, 20), UiHelper.dp(this, 24));
+        android.view.ViewGroup.LayoutParams toolbarParams = toolbar.getLayoutParams();
+        toolbarParams.height = UiHelper.dp(this, tab == 5 ? 48 : 64);
+        toolbar.setLayoutParams(toolbarParams);
 
         if (navigation != null) {
             int navMenuId = R.id.nav_item_home;
@@ -433,11 +448,12 @@ public final class MainActivity extends AppCompatActivity {
             R.string.nav_payments, R.string.nav_gpa, R.string.nav_campus, R.string.nav_news,
             R.string.nav_attendance, R.string.cards_title, R.string.documents_title
         };
-        toolbar.setTitle(tab < titleRes.length ? getString(titleRes[tab]) : getString(R.string.app_name));
-        toolbar.setSubtitle(demo ? getString(R.string.demo_account_subtitle) : connected() ? state.optString("user", getString(R.string.app_name)) : getString(R.string.app_name));
+        toolbar.setTitle(tab == 5 && demo ? getString(R.string.schedule_demo_title)
+            : tab < titleRes.length ? getString(titleRes[tab]) : getString(R.string.app_name));
+        toolbar.setSubtitle(tab == 5 ? null : demo ? getString(R.string.demo_account_subtitle) : connected() ? state.optString("user", getString(R.string.app_name)) : getString(R.string.app_name));
 
         try {
-            if (demo) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.GREEN);
+            if (demo && tab != 5) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.GREEN);
 
             switch (tab) {
                 case 13:
@@ -605,6 +621,17 @@ public final class MainActivity extends AppCompatActivity {
                             @Override public void onOpenTask(String title) { editTask(null, title); }
                             @Override public void onAbsenceRecorded() { render(); }
                         });
+                    if (focusCurrentSchedule && content.findViewById(R.id.schedule_swipe_content) != null) {
+                        focusCurrentSchedule = false;
+                        View ongoing = content.findViewById(R.id.schedule_current_lesson);
+                        if (ongoing != null) androidx.core.view.OneShotPreDrawListener.add(scroll, () -> {
+                            if (tab != 5 || content.findViewById(R.id.schedule_current_lesson) != ongoing) return;
+                            int[] cardPosition = new int[2], viewportPosition = new int[2];
+                            ongoing.getLocationOnScreen(cardPosition);
+                            scroll.getLocationOnScreen(viewportPosition);
+                            scroll.scrollTo(0, Math.max(0, scroll.getScrollY() + cardPosition[1] - viewportPosition[1] - UiHelper.dp(this, 8)));
+                        });
+                    }
                     break;
                 case 6:
                     MoreScreenController.render(this, content);
@@ -664,6 +691,11 @@ public final class MainActivity extends AppCompatActivity {
 
     public String getCalendarDate() { return calendarDate; }
     public void setCalendarDate(String date) { this.calendarDate = date; }
+    public boolean shouldFocusCurrentSchedule() { return focusCurrentSchedule; }
+    public void setScheduleNavigation(java.util.function.IntConsumer action) {
+        if (scroll instanceof pl.vistula.checker.ui.ScheduleScrollView)
+            ((pl.vistula.checker.ui.ScheduleScrollView) scroll).setScheduleNavigation(action);
+    }
 
     public String getCalendarMode() { return calendarMode; }
     public void setCalendarMode(String mode) { this.calendarMode = mode; }

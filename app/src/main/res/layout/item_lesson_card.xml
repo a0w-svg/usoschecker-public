@@ -11,6 +11,16 @@
     android:paddingEnd="20dp"
     android:paddingBottom="12dp">
 
+    <TextView
+        android:id="@+id/lesson_item_current_badge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:textColor="@color/app_accent"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -108,9 +108,9 @@ public final class ScheduleScreenController {
 
         LinearLayout navBar = new LinearLayout(activity);
         navBar.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        Button previous = headerButton(activity, "‹", () -> move.accept(-1));
+        Button previous = headerIcon(activity, R.drawable.ic_schedule_previous, () -> move.accept(-1));
         previous.setContentDescription(activity.getString(weekly ? R.string.schedule_previous_week : R.string.schedule_previous_day));
-        Button next = headerButton(activity, "›", () -> move.accept(1));
+        Button next = headerIcon(activity, R.drawable.ic_schedule_next, () -> move.accept(1));
         next.setContentDescription(activity.getString(weekly ? R.string.schedule_next_week : R.string.schedule_next_day));
         String dateLabel = calendarMode.equals("agenda") ? activity.getString(R.string.schedule_mode_agenda)
             : weekly ? monday.format(DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pl-PL"))) + " – "
@@ -132,11 +132,12 @@ public final class ScheduleScreenController {
         });
         date.setContentDescription(activity.getString(R.string.schedule_btn_choose_date) + ": " + dateLabel);
         date.setTextSize(20);
+        date.setTextColor(activity.getColor(R.color.app_ink));
         date.setMinHeight(UiHelper.dp(activity, 64));
         date.setMinimumHeight(UiHelper.dp(activity, 64));
         date.setPadding(UiHelper.dp(activity, 8), UiHelper.dp(activity, 4), UiHelper.dp(activity, 8), UiHelper.dp(activity, 4));
         date.setTypeface(null, android.graphics.Typeface.BOLD);
-        Button more = headerButton(activity, "⋮", () -> {});
+        Button more = headerIcon(activity, R.drawable.ic_schedule_more, () -> {});
         more.setId(R.id.schedule_more);
         more.setContentDescription(activity.getString(R.string.schedule_options));
         previous.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, -1) != null);
@@ -287,11 +288,7 @@ public final class ScheduleScreenController {
                     currentBadge.setText(activity.getString(R.string.schedule_current_badge, remaining));
                     card.setId(R.id.schedule_current_lesson);
                     card.setStateDescription(activity.getString(R.string.classes_ongoing));
-                    android.graphics.drawable.GradientDrawable background = new android.graphics.drawable.GradientDrawable();
-                    background.setColor(UiHelper.background(activity, Color.rgb(214, 241, 229)));
-                    background.setCornerRadius(UiHelper.dp(activity, 20));
-                    background.setStroke(UiHelper.dp(activity, 2), UiHelper.foreground(activity, UiHelper.GREEN));
-                    card.setBackground(background);
+                    card.setBackgroundResource(R.drawable.bg_schedule_current);
                 }
 
                 if (isConflict) conflictBadge.setVisibility(View.VISIBLE);
@@ -335,6 +332,17 @@ public final class ScheduleScreenController {
         button.setMinimumHeight(UiHelper.dp(context, 64));
         ((MaterialButton) button).setInsetTop(0);
         ((MaterialButton) button).setInsetBottom(0);
+        return button;
+    }
+
+    private static Button headerIcon(Context context, int icon, Runnable action) {
+        MaterialButton button = (MaterialButton) headerButton(context, "", action);
+        button.setIconResource(icon);
+        button.setIconSize(UiHelper.dp(context, 28));
+        button.setIconPadding(0);
+        button.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+        button.setIconTint(button.getTextColors());
+        button.setGravity(android.view.Gravity.CENTER);
         return button;
     }
 

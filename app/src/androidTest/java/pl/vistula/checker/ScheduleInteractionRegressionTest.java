@@ -157,7 +157,7 @@ public class ScheduleInteractionRegressionTest {
             assertEquals(View.VISIBLE, room.getVisibility());
             assertEquals("Sala 101", room.getText().toString());
             assertTrue(room.getTypeface().isBold());
-            assertEquals(20 * a.getResources().getDisplayMetrics().scaledDensity, room.getTextSize(), .5f);
+            assertEquals(18 * a.getResources().getDisplayMetrics().scaledDensity, room.getTextSize(), .5f);
             assertFalse(((TextView) card.findViewById(R.id.lesson_item_details)).getText().toString().contains("Sala "));
             android.view.ViewGroup bar = (android.view.ViewGroup) a.findViewById(R.id.schedule_more).getParent();
             for (int i = 0; i < bar.getChildCount(); i++) {

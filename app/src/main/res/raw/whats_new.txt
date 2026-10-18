@@ -1,3 +1,4 @@
+• Spójny wygląd kart, ikon, odstępów i tekstu w planie zajęć.
 • Gesty planu działają na całej powierzchni w obu kierunkach, bez przypadkowego odświeżania.
 • Mniejszy nagłówek planu, większe pole daty oraz większe strzałki i przycisk menu.
 • Sala jest wyraźnie widoczna w osobnej, dużej etykiecie pod nazwą przedmiotu.

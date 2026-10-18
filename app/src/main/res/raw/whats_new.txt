@@ -1,6 +1,5 @@
-• Spójny wygląd kart, ikon, odstępów i tekstu w planie zajęć.
-• Gesty planu działają na całej powierzchni w obu kierunkach, bez przypadkowego odświeżania.
-• Mniejszy nagłówek planu, większe pole daty oraz większe strzałki i przycisk menu.
-• Sala jest wyraźnie widoczna w osobnej, dużej etykiecie pod nazwą przedmiotu.
-• Trwające zajęcia mają wyraźne oznaczenie i czas pozostały do końca.
-• Po wejściu w plan aplikacja otwiera dzień trwających zajęć i przewija do ich karty. Ręczna nawigacja i wyszukiwanie pozostają zachowane.
+• Prostszy ekran startowy bez banera, szybkich skrótów, stanu monitorowania i podsumowania najbliższych 7 dni.
+• Wspólne Ustawienia: konto, wygląd, synchronizacja, powiadomienia, widżety, semestr akademicki i informacje o aplikacji.
+• Usunięte powtarzające się nagłówki ekranów i zdublowane wejścia do ustawień.
+• Menu planu zajęć przeniesione na lewą stronę.
+• Spokojniejsze akcenty na ekranie startowym: wyróżnione trwające lub najbliższe zajęcia.

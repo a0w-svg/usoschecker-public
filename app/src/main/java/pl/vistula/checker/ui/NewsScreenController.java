@@ -37,9 +37,7 @@ public final class NewsScreenController {
     public static void render(MainActivity activity, LinearLayout content, JSONObject d,
                               String query, java.util.function.Consumer<String> onQueryChanged,
                               Runnable onRefresh) throws JSONException {
-        UiHelper.title(activity, content,
-            activity.getString(R.string.news_title),
-            activity.getString(R.string.news_subtitle));
+        UiHelper.note(activity, content, activity.getString(R.string.news_subtitle), UiHelper.MUTED);
 
         JSONObject raw = d.optJSONObject("snapshot");
         Snapshot snapshot = raw != null ? Snapshot.from(raw) : null;

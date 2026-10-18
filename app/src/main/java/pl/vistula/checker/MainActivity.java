@@ -450,7 +450,7 @@ public final class MainActivity extends AppCompatActivity {
         };
         toolbar.setTitle(tab == 5 && demo ? getString(R.string.schedule_demo_title)
             : tab < titleRes.length ? getString(titleRes[tab]) : getString(R.string.app_name));
-        toolbar.setSubtitle(tab == 5 ? null : demo ? getString(R.string.demo_account_subtitle) : connected() ? state.optString("user", getString(R.string.app_name)) : getString(R.string.app_name));
+        toolbar.setSubtitle(tab == 5 ? null : demo ? getString(R.string.demo_account_subtitle) : connected() ? state.optString("user", getString(R.string.app_name)) : null);
 
         try {
             if (demo && tab != 5) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.GREEN);
@@ -463,7 +463,7 @@ public final class MainActivity extends AppCompatActivity {
                     StudentDocumentsController.render(this, content, state, studentServices());
                     break;
                 case 0:
-                    HomeScreenController.render(this, content, display(), state, demo, demoTasks, this::sync, this::lessonDetails);
+                    HomeScreenController.render(this, content, display(), state, demo, demoTasks, this::lessonDetails);
                     break;
                 case 1:
                     HistoryScreenController.render(this, content, display(), filter, historyQuery, demo,

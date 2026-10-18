@@ -52,7 +52,7 @@
     <string name="nav_payments">Płatności</string>
     <string name="nav_tasks">Zadania</string>
     <string name="nav_campus">Niezbędnik i Kampus</string>
-    <string name="nav_account">Konto i profil</string>
+    <string name="nav_account">Ustawienia</string>
     <string name="nav_api">Katalog API</string>
 
     <!-- General Buttons & Actions -->
@@ -146,14 +146,14 @@
     <string name="tool_news_desc">Oficjalne wiadomości, zarządzenia i komunikaty Dziekanatu</string>
     <string name="tool_campus_title">Niezbędnik i kampus Vistula</string>
     <string name="tool_campus_desc">Godziny Dziekanatu, biblioteka, numery sal, WiFi eduroam</string>
-    <string name="tool_account_title">Konto i profil studenta</string>
-    <string name="tool_account_desc">Karta studenta, synchronizacja w tle, sejf Android Keystore</string>
+    <string name="tool_account_title">Ustawienia</string>
+    <string name="tool_account_desc">Konto, wygląd, synchronizacja, powiadomienia i semestr akademicki</string>
     <string name="tool_api_title">Katalog USOS API</string>
     <string name="tool_api_desc">Interaktywne testowanie zapytań dla studentów i deweloperów</string>
 
     <!-- Account & OAuth -->
-    <string name="account_title">Konto i profil</string>
-    <string name="account_subtitle">Akademia Finansów i Biznesu Vistula</string>
+    <string name="account_title">Ustawienia</string>
+    <string name="account_subtitle">Konto i preferencje aplikacji</string>
     <string name="student_card_badge">KARTA STUDENTA VISTULA</string>
     <string name="keystore_badge">BEZPIECZNY SEJF SPRZĘTOWY</string>
     <string name="keystore_note">Szyfrowanie Android Keystore (AES-256-GCM). Wszystkie dane przechowywane wyłącznie lokalnie.</string>

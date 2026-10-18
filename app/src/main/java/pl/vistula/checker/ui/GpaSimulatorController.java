@@ -25,9 +25,7 @@ public final class GpaSimulatorController {
                               double targetGpa, double remainingEcts,
                               java.util.function.Consumer<Double> onTargetChanged,
                               java.util.function.Consumer<Double> onEctsChanged) throws JSONException {
-        UiHelper.title(activity, content,
-            activity.getString(R.string.gpa_title),
-            activity.getString(R.string.gpa_subtitle));
+        UiHelper.note(activity, content, activity.getString(R.string.gpa_subtitle), UiHelper.MUTED);
 
         JSONObject raw = d.optJSONObject("snapshot");
         if (raw == null) {

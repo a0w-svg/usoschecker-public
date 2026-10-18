@@ -27,7 +27,7 @@ public class OledThemeTest {
             context.getSharedPreferences("appearance", Context.MODE_PRIVATE).edit()
                 .putInt("nightMode", AppCompatDelegate.MODE_NIGHT_NO).commit();
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
-                scenario.onActivity(a -> a.navigate(6));
+                scenario.onActivity(a -> a.navigate(4));
                 onView(withText(R.string.appearance_title)).perform(scrollTo(), click());
                 onView(withText("Ciemny OLED")).perform(click());
                 scenario.onActivity(this::assertOled);

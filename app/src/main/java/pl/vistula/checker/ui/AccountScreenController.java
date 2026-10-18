@@ -35,6 +35,9 @@ import pl.vistula.checker.MainActivity;
 import pl.vistula.checker.NotificationHelper;
 import pl.vistula.checker.R;
 import pl.vistula.checker.SyncWorker;
+import pl.vistula.checker.core.AcademicTerm;
+import pl.vistula.checker.UsosClient;
+import java.time.LocalDate;
 import pl.vistula.checker.core.OAuth;
 import pl.vistula.checker.core.Snapshot;
 
@@ -59,9 +62,7 @@ public final class AccountScreenController {
     public static void render(MainActivity activity, LinearLayout content, JSONObject d,
                               JSONObject state, boolean demo, String detectedPin,
                               AccountListener listener) {
-        UiHelper.title(activity, content,
-            activity.getString(R.string.account_title),
-            activity.getString(R.string.account_subtitle));
+        UiHelper.note(activity, content, activity.getString(R.string.account_subtitle), UiHelper.MUTED);
 
         if (demo) {
             content.addView(UiHelper.button(activity, activity.getString(R.string.btn_end_demo), listener::onEndDemo, true));
@@ -154,9 +155,22 @@ public final class AccountScreenController {
             UiHelper.note(activity, profile, activity.getString(R.string.keystore_note), UiHelper.MUTED);
         }
 
+        renderAcademicTerm(activity, content, d);
+
+        if (demo || connected) {
+            content.addView(UiHelper.button(activity, activity.getString(demo ? R.string.btn_simulate_changes : R.string.btn_check_now), activity::sync, false));
+        }
+
         if (connected) {
             LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
             UiHelper.add(activity, box, activity.getString(R.string.sync_settings_title), 19, UiHelper.INK, true);
+            UiHelper.note(activity, box, activity.getString(R.string.monitoring_last_success) + "\n"
+                + UiHelper.timestamp(d == null ? 0 : d.optLong("successAt")), UiHelper.MUTED);
+            if (!state.optString("error").isEmpty()) {
+                UiHelper.note(activity, box, state.optString("error"), Color.rgb(167, 49, 49));
+                if (state.optLong("retryAt") > System.currentTimeMillis()) UiHelper.note(activity, box,
+                    activity.getString(R.string.home_next_retry, UiHelper.timestamp(state.optLong("retryAt"))), UiHelper.MUTED);
+            }
             String authorizedScopes = state.optString("scopes");
             UiHelper.add(activity, box, activity.getString(R.string.account_oauth_consent, authorizedScopes), 13, UiHelper.MUTED, false);
             if (!pl.vistula.checker.core.StudentServices.hasScope(authorizedScopes, "payments")) {
@@ -400,6 +414,33 @@ public final class AccountScreenController {
         UiHelper.note(activity, content, activity.getString(R.string.account_security_keystore_note), UiHelper.MUTED);
         content.addView(UiHelper.button(activity, activity.getString(R.string.account_btn_open_usosapps), () -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/"), false));
         AppInfo.render(activity, content);
+    }
+
+    private static void renderAcademicTerm(MainActivity activity, LinearLayout content, JSONObject data) {
+        JSONObject raw = data == null ? null : data.optJSONObject("snapshot");
+        if (raw == null) return;
+        try {
+            Snapshot snap = Snapshot.from(raw);
+            LocalDate today = LocalDate.now(UsosClient.ZONE);
+            AcademicTerm currentTerm = null;
+            for (AcademicTerm t : snap.terms.values()) {
+                if (t.isCurrent(today)) { currentTerm = t; break; }
+            }
+            if (currentTerm == null && !snap.terms.isEmpty()) currentTerm = snap.terms.values().iterator().next();
+            if (currentTerm != null) {
+                LinearLayout termBox = UiHelper.card(activity, content, Color.rgb(238, 245, 242));
+                UiHelper.add(activity, termBox, activity.getString(R.string.academic_calendar_title), 11, UiHelper.GREEN, true);
+                UiHelper.add(activity, termBox, currentTerm.name, 17, UiHelper.INK, true);
+                long days = currentTerm.daysRemaining(today);
+                String termInfo = days >= 0
+                    ? activity.getString(R.string.home_term_remaining, days, currentTerm.endDate)
+                    : activity.getString(R.string.home_term_ended, currentTerm.endDate);
+                UiHelper.add(activity, termBox, termInfo, 13, UiHelper.MUTED, false);
+            }
+
+        } catch (org.json.JSONException ignored) {
+            // Missing cached academic information must not block account settings.
+        }
     }
 
     private static void showApiKeyHelpDialog(MainActivity activity) {

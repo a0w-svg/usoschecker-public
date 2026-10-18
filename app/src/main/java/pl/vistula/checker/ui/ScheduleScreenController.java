@@ -137,7 +137,7 @@ public final class ScheduleScreenController {
                     UiHelper.timestamp(d.optLong("successAt"))) + "\n\n" + activity.getString(R.string.schedule_warsaw_zone);
                 if (!conflicts.isEmpty()) info += "\n\n" + activity.getString(R.string.home_conflicts_title, conflicts.size())
                     + "\n" + conflicts.get(0).description();
-                new MaterialAlertDialogBuilder(activity).setTitle(R.string.schedule_info).setMessage(info)
+                new MaterialAlertDialogBuilder(activity).setTitle(R.string.schedule_info_title).setMessage(info)
                     .setPositiveButton(R.string.btn_close, null).show();
             });
         if (!calendarMode.equals("agenda")) {

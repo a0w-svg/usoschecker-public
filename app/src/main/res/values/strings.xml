@@ -706,7 +706,8 @@
     <string name="schedule_previous_day">Poprzedni dzień</string>
     <string name="schedule_next_day">Następny dzień</string>
     <string name="schedule_day_label">Dzień</string>
-    <string name="schedule_info">Informacje o planie</string>
+    <string name="schedule_info">Info</string>
+    <string name="schedule_info_title">Informacje o planie</string>
     <string name="schedule_next_week">Następny tydzień</string>
     <string name="schedule_search_hint">Szukaj przedmiotu, sali lub prowadzącego</string>
     <string name="schedule_day_summary">%1$d zajęć · %2$d godz. %3$d min\nPrzerwy między zajęciami: %4$d min</string>

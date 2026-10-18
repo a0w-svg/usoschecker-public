@@ -35,7 +35,7 @@
             android:paddingTop="4dp"
             android:paddingEnd="8dp"
             android:paddingBottom="4dp"
-            android:textColor="@color/app_accent"
+            android:textColor="@color/app_ink"
             android:textSize="12sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -63,7 +63,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="4dp"
-        android:textColor="@color/app_accent"
+        android:textColor="@color/app_ink"
         android:textSize="12sp"
         android:visibility="gone" />
 
@@ -85,7 +85,7 @@
         android:minHeight="48dp"
         android:text="@string/payments_copy_installment_account"
         android:textAllCaps="false"
-        android:textColor="@color/app_accent"
+        android:textColor="@color/app_ink"
         android:textSize="14sp"
         android:visibility="gone"
         app:backgroundTint="@color/app_button_surface"

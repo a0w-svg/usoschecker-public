@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_accent"
+        android:textColor="@color/app_ink"
         android:textSize="13sp"
         android:textStyle="bold" />
 
@@ -62,7 +62,7 @@
             android:minHeight="48dp"
             android:text="@string/tasks_btn_mark_done"
             android:textAllCaps="false"
-            android:textColor="@color/app_accent"
+            android:textColor="@color/app_ink"
             android:textSize="14sp"
             app:backgroundTint="@color/app_button_surface"
             app:cornerRadius="14dp" />
@@ -83,7 +83,7 @@
             android:minHeight="48dp"
             android:text="@string/tasks_btn_edit"
             android:textAllCaps="false"
-            android:textColor="@color/app_accent"
+            android:textColor="@color/app_ink"
             android:textSize="14sp"
             android:maxLines="3"
             app:cornerRadius="14dp" />

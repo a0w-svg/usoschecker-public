@@ -116,7 +116,7 @@
             android:minHeight="48dp"
             android:text="@string/schedule_btn_choose_date"
             android:textAllCaps="false"
-            android:textColor="@color/app_accent"
+            android:textColor="@color/app_ink"
             android:textSize="14sp"
             app:backgroundTint="@color/app_button_surface"
             app:cornerRadius="14dp" />

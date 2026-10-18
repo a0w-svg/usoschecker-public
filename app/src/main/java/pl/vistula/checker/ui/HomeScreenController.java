@@ -136,7 +136,7 @@ public final class HomeScreenController {
         content.addView(stats, statsParams);
 
         // Ongoing lecture
-        renderOngoingLectures(activity, content, records);
+        renderOngoingLectures(activity, content, records, onLessonDetails);
 
         // Upcoming lecture
         UiHelper.heading(activity, content, activity.getString(R.string.classes_upcoming));
@@ -154,7 +154,7 @@ public final class HomeScreenController {
             LinearLayout box = UiHelper.card(activity, content, focused ? Color.rgb(214, 241, 229) : Color.WHITE);
             UiHelper.add(activity, box, upcoming.record.title, 20, UiHelper.INK, true);
             UiHelper.add(activity, box, UiHelper.shortDate(upcoming.start.toLocalDate()), 13, UiHelper.MUTED, true);
-            UiHelper.add(activity, box, upcoming.record.value, 14, UiHelper.MUTED, false);
+            renderLessonSummary(activity, box, upcoming);
             LessonTime next = upcoming;
             box.setClickable(true);
             box.setFocusable(true);
@@ -166,7 +166,8 @@ public final class HomeScreenController {
         }
     }
 
-    private static void renderOngoingLectures(MainActivity activity, LinearLayout parent, Collection<Record> rows) {
+    private static void renderOngoingLectures(MainActivity activity, LinearLayout parent, Collection<Record> rows,
+            java.util.function.Consumer<LessonTime> onLessonDetails) {
         List<LessonTime> current = LessonTime.current(rows, Instant.now());
         if (current.isEmpty()) {
             UiHelper.note(activity, parent, activity.getString(R.string.classes_no_ongoing), UiHelper.MUTED);
@@ -176,10 +177,23 @@ public final class HomeScreenController {
             LinearLayout box = UiHelper.card(activity, parent, lesson == current.get(0) ? Color.rgb(214, 241, 229) : Color.WHITE);
             UiHelper.add(activity, box, activity.getString(R.string.classes_ongoing), 11, UiHelper.GREEN, true);
             UiHelper.add(activity, box, lesson.record.title, 22, UiHelper.INK, true);
-            UiHelper.add(activity, box, lesson.record.value, 14, UiHelper.INK, false);
+            renderLessonSummary(activity, box, lesson);
+            box.setClickable(true);
+            box.setFocusable(true);
+            box.setOnClickListener(v -> onLessonDetails.accept(lesson));
             long remaining = Math.max(1, (java.time.Duration.between(Instant.now(), lesson.end.toInstant()).getSeconds() + 59) / 60);
             UiHelper.add(activity, box, activity.getString(R.string.home_classes_remaining_min, remaining), 12, UiHelper.GREEN, false);
         }
+    }
+
+    private static void renderLessonSummary(MainActivity activity, LinearLayout box, LessonTime lesson) {
+        DateTimeFormatter clock = DateTimeFormatter.ofPattern("HH:mm");
+        UiHelper.add(activity, box, lesson.start.format(clock) + " – " + lesson.end.format(clock), 16, UiHelper.INK, true);
+        String room = lesson.record.metadata.optString("room").trim();
+        if (room.isEmpty()) for (String line : lesson.record.value.split("\n")) {
+            if (line.startsWith("Sala ")) { room = line.substring(5).trim(); break; }
+        }
+        if (!room.isEmpty()) UiHelper.add(activity, box, activity.getString(R.string.lesson_room_label, room), 14, UiHelper.MUTED, false);
     }
 
     private static void renderDeadlinesPreview(MainActivity activity, LinearLayout content, JSONArray rows) throws JSONException {
@@ -219,8 +233,8 @@ public final class HomeScreenController {
 
     private static void renderRecentChanges(MainActivity activity, LinearLayout content, JSONObject d) throws Exception {
         JSONArray rows = d.optJSONArray("history");
-        UiHelper.heading(activity, content, activity.getString(R.string.home_recent_changes));
         if (rows != null && rows.length() != 0) {
+            UiHelper.heading(activity, content, activity.getString(R.string.home_recent_changes));
             List<Change> recent = new ArrayList<>();
             for (int i = 0; i < rows.length(); ++i) {
                 recent.add(Change.from(rows.getJSONObject(i)));
@@ -230,10 +244,6 @@ public final class HomeScreenController {
                 HistoryScreenController.renderChangeCard(activity, content, recent.get(i));
             }
             content.addView(UiHelper.button(activity, activity.getString(R.string.home_all_history_btn), () -> activity.navigate(1), false));
-        } else {
-            UiHelper.empty(activity, content,
-                activity.getString(R.string.home_no_changes_title),
-                activity.getString(R.string.home_no_changes_desc));
         }
     }
 }

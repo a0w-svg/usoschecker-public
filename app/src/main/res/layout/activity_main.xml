@@ -16,13 +16,11 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="48dp"
             android:background="@color/app_background"
             app:navigationContentDescription="@string/menu_open"
             app:navigationIcon="@drawable/ic_nav_menu"
-            app:subtitle="@string/app_subtitle"
             app:subtitleTextColor="@color/app_muted"
-            app:title="@string/app_name"
             app:titleTextColor="@color/app_ink" />
 
         <TextView
@@ -34,7 +32,7 @@
             android:paddingEnd="24dp"
             android:paddingBottom="8dp"
             android:text="@string/sync_in_progress"
-            android:textColor="@color/app_accent"
+            android:textColor="@color/app_ink"
             android:textSize="12sp"
             android:visibility="gone" />
 
@@ -69,7 +67,7 @@
             android:background="@color/app_surface_high"
             app:itemHorizontalTranslationEnabled="false"
             app:itemIconTint="@color/navigation_item_color"
-            app:itemTextColor="@color/navigation_item_color"
+            app:itemTextColor="@color/navigation_text_color"
             app:labelVisibilityMode="labeled"
             app:menu="@menu/bottom_nav_menu" />
     </LinearLayout>
@@ -81,7 +79,7 @@
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_main"
         app:itemIconTint="@color/navigation_item_color"
-        app:itemTextColor="@color/navigation_item_color"
+        app:itemTextColor="@color/navigation_text_color"
         app:menu="@menu/drawer_nav_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

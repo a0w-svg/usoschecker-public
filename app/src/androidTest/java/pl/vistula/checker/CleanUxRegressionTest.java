@@ -50,7 +50,7 @@ public class CleanUxRegressionTest {
                     R.string.account_widgets_heading, R.string.academic_calendar_title, R.string.about_title}) {
                 assertTrue(activity.getString(label), hasText(content, activity.getString(label)));
             }
-            // The title is supplied once by the main toolbar, not repeated in the content.
+            // Screen names are represented by navigation, without duplicate headings.
             assertFalse(hasText(content, activity.getString(R.string.nav_account)));
         });
     }
@@ -64,6 +64,20 @@ public class CleanUxRegressionTest {
             android.view.ViewGroup row = (android.view.ViewGroup) menu.getParent();
             assertSame(menu, row.getChildAt(0));
             assertEquals(activity.getString(R.string.schedule_options), menu.getContentDescription());
+        });
+    }
+    @Test public void screenNamesStayHiddenAndTextUsesNeutralColors() {
+        main(() -> {
+            MainActivity activity = rule.getActivity();
+            for (int tab : new int[]{0, 1, 2, 4, 5, 6}) {
+                activity.navigate(tab);
+                com.google.android.material.appbar.MaterialToolbar bar = activity.findViewById(R.id.toolbar);
+                assertTrue(bar.getTitle() == null || bar.getTitle().length() == 0);
+                assertTrue(bar.getSubtitle() == null || bar.getSubtitle().length() == 0);
+            }
+            assertEquals(activity.getColor(R.color.app_ink), UiHelper.foreground(activity, UiHelper.GREEN));
+            TextView time = (TextView) activity.getLayoutInflater().inflate(R.layout.item_lesson_card, null).findViewById(R.id.lesson_item_time);
+            assertEquals(activity.getColor(R.color.app_ink), time.getCurrentTextColor());
         });
     }
     @Test public void timetableTechnicalFieldsAreAvailableOnlyAfterRequestingFullData() {

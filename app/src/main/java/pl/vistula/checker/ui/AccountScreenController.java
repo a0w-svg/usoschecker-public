@@ -62,7 +62,6 @@ public final class AccountScreenController {
     public static void render(MainActivity activity, LinearLayout content, JSONObject d,
                               JSONObject state, boolean demo, String detectedPin,
                               AccountListener listener) {
-        UiHelper.note(activity, content, activity.getString(R.string.account_subtitle), UiHelper.MUTED);
 
         if (demo) {
             content.addView(UiHelper.button(activity, activity.getString(R.string.btn_end_demo), listener::onEndDemo, true));
@@ -142,17 +141,7 @@ public final class AccountScreenController {
                 if (!snapshot.thesis.reviewers.isEmpty()) UiHelper.add(activity, profile, activity.getString(R.string.account_thesis_reviewer, snapshot.thesis.reviewers), 13, UiHelper.MUTED, false);
             }
 
-            LinearLayout secBadge = new LinearLayout(activity);
-            secBadge.setGravity(Gravity.CENTER_VERTICAL);
-            TextView badgeText = UiHelper.text(activity, activity.getString(R.string.keystore_badge), 10, UiHelper.GREEN, true);
-            badgeText.setPadding(UiHelper.dp(activity, 8), UiHelper.dp(activity, 4), UiHelper.dp(activity, 8), UiHelper.dp(activity, 4));
-            GradientDrawable badgeBg = new GradientDrawable();
-            badgeBg.setColor(UiHelper.background(activity, Color.rgb(232, 243, 236)));
-            badgeBg.setCornerRadius(UiHelper.dp(activity, 8));
-            badgeText.setBackground(badgeBg);
-            secBadge.addView(badgeText);
-            profile.addView(secBadge);
-            UiHelper.note(activity, profile, activity.getString(R.string.keystore_note), UiHelper.MUTED);
+
         }
 
         renderAcademicTerm(activity, content, d);
@@ -411,7 +400,6 @@ public final class AccountScreenController {
             Toast.makeText(activity, R.string.account_toast_widgets_updated, Toast.LENGTH_SHORT).show();
         }, false));
 
-        UiHelper.note(activity, content, activity.getString(R.string.account_security_keystore_note), UiHelper.MUTED);
         content.addView(UiHelper.button(activity, activity.getString(R.string.account_btn_open_usosapps), () -> UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/"), false));
         AppInfo.render(activity, content);
     }

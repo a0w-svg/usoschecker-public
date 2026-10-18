@@ -13,7 +13,6 @@ public final class MoreScreenController {
     private MoreScreenController() {}
 
     public static void render(MainActivity activity, LinearLayout content) {
-        UiHelper.note(activity, content, activity.getString(R.string.tools_subtitle), UiHelper.MUTED);
 
         UiHelper.heading(activity, content, activity.getString(R.string.section_studies));
         UiHelper.toolTile(activity, content, R.drawable.ic_nav_card, activity.getString(R.string.cards_title), activity.getString(R.string.cards_description), () -> activity.navigate(13));

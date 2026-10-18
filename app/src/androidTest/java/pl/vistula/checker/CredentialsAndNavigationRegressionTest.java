@@ -82,9 +82,9 @@ public class CredentialsAndNavigationRegressionTest {
         main(() -> {
             MainActivity activity = rule.getActivity();
             activity.onNewIntent(new Intent(activity, MainActivity.class).putExtra("tab", 2));
-            assertEquals(activity.getString(R.string.nav_grades), ((com.google.android.material.appbar.MaterialToolbar) activity.findViewById(R.id.toolbar)).getTitle());
+            assertEquals(R.id.nav_item_grades, ((com.google.android.material.bottomnavigation.BottomNavigationView) activity.findViewById(R.id.bottom_navigation)).getSelectedItemId());
             activity.onNewIntent(new Intent(activity, MainActivity.class).putExtra("tab", 5));
-            assertEquals(activity.getString(R.string.nav_plan_full), ((com.google.android.material.appbar.MaterialToolbar) activity.findViewById(R.id.toolbar)).getTitle());
+            assertEquals(R.id.nav_item_plan, ((com.google.android.material.bottomnavigation.BottomNavigationView) activity.findViewById(R.id.bottom_navigation)).getSelectedItemId());
         });
     }
 

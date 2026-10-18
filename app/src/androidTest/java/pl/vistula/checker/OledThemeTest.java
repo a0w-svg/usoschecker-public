@@ -112,7 +112,7 @@ public class OledThemeTest {
                 badge.getCurrentTextColor(), activity.getColor(R.color.app_secondary_container)) >= 4.5);
         }
         assertNotEquals(activity.getColor(R.color.app_background), activity.getColor(R.color.app_card));
-        assertEquals(activity.getColor(R.color.app_accent), UiHelper.foreground(activity, UiHelper.GREEN));
+        assertEquals(activity.getColor(R.color.app_ink), UiHelper.foreground(activity, UiHelper.GREEN));
     }
 
     private void assertGradeBadges(android.view.View view) {

@@ -9,6 +9,27 @@ import pl.vistula.checker.ui.UiHelper;
 
 public class UiFormattersTest {
 
+    @Test public void scheduleCardsKeepEssentialsWithoutRepeatedTimesOrTechnicalFields() throws Exception {
+        org.json.JSONObject meta = new org.json.JSONObject().put("room", "201").put("building", "Budynek A")
+            .put("classType", "Ćwiczenia").put("lecturers", "Jan Nowak").put("unitId", "private-id");
+        pl.vistula.checker.core.Record record = new pl.vistula.checker.core.Record("lesson", "plan", "Finanse",
+            "09:00 – 10:30\nĆwiczenia\nSala 201 · Budynek A\nProwadzący: Jan Nowak\nTermin orientacyjny",
+            "", "2026-10-18", "", "", "", Double.NaN, meta);
+        assertEquals("Ćwiczenia\nSala 201\nProwadzący: Jan Nowak\nTermin orientacyjny",
+            pl.vistula.checker.ui.ScheduleScreenController.lessonSummary(pl.vistula.checker.core.LessonTime.of(record)));
+        assertTrue(record.value.contains("Budynek A")); // Details and exports retain the original data.
+    }
+
+    @Test public void scheduleCardsKeepLegacyAndPartiallyStructuredDescriptions() throws Exception {
+        for (org.json.JSONObject meta : new org.json.JSONObject[]{new org.json.JSONObject(), new org.json.JSONObject().put("room", "201")}) {
+            pl.vistula.checker.core.Record record = new pl.vistula.checker.core.Record("lesson", "plan", "Finanse",
+                "2026-10-18 09:00 – 10:30\nĆwiczenia\nSala 201\nProwadzący: Jan Nowak", "", "2026-10-18", "",
+                "", "", Double.NaN, meta);
+            assertEquals("Ćwiczenia\nSala 201\nProwadzący: Jan Nowak",
+                pl.vistula.checker.ui.ScheduleScreenController.lessonSummary(pl.vistula.checker.core.LessonTime.of(record)));
+        }
+    }
+
     @Test
     public void testFormatIbanStandardPolish() {
         String raw = "12345678901234567890123456";

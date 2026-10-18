@@ -157,6 +157,7 @@ public class ScreenRegressionTest {
     @Test public void gradeSubjectDetailsIncludeAllComponentsAndCompleteStoredData() throws Exception {
         main(() -> rule.getActivity().navigate(2)); search("finansów");
         has(rule.getActivity().getString(R.string.grades_group_entry_count, 2));
+        click(rule.getActivity().getString(R.string.subject_view_more));
         click(rule.getActivity().getString(R.string.grades_subject_details));
         dialogHas("4,0"); dialogHas("5,0"); dialogHas("Kod przedmiotu"); dialogHas("ID autora modyfikacji");
         dialogHas(rule.getActivity().getString(R.string.grades_full_data));

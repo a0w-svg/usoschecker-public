@@ -61,8 +61,6 @@ public final class ScheduleScreenController {
                               java.util.function.Consumer<String> onModeChanged,
                               Runnable onRefresh,
                               ScheduleListener listener) throws Exception {
-        UiHelper.heading(activity, content, activity.getString(R.string.schedule_heading));
-        UiHelper.note(activity, content, activity.getString(R.string.schedule_warsaw_zone), UiHelper.MUTED);
 
         JSONObject raw = d.optJSONObject("snapshot");
         if (raw == null) {
@@ -77,8 +75,6 @@ public final class ScheduleScreenController {
         }
 
         Snapshot snapshot = Snapshot.from(raw);
-        UiHelper.note(activity, content, activity.getString(R.string.schedule_saved_range, snapshot.start, snapshot.end,
-            UiHelper.timestamp(d.optLong("successAt"))), UiHelper.MUTED);
         List<Record> planRows = new ArrayList<>();
         for (Record r : snapshot.records.values()) {
             if (r.kind.equals("plan")) planRows.add(r);
@@ -91,84 +87,75 @@ public final class ScheduleScreenController {
             conflictLessonKeys.add(c.second.id);
         }
 
-        if (!conflicts.isEmpty()) {
-            LinearLayout conflictCard = UiHelper.card(activity, content, Color.rgb(255, 243, 224));
-            UiHelper.add(activity, conflictCard, activity.getString(R.string.home_conflicts_title, conflicts.size()), 11, Color.rgb(217, 119, 6), true);
-            UiHelper.add(activity, conflictCard, activity.getString(R.string.home_conflicts_heading), 16, UiHelper.INK, true);
-            UiHelper.add(activity, conflictCard, conflicts.get(0).description(), 13, UiHelper.INK, false);
-            if (conflicts.size() > 1) {
-                UiHelper.note(activity, conflictCard, activity.getString(R.string.home_conflicts_more, (conflicts.size() - 1)), UiHelper.MUTED);
-            }
-        }
-
         LocalDate today = LocalDate.now(UsosClient.ZONE);
         LocalDate activeDate = calendarDate.isEmpty() ? today : LocalDate.parse(calendarDate);
+        boolean weekly = calendarMode.equals("week");
+        LocalDate monday = activeDate.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        java.util.function.IntConsumer move = direction -> {
+            LocalDate target = activeDate.plusDays(direction * (weekly ? 7L : 1L));
+            activity.setCalendarDate(target.toString());
+            if (calendarMode.equals("agenda")) onModeChanged.accept("day");
+            else onDateChanged.accept(target.toString());
+        };
 
-        // Date selection bar
+        // One compact date row. The date itself opens the date picker.
         LinearLayout navBar = new LinearLayout(activity);
-        navBar.setOrientation(LinearLayout.HORIZONTAL);
-
-        Button todayBtn = UiHelper.button(activity, activity.getString(R.string.schedule_btn_today), () -> {
-            onDateChanged.accept(today.toString());
-            onModeChanged.accept("day");
-        }, activeDate.equals(today) && calendarMode.equals("day"));
-
-        Button chooseDateBtn = UiHelper.button(activity, activity.getString(R.string.schedule_btn_choose_date), () -> {
+        navBar.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        Button previous = UiHelper.button(activity, "‹", () -> move.accept(-1), false);
+        previous.setContentDescription(activity.getString(weekly ? R.string.schedule_previous_week : R.string.schedule_previous_day));
+        Button next = UiHelper.button(activity, "›", () -> move.accept(1), false);
+        next.setContentDescription(activity.getString(weekly ? R.string.schedule_next_week : R.string.schedule_next_day));
+        String dateLabel = weekly
+            ? monday.format(DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pl-PL"))) + " – "
+                + monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.forLanguageTag("pl-PL")))
+            : activeDate.format(DateTimeFormatter.ofPattern("EEE, d MMM yyyy", Locale.forLanguageTag("pl-PL")));
+        Button date = UiHelper.button(activity, dateLabel, () ->
             new DatePickerDialog(activity, (picker, year, month, day) -> {
-                LocalDate picked = LocalDate.of(year, month + 1, day);
-                onDateChanged.accept(picked.toString());
-                onModeChanged.accept("day");
-            }, activeDate.getYear(), activeDate.getMonthValue() - 1, activeDate.getDayOfMonth()).show();
-        }, false);
-
+                activity.setCalendarDate(LocalDate.of(year, month + 1, day).toString());
+                onModeChanged.accept(weekly ? "week" : "day");
+            }, activeDate.getYear(), activeDate.getMonthValue() - 1, activeDate.getDayOfMonth()).show(), false);
+        date.setContentDescription(activity.getString(R.string.schedule_btn_choose_date) + ": " + dateLabel);
+        date.setTextSize(14);
+        Button todayBtn = UiHelper.button(activity, activity.getString(R.string.schedule_btn_today), () -> {
+            activity.setCalendarDate(today.toString());
+            onModeChanged.accept(weekly ? "week" : "day");
+        }, activeDate.equals(today));
         todayBtn.setTextSize(12);
-        todayBtn.setMinHeight(UiHelper.dp(activity, 48));
-        chooseDateBtn.setTextSize(12);
-        chooseDateBtn.setMinHeight(UiHelper.dp(activity, 48));
-
-        LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, -2, 1);
-        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(0, -2, 1);
-        lp1.setMarginEnd(UiHelper.dp(activity, 6));
-        navBar.addView(todayBtn, lp1);
-        navBar.addView(chooseDateBtn, lp2);
+        navBar.addView(previous, new LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2));
+        navBar.addView(date, new LinearLayout.LayoutParams(0, -2, 1));
+        navBar.addView(next, new LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2));
+        navBar.addView(todayBtn, new LinearLayout.LayoutParams(-2, -2));
         content.addView(navBar);
 
-        // Mode chips
         UiHelper.chips(activity, content,
-            new String[]{"day", "week", "agenda"},
-            new String[]{activity.getString(R.string.schedule_mode_day, activeDate.format(DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pl-PL")))),
-                activity.getString(R.string.schedule_mode_week),
-                activity.getString(R.string.schedule_mode_agenda)},
-            calendarMode.equals("list") ? "day" : calendarMode, onModeChanged);
-
-        LocalDate monday = activeDate.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
-        LinearLayout weekBar = new LinearLayout(activity);
-        weekBar.setOrientation(LinearLayout.HORIZONTAL);
-        weekBar.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        Button previous = UiHelper.button(activity, "‹", () -> onDateChanged.accept(activeDate.minusWeeks(1).toString()), false);
-        previous.setContentDescription(activity.getString(R.string.schedule_previous_week));
-        Button next = UiHelper.button(activity, "›", () -> onDateChanged.accept(activeDate.plusWeeks(1).toString()), false);
-        next.setContentDescription(activity.getString(R.string.schedule_next_week));
-        weekBar.addView(previous, new LinearLayout.LayoutParams(UiHelper.dp(activity, 52), -2));
-        TextView weekTitle = UiHelper.text(activity, monday.format(DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pl-PL")))
-            + " – " + monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM yyyy", Locale.forLanguageTag("pl-PL"))), 14, UiHelper.INK, true);
-        weekTitle.setGravity(android.view.Gravity.CENTER);
-        weekBar.addView(weekTitle, new LinearLayout.LayoutParams(0, -2, 1));
-        weekBar.addView(next, new LinearLayout.LayoutParams(UiHelper.dp(activity, 52), -2));
-        content.addView(weekBar);
-        String[] dayValues = new String[7], dayLabels = new String[7];
-        for (int i = 0; i < 7; i++) {
-            LocalDate date = monday.plusDays(i);
-            dayValues[i] = date.toString();
-            dayLabels[i] = UiHelper.shortDate(date);
+            new String[]{"day", "week", "agenda", "info"},
+            new String[]{activity.getString(R.string.schedule_day_label), activity.getString(R.string.schedule_mode_week),
+                activity.getString(R.string.schedule_mode_agenda), activity.getString(R.string.schedule_info)},
+            calendarMode.equals("list") ? "day" : calendarMode, selected -> {
+                if (!selected.equals("info")) { onModeChanged.accept(selected); return; }
+                String info = activity.getString(R.string.schedule_saved_range, snapshot.start, snapshot.end,
+                    UiHelper.timestamp(d.optLong("successAt"))) + "\n\n" + activity.getString(R.string.schedule_warsaw_zone);
+                if (!conflicts.isEmpty()) info += "\n\n" + activity.getString(R.string.home_conflicts_title, conflicts.size())
+                    + "\n" + conflicts.get(0).description();
+                new MaterialAlertDialogBuilder(activity).setTitle(R.string.schedule_info).setMessage(info)
+                    .setPositiveButton(R.string.btn_close, null).show();
+            });
+        if (!calendarMode.equals("agenda")) {
+            String[] dayValues = new String[7], dayLabels = new String[7];
+            for (int i = 0; i < 7; i++) {
+                LocalDate day = monday.plusDays(i);
+                dayValues[i] = day.toString();
+                dayLabels[i] = day.format(DateTimeFormatter.ofPattern("EEE d", Locale.forLanguageTag("pl-PL")));
+            }
+            UiHelper.chips(activity, content, dayValues, dayLabels, activeDate.toString(), selected -> {
+                activity.setCalendarDate(selected);
+                onModeChanged.accept("day");
+            });
         }
-        UiHelper.chips(activity, content, dayValues, dayLabels, activeDate.toString(), date -> {
-            activity.setCalendarDate(date);
-            onModeChanged.accept("day");
-        });
         EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.schedule_search_hint), activity.getCalendarQuery(), null, () -> activity.setCalendarQuery(""));
-        LinearLayout results = new LinearLayout(activity);
-        results.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout results = new ScheduleSwipeLayout(activity, move);
+        results.setId(R.id.schedule_swipe_content);
+        results.setMinimumHeight(UiHelper.dp(activity, 240));
         content.addView(results);
 
         List<LessonTime> allLessons = LessonTime.sorted(planRows);
@@ -191,13 +178,6 @@ public final class ScheduleScreenController {
                                       Runnable onClearSearch) {
         content.removeAllViews();
         List<LessonTime> visible = PlanBrowser.select(allLessons, activeDate, calendarMode, query);
-        if (!calendarMode.equals("agenda") && !calendarMode.equals("week")) {
-            DaySummary summary = DaySummary.of(visible, activeDate);
-            LinearLayout summaryBox = UiHelper.card(activity, content, Color.rgb(214, 241, 229));
-            UiHelper.add(activity, summaryBox, activity.getString(R.string.schedule_day_summary, summary.meetings,
-                summary.busyMinutes / 60, summary.busyMinutes % 60, summary.gapMinutes), 16, UiHelper.INK, true);
-            UiHelper.note(activity, summaryBox, activity.getString(R.string.schedule_summary_hint), UiHelper.MUTED);
-        }
 
         if (visible.isEmpty()) {
             UiHelper.empty(activity, content,
@@ -268,7 +248,9 @@ public final class ScheduleScreenController {
                 else conflictBadge.setVisibility(View.GONE);
 
                 titleView.setText(lesson.record.title);
-                detailsView.setText(lesson.record.value);
+                String summary = lessonSummary(lesson);
+                detailsView.setText(summary);
+                detailsView.setVisibility(summary.isEmpty() ? View.GONE : View.VISIBLE);
 
                 card.setClickable(true);
                 card.setFocusable(true);
@@ -276,6 +258,13 @@ public final class ScheduleScreenController {
                 btnDetails.setOnClickListener(v -> showLessonDetails(activity, lesson, listener));
                 content.addView(card);
             }
+        }
+
+        if (!calendarMode.equals("agenda") && !calendarMode.equals("week")) {
+            DaySummary summary = DaySummary.of(visible, activeDate);
+            LinearLayout summaryBox = UiHelper.card(activity, content, Color.rgb(214, 241, 229));
+            UiHelper.add(activity, summaryBox, activity.getString(R.string.schedule_day_summary, summary.meetings,
+                summary.busyMinutes / 60, summary.busyMinutes % 60, summary.gapMinutes), 16, UiHelper.INK, true);
         }
 
         // Action buttons (Export ICS, Share)
@@ -296,8 +285,18 @@ public final class ScheduleScreenController {
         String details = UiHelper.shortDate(lesson.start.toLocalDate()) + "\n\n" + lesson.record.value;
         LinearLayout body = new LinearLayout(activity); body.setOrientation(LinearLayout.VERTICAL);
         body.setPadding(UiHelper.dp(activity, 20), UiHelper.dp(activity, 8), UiHelper.dp(activity, 20), UiHelper.dp(activity, 8));
-        for (java.util.Map.Entry<String, String> field : pl.vistula.checker.core.RecordDetails.fields(lesson.record, null).entrySet()) {
-            UiHelper.detailField(activity, body, field.getKey(), field.getValue());
+        UiHelper.detailField(activity, body, activity.getString(R.string.schedule_when),
+            UiHelper.shortDate(lesson.start.toLocalDate()) + " · "
+                + lesson.start.format(DateTimeFormatter.ofPattern("HH:mm")) + " – "
+                + (!lesson.start.toLocalDate().equals(lesson.end.toLocalDate())
+                    ? UiHelper.shortDate(lesson.end.toLocalDate()) + " " : "")
+                + lesson.end.format(DateTimeFormatter.ofPattern("HH:mm")));
+        String summary = lessonSummary(lesson);
+        if (!summary.isEmpty()) UiHelper.note(activity, body, summary, UiHelper.INK);
+        for (String key : new String[]{"building", "groupNumber"}) {
+            String value = lesson.record.optMeta(key);
+            if (!value.isEmpty()) UiHelper.detailField(activity, body,
+                activity.getString(key.equals("building") ? R.string.schedule_building : R.string.schedule_group), value);
         }
         try {
             TextView raw = UiHelper.text(activity, lesson.record.json().toString(2), 12, UiHelper.INK, false);
@@ -332,6 +331,32 @@ public final class ScheduleScreenController {
                         }
                     }).show();
             }).show();
+    }
+
+    /** Avoid repeating the time and building on cards. Old snapshots still keep their readable description. */
+    public static String lessonSummary(LessonTime lesson) {
+        pl.vistula.checker.core.Record record = lesson.record;
+        List<String> lines = new ArrayList<>();
+        String type = record.optMeta("classType");
+        String room = record.optMeta("room");
+        String lecturers = record.optMeta("lecturers");
+        // Mixed/older snapshots may have only some of the structured fields.
+        List<String> legacyType = new ArrayList<>();
+        for (String line : record.value.split("\\n")) {
+            String trimmed = line.trim();
+            if (trimmed.startsWith("Sala ")) {
+                if (room.isEmpty()) room = trimmed.substring("Sala ".length());
+            } else if (trimmed.startsWith("Prowadzący: ")) {
+                if (lecturers.isEmpty()) lecturers = trimmed.substring("Prowadzący: ".length());
+            } else if (!trimmed.isEmpty() && !trimmed.matches("(?:\\d{4}-\\d{2}-\\d{2} )?\\d{2}:\\d{2}\\s*[–−-]\\s*\\d{2}:\\d{2}")
+                && !trimmed.equals("Termin orientacyjny")) legacyType.add(trimmed);
+        }
+        if (type.isEmpty()) type = String.join("\n", legacyType);
+        if (!type.isEmpty()) lines.add(type);
+        if (!room.isEmpty()) lines.add("Sala " + room);
+        if (!lecturers.isEmpty()) lines.add("Prowadzący: " + lecturers);
+        if (lesson.tentative()) lines.add("Termin orientacyjny");
+        return String.join("\n", lines);
     }
 
     private static void recordAbsenceForLesson(MainActivity activity, LessonTime lesson, ScheduleListener listener) {

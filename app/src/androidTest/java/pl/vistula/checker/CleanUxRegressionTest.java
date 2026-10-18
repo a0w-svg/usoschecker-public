@@ -29,6 +29,59 @@ import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 
 @RunWith(AndroidJUnit4.class)
 public class CleanUxRegressionTest {
+    @Test public void timetableTechnicalFieldsAreAvailableOnlyAfterRequestingFullData() {
+        main(() -> {
+            try {
+                pl.vistula.checker.core.Record lesson = new pl.vistula.checker.core.Record("lesson", "plan", "Finanse",
+                    "09:00 – 10:30\nSala 201", "", "2026-10-18", "2026Z", "", "", Double.NaN,
+                    new JSONObject().put("room", "201").put("unitId", "unit-fixture"));
+                pl.vistula.checker.ui.ScheduleScreenController.showLessonDetails(rule.getActivity(),
+                    pl.vistula.checker.core.LessonTime.of(lesson), new pl.vistula.checker.ui.ScheduleScreenController.ScheduleListener() {
+                        public void onOpenTask(String title) {}
+                        public void onAbsenceRecorded() {}
+                    });
+            } catch (Exception e) { throw new AssertionError(e); }
+        });
+        onView(withText("Sala 201")).inRoot(isDialog()).check(androidx.test.espresso.assertion.ViewAssertions.matches(isDisplayed()));
+        onView(withText(org.hamcrest.Matchers.containsString("unit-fixture"))).inRoot(isDialog())
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(org.hamcrest.Matchers.not(isDisplayed())));
+        onView(withText(R.string.grades_full_data)).inRoot(isDialog()).perform(click());
+        onView(withText(org.hamcrest.Matchers.containsString("unit-fixture"))).inRoot(isDialog())
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(isDisplayed()));
+        onView(withText(R.string.btn_close)).inRoot(isDialog()).perform(click());
+    }
+    @Test public void subjectDetailsExpandAndCollapseWithoutHidingTheGradeOverview() {
+        main(() -> {
+            try {
+                MainActivity activity = rule.getActivity();
+                pl.vistula.checker.core.Snapshot snapshot = new pl.vistula.checker.core.Snapshot("", "");
+                snapshot.add(new pl.vistula.checker.core.Record("grade", "ocena", "Finanse", "5", "", "", "2026Z",
+                    "", "", 5, new JSONObject().put("courseId", "FIN").put("comment", "Komentarz testowy")));
+                LinearLayout content = new LinearLayout(activity);
+                pl.vistula.checker.ui.GradesScreenController.render(activity, content,
+                    new JSONObject().put("snapshot", snapshot.json()), new JSONObject(), false,
+                    "", "all", "name", "", false, value -> {}, value -> {}, value -> {}, value -> {}, value -> {},
+                    () -> {}, () -> {}, new pl.vistula.checker.ui.GradesScreenController.GradesListener() {
+                        public void onFilterChanged() {}
+                        public void onOpenTask(String title) {}
+                    });
+                View components = content.findViewById(R.id.grade_item_components_container);
+                View comment = content.findViewById(R.id.grade_item_comment);
+                Button more = content.findViewById(R.id.subject_view_more);
+                assertEquals(View.VISIBLE, content.findViewById(R.id.grade_item_value_badge).getVisibility());
+                assertEquals(View.GONE, components.getVisibility());
+                assertEquals(View.GONE, comment.getVisibility());
+                more.performClick();
+                assertEquals(View.VISIBLE, components.getVisibility());
+                assertEquals(View.VISIBLE, comment.getVisibility());
+                assertEquals(activity.getString(R.string.subject_view_less), more.getText().toString());
+                more.performClick();
+                assertEquals(View.GONE, components.getVisibility());
+                assertEquals(View.GONE, comment.getVisibility());
+                assertEquals(activity.getString(R.string.subject_view_more), more.getText().toString());
+            } catch (Exception e) { throw new AssertionError(e); }
+        });
+    }
     @Rule public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
     @Before public void isolatedOnly() {
         Assume.assumeTrue(rule.getActivity().getPackageName().endsWith(".qa"));

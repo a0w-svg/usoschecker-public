@@ -38,8 +38,11 @@ public class ScreenRegressionTest {
     private View decor() { return rule.getActivity().getWindow().getDecorView(); }
     private void has(String text) { main(() -> assertNotNull(text, find(decor(), text))); }
     private void absent(String text) { main(() -> assertNull(text, find(decor(), text))); }
-    private void search(String query) { main(() -> { assertNotNull(input(decor())); input(decor()).setText(query); }); }
-    private void click(String text) { main(() -> { View view = find(decor(), text); assertNotNull(text, view); assertTrue(view.performClick()); }); }
+    private void search(String query) { PlanMenuTestHelper.revealSearch(rule.getActivity()); main(() -> { assertNotNull(input(decor())); input(decor()).setText(query); }); }
+    private void click(String text) {
+        if (PlanMenuTestHelper.select(rule.getActivity(), text)) return;
+        main(() -> { View view = find(decor(), text); assertNotNull(text, view); assertTrue(view.performClick()); });
+    }
     private void capture(String name) throws Exception {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         InstrumentationRegistry.getInstrumentation().getUiAutomation().waitForIdle(400, 3000);
@@ -77,14 +80,18 @@ public class ScreenRegressionTest {
         has("Podstawy finansów"); has("Statystyka opisowa");
     }
     @Test public void timetableWeekSearchPersistsAcrossNavigation() throws Exception {
-        main(() -> rule.getActivity().navigate(5));
+        // The demo statistics class is tomorrow, which belongs to the next week on Sundays.
+        main(() -> {
+            rule.getActivity().setCalendarDate(java.time.LocalDate.now(UsosClient.ZONE).plusDays(1).toString());
+            rule.getActivity().navigate(5);
+        });
         click(rule.getActivity().getString(R.string.schedule_mode_week));
         capture("timetable-improved");
         search("Kowalska"); has("Statystyka opisowa"); absent("Programowanie obiektowe");
         main(() -> { rule.getActivity().navigate(2); rule.getActivity().navigate(5); });
         main(() -> assertEquals("Kowalska", input(decor()).getText().toString()));
         search("no-such-lesson"); absent("Statystyka opisowa");
-        main(() -> assertFalse(find(decor(), rule.getActivity().getString(R.string.schedule_export_ics)).isEnabled()));
+        PlanMenuTestHelper.assertExportDisabled(rule.getActivity());
     }
     @Test public void weeklyTasksExcludeOverdueAndCompletedEntries() throws Exception {
         java.time.LocalDate today = java.time.LocalDate.now(UsosClient.ZONE);
@@ -157,6 +164,7 @@ public class ScreenRegressionTest {
     @Test public void gradeSubjectDetailsIncludeAllComponentsAndCompleteStoredData() throws Exception {
         main(() -> rule.getActivity().navigate(2)); search("finansów");
         has(rule.getActivity().getString(R.string.grades_group_entry_count, 2));
+        click(rule.getActivity().getString(R.string.subject_view_more));
         click(rule.getActivity().getString(R.string.grades_subject_details));
         dialogHas("4,0"); dialogHas("5,0"); dialogHas("Kod przedmiotu"); dialogHas("ID autora modyfikacji");
         dialogHas(rule.getActivity().getString(R.string.grades_full_data));

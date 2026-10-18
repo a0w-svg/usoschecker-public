@@ -218,12 +218,26 @@ public final class GradesScreenController {
         badge.setText(R.string.grades_no_grade);
         badge.setTextSize(13);
         badge.setTextColor(UiHelper.foreground(activity, UiHelper.MUTED));
-        ((TextView) card.findViewById(R.id.grade_item_course_meta)).setText(course.optMeta("courseId"));
+        TextView meta = card.findViewById(R.id.grade_item_course_meta);
+        meta.setText(course.optMeta("courseId"));
         TextView ects = card.findViewById(R.id.grade_item_ects);
         if (Double.isFinite(course.ects)) ects.setText(activity.getString(R.string.grade_ects_points,
             String.format(Locale.forLanguageTag("pl-PL"), "%s", course.ects)));
         else ects.setVisibility(View.GONE);
-        card.findViewById(R.id.grade_item_btn_details).setVisibility(View.GONE);
+        Button more = card.findViewById(R.id.grade_item_btn_details);
+        meta.setVisibility(View.GONE);
+        ects.setVisibility(View.GONE);
+        more.setText(R.string.subject_view_more);
+        more.setContentDescription(activity.getString(R.string.subject_view_more_description, course.title));
+        boolean[] expanded = {false};
+        more.setOnClickListener(v -> {
+            expanded[0] = !expanded[0];
+            meta.setVisibility(expanded[0] && !course.optMeta("courseId").isEmpty() ? View.VISIBLE : View.GONE);
+            ects.setVisibility(expanded[0] && Double.isFinite(course.ects) ? View.VISIBLE : View.GONE);
+            more.setText(expanded[0] ? R.string.subject_view_less : R.string.subject_view_more);
+            more.setContentDescription(activity.getString(expanded[0] ? R.string.subject_view_less_description
+                : R.string.subject_view_more_description, course.title));
+        });
         parent.addView(card);
     }
 
@@ -489,6 +503,25 @@ public final class GradesScreenController {
             testsContainer.removeAllViews();
         }
 
+        // Keep the overview compact; expand only this subject's supporting information.
+        Button more = UiHelper.button(activity, activity.getString(R.string.subject_view_more), () -> {}, false);
+        more.setId(R.id.subject_view_more);
+        more.setContentDescription(activity.getString(R.string.subject_view_more_description, first.title));
+        View[] expandable = {commentView, componentsTitle, componentsContainer, testsTitle, testsContainer, btnDetails};
+        int[] expandedVisibility = new int[expandable.length];
+        for (int i = 0; i < expandable.length; i++) {
+            expandedVisibility[i] = expandable[i].getVisibility();
+            expandable[i].setVisibility(View.GONE);
+        }
+        more.setOnClickListener(v -> {
+            boolean expand = componentsContainer.getVisibility() == View.GONE;
+            for (int i = 0; i < expandable.length; i++)
+                expandable[i].setVisibility(expand ? expandedVisibility[i] : View.GONE);
+            more.setText(expand ? R.string.subject_view_less : R.string.subject_view_more);
+            more.setContentDescription(activity.getString(expand ? R.string.subject_view_less_description
+                : R.string.subject_view_more_description, first.title));
+        });
+        ((LinearLayout) card).addView(more);
         btnDetails.setText(R.string.grades_subject_details);
         btnDetails.setOnClickListener(v -> {
             List<Record> allCourseRows = new ArrayList<>();

@@ -1,5 +1,6 @@
-• Powiadomienia o nowych stabilnych wersjach aplikacji z GitHub Releases.
-• Opis zmian i przycisk pobrania APK w sekcji „Aktualizacje i nowości”.
-• Automatyczne sprawdzanie w tle oraz ręczne „Sprawdź teraz”.
-• Osobna opcja włączania i wyłączania powiadomień o wersjach.
-• Działanie bez logowania do USOS; żadne dane konta nie są wysyłane do GitHuba.
+• Przesuwaj plan w bok, aby przejść do poprzedniego lub następnego dnia albo tygodnia.
+• Nawigacja pomija puste dni i tygodnie. Lista dat pokazuje wyłącznie dni z zajęciami i uwzględnia wyszukiwanie.
+• Minimalna góra planu: data, strzałki i menu „⋮”. Dotknij daty, aby otworzyć kalendarz.
+• Widoki, „Dzisiaj”, wyszukiwanie, eksport i informacje o danych znajdziesz w menu.
+• Karty przedmiotów rozwijają oceny, komentarze i wyniki po wybraniu „Zobacz więcej”.
+• Mniej powtarzających się informacji w planie. Dane techniczne są dostępne na żądanie.

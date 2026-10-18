@@ -39,6 +39,7 @@ public class AppSmokeTest {
         return null;
     }
     private void click(String text) throws Exception {
+        if (PlanMenuTestHelper.select(activity(), text)) return;
         long until = System.currentTimeMillis() + 10000;
         boolean[] done = {false};
         while (!done[0] && System.currentTimeMillis() < until) {
@@ -138,6 +139,7 @@ public class AppSmokeTest {
             assertNull(find(activity().getWindow().getDecorView(), "Pokaż kolejne metody", true)));
     }
     private void searchFor(String query) {
+        PlanMenuTestHelper.revealSearch(activity());
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             EditText input = firstInput((ViewGroup) activity().getWindow().getDecorView());
             assertNotNull(input); input.setText(query);
@@ -193,8 +195,8 @@ public class AppSmokeTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             View decor = activity().getWindow().getDecorView();
             assertNull(find(decor, activity().getString(R.string.schedule_btn_next_class), true));
-            assertFalse(find(decor, activity().getString(R.string.schedule_export_ics), true).isEnabled());
         });
+        PlanMenuTestHelper.assertExportDisabled(activity());
     }
     @Test public void weeklyViewExportsOnlyTheSelectedWeek() throws Exception {
         java.io.File exportDirectory = new java.io.File(activity().getCacheDir(), "test-exports");
@@ -403,8 +405,14 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         click("Plan"); hasContaining(activity().getString(R.string.classes_ongoing));
         click(activity().getString(R.string.schedule_mode_agenda));
         has("Statystyka opisowa");
-        hasContaining(Demo.state(false).getJSONObject("snapshot").getString("start") + " – "
-            + Demo.state(false).getJSONObject("snapshot").getString("end"));
+        click(activity().getString(R.string.schedule_info));
+        String range = Demo.state(false).getJSONObject("snapshot").getString("start") + " – "
+            + Demo.state(false).getJSONObject("snapshot").getString("end");
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withSubstring(range))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog())
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(androidx.test.espresso.matcher.ViewMatchers.isDisplayed()));
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_close))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).perform(androidx.test.espresso.action.ViewActions.click());
         click("Dzisiaj"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
     }
     @Test public void calendarBlocksFollowDurationAndSeparateOverlaps() {

@@ -58,7 +58,7 @@ public class ScreenRegressionTest {
         long deadline = System.currentTimeMillis() + 10000;
         boolean[] ready = {false};
         while (!ready[0] && System.currentTimeMillis() < deadline) {
-            main(() -> { rule.getActivity().navigate(4); ready[0] = find(decor(), rule.getActivity().getString(R.string.btn_connect)) != null; });
+            main(() -> { rule.getActivity().navigate(4); ready[0] = find(decor(), rule.getActivity().getString(R.string.btn_start_demo)) != null; });
             if (!ready[0]) Thread.sleep(100);
         }
         assertTrue(ready[0]);

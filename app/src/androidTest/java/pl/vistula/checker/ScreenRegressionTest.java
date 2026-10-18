@@ -82,8 +82,9 @@ public class ScreenRegressionTest {
     @Test public void timetableWeekSearchPersistsAcrossNavigation() throws Exception {
         // The demo statistics class is tomorrow, which belongs to the next week on Sundays.
         main(() -> {
-            rule.getActivity().setCalendarDate(java.time.LocalDate.now(UsosClient.ZONE).plusDays(1).toString());
             rule.getActivity().navigate(5);
+            rule.getActivity().setCalendarDate(java.time.LocalDate.now(UsosClient.ZONE).plusDays(1).toString());
+            rule.getActivity().render();
         });
         click(rule.getActivity().getString(R.string.schedule_mode_week));
         capture("timetable-improved");

@@ -1,6 +1,6 @@
-• Przesuwaj plan w bok, aby przejść do poprzedniego lub następnego dnia albo tygodnia.
-• Nawigacja pomija puste dni i tygodnie. Lista dat pokazuje wyłącznie dni z zajęciami i uwzględnia wyszukiwanie.
-• Minimalna góra planu: data, strzałki i menu „⋮”. Dotknij daty, aby otworzyć kalendarz.
-• Widoki, „Dzisiaj”, wyszukiwanie, eksport i informacje o danych znajdziesz w menu.
-• Karty przedmiotów rozwijają oceny, komentarze i wyniki po wybraniu „Zobacz więcej”.
-• Mniej powtarzających się informacji w planie. Dane techniczne są dostępne na żądanie.
+• Spójny wygląd kart, ikon, odstępów i tekstu w planie zajęć.
+• Gesty planu działają na całej powierzchni w obu kierunkach, bez przypadkowego odświeżania.
+• Mniejszy nagłówek planu, większe pole daty oraz większe strzałki i przycisk menu.
+• Sala jest wyraźnie widoczna w osobnej, dużej etykiecie pod nazwą przedmiotu.
+• Trwające zajęcia mają wyraźne oznaczenie i czas pozostały do końca.
+• Po wejściu w plan aplikacja otwiera dzień trwających zajęć i przewija do ich karty. Ręczna nawigacja i wyszukiwanie pozostają zachowane.

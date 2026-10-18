@@ -136,9 +136,8 @@ public final class HomeScreenController {
                     UiHelper.note(activity, conflictBox, activity.getString(R.string.home_conflicts_more, (conflicts.size() - 1)), UiHelper.MUTED);
                 }
                 conflictBox.addView(UiHelper.button(activity, activity.getString(R.string.home_conflicts_btn), () -> {
-                    activity.setCalendarDate(conflicts.get(0).first.date);
                     activity.setCalendarMode("day");
-                    activity.navigate(5);
+                    activity.openScheduleDate(conflicts.get(0).first.date);
                 }, false));
             }
 
@@ -182,10 +181,9 @@ public final class HomeScreenController {
         for (WeekOverview.Day day : week.days) {
             Button button = UiHelper.button(activity, activity.getString(R.string.home_week_day, UiHelper.shortDate(day.date),
                 day.schedule.meetings, day.tasks), () -> {
-                    activity.setCalendarDate(day.date.toString());
                     activity.setCalendarMode("day");
                     activity.setCalendarQuery("");
-                    activity.navigate(5);
+                    activity.openScheduleDate(day.date.toString());
                 }, day.date.equals(LocalDate.now(UsosClient.ZONE)));
             button.setMaxLines(3);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(UiHelper.dp(activity, 144), -2);
@@ -262,9 +260,8 @@ public final class HomeScreenController {
             box.setFocusable(true);
             box.setOnClickListener(v -> onLessonDetails.accept(next));
             box.addView(UiHelper.button(activity, activity.getString(R.string.btn_open_plan), () -> {
-                activity.setCalendarDate(next.start.toLocalDate().toString());
                 activity.setCalendarMode("day");
-                activity.navigate(5);
+                activity.openScheduleDate(next.start.toLocalDate().toString());
             }, false));
             box.addView(UiHelper.button(activity, activity.getString(R.string.btn_class_details), () -> onLessonDetails.accept(next), false));
         }

@@ -24,7 +24,7 @@ public class ScheduleSwipeRegressionTest {
         assertTrue(rule.getActivity().getPackageName().endsWith(".qa"));
         main(() -> {
             rule.getActivity().setDemo(true);
-            rule.getActivity().setCalendarDate("2026-10-31");
+            rule.getActivity().setCalendarDate(java.time.LocalDate.now(UsosClient.ZONE).toString());
             rule.getActivity().setCalendarMode("day");
             rule.getActivity().navigate(5);
         });
@@ -53,22 +53,35 @@ public class ScheduleSwipeRegressionTest {
         }
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
-    @Test public void daySwipesCrossMonthBoundaryAndKeepSearch() {
-        main(() -> { rule.getActivity().setCalendarQuery("finanse"); rule.getActivity().navigate(5); });
+    private java.util.NavigableSet<java.time.LocalDate> days(String query) {
+        try {
+            return pl.vistula.checker.core.PlanBrowser.daysWithLessons(pl.vistula.checker.core.LessonTime.sorted(
+                pl.vistula.checker.core.Snapshot.from(Demo.state(false).getJSONObject("snapshot")).records.values()), query);
+        } catch (Exception e) { throw new AssertionError(e); }
+    }
+    @Test public void daySwipesSkipEmptyDaysAndKeepSearch() {
+        main(() -> { rule.getActivity().setCalendarQuery("Kowalska"); rule.getActivity().navigate(5); });
+        String initial = rule.getActivity().getCalendarDate();
+        java.time.LocalDate next = days("Kowalska").higher(java.time.LocalDate.parse(initial));
+        assertNotNull(next);
         swipe(true, false);
-        assertEquals("2026-11-01", rule.getActivity().getCalendarDate());
-        assertEquals("finanse", rule.getActivity().getCalendarQuery());
+        assertEquals(next.toString(), rule.getActivity().getCalendarDate());
+        assertEquals("Kowalska", rule.getActivity().getCalendarQuery());
         swipe(false, false);
-        assertEquals("2026-10-31", rule.getActivity().getCalendarDate());
+        assertEquals(initial, rule.getActivity().getCalendarDate());
     }
     @Test public void weekSwipeMovesSevenDaysAndVerticalScrollKeepsDate() {
         main(() -> { rule.getActivity().setCalendarMode("week"); rule.getActivity().navigate(5); });
+        java.time.LocalDate initial = java.time.LocalDate.parse(rule.getActivity().getCalendarDate());
+        java.time.LocalDate expected = pl.vistula.checker.core.PlanBrowser.adjacentDay(days(""), initial, true, 1);
+        assertNotNull(expected);
         swipe(true, false);
-        assertEquals("2026-11-07", rule.getActivity().getCalendarDate());
+        assertEquals(expected.toString(), rule.getActivity().getCalendarDate());
         swipe(false, false);
-        assertEquals("2026-10-31", rule.getActivity().getCalendarDate());
+        String previous = rule.getActivity().getCalendarDate();
+        assertEquals(initial.with(java.time.DayOfWeek.MONDAY), java.time.LocalDate.parse(previous).with(java.time.DayOfWeek.MONDAY));
         swipe(true, true);
-        assertEquals("2026-10-31", rule.getActivity().getCalendarDate());
+        assertEquals(previous, rule.getActivity().getCalendarDate());
     }
     @Test public void minimalHeaderKeepsSecondaryActionsInMenu() throws Exception {
         main(() -> {

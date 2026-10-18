@@ -6,6 +6,24 @@ import java.util.*;
 
 public final class PlanBrowser {
     private PlanBrowser() {}
+    public static NavigableSet<LocalDate> daysWithLessons(List<LessonTime> lessons, String query) {
+        NavigableSet<LocalDate> days = new TreeSet<>();
+        for (LessonTime lesson : lessons) {
+            if (!StudentSearch.matches(query, lesson.record.title, lesson.record.value, lesson.record.date)) continue;
+            LocalDate last = lesson.end.minusNanos(1).toLocalDate();
+            for (LocalDate day = lesson.start.toLocalDate(); !day.isAfter(last); day = day.plusDays(1)) days.add(day);
+        }
+        return days;
+    }
+    public static LocalDate nearestDay(NavigableSet<LocalDate> days, LocalDate requested) {
+        LocalDate next = days.ceiling(requested);
+        return next != null ? next : days.isEmpty() ? requested : days.last();
+    }
+    public static LocalDate adjacentDay(NavigableSet<LocalDate> days, LocalDate active, boolean weekly, int direction) {
+        LocalDate monday = active.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        return direction > 0 ? days.higher(weekly ? monday.plusDays(6) : active)
+            : days.lower(weekly ? monday : active);
+    }
     public static List<LessonTime> select(List<LessonTime> lessons, LocalDate day, String mode, String query) {
         LocalDate week = day.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         List<LessonTime> result = new ArrayList<>();

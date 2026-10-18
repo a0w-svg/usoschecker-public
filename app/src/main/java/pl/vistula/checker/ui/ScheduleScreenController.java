@@ -1,6 +1,5 @@
 package pl.vistula.checker.ui;
 
-import android.app.DatePickerDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -88,11 +87,16 @@ public final class ScheduleScreenController {
         }
 
         LocalDate today = LocalDate.now(UsosClient.ZONE);
-        LocalDate activeDate = calendarDate.isEmpty() ? today : LocalDate.parse(calendarDate);
+        List<LessonTime> allLessons = LessonTime.sorted(planRows);
+        java.util.NavigableSet<LocalDate> lessonDays = PlanBrowser.daysWithLessons(allLessons, activity.getCalendarQuery());
+        LocalDate requested = calendarDate.isEmpty() ? today : LocalDate.parse(calendarDate);
+        LocalDate activeDate = PlanBrowser.nearestDay(lessonDays, requested);
+        activity.setCalendarDate(activeDate.toString());
         boolean weekly = calendarMode.equals("week");
         LocalDate monday = activeDate.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
         java.util.function.IntConsumer move = direction -> {
-            LocalDate target = activeDate.plusDays(direction * (weekly ? 7L : 1L));
+            LocalDate target = PlanBrowser.adjacentDay(PlanBrowser.daysWithLessons(allLessons, activity.getCalendarQuery()), activeDate, weekly, direction);
+            if (target == null) return;
             activity.setCalendarDate(target.toString());
             if (calendarMode.equals("agenda")) onModeChanged.accept("day");
             else onDateChanged.accept(target.toString());
@@ -109,14 +113,18 @@ public final class ScheduleScreenController {
                 + monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pl-PL")))
             : activeDate.format(DateTimeFormatter.ofPattern("EEEE, d MMM", Locale.forLanguageTag("pl-PL")));
         Button date = headerButton(activity, dateLabel, () -> {
-            DatePickerDialog picker = new DatePickerDialog(activity, (view, year, month, day) -> {
-                activity.setCalendarDate(LocalDate.of(year, month + 1, day).toString());
+            List<LocalDate> days = new ArrayList<>(PlanBrowser.daysWithLessons(allLessons, activity.getCalendarQuery()));
+            if (days.isEmpty()) {
+                Toast.makeText(activity, R.string.schedule_no_search_results, Toast.LENGTH_SHORT).show(); return;
+            }
+            String[] labels = new String[days.size()];
+            for (int i = 0; i < days.size(); i++) labels[i] = days.get(i).format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.forLanguageTag("pl-PL")));
+            new MaterialAlertDialogBuilder(activity).setTitle(R.string.schedule_btn_choose_date)
+                .setSingleChoiceItems(labels, days.indexOf(activeDate), (dialog, index) -> {
+                activity.setCalendarDate(days.get(index).toString());
                 onModeChanged.accept(weekly ? "week" : "day");
-            }, activeDate.getYear(), activeDate.getMonthValue() - 1, activeDate.getDayOfMonth());
-            picker.setButton(android.content.DialogInterface.BUTTON_NEUTRAL, activity.getString(R.string.schedule_btn_today), (dialog, which) -> {
-                activity.setCalendarDate(today.toString()); onModeChanged.accept(weekly ? "week" : "day");
-            });
-            picker.show();
+                dialog.dismiss();
+            }).setNegativeButton(R.string.btn_close, null).show();
         });
         date.setContentDescription(activity.getString(R.string.schedule_btn_choose_date) + ": " + dateLabel);
         date.setTextSize(16);
@@ -124,6 +132,8 @@ public final class ScheduleScreenController {
         Button more = headerButton(activity, "⋮", () -> {});
         more.setId(R.id.schedule_more);
         more.setContentDescription(activity.getString(R.string.schedule_options));
+        previous.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, -1) != null);
+        next.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, 1) != null);
         navBar.addView(previous, new LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2));
         navBar.addView(date, new LinearLayout.LayoutParams(0, -2, 1));
         navBar.addView(next, new LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2));
@@ -176,7 +186,6 @@ public final class ScheduleScreenController {
             menu.show();
         });
 
-        List<LessonTime> allLessons = LessonTime.sorted(planRows);
         Runnable[] populateRef = new Runnable[1];
         populateRef[0] = () -> renderResults(activity, results, allLessons, activeDate, calendarMode,
             search.getText().toString(), conflictLessonKeys, onDateChanged, onModeChanged, listener, () -> {
@@ -184,7 +193,13 @@ public final class ScheduleScreenController {
                 activity.setCalendarQuery("");
                 populateRef[0].run();
             });
-        UiHelper.watchSearch(search, value -> { activity.setCalendarQuery(value); populateRef[0].run(); });
+        UiHelper.watchSearch(search, value -> {
+            activity.setCalendarQuery(value);
+            java.util.NavigableSet<LocalDate> matchingDays = PlanBrowser.daysWithLessons(allLessons, value);
+            previous.setEnabled(PlanBrowser.adjacentDay(matchingDays, activeDate, weekly, -1) != null);
+            next.setEnabled(PlanBrowser.adjacentDay(matchingDays, activeDate, weekly, 1) != null);
+            populateRef[0].run();
+        });
         populateRef[0].run();
     }
 

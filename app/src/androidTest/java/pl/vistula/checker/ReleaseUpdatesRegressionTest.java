@@ -185,7 +185,11 @@ public class ReleaseUpdatesRegressionTest {
     @Test public void installedReleaseNotesAreAvailableWithoutNetworkOrAccount() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(new Intent(context, MainActivity.class)
                 .putExtra(ReleaseUpdates.SHOW_UPDATES, true))) {
-            onView(withSubstring("Powiadomienia o nowych stabilnych wersjach"))
+            String firstLine;
+            try (java.io.InputStream notes = context.getResources().openRawResource(R.raw.whats_new)) {
+                firstLine = new String(notes.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).strip().split("\\R")[0];
+            }
+            onView(withSubstring(firstLine))
                 .check(matches(withEffectiveVisibility(Visibility.VISIBLE)));
         }
     }

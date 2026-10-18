@@ -403,8 +403,14 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         click("Plan"); hasContaining(activity().getString(R.string.classes_ongoing));
         click(activity().getString(R.string.schedule_mode_agenda));
         has("Statystyka opisowa");
-        hasContaining(Demo.state(false).getJSONObject("snapshot").getString("start") + " – "
-            + Demo.state(false).getJSONObject("snapshot").getString("end"));
+        click(activity().getString(R.string.schedule_info));
+        String range = Demo.state(false).getJSONObject("snapshot").getString("start") + " – "
+            + Demo.state(false).getJSONObject("snapshot").getString("end");
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withSubstring(range))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog())
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(androidx.test.espresso.matcher.ViewMatchers.isDisplayed()));
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_close))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).perform(androidx.test.espresso.action.ViewActions.click());
         click("Dzisiaj"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
     }
     @Test public void calendarBlocksFollowDurationAndSeparateOverlaps() {

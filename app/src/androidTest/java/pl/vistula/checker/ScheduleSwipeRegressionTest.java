@@ -70,4 +70,27 @@ public class ScheduleSwipeRegressionTest {
         swipe(true, true);
         assertEquals("2026-10-31", rule.getActivity().getCalendarDate());
     }
+    @Test public void minimalHeaderKeepsSecondaryActionsInMenu() throws Exception {
+        main(() -> {
+            rule.getActivity().setCalendarDate(java.time.LocalDate.now(UsosClient.ZONE).toString());
+            rule.getActivity().navigate(5);
+            View more = rule.getActivity().findViewById(R.id.schedule_more);
+            assertEquals(4, ((android.view.ViewGroup) more.getParent()).getChildCount());
+        });
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().waitForIdle(400, 3000);
+        android.graphics.Bitmap image = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+        assertNotNull(image);
+        try (java.io.FileOutputStream stream = new java.io.FileOutputStream(new java.io.File(
+                rule.getActivity().getExternalFilesDir(null), "minimal-plan.png"))) {
+            image.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, stream);
+        } finally { image.recycle(); }
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.schedule_btn_today))
+            .check(androidx.test.espresso.assertion.ViewAssertions.doesNotExist());
+        PlanMenuTestHelper.select(rule.getActivity(), rule.getActivity().getString(R.string.schedule_mode_week));
+        assertEquals("week", rule.getActivity().getCalendarMode());
+        PlanMenuTestHelper.select(rule.getActivity(), rule.getActivity().getString(R.string.schedule_search_action));
+        androidx.test.espresso.Espresso.closeSoftKeyboard();
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom(android.widget.EditText.class))
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(androidx.test.espresso.matcher.ViewMatchers.isDisplayed()));
+    }
 }

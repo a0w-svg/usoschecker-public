@@ -39,6 +39,7 @@ public class AppSmokeTest {
         return null;
     }
     private void click(String text) throws Exception {
+        if (PlanMenuTestHelper.select(activity(), text)) return;
         long until = System.currentTimeMillis() + 10000;
         boolean[] done = {false};
         while (!done[0] && System.currentTimeMillis() < until) {
@@ -138,6 +139,7 @@ public class AppSmokeTest {
             assertNull(find(activity().getWindow().getDecorView(), "Pokaż kolejne metody", true)));
     }
     private void searchFor(String query) {
+        PlanMenuTestHelper.revealSearch(activity());
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             EditText input = firstInput((ViewGroup) activity().getWindow().getDecorView());
             assertNotNull(input); input.setText(query);
@@ -193,8 +195,8 @@ public class AppSmokeTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             View decor = activity().getWindow().getDecorView();
             assertNull(find(decor, activity().getString(R.string.schedule_btn_next_class), true));
-            assertFalse(find(decor, activity().getString(R.string.schedule_export_ics), true).isEnabled());
         });
+        PlanMenuTestHelper.assertExportDisabled(activity());
     }
     @Test public void weeklyViewExportsOnlyTheSelectedWeek() throws Exception {
         java.io.File exportDirectory = new java.io.File(activity().getCacheDir(), "test-exports");

@@ -38,8 +38,11 @@ public class ScreenRegressionTest {
     private View decor() { return rule.getActivity().getWindow().getDecorView(); }
     private void has(String text) { main(() -> assertNotNull(text, find(decor(), text))); }
     private void absent(String text) { main(() -> assertNull(text, find(decor(), text))); }
-    private void search(String query) { main(() -> { assertNotNull(input(decor())); input(decor()).setText(query); }); }
-    private void click(String text) { main(() -> { View view = find(decor(), text); assertNotNull(text, view); assertTrue(view.performClick()); }); }
+    private void search(String query) { PlanMenuTestHelper.revealSearch(rule.getActivity()); main(() -> { assertNotNull(input(decor())); input(decor()).setText(query); }); }
+    private void click(String text) {
+        if (PlanMenuTestHelper.select(rule.getActivity(), text)) return;
+        main(() -> { View view = find(decor(), text); assertNotNull(text, view); assertTrue(view.performClick()); });
+    }
     private void capture(String name) throws Exception {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         InstrumentationRegistry.getInstrumentation().getUiAutomation().waitForIdle(400, 3000);
@@ -88,7 +91,7 @@ public class ScreenRegressionTest {
         main(() -> { rule.getActivity().navigate(2); rule.getActivity().navigate(5); });
         main(() -> assertEquals("Kowalska", input(decor()).getText().toString()));
         search("no-such-lesson"); absent("Statystyka opisowa");
-        main(() -> assertFalse(find(decor(), rule.getActivity().getString(R.string.schedule_export_ics)).isEnabled()));
+        PlanMenuTestHelper.assertExportDisabled(rule.getActivity());
     }
     @Test public void weeklyTasksExcludeOverdueAndCompletedEntries() throws Exception {
         java.time.LocalDate today = java.time.LocalDate.now(UsosClient.ZONE);

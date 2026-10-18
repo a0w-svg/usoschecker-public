@@ -133,8 +133,8 @@ public class ScheduleInteractionRegressionTest {
             org.hamcrest.Matchers.startsWith(rule.getActivity().getString(R.string.schedule_btn_choose_date) + ":")))
             .check((view, error) -> {
                 if (error != null) throw error;
-                assertTrue(view.getHeight() >= UiHelper.dp(rule.getActivity(), 56));
-                assertEquals(18 * rule.getActivity().getResources().getDisplayMetrics().scaledDensity, ((TextView) view).getTextSize(), .5f);
+                assertTrue(view.getHeight() >= UiHelper.dp(rule.getActivity(), 64));
+                assertEquals(20 * rule.getActivity().getResources().getDisplayMetrics().scaledDensity, ((TextView) view).getTextSize(), .5f);
             });
     }
     @Test public void explicitDateLinksStayOnTheirDayButDefaultEntryReturnsToCurrentClass() {
@@ -146,6 +146,24 @@ public class ScheduleInteractionRegressionTest {
             a.navigate(0); a.navigate(5);
             assertEquals(today.toString(), a.getCalendarDate());
             assertNotNull(a.findViewById(R.id.schedule_current_lesson));
+        });
+    }
+    @Test public void roomIsProminentAndNotRepeatedInSecondaryText() {
+        main(() -> { rule.getActivity().setDemo(true); rule.getActivity().navigate(5); });
+        main(() -> {
+            MainActivity a = rule.getActivity();
+            View card = a.findViewById(R.id.schedule_current_lesson); assertNotNull(card);
+            TextView room = card.findViewById(R.id.lesson_item_room);
+            assertEquals(View.VISIBLE, room.getVisibility());
+            assertEquals("Sala 101", room.getText().toString());
+            assertTrue(room.getTypeface().isBold());
+            assertEquals(20 * a.getResources().getDisplayMetrics().scaledDensity, room.getTextSize(), .5f);
+            assertFalse(((TextView) card.findViewById(R.id.lesson_item_details)).getText().toString().contains("Sala "));
+            android.view.ViewGroup bar = (android.view.ViewGroup) a.findViewById(R.id.schedule_more).getParent();
+            for (int i = 0; i < bar.getChildCount(); i++) {
+                assertTrue(bar.getChildAt(i).getWidth() >= UiHelper.dp(a, 56));
+                assertTrue(bar.getChildAt(i).getHeight() >= UiHelper.dp(a, 64));
+            }
         });
     }
 }

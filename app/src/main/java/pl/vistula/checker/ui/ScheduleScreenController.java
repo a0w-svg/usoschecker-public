@@ -131,9 +131,9 @@ public final class ScheduleScreenController {
             }).setNegativeButton(R.string.btn_close, null).show();
         });
         date.setContentDescription(activity.getString(R.string.schedule_btn_choose_date) + ": " + dateLabel);
-        date.setTextSize(18);
-        date.setMinHeight(UiHelper.dp(activity, 56));
-        date.setMinimumHeight(UiHelper.dp(activity, 56));
+        date.setTextSize(20);
+        date.setMinHeight(UiHelper.dp(activity, 64));
+        date.setMinimumHeight(UiHelper.dp(activity, 64));
         date.setPadding(UiHelper.dp(activity, 8), UiHelper.dp(activity, 4), UiHelper.dp(activity, 8), UiHelper.dp(activity, 4));
         date.setTypeface(null, android.graphics.Typeface.BOLD);
         Button more = headerButton(activity, "⋮", () -> {});
@@ -141,10 +141,10 @@ public final class ScheduleScreenController {
         more.setContentDescription(activity.getString(R.string.schedule_options));
         previous.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, -1) != null);
         next.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, 1) != null);
-        navBar.addView(previous, new LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2));
+        navBar.addView(previous, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         navBar.addView(date, new LinearLayout.LayoutParams(0, -2, 1));
-        navBar.addView(next, new LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2));
-        navBar.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2));
+        navBar.addView(next, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
+        navBar.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         content.addView(navBar);
 
         EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.schedule_search_hint), activity.getCalendarQuery(), null, () -> activity.setCalendarQuery(""));
@@ -284,8 +284,7 @@ public final class ScheduleScreenController {
                     TextView currentBadge = card.findViewById(R.id.lesson_item_current_badge);
                     currentBadge.setVisibility(View.VISIBLE);
                     long remaining = Math.max(1, (java.time.Duration.between(Instant.now(), lesson.end.toInstant()).getSeconds() + 59) / 60);
-                    currentBadge.setText(activity.getString(R.string.classes_ongoing) + " · "
-                        + activity.getString(R.string.home_classes_remaining_min, remaining));
+                    currentBadge.setText(activity.getString(R.string.schedule_current_badge, remaining));
                     card.setId(R.id.schedule_current_lesson);
                     card.setStateDescription(activity.getString(R.string.classes_ongoing));
                     android.graphics.drawable.GradientDrawable background = new android.graphics.drawable.GradientDrawable();
@@ -300,6 +299,15 @@ public final class ScheduleScreenController {
 
                 titleView.setText(lesson.record.title);
                 String summary = lessonSummary(lesson);
+                TextView roomView = card.findViewById(R.id.lesson_item_room);
+                String room = lessonRoom(lesson.record);
+                if (!room.isEmpty()) {
+                    roomView.setVisibility(View.VISIBLE);
+                    roomView.setText(activity.getString(R.string.lesson_room_label, room));
+                    List<String> secondary = new ArrayList<>();
+                    for (String line : summary.split("\\n")) if (!line.startsWith("Sala ")) secondary.add(line);
+                    summary = String.join("\n", secondary);
+                }
                 detailsView.setText(summary);
                 detailsView.setVisibility(summary.isEmpty() ? View.GONE : View.VISIBLE);
 
@@ -322,8 +330,9 @@ public final class ScheduleScreenController {
         Button button = UiHelper.button(context, label, action, false);
         button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.TRANSPARENT));
         button.setPadding(UiHelper.dp(context, 4), 0, UiHelper.dp(context, 4), 0);
-        button.setMinHeight(UiHelper.dp(context, 48));
-        button.setMinimumHeight(UiHelper.dp(context, 48));
+        button.setTextSize(28);
+        button.setMinHeight(UiHelper.dp(context, 64));
+        button.setMinimumHeight(UiHelper.dp(context, 64));
         ((MaterialButton) button).setInsetTop(0);
         ((MaterialButton) button).setInsetBottom(0);
         return button;
@@ -379,6 +388,16 @@ public final class ScheduleScreenController {
                         }
                     }).show();
             }).show();
+    }
+
+    public static String lessonRoom(Record record) {
+        String room = record.optMeta("room").trim();
+        if (!room.isEmpty()) return room;
+        for (String line : record.value.split("\\n")) {
+            String trimmed = line.trim();
+            if (trimmed.startsWith("Sala ")) return trimmed.substring(5).split(" · ", 2)[0].trim();
+        }
+        return "";
     }
 
     /** Avoid repeating the time and building on cards. Old snapshots still keep their readable description. */

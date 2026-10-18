@@ -710,6 +710,8 @@
     <string name="schedule_info_title">Informacje o planie</string>
     <string name="schedule_options">Opcje planu</string>
     <string name="schedule_demo_title">Plan zajęć · DEMO</string>
+    <string name="schedule_current_badge">TRWAJĄ TERAZ · jeszcze %1$d min</string>
+    <string name="lesson_room_label">Sala %1$s</string>
     <string name="schedule_search_action">Szukaj w planie</string>
     <string name="schedule_summary_compact">Zajęcia: %1$d · Łącznie %2$d godz. %3$d min</string>
     <string name="schedule_next_week">Następny tydzień</string>

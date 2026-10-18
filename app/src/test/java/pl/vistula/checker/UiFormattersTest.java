@@ -8,6 +8,15 @@ import pl.vistula.checker.ui.PaymentsScreenController;
 import pl.vistula.checker.ui.UiHelper;
 
 public class UiFormattersTest {
+    @Test public void lessonRoomPrefersStructuredRoomAndReadsLegacyLabels() throws Exception {
+        pl.vistula.checker.core.Record legacy = new pl.vistula.checker.core.Record("room", "plan", "Course",
+            "09:00 – 10:00\nSala A-204 · Budynek B\nProwadzący: Jan Nowak", "", "2026-10-18");
+        assertEquals("A-204", pl.vistula.checker.ui.ScheduleScreenController.lessonRoom(legacy));
+        legacy.metadata.put("room", "315");
+        assertEquals("315", pl.vistula.checker.ui.ScheduleScreenController.lessonRoom(legacy));
+        assertEquals("", pl.vistula.checker.ui.ScheduleScreenController.lessonRoom(
+            new pl.vistula.checker.core.Record("online", "plan", "Course", "09:00 – 10:00\nOnline", "", "2026-10-18")));
+    }
 
     @Test public void scheduleCardsKeepEssentialsWithoutRepeatedTimesOrTechnicalFields() throws Exception {
         org.json.JSONObject meta = new org.json.JSONObject().put("room", "201").put("building", "Budynek A")

@@ -103,6 +103,10 @@ public class OledThemeTest {
         android.widget.Button secondary = UiHelper.button(activity, "Secondary", () -> {}, false);
         assertTrue(androidx.core.graphics.ColorUtils.calculateContrast(secondary.getCurrentTextColor(),
             secondary.getBackgroundTintList().getDefaultColor()) >= 4.5);
+        androidx.appcompat.app.AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
+            .setMessage("Palette check").setPositiveButton(android.R.string.ok, null).show();
+        assertEquals(activity.getColor(R.color.app_ink), dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).getCurrentTextColor());
+        dialog.dismiss();
         for (int layout : new int[]{R.layout.item_grade_card, R.layout.item_grade_component, R.layout.item_lesson_card}) {
             android.view.View view = activity.getLayoutInflater().inflate(layout, null);
             int id = layout == R.layout.item_grade_card ? R.id.grade_item_value_badge
@@ -112,7 +116,7 @@ public class OledThemeTest {
                 badge.getCurrentTextColor(), activity.getColor(R.color.app_secondary_container)) >= 4.5);
         }
         assertNotEquals(activity.getColor(R.color.app_background), activity.getColor(R.color.app_card));
-        assertEquals(activity.getColor(R.color.app_accent), UiHelper.foreground(activity, UiHelper.GREEN));
+        assertEquals(activity.getColor(R.color.app_ink), UiHelper.foreground(activity, UiHelper.GREEN));
     }
 
     private void assertGradeBadges(android.view.View view) {

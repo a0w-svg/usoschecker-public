@@ -53,7 +53,7 @@ public final class UiHelper {
     public static int foreground(Context context, int color) {
         if (color == INK) return context.getColor(R.color.app_ink);
         if (color == MUTED) return context.getColor(R.color.app_muted);
-        if (color == GREEN) return context.getColor(R.color.app_accent);
+        if (color == GREEN) return context.getColor(R.color.app_ink);
         if (color == Color.rgb(217, 119, 6) || color == Color.rgb(180, 83, 9))
             return context.getColor(R.color.app_warning);
         if (color == Color.rgb(160, 48, 40) || color == Color.rgb(167, 49, 49))
@@ -251,6 +251,7 @@ public final class UiHelper {
         TextInputLayout wrapper = new TextInputLayout(context);
         wrapper.setBoxBackgroundMode(TextInputLayout.BOX_BACKGROUND_OUTLINE);
         wrapper.setHint(hint);
+        wrapper.setHintTextColor(ColorStateList.valueOf(context.getColor(R.color.app_muted)));
         wrapper.setBoxCornerRadii(dp(context, 12), dp(context, 12), dp(context, 12), dp(context, 12));
         if (password) wrapper.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
         TextInputEditText e = new TextInputEditText(wrapper.getContext());

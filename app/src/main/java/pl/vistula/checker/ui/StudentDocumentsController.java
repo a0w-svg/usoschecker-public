@@ -12,7 +12,6 @@ import pl.vistula.checker.core.StudentServices;
 public final class StudentDocumentsController {
     private StudentDocumentsController() {}
     public static void render(MainActivity activity, LinearLayout content, JSONObject state, JSONObject services) {
-        UiHelper.note(activity, content, activity.getString(R.string.documents_description), UiHelper.MUTED);
         StudentCardsController.renderAccess(activity, content, state, "adm_documents");
         content.addView(UiHelper.button(activity, activity.getString(R.string.documents_refresh), () -> activity.refreshStudentServices("documents"), true));
         JSONObject entry = StudentCardsController.entry(services, "documents");

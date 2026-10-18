@@ -60,7 +60,6 @@ public final class GradesScreenController {
                               java.util.function.Consumer<String> onQueryChanged,
                               Runnable onResetFilters, Runnable onRefresh,
                               GradesListener listener) throws Exception {
-        UiHelper.note(activity, content, activity.getString(R.string.grades_semester_overview), UiHelper.MUTED);
         UiHelper.note(activity, content, activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(d.optLong("successAt"))), UiHelper.MUTED);
 
         if (!demo && !state.optString("error").isEmpty()) {

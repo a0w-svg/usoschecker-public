@@ -45,7 +45,6 @@ public final class AttendanceScreenController {
     public static void render(MainActivity activity, LinearLayout content, JSONObject d,
                               String filter, java.util.function.Consumer<String> onFilterChanged,
                               Runnable requestRender) {
-        UiHelper.note(activity, content, activity.getString(R.string.attendance_subtitle), UiHelper.MUTED);
 
         SharedPreferences prefs = activity.attendancePreferences();
         JSONObject saved;

@@ -80,7 +80,7 @@ public class AppSmokeTest {
         click("Więcej"); click(activity().getString(R.string.tool_account_title));
         click(activity().getString(R.string.btn_start_demo));
         click("Więcej"); click(activity().getString(R.string.tool_account_title)); click("Symuluj zmiany");
-        has(activity().getString(R.string.nav_history_full)); has("Podstawy finansów"); has("Statystyka opisowa");
+        has("Zmiany"); has("Podstawy finansów"); has("Statystyka opisowa");
         click("Oceny"); has("Podstawy finansów");
         click("Plan"); click(activity().getString(R.string.schedule_mode_agenda)); has("Statystyka opisowa");
         click("Więcej"); click(activity().getString(R.string.tool_account_title)); click("Zakończ tryb demonstracyjny");
@@ -258,8 +258,8 @@ public class AppSmokeTest {
         startDemo();
         has("Najbliższe zajęcia");
         click("Oceny"); has(activity().getString(R.string.nav_grades)); has("Podstawy finansów");
-        click("Plan"); has("Plan zajęć"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
-        click("Zmiany"); has(activity().getString(R.string.nav_history_full));
+        click("Plan"); has("Plan"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
+        click("Zmiany"); has("Zmiany");
         click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); has("Dodaj zadanie");
     }
     @Test public void demoTasksCanBeAddedAndCompletedWithoutWritingLiveData() throws Exception {
@@ -394,10 +394,10 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         JSONArray week = new JSONArray().put(new JSONObject().put("lecturer_ids", new JSONArray().put(1)));
         UsosClient.resolveLecturers(java.util.List.of(week), ids -> new JSONObject());
     }
-    @Test public void lecturerNameAppearsOnDashboardAndIsSearchableInTimetable() throws Exception {
+    @Test public void conciseDashboardKeepsUpcomingLessonAndLecturerIsSearchableInTimetable() throws Exception {
         startDemo();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
-            assertTrue(containsText(activity().getWindow().getDecorView(), "Prowadzący: Anna Kowalska")));
+            assertTrue(containsText(activity().getWindow().getDecorView(), "Statystyka opisowa")));
         click("Plan"); click(activity().getString(R.string.schedule_mode_agenda)); searchFor("Kowalska"); has("Statystyka opisowa");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertTrue(containsText(activity().getWindow().getDecorView(), "Prowadzący: Anna Kowalska")));

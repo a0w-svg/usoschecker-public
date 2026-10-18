@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Vistula · Plan zajęć"
-                android:textColor="@color/app_accent"
+                android:textColor="@color/app_ink"
                 android:textSize="13sp"
                 android:textStyle="bold" />
 
@@ -94,7 +94,7 @@
                 android:paddingEnd="6dp"
                 android:paddingBottom="2dp"
                 android:text="NAJBLIŻSZE"
-                android:textColor="@color/app_accent"
+                android:textColor="@color/app_ink"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
@@ -164,6 +164,6 @@
         android:layout_marginTop="6dp"
         android:gravity="center"
         android:text="Dotknij, aby otworzyć plan zajęć"
-        android:textColor="@color/app_accent"
+        android:textColor="@color/app_ink"
         android:textSize="11sp" />
 </LinearLayout>

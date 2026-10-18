@@ -199,7 +199,7 @@
     <string name="home_all_history_btn">Otwórz całą historię</string>
     <string name="home_no_changes_title">Jeszcze bez zmian</string>
     <string name="home_no_changes_desc">Pierwsze pobranie zapisuje punkt odniesienia. Kolejne różnice zobaczysz tutaj.</string>
-    <string name="home_classes_remaining_min">Do końca: %1$d min · według ostatnio pobranego planu</string>
+    <string name="home_classes_remaining_min">Do końca: %1$d min</string>
 
     <!-- History Screen -->
     <string name="history_title">Historia zmian</string>

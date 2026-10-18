@@ -1,5 +1,10 @@
 <resources>
     <style name="AppThemeBase" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="materialAlertDialogTheme">@style/NeutralAlertDialogTheme</item>
+        <item name="android:textColorLink">@color/app_ink</item>
+        <item name="buttonBarPositiveButtonStyle">@style/NeutralDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NeutralDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/NeutralDialogButton</item>
         <item name="fontFamily">sans-serif</item>
         <item name="colorPrimary">@color/app_accent</item>
         <item name="colorOnPrimary">@color/app_on_accent</item>
@@ -28,6 +33,14 @@
         <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <style name="NeutralAlertDialogTheme" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/NeutralDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NeutralDialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/NeutralDialogButton</item>
+    </style>
+    <style name="NeutralDialogButton" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/app_ink</item>
     </style>
     <style name="AppTheme" parent="AppThemeBase" />
 </resources>

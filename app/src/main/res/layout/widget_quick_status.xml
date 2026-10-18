@@ -29,7 +29,7 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="Vistula · Karta Studenta"
-            android:textColor="@color/app_accent"
+            android:textColor="@color/app_ink"
             android:textSize="13sp"
             android:textStyle="bold" />
 
@@ -89,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="ŚREDNIA &amp; OCENY"
-                android:textColor="@color/app_accent"
+                android:textColor="@color/app_ink"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
@@ -128,7 +128,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PŁATNOŚCI"
-                android:textColor="@color/app_accent"
+                android:textColor="@color/app_ink"
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
@@ -161,6 +161,6 @@
         android:layout_marginTop="6dp"
         android:gravity="center"
         android:text="Dotknij, aby otworzyć aplikację"
-        android:textColor="@color/app_accent"
+        android:textColor="@color/app_ink"
         android:textSize="11sp" />
 </LinearLayout>

@@ -3,3 +3,5 @@
 • Usunięte powtarzające się nagłówki ekranów i zdublowane wejścia do ustawień.
 • Menu planu zajęć przeniesione na lewą stronę.
 • Spokojniejsze akcenty na ekranie startowym: wyróżnione trwające lub najbliższe zajęcia.
+• Neutralny kolor tekstu w obu motywach; zieleń pozostaje w ikonach i wybranych tłach.
+• Usunięte nazwy ekranów z górnego paska, zbędne opisy i puste sekcje; krótszy podgląd kolejnych zajęć.

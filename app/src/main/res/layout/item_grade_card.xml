@@ -36,7 +36,7 @@
             android:paddingTop="6dp"
             android:paddingEnd="12dp"
             android:paddingBottom="6dp"
-            android:textColor="@color/app_accent"
+            android:textColor="@color/app_ink"
             android:textSize="22sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -55,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
-        android:textColor="@color/app_accent"
+        android:textColor="@color/app_ink"
         android:textSize="13sp"
         android:textStyle="bold" />
 
@@ -116,7 +116,7 @@
         android:minHeight="48dp"
         android:text="@string/btn_class_details"
         android:textAllCaps="false"
-        android:textColor="@color/app_accent"
+        android:textColor="@color/app_ink"
         android:textSize="14sp"
         app:backgroundTint="@color/app_button_surface"
         app:cornerRadius="14dp" />

@@ -17,12 +17,4 @@
         android:textSize="28sp"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/nav_header_subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="@string/app_assistant"
-        android:textColor="@color/app_muted"
-        android:textSize="14sp" />
 </LinearLayout>

@@ -41,7 +41,6 @@ public final class HistoryScreenController {
                               java.util.function.Consumer<String> onFilterChanged,
                               java.util.function.Consumer<String> onQueryChanged,
                               Runnable onSimulate) {
-        UiHelper.note(activity, content, activity.getString(R.string.history_subtitle), UiHelper.MUTED);
 
         JSONArray history = d.optJSONArray("history");
         List<Change> allChanges = new ArrayList<>();

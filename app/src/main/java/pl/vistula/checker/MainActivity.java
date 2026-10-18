@@ -412,7 +412,7 @@ public final class MainActivity extends AppCompatActivity {
         setScheduleNavigation(null);
         content.setPadding(UiHelper.dp(this, 20), UiHelper.dp(this, tab == 5 ? 0 : 12), UiHelper.dp(this, 20), UiHelper.dp(this, 24));
         android.view.ViewGroup.LayoutParams toolbarParams = toolbar.getLayoutParams();
-        toolbarParams.height = UiHelper.dp(this, tab == 5 ? 48 : 64);
+        toolbarParams.height = UiHelper.dp(this, 48);
         toolbar.setLayoutParams(toolbarParams);
 
         if (navigation != null) {
@@ -442,18 +442,11 @@ public final class MainActivity extends AppCompatActivity {
             sideMenu.getMenu().findItem(drawerMenuId).setChecked(true);
         }
 
-        int[] titleRes = {
-            R.string.nav_home, R.string.nav_history_full, R.string.nav_grades, R.string.nav_api,
-            R.string.nav_account, R.string.nav_plan_full, R.string.nav_more, R.string.nav_tasks,
-            R.string.nav_payments, R.string.nav_gpa, R.string.nav_campus, R.string.nav_news,
-            R.string.nav_attendance, R.string.cards_title, R.string.documents_title
-        };
-        toolbar.setTitle(tab == 5 && demo ? getString(R.string.schedule_demo_title)
-            : tab < titleRes.length ? getString(titleRes[tab]) : getString(R.string.app_name));
-        toolbar.setSubtitle(tab == 5 ? null : demo ? getString(R.string.demo_account_subtitle) : connected() ? state.optString("user", getString(R.string.app_name)) : null);
+        toolbar.setTitle(null);
+        toolbar.setSubtitle(null);
 
         try {
-            if (demo && tab != 5) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.GREEN);
+            if (demo) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.MUTED);
 
             switch (tab) {
                 case 13:

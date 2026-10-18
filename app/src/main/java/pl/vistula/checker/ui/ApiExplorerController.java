@@ -60,9 +60,7 @@ public final class ApiExplorerController {
                                      java.util.function.Consumer<Integer> onLimitChanged,
                                      java.util.function.Consumer<Boolean> onFavoritesChanged,
                                      java.util.function.Consumer<String> onShowMethod) {
-        UiHelper.title(activity, content,
-            activity.getString(R.string.api_title),
-            activity.getString(R.string.api_subtitle_methods, catalog.length()));
+        UiHelper.note(activity, content, activity.getString(R.string.api_subtitle_methods, catalog.length()), UiHelper.MUTED);
 
         UiHelper.note(activity, content,
             activity.getString(R.string.api_offline_note),

@@ -29,6 +29,43 @@ import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 
 @RunWith(AndroidJUnit4.class)
 public class CleanUxRegressionTest {
+    @Test public void homeIsCleanAndSettingsOwnAllPreferences() {
+        main(() -> {
+            MainActivity activity = rule.getActivity();
+            activity.setDemo(true);
+            activity.navigate(0);
+            View content = activity.findViewById(R.id.main_content);
+            for (int label : new int[]{R.string.hero_heading, R.string.monitoring_title,
+                    R.string.home_week_title, R.string.academic_calendar_title,
+                    R.string.quick_refresh, R.string.btn_simulate_changes}) {
+                assertFalse(activity.getString(label), hasText(content, activity.getString(label)));
+            }
+            activity.navigate(6);
+            content = activity.findViewById(R.id.main_content);
+            assertFalse(hasText(content, activity.getString(R.string.appearance_title)));
+            assertFalse(hasText(content, activity.getString(R.string.about_title)));
+            activity.navigate(4);
+            content = activity.findViewById(R.id.main_content);
+            for (int label : new int[]{R.string.appearance_title, R.string.account_notices_heading,
+                    R.string.account_widgets_heading, R.string.academic_calendar_title, R.string.about_title}) {
+                assertTrue(activity.getString(label), hasText(content, activity.getString(label)));
+            }
+            // The title is supplied once by the main toolbar, not repeated in the content.
+            assertFalse(hasText(content, activity.getString(R.string.nav_account)));
+        });
+    }
+    @Test public void timetableOptionsAreLeftOfDateNavigation() {
+        main(() -> {
+            MainActivity activity = rule.getActivity();
+            activity.setDemo(true);
+            activity.navigate(5);
+            View menu = activity.findViewById(R.id.schedule_more);
+            assertNotNull(menu);
+            android.view.ViewGroup row = (android.view.ViewGroup) menu.getParent();
+            assertSame(menu, row.getChildAt(0));
+            assertEquals(activity.getString(R.string.schedule_options), menu.getContentDescription());
+        });
+    }
     @Test public void timetableTechnicalFieldsAreAvailableOnlyAfterRequestingFullData() {
         main(() -> {
             try {

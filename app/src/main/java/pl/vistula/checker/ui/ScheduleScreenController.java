@@ -142,10 +142,10 @@ public final class ScheduleScreenController {
         more.setContentDescription(activity.getString(R.string.schedule_options));
         previous.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, -1) != null);
         next.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, 1) != null);
+        navBar.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         navBar.addView(previous, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         navBar.addView(date, new LinearLayout.LayoutParams(0, -2, 1));
         navBar.addView(next, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
-        navBar.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         content.addView(navBar);
 
         EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.schedule_search_hint), activity.getCalendarQuery(), null, () -> activity.setCalendarQuery(""));

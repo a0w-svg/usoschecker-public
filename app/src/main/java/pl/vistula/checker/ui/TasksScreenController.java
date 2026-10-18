@@ -54,9 +54,7 @@ public final class TasksScreenController {
                               java.util.function.Consumer<String> onOrderChanged,
                               java.util.function.Consumer<String> onQueryChanged,
                               TaskCallback callback) throws JSONException {
-        UiHelper.title(activity, content,
-            activity.getString(R.string.tasks_title),
-            activity.getString(R.string.tasks_subtitle));
+        UiHelper.note(activity, content, activity.getString(R.string.tasks_subtitle), UiHelper.MUTED);
 
         LinearLayout platon = UiHelper.card(activity, content, Color.WHITE);
         UiHelper.add(activity, platon, activity.getString(R.string.tasks_platon_title), 18, UiHelper.INK, true);

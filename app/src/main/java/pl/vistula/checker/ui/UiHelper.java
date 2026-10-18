@@ -136,10 +136,10 @@ public final class UiHelper {
         b.setTextSize(14);
         int[][] states = {new int[]{-android.R.attr.state_enabled}, new int[]{}};
         b.setTextColor(new ColorStateList(states, new int[]{context.getColor(R.color.app_disabled_content),
-            context.getColor(primary ? R.color.app_on_accent : R.color.app_accent)}));
+            context.getColor(primary ? R.color.app_on_accent : R.color.app_ink)}));
         b.setCornerRadius(dp(context, 14));
         b.setBackgroundTintList(new ColorStateList(states, new int[]{context.getColor(R.color.app_disabled_surface),
-            context.getColor(primary ? R.color.app_accent : R.color.app_button_surface)}));
+            context.getColor(primary ? R.color.app_accent : R.color.app_inner_surface)}));
         b.setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10));
         b.setMinHeight(dp(context, 48));
         LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);

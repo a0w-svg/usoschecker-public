@@ -31,9 +31,7 @@ public final class PaymentsScreenController {
 
     public static void render(MainActivity activity, LinearLayout content, JSONObject d,
                               JSONObject state, boolean connected, Runnable onRefresh) throws JSONException {
-        UiHelper.title(activity, content,
-            activity.getString(R.string.payments_title),
-            activity.getString(R.string.payments_subtitle));
+        UiHelper.note(activity, content, activity.getString(R.string.payments_subtitle), UiHelper.MUTED);
 
         UiHelper.note(activity, content,
             activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(d.optLong("successAt"))),

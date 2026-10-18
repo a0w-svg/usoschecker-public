@@ -13,7 +13,7 @@ import pl.vistula.checker.core.StudentServices;
 public final class StudentCardsController {
     private StudentCardsController() {}
     public static void render(MainActivity activity, LinearLayout content, JSONObject state, JSONObject services) throws Exception {
-        UiHelper.title(activity, content, activity.getString(R.string.cards_title), activity.getString(R.string.cards_description));
+        UiHelper.note(activity, content, activity.getString(R.string.cards_description), UiHelper.MUTED);
         UiHelper.note(activity, content, activity.getString(R.string.cards_information_only), UiHelper.MUTED);
         renderAccess(activity, content, state, "cards");
         content.addView(UiHelper.button(activity, activity.getString(R.string.cards_refresh), () -> activity.refreshStudentServices("cards"), true));

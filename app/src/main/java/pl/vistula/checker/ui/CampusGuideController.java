@@ -16,9 +16,7 @@ public final class CampusGuideController {
     private CampusGuideController() {}
 
     public static void render(MainActivity activity, LinearLayout content) {
-        UiHelper.title(activity, content,
-            activity.getString(R.string.campus_title),
-            activity.getString(R.string.campus_subtitle));
+        UiHelper.note(activity, content, activity.getString(R.string.campus_subtitle), UiHelper.MUTED);
 
         // Campus Location
         LinearLayout campusCard = UiHelper.card(activity, content, Color.WHITE);

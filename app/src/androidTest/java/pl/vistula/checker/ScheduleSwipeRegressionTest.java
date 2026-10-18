@@ -70,7 +70,7 @@ public class ScheduleSwipeRegressionTest {
         swipe(false, false);
         assertEquals(initial, rule.getActivity().getCalendarDate());
     }
-    @Test public void weekSwipeMovesSevenDaysAndVerticalScrollKeepsDate() {
+    @Test public void weekSwipeSkipsEmptyWeeksAndVerticalScrollKeepsDate() {
         main(() -> { rule.getActivity().setCalendarMode("week"); rule.getActivity().navigate(5); });
         java.time.LocalDate initial = java.time.LocalDate.parse(rule.getActivity().getCalendarDate());
         java.time.LocalDate expected = pl.vistula.checker.core.PlanBrowser.adjacentDay(days(""), initial, true, 1);

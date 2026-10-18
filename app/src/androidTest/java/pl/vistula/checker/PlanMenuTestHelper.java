@@ -45,7 +45,15 @@ final class PlanMenuTestHelper {
     }
     static void assertExportDisabled(Activity activity) {
         onView(withId(R.id.schedule_more)).perform(click());
-        onView(withText(R.string.schedule_export_ics)).inRoot(isPlatformPopup()).check(matches(not(isEnabled())));
-        pressBack();
+        try {
+            onView(withText(R.string.schedule_export_ics)).inRoot(isPlatformPopup()).check((view, error) -> {
+                if (error != null) throw error;
+                boolean disabled = false;
+                // Native menus disable the row; the title TextView itself remains enabled.
+                for (View row = view; row != null; row = row.getParent() instanceof View ? (View) row.getParent() : null)
+                    disabled |= !row.isEnabled();
+                org.junit.Assert.assertTrue("Export menu row must be disabled", disabled);
+            });
+        } finally { pressBack(); }
     }
 }

@@ -77,7 +77,7 @@ public class CleanUxRegressionTest {
             }
             assertEquals(activity.getColor(R.color.app_ink), UiHelper.foreground(activity, UiHelper.GREEN));
             TextView time = (TextView) activity.getLayoutInflater().inflate(R.layout.item_lesson_card, null).findViewById(R.id.lesson_item_time);
-            assertEquals(activity.getColor(R.color.app_ink), time.getCurrentTextColor());
+            assertEquals(activity.getColor(R.color.app_muted), time.getCurrentTextColor());
         });
     }
     @Test public void timetableTechnicalFieldsAreAvailableOnlyAfterRequestingFullData() {

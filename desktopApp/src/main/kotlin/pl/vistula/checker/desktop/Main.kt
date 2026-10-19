@@ -45,6 +45,8 @@ fun main() = application {
     }
 
     var shortcutTab by remember { mutableStateOf<VistulaTab?>(null) }
+    var syncTrigger by remember { mutableStateOf(0) }
+    var demoTrigger by remember { mutableStateOf(0) }
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -52,13 +54,16 @@ fun main() = application {
         state = rememberWindowState(width = 1120.dp, height = 780.dp),
         onPreviewKeyEvent = { event ->
             val modPressed = event.isCtrlPressed || event.isMetaPressed
-            if (modPressed && event.type == KeyEventType.KeyDown) {
-                when (event.key) {
-                    Key.One -> { shortcutTab = VistulaTab.HOME; true }
-                    Key.Two -> { shortcutTab = VistulaTab.SCHEDULE; true }
-                    Key.Three -> { shortcutTab = VistulaTab.GRADES; true }
-                    Key.Four -> { shortcutTab = VistulaTab.HISTORY; true }
-                    Key.Five -> { shortcutTab = VistulaTab.MORE; true }
+            if (event.type == KeyEventType.KeyDown) {
+                when {
+                    event.key == Key.F5 -> { syncTrigger += 1; true }
+                    modPressed && event.key == Key.R -> { syncTrigger += 1; true }
+                    modPressed && event.key == Key.D -> { demoTrigger += 1; true }
+                    modPressed && event.key == Key.One -> { shortcutTab = VistulaTab.HOME; true }
+                    modPressed && event.key == Key.Two -> { shortcutTab = VistulaTab.SCHEDULE; true }
+                    modPressed && event.key == Key.Three -> { shortcutTab = VistulaTab.GRADES; true }
+                    modPressed && event.key == Key.Four -> { shortcutTab = VistulaTab.HISTORY; true }
+                    modPressed && event.key == Key.Five -> { shortcutTab = VistulaTab.MORE; true }
                     else -> false
                 }
             } else {
@@ -72,6 +77,8 @@ fun main() = application {
             notifier = notifier,
             syncScheduler = scheduler,
             externalTabTrigger = shortcutTab,
+            externalSyncTrigger = syncTrigger,
+            externalDemoTrigger = demoTrigger,
             onOpenUrl = { url ->
                 try {
                     if (Desktop.isDesktopSupported()) {

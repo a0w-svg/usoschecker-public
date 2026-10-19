@@ -31,8 +31,8 @@ android {
         applicationId 'pl.vistula.checker'
         minSdk 31
         targetSdk 36
-        versionCode 10
-        versionName '1.1.0'
+        versionCode 11
+        versionName '1.2.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField "String", "USOS_KEY", '""'
         buildConfigField "String", "USOS_SECRET", '""'

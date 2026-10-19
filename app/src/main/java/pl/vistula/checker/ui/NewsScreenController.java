@@ -38,8 +38,14 @@ public final class NewsScreenController {
                               String query, java.util.function.Consumer<String> onQueryChanged,
                               Runnable onRefresh) throws JSONException {
 
+        ToolScreenUi.header(activity, content, R.string.tool_news_title, menu -> {
+            ToolScreenUi.action(menu, R.string.news_refresh_btn, onRefresh);
+            ToolScreenUi.action(menu, R.string.tool_api_methods, () -> activity.openApiModule("news"));
+        });
         JSONObject raw = d.optJSONObject("snapshot");
         Snapshot snapshot = raw != null ? Snapshot.from(raw) : null;
+        if (snapshot != null && snapshot.serviceErrors.containsKey("news")) UiHelper.note(activity, content,
+            activity.getString(R.string.services_refresh_error, snapshot.serviceErrors.get("news")), activity.getColor(R.color.app_error));
         List<NewsArticle> articles = snapshot != null && snapshot.news != null ? snapshot.news : Collections.emptyList();
 
         EditText search = UiHelper.searchField(activity, content,
@@ -54,18 +60,16 @@ public final class NewsScreenController {
 
         Runnable populate = () -> {
             list.removeAllViews();
-            String q = query.trim().toLowerCase(Locale.ROOT);
+            String q = search.getText().toString().trim();
             List<NewsArticle> filtered = new ArrayList<>();
             for (NewsArticle a : articles) {
-                if (q.isEmpty() || a.title.toLowerCase(Locale.ROOT).contains(q)
-                    || a.headline.toLowerCase(Locale.ROOT).contains(q)
-                    || a.author.toLowerCase(Locale.ROOT).contains(q)) {
+                if (pl.vistula.checker.core.StudentSearch.matches(q, a.title, a.headline, a.author, UiHelper.plain(a.content))) {
                     filtered.add(a);
                 }
             }
 
             if (filtered.isEmpty()) {
-                LinearLayout emptyBox = UiHelper.card(activity, list, Color.WHITE);
+                LinearLayout emptyBox = UiHelper.section(activity, list, Color.WHITE);
                 UiHelper.add(activity, emptyBox,
                     q.isEmpty() ? activity.getString(R.string.news_empty_title) : activity.getString(R.string.news_no_match_title),
                     17, UiHelper.INK, true);
@@ -74,6 +78,7 @@ public final class NewsScreenController {
                     UiHelper.MUTED);
                 if (!q.isEmpty()) {
                     emptyBox.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), () -> {
+                        search.setText("");
                         onQueryChanged.accept("");
                     }, false));
                 }
@@ -85,7 +90,6 @@ public final class NewsScreenController {
                     TextView title = itemCard.findViewById(R.id.news_item_title);
                     TextView meta = itemCard.findViewById(R.id.news_item_meta);
                     TextView headline = itemCard.findViewById(R.id.news_item_headline);
-                    MaterialButton btnRead = itemCard.findViewById(R.id.news_item_btn_read);
 
                     title.setText(a.title);
                     String formattedDate = HistoryScreenController.formatFullDate(a.publicationDate);
@@ -99,8 +103,8 @@ public final class NewsScreenController {
                         headline.setVisibility(View.GONE);
                     }
 
-                    btnRead.setOnClickListener(v -> showNewsDetails(activity, a));
                     itemCard.setClickable(true);
+                    itemCard.setFocusable(true);
                     itemCard.setOnClickListener(v -> showNewsDetails(activity, a));
                     list.addView(itemCard);
                 }
@@ -113,7 +117,6 @@ public final class NewsScreenController {
         });
         populate.run();
 
-        content.addView(UiHelper.button(activity, activity.getString(R.string.news_refresh_btn), onRefresh, true));
     }
 
     private static void showNewsDetails(MainActivity activity, NewsArticle article) {
@@ -124,10 +127,10 @@ public final class NewsScreenController {
         UiHelper.add(activity, box, article.title, 20, UiHelper.INK, true);
         String formattedDate = HistoryScreenController.formatFullDate(article.publicationDate);
         String meta = (!formattedDate.isEmpty() ? formattedDate : article.publicationDate) + (!article.author.isEmpty() ? " · " + article.author : "");
-        UiHelper.add(activity, box, "📅 " + meta, 13, UiHelper.GREEN, true);
+        UiHelper.add(activity, box, meta, 13, UiHelper.GREEN, true);
 
-        if (!article.headline.isEmpty()) {
-            UiHelper.add(activity, box, article.headline, 15, UiHelper.INK, false);
+        if (!article.content.isEmpty() || !article.headline.isEmpty()) {
+            UiHelper.add(activity, box, article.content.isEmpty() ? article.headline : UiHelper.plain(article.content), 15, UiHelper.INK, false);
         }
 
         ScrollView scroll = new ScrollView(activity);
@@ -139,7 +142,7 @@ public final class NewsScreenController {
             .setNeutralButton(activity.getString(R.string.news_copy_content), (dlg, which) -> {
                 ClipboardManager cb = activity.getSystemService(ClipboardManager.class);
                 if (cb != null) {
-                    String text = article.title + "\n\n" + meta + "\n\n" + article.headline + (article.url.isEmpty() ? "" : "\n\n" + article.url);
+                    String text = article.title + "\n\n" + meta + "\n\n" + (article.content.isEmpty() ? article.headline : UiHelper.plain(article.content)) + (article.url.isEmpty() ? "" : "\n\n" + article.url);
                     cb.setPrimaryClip(ClipData.newPlainText("Komunikat Vistula", text));
                     Toast.makeText(activity, activity.getString(R.string.news_copied_toast), Toast.LENGTH_SHORT).show();
                 }

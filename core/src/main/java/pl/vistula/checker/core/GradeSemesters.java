@@ -22,6 +22,7 @@ public final class GradeSemesters {
         for (Record course : snapshot.courses) ids.add(course.term);
         for (Record record : snapshot.records.values())
             if (record.kind.equals("ocena") || (record.kind.equals("plan") && !record.term.isEmpty())) ids.add(record.term);
+        for (CourseTestRecord test : snapshot.tests) if (!test.term.isEmpty()) ids.add(test.term);
         String current = current(snapshot, today);
         if (current != null) ids.add(current);
         List<String> result = new ArrayList<>(ids);
@@ -37,6 +38,7 @@ public final class GradeSemesters {
         return result;
     }
     public static String testTerm(Snapshot snapshot, CourseTestRecord test) {
+        if (!test.term.isEmpty()) return test.term;
         Set<String> terms = new HashSet<>();
         for (Record row : snapshot.records.values()) {
             if (!row.kind.equals("ocena")) continue;

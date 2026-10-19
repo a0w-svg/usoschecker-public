@@ -46,15 +46,14 @@ public class CleanUxRegressionTest {
             assertFalse(hasText(content, activity.getString(R.string.about_title)));
             activity.navigate(4);
             content = activity.findViewById(R.id.main_content);
-            for (int label : new int[]{R.string.appearance_title, R.string.account_notices_heading,
+            for (int label : new int[]{R.string.appearance_title, R.string.language_title, R.string.account_notices_heading,
                     R.string.account_widgets_heading, R.string.academic_calendar_title, R.string.about_title}) {
                 assertTrue(activity.getString(label), hasText(content, activity.getString(label)));
             }
-            // Screen names are represented by navigation, without duplicate headings.
-            assertFalse(hasText(content, activity.getString(R.string.nav_account)));
+            assertTrue(hasText(content, activity.getString(R.string.nav_account)));
         });
     }
-    @Test public void timetableOptionsAreLeftOfDateNavigation() {
+    @Test public void timetableOptionsAreRightOfDateNavigation() {
         main(() -> {
             MainActivity activity = rule.getActivity();
             activity.setDemo(true);
@@ -62,8 +61,10 @@ public class CleanUxRegressionTest {
             View menu = activity.findViewById(R.id.schedule_more);
             assertNotNull(menu);
             android.view.ViewGroup row = (android.view.ViewGroup) menu.getParent();
-            assertSame(menu, row.getChildAt(0));
+            assertSame(menu, row.getChildAt(3));
             assertEquals(activity.getString(R.string.schedule_options), menu.getContentDescription());
+            assertTrue(activity.findViewById(R.id.main_root) instanceof LinearLayout);
+            assertNotNull(activity.findViewById(R.id.nav_item_more));
         });
     }
     @Test public void screenNamesStayHiddenAndTextUsesNeutralColors() {
@@ -71,9 +72,7 @@ public class CleanUxRegressionTest {
             MainActivity activity = rule.getActivity();
             for (int tab : new int[]{0, 1, 2, 4, 5, 6}) {
                 activity.navigate(tab);
-                com.google.android.material.appbar.MaterialToolbar bar = activity.findViewById(R.id.toolbar);
-                assertTrue(bar.getTitle() == null || bar.getTitle().length() == 0);
-                assertTrue(bar.getSubtitle() == null || bar.getSubtitle().length() == 0);
+                assertTrue(activity.findViewById(R.id.main_root) instanceof LinearLayout);
             }
             assertEquals(activity.getColor(R.color.app_ink), UiHelper.foreground(activity, UiHelper.GREEN));
             TextView time = (TextView) activity.getLayoutInflater().inflate(R.layout.item_lesson_card, null).findViewById(R.id.lesson_item_time);
@@ -101,13 +100,13 @@ public class CleanUxRegressionTest {
             .check(androidx.test.espresso.assertion.ViewAssertions.matches(isDisplayed()));
         onView(withText(R.string.btn_close)).inRoot(isDialog()).perform(click());
     }
-    @Test public void subjectDetailsExpandAndCollapseWithoutHidingTheGradeOverview() {
+    @Test public void compactGradeRowShowsValuesAndKeepsSupportingDataInDetails() {
         main(() -> {
             try {
                 MainActivity activity = rule.getActivity();
                 pl.vistula.checker.core.Snapshot snapshot = new pl.vistula.checker.core.Snapshot("", "");
                 snapshot.add(new pl.vistula.checker.core.Record("grade", "ocena", "Finanse", "5", "", "", "2026Z",
-                    "", "", 5, new JSONObject().put("courseId", "FIN").put("comment", "Komentarz testowy")));
+                    "", "", 5, new JSONObject().put("courseId", "FIN").put("gradeScope", "course").put("comment", "Komentarz testowy")));
                 LinearLayout content = new LinearLayout(activity);
                 pl.vistula.checker.ui.GradesScreenController.render(activity, content,
                     new JSONObject().put("snapshot", snapshot.json()), new JSONObject(), false,
@@ -116,22 +115,22 @@ public class CleanUxRegressionTest {
                         public void onFilterChanged() {}
                         public void onOpenTask(String title) {}
                     });
-                View components = content.findViewById(R.id.grade_item_components_container);
-                View comment = content.findViewById(R.id.grade_item_comment);
-                Button more = content.findViewById(R.id.subject_view_more);
-                assertEquals(View.VISIBLE, content.findViewById(R.id.grade_item_value_badge).getVisibility());
-                assertEquals(View.GONE, components.getVisibility());
-                assertEquals(View.GONE, comment.getVisibility());
-                more.performClick();
-                assertEquals(View.VISIBLE, components.getVisibility());
-                assertEquals(View.VISIBLE, comment.getVisibility());
-                assertEquals(activity.getString(R.string.subject_view_less), more.getText().toString());
-                more.performClick();
-                assertEquals(View.GONE, components.getVisibility());
-                assertEquals(View.GONE, comment.getVisibility());
-                assertEquals(activity.getString(R.string.subject_view_more), more.getText().toString());
+                assertNotNull(content.findViewById(R.id.grades_more));
+                assertFalse(hasText(content, activity.getString(R.string.grades_summary_title)));
+                assertFalse(hasText(content, "Komentarz testowy"));
+                TextView grade = content.findViewById(R.id.grade_item_value_badge);
+                assertEquals("5", grade.getText().toString()); assertNull(grade.getBackground());
+                TextView source = content.findViewById(R.id.grade_item_course_meta);
+                assertEquals(View.VISIBLE, source.getVisibility());
+                assertEquals(activity.getString(R.string.grades_scope_course), source.getText().toString());
+                View row = (View) grade.getParent().getParent();
+                assertTrue(row.isClickable()); assertTrue(row.isFocusable());
+                row.performClick();
             } catch (Exception e) { throw new AssertionError(e); }
         });
+        onView(withText("Komentarz testowy")).inRoot(isDialog()).perform(androidx.test.espresso.action.ViewActions.scrollTo())
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(isDisplayed()));
+        onView(withText(R.string.btn_close)).inRoot(isDialog()).perform(click());
     }
     @Rule public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(MainActivity.class);
     @Before public void isolatedOnly() {
@@ -194,10 +193,9 @@ public class CleanUxRegressionTest {
                         public void onSaveTask(JSONObject value) {}
                         public void onMutateTask(String id, boolean remove) {}
                     });
-                for (int id : new int[]{R.id.task_item_btn_edit, R.id.task_item_btn_toggle, R.id.task_item_btn_delete})
+                for (int id : new int[]{R.id.task_item_more, R.id.task_item_btn_toggle})
                     assertTrue(content.findViewById(id).getContentDescription().toString().contains("Projekt testowy"));
-                assertEquals(3, ((TextView) content.findViewById(R.id.task_item_notes)).getMaxLines());
-                assertTrue(hasText(content, activity.getString(R.string.tasks_chip_week) + " (0)"));
+                assertFalse(pl.vistula.checker.core.TaskTools.matches(task, "week", "", java.time.LocalDate.now(UsosClient.ZONE)));
             } catch (JSONException e) { throw new AssertionError(e); }
         });
     }
@@ -217,10 +215,10 @@ public class CleanUxRegressionTest {
             card.measure(View.MeasureSpec.makeMeasureSpec(UiHelper.dp(context, 280), View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
             card.layout(0, 0, card.getMeasuredWidth(), card.getMeasuredHeight());
-            for (int id : new int[]{R.id.task_item_btn_edit, R.id.task_item_btn_delete, R.id.task_item_btn_toggle}) {
-                TextView button = card.findViewById(id);
+            for (int id : new int[]{R.id.task_item_more, R.id.task_item_btn_toggle}) {
+                View button = card.findViewById(id);
                 assertTrue(button.getMeasuredHeight() >= UiHelper.dp(context, 48));
-                assertEquals(0, button.getLayout().getEllipsisCount(button.getLayout().getLineCount() - 1));
+                assertTrue(button.getMeasuredWidth() >= UiHelper.dp(context, 48));
             }
         });
     }

@@ -32,6 +32,10 @@ public final class PaymentsScreenController {
     public static void render(MainActivity activity, LinearLayout content, JSONObject d,
                               JSONObject state, boolean connected, Runnable onRefresh) throws JSONException {
 
+        ToolScreenUi.header(activity, content, R.string.tool_payments_title, menu -> {
+            ToolScreenUi.action(menu, R.string.payments_refresh_btn, onRefresh);
+            ToolScreenUi.action(menu, R.string.tool_api_methods, () -> activity.openApiModule("payments"));
+        });
         UiHelper.note(activity, content,
             activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(d.optLong("successAt"))),
             UiHelper.MUTED);
@@ -56,7 +60,7 @@ public final class PaymentsScreenController {
             || (connected && !authorizedScopes.isEmpty() && !hasPaymentsScope);
 
         if (scopeMissing) {
-            LinearLayout warnBox = UiHelper.card(activity, content, Color.rgb(255, 248, 230));
+            LinearLayout warnBox = UiHelper.section(activity, content, Color.rgb(255, 248, 230));
             UiHelper.add(activity, warnBox, activity.getString(R.string.payments_missing_scope_badge), 11, Color.rgb(180, 110, 0), true);
             UiHelper.add(activity, warnBox, activity.getString(R.string.payments_missing_scope_title), 17, UiHelper.INK, true);
             UiHelper.note(activity, warnBox,
@@ -71,15 +75,14 @@ public final class PaymentsScreenController {
                 UiHelper.empty(activity, content,
                     activity.getString(R.string.payments_empty_title),
                     activity.getString(R.string.payments_empty_desc));
-                content.addView(UiHelper.button(activity, activity.getString(R.string.payments_refresh_btn), onRefresh, false));
-            }
+                    }
             return;
         }
 
         if (!payments.accounts.isEmpty()) {
             UiHelper.heading(activity, content, activity.getString(R.string.payments_accounts_heading));
             for (PaymentInfo.Account acc : payments.accounts) {
-                LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
+                LinearLayout box = UiHelper.section(activity, content, Color.WHITE);
                 UiHelper.add(activity, box, acc.name.isEmpty() ? activity.getString(R.string.payments_account_default_name) : acc.name, 18, UiHelper.INK, true);
                 if (!acc.faculty.isEmpty()) {
                     UiHelper.add(activity, box, activity.getString(R.string.payments_faculty, acc.faculty), 13, UiHelper.MUTED, false);
@@ -107,7 +110,7 @@ public final class PaymentsScreenController {
         if (!payments.installments.isEmpty()) {
             UiHelper.heading(activity, content, activity.getString(R.string.payments_schedule_heading));
             double totalUnpaid = payments.totalUnpaidAmount();
-            LinearLayout summaryBox = UiHelper.card(activity, content, payments.hasOverdue() ? Color.rgb(255, 240, 240) : Color.rgb(238, 245, 242));
+            LinearLayout summaryBox = UiHelper.section(activity, content, payments.hasOverdue() ? Color.rgb(255, 240, 240) : Color.rgb(238, 245, 242));
             UiHelper.add(activity, summaryBox, activity.getString(R.string.payments_status_settlement), 11, payments.hasOverdue() ? Color.rgb(160, 48, 40) : UiHelper.GREEN, true);
             UiHelper.add(activity, summaryBox, activity.getString(R.string.payments_total_due, totalUnpaid), 22, UiHelper.INK, true);
             UiHelper.note(activity, summaryBox,
@@ -171,7 +174,6 @@ public final class PaymentsScreenController {
                 content.addView(instCard);
             }
         }
-        content.addView(UiHelper.button(activity, activity.getString(R.string.payments_refresh_btn), onRefresh, false));
     }
 
     public static String formatIban(String raw) {

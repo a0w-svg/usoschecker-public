@@ -8,6 +8,10 @@ public final class Snapshot {
     // Enrolled course editions are separate from grades and never participate in grade diffs.
     public final List<Record> courses = new ArrayList<>();
     public final String start, end;
+    // The primary snapshot remains Polish for stable monitoring across UI language changes.
+    public final Map<String, Snapshot> localized = new LinkedHashMap<>();
+    public Snapshot forLanguage(String language) { return localized.getOrDefault(ApiLanguage.normalize(language), this); }
+    public final Map<String, String> serviceErrors = new LinkedHashMap<>();
     public PaymentInfo payments;
     public final Map<String, AcademicTerm> terms = new LinkedHashMap<>();
     public ThesisInfo thesis;
@@ -38,6 +42,7 @@ public final class Snapshot {
         for (Record course : courses) courseRows.put(course.json());
         o.put("courses", courseRows);
         if (payments != null) o.put("payments", payments.json());
+        if (!serviceErrors.isEmpty()) o.put("serviceErrors", new JSONObject(serviceErrors));
         if (terms != null && !terms.isEmpty()) {
             JSONObject tObj = new JSONObject();
             for (Map.Entry<String, AcademicTerm> e : terms.entrySet()) tObj.put(e.getKey(), e.getValue().json());
@@ -54,6 +59,11 @@ public final class Snapshot {
             for (NewsArticle na : news) newsArr.put(na.json());
             o.put("news", newsArr);
         }
+        if (!localized.isEmpty()) {
+            JSONObject translations = new JSONObject();
+            for (Map.Entry<String, Snapshot> entry : localized.entrySet()) translations.put(entry.getKey(), entry.getValue().json());
+            o.put("localized", translations);
+        }
         return o;
     }
     public static Snapshot from(JSONObject o) throws JSONException {
@@ -62,6 +72,8 @@ public final class Snapshot {
         for (int i = 0; i < rows.length(); i++) s.add(Record.from(rows.getJSONObject(i)));
         JSONArray courseRows = o.optJSONArray("courses");
         if (courseRows != null) for (int i = 0; i < courseRows.length(); i++) s.courses.add(Record.from(courseRows.getJSONObject(i)));
+        JSONObject errors = o.optJSONObject("serviceErrors");
+        if (errors != null) for (Iterator<String> keys = errors.keys(); keys.hasNext();) { String key = keys.next(); s.serviceErrors.put(key, errors.optString(key)); }
         if (o.has("payments")) s.payments = PaymentInfo.from(o.optJSONObject("payments"));
         if (o.has("terms")) {
             JSONObject tObj = o.optJSONObject("terms");
@@ -87,6 +99,15 @@ public final class Snapshot {
                 for (int i = 0; i < newsArr.length(); i++) {
                     s.news.add(NewsArticle.from(newsArr.optJSONObject(i)));
                 }
+            }
+        }
+        JSONObject translations = o.optJSONObject("localized");
+        if (translations != null) for (String language : new String[]{"en", "uk"}) {
+            JSONObject translation = translations.optJSONObject(language);
+            if (translation != null) {
+                JSONObject flat = new JSONObject(translation.toString());
+                flat.remove("localized");
+                s.localized.put(language, Snapshot.from(flat));
             }
         }
         return s;

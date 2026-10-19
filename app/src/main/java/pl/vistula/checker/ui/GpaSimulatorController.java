@@ -26,6 +26,7 @@ public final class GpaSimulatorController {
                               java.util.function.Consumer<Double> onTargetChanged,
                               java.util.function.Consumer<Double> onEctsChanged) throws JSONException {
 
+        ToolScreenUi.header(activity, content, R.string.tool_gpa_title, null);
         JSONObject raw = d.optJSONObject("snapshot");
         if (raw == null) {
             UiHelper.empty(activity, content,
@@ -40,7 +41,7 @@ public final class GpaSimulatorController {
         Snapshot snapshot = Snapshot.from(raw);
         GradeSummary summary = GradeSummary.of(snapshot.records.values());
 
-        LinearLayout currentCard = UiHelper.card(activity, content, Color.rgb(238, 245, 242));
+        LinearLayout currentCard = UiHelper.section(activity, content, Color.rgb(238, 245, 242));
         UiHelper.add(activity, currentCard, activity.getString(R.string.gpa_status_header), 11, UiHelper.GREEN, true);
 
         double currentWeighted = !Double.isNaN(summary.ectsAverage) ? summary.ectsAverage : summary.average;
@@ -62,7 +63,7 @@ public final class GpaSimulatorController {
             activity.getString(R.string.gpa_index_entries, (summary.numeric + summary.other), summary.numeric), 12, UiHelper.MUTED, false);
 
         // Rector's Scholarship
-        LinearLayout scholarCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout scholarCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, scholarCard, activity.getString(R.string.gpa_rector_title), 18, UiHelper.INK, true);
         String scholarText = GpaCalculator.scholarshipStatus(currentWeighted);
         boolean qualifiesScholar = currentWeighted >= GpaCalculator.SCHOLARSHIP_THRESHOLD;
@@ -70,7 +71,7 @@ public final class GpaSimulatorController {
         UiHelper.note(activity, scholarCard, activity.getString(R.string.gpa_rector_rule), UiHelper.MUTED);
 
         // Honors Diploma
-        LinearLayout honorsCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout honorsCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, honorsCard, activity.getString(R.string.gpa_honors_title), 18, UiHelper.INK, true);
         String honorsText = GpaCalculator.honorsStatus(currentWeighted);
         boolean qualifiesHonors = currentWeighted >= GpaCalculator.HONORS_THRESHOLD;
@@ -78,7 +79,7 @@ public final class GpaSimulatorController {
         UiHelper.note(activity, honorsCard, activity.getString(R.string.gpa_honors_rule), UiHelper.MUTED);
 
         // Simulator
-        LinearLayout simCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout simCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, simCard, activity.getString(R.string.gpa_sim_card_title), 18, UiHelper.INK, true);
         UiHelper.note(activity, simCard, activity.getString(R.string.gpa_sim_card_desc), UiHelper.MUTED);
 
@@ -117,7 +118,7 @@ public final class GpaSimulatorController {
         double currentEcts = !Double.isNaN(summary.totalEcts) && summary.totalEcts > 0 ? summary.totalEcts : 30.0;
         GpaCalculator.SimulationResult sim = GpaCalculator.simulate(currentWeighted, currentEcts, targetGpa, remainingEcts);
 
-        LinearLayout simResultBox = UiHelper.card(activity, simCard, sim.achievable ? Color.rgb(232, 243, 236) : Color.rgb(255, 238, 238));
+        LinearLayout simResultBox = UiHelper.section(activity, simCard, sim.achievable ? Color.rgb(232, 243, 236) : Color.rgb(255, 238, 238));
         UiHelper.add(activity, simResultBox,
             sim.achievable ? activity.getString(R.string.gpa_status_achievable) : activity.getString(R.string.gpa_status_unachievable),
             11, sim.achievable ? UiHelper.GREEN : Color.rgb(160, 48, 40), true);

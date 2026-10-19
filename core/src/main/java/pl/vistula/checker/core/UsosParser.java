@@ -13,14 +13,9 @@ public final class UsosParser {
         return o.isNull(field) ? "" : o.optString(field, "");
     }
     public static String language(JSONObject o) {
-        String pl = optionalText(o, "pl");
-        if (!pl.isEmpty()) return pl;
-        String en = optionalText(o, "en");
-        if (!en.isEmpty()) return en;
-        Iterator<String> keys = o.keys();
-        while (keys.hasNext()) { String value = optionalText(o, keys.next()); if (!value.isEmpty()) return value; }
-        return "";
+        return ApiLanguage.text(o);
     }
+
     public static Map<String, String> courseNames(JSONObject courses) {
         Map<String, String> names = new TreeMap<>();
         for (String term : sortedKeys(courses)) {
@@ -160,9 +155,9 @@ public final class UsosParser {
         String studentStatus = "";
         if (user.has("student_status") && !user.isNull("student_status")) {
             int status = user.optInt("student_status", -1);
-            if (status == 2) studentStatus = "Aktywny student";
-            else if (status == 1) studentStatus = "Były student";
-            else if (status == 0) studentStatus = "Nie jest studentem";
+            if (status == 2) studentStatus = ApiLanguage.label("Aktywny student", "Active student", "Активний студент");
+            else if (status == 1) studentStatus = ApiLanguage.label("Były student", "Former student", "Колишній студент");
+            else if (status == 0) studentStatus = ApiLanguage.label("Nie jest studentem", "Not a student", "Не є студентом");
         }
 
         String photoUrl = "";
@@ -227,7 +222,7 @@ public final class UsosParser {
                     LocalDateTime.parse(modified, TIME);
                 }
                 String comment = optionalText(g, "comment");
-                String value = symbol + " · termin " + number + (comment.isEmpty() ? "" : "\n" + comment);
+                String value = symbol + " · " + ApiLanguage.label("termin", "attempt", "спроба") + " " + number + (comment.isEmpty() ? "" : "\n" + comment);
 
                 JSONObject meta = new JSONObject();
                 meta.put("rawGrade", new JSONObject(g.toString()));
@@ -327,13 +322,18 @@ public final class UsosParser {
                 String date = parsedStart.toLocalDate().toString();
                 if (!s.covers(date)) continue;
 
-                String genericName = a.optJSONObject("name") == null ? "Brak nazwy" : language(a.getJSONObject("name"));
+                String genericName = a.optJSONObject("name") == null ? ApiLanguage.label("Brak nazwy", "Unnamed", "Без назви") : language(a.getJSONObject("name"));
                 String courseName = a.optJSONObject("course_name") == null ? genericName : language(a.getJSONObject("course_name"));
 
                 String stable;
                 if (type.equals("classgroup2") && !a.isNull("sm_id")) stable = "sm:" + a.optString("sm_id", "");
                 else if (type.equals("classgroup")) stable = "cg:" + a.optString("unit_id", "") + ":" + a.optString("group_number", "") + ":" + a.optString("cgwm_id", "") + ":" + date;
-                else stable = type + ":" + a.optString("unit_id", "") + ":" + a.optString("group_number", "") + ":" + courseName + ":" + start;
+                else {
+                    JSONObject stableName = a.optJSONObject("course_name");
+                    if (stableName == null) stableName = a.optJSONObject("name");
+                    String canonicalName = stableName == null ? "Brak nazwy" : ApiLanguage.text(stableName, "pl");
+                    stable = type + ":" + a.optString("unit_id", "") + ":" + a.optString("group_number", "") + ":" + canonicalName + ":" + start;
+                }
                 String room = optionalText(a, "room_number");
                 String building = a.optJSONObject("building_name") == null ? "" : language(a.getJSONObject("building_name"));
                 String classType = a.optJSONObject("classtype_name") == null ? "" : language(a.getJSONObject("classtype_name"));
@@ -349,10 +349,10 @@ public final class UsosParser {
                 Collections.sort(ids);
                 String value = start.substring(11, 16) + " – " + end.substring(11, 16)
                     + (classType.isEmpty() ? "" : "\n" + classType)
-                    + (room.isEmpty() ? "" : "\nSala " + room)
+                    + (room.isEmpty() ? "" : "\n" + ApiLanguage.label("Sala", "Room", "Аудиторія") + " " + room)
                     + (building.isEmpty() ? "" : " · " + building)
-                    + (ids.isEmpty() ? "" : "\nProwadzący: " + String.join(", ", ids))
-                    + (a.optString("frequency", "").equals("other") || a.optString("frequency", "").equals("once") ? "\nTermin orientacyjny" : "");
+                    + (ids.isEmpty() ? "" : "\n" + ApiLanguage.label("Prowadzący", "Lecturers", "Викладачі") + ": " + String.join(", ", ids))
+                    + (a.optString("frequency", "").equals("other") || a.optString("frequency", "").equals("once") ? "\n" + ApiLanguage.label("Termin orientacyjny", "Tentative date", "Орієнтовна дата") : "");
 
                 JSONObject meta = new JSONObject();
                 meta.put("rawLesson", new JSONObject(a.toString()));
@@ -461,7 +461,7 @@ public final class UsosParser {
                 String id = String.valueOf(item.opt("id"));
                 JSONObject nameObj = item.optJSONObject("name");
                 String name = nameObj != null ? language(nameObj) : optionalText(item, "name");
-                if (name.isEmpty()) name = "Należność";
+                if (name.isEmpty()) name = ApiLanguage.label("Należność", "Payment", "Платіж");
                 double amount = item.optDouble("amount", 0.0);
                 String currency = optionalText(item, "currency");
                 if (currency.isEmpty()) currency = "PLN";
@@ -509,7 +509,7 @@ public final class UsosParser {
                     String status = optionalText(pi, "status");
                     if (status.isEmpty()) {
                         if ("paid".equalsIgnoreCase(payState)) {
-                            status = "Opłacona";
+                            status = ApiLanguage.label("Opłacona", "Paid", "Сплачено");
                         } else if ("cancelled".equalsIgnoreCase(payState)) {
                             status = "Anulowana";
                         } else {
@@ -520,7 +520,7 @@ public final class UsosParser {
                                     overdue = LocalDate.parse(d).isBefore(LocalDate.now());
                                 } catch (Exception ignored) {}
                             }
-                            status = overdue ? "Po terminie" : "Do zapłaty";
+                            status = overdue ? ApiLanguage.label("Po terminie", "Overdue", "Прострочено") : ApiLanguage.label("Do zapłaty", "Due", "До сплати");
                         }
                     }
                     String paymentDate = optionalText(pi, "payment_date_settled");
@@ -531,13 +531,13 @@ public final class UsosParser {
                 }
             } else {
                 String instId = payId.isEmpty() ? ("pay:" + (i + 1)) : payId;
-                String fullName = !payDesc.isEmpty() ? payDesc : "Należność USOS";
+                String fullName = !payDesc.isEmpty() ? payDesc : ApiLanguage.label("Należność USOS", "USOS payment", "Платіж USOS");
                 String status = optionalText(item, "status");
                 if (status.isEmpty()) status = payState;
-                if ("paid".equalsIgnoreCase(status)) status = "Opłacona";
-                else if ("unsettled".equalsIgnoreCase(status)) status = "Do zapłaty";
-                else if ("overdue".equalsIgnoreCase(status)) status = "Po terminie";
-                else if ("underpaid".equalsIgnoreCase(status)) status = "Niedopłata";
+                if ("paid".equalsIgnoreCase(status)) status = ApiLanguage.label("Opłacona", "Paid", "Сплачено");
+                else if ("unsettled".equalsIgnoreCase(status)) status = ApiLanguage.label("Do zapłaty", "Due", "До сплати");
+                else if ("overdue".equalsIgnoreCase(status)) status = ApiLanguage.label("Po terminie", "Overdue", "Прострочено");
+                else if ("underpaid".equalsIgnoreCase(status)) status = ApiLanguage.label("Niedopłata", "Underpaid", "Недоплата");
                 else if ("cancelled".equalsIgnoreCase(status)) status = "Anulowana";
                 else if (status.isEmpty()) {
                     boolean overdue = false;
@@ -547,7 +547,7 @@ public final class UsosParser {
                             overdue = LocalDate.parse(d).isBefore(LocalDate.now());
                         } catch (Exception ignored) {}
                     }
-                    status = overdue ? "Po terminie" : "Do zapłaty";
+                    status = overdue ? ApiLanguage.label("Po terminie", "Overdue", "Прострочено") : ApiLanguage.label("Do zapłaty", "Due", "До сплати");
                 }
                 String paymentDate = optionalText(item, "payment_date");
                 results.add(new PaymentInfo.Installment(instId, fullName, totalAmount, payCurrency, payDeadline, status, paymentDate, payAcc, payType));
@@ -686,6 +686,50 @@ public final class UsosParser {
         return results;
     }
 
+    private static String localizedText(Object value) {
+        return value instanceof JSONObject ? language((JSONObject) value) : value == null || value == JSONObject.NULL ? "" : String.valueOf(value);
+    }
+    /** participant2 returns course-test trees, rather than a flat list of exam grades. */
+    public static List<CourseTestRecord> courseTestTrees(JSONArray tests, Map<String, String> names) {
+        List<CourseTestRecord> result = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (int i = 0; i < tests.length(); i++) {
+            JSONObject test = tests.optJSONObject(i); if (test == null) continue;
+            JSONObject edition = test.optJSONObject("course_edition");
+            JSONObject course = edition == null ? null : edition.optJSONObject("course");
+            JSONObject term = edition == null ? null : edition.optJSONObject("term");
+            String id = course == null ? "" : optionalText(course, "id");
+            String title = course == null ? "" : localizedText(course.opt("name"));
+            if (title.isEmpty()) title = names.getOrDefault(id, id);
+            String termId = term == null ? "" : optionalText(term, "id");
+            collectTestNodes(test.optJSONObject("root"), id, title, termId, result, seen);
+        }
+        return result;
+    }
+    private static void collectTestNodes(JSONObject node, String courseId, String courseName, String term,
+                                         List<CourseTestRecord> result, Set<String> seen) {
+        if (node == null || !node.optBoolean("visible_for_students", true)) return;
+        String id = optionalText(node, "id");
+        if (id.isEmpty() || !seen.add(term + ":" + id)) return;
+        JSONObject task = node.optJSONObject("task_node_details");
+        JSONObject grading = node.optJSONObject("grade_node_details");
+        JSONObject points = task == null ? null : task.optJSONObject("students_points");
+        if (points == null) points = node.optJSONObject("students_points");
+        JSONObject grade = grading == null ? null : grading.optJSONObject("students_grade");
+        JSONObject value = grade == null ? null : grade.optJSONObject("grade_value");
+        boolean hasPoints = points != null && !points.isNull("points") && points.has("points");
+        boolean hasGrade = value != null && !optionalText(value, "symbol").isEmpty();
+        if (hasPoints || hasGrade) result.add(new CourseTestRecord(id, courseId, courseName,
+            localizedText(node.opt("name")), hasPoints ? points.optDouble("points", 0) : 0,
+            task == null ? 0 : task.optDouble("points_max", 0), hasGrade ? optionalText(value, "symbol") : "",
+            hasGrade ? optionalText(grade, "last_changed") : optionalText(points, "last_changed"), term));
+        for (String key : new String[]{"subnodes_deep", "subnodes"}) {
+            JSONArray children = node.optJSONArray(key);
+            if (children != null) for (int i = 0; i < children.length(); i++)
+                collectTestNodes(children.optJSONObject(i), courseId, courseName, term, result, seen);
+        }
+    }
+
     public static List<NewsArticle> newsArticles(Object raw) {
         if (raw == null) return Collections.emptyList();
         List<NewsArticle> results = new ArrayList<>();
@@ -726,12 +770,13 @@ public final class UsosParser {
                 String first = optionalText(authorObj, "first_name");
                 String last = optionalText(authorObj, "last_name");
                 authorName = (first + " " + last).trim();
+                if (authorName.isEmpty()) authorName = language(authorObj);
             }
             if (authorName.isEmpty()) authorName = optionalText(a, "author_name");
             if (authorName.isEmpty()) authorName = optionalText(a, "author");
 
             String url = optionalText(a, "url");
-            results.add(new NewsArticle(id, title, pubDate, authorName, cleanHeadline, url));
+            results.add(new NewsArticle(id, title, pubDate, authorName, cleanHeadline, url, localizedText(a.opt("content_html"))));
         }
         return results;
     }

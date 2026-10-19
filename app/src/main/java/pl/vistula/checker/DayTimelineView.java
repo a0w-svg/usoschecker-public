@@ -51,7 +51,9 @@ final class DayTimelineView extends FrameLayout {
             block.setGravity(Gravity.TOP); block.setEllipsize(android.text.TextUtils.TruncateAt.END);
             String hours = item.lesson.start.format(CLOCK) + " – " + item.lesson.end.format(CLOCK);
             String room = "";
-            for (String line : item.lesson.record.value.split("\n")) if (line.startsWith("Sala ")) room = line;
+            String roomNumber = item.lesson.record.optMeta("room");
+            if (!roomNumber.isEmpty()) room = context.getString(R.string.lesson_room_label, roomNumber);
+            else for (String line : item.lesson.record.value.split("\n")) if (line.startsWith("Sala ")) room = line;
             String label = (item.lesson.tentative() ? "Orientacyjne · " : "") + item.lesson.record.title;
             int height = dp((item.end - item.start) * HOUR_HEIGHT / 60f);
             if (height >= dp(42)) label += "\n" + hours;

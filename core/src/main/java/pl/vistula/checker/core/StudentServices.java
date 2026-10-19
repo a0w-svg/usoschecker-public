@@ -17,18 +17,10 @@ public final class StudentServices {
         return value instanceof String || value instanceof Number ? String.valueOf(value) : "";
     }
     public static String localized(Object value) {
-        if (value instanceof String) return (String) value;
-        if (!(value instanceof JSONObject)) return "";
-        JSONObject languages = (JSONObject) value;
-        String polish = text(languages, "pl"), english = text(languages, "en");
-        if (!polish.isEmpty()) return polish;
-        if (!english.isEmpty()) return english;
-        for (java.util.Iterator<String> keys = languages.keys(); keys.hasNext();) {
-            String key = keys.next();
-            String candidate = text(languages, key);
-            if (!candidate.isEmpty()) return candidate;
-        }
-        return "";
+        return ApiLanguage.text(value);
+    }
+    public static String localized(Object value, String language) {
+        return ApiLanguage.text(value, language);
     }
     public static LocalDate date(String value) {
         try { return LocalDate.parse(value.length() >= 10 ? value.substring(0, 10) : value); }
@@ -74,8 +66,8 @@ public final class StudentServices {
     }
     /** Cache only status information, never mobile activation tokens or passwords. */
     public static JSONObject safeMobileCard(JSONObject source) throws JSONException {
-        JSONObject result = new JSONObject().put("why_cannot_order", localized(source.opt("why_cannot_order")))
-            .put("why_cannot_revoke", localized(source.opt("why_cannot_revoke")))
+        JSONObject result = new JSONObject().put("why_cannot_order", ApiLanguage.safe(source.opt("why_cannot_order")))
+            .put("why_cannot_revoke", ApiLanguage.safe(source.opt("why_cannot_revoke")))
             .put("orderEligibilityKnown", source.has("why_cannot_order"))
             .put("revokeEligibilityKnown", source.has("why_cannot_revoke"))
             .put("expected_expiration_date", text(source, "expected_expiration_date"));
@@ -94,9 +86,10 @@ public final class StudentServices {
     public static final class Document {
         public final String id, name, status, typeName, published, delivered, blobId;
         public final List<String> actions = new ArrayList<>();
-        public Document(JSONObject source) {
-            id = text(source, "id"); name = localized(source.opt("name")); status = localized(source.opt("status"));
-            typeName = localized(source.opt("type_name")); published = text(source, "published_date");
+        public Document(JSONObject source) { this(source, ApiLanguage.current()); }
+        public Document(JSONObject source, String language) {
+            id = text(source, "id"); name = localized(source.opt("name"), language); status = localized(source.opt("status"), language);
+            typeName = localized(source.opt("type_name"), language); published = text(source, "published_date");
             delivered = text(source, "delivered_date"); blobId = text(source, "id_blobbox");
             JSONArray values = source.optJSONArray("actions");
             if (values != null) for (int i = 0; i < values.length(); i++) {
@@ -112,7 +105,12 @@ public final class StudentServices {
     }
     public static JSONArray safeDocuments(JSONArray source) throws JSONException {
         JSONArray result = new JSONArray();
-        for (int i = 0; i < source.length(); i++) result.put(new Document(source.getJSONObject(i)).json());
+        for (int i = 0; i < source.length(); i++) {
+            JSONObject raw = source.getJSONObject(i);
+            JSONObject safe = new Document(raw).json();
+            for (String key : new String[]{"name", "status", "type_name"}) safe.put(key, ApiLanguage.safe(raw.opt(key)));
+            result.put(safe);
+        }
         return result;
     }
 }

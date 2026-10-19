@@ -90,12 +90,12 @@ public final class PaymentInfo {
         public boolean isPaid() {
             return "paid".equalsIgnoreCase(status) || "opłacona".equalsIgnoreCase(status)
                 || "oplacona".equalsIgnoreCase(status) || "settled".equalsIgnoreCase(status)
-                || "rozliczona".equalsIgnoreCase(status);
+                || "rozliczona".equalsIgnoreCase(status) || "сплачено".equalsIgnoreCase(status);
         }
 
         public boolean isOverdue() {
             if ("overdue".equalsIgnoreCase(status) || "przeterminowana".equalsIgnoreCase(status)
-                || "po terminie".equalsIgnoreCase(status)) return true;
+                || "po terminie".equalsIgnoreCase(status) || "прострочено".equalsIgnoreCase(status)) return true;
             if (isPaid()) return false;
             if (deadline != null && !deadline.isEmpty()) {
                 try {

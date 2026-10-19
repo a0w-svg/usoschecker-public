@@ -62,6 +62,53 @@ public class HistoryChangesRegressionTest {
         });
     }
 
+    @Test public void minimalHistoryKeepsSearchInMenuAndOpensFullDetails() throws Exception {
+        long deadline = android.os.SystemClock.uptimeMillis() + 10000;
+        boolean[] ready = {false};
+        while (!ready[0] && android.os.SystemClock.uptimeMillis() < deadline) {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
+                ready[0] = rule.getActivity().findViewById(R.id.progress_text).getVisibility() == View.GONE);
+            if (!ready[0]) android.os.SystemClock.sleep(50);
+        }
+        assertTrue("Startup must finish before replacing test content", ready[0]);
+        Change change = new Change(lesson("09:00", "10:00", "204"), lesson("10:00", "11:00", "315"), 1);
+        JSONObject state = new JSONObject().put("history", new JSONArray().put(change.json()));
+        final LinearLayout[] root = new LinearLayout[1];
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            MainActivity activity = rule.getActivity();
+            root[0] = new LinearLayout(activity);
+            root[0].setOrientation(LinearLayout.VERTICAL);
+            activity.setContentView(root[0]);
+            HistoryScreenController.render(activity, root[0], state, "wszystkie", "", false,
+                ignored -> {}, ignored -> {}, null);
+            assertFalse(findSearch(root[0]).isShown());
+            root[0].findViewById(R.id.history_more).performClick();
+        });
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.history_search_action))
+            .perform(androidx.test.espresso.action.ViewActions.click());
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            assertTrue(findSearch(root[0]).isShown());
+            findSearch(root[0]).setText("no matching subject");
+            assertFalse(text(root[0]).contains("Schedule-only subject"));
+            findSearch(root[0]).setText("");
+            assertTrue(text(root[0]).contains("Schedule-only subject"));
+        });
+        androidx.test.espresso.Espresso.closeSoftKeyboard();
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Schedule-only subject"))
+            .perform(androidx.test.espresso.action.ViewActions.click());
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.history_details_title))
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(androidx.test.espresso.matcher.ViewMatchers.isDisplayed()));
+    }
+
+    private android.widget.EditText findSearch(View view) {
+        if (view instanceof android.widget.EditText) return (android.widget.EditText) view;
+        if (view instanceof ViewGroup) for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+            android.widget.EditText result = findSearch(((ViewGroup) view).getChildAt(i));
+            if (result != null) return result;
+        }
+        return null;
+    }
+
     private Record lesson(String start, String end, String room) throws Exception {
         return new Record("lesson", "plan", "Schedule-only subject", start + "–" + end + " · " + room, "", "2026-10-15", "",
             "2026-10-15 " + start + ":00", "2026-10-15 " + end + ":00", Double.NaN, new JSONObject().put("room", room));

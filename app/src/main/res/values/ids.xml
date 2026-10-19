@@ -6,4 +6,12 @@
     <item name="task_title" type="id" />
     <item name="task_notes" type="id" />
     <item name="task_priority" type="id" />
+    <item name="history_more" type="id" />
+    <item name="grades_more" type="id" />
+    <item name="grades_semester" type="id" />
+    <item name="grades_active_filters" type="id" />
+    <item name="tasks_more" type="id"/>
+    <item name="tasks_add" type="id"/>
+    <item name="tool_screen_more" type="id"/>
+    <item name="document_more" type="id"/>
 </resources>

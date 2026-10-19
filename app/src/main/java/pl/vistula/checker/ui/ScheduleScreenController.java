@@ -112,17 +112,18 @@ public final class ScheduleScreenController {
         previous.setContentDescription(activity.getString(weekly ? R.string.schedule_previous_week : R.string.schedule_previous_day));
         Button next = headerIcon(activity, R.drawable.ic_schedule_next, () -> move.accept(1));
         next.setContentDescription(activity.getString(weekly ? R.string.schedule_next_week : R.string.schedule_next_day));
+        Locale navLocale = Language.currentLocale(activity);
         String dateLabel = calendarMode.equals("agenda") ? activity.getString(R.string.schedule_mode_agenda)
-            : weekly ? monday.format(DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pl-PL"))) + " – "
-                + monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("pl-PL")))
-            : activeDate.format(DateTimeFormatter.ofPattern("EEE, d MMM", Locale.forLanguageTag("pl-PL")));
+            : weekly ? monday.format(DateTimeFormatter.ofPattern("d MMM", navLocale)) + " – "
+                + monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", navLocale))
+            : activeDate.format(DateTimeFormatter.ofPattern("EEE, d MMM", navLocale));
         Button date = headerButton(activity, dateLabel, () -> {
             List<LocalDate> days = new ArrayList<>(PlanBrowser.daysWithLessons(allLessons, activity.getCalendarQuery()));
             if (days.isEmpty()) {
                 Toast.makeText(activity, R.string.schedule_no_search_results, Toast.LENGTH_SHORT).show(); return;
             }
             String[] labels = new String[days.size()];
-            for (int i = 0; i < days.size(); i++) labels[i] = days.get(i).format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.forLanguageTag("pl-PL")));
+            for (int i = 0; i < days.size(); i++) labels[i] = days.get(i).format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", navLocale));
             new MaterialAlertDialogBuilder(activity).setTitle(R.string.schedule_btn_choose_date)
                 .setSingleChoiceItems(labels, days.indexOf(activeDate), (dialog, index) -> {
                 activity.setCalendarDate(days.get(index).toString());
@@ -142,10 +143,10 @@ public final class ScheduleScreenController {
         more.setContentDescription(activity.getString(R.string.schedule_options));
         previous.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, -1) != null);
         next.setEnabled(PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, 1) != null);
-        navBar.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         navBar.addView(previous, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         navBar.addView(date, new LinearLayout.LayoutParams(0, -2, 1));
         navBar.addView(next, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
+        navBar.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
         content.addView(navBar);
 
         EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.schedule_search_hint), activity.getCalendarQuery(), null, () -> activity.setCalendarQuery(""));
@@ -220,9 +221,10 @@ public final class ScheduleScreenController {
         content.removeAllViews();
         List<LessonTime> visible = PlanBrowser.select(allLessons, activeDate, calendarMode, query);
 
+        Locale contentLocale = Language.currentLocale(activity);
         if (visible.isEmpty()) {
             UiHelper.empty(activity, content,
-                activeDate.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("pl-PL"))),
+                activeDate.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", contentLocale)),
                 !query.trim().isEmpty() ? activity.getString(R.string.schedule_no_search_results)
                     : calendarMode.equals("week") ? activity.getString(R.string.schedule_week_empty)
                     : calendarMode.equals("agenda") ? activity.getString(R.string.schedule_agenda_empty)
@@ -254,7 +256,7 @@ public final class ScheduleScreenController {
                 if (!lessonDay.equals(currentSectionDay)) {
                     currentSectionDay = lessonDay;
                     if (calendarMode.equals("week") || calendarMode.equals("agenda"))
-                        UiHelper.heading(activity, content, lessonDay.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("pl-PL"))));
+                        UiHelper.heading(activity, content, lessonDay.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", contentLocale)));
                     breaks.clear();
                     // Use the complete plan so a search cannot turn hidden meetings into free time.
                     for (ScheduleBreaks.Break gap : ScheduleBreaks.inDay(allLessons, lessonDay)) breaks.put(gap.end.toInstant(), gap);
@@ -323,7 +325,7 @@ public final class ScheduleScreenController {
         }
     }
 
-    private static Button headerButton(Context context, String label, Runnable action) {
+    static Button headerButton(Context context, String label, Runnable action) {
         Button button = UiHelper.button(context, label, action, false);
         button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.TRANSPARENT));
         button.setPadding(UiHelper.dp(context, 4), 0, UiHelper.dp(context, 4), 0);
@@ -335,7 +337,7 @@ public final class ScheduleScreenController {
         return button;
     }
 
-    private static Button headerIcon(Context context, int icon, Runnable action) {
+    static Button headerIcon(Context context, int icon, Runnable action) {
         MaterialButton button = (MaterialButton) headerButton(context, "", action);
         button.setIconResource(icon);
         button.setIconSize(UiHelper.dp(context, 28));
@@ -480,7 +482,8 @@ public final class ScheduleScreenController {
     private static void sharePlanText(MainActivity activity, List<LessonTime> visible, LocalDate activeDate) {
         if (visible.isEmpty()) return;
         StringBuilder sb = new StringBuilder();
-        sb.append(activity.getString(R.string.schedule_share_title, activeDate.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.forLanguageTag("pl-PL"))))).append("\n\n");
+        Locale shareLocale = Language.currentLocale(activity);
+        sb.append(activity.getString(R.string.schedule_share_title, activeDate.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", shareLocale)))).append("\n\n");
         for (LessonTime l : visible) {
             sb.append(l.start.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))).append(" – ").append(l.end.format(DateTimeFormatter.ofPattern("HH:mm"))).append(" | ")
                 .append(l.record.title).append("\n").append(l.record.value).append("\n\n");

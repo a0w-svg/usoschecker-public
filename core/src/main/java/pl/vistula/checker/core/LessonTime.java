@@ -24,7 +24,12 @@ public final class LessonTime {
     }
     public boolean current(Instant now) { return !now.isBefore(start.toInstant()) && now.isBefore(end.toInstant()); }
     public boolean contains(Instant now) { return current(now); }
-    public boolean tentative() { return record.value.contains("Termin orientacyjny"); }
+    public boolean tentative() {
+        String frequency = record.optMeta("frequency");
+        return "other".equals(frequency) || "once".equals(frequency)
+            || record.value.contains("Termin orientacyjny") || record.value.contains("Tentative date")
+            || record.value.contains("Орієнтовна дата");
+    }
     public boolean intersects(LocalDate date) {
         return start.toInstant().isBefore(date.plusDays(1).atStartOfDay(ZONE).toInstant())
             && end.toInstant().isAfter(date.atStartOfDay(ZONE).toInstant());

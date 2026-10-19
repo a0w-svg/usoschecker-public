@@ -13,9 +13,13 @@ import pl.vistula.checker.core.StudentServices;
 public final class StudentCardsController {
     private StudentCardsController() {}
     public static void render(MainActivity activity, LinearLayout content, JSONObject state, JSONObject services) throws Exception {
-        UiHelper.note(activity, content, activity.getString(R.string.cards_information_only), UiHelper.MUTED);
+        ToolScreenUi.header(activity, content, R.string.cards_title, menu -> {
+            ToolScreenUi.action(menu, R.string.cards_refresh, () -> activity.refreshStudentServices("cards"));
+            ToolScreenUi.action(menu, R.string.cards_all_methods, () -> activity.openApiModule("cards"));
+            ToolScreenUi.action(menu, R.string.cards_information_only, () -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
+                .setMessage(R.string.cards_information_only).setPositiveButton(R.string.btn_close, null).show());
+        });
         renderAccess(activity, content, state, "cards");
-        content.addView(UiHelper.button(activity, activity.getString(R.string.cards_refresh), () -> activity.refreshStudentServices("cards"), true));
         JSONObject physical = entry(services, "cards");
         status(activity, content, physical);
         JSONArray cards = physical.optJSONArray("data");
@@ -29,10 +33,10 @@ public final class StudentCardsController {
         JSONObject data = mobile.optJSONObject("data");
         if (data == null) UiHelper.empty(activity, content, activity.getString(R.string.cards_mobile_empty), activity.getString(R.string.services_load_hint));
         else {
-            LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
+            LinearLayout box = UiHelper.section(activity, content, Color.WHITE);
             JSONObject latest = data.optJSONObject("latest_order");
-            String orderReason = StudentServices.localized(data.opt("why_cannot_order"));
-            String revokeReason = StudentServices.localized(data.opt("why_cannot_revoke"));
+            String orderReason = StudentServices.localized(data.opt("why_cannot_order"), Language.currentLocale(activity).getLanguage());
+            String revokeReason = StudentServices.localized(data.opt("why_cannot_revoke"), Language.currentLocale(activity).getLanguage());
             if (latest == null) UiHelper.add(activity, box, activity.getString(R.string.cards_no_order), 18, UiHelper.INK, true);
             else {
                 String status = StudentServices.text(latest, "status"), id = StudentServices.text(latest, "id");
@@ -53,14 +57,13 @@ public final class StudentCardsController {
             if (orders != null && orders.length() > 0) box.addView(UiHelper.button(activity,
                 activity.getString(R.string.cards_order_history, orders.length()), () -> showOrders(activity, orders), false));
         }
-        content.addView(UiHelper.button(activity, activity.getString(R.string.cards_all_methods), () -> activity.openApiModule("cards"), false));
     }
     private static void showOrders(MainActivity activity, JSONArray orders) {
         LinearLayout body = new LinearLayout(activity); body.setOrientation(LinearLayout.VERTICAL);
         body.setPadding(UiHelper.dp(activity, 20), UiHelper.dp(activity, 8), UiHelper.dp(activity, 20), UiHelper.dp(activity, 8));
         for (int i = 0; i < orders.length(); i++) {
             JSONObject order = orders.optJSONObject(i); if (order == null) continue;
-            LinearLayout card = UiHelper.card(activity, body, Color.WHITE);
+            LinearLayout card = UiHelper.section(activity, body, Color.WHITE);
             UiHelper.add(activity, card, mobileStatus(activity, StudentServices.text(order, "status")), 18, UiHelper.INK, true);
             line(activity, card, R.string.cards_order_date, HistoryScreenController.formatFullDate(StudentServices.text(order, "order_date")));
             line(activity, card, R.string.cards_expiration, HistoryScreenController.formatFullDate(StudentServices.text(order, "expiration_date")));
@@ -72,19 +75,19 @@ public final class StudentCardsController {
     }
     private static void renderCard(MainActivity activity, LinearLayout parent, JSONObject state, StudentServices.Card card) {
         LocalDate today = LocalDate.now(UsosClient.ZONE);
-        LinearLayout box = UiHelper.card(activity, parent, UiHelper.INK);
-        UiHelper.add(activity, box, activity.getString(R.string.cards_physical_title), 12, Color.rgb(124, 219, 192), true);
-        UiHelper.add(activity, box, state.optString("user", activity.getString(R.string.cards_owner)), 23, Color.WHITE, true);
-        if (!card.studentNumber.isEmpty()) UiHelper.add(activity, box, activity.getString(R.string.cards_student_number, card.studentNumber), 16, Color.WHITE, true);
-        int statusColor = card.expired(today) ? Color.rgb(255, 183, 178) : Color.rgb(124, 219, 192);
+        LinearLayout box = UiHelper.section(activity, parent, UiHelper.INK);
+        UiHelper.add(activity, box, activity.getString(R.string.cards_physical_title), 12, UiHelper.MUTED, true);
+        UiHelper.add(activity, box, state.optString("user", activity.getString(R.string.cards_owner)), 23, UiHelper.INK, true);
+        if (!card.studentNumber.isEmpty()) UiHelper.add(activity, box, activity.getString(R.string.cards_student_number, card.studentNumber), 16, UiHelper.INK, true);
+        int statusColor = card.expired(today) ? UiHelper.foreground(activity, Color.rgb(160, 48, 40)) : UiHelper.MUTED;
         String formattedExp = HistoryScreenController.formatFullDate(card.expires);
         String expiration = card.expires.isEmpty() ? activity.getString(R.string.cards_no_expiration)
             : activity.getString(R.string.cards_expiration, formattedExp.isEmpty() ? card.expires : formattedExp);
         UiHelper.add(activity, box, expiration, 16, statusColor, true);
         if (card.expired(today)) UiHelper.note(activity, box, activity.getString(R.string.cards_expired), statusColor);
         else if (card.expiresSoon(today)) UiHelper.note(activity, box, activity.getString(R.string.cards_expires_soon), statusColor);
-        if (!card.issued.isEmpty()) UiHelper.note(activity, box, activity.getString(R.string.cards_issue_date, HistoryScreenController.formatFullDate(card.issued)), Color.LTGRAY);
-        if (!card.type.isEmpty()) UiHelper.note(activity, box, activity.getString(R.string.cards_type, card.type), Color.LTGRAY);
+        if (!card.issued.isEmpty()) UiHelper.note(activity, box, activity.getString(R.string.cards_issue_date, HistoryScreenController.formatFullDate(card.issued)), UiHelper.MUTED);
+        if (!card.type.isEmpty()) UiHelper.note(activity, box, activity.getString(R.string.cards_type, card.type), UiHelper.MUTED);
         if (!card.barcode.isEmpty()) box.addView(UiHelper.button(activity, activity.getString(R.string.cards_show_number), () ->
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
                 .setTitle(R.string.cards_barcode_title).setMessage(card.barcode)
@@ -104,7 +107,7 @@ public final class StudentCardsController {
     static void renderAccess(MainActivity activity, LinearLayout content, JSONObject state, String scope) {
         if (activity.isDemo()) return;
         if (!activity.connected() || !StudentServices.hasScope(state.optString("scopes"), scope)) {
-            LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
+            LinearLayout box = UiHelper.section(activity, content, Color.WHITE);
             UiHelper.add(activity, box, activity.getString(R.string.services_scope_required, scope), 14, UiHelper.INK, false);
             box.addView(UiHelper.button(activity, activity.getString(R.string.nav_account), () -> activity.navigate(4), false));
         }

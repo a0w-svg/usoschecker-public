@@ -63,13 +63,16 @@ public final class AccountScreenController {
                               JSONObject state, boolean demo, String detectedPin,
                               AccountListener listener) {
 
+        ToolScreenUi.header(activity, content, R.string.nav_account, null);
         if (demo) {
             content.addView(UiHelper.button(activity, activity.getString(R.string.btn_end_demo), listener::onEndDemo, true));
         }
 
         boolean connected = !state.optString("token").isEmpty();
-        content.addView(UiHelper.button(activity, activity.getString(R.string.appearance_title),
+        content.addView(UiHelper.actionRow(activity, activity.getString(R.string.appearance_title),
             () -> Appearance.choose(activity), false));
+        content.addView(UiHelper.actionRow(activity, activity.getString(R.string.language_title),
+            () -> Language.choose(activity), false));
 
         if (connected || demo) {
             JSONObject raw = d != null ? d.optJSONObject("snapshot") : null;
@@ -78,7 +81,7 @@ public final class AccountScreenController {
                 try { snapshot = Snapshot.from(raw); } catch (Exception ignored) {}
             }
 
-            LinearLayout profile = UiHelper.card(activity, content, Color.WHITE);
+            LinearLayout profile = UiHelper.section(activity, content, Color.WHITE);
             String userName = demo ? "Jan Kowalski" : state.optString("user", "Student USOS");
             String studentNr = demo ? "34589" : state.optString("studentNumber", "");
             String email = demo ? "j.kowalski@vistula.edu.pl" : state.optString("email", "");
@@ -151,7 +154,7 @@ public final class AccountScreenController {
         }
 
         if (connected) {
-            LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
+            LinearLayout box = UiHelper.section(activity, content, Color.WHITE);
             UiHelper.add(activity, box, activity.getString(R.string.sync_settings_title), 19, UiHelper.INK, true);
             UiHelper.note(activity, box, activity.getString(R.string.monitoring_last_success) + "\n"
                 + UiHelper.timestamp(d == null ? 0 : d.optLong("successAt")), UiHelper.MUTED);
@@ -204,7 +207,7 @@ public final class AccountScreenController {
                     .show();
             }, false));
         } else {
-            LinearLayout box = UiHelper.card(activity, content, Color.WHITE);
+            LinearLayout box = UiHelper.section(activity, content, Color.WHITE);
             UiHelper.add(activity, box, activity.getString(R.string.connect_usos_title), 20, UiHelper.INK, true);
             UiHelper.add(activity, box, activity.getString(R.string.connect_usos_desc), 14, UiHelper.MUTED, false);
 
@@ -239,14 +242,14 @@ public final class AccountScreenController {
             if (!buildKey.isEmpty()) {
                 UiHelper.note(activity, advanced, "Wczytano klucz aplikacji (Consumer Key & Secret) z pliku local.properties.", UiHelper.GREEN);
             }
-            EditText scopes = UiHelper.field(activity, advanced, "Zakresy zgody OAuth (oddzielone |)", state.optString("scopes", "grades|studies|payments|cards|offline_access"), false);
+            EditText scopes = UiHelper.field(activity, advanced, "Zakresy zgody OAuth (oddzielone |)", state.optString("scopes", "grades|studies|payments|cards|adm_documents|crstests|offline_access"), false);
             HorizontalScrollView scopeScroll = new HorizontalScrollView(activity);
             scopeScroll.setHorizontalScrollBarEnabled(false);
             LinearLayout scopeRow = new LinearLayout(activity);
             scopeRow.setOrientation(LinearLayout.HORIZONTAL);
-            Button b1 = UiHelper.button(activity, activity.getString(R.string.scope_recommended), () -> scopes.setText("grades|studies|payments|cards|offline_access"), false);
+            Button b1 = UiHelper.button(activity, activity.getString(R.string.scope_recommended), () -> scopes.setText("grades|studies|payments|cards|adm_documents|crstests|offline_access"), false);
             Button b2 = UiHelper.button(activity, activity.getString(R.string.scope_basic), () -> scopes.setText("grades|studies|offline_access"), false);
-            Button b3 = UiHelper.button(activity, activity.getString(R.string.scope_complete), () -> scopes.setText("grades|studies|payments|cards|adm_documents|photo|events|email|offline_access"), false);
+            Button b3 = UiHelper.button(activity, activity.getString(R.string.scope_complete), () -> scopes.setText("grades|studies|payments|cards|adm_documents|crstests|photo|events|email|offline_access"), false);
             b1.setMinHeight(UiHelper.dp(activity, 48)); b1.setTextSize(12);
             b2.setMinHeight(UiHelper.dp(activity, 48)); b2.setTextSize(12);
             b3.setMinHeight(UiHelper.dp(activity, 48)); b3.setTextSize(12);
@@ -334,7 +337,7 @@ public final class AccountScreenController {
         }
 
         // Notifications
-        LinearLayout notices = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout notices = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, notices, activity.getString(R.string.account_notices_heading), 18, UiHelper.INK, true);
         UiHelper.add(activity, notices, NotificationManagerCompat.from(activity).areNotificationsEnabled() ? activity.getString(R.string.account_notif_system_allowed) : activity.getString(R.string.account_notif_system_blocked), 14, UiHelper.MUTED, false);
         notices.addView(UiHelper.button(activity, activity.getString(R.string.account_btn_system_notif_settings), listener::onRequestNotifications, false));
@@ -391,7 +394,7 @@ public final class AccountScreenController {
         UiHelper.note(activity, notices, activity.getString(R.string.account_channels_note), UiHelper.MUTED);
 
         // Widgets
-        LinearLayout widgetsCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout widgetsCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, widgetsCard, activity.getString(R.string.account_widgets_heading), 18, UiHelper.INK, true);
         UiHelper.add(activity, widgetsCard, activity.getString(R.string.account_widgets_desc), 13, UiHelper.MUTED, false);
         widgetsCard.addView(UiHelper.button(activity, activity.getString(R.string.account_btn_update_widgets), () -> {
@@ -416,7 +419,7 @@ public final class AccountScreenController {
             }
             if (currentTerm == null && !snap.terms.isEmpty()) currentTerm = snap.terms.values().iterator().next();
             if (currentTerm != null) {
-                LinearLayout termBox = UiHelper.card(activity, content, Color.rgb(238, 245, 242));
+                LinearLayout termBox = UiHelper.section(activity, content, Color.rgb(238, 245, 242));
                 UiHelper.add(activity, termBox, activity.getString(R.string.academic_calendar_title), 11, UiHelper.GREEN, true);
                 UiHelper.add(activity, termBox, currentTerm.name, 17, UiHelper.INK, true);
                 long days = currentTerm.daysRemaining(today);

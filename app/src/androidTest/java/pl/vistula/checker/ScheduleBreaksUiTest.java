@@ -39,21 +39,26 @@ public class ScheduleBreaksUiTest {
         return output[0];
     }
     @Test public void dayWeekAndAgendaShowBreakHoursAndDurationOnlyOnce() throws Exception {
+        String break30 = rule.getActivity().getString(R.string.schedule_break_title, 30);
+        String breakTime = rule.getActivity().getString(R.string.schedule_break_time, "10:00", "10:30");
         for (String mode : new String[]{"day", "week", "agenda"}) {
             String text = render(mode, "", lesson("a", "09:00 – 10:00"), lesson("b", "10:30 – 11:30"), lesson("c", "10:30 – 12:00"));
-            assertEquals(1, text.split("Przerwa · 30 min", -1).length - 1);
-            assertTrue(text.contains("10:00 – 10:30 · Czas wolny między zajęciami"));
+            assertEquals(1, text.split(java.util.regex.Pattern.quote(break30), -1).length - 1);
+            assertTrue(text.contains(breakTime));
         }
     }
     @Test public void searchDoesNotTreatHiddenMeetingAsFreeTime() throws Exception {
+        String break15 = rule.getActivity().getString(R.string.schedule_break_title, 15);
+        String break75 = rule.getActivity().getString(R.string.schedule_break_title, 75);
         String text = render("day", "visible", lesson("first", "09:00 – 10:00"),
             lesson("hidden", "10:00 – 11:00"), lesson("visible", "11:15 – 12:00"));
-        assertTrue(text.contains("Przerwa · 15 min"));
-        assertFalse(text.contains("Przerwa · 75 min"));
+        assertTrue(text.contains(break15));
+        assertFalse(text.contains(break75));
     }
     @Test public void overlappingOrTouchingLessonsHaveNoBreakCard() throws Exception {
+        String breakPrefix = rule.getActivity().getString(R.string.schedule_break_title, 30).split("·")[0].trim() + " ·";
         assertFalse(render("day", "", lesson("a", "09:00 – 12:00"), lesson("b", "10:00 – 11:00"),
-            lesson("c", "12:00 – 13:00")).contains("Przerwa ·"));
+            lesson("c", "12:00 – 13:00")).contains(breakPrefix));
     }
     private String text(View view) {
         StringBuilder result = new StringBuilder();

@@ -32,7 +32,7 @@ public final class GradeBrowser {
         for (Record row : rows) {
             if (!row.kind.equals("ocena") || (!term.isEmpty() && !term.equals(row.term))) continue;
             boolean numeric = number(row) != null;
-            String cType = classType(row, snapshot).toLowerCase(Locale.ROOT);
+            String cType = canonicalClassType(row, snapshot).toLowerCase(Locale.ROOT);
             if (type.equals("numeric") && !numeric) continue;
             if (type.equals("other") && numeric) continue;
             if (type.equals("retakes") && row.metadata.optInt("sessionNumber", 1) <= 1) continue;
@@ -47,6 +47,9 @@ public final class GradeBrowser {
             : order.equals("value") ? byValue.thenComparing(byTitle) : byTitle.thenComparing(byRecent);
         result.sort(selected.thenComparing(r -> r.term).thenComparing(r -> r.id));
         return result;
+    }
+    public static String canonicalClassType(Record row, Snapshot snapshot) {
+        return row.optMeta("classTypeCanonical", classType(row, snapshot));
     }
     public static String classType(Record row) {
         return classType(row, null);

@@ -17,12 +17,13 @@ public final class CampusGuideController {
 
     public static void render(MainActivity activity, LinearLayout content) {
 
+        ToolScreenUi.header(activity, content, R.string.tool_campus_title, null);
         // Campus Location
-        LinearLayout campusCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout campusCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, campusCard, activity.getString(R.string.campus_name), 18, UiHelper.INK, true);
         UiHelper.add(activity, campusCard, activity.getString(R.string.campus_address), 15, UiHelper.GREEN, true);
         UiHelper.add(activity, campusCard, activity.getString(R.string.campus_metro), 13, UiHelper.MUTED, false);
-        campusCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_btn_maps), () -> {
+        campusCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_btn_maps), () -> {
             try {
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:52.158145,21.034326?q=Akademia+Finansów+i+Biznesu+Vistula,+ul.+Stokłosy+3,+Warszawa"));
                 activity.startActivity(mapIntent);
@@ -30,63 +31,63 @@ public final class CampusGuideController {
                 UiHelper.browser(activity, "https://www.google.com/maps/search/?api=1&query=Akademia%20Finans%C3%B3w%20i%20Biznesu%20Vistula%20Stok%C5%82osy%203%20Warszawa");
             }
         }, true));
-        campusCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_btn_website),
+        campusCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_btn_website),
             () -> UiHelper.browser(activity, "https://vistula.edu.pl/"), false));
 
         // Dziekanat
-        LinearLayout dziekanatCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout dziekanatCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_title), 18, UiHelper.INK, true);
         UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_desc), 13, UiHelper.MUTED, false);
         UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_hours), 13, UiHelper.INK, false);
-        dziekanatCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_dziekanat_call), () -> {
+        dziekanatCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_dziekanat_call), () -> {
             try { activity.startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:+48224572300"))); } catch (Exception ignored) {}
         }, false));
-        dziekanatCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_dziekanat_email), () -> {
+        dziekanatCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_dziekanat_email), () -> {
             try { activity.startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:dziekanat@vistula.edu.pl"))); } catch (Exception ignored) {}
         }, false));
 
         // Finance
-        LinearLayout financeCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout financeCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, financeCard, activity.getString(R.string.campus_finanse_title), 18, UiHelper.INK, true);
         UiHelper.add(activity, financeCard, activity.getString(R.string.campus_finanse_desc), 13, UiHelper.MUTED, false);
-        financeCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_finanse_view_subaccounts),
+        financeCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_finanse_view_subaccounts),
             () -> activity.navigate(8), true));
-        financeCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_finanse_email), () -> {
+        financeCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_finanse_email), () -> {
             try { activity.startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:finanse@vistula.edu.pl"))); } catch (Exception ignored) {}
         }, false));
 
         // Library
-        LinearLayout libraryCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout libraryCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, libraryCard, activity.getString(R.string.campus_library_title), 18, UiHelper.INK, true);
         UiHelper.add(activity, libraryCard, activity.getString(R.string.campus_library_desc), 13, UiHelper.MUTED, false);
-        libraryCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_library_email), () -> {
+        libraryCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_library_email), () -> {
             try { activity.startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:biblioteka@vistula.edu.pl"))); } catch (Exception ignored) {}
         }, false));
 
         // Wi-Fi eduroam
-        LinearLayout wifiCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout wifiCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_title), 18, UiHelper.INK, true);
         UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_desc), 13, UiHelper.MUTED, false);
         UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_instructions), 13, UiHelper.INK, false);
-        wifiCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_wifi_copy),
+        wifiCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_wifi_copy),
             () -> UiHelper.copyToClipboard(activity, "SSID", "eduroam"), false));
 
         // IT Support
-        LinearLayout itCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout itCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, itCard, activity.getString(R.string.campus_it_title), 18, UiHelper.INK, true);
         UiHelper.add(activity, itCard, activity.getString(R.string.campus_it_desc), 13, UiHelper.MUTED, false);
-        itCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_it_email), () -> {
+        itCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_it_email), () -> {
             try { activity.startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:pomocit@vistula.edu.pl"))); } catch (Exception ignored) {}
         }, false));
 
         // Regulations
-        LinearLayout linksCard = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout linksCard = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, linksCard, activity.getString(R.string.campus_rules_title), 18, UiHelper.INK, true);
-        linksCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_rules_studies),
+        linksCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_rules_studies),
             () -> UiHelper.browser(activity, "https://vistula.edu.pl/uczelnia/wazne-dokumenty"), false));
-        linksCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_rules_templates),
+        linksCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_rules_templates),
             () -> UiHelper.browser(activity, "https://vistula.edu.pl/student/sprawy-studenckie"), false));
-        linksCard.addView(UiHelper.button(activity, activity.getString(R.string.campus_rules_programs),
+        linksCard.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_rules_programs),
             () -> UiHelper.browser(activity, "https://usosweb.vistula.edu.pl/"), false));
     }
 }

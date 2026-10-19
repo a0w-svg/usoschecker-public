@@ -88,7 +88,7 @@ public class ReleaseUpdatesRegressionTest {
         seed(release("9.0.0"), true);
         ReleaseUpdates.check(context, false, () -> { throw new AssertionError("Fresh cache must avoid HTTP"); });
         Notification notification = posted();
-        assertEquals("Dostępna wersja 9.0.0", notification.extras.getString(Notification.EXTRA_TITLE));
+        assertEquals(context.getString(R.string.updates_available, "9.0.0"), notification.extras.getString(Notification.EXTRA_TITLE));
         assertEquals("Nowe funkcje i poprawki testowe", notification.extras.getString(Notification.EXTRA_BIG_TEXT));
         assertEquals("9.0.0", ReleaseUpdates.preferences(context).getString("notified", ""));
         manager.cancel(ReleaseUpdates.NOTIFICATION_ID);

@@ -25,16 +25,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.activity.OnBackPressedCallback;
-import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -72,6 +68,7 @@ import pl.vistula.checker.ui.PaymentsScreenController;
 import pl.vistula.checker.ui.ScheduleScreenController;
 import pl.vistula.checker.ui.TasksScreenController;
 import pl.vistula.checker.ui.UiHelper;
+import pl.vistula.checker.ui.Language;
 import pl.vistula.checker.ui.StudentCardsController;
 import pl.vistula.checker.ui.StudentDocumentsController;
 import pl.vistula.checker.core.StudentServices;
@@ -85,10 +82,7 @@ public final class MainActivity extends AppCompatActivity {
     private JSONObject state = new JSONObject();
     private JSONArray catalog = new JSONArray();
     private LinearLayout root, content;
-    private DrawerLayout drawer;
-    private NavigationView sideMenu;
     private BottomNavigationView navigation;
-    private MaterialToolbar toolbar;
     private JSONArray demoTasks = new JSONArray();
     private ScrollView scroll;
     private SwipeRefreshLayout swipeRefresh;
@@ -151,9 +145,8 @@ public final class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override public void handleOnBackPressed() {
                 if (busy) return;
-                if (drawer != null && (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerVisible(GravityCompat.START))) { drawer.closeDrawers(); return; }
                 if (currentMethod != null) { currentMethod = null; currentMethodJson = null; render(); }
-                else if (tab != 0) { tab = 0; render(); }
+                else if (tab != 0) { navigate(tab == 1 || tab == 2 || tab == 5 || tab == 6 ? 0 : 6); }
                 else {
                     setEnabled(false);
                     getOnBackPressedDispatcher().onBackPressed();
@@ -210,15 +203,12 @@ public final class MainActivity extends AppCompatActivity {
 
         focusCurrentSchedule = bundle == null && tab == 5;
         setContentView(R.layout.activity_main);
-        drawer = findViewById(R.id.drawer_layout);
         root = findViewById(R.id.main_root);
-        toolbar = findViewById(R.id.toolbar);
         progress = findViewById(R.id.progress_text);
         swipeRefresh = findViewById(R.id.swipe_refresh);
         scroll = findViewById(R.id.main_scroll);
         content = findViewById(R.id.main_content);
         navigation = findViewById(R.id.bottom_navigation);
-        sideMenu = findViewById(R.id.nav_view);
 
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             androidx.core.graphics.Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -228,10 +218,6 @@ public final class MainActivity extends AppCompatActivity {
                 navigation.setVisibility(insets.isVisible(WindowInsetsCompat.Type.ime()) ? View.GONE : View.VISIBLE);
             }
             return WindowInsetsCompat.CONSUMED;
-        });
-
-        toolbar.setNavigationOnClickListener(v -> {
-            if (!busy) drawer.openDrawer(GravityCompat.START);
         });
 
         swipeRefresh.setColorSchemeColors(UiHelper.GREEN, Color.rgb(20, 110, 60));
@@ -254,25 +240,16 @@ public final class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        sideMenu.setNavigationItemSelectedListener(item -> {
-            if (busy) return false;
-            int id = item.getItemId();
-            if (id == R.id.drawer_item_home) navigate(0);
-            else if (id == R.id.drawer_item_grades) navigate(2);
-            else if (id == R.id.drawer_item_plan) navigate(5);
-            else if (id == R.id.drawer_item_history) navigate(1);
-            else if (id == R.id.drawer_item_news) navigate(11);
-            else if (id == R.id.drawer_item_attendance) navigate(12);
-            else if (id == R.id.drawer_item_gpa) navigate(9);
-            else if (id == R.id.drawer_item_payments) navigate(8);
-            else if (id == R.id.drawer_item_tasks) navigate(7);
-            else if (id == R.id.drawer_item_campus) navigate(10);
-            else if (id == R.id.drawer_item_account) navigate(4);
-            else if (id == R.id.drawer_item_api) navigate(3);
-            else if (id == R.id.drawer_item_cards) navigate(13);
-            else if (id == R.id.drawer_item_documents) navigate(14);
-            drawer.closeDrawers();
-            return true;
+        ((pl.vistula.checker.ui.SwipeNavigationView) navigation).setOnTabSwipe(direction -> {
+            if (busy) return;
+            int[] tabs = {0, 2, 5, 1, 6};
+            int current = tab == 0 ? 0 : tab == 2 ? 1 : tab == 5 ? 2 : tab == 1 ? 3 : 4;
+            int next = current + direction;
+            if (next >= 0 && next < tabs.length) navigate(tabs[next]);
+        });
+
+        navigation.setOnItemReselectedListener(item -> {
+            if (!busy && item.getItemId() == R.id.nav_item_more && tab != 6) navigate(6);
         });
 
         task(() -> {
@@ -397,6 +374,12 @@ public final class MainActivity extends AppCompatActivity {
         navigate(5, false);
     }
     private void navigate(int target, boolean focusCurrent) {
+        if (target != tab) {
+            View focused = getCurrentFocus();
+            if (focused != null) focused.clearFocus();
+            android.view.inputmethod.InputMethodManager keyboard = getSystemService(android.view.inputmethod.InputMethodManager.class);
+            if (keyboard != null) keyboard.hideSoftInputFromWindow(root.getWindowToken(), 0);
+        }
         focusCurrentSchedule = focusCurrent && target == 5 && tab != 5;
         currentMethod = null;
         currentMethodJson = null;
@@ -411,10 +394,6 @@ public final class MainActivity extends AppCompatActivity {
         content.removeAllViews();
         setScheduleNavigation(null);
         content.setPadding(UiHelper.dp(this, 20), UiHelper.dp(this, tab == 5 ? 0 : 12), UiHelper.dp(this, 20), UiHelper.dp(this, 24));
-        android.view.ViewGroup.LayoutParams toolbarParams = toolbar.getLayoutParams();
-        toolbarParams.height = UiHelper.dp(this, 48);
-        toolbar.setLayoutParams(toolbarParams);
-
         if (navigation != null) {
             int navMenuId = R.id.nav_item_home;
             if (tab == 2) navMenuId = R.id.nav_item_grades;
@@ -423,27 +402,6 @@ public final class MainActivity extends AppCompatActivity {
             else if (tab == 6 || tab == 3 || tab == 4 || tab == 7 || tab == 8 || tab == 9 || tab == 10 || tab == 11 || tab == 12 || tab == 13 || tab == 14) navMenuId = R.id.nav_item_more;
             navigation.getMenu().findItem(navMenuId).setChecked(true);
         }
-
-        if (sideMenu != null) {
-            int drawerMenuId = R.id.drawer_item_home;
-            if (tab == 2) drawerMenuId = R.id.drawer_item_grades;
-            else if (tab == 5) drawerMenuId = R.id.drawer_item_plan;
-            else if (tab == 1) drawerMenuId = R.id.drawer_item_history;
-            else if (tab == 11) drawerMenuId = R.id.drawer_item_news;
-            else if (tab == 12) drawerMenuId = R.id.drawer_item_attendance;
-            else if (tab == 9) drawerMenuId = R.id.drawer_item_gpa;
-            else if (tab == 8) drawerMenuId = R.id.drawer_item_payments;
-            else if (tab == 7) drawerMenuId = R.id.drawer_item_tasks;
-            else if (tab == 10) drawerMenuId = R.id.drawer_item_campus;
-            else if (tab == 4) drawerMenuId = R.id.drawer_item_account;
-            else if (tab == 3) drawerMenuId = R.id.drawer_item_api;
-            else if (tab == 13) drawerMenuId = R.id.drawer_item_cards;
-            else if (tab == 14) drawerMenuId = R.id.drawer_item_documents;
-            sideMenu.getMenu().findItem(drawerMenuId).setChecked(true);
-        }
-
-        toolbar.setTitle(null);
-        toolbar.setSubtitle(null);
 
         try {
             if (demo) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.MUTED);
@@ -753,7 +711,7 @@ public final class MainActivity extends AppCompatActivity {
                 JSONObject eligibility = new JSONObject(client.get("services/cards/mcard2", java.util.Map.of("fields", "why_cannot_order|why_cannot_revoke")));
                 if (!eligibility.has(order ? "why_cannot_order" : "why_cannot_revoke"))
                     throw new IllegalStateException(getString(R.string.cards_action_rejected));
-                String reason = StudentServices.localized(eligibility.opt(order ? "why_cannot_order" : "why_cannot_revoke"));
+                String reason = StudentServices.localized(eligibility.opt(order ? "why_cannot_order" : "why_cannot_revoke"), Language.currentLocale(this).getLanguage());
                 if (!reason.isEmpty()) throw new IllegalStateException(reason);
                 String endpoint = order ? "services/cards/make_mcard_order" : "services/cards/revoke_mcard";
                 JSONObject response = new JSONObject(client.request("POST", endpoint, order ? java.util.Map.of() : java.util.Map.of("order_id", id),

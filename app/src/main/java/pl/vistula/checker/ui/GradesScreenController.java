@@ -3,21 +3,16 @@ package pl.vistula.checker.ui;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.json.JSONObject;
@@ -60,7 +55,6 @@ public final class GradesScreenController {
                               java.util.function.Consumer<String> onQueryChanged,
                               Runnable onResetFilters, Runnable onRefresh,
                               GradesListener listener) throws Exception {
-        UiHelper.note(activity, content, activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(d.optLong("successAt"))), UiHelper.MUTED);
 
         if (!demo && !state.optString("error").isEmpty()) {
             UiHelper.note(activity, content, state.optString("error"), Color.rgb(160, 48, 40));
@@ -80,53 +74,106 @@ public final class GradesScreenController {
 
         Snapshot snapshot = Snapshot.from(raw);
         java.time.LocalDate today = java.time.LocalDate.now(pl.vistula.checker.UsosClient.ZONE);
-        String currentTerm = GradeSemesters.current(snapshot, today);
         List<String> terms = GradeSemesters.ordered(snapshot, today);
-        Button options = UiHelper.button(activity,
-            filtersExpanded ? activity.getString(R.string.grades_filter_collapse) : activity.getString(R.string.grades_filter_expand),
-            () -> onExpandToggled.accept(!filtersExpanded), false);
-        content.addView(options);
-
-        if (filtersExpanded) {
-            renderSemesterPicker(activity, content, snapshot, semester, onSemesterChanged);
-            UiHelper.chips(activity, content,
-                new String[]{"all", "labs", "exercises", "numeric", "other", "retakes"},
-                new String[]{
-                    activity.getString(R.string.grades_chip_all),
-                    activity.getString(R.string.grades_chip_labs),
-                    activity.getString(R.string.grades_chip_exercises),
-                    activity.getString(R.string.grades_chip_numeric),
-                    activity.getString(R.string.grades_chip_other),
-                    activity.getString(R.string.grades_chip_retakes)
-                },
-                gradeType, onTypeChanged);
-
-            UiHelper.note(activity, content, activity.getString(R.string.grades_sort_title), UiHelper.MUTED);
-            UiHelper.chips(activity, content,
-                new String[]{"name", "recent", "value"},
-                new String[]{activity.getString(R.string.grades_sort_subject), activity.getString(R.string.grades_sort_recent), activity.getString(R.string.grades_sort_value)},
-                gradeOrder, onOrderChanged);
-        } else {
-            String typeLabel = gradeType.equals("labs") ? activity.getString(R.string.grades_type_labs_label)
-                : gradeType.equals("exercises") ? activity.getString(R.string.grades_type_exercises_label)
-                : gradeType.equals("numeric") ? activity.getString(R.string.grades_type_numeric_label)
-                : gradeType.equals("other") ? activity.getString(R.string.grades_type_other_label)
-                : gradeType.equals("retakes") ? activity.getString(R.string.grades_chip_retakes)
-                : activity.getString(R.string.grades_type_all_label);
-            UiHelper.note(activity, content,
-                (semester.isEmpty() ? activity.getString(R.string.grades_all_terms) : semester) + " · "
-                    + typeLabel + " · "
-                    + (gradeOrder.equals("recent") ? activity.getString(R.string.grades_order_recent_label) : gradeOrder.equals("value") ? activity.getString(R.string.grades_order_value_label) : activity.getString(R.string.grades_order_subject_label)),
-                UiHelper.MUTED);
+        String[] types = {"all", "labs", "exercises", "numeric", "other", "retakes"};
+        int[] typeLabels = {R.string.grades_chip_all, R.string.grades_type_labs_label,
+            R.string.grades_type_exercises_label, R.string.grades_chip_numeric, R.string.grades_chip_other, R.string.grades_chip_retakes};
+        String[] orders = {"name", "recent", "value"};
+        int[] orderLabels = {R.string.grades_sort_subject, R.string.grades_sort_recent, R.string.grades_sort_value};
+        LinearLayout header = new LinearLayout(activity);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        String semesterLabel = semester.isEmpty() ? activity.getString(R.string.grades_all_terms)
+            : snapshot.terms.containsKey(semester) && !snapshot.terms.get(semester).name.isEmpty() ? snapshot.terms.get(semester).name : semester;
+        Button termPicker = ScheduleScreenController.headerButton(activity, semesterLabel + " ▾",
+            () -> showSemesterPicker(activity, snapshot, semester, onSemesterChanged));
+        termPicker.setId(R.id.grades_semester);
+        termPicker.setTextSize(20);
+        termPicker.setTextColor(activity.getColor(R.color.app_ink));
+        termPicker.setTypeface(null, android.graphics.Typeface.BOLD);
+        termPicker.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        termPicker.setPadding(UiHelper.dp(activity, 8), UiHelper.dp(activity, 4), UiHelper.dp(activity, 8), UiHelper.dp(activity, 4));
+        termPicker.setContentDescription(activity.getString(R.string.grade_picker_semester) + ": " + semesterLabel);
+        header.addView(termPicker, new LinearLayout.LayoutParams(0, -2, 1));
+        Button more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more, () -> {});
+        more.setId(R.id.grades_more);
+        more.setContentDescription(activity.getString(R.string.grades_options));
+        header.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
+        content.addView(header);
+        if (snapshot.serviceErrors.containsKey("crstests")) {
+            String reason = snapshot.serviceErrors.get("crstests");
+            UiHelper.note(activity, content, "crstests".equals(reason)
+                ? activity.getString(R.string.services_scope_required, "crstests")
+                : activity.getString(R.string.services_refresh_error, reason), UiHelper.MUTED);
         }
-
-        EditText search = UiHelper.searchField(activity, content,
-            activity.getString(R.string.grades_search_hint),
-            gradeQuery, activity.getString(R.string.grades_search_desc),
-            () -> onQueryChanged.accept(""));
-
-        Button resetGrades = UiHelper.button(activity, activity.getString(R.string.grades_filter_reset), onResetFilters, false);
-        content.addView(resetGrades);
+        if (!gradeType.equals("all") || !gradeOrder.equals("name")) {
+            List<String> active = new ArrayList<>();
+            for (int i = 0; i < types.length; i++) if (!gradeType.equals("all") && types[i].equals(gradeType)) active.add(activity.getString(typeLabels[i]));
+            for (int i = 0; i < orders.length; i++) if (!gradeOrder.equals("name") && orders[i].equals(gradeOrder)) active.add(activity.getString(orderLabels[i]));
+            Button clear = ScheduleScreenController.headerButton(activity, String.join(" · ", active) + " ×", onResetFilters);
+            clear.setId(R.id.grades_active_filters);
+            clear.setTextSize(14);
+            clear.setSelected(true);
+            clear.setContentDescription(String.join(" · ", active) + ". " + activity.getString(R.string.grades_filter_reset));
+            content.addView(clear);
+        }
+        View[] searchContainer = new View[1];
+        EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.grades_search_hint),
+            gradeQuery, null, () -> {
+                onQueryChanged.accept("");
+                if (searchContainer[0] != null) {
+                    ((android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE))
+                        .hideSoftInputFromWindow(searchContainer[0].getWindowToken(), 0);
+                    searchContainer[0].clearFocus(); searchContainer[0].setVisibility(View.GONE);
+                }
+            });
+        View searchBox = content.getChildAt(content.getChildCount() - 1);
+        searchContainer[0] = searchBox;
+        searchBox.setVisibility(gradeQuery.isEmpty() ? View.GONE : View.VISIBLE);
+        more.setOnClickListener(view -> {
+            android.widget.PopupMenu menu = new android.widget.PopupMenu(activity, more);
+            menu.getMenu().add(0, 1, 0, R.string.grades_search_action);
+            android.view.SubMenu filterMenu = menu.getMenu().addSubMenu(R.string.grades_filter_type);
+            for (int i = 0; i < types.length; i++) filterMenu.add(1, 10 + i, i, typeLabels[i]).setCheckable(true).setChecked(types[i].equals(gradeType));
+            filterMenu.setGroupCheckable(1, true, true);
+            android.view.SubMenu sortMenu = menu.getMenu().addSubMenu(R.string.grades_sort_title);
+            for (int i = 0; i < orders.length; i++) sortMenu.add(2, 20 + i, i, orderLabels[i]).setCheckable(true).setChecked(orders[i].equals(gradeOrder));
+            sortMenu.setGroupCheckable(2, true, true);
+            List<Record> visible = GradeBrowser.select(snapshot.records.values(), semester, gradeType, gradeOrder, search.getText().toString(), snapshot);
+            menu.getMenu().add(0, 2, 3, R.string.grades_summary_title).setEnabled(!visible.isEmpty());
+            menu.getMenu().add(0, 3, 4, R.string.grades_calc_button);
+            menu.getMenu().add(0, 4, 5, R.string.grades_refresh);
+            menu.getMenu().add(0, 5, 6, R.string.grades_filter_reset).setEnabled(!semester.isEmpty() || !gradeType.equals("all")
+                || !gradeOrder.equals("name") || !search.getText().toString().trim().isEmpty());
+            menu.getMenu().add(0, 6, 7, R.string.grades_data_status);
+            menu.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id >= 10 && id < 10 + types.length) onTypeChanged.accept(types[id - 10]);
+                else if (id >= 20 && id < 20 + orders.length) onOrderChanged.accept(orders[id - 20]);
+                else if (id == 1) {
+                    searchBox.setVisibility(View.VISIBLE); search.requestFocus();
+                    search.post(() -> ((android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE))
+                        .showSoftInput(search, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT));
+                } else if (id == 2) {
+                    LinearLayout body = new LinearLayout(activity); body.setOrientation(LinearLayout.VERTICAL);
+                    for (String term : terms) {
+                        List<Record> rows = GradeSemesters.inTerm(visible, term);
+                        if (rows.isEmpty()) continue;
+                        String label = snapshot.terms.containsKey(term) && !snapshot.terms.get(term).name.isEmpty() ? snapshot.terms.get(term).name : term;
+                        UiHelper.heading(activity, body, label.isEmpty() ? activity.getString(R.string.grades_semester_unknown) : label);
+                        renderGradeSummary(activity, body, rows, state, term);
+                    }
+                    new MaterialAlertDialogBuilder(activity).setTitle(R.string.grades_summary_title)
+                        .setView(UiHelper.dialogScroll(activity, body)).setPositiveButton(R.string.btn_close, null).show();
+                } else if (id == 3) activity.navigate(9);
+                else if (id == 4) onRefresh.run();
+                else if (id == 5) onResetFilters.run();
+                else if (id == 6) new MaterialAlertDialogBuilder(activity).setTitle(R.string.grades_data_status)
+                    .setMessage(activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(d.optLong("successAt"))))
+                    .setPositiveButton(R.string.btn_close, null).show();
+                return id != 0;
+            });
+            menu.show();
+        });
 
         LinearLayout list = new LinearLayout(activity);
         list.setOrientation(LinearLayout.VERTICAL);
@@ -137,17 +184,17 @@ public final class GradesScreenController {
             String currentQuery = search.getText().toString();
             List<Record> visible = GradeBrowser.select(snapshot.records.values(), semester, gradeType, gradeOrder, currentQuery, snapshot);
             Set<String> renderedTestIds = new HashSet<>();
-            int pendingCount = 0;
+            int pendingCount = 0, extraTestCount = 0;
             for (String term : terms) {
                 if (!semester.isEmpty() && !semester.equals(term)) continue;
                 List<Record> termRows = GradeSemesters.inTerm(visible, term);
                 List<Record> pendingCourses = GradeBrowser.ungraded(snapshot, term, gradeType, currentQuery);
                 pendingCount += pendingCourses.size();
+                if (termRows.isEmpty() && pendingCourses.isEmpty() && (!currentQuery.trim().isEmpty() || !gradeType.equals("all"))) continue;
                 String label = term.isEmpty() ? activity.getString(R.string.grades_semester_unknown)
                     : snapshot.terms.containsKey(term) && !snapshot.terms.get(term).name.isEmpty() ? snapshot.terms.get(term).name : term;
-                if (term.equals(currentTerm)) label = activity.getString(R.string.grades_semester_current, label);
-                LinearLayout section = semesterSection(activity, list, term, label, termRows.size() + pendingCourses.size(), true);
-                renderGradeSummary(activity, section, termRows, state, label);
+                LinearLayout section = semester.isEmpty()
+                    ? semesterSection(activity, list, term, label, termRows.size() + pendingCourses.size(), true) : list;
                 for (List<Record> group : GradeBrowser.groups(termRows))
                     renderCourseGroup(activity, section, group, snapshot, renderedTestIds, listener);
                 for (Record course : pendingCourses) renderUngradedCourse(activity, section, course);
@@ -155,8 +202,6 @@ public final class GradesScreenController {
                     boolean hasGrades = snapshot.records.values().stream().anyMatch(row -> row.kind.equals("ocena") && row.term.equals(term));
                     UiHelper.note(activity, section, activity.getString(hasGrades ? R.string.grades_semester_empty : R.string.grades_semester_no_grades), UiHelper.MUTED);
                 }
-                else if (!termRows.isEmpty()) UiHelper.note(activity, section, activity.getString(R.string.grades_count_summary,
-                    termRows.size(), GradeBrowser.groups(termRows).size()), UiHelper.MUTED);
             }
 
             if (snapshot.tests != null && !snapshot.tests.isEmpty()) {
@@ -165,20 +210,30 @@ public final class GradesScreenController {
                     boolean courseVisible = visible.stream().anyMatch(r -> (!ctr.courseId.isEmpty() && ctr.courseId.equals(r.optMeta("courseId")))
                         || (!ctr.courseName.isEmpty() && ctr.courseName.equals(r.title)));
                     boolean matchesTest = pl.vistula.checker.core.StudentSearch.matches(currentQuery, ctr.courseName, ctr.testName, ctr.grade, ctr.date);
-                    if (!renderedTestIds.contains(ctr.id) && (courseVisible || (semester.isEmpty() && gradeType.equals("all") && matchesTest))) {
-                        unassigned.add(ctr);
+                    if (!renderedTestIds.contains(ctr.id) && (semester.isEmpty() || semester.equals(GradeSemesters.testTerm(snapshot, ctr)))
+                        && (courseVisible || (gradeType.equals("all") && matchesTest))) {
+                        unassigned.add(ctr); extraTestCount++;
                     }
                 }
                 if (!unassigned.isEmpty()) {
-                    LinearLayout testsSection = semesterSection(activity, list, "\u0000tests", activity.getString(R.string.grades_unassigned_tests), unassigned.size(), false);
-                    for (CourseTestRecord ctr : unassigned) {
-                        LinearLayout testBox = UiHelper.card(activity, testsSection, Color.WHITE);
+                    java.util.Map<String, List<CourseTestRecord>> grouped = new java.util.LinkedHashMap<>();
+                    for (CourseTestRecord test : unassigned) {
+                        String term = GradeSemesters.testTerm(snapshot, test);
+                        grouped.computeIfAbsent(term == null ? "" : term, key -> new ArrayList<>()).add(test);
+                    }
+                    for (java.util.Map.Entry<String, List<CourseTestRecord>> group : grouped.entrySet()) {
+                    String term = group.getKey();
+                    String heading = term.isEmpty() ? activity.getString(R.string.grades_unassigned_tests)
+                        : activity.getString(R.string.grades_tests_heading) + " · " + (snapshot.terms.containsKey(term) ? snapshot.terms.get(term).name : term);
+                    LinearLayout testsSection = semesterSection(activity, list, "\u0000tests" + term, heading, group.getValue().size(), !term.isEmpty());
+                    for (CourseTestRecord ctr : group.getValue()) {
+                        LinearLayout testBox = UiHelper.section(activity, testsSection, Color.WHITE);
                         UiHelper.add(activity, testBox, ctr.testName, 17, UiHelper.INK, true);
                         UiHelper.add(activity, testBox, ctr.courseName, 13, UiHelper.GREEN, true);
                         if (ctr.maxPoints > 0) {
-                            UiHelper.add(activity, testBox, String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_points_format), ctr.points, ctr.maxPoints, ctr.percentage()), 15, UiHelper.INK, false);
+                            UiHelper.add(activity, testBox, String.format(Language.currentLocale(activity), activity.getString(R.string.grades_points_format), ctr.points, ctr.maxPoints, ctr.percentage()), 15, UiHelper.INK, false);
                         } else if (!Double.isNaN(ctr.points) && ctr.points > 0) {
-                            UiHelper.add(activity, testBox, String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_points_simple), ctr.points), 15, UiHelper.INK, false);
+                            UiHelper.add(activity, testBox, String.format(Language.currentLocale(activity), activity.getString(R.string.grades_points_simple), ctr.points), 15, UiHelper.INK, false);
                         }
                         if (!ctr.grade.isEmpty()) {
                             UiHelper.add(activity, testBox, activity.getString(R.string.grades_test_grade, ctr.grade), 14, UiHelper.GREEN, true);
@@ -187,11 +242,11 @@ public final class GradesScreenController {
                             UiHelper.add(activity, testBox, activity.getString(R.string.grades_test_date, ctr.date), 12, UiHelper.MUTED, false);
                         }
                     }
+                    }
                 }
             }
 
-            resetGrades.setVisibility(!semester.isEmpty() || !gradeType.equals("all") || !currentQuery.trim().isEmpty() || !gradeOrder.equals("name") ? View.VISIBLE : View.GONE);
-            if (visible.isEmpty() && pendingCount == 0 && (terms.isEmpty() || !currentQuery.trim().isEmpty())) {
+            if (visible.isEmpty() && pendingCount == 0 && extraTestCount == 0 && (terms.isEmpty() || !currentQuery.trim().isEmpty())) {
                 LinearLayout box = UiHelper.card(activity, list, Color.WHITE);
                 UiHelper.add(activity, box,
                     currentQuery.trim().isEmpty() ? activity.getString(R.string.grades_empty_title) : activity.getString(R.string.grades_no_match),
@@ -206,38 +261,25 @@ public final class GradesScreenController {
         });
         populate.run();
 
-        content.addView(UiHelper.button(activity, activity.getString(R.string.grades_refresh), onRefresh, false));
-        content.addView(UiHelper.button(activity, activity.getString(R.string.grades_calc_button), () -> activity.navigate(9), false));
     }
 
     private static void renderUngradedCourse(MainActivity activity, LinearLayout parent, Record course) {
-        View card = LayoutInflater.from(activity).inflate(R.layout.item_grade_card, parent, false);
-        ((TextView) card.findViewById(R.id.grade_item_course_name)).setText(course.title);
-        TextView badge = card.findViewById(R.id.grade_item_value_badge);
-        badge.setText(R.string.grades_no_grade);
-        badge.setTextSize(13);
-        badge.setTextColor(UiHelper.foreground(activity, UiHelper.MUTED));
-        TextView meta = card.findViewById(R.id.grade_item_course_meta);
-        meta.setText(course.optMeta("courseId"));
-        TextView ects = card.findViewById(R.id.grade_item_ects);
-        if (Double.isFinite(course.ects)) ects.setText(activity.getString(R.string.grade_ects_points,
-            String.format(Locale.forLanguageTag("pl-PL"), "%s", course.ects)));
-        else ects.setVisibility(View.GONE);
-        Button more = card.findViewById(R.id.grade_item_btn_details);
-        meta.setVisibility(View.GONE);
-        ects.setVisibility(View.GONE);
-        more.setText(R.string.subject_view_more);
-        more.setContentDescription(activity.getString(R.string.subject_view_more_description, course.title));
-        boolean[] expanded = {false};
-        more.setOnClickListener(v -> {
-            expanded[0] = !expanded[0];
-            meta.setVisibility(expanded[0] && !course.optMeta("courseId").isEmpty() ? View.VISIBLE : View.GONE);
-            ects.setVisibility(expanded[0] && Double.isFinite(course.ects) ? View.VISIBLE : View.GONE);
-            more.setText(expanded[0] ? R.string.subject_view_less : R.string.subject_view_more);
-            more.setContentDescription(activity.getString(expanded[0] ? R.string.subject_view_less_description
-                : R.string.subject_view_more_description, course.title));
+        View row = LayoutInflater.from(activity).inflate(R.layout.item_grade_card, parent, false);
+        ((TextView) row.findViewById(R.id.grade_item_course_name)).setText(course.title);
+        TextView value = row.findViewById(R.id.grade_item_value_badge);
+        value.setText("—"); value.setTextColor(activity.getColor(R.color.app_muted));
+        ((TextView) row.findViewById(R.id.grade_item_course_meta)).setText(R.string.grades_no_grade);
+        row.setOnClickListener(view -> {
+            LinearLayout body = new LinearLayout(activity); body.setOrientation(LinearLayout.VERTICAL);
+            body.setPadding(UiHelper.dp(activity, 24), 0, UiHelper.dp(activity, 24), UiHelper.dp(activity, 16));
+            UiHelper.add(activity, body, activity.getString(R.string.grades_no_grade), 15, UiHelper.MUTED, false);
+            if (!course.optMeta("courseId").isEmpty()) UiHelper.add(activity, body, course.optMeta("courseId"), 14, UiHelper.INK, false);
+            if (Double.isFinite(course.ects)) UiHelper.add(activity, body, activity.getString(R.string.grade_ects_points,
+                String.format(Language.currentLocale(activity), "%s", course.ects)), 14, UiHelper.INK, false);
+            new MaterialAlertDialogBuilder(activity).setTitle(course.title).setView(body).setPositiveButton(R.string.btn_close, null).show();
         });
-        parent.addView(card);
+        androidx.core.view.ViewCompat.setScreenReaderFocusable(row, true);
+        parent.addView(row);
     }
 
     private static LinearLayout semesterSection(MainActivity activity, LinearLayout parent, String key,
@@ -248,8 +290,7 @@ public final class GradesScreenController {
         Button[] header = new Button[1];
         Runnable update = () -> {
             section.setVisibility(expanded[0] ? View.VISIBLE : View.GONE);
-            header[0].setText((expanded[0] ? "▾ " : "▸ ") + activity.getString(R.string.grades_semester_toggle,
-                title, count, activity.getString(expanded[0] ? R.string.grades_semester_collapse : R.string.grades_semester_expand)));
+            header[0].setText(title + (expanded[0] ? " ▾" : " ▸"));
             header[0].setContentDescription(activity.getString(R.string.grades_semester_toggle,
                 title, count, activity.getString(expanded[0] ? R.string.grades_semester_collapse : R.string.grades_semester_expand)));
         };
@@ -258,7 +299,11 @@ public final class GradesScreenController {
             activity.gradeSemesterExpansion().put(key, expanded[0]);
             update.run();
         }, false);
+        header[0].setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.TRANSPARENT));
         header[0].setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        header[0].setTextSize(13);
+        header[0].setTextColor(activity.getColor(R.color.app_muted));
+        header[0].setPadding(UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8), 0);
         header[0].setMaxLines(Integer.MAX_VALUE);
         androidx.core.view.ViewCompat.setAccessibilityHeading(header[0], true);
         parent.addView(header[0]);
@@ -267,279 +312,88 @@ public final class GradesScreenController {
         return section;
     }
 
-    private static void renderSemesterPicker(MainActivity activity, LinearLayout content, Snapshot snapshot,
-                                             String currentSemester, java.util.function.Consumer<String> onSelected) {
-        List<String> terms = new ArrayList<>(GradeSemesters.ordered(snapshot, java.time.LocalDate.now(pl.vistula.checker.UsosClient.ZONE)));
-        terms.remove("");
-
-        final List<String> values = new ArrayList<>();
-        values.add("");
-        values.addAll(terms);
-        List<String> labels = new ArrayList<>();
-        labels.add(activity.getString(R.string.grades_all_terms));
-        labels.addAll(terms);
-
-        UiHelper.note(activity, content, activity.getString(R.string.grade_picker_semester), UiHelper.MUTED);
-        Spinner picker = new Spinner(activity);
-        picker.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_spinner_dropdown_item, labels));
-        picker.setSelection(Math.max(0, values.indexOf(currentSemester)));
-        content.addView(picker, new LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 56)));
-        picker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selected = values.get(position);
-                if (!currentSemester.equals(selected)) {
-                    onSelected.accept(selected);
-                }
-            }
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+    private static void showSemesterPicker(MainActivity activity, Snapshot snapshot, String selected,
+                                           java.util.function.Consumer<String> onSelected) {
+        List<String> values = new ArrayList<>(); values.add("");
+        for (String term : GradeSemesters.ordered(snapshot, java.time.LocalDate.now(pl.vistula.checker.UsosClient.ZONE)))
+            if (!term.isEmpty()) values.add(term);
+        String[] labels = new String[values.size()];
+        for (int i = 0; i < values.size(); i++) {
+            String term = values.get(i);
+            labels[i] = term.isEmpty() ? activity.getString(R.string.grades_all_terms)
+                : snapshot.terms.containsKey(term) && !snapshot.terms.get(term).name.isEmpty() ? snapshot.terms.get(term).name : term;
+        }
+        new MaterialAlertDialogBuilder(activity).setTitle(R.string.grade_picker_semester)
+            .setSingleChoiceItems(labels, values.indexOf(selected), (dialog, index) -> {
+                dialog.dismiss(); onSelected.accept(values.get(index));
+            }).setNegativeButton(R.string.btn_close, null).show();
     }
 
     private static void renderCourseGroup(MainActivity activity, LinearLayout parent, List<Record> rows,
                                           Snapshot snapshot, Set<String> renderedTestIds, GradesListener listener) {
         Record first = rows.get(0);
-        LayoutInflater inflater = LayoutInflater.from(activity);
-        View card = inflater.inflate(R.layout.item_grade_card, parent, false);
-
-        TextView courseName = card.findViewById(R.id.grade_item_course_name);
-        TextView valueBadge = card.findViewById(R.id.grade_item_value_badge);
-        TextView courseMeta = card.findViewById(R.id.grade_item_course_meta);
-        TextView ectsView = card.findViewById(R.id.grade_item_ects);
-        TextView commentView = card.findViewById(R.id.grade_item_comment);
-        TextView componentsTitle = card.findViewById(R.id.grade_item_components_title);
-        LinearLayout componentsContainer = card.findViewById(R.id.grade_item_components_container);
-        TextView testsTitle = card.findViewById(R.id.grade_item_tests_title);
-        LinearLayout testsContainer = card.findViewById(R.id.grade_item_tests_container);
-        MaterialButton btnDetails = card.findViewById(R.id.grade_item_btn_details);
-
-        courseName.setText(first.title);
-
-        Record topRecord = first;
-        for (Record r : rows) {
-            String scope = r.optMeta("gradeScope");
-            String ct = GradeBrowser.classType(r, snapshot).toLowerCase(Locale.ROOT);
-            if ("course".equals(scope) || r.metadata.optBoolean("alsoCourseProtocol")) {
-                topRecord = r;
-                break;
-            }
+        View row = LayoutInflater.from(activity).inflate(R.layout.item_grade_card, parent, false);
+        ((TextView) row.findViewById(R.id.grade_item_course_name)).setText(first.title);
+        List<String> symbols = new ArrayList<>();
+        Set<String> forms = new java.util.LinkedHashSet<>();
+        for (Record grade : rows) {
+            symbols.add(GradeBrowser.symbol(grade));
+            String form = gradeFormLabel(activity, grade, snapshot);
+            if (!form.isEmpty()) forms.add(form);
         }
-        String topSymbol = GradeBrowser.symbol(topRecord);
-        // A course can have several units and exam sessions. Do not present one arbitrary entry as its final grade.
-        boolean multipleEntries = rows.size() > 1;
-        valueBadge.setText(multipleEntries ? activity.getString(R.string.grades_group_entry_count, rows.size()) : topSymbol);
-        valueBadge.setTextSize(multipleEntries ? 13 : 22);
-        int topBgColor = multipleEntries ? UiHelper.GREEN : getGradeBadgeColor(topRecord, topSymbol);
-        GradientDrawable topBg = new GradientDrawable();
-        topBg.setColor(UiHelper.background(activity, topBgColor));
-        topBg.setCornerRadius(UiHelper.dp(activity, 8));
-        valueBadge.setBackground(topBg);
-        valueBadge.setTextColor(UiHelper.onColor(activity, UiHelper.background(activity, topBgColor)));
-
-        String meta = (!first.term.isEmpty() ? activity.getString(R.string.grade_meta_term, first.term) : "")
-            + (rows.size() > 1 ? " · " + activity.getString(R.string.grade_meta_count, rows.size()) : " · " + activity.getString(R.string.grade_meta_single));
-        courseMeta.setText(meta);
-
-        String ectsPoints = first.optMeta("ects");
-        if (ectsPoints.isEmpty() && !Double.isNaN(first.ects)) {
-            ectsPoints = first.ects == Math.floor(first.ects) ? String.format(Locale.forLanguageTag("pl-PL"), "%.0f", first.ects) : String.format(Locale.forLanguageTag("pl-PL"), "%.1f", first.ects);
-        }
-        if (!ectsPoints.isEmpty()) {
-            ectsView.setVisibility(View.VISIBLE);
-            ectsView.setText(activity.getString(R.string.grade_ects_points, ectsPoints));
-        } else {
-            ectsView.setVisibility(View.GONE);
-        }
-
-        String comment = first.optMeta("comment");
-        if (!comment.isEmpty() && rows.size() == 1) {
-            commentView.setVisibility(View.VISIBLE);
-            commentView.setText(activity.getString(R.string.grade_comment_prefix, comment));
-        } else {
-            commentView.setVisibility(View.GONE);
-        }
-
-        componentsTitle.setVisibility(View.VISIBLE);
-        componentsContainer.removeAllViews();
-        for (Record r : rows) {
-            View compView = inflater.inflate(R.layout.item_grade_component, componentsContainer, false);
-            TextView typeBadge = compView.findViewById(R.id.grade_comp_type_badge);
-            TextView sessionView = compView.findViewById(R.id.grade_comp_session);
-            TextView valBadge = compView.findViewById(R.id.grade_comp_value);
-            TextView compComment = compView.findViewById(R.id.grade_comp_comment);
-            TextView compDate = compView.findViewById(R.id.grade_comp_date);
-
-            String cType = GradeBrowser.classType(r, snapshot);
-            String badgeText;
-            int badgeBgColor;
-            int badgeTextColor;
-
-            String lower = cType.toLowerCase(Locale.ROOT);
-            if (lower.contains("lab")) {
-                badgeText = "🧪 " + cType;
-                badgeBgColor = Color.rgb(224, 242, 241);
-                badgeTextColor = Color.rgb(0, 121, 107);
-            } else if (lower.contains("ćwicz") || lower.contains("cwicz")) {
-                badgeText = "📝 " + cType;
-                badgeBgColor = Color.rgb(237, 231, 246);
-                badgeTextColor = Color.rgb(81, 45, 168);
-            } else if (lower.contains("proj")) {
-                badgeText = "💻 " + cType;
-                badgeBgColor = Color.rgb(255, 243, 224);
-                badgeTextColor = Color.rgb(230, 81, 0);
-            } else if (lower.contains("wykł") || lower.contains("wykl")) {
-                badgeText = "📚 " + cType;
-                badgeBgColor = Color.rgb(232, 245, 233);
-                badgeTextColor = Color.rgb(46, 125, 50);
-            } else if (lower.contains("lekt")) {
-                badgeText = "🗣️ " + cType;
-                badgeBgColor = Color.rgb(227, 242, 253);
-                badgeTextColor = Color.rgb(21, 101, 192);
-            } else {
-                badgeText = "🎓 " + cType;
-                badgeBgColor = Color.rgb(232, 243, 236);
-                badgeTextColor = Color.rgb(23, 107, 87);
+        TextView values = row.findViewById(R.id.grade_item_value_badge);
+        android.text.SpannableStringBuilder preview = new android.text.SpannableStringBuilder();
+        List<String> descriptions = new ArrayList<>();
+        for (int i = 0; i < rows.size(); i++) {
+            Record grade = rows.get(i);
+            String form = gradeFormLabel(activity, grade, snapshot);
+            int session = grade.metadata.optInt("sessionNumber", 0);
+            String label = form;
+            if (session > 1) label += " · " + activity.getString(R.string.grades_session_term, String.valueOf(session));
+            descriptions.add(label + ": " + symbols.get(i));
+            if (i >= 3) continue;
+            if (i > 0) preview.append("\n");
+            if (rows.size() > 1) {
+                int start = preview.length();
+                preview.append(label).append("  ");
+                preview.setSpan(new android.text.style.RelativeSizeSpan(0.65f), start, preview.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                preview.setSpan(new android.text.style.ForegroundColorSpan(activity.getColor(R.color.app_muted)), start, preview.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                preview.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.NORMAL), start, preview.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-
-            typeBadge.setText(badgeText);
-            GradientDrawable tBg = new GradientDrawable();
-            tBg.setColor(UiHelper.background(activity, badgeBgColor));
-            tBg.setCornerRadius(UiHelper.dp(activity, 8));
-            typeBadge.setBackground(tBg);
-            typeBadge.setTextColor(UiHelper.foreground(activity, badgeTextColor));
-
-            String sessionNum = r.optMeta("sessionNumber");
-            if (sessionNum.isEmpty()) {
-                if (r.value.contains("termin 1")) sessionNum = "1";
-                else if (r.value.contains("termin 2")) sessionNum = "2";
-                else if (r.value.contains("termin 3")) sessionNum = "3";
-            }
-            if (!sessionNum.isEmpty()) {
-                sessionView.setText(activity.getString(R.string.grades_session_term, sessionNum));
-            } else {
-                sessionView.setText(activity.getString(R.string.grades_session_unknown));
-            }
-
-            String sym = GradeBrowser.symbol(r);
-            valBadge.setText(sym);
-            int vBgColor = getGradeBadgeColor(r, sym);
-            GradientDrawable vBg = new GradientDrawable();
-            vBg.setColor(UiHelper.background(activity, vBgColor));
-            vBg.setCornerRadius(UiHelper.dp(activity, 8));
-            valBadge.setBackground(vBg);
-            valBadge.setTextColor(UiHelper.onColor(activity, UiHelper.background(activity, vBgColor)));
-
-            String rComment = r.optMeta("comment");
-            if (!rComment.isEmpty()) {
-                compComment.setVisibility(View.VISIBLE);
-                compComment.setText(rComment);
-            } else {
-                compComment.setVisibility(View.GONE);
-            }
-
-            String modTime = !r.sourceTime.isEmpty() ? r.sourceTime : r.optMeta("dateAcquisition");
-            if (!modTime.isEmpty()) {
-                compDate.setVisibility(View.VISIBLE);
-                compDate.setText(HistoryScreenController.formatFullDate(modTime));
-            } else {
-                compDate.setVisibility(View.GONE);
-            }
-
-            compView.setOnClickListener(v -> showGradeDetails(activity, r, snapshot, listener));
-            componentsContainer.addView(compView);
+            int symbolStart = preview.length();
+            preview.append(symbols.get(i));
+            preview.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), symbolStart, preview.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-
-        List<CourseTestRecord> matchedTests = new ArrayList<>();
-        String courseId = first.optMeta("courseId");
-        if (snapshot.tests != null) {
-            for (CourseTestRecord ctr : snapshot.tests) {
-                boolean matchId = !courseId.isEmpty() && courseId.equalsIgnoreCase(ctr.courseId);
-                boolean matchName = !first.title.isEmpty() && (first.title.equalsIgnoreCase(ctr.courseName)
-                    || (ctr.courseName != null && ctr.courseName.toLowerCase(Locale.ROOT).contains(first.title.toLowerCase(Locale.ROOT))));
-                if ((matchId || matchName) && first.term.equals(GradeSemesters.testTerm(snapshot, ctr))) {
-                    matchedTests.add(ctr);
-                    renderedTestIds.add(ctr.id);
-                }
-            }
-        }
-
-        if (!matchedTests.isEmpty()) {
-            testsTitle.setVisibility(View.VISIBLE);
-            testsContainer.removeAllViews();
-            for (CourseTestRecord ctr : matchedTests) {
-                View testView = inflater.inflate(R.layout.item_grade_test_subitem, testsContainer, false);
-                TextView testName = testView.findViewById(R.id.grade_test_name);
-                TextView testPoints = testView.findViewById(R.id.grade_test_points);
-                TextView testGrade = testView.findViewById(R.id.grade_test_grade);
-                TextView testDate = testView.findViewById(R.id.grade_test_date);
-
-                testName.setText(ctr.testName);
-                if (ctr.maxPoints > 0) {
-                    testPoints.setText(String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_points_format), ctr.points, ctr.maxPoints, ctr.percentage()));
-                } else if (!Double.isNaN(ctr.points) && ctr.points > 0) {
-                    testPoints.setText(String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_points_simple), ctr.points));
-                } else {
-                    testPoints.setVisibility(View.GONE);
-                }
-
-                if (!ctr.grade.isEmpty()) {
-                    testGrade.setVisibility(View.VISIBLE);
-                    testGrade.setText(activity.getString(R.string.grades_test_grade, ctr.grade));
-                } else {
-                    testGrade.setVisibility(View.GONE);
-                }
-
-                if (!ctr.date.isEmpty()) {
-                    testDate.setVisibility(View.VISIBLE);
-                    testDate.setText(activity.getString(R.string.grades_test_date, ctr.date));
-                } else {
-                    testDate.setVisibility(View.GONE);
-                }
-
-                testsContainer.addView(testView);
-            }
-        } else {
-            testsTitle.setVisibility(View.GONE);
-            testsContainer.removeAllViews();
-        }
-
-        // Keep the overview compact; expand only this subject's supporting information.
-        Button more = UiHelper.button(activity, activity.getString(R.string.subject_view_more), () -> {}, false);
-        more.setId(R.id.subject_view_more);
-        more.setContentDescription(activity.getString(R.string.subject_view_more_description, first.title));
-        View[] expandable = {commentView, componentsTitle, componentsContainer, testsTitle, testsContainer, btnDetails};
-        int[] expandedVisibility = new int[expandable.length];
-        for (int i = 0; i < expandable.length; i++) {
-            expandedVisibility[i] = expandable[i].getVisibility();
-            expandable[i].setVisibility(View.GONE);
-        }
-        more.setOnClickListener(v -> {
-            boolean expand = componentsContainer.getVisibility() == View.GONE;
-            for (int i = 0; i < expandable.length; i++)
-                expandable[i].setVisibility(expand ? expandedVisibility[i] : View.GONE);
-            more.setText(expand ? R.string.subject_view_less : R.string.subject_view_more);
-            more.setContentDescription(activity.getString(expand ? R.string.subject_view_less_description
-                : R.string.subject_view_more_description, first.title));
-        });
-        ((LinearLayout) card).addView(more);
-        btnDetails.setText(R.string.grades_subject_details);
-        btnDetails.setOnClickListener(v -> {
-            List<Record> allCourseRows = new ArrayList<>();
+        if (rows.size() > 3) preview.append("\n+").append(String.valueOf(rows.size() - 3));
+        values.setTypeface(null, android.graphics.Typeface.NORMAL);
+        values.setText(preview);
+        values.setMaxWidth(UiHelper.dp(activity, rows.size() > 1 ? 160 : 96));
+        values.setTextSize(20);
+        values.setLineSpacing(UiHelper.dp(activity, 5), 1f);
+        values.setContentDescription(activity.getString(R.string.grades_values_description, String.join(", ", descriptions)));
+        TextView meta = row.findViewById(R.id.grade_item_course_meta);
+        meta.setText(String.join(" · ", forms));
+        meta.setVisibility(rows.size() > 1 || forms.isEmpty() ? View.GONE : View.VISIBLE);
+        row.setOnClickListener(view -> {
+            List<Record> all = new ArrayList<>();
             for (Record candidate : snapshot.records.values()) if (candidate.kind.equals("ocena") && candidate.term.equals(first.term)
                 && (!first.optMeta("courseId").isEmpty() ? first.optMeta("courseId").equals(candidate.optMeta("courseId"))
-                    : first.title.equals(candidate.title))) allCourseRows.add(candidate);
-            showGradeGroupDetails(activity, allCourseRows, snapshot, listener);
+                    : first.title.equals(candidate.title))) all.add(candidate);
+            showGradeGroupDetails(activity, all, snapshot, listener);
         });
-        parent.addView(card);
+        androidx.core.view.ViewCompat.setScreenReaderFocusable(row, true);
+        for (CourseTestRecord test : snapshot.tests) if (first.term.equals(GradeSemesters.testTerm(snapshot, test))
+            && ((!first.optMeta("courseId").isEmpty() && first.optMeta("courseId").equals(test.courseId)) || first.title.equals(test.courseName)))
+            renderedTestIds.add(test.id);
+        parent.addView(row);
     }
 
-    private static int getGradeBadgeColor(Record r, String sym) {
-        Boolean passes = r.metadata != null && r.metadata.opt("passes") instanceof Boolean ? r.metadata.optBoolean("passes") : null;
-        if (passes != null) return passes ? UiHelper.GREEN : Color.rgb(198, 40, 40);
-        return Color.rgb(84, 110, 122);
-    }
-
-    private static void showGradeDetails(MainActivity activity, Record row, Snapshot snapshot, GradesListener listener) {
-        showGradeGroupDetails(activity, java.util.Collections.singletonList(row), snapshot, listener);
+    private static String gradeFormLabel(MainActivity activity, Record row, Snapshot snapshot) {
+        String label = GradeBrowser.classType(row, snapshot);
+        if (label.equals("Ocena z protokołu przedmiotu")) return activity.getString(R.string.grades_scope_course);
+        if (label.equals("Ocena z protokołu zajęć")) return activity.getString(R.string.grades_scope_unit);
+        if (label.equals("Typ zajęć niepodany")) return activity.getString(R.string.grades_type_unknown);
+        return label;
     }
 
     private static void showGradeGroupDetails(MainActivity activity, List<Record> rows, Snapshot snapshot, GradesListener listener) {
@@ -563,12 +417,19 @@ public final class GradesScreenController {
             } catch (Exception ignored) {}
         }
         Set<String> courseIds = new HashSet<>(); for (Record row : rows) if (!row.optMeta("courseId").isEmpty()) courseIds.add(row.optMeta("courseId"));
-        for (CourseTestRecord test : snapshot.tests) if (courseIds.contains(test.courseId)
+        for (CourseTestRecord test : snapshot.tests) if ((courseIds.contains(test.courseId) || rows.get(0).title.equals(test.courseName))
                 && rows.get(0).term.equals(GradeSemesters.testTerm(snapshot, test))) {
             UiHelper.heading(activity, body, test.testName);
             try {
+                if (test.maxPoints > 0) UiHelper.add(activity, body, String.format(Language.currentLocale(activity),
+                    activity.getString(R.string.grades_points_format), test.points, test.maxPoints, test.percentage()), 15, UiHelper.INK, false);
+                if (!test.grade.isEmpty()) UiHelper.add(activity, body, activity.getString(R.string.grades_test_grade, test.grade), 15, UiHelper.INK, true);
+                if (!test.date.isEmpty()) UiHelper.note(activity, body, activity.getString(R.string.grades_test_date, test.date), UiHelper.MUTED);
                 TextView text = UiHelper.text(activity, test.json().toString(2), 13, UiHelper.INK, false);
-                text.setTextIsSelectable(true); body.addView(text); copied.append(test.json().toString(2)).append("\n");
+                text.setTextIsSelectable(true); text.setVisibility(View.GONE);
+                body.addView(UiHelper.button(activity, activity.getString(R.string.grades_full_data), () ->
+                    text.setVisibility(text.getVisibility() == View.GONE ? View.VISIBLE : View.GONE), false));
+                body.addView(text); copied.append(test.json().toString(2)).append("\n");
             } catch (Exception ignored) {}
         }
         androidx.appcompat.app.AlertDialog[] detailDialog = new androidx.appcompat.app.AlertDialog[1];
@@ -595,9 +456,9 @@ public final class GradesScreenController {
         header.addView(UiHelper.text(activity, activity.getString(R.string.grades_summary_title), 16, UiHelper.INK, true), new LinearLayout.LayoutParams(0, -2, 1));
 
         Button help = UiHelper.button(activity, "?", () -> {
-            String statistics = summary.numeric == 0 ? activity.getString(R.string.grades_no_numeric_stats) : String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_stats_simple), summary.average, summary.min, summary.max);
+            String statistics = summary.numeric == 0 ? activity.getString(R.string.grades_no_numeric_stats) : String.format(Language.currentLocale(activity), activity.getString(R.string.grades_stats_simple), summary.average, summary.min, summary.max);
             if (!Double.isNaN(summary.ectsAverage)) {
-                statistics += String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_stats_weighted), summary.ectsAverage, summary.totalEcts);
+                statistics += String.format(Language.currentLocale(activity), activity.getString(R.string.grades_stats_weighted), summary.ectsAverage, summary.totalEcts);
             }
             new MaterialAlertDialogBuilder(activity).setTitle(activity.getString(R.string.grades_summary_title)).setMessage(statistics
                 + activity.getString(R.string.grades_stats_disclaimer)).setPositiveButton(activity.getString(R.string.btn_understand), null).show();
@@ -611,7 +472,7 @@ public final class GradesScreenController {
         values.setGravity(Gravity.CENTER_VERTICAL);
         values.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8));
 
-        TextView average = UiHelper.text(activity, summary.numeric == 0 ? "—" : String.format(Locale.forLanguageTag("pl-PL"), "%.2f", summary.average), 32, UiHelper.GREEN, true);
+        TextView average = UiHelper.text(activity, summary.numeric == 0 ? "—" : String.format(Language.currentLocale(activity), "%.2f", summary.average), 32, UiHelper.GREEN, true);
         average.setPadding(0, 0, UiHelper.dp(activity, 16), 0);
         values.addView(average, new LinearLayout.LayoutParams(-2, -2));
 
@@ -619,7 +480,7 @@ public final class GradesScreenController {
         counts.setOrientation(LinearLayout.VERTICAL);
         counts.addView(UiHelper.text(activity, summary.numeric == 0 ? activity.getString(R.string.grades_card_no_numeric) : activity.getString(R.string.grades_card_simple_avg), 12, UiHelper.INK, false));
         if (!Double.isNaN(summary.ectsAverage)) {
-            counts.addView(UiHelper.text(activity, String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_card_weighted_avg), summary.ectsAverage, summary.totalEcts), 13, UiHelper.GREEN, true));
+            counts.addView(UiHelper.text(activity, String.format(Language.currentLocale(activity), activity.getString(R.string.grades_card_weighted_avg), summary.ectsAverage, summary.totalEcts), 13, UiHelper.GREEN, true));
         }
         counts.addView(UiHelper.text(activity, activity.getString(R.string.grades_card_counts, summary.numeric, summary.other), 13, UiHelper.MUTED, false));
         values.addView(counts, new LinearLayout.LayoutParams(0, -2, 1));
@@ -651,10 +512,10 @@ public final class GradesScreenController {
         if (!studentNr.isEmpty()) sb.append(activity.getString(R.string.account_album_number, studentNr)).append("\n");
         sb.append(activity.getString(R.string.grades_share_term, currentSemester.isEmpty() ? activity.getString(R.string.grades_all_terms) : currentSemester)).append("\n");
         if (!Double.isNaN(summary.ectsAverage)) {
-            sb.append(String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_share_weighted), summary.ectsAverage, summary.totalEcts));
+            sb.append(String.format(Language.currentLocale(activity), activity.getString(R.string.grades_share_weighted), summary.ectsAverage, summary.totalEcts));
         }
         if (summary.numeric > 0) {
-            sb.append(String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_share_arithmetic), summary.average));
+            sb.append(String.format(Language.currentLocale(activity), activity.getString(R.string.grades_share_arithmetic), summary.average));
         }
         sb.append(activity.getString(R.string.grades_share_courses_header));
         for (List<Record> group : GradeBrowser.groups(rows)) {
@@ -683,7 +544,7 @@ public final class GradesScreenController {
         dialogLayout.setPadding(UiHelper.dp(activity, 24), UiHelper.dp(activity, 16), UiHelper.dp(activity, 24), UiHelper.dp(activity, 8));
 
         double currentAvg = Double.isNaN(summary.ectsAverage) ? summary.average : summary.ectsAverage;
-        String currentAvgStr = Double.isNaN(currentAvg) ? "brak" : String.format(Locale.forLanguageTag("pl-PL"), "%.2f", currentAvg);
+        String currentAvgStr = Double.isNaN(currentAvg) ? activity.getString(R.string.grades_sim_current_none) : String.format(Language.currentLocale(activity), "%.2f", currentAvg);
 
         TextView currentLabel = UiHelper.text(activity, activity.getString(R.string.grades_sim_current, currentAvgStr), 14, UiHelper.INK, true);
         dialogLayout.addView(currentLabel);
@@ -710,13 +571,13 @@ public final class GradesScreenController {
 
                 StringBuilder sb = new StringBuilder();
                 if (!Double.isNaN(reqSimple)) {
-                    sb.append(String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_sim_req_simple), count, reqSimple));
+                    sb.append(String.format(Language.currentLocale(activity), activity.getString(R.string.grades_sim_req_simple), count, reqSimple));
                     if (reqSimple > 5.0) sb.append(activity.getString(R.string.grades_sim_impossible));
                     else if (reqSimple <= 3.0) sb.append(activity.getString(R.string.grades_sim_already_reached));
                 }
                 if (!Double.isNaN(reqEcts) && !Double.isNaN(summary.ectsAverage)) {
                     if (sb.length() > 0) sb.append("\n\n");
-                    sb.append(String.format(Locale.forLanguageTag("pl-PL"), activity.getString(R.string.grades_sim_req_weighted), ectsPoints, reqEcts));
+                    sb.append(String.format(Language.currentLocale(activity), activity.getString(R.string.grades_sim_req_weighted), ectsPoints, reqEcts));
                     if (reqEcts > 5.0) sb.append(activity.getString(R.string.grades_sim_impossible));
                     else if (reqEcts <= 3.0) sb.append(activity.getString(R.string.grades_sim_already_reached));
                 }

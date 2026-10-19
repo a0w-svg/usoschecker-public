@@ -12,7 +12,7 @@ public final class AttendanceTracker {
         return new JSONArray().put(term).put(course).put(type).toString();
     }
     public static String type(Record row) {
-        String label = row.optMeta("classType").trim();
+        String label = row.optMeta("classTypeCanonical", row.optMeta("classType")).trim();
         String value = label.isEmpty() ? row.optMeta("classTypeId").trim() : label;
         String lower = value.toLowerCase(Locale.ROOT);
         if (lower.equals("w") || lower.equals("wyk") || lower.contains("wykład") || lower.contains("lecture")) return "Wykład";

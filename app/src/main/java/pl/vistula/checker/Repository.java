@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.*;
 import org.json.*;
 import pl.vistula.checker.core.Change;
+import pl.vistula.checker.core.ApiLanguage;
+import pl.vistula.checker.ui.Language;
 import pl.vistula.checker.core.Diff;
 import pl.vistula.checker.core.Snapshot;
 import pl.vistula.checker.core.UsosParser;
@@ -45,7 +47,39 @@ public final class Repository {
             vault.write(current);
         }
     }
-    public JSONObject read() throws Exception { synchronized (LOCK) { return vault.read(); } }
+    public JSONObject read() throws Exception {
+        synchronized (LOCK) { return localizedView(vault.read(), Language.currentLocale(context).getLanguage()); }
+    }
+    static JSONObject localizedView(JSONObject source, String language) throws Exception {
+        JSONObject view = new JSONObject(source.toString());
+        JSONObject rawSnapshot = view.optJSONObject("snapshot");
+        if (rawSnapshot != null) view.put("snapshot", Snapshot.from(rawSnapshot).forLanguage(language).json());
+        JSONArray history = view.optJSONArray("history");
+        if (history != null) for (int i = 0; i < history.length(); i++) {
+            JSONObject entry = history.optJSONObject(i);
+            if (entry == null) continue;
+            JSONObject translations = entry.optJSONObject("localized");
+            JSONObject translated = translations == null ? null : translations.optJSONObject(ApiLanguage.normalize(language));
+            if (translated != null) history.put(i, translated);
+        }
+        JSONObject profiles = view.optJSONObject("profileTranslations");
+        JSONObject profile = profiles == null ? null : profiles.optJSONObject(ApiLanguage.normalize(language));
+        if (profile != null) for (String key : UsosParser.sortedKeys(profile)) view.put(key, profile.get(key));
+        return view;
+    }
+    private static JSONObject profileData(JSONObject user) throws Exception {
+        JSONObject fields = new JSONObject();
+        JSONObject translations = new JSONObject();
+        for (String language : ApiLanguage.SUPPORTED) {
+            UsosParser.UserProfile profile = ApiLanguage.in(language, () -> UsosParser.userProfile(user));
+            JSONObject translated = new JSONObject().put("user", profile.name).put("studentNumber", profile.studentNumber)
+                .put("email", profile.email).put("programme", profile.programme).put("studentStatus", profile.studentStatus)
+                .put("stage", profile.stage).put("admissionDate", profile.admissionDate).put("photoUrl", profile.photoUrl);
+            translations.put(language, translated);
+            if (language.equals("pl")) for (String key : UsosParser.sortedKeys(translated)) fields.put(key, translated.get(key));
+        }
+        return fields.put("profileTranslations", translations);
+    }
     public interface Update { void apply(JSONObject state) throws Exception; }
     public void update(Update operation) throws Exception {
         synchronized (LOCK) { JSONObject state = vault.read(); operation.apply(state); vault.write(state); }
@@ -85,7 +119,7 @@ public final class Repository {
                 s.put("token", access.get("oauth_token")).put("tokenSecret", access.get("oauth_token_secret"))
                     .put("accountSession", UUID.randomUUID().toString());
                 for (String field : new String[]{"requestToken", "requestSecret", "authAttempt", "snapshot", "history", "studentServices",
-                        "retryAt", "authorizationError", "studentNumber", "email", "programme", "studentStatus", "stage", "admissionDate", "photoUrl", "reminderDeliveries"}) s.remove(field);
+                        "retryAt", "authorizationError", "studentNumber", "email", "programme", "studentStatus", "stage", "admissionDate", "photoUrl", "profileTranslations", "reminderDeliveries"}) s.remove(field);
                 s.put("enabled", true).put("error", "").put("user", "Student USOS");
                 vault.write(s);
                 connected = new JSONObject(s.toString());
@@ -97,15 +131,7 @@ public final class Repository {
         try {
             JSONObject user = new JSONObject(clients.create(connected).get("services/users/user",
                 Map.of("fields", UsosClient.profileFields(connected))));
-            UsosParser.UserProfile parsed = UsosParser.userProfile(user);
-            profile.put("user", parsed.name.isEmpty() ? (user.optString("first_name") + " " + user.optString("last_name")).trim() : parsed.name);
-            if (!parsed.studentNumber.isEmpty()) profile.put("studentNumber", parsed.studentNumber);
-            if (!parsed.email.isEmpty()) profile.put("email", parsed.email);
-            if (!parsed.programme.isEmpty()) profile.put("programme", parsed.programme);
-            if (!parsed.studentStatus.isEmpty()) profile.put("studentStatus", parsed.studentStatus);
-            if (!parsed.stage.isEmpty()) profile.put("stage", parsed.stage);
-            if (!parsed.admissionDate.isEmpty()) profile.put("admissionDate", parsed.admissionDate);
-            if (!parsed.photoUrl.isEmpty()) profile.put("photoUrl", parsed.photoUrl);
+            profile = profileData(user);
         } catch (Exception e) {
             profileFailure = e;
             boolean fallback = e instanceof JSONException || (e instanceof UsosClient.ApiException
@@ -134,19 +160,22 @@ public final class Repository {
     }
     private static IllegalStateException loginChanged() { return new IllegalStateException("Logowanie zostało anulowane lub konto się zmieniło."); }
     public List<Change> sync(boolean manual) throws Exception {
-        return sync(manual, s -> new UsosClient(s).snapshot());
+        return sync(manual, s -> new UsosClient(s).snapshot(), changes -> {}, true);
     }
     public List<Change> syncWithProgress(boolean manual, java.util.function.Consumer<String> progress) throws Exception {
-        return sync(manual, s -> new UsosClient(s, progress).snapshot());
+        return sync(manual, s -> new UsosClient(s, progress).snapshot(), changes -> {}, true);
     }
     List<Change> syncAndNotify(boolean manual, java.util.function.Consumer<String> progress) throws Exception {
-        return sync(manual, s -> new UsosClient(s, progress).snapshot(), changes -> NotificationHelper.notifyChanges(context, changes));
+        return sync(manual, s -> new UsosClient(s, progress).snapshot(), changes -> NotificationHelper.notifyChanges(context, changes), true);
     }
     interface SnapshotSource { Snapshot fetch(JSONObject state) throws Exception; }
     List<Change> sync(boolean manual, SnapshotSource source) throws Exception {
         return sync(manual, source, changes -> {});
     }
     List<Change> sync(boolean manual, SnapshotSource source, java.util.function.Consumer<List<Change>> publish) throws Exception {
+        return sync(manual, source, publish, false);
+    }
+    private List<Change> sync(boolean manual, SnapshotSource source, java.util.function.Consumer<List<Change>> publish, boolean refreshProfile) throws Exception {
         synchronized (SYNC_LOCK) {
             JSONObject s;
             synchronized (LOCK) {
@@ -157,19 +186,12 @@ public final class Repository {
                 s.put("attemptAt", System.currentTimeMillis()); vault.write(s);
             }
             try {
-                if (s.optString("studentNumber").isEmpty()) {
+                if (s.optString("studentNumber").isEmpty() || (refreshProfile && !s.has("profileTranslations"))) {
                     try {
                         JSONObject user = new JSONObject(new UsosClient(s).get("services/users/user",
                             Map.of("fields", UsosClient.profileFields(s))));
-                        UsosParser.UserProfile profile = UsosParser.userProfile(user);
-                        if (!profile.name.isEmpty()) s.put("user", profile.name);
-                        if (!profile.studentNumber.isEmpty()) s.put("studentNumber", profile.studentNumber);
-                        if (!profile.email.isEmpty()) s.put("email", profile.email);
-                        if (!profile.programme.isEmpty()) s.put("programme", profile.programme);
-                        if (!profile.studentStatus.isEmpty()) s.put("studentStatus", profile.studentStatus);
-                        if (!profile.stage.isEmpty()) s.put("stage", profile.stage);
-                        if (!profile.admissionDate.isEmpty()) s.put("admissionDate", profile.admissionDate);
-                        if (!profile.photoUrl.isEmpty()) s.put("photoUrl", profile.photoUrl);
+                        JSONObject fields = profileData(user);
+                        for (String field : UsosParser.sortedKeys(fields)) s.put(field, fields.get(field));
                     } catch (Exception ignored) {}
                 }
                 Snapshot current = source.fetch(s);
@@ -181,10 +203,19 @@ public final class Repository {
                     List<Change> changes = Diff.between(previous, current, now, LocalDate.now(UsosClient.ZONE).toString());
                     JSONArray oldHistory = latest.optJSONArray("history");
                     JSONArray history = new JSONArray();
-                    for (Change c : changes) { if (history.length() < 200) history.put(c.json()); }
+                    Map<String, List<Change>> translations = new LinkedHashMap<>();
+                    for (String language : new String[]{"en", "uk"}) translations.put(language,
+                        Diff.between(previous, current, now, LocalDate.now(UsosClient.ZONE).toString(), language));
+                    for (int i = 0; i < changes.size() && history.length() < 200; i++) {
+                        JSONObject entry = changes.get(i).json();
+                        JSONObject localized = new JSONObject();
+                        for (String language : translations.keySet()) localized.put(language, translations.get(language).get(i).json());
+                        history.put(entry.put("localized", localized));
+                    }
+                    changes = Diff.between(previous, current, now, LocalDate.now(UsosClient.ZONE).toString(), Language.currentLocale(context).getLanguage());
                     if (oldHistory != null) for (int i = 0; i < oldHistory.length() && history.length() < 200; i++) history.put(oldHistory.get(i));
                     JSONObject snapshot = current.json();
-                    for (String field : new String[]{"user", "studentNumber", "email", "programme", "studentStatus", "stage", "admissionDate", "photoUrl"}) {
+                    for (String field : new String[]{"user", "studentNumber", "email", "programme", "studentStatus", "stage", "admissionDate", "photoUrl", "profileTranslations"}) {
                         if (s.has(field)) latest.put(field, s.get(field));
                     }
                     latest.put("history", history).put("snapshot", snapshot).put("successAt", now).put("error", "");

@@ -87,7 +87,8 @@ public class TodayScheduleWidget extends AppWidgetProvider {
         }
 
         LocalDate today = LocalDate.now(UsosClient.ZONE);
-        views.setTextViewText(R.id.widget_date_text, today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag("pl-PL"))));
+        Locale widgetLocale = pl.vistula.checker.ui.Language.currentLocale(context);
+        views.setTextViewText(R.id.widget_date_text, today.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", widgetLocale)));
 
         // Academic term info
         if (snapshot != null && !snapshot.terms.isEmpty()) {
@@ -157,7 +158,7 @@ public class TodayScheduleWidget extends AppWidgetProvider {
 
             boolean isCurrent = highlight.contains(now);
             if (isFutureUpcoming) {
-                String dayStr = highlight.start.toLocalDate().format(DateTimeFormatter.ofPattern("EEE, d.MM", Locale.forLanguageTag("pl-PL"))).toUpperCase(Locale.forLanguageTag("pl-PL"));
+                String dayStr = highlight.start.toLocalDate().format(DateTimeFormatter.ofPattern("EEE, d.MM", widgetLocale)).toUpperCase(widgetLocale);
                 views.setTextViewText(R.id.widget_lesson_status, context.getString(R.string.widget_status_next, dayStr));
             } else {
                 views.setTextViewText(R.id.widget_lesson_status, isCurrent ? context.getString(R.string.widget_status_ongoing) : (highlight.start.toInstant().isAfter(now) ? context.getString(R.string.widget_status_upcoming_today) : context.getString(R.string.widget_status_ended_today)));

@@ -9,8 +9,13 @@ public final class NewsArticle {
     public final String author;
     public final String headline;
     public final String url;
+    public final String content;
 
     public NewsArticle(String id, String title, String publicationDate, String author, String headline, String url) {
+        this(id, title, publicationDate, author, headline, url, "");
+    }
+    public NewsArticle(String id, String title, String publicationDate, String author, String headline, String url, String content) {
+        this.content = content == null ? "" : content;
         this.id = id != null ? id : "";
         this.title = title != null ? title : "";
         this.publicationDate = publicationDate != null ? publicationDate : "";
@@ -26,7 +31,7 @@ public final class NewsArticle {
             .put("publicationDate", publicationDate)
             .put("author", author)
             .put("headline", headline)
-            .put("url", url);
+            .put("url", url).put("content", content);
     }
 
     public static NewsArticle from(JSONObject o) {
@@ -37,7 +42,7 @@ public final class NewsArticle {
             o.optString("publicationDate", ""),
             o.optString("author", ""),
             o.optString("headline", ""),
-            o.optString("url", "")
+            o.optString("url", ""), o.optString("content", "")
         );
     }
 }

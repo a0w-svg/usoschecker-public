@@ -60,17 +60,19 @@ public final class ApiExplorerController {
                                      java.util.function.Consumer<Integer> onLimitChanged,
                                      java.util.function.Consumer<Boolean> onFavoritesChanged,
                                      java.util.function.Consumer<String> onShowMethod) {
-        UiHelper.note(activity, content, activity.getString(R.string.api_subtitle_methods, catalog.length()), UiHelper.MUTED);
-
-        UiHelper.note(activity, content,
-            activity.getString(R.string.api_offline_note),
-            UiHelper.MUTED);
-
-        UiHelper.chips(activity, content,
-            new String[]{"all", "favorites"},
-            new String[]{activity.getString(R.string.api_all_methods), activity.getString(R.string.api_fav_filter)},
-            favoritesOnly ? "favorites" : "all",
-            value -> onFavoritesChanged.accept(value.equals("favorites")));
+        ToolScreenUi.header(activity, content, R.string.tool_api_title, menu -> {
+            ToolScreenUi.action(menu, favoritesOnly ? R.string.api_all_methods : R.string.api_fav_filter, () -> onFavoritesChanged.accept(!favoritesOnly));
+            android.view.SubMenu quick = menu.addSubMenu(R.string.api_key_services_heading);
+            String[] methods = {"services/users/user", "services/grades/terms2", "services/tt/student", "services/payments/user_accounts",
+                "services/payments/user_payments", "services/theses/user", "services/crstests/participant2", "services/terms/terms", "services/cards/mcard2", "services/adm_documents/user_documents", "services/news/search"};
+            int[] labels = {R.string.api_quick_profile, R.string.api_quick_grades, R.string.api_quick_schedule, R.string.api_quick_accounts,
+                R.string.api_quick_payments, R.string.api_quick_theses, R.string.api_quick_tests, R.string.api_quick_terms, R.string.cards_title, R.string.documents_title, R.string.tool_news_title};
+            for (int i = 0; i < methods.length; i++) { final String method = methods[i]; ToolScreenUi.action(quick, labels[i], () -> onShowMethod.accept(method)); }
+            ToolScreenUi.action(menu, R.string.api_offline_note, () -> new MaterialAlertDialogBuilder(activity)
+                .setMessage(activity.getString(R.string.api_subtitle_methods, catalog.length()) + "\n\n" + activity.getString(R.string.api_offline_note))
+                .setPositiveButton(R.string.btn_close, null).show());
+        });
+        if (favoritesOnly) UiHelper.note(activity, content, activity.getString(R.string.api_fav_filter), UiHelper.MUTED);
         Map<String, Integer> modules = ApiCatalog.modules(catalog);
         UiHelper.note(activity, content, activity.getString(R.string.api_modules_count, modules.size(), catalog.length()), UiHelper.MUTED);
         java.util.List<String> moduleValues = new java.util.ArrayList<>(), moduleLabels = new java.util.ArrayList<>();
@@ -91,35 +93,6 @@ public final class ApiExplorerController {
             public void onNothingSelected(android.widget.AdapterView<?> parent) {}
         });
 
-        UiHelper.heading(activity, content, activity.getString(R.string.api_key_services_heading));
-        String[] quickMethods = {
-            "services/users/user", "services/grades/terms2", "services/tt/student",
-            "services/payments/user_accounts", "services/payments/user_payments", "services/theses/user", "services/crstests/user", "services/terms/terms",
-            "services/cards/mcard2", "services/adm_documents/user_documents"
-        };
-        int[] quickLabelRes = {
-            R.string.api_quick_profile, R.string.api_quick_grades, R.string.api_quick_schedule,
-            R.string.api_quick_accounts, R.string.api_quick_payments, R.string.api_quick_theses, R.string.api_quick_tests, R.string.api_quick_terms,
-            R.string.cards_title, R.string.documents_title
-        };
-        LinearLayout quickScrollLayout = new LinearLayout(activity);
-        HorizontalScrollView quickScroll = new HorizontalScrollView(activity);
-        quickScroll.setHorizontalScrollBarEnabled(false);
-        quickScroll.addView(quickScrollLayout);
-        for (int i = 0; i < quickMethods.length; i++) {
-            final String qm = quickMethods[i];
-            Button qb = UiHelper.button(activity, activity.getString(quickLabelRes[i]), () -> onShowMethod.accept(qm), false);
-            qb.setTextSize(12);
-            qb.setSingleLine(true);
-            LinearLayout.LayoutParams qp = new LinearLayout.LayoutParams(-2, -2);
-            qp.rightMargin = UiHelper.dp(activity, 6);
-            quickScrollLayout.addView(qb, qp);
-        }
-        LinearLayout.LayoutParams qsp = new LinearLayout.LayoutParams(-1, -2);
-        qsp.bottomMargin = UiHelper.dp(activity, 12);
-        content.addView(quickScroll, qsp);
-
-        UiHelper.note(activity, content, activity.getString(R.string.api_search_alias_hint), UiHelper.MUTED);
         EditText search = UiHelper.searchField(activity, content, activity.getString(R.string.api_search_hint), apiQuery, null, null);
         final LinearLayout list = new LinearLayout(activity);
         list.setOrientation(LinearLayout.VERTICAL);
@@ -158,7 +131,12 @@ public final class ApiExplorerController {
                         Button b = UiHelper.button(activity, name.substring("services/".length()) + "\n" + brief, () -> onShowMethod.accept(name), false);
                         b.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
                         b.setTextSize(13.0f);
+                        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.TRANSPARENT));
+                        b.setPadding(UiHelper.dp(activity, 8), UiHelper.dp(activity, 12), UiHelper.dp(activity, 8), UiHelper.dp(activity, 12));
                         list.addView(b, new LinearLayout.LayoutParams(-1, -2));
+                        android.view.View divider = new android.view.View(activity);
+                        divider.setBackgroundColor(activity.getColor(R.color.app_outline_soft));
+                        list.addView(divider, new LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 1)));
                     }
                 }
             }
@@ -186,7 +164,8 @@ public final class ApiExplorerController {
         scroll.smoothScrollTo(0, 0);
 
         content.addView(UiHelper.button(activity, activity.getString(R.string.api_btn_back_catalog), onBack, false));
-        UiHelper.title(activity, content, methodName.substring("services/".length()), UiHelper.plain(metadata.optString("brief_description")));
+        UiHelper.add(activity, content, methodName.substring("services/".length()), 20, UiHelper.INK, true);
+        UiHelper.note(activity, content, UiHelper.plain(metadata.optString("brief_description")), UiHelper.MUTED);
 
         Button favorite = UiHelper.button(activity, favorites.contains(methodName) ? activity.getString(R.string.api_btn_fav_remove) : activity.getString(R.string.api_btn_fav_add), () -> {}, false);
         favorite.setOnClickListener(v -> {
@@ -197,7 +176,7 @@ public final class ApiExplorerController {
         content.addView(favorite);
 
         JSONObject auth = metadata.getJSONObject("auth_options");
-        LinearLayout docs = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout docs = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, docs, activity.getString(R.string.api_access_heading), 17, UiHelper.INK, true);
         UiHelper.add(activity, docs, activity.getString(R.string.api_auth_details, auth.optString("consumer"), auth.optString("token"), String.valueOf(auth.optJSONArray("scopes")), (auth.optBoolean("administrative_only") ? activity.getString(R.string.api_admin_key_required) : "")), 13, UiHelper.MUTED, false);
         java.util.List<String> missing = ApiCatalog.missingScopes(metadata, activity.serviceAccountState().optString("scopes"));
@@ -216,7 +195,7 @@ public final class ApiExplorerController {
         LinkedHashMap<String, String> defaults = new LinkedHashMap<>();
         JSONObject draft = activity.apiDraft(methodName);
         Set<String> required = new HashSet<>();
-        LinearLayout params = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout params = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, params, activity.getString(R.string.api_params_heading), 18, UiHelper.INK, true);
 
         for (int i = 0; i < arguments.length(); ++i) {
@@ -328,17 +307,17 @@ public final class ApiExplorerController {
                 .show();
         }, true));
 
-        LinearLayout output = UiHelper.card(activity, content, Color.WHITE);
+        LinearLayout output = UiHelper.section(activity, content, Color.WHITE);
         UiHelper.add(activity, output, activity.getString(R.string.api_response_title), 17, UiHelper.INK, true);
         output.addView(result);
         output.addView(saveResponse); output.addView(copyResponse);
         if (!metadata.optString("returns").isEmpty()) {
-            LinearLayout fields = UiHelper.card(activity, content, Color.WHITE);
+            LinearLayout fields = UiHelper.section(activity, content, Color.WHITE);
             UiHelper.add(activity, fields, activity.getString(R.string.api_result_fields), 18, UiHelper.INK, true);
             UiHelper.add(activity, fields, UiHelper.plain(metadata.optString("returns")), 14, UiHelper.MUTED, false);
         }
         if (!metadata.optString("errors").isEmpty()) {
-            LinearLayout errors = UiHelper.card(activity, content, Color.WHITE);
+            LinearLayout errors = UiHelper.section(activity, content, Color.WHITE);
             UiHelper.add(activity, errors, activity.getString(R.string.api_errors_reference), 18, UiHelper.INK, true);
             UiHelper.add(activity, errors, UiHelper.plain(metadata.optString("errors")), 14, UiHelper.MUTED, false);
         }

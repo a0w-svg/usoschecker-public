@@ -201,6 +201,13 @@ public final class UsosClient {
         try { return fetchSnapshot(); }
         catch (Exception e) { throw new SyncException(stage, e); }
     }
+    private interface SnapshotParser { void parse(Snapshot snapshot) throws Exception; }
+    private static void parseLanguages(Snapshot snapshot, SnapshotParser parser) throws Exception {
+        for (String language : ApiLanguage.SUPPORTED) {
+            Snapshot target = snapshot.forLanguage(language);
+            ApiLanguage.in(language, () -> { parser.parse(target); return null; });
+        }
+    }
     private Snapshot fetchSnapshot() throws Exception {
         for (String required : List.of("grades", "studies")) {
             if (!StudentServices.hasScope(scopes, required)) throw new IllegalStateException(
@@ -208,10 +215,10 @@ public final class UsosClient {
         }
         LocalDate start = LocalDate.now(ZONE).with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         Snapshot s = new Snapshot(start.toString(), start.plusDays(planDays).toString());
+        for (String language : new String[]{"en", "uk"}) s.localized.put(language, new Snapshot(s.start, s.end));
         reportProgress("Pobieranie semestrów · courses/user");
         JSONObject editions = new JSONObject(get("services/courses/user", Map.of("active_terms_only", "false",
             "fields", "course_editions[course_id|course_name]"))).getJSONObject("course_editions");
-        Map<String, String> names = UsosParser.courseNames(editions);
         List<String> terms = UsosParser.sortedKeys(editions);
 
         reportProgress("Pobieranie punktów ECTS · courses/user_ects_points");
@@ -222,12 +229,13 @@ public final class UsosClient {
         } catch (Exception e) { optionalFailure(e); }
 
         reportProgress("Pobieranie kalendarza semestrów · terms/terms");
-        s.courses.addAll(UsosParser.courseEditions(editions, ectsPoints));
+        Map<String, Double> points = ectsPoints;
+        parseLanguages(s, variant -> variant.courses.addAll(UsosParser.courseEditions(editions, points)));
         try {
             if (!terms.isEmpty()) {
                 String termsRaw = get("services/terms/terms", Map.of("term_ids", String.join("|", terms),
                     "fields", "id|name|start_date|end_date|finish_date"));
-                s.terms.putAll(UsosParser.academicTerms(new JSONObject(termsRaw)));
+                parseLanguages(s, variant -> variant.terms.putAll(UsosParser.academicTerms(new JSONObject(termsRaw))));
             }
         } catch (Exception e) { optionalFailure(e); }
 
@@ -261,26 +269,39 @@ public final class UsosClient {
                 } else throw e;
             }
         }
-        s.payments = UsosParser.payments(accountsRaw, paymentsRaw, paymentsScopeMissing, paymentsNotice);
+        Object accountData = accountsRaw, paymentData = paymentsRaw;
+        boolean missingPayments = paymentsScopeMissing;
+        String paymentMessage = paymentsNotice;
+        parseLanguages(s, variant -> variant.payments = UsosParser.payments(accountData, paymentData, missingPayments, paymentMessage));
 
         reportProgress("Pobieranie prac dyplomowych · theses/user");
         try {
             String thesesRaw = get("services/theses/user", Map.of("fields", "id|title|status|supervisors[first_name|last_name]|reviewers[first_name|last_name]"));
-            s.thesis = UsosParser.thesis(new JSONTokener(thesesRaw).nextValue());
+            parseLanguages(s, variant -> variant.thesis = UsosParser.thesis(new JSONTokener(thesesRaw).nextValue()));
         } catch (Exception e) { optionalFailure(e); }
 
-        reportProgress("Pobieranie sprawdzianów cząstkowych · crstests/user");
-        try {
-            String testsRaw = get("services/crstests/user", Map.of("fields", "id|course_id|name|points|max_points|grade|date"));
-            s.tests.addAll(UsosParser.courseTests(new JSONTokener(testsRaw).nextValue(), names));
-        } catch (Exception e) { optionalFailure(e); }
+        if (StudentServices.hasScope(scopes, "crstests")) {
+            reportProgress("Pobieranie sprawdzianów cząstkowych · crstests/participant2");
+            try {
+                String node = "id|name|type|visible_for_students|task_node_details[points_max|students_points[points|last_changed]]|grade_node_details[students_grade[grade_value[symbol]|last_changed]]";
+                JSONArray tests = new JSONArray(get("services/crstests/participant2", Map.of("active_terms_only", "false", "fields",
+                    "course_edition[course[id|name]|term[id]]|root[" + node + "|subnodes_deep[" + node + "]]")));
+                parseLanguages(s, variant -> variant.tests.addAll(UsosParser.courseTestTrees(tests, UsosParser.courseNames(editions))));
+            } catch (Exception e) {
+                optionalFailure(e);
+                parseLanguages(s, variant -> variant.serviceErrors.put("crstests", Repository.message(e)));
+            }
+        } else parseLanguages(s, variant -> variant.serviceErrors.put("crstests", "crstests"));
 
         reportProgress("Pobieranie komunikatów uczelni · news/search");
         try {
             String newsRaw = get("services/news/search", Map.of("num", "10",
-                "fields", "items[article[id|title|publication_date|author[first_name|last_name]|headline_html]]"));
-            s.news.addAll(UsosParser.newsArticles(new JSONTokener(newsRaw).nextValue()));
-        } catch (Exception e) { optionalFailure(e); }
+                "fields", "items[article[id|title|publication_date|author|headline_html|content_html]]"));
+            parseLanguages(s, variant -> variant.news.addAll(UsosParser.newsArticles(new JSONTokener(newsRaw).nextValue())));
+        } catch (Exception e) {
+            optionalFailure(e);
+            parseLanguages(s, variant -> variant.serviceErrors.put("news", Repository.message(e)));
+        }
 
         // Batch term IDs to avoid URL limits; every batch must succeed before commit.
         for (int i = 0; i < terms.size(); i += 8) {
@@ -289,7 +310,7 @@ public final class UsosClient {
             JSONObject grades = new JSONObject(get("services/grades/terms2", Map.of("term_ids", String.join("|", batch),
                 "fields", "exam_id|exam_session_number|value_symbol|passes|value_description|counts_into_average|grade_type_id|date_modified|date_acquisition|modification_author|comment")));
             for (String term : batch) if (!grades.has(term) || grades.isNull(term)) throw new IOException("USOS zwrócił niepełny zestaw ocen.");
-            UsosParser.grades(s, grades, names, ectsPoints);
+            parseLanguages(s, variant -> UsosParser.grades(variant, grades, UsosParser.courseNames(editions), points));
         }
         List<JSONArray> weeks = TimetableLoader.load(start, planDays, (pageStart, days) ->
             new JSONArray(get("services/tt/student", Map.of("start", pageStart.toString(), "days", String.valueOf(days),
@@ -298,8 +319,13 @@ public final class UsosClient {
         Map<String, String> lecturerNames = resolveLecturers(weeks, ids -> new JSONObject(get("services/users/users",
             Map.of("user_ids", String.join("|", ids), "fields", "first_name|last_name"))));
         reportProgress("Odczyt planu zajęć · tt/student");
-        for (JSONArray rows : weeks) UsosParser.timetable(s, rows, lecturerNames);
+        for (JSONArray rows : weeks) parseLanguages(s, variant -> UsosParser.timetable(variant, rows, lecturerNames));
         enrichGradeUnits(s);
+        for (Snapshot translation : s.localized.values()) for (Record record : translation.records.values()) {
+            Record canonical = s.records.get(record.id);
+            if (canonical != null) record.metadata.put("classTypeCanonical",
+                canonical.kind.equals("ocena") ? GradeBrowser.classType(canonical, s) : canonical.optMeta("classType"));
+        }
         return s;
     }
     private static void optionalFailure(Exception failure) throws Exception {
@@ -323,16 +349,19 @@ public final class UsosClient {
             try {
                 JSONObject units = new JSONObject(get("services/courses/units", Map.of("unit_ids", String.join("|", batch),
                     "fields", "id|course_name|course_id|term_id|classtype_id|homepage_url|profile_url")));
-                for (Record grade : snapshot.records.values()) {
+                JSONObject definitions = types;
+                parseLanguages(snapshot, variant -> {
+                for (Record grade : variant.records.values()) {
                     JSONObject unit = units.optJSONObject(grade.optMeta("unitId"));
                     if (!grade.kind.equals("ocena") || unit == null) continue;
                     grade.metadata.put("unitData", new JSONObject(unit.toString()));
                     String typeId = StudentServices.text(unit, "classtype_id");
                     if (!typeId.isEmpty()) grade.metadata.put("classTypeId", typeId);
-                    JSONObject definition = types.optJSONObject(typeId);
+                    JSONObject definition = definitions.optJSONObject(typeId);
                     String name = definition == null ? "" : StudentServices.localized(definition.opt("name"));
                     if (!name.isEmpty()) grade.metadata.put("classType", name).put("classTypeSource", "unit_api");
                 }
+                });
             } catch (Exception e) { optionalFailure(e); }
         }
         // Resolve editor IDs independently; unavailable names never prevent a grade snapshot.
@@ -342,10 +371,12 @@ public final class UsosClient {
             try {
                 Map<String, String> names = UsosParser.lecturerNames(new JSONObject(get("services/users/users", Map.of(
                     "user_ids", String.join("|", authors.subList(i, Math.min(i + 50, authors.size()))), "fields", "first_name|last_name"))));
-                for (Record grade : snapshot.records.values()) {
+                parseLanguages(snapshot, variant -> {
+                for (Record grade : variant.records.values()) {
                     String name = names.get(grade.optMeta("modificationAuthor"));
                     if (name != null && !name.isEmpty()) grade.metadata.put("modificationAuthorName", name);
                 }
+                });
             } catch (Exception e) { optionalFailure(e); }
         }
     }

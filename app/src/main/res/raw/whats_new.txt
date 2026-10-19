@@ -1,7 +1,7 @@
+• Menu planu zajęć (trzy kropki) przeniesione na prawą stronę paska nawigacji datą.
+• Przycisk menu bocznego (hamburgerek) umieszczony w prawym górnym rogu paska; menu wysuwa się z prawej strony.
 • Prostszy ekran startowy bez banera, szybkich skrótów, stanu monitorowania i podsumowania najbliższych 7 dni.
 • Wspólne Ustawienia: konto, wygląd, synchronizacja, powiadomienia, widżety, semestr akademicki i informacje o aplikacji.
-• Usunięte powtarzające się nagłówki ekranów i zdublowane wejścia do ustawień.
-• Menu planu zajęć przeniesione na lewą stronę.
-• Spokojniejsze akcenty na ekranie startowym: wyróżnione trwające lub najbliższe zajęcia.
 • Neutralny kolor tekstu w obu motywach; zieleń pozostaje w ikonach i wybranych tłach.
 • Usunięte nazwy ekranów z górnego paska, zbędne opisy i puste sekcje; krótszy podgląd kolejnych zajęć.
+• Minimalistyczna zakładka Zmiany: filtry i wyszukiwanie w menu, zwięzłe wpisy oraz pełne szczegóły po dotknięciu.

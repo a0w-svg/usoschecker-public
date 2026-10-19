@@ -23,13 +23,14 @@ public class OledThemeTest {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         org.junit.Assume.assumeTrue(context.getPackageName().endsWith(".qa"));
         int previous = Appearance.mode(context);
+        String[] modes = context.getResources().getStringArray(R.array.appearance_modes);
         try {
             context.getSharedPreferences("appearance", Context.MODE_PRIVATE).edit()
                 .putInt("nightMode", AppCompatDelegate.MODE_NIGHT_NO).commit();
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
                 scenario.onActivity(a -> a.navigate(4));
                 onView(withText(R.string.appearance_title)).perform(scrollTo(), click());
-                onView(withText("Ciemny OLED")).perform(click());
+                onView(withText(modes[2])).perform(click());
                 scenario.onActivity(this::assertOled);
                 scenario.recreate();
                 scenario.onActivity(a -> {
@@ -55,7 +56,7 @@ public class OledThemeTest {
             }
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
                 scenario.onActivity(a -> { assertOled(a); Appearance.choose(a); });
-                onView(withText("Jasny")).perform(click());
+                onView(withText(modes[1])).perform(click());
                 scenario.onActivity(a -> {
                     assertFalse(UiHelper.isDark(a));
                     assertEquals(AppCompatDelegate.MODE_NIGHT_NO, Appearance.mode(a));
@@ -74,7 +75,7 @@ public class OledThemeTest {
                     assertTrue(lightScreenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output));
                 } finally { lightScreenshot.recycle(); }
                 scenario.onActivity(Appearance::choose);
-                onView(withText("Systemowy")).perform(click());
+                onView(withText(modes[0])).perform(click());
                 scenario.onActivity(a -> assertEquals(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM, Appearance.mode(a)));
             }
         } finally {
@@ -87,10 +88,7 @@ public class OledThemeTest {
         assertTrue(UiHelper.isDark(activity));
         assertEquals(AppCompatDelegate.MODE_NIGHT_YES, Appearance.mode(activity));
         assertEquals(Color.BLACK, ((ColorDrawable) activity.findViewById(R.id.main_root).getBackground()).getColor());
-        android.graphics.drawable.Drawable toolbarBackground = activity.findViewById(R.id.toolbar).getBackground();
-        int toolbarColor = toolbarBackground instanceof ColorDrawable ? ((ColorDrawable) toolbarBackground).getColor()
-            : ((com.google.android.material.shape.MaterialShapeDrawable) toolbarBackground).getFillColor().getDefaultColor();
-        assertEquals(Color.BLACK, toolbarColor);
+
         for (int color : new int[]{UiHelper.INK, UiHelper.MUTED, UiHelper.GREEN, Color.rgb(160, 48, 40)})
             assertTrue(androidx.core.graphics.ColorUtils.calculateContrast(
                 UiHelper.foreground(activity, color), Color.rgb(24, 24, 24)) >= 4.5);
@@ -122,9 +120,12 @@ public class OledThemeTest {
     private void assertGradeBadges(android.view.View view) {
         if (view instanceof android.widget.TextView && (view.getId() == R.id.grade_item_value_badge
                 || view.getId() == R.id.grade_comp_value)) {
-            android.graphics.drawable.GradientDrawable shape = (android.graphics.drawable.GradientDrawable) view.getBackground();
-            assertTrue("Rendered grade badge contrast", androidx.core.graphics.ColorUtils.calculateContrast(
-                ((android.widget.TextView) view).getCurrentTextColor(), shape.getColor().getDefaultColor()) >= 4.5);
+            android.graphics.drawable.Drawable background = view.getBackground();
+            int surface = background instanceof android.graphics.drawable.GradientDrawable
+                ? ((android.graphics.drawable.GradientDrawable) background).getColor().getDefaultColor()
+                : view.getContext().getColor(R.color.app_background);
+            assertTrue("Rendered grade text contrast", androidx.core.graphics.ColorUtils.calculateContrast(
+                ((android.widget.TextView) view).getCurrentTextColor(), surface) >= 4.5);
         }
         if (view instanceof android.view.ViewGroup) {
             android.view.ViewGroup parent = (android.view.ViewGroup) view;

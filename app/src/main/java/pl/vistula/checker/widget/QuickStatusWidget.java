@@ -102,14 +102,15 @@ public class QuickStatusWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_status_album, (!album.isEmpty() ? "Nr albumu: " + album : "") + (!program.isEmpty() ? (!album.isEmpty() ? " · " : "") + program : ""));
 
         // Grade calculation
+        Locale widgetLocale = pl.vistula.checker.ui.Language.currentLocale(context);
         if (snapshot != null && !snapshot.records.isEmpty()) {
             GradeSummary summary = GradeSummary.of(snapshot.records.values());
             if (!Double.isNaN(summary.ectsAverage)) {
-                views.setTextViewText(R.id.widget_status_grade_value, String.format(Locale.forLanguageTag("pl-PL"), "%.2f", summary.ectsAverage));
+                views.setTextViewText(R.id.widget_status_grade_value, String.format(widgetLocale, "%.2f", summary.ectsAverage));
                 String sub = summary.ectsAverage >= 4.50 ? context.getString(R.string.widget_grade_sub_stipend, summary.totalEcts) : context.getString(R.string.widget_grade_sub_weighted, summary.totalEcts);
                 views.setTextViewText(R.id.widget_status_grade_sub, sub);
             } else if (!Double.isNaN(summary.average)) {
-                views.setTextViewText(R.id.widget_status_grade_value, String.format(Locale.forLanguageTag("pl-PL"), "%.2f", summary.average));
+                views.setTextViewText(R.id.widget_status_grade_value, String.format(widgetLocale, "%.2f", summary.average));
                 views.setTextViewText(R.id.widget_status_grade_sub, context.getString(R.string.widget_grade_sub_simple));
             } else {
                 views.setTextViewText(R.id.widget_status_grade_value, "—");
@@ -124,7 +125,7 @@ public class QuickStatusWidget extends AppWidgetProvider {
         if (snapshot != null && snapshot.payments != null) {
             PaymentInfo p = snapshot.payments;
             double unpaid = p.totalUnpaidAmount();
-            views.setTextViewText(R.id.widget_status_payment_value, String.format(Locale.forLanguageTag("pl-PL"), "%.2f PLN", unpaid));
+            views.setTextViewText(R.id.widget_status_payment_value, String.format(widgetLocale, "%.2f PLN", unpaid));
             if (p.hasOverdue()) {
                 views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_overdue));
             } else if (unpaid == 0) {

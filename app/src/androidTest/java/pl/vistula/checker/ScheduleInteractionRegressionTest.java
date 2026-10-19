@@ -126,8 +126,7 @@ public class ScheduleInteractionRegressionTest {
         main(() -> { rule.getActivity().setDemo(true); rule.getActivity().navigate(5); });
         main(() -> {
             MainActivity a = rule.getActivity();
-            assertEquals(UiHelper.dp(a, 48), a.findViewById(R.id.toolbar).getHeight());
-            assertNull(((com.google.android.material.appbar.MaterialToolbar) a.findViewById(R.id.toolbar)).getSubtitle());
+            assertTrue(a.findViewById(R.id.main_root) instanceof android.widget.LinearLayout);
         });
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withContentDescription(
             org.hamcrest.Matchers.startsWith(rule.getActivity().getString(R.string.schedule_btn_choose_date) + ":")))
@@ -155,10 +154,10 @@ public class ScheduleInteractionRegressionTest {
             View card = a.findViewById(R.id.schedule_current_lesson); assertNotNull(card);
             TextView room = card.findViewById(R.id.lesson_item_room);
             assertEquals(View.VISIBLE, room.getVisibility());
-            assertEquals("Sala 101", room.getText().toString());
+            assertEquals(a.getString(R.string.lesson_room_label, "101"), room.getText().toString());
             assertTrue(room.getTypeface().isBold());
             assertEquals(18 * a.getResources().getDisplayMetrics().scaledDensity, room.getTextSize(), .5f);
-            assertFalse(((TextView) card.findViewById(R.id.lesson_item_details)).getText().toString().contains("Sala "));
+            assertFalse(((TextView) card.findViewById(R.id.lesson_item_details)).getText().toString().contains(a.getString(R.string.lesson_room_label, "101")));
             android.view.ViewGroup bar = (android.view.ViewGroup) a.findViewById(R.id.schedule_more).getParent();
             for (int i = 0; i < bar.getChildCount(); i++) {
                 assertTrue(bar.getChildAt(i).getWidth() >= UiHelper.dp(a, 56));

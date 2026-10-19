@@ -32,10 +32,74 @@ public class AppSmokeTest {
         click(activity().getString(R.string.btn_start_demo));
     }
     private Activity activity() { return rule.getActivity(); }
+    private String localized(String text) {
+        if (text == null) return null;
+        Activity a = activity();
+        if (a == null) return text;
+        switch (text) {
+            case "Więcej": return a.getString(R.string.nav_more);
+            case "Start": return a.getString(R.string.nav_home);
+            case "Oceny": return a.getString(R.string.nav_grades);
+            case "Plan": return a.getString(R.string.nav_plan);
+            case "Zmiany": return a.getString(R.string.nav_history);
+            case "Dzisiaj": return a.getString(R.string.schedule_btn_today);
+            case "Symuluj zmiany": return a.getString(R.string.btn_simulate_changes);
+            case "Zakończ tryb demonstracyjny": return a.getString(R.string.btn_end_demo);
+            case "Połącz z USOS": return a.getString(R.string.btn_login_browser);
+            case "Parametry żądania": return a.getString(R.string.api_params_heading);
+            case "← Wróć do katalogu": return a.getString(R.string.api_btn_back_catalog);
+            case "Dodaj do ulubionych": return a.getString(R.string.api_btn_fav_add);
+            case "Usuń z ulubionych": return a.getString(R.string.api_btn_fav_remove);
+            case "Brak pasujących metod. Spróbuj innej nazwy lub opisu.": return a.getString(R.string.api_count_none);
+            case "Pokaż kolejne metody": return a.getString(R.string.api_btn_show_more);
+            case "Brak pasujących danych": return a.getString(R.string.grades_no_match);
+            case "Filtry i sortowanie": return a.getString(R.string.grades_filter_expand);
+            case "Ukryj filtry i sortowanie": return a.getString(R.string.grades_filter_collapse);
+            case "Liczbowe": return a.getString(R.string.grades_chip_numeric);
+            case "Pozostałe": return a.getString(R.string.grades_chip_other);
+            case "Wyczyść filtry ocen": return a.getString(R.string.grades_filter_reset);
+            case "Podsumowanie ocen": return a.getString(R.string.grades_summary_title);
+            case "Ostatnia zmiana": return a.getString(R.string.grades_sort_recent);
+            case "Brak pasujących zmian": return a.getString(R.string.history_no_match_title);
+            case "Najbliższe zajęcia": return a.getString(R.string.classes_upcoming);
+            case "Dodaj zadanie": return a.getString(R.string.btn_add_task);
+            case "Oznacz jako ukończone": return a.getString(R.string.tasks_btn_mark_done);
+            case "Edytuj zadanie": return a.getString(R.string.tasks_btn_edit);
+            case "Usuń zadanie": return a.getString(R.string.tasks_btn_delete);
+            case "Cofnij": return a.getString(R.string.undo);
+            case "Najbliższe terminy": return a.getString(R.string.deadlines_upcoming);
+            case "Otwórz zadania": return a.getString(R.string.home_open_tasks);
+            case "Na dzisiaj": return a.getString(R.string.tasks_chip_today);
+            case "Ukończone": return a.getString(R.string.tasks_chip_done);
+            case "Otwarte": return a.getString(R.string.tasks_chip_open);
+            case "Brak pasujących zadań": return a.getString(R.string.tasks_no_match_title);
+            case "Wysoki priorytet": return a.getString(R.string.tasks_priority_high);
+            case "Spokojna głowa": return a.getString(R.string.tasks_empty_title);
+            default:
+                if (text.startsWith("Wyświetlono ") && text.endsWith(" pasujących metod.")) {
+                    String[] parts = text.split(" ");
+                    try {
+                        int count = Integer.parseInt(parts[1]);
+                        int total = Integer.parseInt(parts[3]);
+                        return a.getString(R.string.api_count_match, count, total);
+                    } catch (Exception ignored) {}
+                }
+                if (text.startsWith("Do zrobienia: ") && text.contains(" · ukończone: ")) {
+                    String[] parts = text.split(" · ");
+                    try {
+                        int open = Integer.parseInt(parts[0].replace("Do zrobienia: ", "").trim());
+                        int done = Integer.parseInt(parts[1].replace("ukończone: ", "").trim());
+                        return a.getString(R.string.tasks_summary, open, done);
+                    } catch (Exception ignored) {}
+                }
+                return text;
+        }
+    }
     private View find(View root, String text, boolean button) {
+        String loc = localized(text);
         if (root instanceof TextView && (!button || root instanceof Button)) {
             String label = ((TextView) root).getText().toString();
-            if (label.equals(text) || (button && label.matches(java.util.regex.Pattern.quote(text) + " \\(\\d+\\)"))) return root;
+            if (label.equals(text) || label.equals(loc) || (button && (label.matches(java.util.regex.Pattern.quote(text) + " \\(\\d+\\)") || label.matches(java.util.regex.Pattern.quote(loc) + " \\(\\d+\\)")))) return root;
         }
         if (root instanceof ViewGroup) for (int i = 0; i < ((ViewGroup) root).getChildCount(); i++) {
             View result = find(((ViewGroup) root).getChildAt(i), text, button); if (result != null) return result;
@@ -43,15 +107,19 @@ public class AppSmokeTest {
         return null;
     }
     private void click(String text) throws Exception {
-        if (PlanMenuTestHelper.select(activity(), text)) return;
+        if (ToolMenuTestHelper.select(activity(), localized(text))) return;
+        if (TasksMenuTestHelper.select(activity(), localized(text))) return;
+        if (GradesMenuTestHelper.select(activity(), localized(text))) return;
+        if (PlanMenuTestHelper.select(activity(), text) || PlanMenuTestHelper.select(activity(), localized(text))) return;
         long until = System.currentTimeMillis() + 10000;
         boolean[] done = {false};
         while (!done[0] && System.currentTimeMillis() < until) {
             InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
                 String[] tabs = {"Start", "Oceny", "Plan", "Zmiany", "Więcej"};
+                int[] labelIds = {R.string.nav_home, R.string.nav_grades, R.string.nav_plan, R.string.nav_history, R.string.nav_more};
                 int[] ids = {R.id.nav_item_home, R.id.nav_item_grades, R.id.nav_item_plan, R.id.nav_item_history, R.id.nav_item_more};
                 View nav = findNavigation(activity().getWindow().getDecorView());
-                for (int i = 0; i < tabs.length; i++) if (text.equals(tabs[i]) && nav != null) {
+                for (int i = 0; i < tabs.length; i++) if ((text.equals(tabs[i]) || text.equals(activity().getString(labelIds[i])) || text.equals(localized(tabs[i]))) && nav != null) {
                     android.view.MenuItem item = ((com.google.android.material.bottomnavigation.BottomNavigationView) nav).getMenu().findItem(ids[i]);
                     if (item.isEnabled()) { nav.findViewById(ids[i]).performClick(); done[0] = true; }
                     return;
@@ -144,8 +212,18 @@ public class AppSmokeTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertNull(find(activity().getWindow().getDecorView(), "Pokaż kolejne metody", true)));
     }
+    private void assertGradeCounts(int numeric, int other) {
+        GradesMenuTestHelper.select(activity(), activity().getString(R.string.grades_summary_title));
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(activity().getString(R.string.grades_card_counts, numeric, other)))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog())
+            .check(androidx.test.espresso.assertion.ViewAssertions.matches(androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility(androidx.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE)));
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_close))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).perform(androidx.test.espresso.action.ViewActions.click());
+    }
     private void searchFor(String query) {
         PlanMenuTestHelper.revealSearch(activity());
+        GradesMenuTestHelper.revealSearch(activity());
+        TasksMenuTestHelper.revealSearch(activity());
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             EditText input = firstInput((ViewGroup) activity().getWindow().getDecorView());
             assertNotNull(input); input.setText(query);
@@ -165,33 +243,34 @@ public class AppSmokeTest {
             assertEquals("", firstInput((ViewGroup) activity().getWindow().getDecorView()).getText().toString()));
     }
     @Test public void gradeFiltersDetailsAndTimetableSearchStayIndependent() throws Exception {
-        startDemo(); click("Oceny"); click("Filtry i sortowanie"); click("Liczbowe");
-        has(activity().getString(R.string.grades_card_counts, 4, 0)); searchFor("finansów");
-        click("Ukryj filtry i sortowanie"); capturePreview("grades-refined-preview.png");
-        click(activity().getString(R.string.grades_subject_details));
+        startDemo(); click("Oceny"); click("Liczbowe");
+        assertGradeCounts(4, 0); searchFor("finansów");
+        capturePreview("grades-refined-preview.png");
+        click("Podstawy finansów");
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.grades_btn_add_task))
             .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog())
             .perform(androidx.test.espresso.action.ViewActions.click());
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_title))
             .check((view, missing) -> { assertNull(missing); assertEquals("Podstawy finansów", ((EditText) view).getText().toString()); });
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Anuluj"))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_cancel))
             .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog())
             .perform(androidx.test.espresso.action.ViewActions.click());
         click("Plan");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> assertEquals("", firstInput((ViewGroup) activity().getWindow().getDecorView()).getText().toString()));
         click(activity().getString(R.string.schedule_mode_week)); has("Ekonomia"); capturePreview("timetable-week-preview.png");
-        searchFor("Kowalska"); click("Oceny"); has("Podstawy finansów"); has(activity().getString(R.string.grades_card_counts, 2, 0));
+        searchFor("Kowalska"); click("Oceny"); has("Podstawy finansów"); assertGradeCounts(2, 0);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> assertEquals("finansów", firstInput((ViewGroup) activity().getWindow().getDecorView()).getText().toString()));
-        click("Filtry i sortowanie"); click("Pozostałe"); has("Brak pasujących danych"); click("Wyczyść filtry ocen"); has("Język angielski");
+        click("Pozostałe"); has("Brak pasujących danych"); click("Wyczyść filtry ocen"); has("Język angielski");
     }
     @Test public void friendlySearchAndDailyNavigationRespectVisibleResults() throws Exception {
         startDemo(); click("Oceny"); searchFor("finansow"); has("Podstawy finansów");
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            View decor = activity().getWindow().getDecorView(); int[] grade = new int[2], summary = new int[2];
-            find(decor,"Podstawy finansów",false).getLocationOnScreen(grade); find(decor,"Podsumowanie ocen",false).getLocationOnScreen(summary);
-            assertTrue(summary[1] < grade[1]); firstInput((ViewGroup) decor).requestFocus();
+            View decor = activity().getWindow().getDecorView();
+            assertNull(find(decor, "Podsumowanie ocen", false));
+            assertNotNull(decor.findViewById(R.id.grades_more));
+            firstInput((ViewGroup) decor).requestFocus();
         });
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withContentDescription("Wyczyść wyszukiwanie"))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withContentDescription(activity().getString(R.string.btn_clear_search)))
             .perform(androidx.test.espresso.action.ViewActions.click());
         has("Język angielski"); capturePreview("friendly-grades.png");
         click("Plan"); click(activity().getString(R.string.schedule_btn_today)); searchFor("Kowalska"); has(activity().getString(R.string.schedule_no_search_results));
@@ -226,7 +305,7 @@ public class AppSmokeTest {
         } finally { androidx.test.espresso.intent.Intents.release(); output.delete(); }
     }
     @Test public void gradeFiltersSurviveActivityRecreation() throws Exception {
-        startDemo(); click("Oceny"); click("Filtry i sortowanie"); click("Liczbowe"); click("Ostatnia zmiana"); searchFor("finansów");
+        startDemo(); click("Oceny"); click("Liczbowe"); click("Ostatnia zmiana"); searchFor("finansów");
         Activity previous = activity(); InstrumentationRegistry.getInstrumentation().runOnMainSync(previous::recreate);
         long until = System.currentTimeMillis() + 10000; Activity[] resumed = {null};
         while (resumed[0] == null && System.currentTimeMillis() < until) {
@@ -240,7 +319,10 @@ public class AppSmokeTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             View decor = resumed[0].getWindow().getDecorView();
             assertEquals("finansów", firstInput((ViewGroup) decor).getText().toString());
-            assertTrue(find(decor, "Liczbowe", true).isSelected()); assertTrue(find(decor, "Ostatnia zmiana", true).isSelected());
+            TextView active = decor.findViewById(R.id.grades_active_filters);
+            assertNotNull(active); assertTrue(active.isSelected());
+            assertTrue(active.getText().toString().contains(activity().getString(R.string.grades_chip_numeric)));
+            assertTrue(active.getText().toString().contains(activity().getString(R.string.grades_sort_recent)));
             assertNotNull(find(decor, "Podstawy finansów", false));
         });
     }
@@ -260,7 +342,7 @@ public class AppSmokeTest {
         click("Oceny"); has(activity().getString(R.string.nav_grades)); has("Podstawy finansów");
         click("Plan"); has("Plan"); has("Ekonomia"); hasContaining(activity().getString(R.string.classes_ongoing));
         click("Zmiany"); has("Zmiany");
-        click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); has("Dodaj zadanie");
+        click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> assertNotNull(activity().findViewById(R.id.tasks_add)));
     }
     @Test public void demoTasksCanBeAddedAndCompletedWithoutWritingLiveData() throws Exception {
         String before = new Repository(activity()).read().optJSONArray("tasks") == null ? "[]" : new Repository(activity()).read().getJSONArray("tasks").toString();
@@ -275,16 +357,16 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
     }
     @Test public void semesterFilterAndSummaryTrackVisibleGrades() throws Exception {
         startDemo(); click("Oceny");
-        click("Filtry i sortowanie");
-        has("Podsumowanie ocen"); has(activity().getString(R.string.grades_card_counts, 4, 0)); has(activity().getString(R.string.grades_card_counts, 1, 1));
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> firstSpinner((ViewGroup) activity().getWindow().getDecorView()).setSelection(1));
+
+        assertGradeCounts(4, 0); assertGradeCounts(1, 1);
+        GradesMenuTestHelper.selectSemester(activity(), 1);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        has("Podstawy finansów"); has(activity().getString(R.string.grades_card_counts, 4, 0));
+        has("Podstawy finansów"); assertGradeCounts(4, 0);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() ->
             assertNull(find(activity().getWindow().getDecorView(), "Język angielski", false)));
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> firstSpinner((ViewGroup) activity().getWindow().getDecorView()).setSelection(2));
+        GradesMenuTestHelper.selectSemester(activity(), 2);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-        has("Język angielski"); has(activity().getString(R.string.grades_card_counts, 1, 1));
+        has("Język angielski"); assertGradeCounts(1, 1);
     }
     @Test public void taskEditingFiltersAndDashboardKeepTheSameTask() throws Exception {
         startDemo(); click("Więcej"); click(activity().getString(R.string.tool_tasks_title)); click("Dodaj zadanie");
@@ -295,7 +377,7 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         click("Edytuj zadanie");
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_title))
             .perform(androidx.test.espresso.action.ViewActions.replaceText("Projekt poprawiony"), androidx.test.espresso.action.ViewActions.closeSoftKeyboard());
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Zapisz"))
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_save))
             .perform(androidx.test.espresso.action.ViewActions.click());
         has("Projekt poprawiony"); has("Do zrobienia: 1 · ukończone: 0");
         click("Start"); has("Najbliższe terminy"); has("Projekt poprawiony");
@@ -314,7 +396,7 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_priority))
             .check((view, missing) -> { assertNull(missing); ((Spinner) view).setSelection(2); });
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_save)).perform(androidx.test.espresso.action.ViewActions.click());
-        has("Wysoki priorytet"); has("Materiały w bibliotece");
+        hasContaining(activity().getString(R.string.tasks_priority_high));
         capturePreview("task-priority-preview.png");
         searchFor("bibliotece"); has("Przygotuj prezentację");
         click("Edytuj zadanie");
@@ -323,12 +405,12 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.task_input_priority))
             .check((view, missing) -> { assertNull(missing); assertEquals(2, ((Spinner) view).getSelectedItemPosition()); });
         capturePreview("task-editor-preview.png");
-        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText("Zapisz")).perform(androidx.test.espresso.action.ViewActions.click());
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_save)).perform(androidx.test.espresso.action.ViewActions.click());
         click("Usuń zadanie");
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.tasks_btn_delete))
             .inRoot(androidx.test.espresso.matcher.RootMatchers.isDialog()).perform(androidx.test.espresso.action.ViewActions.click());
         has("Spokojna głowa"); click("Cofnij");
-        has("Przygotuj prezentację"); has("Wysoki priorytet");
+        has("Przygotuj prezentację"); hasContaining(activity().getString(R.string.tasks_priority_high));
         assertEquals(original, new Repository(activity()).read().toString());
     }
     @Test public void androidJsonNullGradesDoNotFailParsing() throws Exception {
@@ -403,7 +485,8 @@ androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatche
             assertTrue(containsText(activity().getWindow().getDecorView(), "Prowadzący: Anna Kowalska")));
     }
     private boolean containsText(View root, String part) {
-        if (root instanceof TextView && ((TextView) root).getText().toString().contains(part)) return true;
+        String loc = localized(part);
+        if (root instanceof TextView && (((TextView) root).getText().toString().contains(part) || ((TextView) root).getText().toString().contains(loc))) return true;
         if (root instanceof ViewGroup) for (int i = 0; i < ((ViewGroup) root).getChildCount(); i++)
             if (containsText(((ViewGroup) root).getChildAt(i), part)) return true;
         return false;

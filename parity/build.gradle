@@ -1,0 +1,22 @@
+plugins { id 'java-library' }
+
+// Parity gate for the Java -> Kotlin port: the ORIGINAL core unit tests (unchanged, shared with
+// :core) run against the Kotlin implementation in :shared instead of the Java one. :core must
+// never be on this classpath, otherwise both implementations would define the same classes.
+java { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+
+sourceSets.test.java {
+    srcDir '../core/src/test/java'
+    // Grows as classes move to :shared; ends as the whole directory before :core is removed.
+    include 'pl/vistula/checker/core/AppReleaseTest.java'
+    // PlatonLinksTest also covers TaskTools: add it back when TaskTools is ported.
+    include 'pl/vistula/checker/core/WebLinksTest.java'
+    include 'pl/vistula/checker/core/StudentSearchTest.java'
+}
+
+dependencies {
+    testImplementation project(':shared')
+    testImplementation 'org.json:json:20240303'
+    testImplementation 'junit:junit:4.13.2'
+}
+

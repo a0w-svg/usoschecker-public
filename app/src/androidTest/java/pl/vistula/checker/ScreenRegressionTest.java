@@ -38,10 +38,17 @@ public class ScreenRegressionTest {
     private View decor() { return rule.getActivity().getWindow().getDecorView(); }
     private void has(String text) { main(() -> assertNotNull(text, find(decor(), text))); }
     private void absent(String text) { main(() -> assertNull(text, find(decor(), text))); }
-    private void search(String query) { PlanMenuTestHelper.revealSearch(rule.getActivity()); main(() -> { assertNotNull(input(decor())); input(decor()).setText(query); }); }
+    private void search(String query) { GradesMenuTestHelper.revealSearch(rule.getActivity());
+        TasksMenuTestHelper.revealSearch(rule.getActivity()); PlanMenuTestHelper.revealSearch(rule.getActivity()); main(() -> { assertNotNull(input(decor())); input(decor()).setText(query); }); }
     private void click(String text) {
+        if (ToolMenuTestHelper.select(rule.getActivity(), text)) return;
+        if (TasksMenuTestHelper.select(rule.getActivity(), text)) return;
         if (PlanMenuTestHelper.select(rule.getActivity(), text)) return;
-        main(() -> { View view = find(decor(), text); assertNotNull(text, view); assertTrue(view.performClick()); });
+        main(() -> {
+            View view = find(decor(), text); assertNotNull(text, view);
+            while (view != null && !view.isClickable()) view = view.getParent() instanceof View ? (View) view.getParent() : null;
+            assertNotNull("Clickable row for " + text, view); assertTrue(view.performClick());
+        });
     }
     private void capture(String name) throws Exception {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -52,6 +59,13 @@ public class ScreenRegressionTest {
         try (java.io.FileOutputStream output = new java.io.FileOutputStream(file)) {
             screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output);
         } finally { screenshot.recycle(); }
+        if (name.equals("grades-improved") || name.equals("tasks-improved")) {
+            try (android.os.ParcelFileDescriptor result = InstrumentationRegistry.getInstrumentation().getUiAutomation()
+                    .executeShellCommand("cp " + file.getAbsolutePath() + " /data/local/tmp/usos-" + (name.equals("grades-improved") ? "grades" : "tasks") + "-ux.png");
+                 java.io.FileInputStream copied = new java.io.FileInputStream(result.getFileDescriptor())) {
+                while (copied.read() != -1) { /* Wait until the shell copy finishes. */ }
+            }
+        }
     }
     @Before public void demo() throws Exception {
         assertTrue("Regression tests must use isolated app data", rule.getActivity().getPackageName().endsWith(".qa"));
@@ -74,9 +88,18 @@ public class ScreenRegressionTest {
     @Test public void historySearchAndActionFilterUpdateImmediately() throws Exception {
         main(() -> rule.getActivity().sync());
         capture("changes-improved");
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.history_more))
+            .perform(androidx.test.espresso.action.ViewActions.click());
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.history_search_action))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isPlatformPopup()).perform(androidx.test.espresso.action.ViewActions.click());
+        androidx.test.espresso.Espresso.closeSoftKeyboard();
         search("315"); has("Statystyka opisowa"); absent("Podstawy finansów");
         search("no-such-change"); has(rule.getActivity().getString(R.string.history_no_match_title));
-        search(""); click(rule.getActivity().getString(R.string.history_chip_modified, 2));
+        search("");
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withId(R.id.history_more))
+            .perform(androidx.test.espresso.action.ViewActions.click());
+        androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(rule.getActivity().getString(R.string.history_chip_modified, 2)))
+            .inRoot(androidx.test.espresso.matcher.RootMatchers.isPlatformPopup()).perform(androidx.test.espresso.action.ViewActions.click());
         has("Podstawy finansów"); has("Statystyka opisowa");
     }
     @Test public void timetableWeekSearchPersistsAcrossNavigation() throws Exception {
@@ -102,6 +125,8 @@ public class ScreenRegressionTest {
             .put("due", today.minusDays(1).toString()).put("done", false);
         main(() -> { rule.getActivity().savePersonalTask(due); rule.getActivity().savePersonalTask(overdue); rule.getActivity().navigate(0); });
         capture("dashboard-improved");
+        main(() -> rule.getActivity().navigate(7));
+        capture("tasks-improved");
         main(() -> rule.getActivity().openTasks("week"));
         has("Due this week"); absent("Overdue task");
         main(() -> rule.getActivity().openTasks("overdue"));
@@ -164,9 +189,12 @@ public class ScreenRegressionTest {
     }
     @Test public void gradeSubjectDetailsIncludeAllComponentsAndCompleteStoredData() throws Exception {
         main(() -> rule.getActivity().navigate(2)); search("finansów");
-        has(rule.getActivity().getString(R.string.grades_group_entry_count, 2));
-        click(rule.getActivity().getString(R.string.subject_view_more));
-        click(rule.getActivity().getString(R.string.grades_subject_details));
+        main(() -> {
+            TextView values = rule.getActivity().findViewById(R.id.grade_item_value_badge);
+            assertTrue(values.getText().toString().contains("4,0"));
+            assertTrue(values.getText().toString().contains("5,0"));
+        });
+        click("Podstawy finansów");
         dialogHas("4,0"); dialogHas("5,0"); dialogHas("Kod przedmiotu"); dialogHas("ID autora modyfikacji");
         dialogHas(rule.getActivity().getString(R.string.grades_full_data));
         androidx.test.espresso.Espresso.onView(androidx.test.espresso.matcher.ViewMatchers.withText(R.string.btn_close))

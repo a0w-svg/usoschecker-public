@@ -127,6 +127,17 @@ public final class UiHelper {
         return box;
     }
 
+    public static LinearLayout section(Context context, LinearLayout parent, int ignoredColor) {
+        LinearLayout box = new LinearLayout(context);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(context, 8), dp(context, 16), dp(context, 8), dp(context, 12));
+        box.setBackgroundResource(R.drawable.bg_section_divider);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.bottomMargin = dp(context, 8);
+        parent.addView(box, params);
+        return box;
+    }
+
     public static Button button(Context context, String label, Runnable action, boolean primary) {
         MaterialButton b = new MaterialButton(context);
         b.setMaxLines(4);
@@ -147,6 +158,14 @@ public final class UiHelper {
         b.setLayoutParams(p);
         b.setOnClickListener(v -> action.run());
         return b;
+    }
+
+    public static Button actionRow(Context context, String label, Runnable action, boolean ignoredPrimary) {
+        Button button = button(context, label, action, false);
+        button.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+        button.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        button.setPadding(dp(context, 8), dp(context, 10), dp(context, 8), dp(context, 10));
+        return button;
     }
 
     public static View toolTile(Context context, LinearLayout parent, String icon, String title, String subtitle, Runnable action) {
@@ -198,7 +217,7 @@ public final class UiHelper {
     public static View toolTile(Context context, LinearLayout parent, int iconResource, String title, String subtitle, Runnable action) {
         View tile = toolTile(context, parent, "", title, subtitle, action);
         TextView icon = tile.findViewById(R.id.tool_tile_icon);
-        icon.setPadding(dp(context, 10), 0, 0, 0);
+        icon.setPadding(dp(context, 4), 0, 0, 0);
         icon.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
         return tile;
     }
@@ -302,12 +321,12 @@ public final class UiHelper {
     }
 
     public static String timestamp(long millis) {
-        return millis == 0 ? "Jeszcze nie sprawdzano" : Instant.ofEpochMilli(millis).atZone(UsosClient.ZONE)
-            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", Locale.forLanguageTag("pl-PL")));
+        return millis == 0 ? "—" : Instant.ofEpochMilli(millis).atZone(UsosClient.ZONE)
+            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", Language.currentLocale(null)));
     }
 
     public static String shortDate(LocalDate date) {
-        return date.format(DateTimeFormatter.ofPattern("EEE, d MMM", Locale.forLanguageTag("pl-PL")));
+        return date.format(DateTimeFormatter.ofPattern("EEE, d MMM", Language.currentLocale(null)));
     }
 
     public static TextView badge(Context context, LinearLayout parent, String text, int bg, int fg) {

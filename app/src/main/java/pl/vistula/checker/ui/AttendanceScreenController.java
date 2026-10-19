@@ -46,6 +46,7 @@ public final class AttendanceScreenController {
                               String filter, java.util.function.Consumer<String> onFilterChanged,
                               Runnable requestRender) {
 
+        int headerIndex = content.getChildCount();
         SharedPreferences prefs = activity.attendancePreferences();
         JSONObject saved;
         try { saved = new JSONObject(prefs.getString("data", "{}")); } catch (Exception e) { saved = new JSONObject(); }
@@ -75,19 +76,7 @@ public final class AttendanceScreenController {
             termLabels[i] = id.isEmpty() ? activity.getString(R.string.attendance_unassigned) :
                 snapshot != null && snapshot.terms.containsKey(id) ? snapshot.terms.get(id).name + " · " + id : id;
         }
-        UiHelper.add(activity, content, activity.getString(R.string.attendance_semester), 14, UiHelper.MUTED, true);
-        Spinner semester = new Spinner(activity);
-        semester.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_spinner_dropdown_item, termLabels));
-        semester.setSelection(terms.indexOf(activeTerm));
         prefs.edit().putString("term", activeTerm).apply();
-        content.addView(semester);
-        semester.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String next = terms.get(position);
-                if (!next.equals(activeTerm)) { prefs.edit().putString("term", next).apply(); requestRender.run(); }
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
         String activeType = prefs.getString("classType", "all");
         java.util.LinkedHashSet<String> types = new java.util.LinkedHashSet<>();
         types.add("all");
@@ -101,9 +90,6 @@ public final class AttendanceScreenController {
         String[] typeValues = types.toArray(new String[0]);
         String[] typeLabels = types.stream().map(t -> t.equals("all") ? activity.getString(R.string.attendance_all_types) :
             t.isEmpty() ? activity.getString(R.string.attendance_unknown_type) : t).toArray(String[]::new);
-        UiHelper.chips(activity, content, typeValues, typeLabels, selectedType,
-            next -> { prefs.edit().putString("classType", next).apply(); requestRender.run(); });
-
         int totalCourses = 0, warningCount = 0, exceededCount = 0, totalAbsences = 0;
         Iterator<String> keys = saved.keys();
         while (keys.hasNext()) {
@@ -119,31 +105,39 @@ public final class AttendanceScreenController {
             else if (AttendanceTracker.warning(count)) warningCount++;
         }
 
-        LinearLayout summaryBox = UiHelper.card(activity, content,
-            exceededCount > 0 ? Color.rgb(255, 238, 238) : (warningCount > 0 ? Color.rgb(255, 248, 230) : Color.rgb(232, 243, 236)));
-        UiHelper.add(activity, summaryBox,
-            exceededCount > 0 ? activity.getString(R.string.attendance_status_exceeded) : (warningCount > 0 ? activity.getString(R.string.attendance_status_warning) : activity.getString(R.string.attendance_status_ok)),
-            11, exceededCount > 0 ? Color.rgb(160, 48, 40) : (warningCount > 0 ? Color.rgb(217, 119, 6) : UiHelper.GREEN), true);
-        UiHelper.add(activity, summaryBox,
-            activity.getString(R.string.attendance_stats_summary, totalCourses, totalAbsences), 15, UiHelper.INK, true);
-        if (exceededCount > 0) {
-            UiHelper.note(activity, summaryBox, activity.getString(R.string.attendance_note_exceeded, exceededCount), Color.rgb(160, 48, 40));
-        } else if (warningCount > 0) {
-            UiHelper.note(activity, summaryBox, activity.getString(R.string.attendance_note_warning, warningCount), Color.rgb(217, 119, 6));
-        } else {
-            UiHelper.note(activity, summaryBox, activity.getString(R.string.attendance_note_ok), UiHelper.GREEN);
-        }
-
-        UiHelper.chips(activity, content,
-            new String[]{"all", "warning", "exceeded"},
-            new String[]{
-                activity.getString(R.string.attendance_filter_all, totalCourses),
-                activity.getString(R.string.attendance_filter_warning, warningCount),
-                activity.getString(R.string.attendance_filter_exceeded, exceededCount)
-            }, filter, onFilterChanged);
-
-        content.addView(UiHelper.button(activity, activity.getString(R.string.attendance_btn_add_course),
-            () -> showEditCourseDialog(activity, null, requestRender), true));
+        final int courses = totalCourses, warnings = warningCount, exceeded = exceededCount;
+        ToolScreenUi.header(activity, content, R.string.tool_attendance_title, menu -> {
+            ToolScreenUi.action(menu, R.string.attendance_btn_add_course, () -> showEditCourseDialog(activity, null, requestRender));
+            android.view.SubMenu semesters = menu.addSubMenu(R.string.attendance_semester);
+            for (int i = 0; i < terms.size(); i++) {
+                final String next = terms.get(i);
+                semesters.add(termLabels[i]).setCheckable(true).setChecked(next.equals(activeTerm)).setOnMenuItemClickListener(item -> {
+                    prefs.edit().putString("term", next).apply(); requestRender.run(); return true;
+                });
+            }
+            android.view.SubMenu classTypes = menu.addSubMenu(R.string.attendance_all_types);
+            for (int i = 0; i < typeValues.length; i++) {
+                final String next = typeValues[i];
+                classTypes.add(typeLabels[i]).setCheckable(true).setChecked(next.equals(selectedType)).setOnMenuItemClickListener(item -> {
+                    prefs.edit().putString("classType", next).apply(); requestRender.run(); return true;
+                });
+            }
+            android.view.SubMenu statuses = menu.addSubMenu(R.string.grades_filter_type);
+            String[] statusKeys = {"all", "warning", "exceeded"};
+            String[] labels = {activity.getString(R.string.attendance_filter_all, courses), activity.getString(R.string.attendance_filter_warning, warnings), activity.getString(R.string.attendance_filter_exceeded, exceeded)};
+            for (int i = 0; i < statusKeys.length; i++) {
+                final String key = statusKeys[i];
+                statuses.add(labels[i]).setCheckable(true).setChecked(key.equals(filter)).setOnMenuItemClickListener(item -> { onFilterChanged.accept(key); return true; });
+            }
+            ToolScreenUi.action(menu, R.string.tool_api_methods, () -> activity.openApiModule("attendance"));
+            ToolScreenUi.action(menu, R.string.attendance_rule_footer, () -> new MaterialAlertDialogBuilder(activity)
+                .setMessage(R.string.attendance_rule_footer).setPositiveButton(R.string.btn_close, null).show());
+        });
+        View heading = content.getChildAt(content.getChildCount() - 1); content.removeView(heading); content.addView(heading, headerIndex);
+        UiHelper.note(activity, content, termLabels[terms.indexOf(activeTerm)], UiHelper.MUTED);
+        UiHelper.note(activity, content, activity.getString(R.string.attendance_stats_summary, totalCourses, totalAbsences), UiHelper.MUTED);
+        if (exceededCount > 0) UiHelper.note(activity, content, activity.getString(R.string.attendance_note_exceeded, exceededCount), activity.getColor(R.color.app_error));
+        else if (warningCount > 0) UiHelper.note(activity, content, activity.getString(R.string.attendance_note_warning, warningCount), UiHelper.MUTED);
 
         LinearLayout list = new LinearLayout(activity);
         list.setOrientation(LinearLayout.VERTICAL);
@@ -174,7 +168,7 @@ public final class AttendanceScreenController {
             if ("exceeded".equals(filter) && !AttendanceTracker.exceeded(count)) continue;
 
             shown++;
-            LinearLayout itemCard = UiHelper.card(activity, list, Color.WHITE);
+            LinearLayout itemCard = UiHelper.section(activity, list, Color.WHITE);
             itemCard.setClickable(true);
             itemCard.setFocusable(true);
             itemCard.setOnClickListener(v -> showEditCourseDialog(activity, code, requestRender));
@@ -197,19 +191,6 @@ public final class AttendanceScreenController {
                 badgeColor = UiHelper.GREEN;
             }
             UiHelper.add(activity, itemCard, badgeText, 14, badgeColor, true);
-
-            LinearProgressIndicator progress = new LinearProgressIndicator(activity);
-            progress.setMax(limit > 0 ? limit : 1);
-            progress.setProgress(Math.min(count, limit));
-            progress.setTrackColor(UiHelper.background(activity, Color.rgb(230, 235, 232)));
-            progress.setIndicatorColor(UiHelper.foreground(activity, badgeColor));
-            LinearLayout.LayoutParams pParams = new LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 8));
-            pParams.bottomMargin = UiHelper.dp(activity, 14);
-            itemCard.addView(progress, pParams);
-
-            if (!notes.isEmpty()) {
-                UiHelper.add(activity, itemCard, activity.getString(R.string.attendance_notes_label, notes), 13, UiHelper.MUTED, false);
-            }
 
             LinearLayout actions = new LinearLayout(activity);
             actions.setOrientation(LinearLayout.HORIZONTAL);
@@ -247,7 +228,6 @@ public final class AttendanceScreenController {
             LinearLayout.LayoutParams b3 = new LinearLayout.LayoutParams(0, -2, 1.2f);
             actions.addView(minusBtn, b1);
             actions.addView(plusBtn, b2);
-            actions.addView(editBtn, b3);
             itemCard.addView(actions);
         }
 
@@ -260,7 +240,7 @@ public final class AttendanceScreenController {
             }
         }
 
-        UiHelper.note(activity, content, activity.getString(R.string.attendance_rule_footer), UiHelper.MUTED);
+
     }
 
     private static boolean matches(JSONObject item, String term, String type) {

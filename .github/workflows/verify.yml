@@ -40,4 +40,4 @@ jobs:
       - name: Allow installed JDK 21 on the CI runner
         run: sed -i '/^toolchainVendor=/d' gradle/gradle-daemon-jvm.properties
       - name: Tests, lint and release build without personal credentials
-        run: bash gradlew :core:test :app:testDebugUnitTest :app:lintRelease :app:verifyReleaseConfiguration :app:assembleRelease :app:bundleRelease -PisolatedTests --no-daemon
+        run: bash gradlew :core:test :shared:desktopTest :desktopApp:compileKotlin :app:testDebugUnitTest :app:lintRelease :app:verifyReleaseConfiguration :app:assembleRelease :app:bundleRelease -PisolatedTests --no-daemon

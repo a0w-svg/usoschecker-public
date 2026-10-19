@@ -26,6 +26,23 @@ public class UsosClientTest {
             assertEquals(8, planPages.get());
         }
     }
+    @Test public void snapshotStoresAllUiLanguagesWithoutExtraRequests() throws Exception {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        UsosClient client = new UsosClient(credentials().put("scopes", "grades|studies"), ignored -> {}, address -> {
+            calls.incrementAndGet();
+            Connection result = snapshotConnection(address);
+            if (address.contains("services/courses/user?")) result.body = "{\"course_editions\":{\"2026Z\":[{\"course_id\":\"C\",\"course_name\":{\"pl\":\"Analiza\",\"en\":\"Analysis\",\"uk\":\"Аналіз\"}}]}}";
+            return result;
+        });
+        pl.vistula.checker.core.Snapshot snapshot = client.snapshot();
+        assertEquals("Analiza", snapshot.courses.get(0).title);
+        assertEquals("Analysis", snapshot.forLanguage("en").courses.get(0).title);
+        assertEquals("Аналіз", snapshot.forLanguage("uk").courses.get(0).title);
+        assertTrue("One download per endpoint/page", calls.get() < 25);
+        JSONObject view = Repository.localizedView(new JSONObject().put("snapshot", snapshot.json()), "en");
+        assertEquals("Analysis", view.getJSONObject("snapshot").getJSONArray("courses").getJSONObject(0).getString("title"));
+        assertEquals("Analiza", snapshot.courses.get(0).title);
+    }
     @Test public void missingCoreConsentAbortsBeforeNetworkRequests() throws Exception {
         for (String scopes : List.of("", "studies|payments", "grades|payments")) {
             UsosClient client = new UsosClient(credentials().put("scopes", scopes), ignored -> {}, address -> {
@@ -82,7 +99,7 @@ public class UsosClientTest {
     }
     private JSONObject credentials() throws Exception {
         return new JSONObject().put("key", "test-key").put("secret", "test-secret").put("token", "private-token").put("tokenSecret", "private-secret")
-            .put("scopes", "grades|studies|payments|offline_access");
+            .put("scopes", "grades|studies|payments|crstests|offline_access");
     }
     private JSONObject metadata(String consumer, String token) throws Exception {
         return new JSONObject().put("name", "services/apisrv/installation")
@@ -174,7 +191,7 @@ public class UsosClientTest {
             else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":null,\"course_units_grades\":{}}}}";
             else if (address.contains("tt/student")) { connection.body = "[]"; pages.incrementAndGet(); }
             else if (address.contains("terms/terms") || address.contains("payments/") || address.contains("theses/user") || address.contains("news/search")) connection.body = "[]";
-            else if (address.contains("crstests/user")) connection.body = "[]";
+            else if (address.contains("crstests/participant2")) connection.body = "[{\"course_edition\": {\"course\": {\"id\": \"FIN\", \"name\": {\"pl\": \"Finanse\"}}, \"term\": {\"id\": \"2026Z\"}}, \"root\": {\"id\": \"root\", \"type\": \"root\", \"subnodes_deep\": [{\"id\": \"t1\", \"name\": {\"pl\": \"Kolokwium 1\"}, \"type\": \"task\", \"task_node_details\": {\"points_max\": 20, \"students_points\": {\"points\": 18, \"last_changed\": \"2026-10-10\"}}}]}}]";
             else throw new AssertionError("Unexpected request: " + address);
             return connection;
         });
@@ -193,7 +210,7 @@ public class UsosClientTest {
             else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[{\"1\":{\"exam_id\":10,\"exam_session_number\":1,\"value_symbol\":\"4.5\",\"date_modified\":\"2026-10-14 12:00:00\",\"comment\":null}}],\"course_units_grades\":{}}}}";
             else if (address.contains("tt/student")) connection.body = "[]";
             else if (address.contains("terms/terms") || address.contains("payments/") || address.contains("theses/user") || address.contains("news/search")) connection.body = "[]";
-            else if (address.contains("crstests/user")) connection.body = "[]";
+            else if (address.contains("crstests/participant2")) connection.body = "[{\"course_edition\": {\"course\": {\"id\": \"FIN\", \"name\": {\"pl\": \"Finanse\"}}, \"term\": {\"id\": \"2026Z\"}}, \"root\": {\"id\": \"root\", \"type\": \"root\", \"subnodes_deep\": [{\"id\": \"t1\", \"name\": {\"pl\": \"Kolokwium 1\"}, \"type\": \"task\", \"task_node_details\": {\"points_max\": 20, \"students_points\": {\"points\": 18, \"last_changed\": \"2026-10-10\"}}}]}}]";
             else throw new AssertionError("Unexpected request: " + address);
             return connection;
         });
@@ -212,7 +229,7 @@ public class UsosClientTest {
             else if (address.contains("payments/user_accounts")) connection.body = "[{\"account_number\":\"PL999\",\"name\":\"Subkonto czesnego\",\"currency\":\"PLN\"}]";
             else if (address.contains("payments/user_payments")) connection.body = "[{\"id\":\"p1\",\"total_amount\":850.0,\"currency\":\"PLN\",\"description\":{\"pl\":\"Czesne\"},\"state\":\"unsettled\",\"payment_deadline\":\"2026-10-31\"}]";
             else if (address.contains("theses/user")) connection.body = "[{\"title\":{\"pl\":\"System wykrywania anomalii\"},\"status\":{\"pl\":\"W toku\"}}]";
-            else if (address.contains("crstests/user")) connection.body = "[{\"id\":\"t1\",\"course_id\":\"FIN\",\"name\":{\"pl\":\"Kolokwium 1\"},\"points\":18.0,\"max_points\":20.0}]";
+            else if (address.contains("crstests/participant2")) connection.body = "[{\"course_edition\": {\"course\": {\"id\": \"FIN\", \"name\": {\"pl\": \"Finanse\"}}, \"term\": {\"id\": \"2026Z\"}}, \"root\": {\"id\": \"root\", \"type\": \"root\", \"subnodes_deep\": [{\"id\": \"t1\", \"name\": {\"pl\": \"Kolokwium 1\"}, \"type\": \"task\", \"task_node_details\": {\"points_max\": 20, \"students_points\": {\"points\": 18, \"last_changed\": \"2026-10-10\"}}}]}}]";
             else if (address.contains("news/search")) connection.body = "{\"items\":[{\"article\":{\"id\":\"n1\",\"title\":{\"pl\":\"Inauguracja roku\"},\"publication_date\":\"2026-10-01\"}}]}";
             else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[],\"course_units_grades\":{}}}}";
             else if (address.contains("tt/student")) connection.body = "[]";
@@ -228,6 +245,8 @@ public class UsosClientTest {
         assertEquals("System wykrywania anomalii", snapshot.thesis.title);
         assertEquals(1, snapshot.tests.size());
         assertEquals("Kolokwium 1", snapshot.tests.get(0).testName);
+        assertEquals("2026Z", snapshot.tests.get(0).term);
+        assertEquals(18, snapshot.tests.get(0).points, 0.001);
         assertEquals(1, snapshot.news.size());
         assertEquals("Inauguracja roku", snapshot.news.get(0).title);
     }
@@ -266,7 +285,7 @@ public class UsosClientTest {
                 connection.body = "{\"message\":\"User has not granted access to scope 'payments'\"}";
             }
             else if (address.contains("theses/user") || address.contains("news/search")) connection.body = "[]";
-            else if (address.contains("crstests/user")) connection.body = "[]";
+            else if (address.contains("crstests/participant2")) connection.body = "[{\"course_edition\": {\"course\": {\"id\": \"FIN\", \"name\": {\"pl\": \"Finanse\"}}, \"term\": {\"id\": \"2026Z\"}}, \"root\": {\"id\": \"root\", \"type\": \"root\", \"subnodes_deep\": [{\"id\": \"t1\", \"name\": {\"pl\": \"Kolokwium 1\"}, \"type\": \"task\", \"task_node_details\": {\"points_max\": 20, \"students_points\": {\"points\": 18, \"last_changed\": \"2026-10-10\"}}}]}}]";
             else if (address.contains("grades/terms2")) connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[],\"course_units_grades\":{}}}}";
             else if (address.contains("tt/student")) connection.body = "[]";
             return connection;
@@ -332,7 +351,7 @@ public class UsosClientTest {
         });
     }
     @Test public void optionalModulesHonorSessionExpiryAndCooldownsBeforeMakingMoreRequests() throws Exception {
-        for (String endpoint : List.of("courses/user_ects_points", "terms/terms", "theses/user", "crstests/user", "news/search")) {
+        for (String endpoint : List.of("courses/user_ects_points", "terms/terms", "theses/user", "crstests/participant2", "news/search")) {
             for (int status : new int[]{401, 429, 503}) {
                 boolean[] failed = {false};
                 UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
@@ -360,7 +379,7 @@ public class UsosClientTest {
         UsosClient client = new UsosClient(credentials(), progress -> {}, address -> {
             Connection connection = snapshotConnection(address);
             if (address.contains("courses/user_ects_points") || address.contains("terms/terms")
-                    || address.contains("theses/user") || address.contains("crstests/user") || address.contains("news/search")) {
+                    || address.contains("theses/user") || address.contains("crstests/participant2") || address.contains("news/search")) {
                 connection.status = 403;
                 connection.body = "{}";
             }

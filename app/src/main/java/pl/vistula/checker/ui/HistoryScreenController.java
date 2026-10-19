@@ -1,6 +1,5 @@
 package pl.vistula.checker.ui;
 
-import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
 import android.graphics.Color;
@@ -60,17 +59,39 @@ public final class HistoryScreenController {
         }
         allChanges.sort((a, b) -> Long.compare(b.effectiveTimestamp(), a.effectiveTimestamp()));
 
-        UiHelper.chips(activity, content,
-            new String[]{"wszystkie", "ocena", "plan", "Dodano", "Zmieniono", "Usunięto"},
-            new String[]{
-                activity.getString(R.string.history_chip_all, allChanges.size()),
-                activity.getString(R.string.history_chip_grades, countGrades),
-                activity.getString(R.string.history_chip_plan, countPlan),
-                activity.getString(R.string.history_chip_added, countAdded),
-                activity.getString(R.string.history_chip_modified, countModified),
-                activity.getString(R.string.history_chip_removed, countRemoved)
-            },
-            filter, onFilterChanged);
+        String[] filters = {"wszystkie", "ocena", "plan", "Dodano", "Zmieniono", "Usunięto"};
+        String[] labels = {
+            activity.getString(R.string.history_chip_all, allChanges.size()),
+            activity.getString(R.string.history_chip_grades, countGrades),
+            activity.getString(R.string.history_chip_plan, countPlan),
+            activity.getString(R.string.history_chip_added, countAdded),
+            activity.getString(R.string.history_chip_modified, countModified),
+            activity.getString(R.string.history_chip_removed, countRemoved)
+        };
+        LinearLayout header = new LinearLayout(activity);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        TextView title = UiHelper.text(activity, activity.getString(R.string.history_title), 20, UiHelper.INK, true);
+        title.setPadding(UiHelper.dp(activity, 8), 0, 0, 0);
+        title.setMinHeight(UiHelper.dp(activity, 64));
+        header.addView(title, new LinearLayout.LayoutParams(0, -2, 1));
+        title.setGravity(Gravity.CENTER_VERTICAL);
+        Button more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more, () -> {});
+        more.setId(R.id.history_more);
+        more.setContentDescription(activity.getString(R.string.history_options));
+        header.addView(more, new LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2));
+        content.addView(header);
+        if (!filter.equals("wszystkie")) {
+            for (int i = 0; i < filters.length; i++) {
+                if (filters[i].equals(filter)) {
+                    Button activeFilter = ScheduleScreenController.headerButton(activity, labels[i] + " ×",
+                        () -> onFilterChanged.accept("wszystkie"));
+                    activeFilter.setTextSize(14);
+                    activeFilter.setSelected(true);
+                    activeFilter.setContentDescription(labels[i] + ". " + activity.getString(R.string.history_clear_filter));
+                    content.addView(activeFilter);
+                }
+            }
+        }
 
         List<Change> rows = new ArrayList<>();
         for (Change c : allChanges) {
@@ -82,6 +103,30 @@ public final class HistoryScreenController {
         EditText search = UiHelper.searchField(activity, content,
             activity.getString(R.string.history_search_hint),
             query, null, () -> onQueryChanged.accept(""));
+
+        android.view.View searchBox = content.getChildAt(content.getChildCount() - 1);
+        searchBox.setVisibility(query.isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
+        more.setOnClickListener(view -> {
+            android.widget.PopupMenu menu = new android.widget.PopupMenu(activity, more);
+            for (int i = 0; i < filters.length; i++) {
+                menu.getMenu().add(1, i + 1, i, labels[i]).setCheckable(true).setChecked(filters[i].equals(filter));
+            }
+            menu.getMenu().setGroupCheckable(1, true, true);
+            menu.getMenu().add(2, 7, 7, R.string.history_search_action);
+            if (demo && onSimulate != null) menu.getMenu().add(2, 8, 8, R.string.history_btn_simulate);
+            menu.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();
+                if (id >= 1 && id <= filters.length) onFilterChanged.accept(filters[id - 1]);
+                else if (id == 7) {
+                    searchBox.setVisibility(android.view.View.VISIBLE);
+                    search.requestFocus();
+                    search.post(() -> ((android.view.inputmethod.InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE))
+                        .showSoftInput(search, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT));
+                } else if (id == 8) onSimulate.run();
+                return true;
+            });
+            menu.show();
+        });
 
         LinearLayout list = new LinearLayout(activity);
         list.setOrientation(LinearLayout.VERTICAL);
@@ -145,8 +190,6 @@ public final class HistoryScreenController {
                 }
             }
 
-            UiHelper.note(activity, list,
-                activity.getString(R.string.history_count_note, count, rows.size()), UiHelper.MUTED);
         };
 
         UiHelper.watchSearch(search, value -> {
@@ -155,66 +198,82 @@ public final class HistoryScreenController {
         });
         populate.run();
 
-        if (demo) {
-            content.addView(UiHelper.button(activity, activity.getString(R.string.history_btn_simulate), onSimulate, true));
-        }
     }
 
     public static String formatFullDate(String dateStr) {
+        return formatFullDate(Language.currentLocale(null), dateStr);
+    }
+
+    public static String formatFullDate(Locale locale, String dateStr) {
         if (dateStr == null || dateStr.trim().isEmpty()) return "";
         String s = dateStr.trim();
         try {
+            if (locale == null) locale = Language.currentLocale(null);
             if (s.length() >= 19 && (s.contains(" ") || s.contains("T"))) {
                 String normalized = s.substring(0, 19).replace('T', ' ');
                 java.time.LocalDateTime ldt = java.time.LocalDateTime.parse(normalized, pl.vistula.checker.core.UsosParser.TIME);
-                String dayName = ldt.format(DateTimeFormatter.ofPattern("EEEE", Locale.forLanguageTag("pl-PL")));
-                String capDay = dayName.substring(0, 1).toUpperCase(Locale.forLanguageTag("pl-PL")) + dayName.substring(1);
-                return capDay + ", " + ldt.format(DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale.forLanguageTag("pl-PL")));
+                String dayName = ldt.format(DateTimeFormatter.ofPattern("EEEE", locale));
+                String capDay = dayName.isEmpty() ? "" : dayName.substring(0, 1).toUpperCase(locale) + dayName.substring(1);
+                return capDay + ", " + ldt.format(DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", locale));
             }
             if (s.length() >= 10) {
                 java.time.LocalDate ld = java.time.LocalDate.parse(s.substring(0, 10));
-                String dayName = ld.format(DateTimeFormatter.ofPattern("EEEE", Locale.forLanguageTag("pl-PL")));
-                String capDay = dayName.substring(0, 1).toUpperCase(Locale.forLanguageTag("pl-PL")) + dayName.substring(1);
-                return capDay + ", " + ld.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("pl-PL")));
+                String dayName = ld.format(DateTimeFormatter.ofPattern("EEEE", locale));
+                String capDay = dayName.isEmpty() ? "" : dayName.substring(0, 1).toUpperCase(locale) + dayName.substring(1);
+                return capDay + ", " + ld.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale));
             }
         } catch (Exception ignored) {}
         return s;
     }
 
     public static String eventDateDescription(android.content.Context context, Change c) {
+        Locale locale = Language.currentLocale(context);
         if (c.kind.equals("plan")) {
             if (!c.beforeDate.isEmpty() && !c.afterDate.isEmpty() && !c.beforeDate.equals(c.afterDate)) {
-                return context.getString(R.string.history_item_plan_date_diff, formatFullDate(c.beforeDate), formatFullDate(c.afterDate));
+                return context.getString(R.string.history_item_plan_date_diff, formatFullDate(locale, c.beforeDate), formatFullDate(locale, c.afterDate));
             }
             String date = !c.date.isEmpty() ? c.date : (!c.afterDate.isEmpty() ? c.afterDate : c.beforeDate);
             if (!date.isEmpty()) {
-                return context.getString(R.string.history_item_plan_date, formatFullDate(date));
+                return context.getString(R.string.history_item_plan_date, formatFullDate(locale, date));
             }
         } else {
             String date = !c.date.isEmpty() ? c.date : (!c.sourceTime.isEmpty() ? c.sourceTime : (!c.afterDate.isEmpty() ? c.afterDate : c.beforeDate));
             if (!date.isEmpty()) {
-                return context.getString(R.string.history_item_grade_date, formatFullDate(date));
+                return context.getString(R.string.history_item_grade_date, formatFullDate(locale, date));
             }
         }
         return "";
     }
 
     public static String formatRelativeTime(long millis) {
+        return formatRelativeTime(null, millis);
+    }
+
+    public static String formatRelativeTime(android.content.Context context, long millis) {
         if (millis <= 0) return "";
         try {
             Instant event = Instant.ofEpochMilli(millis);
             Instant now = Instant.now();
             long diffSec = java.time.Duration.between(event, now).getSeconds();
-            if (diffSec >= 0 && diffSec < 60) return "przed chwilą";
-            if (diffSec >= 60 && diffSec < 3600) return (diffSec / 60) + " min temu";
+            if (diffSec >= 0 && diffSec < 60) {
+                return context != null ? context.getString(R.string.time_just_now) : "przed chwilą";
+            }
+            if (diffSec >= 60 && diffSec < 3600) {
+                return context != null ? context.getString(R.string.time_minutes_ago, (int)(diffSec / 60)) : (diffSec / 60) + " min temu";
+            }
 
             LocalDate eventDate = event.atZone(UsosClient.ZONE).toLocalDate();
             LocalDate today = LocalDate.now(UsosClient.ZONE);
-            DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm", Locale.forLanguageTag("pl-PL"));
+            Locale locale = Language.currentLocale(context);
+            DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("HH:mm", locale);
             String timeStr = event.atZone(UsosClient.ZONE).format(timeFmt);
-            if (eventDate.equals(today)) return "Dzisiaj, " + timeStr;
-            if (eventDate.equals(today.minusDays(1))) return "Wczoraj, " + timeStr;
-            return event.atZone(UsosClient.ZONE).format(DateTimeFormatter.ofPattern("d MMM, HH:mm", Locale.forLanguageTag("pl-PL")));
+            if (eventDate.equals(today)) {
+                return context != null ? context.getString(R.string.history_time_today, timeStr) : "Dzisiaj, " + timeStr;
+            }
+            if (eventDate.equals(today.minusDays(1))) {
+                return context != null ? context.getString(R.string.history_time_yesterday, timeStr) : "Wczoraj, " + timeStr;
+            }
+            return event.atZone(UsosClient.ZONE).format(DateTimeFormatter.ofPattern("d MMM, HH:mm", locale));
         } catch (Exception ignored) {
             return "";
         }
@@ -267,158 +326,35 @@ public final class HistoryScreenController {
         box.setClickable(true);
         box.setFocusable(true);
 
-        LinearLayout topBar = new LinearLayout(activity);
-        topBar.setOrientation(LinearLayout.HORIZONTAL);
-        topBar.setGravity(Gravity.CENTER_VERTICAL);
+        String category = activity.getString(c.kind.equals("ocena")
+            ? R.string.history_category_grade : R.string.history_category_plan);
+        String action = activity.getString(c.action.equals("Dodano") ? R.string.history_action_added
+            : c.action.equals("Usunięto") ? R.string.history_action_removed : R.string.history_action_modified);
+        String time = formatRelativeTime(activity, c.effectiveTimestamp());
+        UiHelper.add(activity, box, category + " · " + action + (time.isEmpty() ? "" : " · " + time), 12, UiHelper.MUTED, false);
+        UiHelper.add(activity, box, c.title, 17, UiHelper.INK, true);
 
-        int actionBg, actionFg;
-        String actionText;
-        if (c.action.equals("Dodano")) {
-            actionBg = Color.rgb(232, 245, 233);
-            actionFg = Color.rgb(27, 94, 32);
-            actionText = "+ " + activity.getString(R.string.history_action_added);
-        } else if (c.action.equals("Usunięto")) {
-            actionBg = Color.rgb(255, 235, 238);
-            actionFg = Color.rgb(183, 28, 28);
-            actionText = "✕ " + activity.getString(R.string.history_action_removed);
-        } else {
-            actionBg = Color.rgb(238, 242, 255);
-            actionFg = Color.rgb(49, 46, 129);
-            actionText = "✎ " + activity.getString(R.string.history_action_modified);
-        }
-
-        LinearLayout badgesGroup = new LinearLayout(activity);
-        badgesGroup.setOrientation(LinearLayout.HORIZONTAL);
-        badgesGroup.setGravity(Gravity.CENTER_VERTICAL);
-        UiHelper.badge(activity, badgesGroup, c.kind.equals("ocena") ? ("🎓 " + activity.getString(R.string.history_category_grade)) : ("📅 " + activity.getString(R.string.history_category_plan)), Color.rgb(241, 245, 249), UiHelper.GREEN);
-        UiHelper.badge(activity, badgesGroup, actionText, actionBg, actionFg);
-
-        topBar.addView(badgesGroup, new LinearLayout.LayoutParams(0, -2, 1f));
-
-        String relTime = formatRelativeTime(c.effectiveTimestamp());
-        if (!relTime.isEmpty()) {
-            TextView timeBadge = UiHelper.text(activity, relTime, 11, UiHelper.MUTED, false);
-            timeBadge.setGravity(Gravity.END);
-            topBar.addView(timeBadge);
-        }
-        box.addView(topBar);
-
-        UiHelper.add(activity, box, c.title, 18, UiHelper.INK, true);
-
-        String courseId = c.optMeta("courseId");
-        String term = c.optMeta("term");
-        if (!courseId.isEmpty() || !term.isEmpty()) {
-            String sub = (!courseId.isEmpty() ? "Kod: " + courseId : "") + (!courseId.isEmpty() && !term.isEmpty() ? " · " : "") + (!term.isEmpty() ? "Semestr: " + term : "");
-            UiHelper.add(activity, box, sub, 12, UiHelper.MUTED, false);
-        }
-
-        String eventDateText = eventDateDescription(activity, c);
-        if (!eventDateText.isEmpty()) {
-            LinearLayout dateBadge = UiHelper.card(activity, box, Color.rgb(244, 247, 244));
-            dateBadge.setPadding(UiHelper.dp(activity, 10), UiHelper.dp(activity, 6), UiHelper.dp(activity, 10), UiHelper.dp(activity, 6));
-            UiHelper.add(activity, dateBadge, "📅 " + eventDateText, 13, UiHelper.GREEN, true);
-        }
-
-        if (c.action.equals("Zmieniono")) {
-            if (c.kind.equals("ocena") && (!c.before.isEmpty() || !c.after.isEmpty())) {
-                LinearLayout gradeRow = new LinearLayout(activity);
-                gradeRow.setOrientation(LinearLayout.HORIZONTAL);
-                gradeRow.setGravity(Gravity.CENTER_VERTICAL);
-                gradeRow.setPadding(0, UiHelper.dp(activity, 4), 0, UiHelper.dp(activity, 6));
-
-                TextView beforeBadge = UiHelper.badge(activity, gradeRow, c.before.isEmpty() ? "—" : c.before, Color.rgb(244, 245, 246), Color.rgb(100, 116, 139));
-                beforeBadge.setTextSize(16);
-                beforeBadge.setPadding(UiHelper.dp(activity, 14), UiHelper.dp(activity, 6), UiHelper.dp(activity, 14), UiHelper.dp(activity, 6));
-
-                TextView arrow = UiHelper.text(activity, " ➔ ", 18, UiHelper.GREEN, true);
-                gradeRow.addView(arrow);
-
-                TextView afterBadge = UiHelper.badge(activity, gradeRow, c.after.isEmpty() ? "—" : c.after, Color.rgb(214, 241, 229), UiHelper.GREEN);
-                afterBadge.setTextSize(18);
-                afterBadge.setPadding(UiHelper.dp(activity, 14), UiHelper.dp(activity, 6), UiHelper.dp(activity, 14), UiHelper.dp(activity, 6));
-
-                box.addView(gradeRow);
-            }
-
-            List<String> diffPills = getDiffSummaryList(activity, c);
-            if (!diffPills.isEmpty()) {
-                LinearLayout diffsBox = UiHelper.card(activity, box, Color.rgb(240, 247, 255));
-                diffsBox.setPadding(UiHelper.dp(activity, 12), UiHelper.dp(activity, 8), UiHelper.dp(activity, 12), UiHelper.dp(activity, 8));
-                UiHelper.add(activity, diffsBox, activity.getString(R.string.history_diff_summary_title), 12, Color.rgb(30, 64, 175), true);
-                for (String diff : diffPills) {
-                    UiHelper.add(activity, diffsBox, diff, 13, UiHelper.INK, false);
-                }
-            }
-
-            if (!c.kind.equals("ocena")) {
-                if (!c.before.isEmpty()) {
-                    LinearLayout before = UiHelper.card(activity, box, Color.rgb(244, 247, 244));
-                    if (!c.beforeDate.isEmpty() && !c.afterDate.isEmpty() && !c.beforeDate.equals(c.afterDate)) {
-                        UiHelper.add(activity, before, "📅 Przed zmianą (" + formatFullDate(c.beforeDate) + "):", 12, UiHelper.MUTED, true);
-                    }
-                    UiHelper.add(activity, before, activity.getString(R.string.history_value_before, c.before), 14, UiHelper.MUTED, false);
-                }
-                if (!c.after.isEmpty()) {
-                    LinearLayout after = UiHelper.card(activity, box, Color.rgb(214, 241, 229));
-                    if (!c.beforeDate.isEmpty() && !c.afterDate.isEmpty() && !c.beforeDate.equals(c.afterDate)) {
-                        UiHelper.add(activity, after, "📅 Po zmianie (" + formatFullDate(c.afterDate) + "):", 12, UiHelper.GREEN, true);
-                    }
-                    UiHelper.add(activity, after, activity.getString(R.string.history_value_after, c.after), 14, UiHelper.GREEN, true);
-                }
-            }
-        } else if (c.action.equals("Dodano")) {
-            String val = !c.after.isEmpty() ? c.after : c.before;
-            if (!val.isEmpty()) {
-                LinearLayout addedBox = UiHelper.card(activity, box, Color.rgb(232, 245, 233));
-                addedBox.setPadding(UiHelper.dp(activity, 12), UiHelper.dp(activity, 8), UiHelper.dp(activity, 12), UiHelper.dp(activity, 8));
-                UiHelper.add(activity, addedBox, val, 14, Color.rgb(27, 94, 32), true);
-            }
-        } else if (c.action.equals("Usunięto")) {
-            String val = !c.before.isEmpty() ? c.before : c.after;
-            if (!val.isEmpty()) {
-                LinearLayout removedBox = UiHelper.card(activity, box, Color.rgb(255, 235, 238));
-                removedBox.setPadding(UiHelper.dp(activity, 12), UiHelper.dp(activity, 8), UiHelper.dp(activity, 12), UiHelper.dp(activity, 8));
-                UiHelper.add(activity, removedBox, val, 14, Color.rgb(183, 28, 28), false);
+        List<String> diffs = getDiffSummaryList(activity, c);
+        if (c.action.equals("Zmieniono") && !diffs.isEmpty()) {
+            for (int i = 0; i < Math.min(3, diffs.size()); i++) {
+                UiHelper.add(activity, box, diffs.get(i).replaceFirst("^[^\\p{L}]+", ""), 14, UiHelper.INK, false);
             }
         } else {
-            String val = !c.after.isEmpty() ? c.after : c.before;
-            if (!val.isEmpty()) UiHelper.add(activity, box, val, 14, UiHelper.INK, false);
+            String value;
+            if (c.action.equals("Zmieniono")) value = c.before + " → " + c.after;
+            else if (c.action.equals("Usunięto")) value = c.before.isEmpty() ? c.after : c.before;
+            else value = c.after.isEmpty() ? c.before : c.after;
+            if (!value.isEmpty()) UiHelper.add(activity, box, value, 14, UiHelper.INK, false);
         }
-
-        String metadataDetails = changeMetadata(activity, c);
-        String detectedTime = c.detectedAt > 0 ? Instant.ofEpochMilli(c.detectedAt).atZone(UsosClient.ZONE).format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", Locale.forLanguageTag("pl-PL"))) : c.date;
-        String timeInfo = "Wykryto: " + (c.detectedAt > 0 ? Instant.ofEpochMilli(c.detectedAt).atZone(UsosClient.ZONE).format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm", Locale.forLanguageTag("pl-PL"))) : c.date);
-        UiHelper.add(activity, box, timeInfo, 12, UiHelper.MUTED, false);
-
-        String fullShareText = buildShareText(activity, c, eventDateText, metadataDetails, detectedTime);
-
-        LinearLayout btnRow = new LinearLayout(activity);
-        btnRow.setOrientation(LinearLayout.HORIZONTAL);
-        btnRow.setGravity(Gravity.CENTER_VERTICAL);
-
-        Button btnDetails = UiHelper.button(activity, activity.getString(R.string.history_btn_details), () -> showChangeDetails(activity, c), false);
-        LinearLayout.LayoutParams p1 = new LinearLayout.LayoutParams(0, -2, 1f);
-        p1.rightMargin = UiHelper.dp(activity, 8);
-        btnRow.addView(btnDetails, p1);
-
-        Button btnShare = UiHelper.button(activity, "📤 " + activity.getString(R.string.share_change_btn), () -> {
-            Intent share = new Intent(Intent.ACTION_SEND).setType("text/plain");
-            share.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.history_share_subject, c.title, c.action));
-            share.putExtra(Intent.EXTRA_TEXT, fullShareText);
-            try {
-                activity.startActivity(Intent.createChooser(share, activity.getString(R.string.share_change_title)));
-            } catch (Exception e) {
-                ClipboardManager cb = activity.getSystemService(ClipboardManager.class);
-                if (cb != null) {
-                    cb.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.history_clipboard_label), fullShareText));
-                    Toast.makeText(activity, R.string.toast_history_details_copied, Toast.LENGTH_SHORT).show();
-                }
-            }
-        }, false);
-        LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(0, -2, 1f);
-        btnRow.addView(btnShare, p2);
-
-        box.addView(btnRow);
+        String eventDate = eventDateDescription(activity, c);
+        if (!eventDate.isEmpty()) UiHelper.add(activity, box, eventDate, 12, UiHelper.MUTED, false);
+        androidx.core.view.ViewCompat.setScreenReaderFocusable(box, true);
+        androidx.core.view.ViewCompat.replaceAccessibilityAction(box,
+            androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+            activity.getString(R.string.history_btn_details), (view, arguments) -> {
+                showChangeDetails(activity, c);
+                return true;
+            });
         box.setOnClickListener(v -> showChangeDetails(activity, c));
     }
 
@@ -440,9 +376,10 @@ public final class HistoryScreenController {
         String metadataDetails = changeMetadata(activity, c);
         if (!metadataDetails.isEmpty()) UiHelper.add(activity, box, metadataDetails, 14, UiHelper.INK, false);
 
-        String detectedTime = c.detectedAt > 0 ? Instant.ofEpochMilli(c.detectedAt).atZone(UsosClient.ZONE).format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", Locale.forLanguageTag("pl-PL"))) : c.date;
-        UiHelper.add(activity, box, "Wykryto: " + detectedTime, 12, UiHelper.MUTED, false);
-        if (!c.sourceTime.isEmpty()) UiHelper.add(activity, box, "Czas z serwera USOS: " + c.sourceTime, 12, UiHelper.MUTED, false);
+        Locale detailsLocale = Language.currentLocale(activity);
+        String detectedTime = c.detectedAt > 0 ? Instant.ofEpochMilli(c.detectedAt).atZone(UsosClient.ZONE).format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", detailsLocale)) : c.date;
+        UiHelper.add(activity, box, activity.getString(R.string.history_detected_prefix, detectedTime), 12, UiHelper.MUTED, false);
+        if (!c.sourceTime.isEmpty()) UiHelper.add(activity, box, activity.getString(R.string.history_server_time, c.sourceTime), 12, UiHelper.MUTED, false);
 
         String fullShareText = buildShareText(activity, c, eventDateText, metadataDetails, detectedTime);
         box.addView(UiHelper.button(activity, "📤 " + activity.getString(R.string.share_change_btn), () -> {

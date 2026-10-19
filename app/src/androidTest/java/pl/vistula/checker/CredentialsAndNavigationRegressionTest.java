@@ -67,14 +67,16 @@ public class CredentialsAndNavigationRegressionTest {
     @Test public void historyDeepLinksSelectTheCategoryAndClearAnOldSearch() {
         main(() -> {
             MainActivity activity = rule.getActivity();
+            String gradesPrefix = activity.getString(R.string.history_chip_grades, 0).split("\\(")[0].trim() + " (";
+            String planPrefix = activity.getString(R.string.history_chip_plan, 0).split("\\(")[0].trim() + " (";
             activity.navigate(1);
             EditText search = input(activity.getWindow().getDecorView());
             assertNotNull(search); search.setText("old unrelated search");
             activity.onNewIntent(new Intent(activity, MainActivity.class).putExtra("showHistory", true).putExtra("historyKind", "ocena"));
             assertEquals("", input(activity.getWindow().getDecorView()).getText().toString());
-            assertTrue(selectedLabel(activity.getWindow().getDecorView()).startsWith("Oceny ("));
+            assertTrue(selectedLabel(activity.getWindow().getDecorView()).startsWith(gradesPrefix));
             activity.onNewIntent(new Intent(activity, MainActivity.class).putExtra("showHistory", true).putExtra("historyKind", "plan"));
-            assertTrue(selectedLabel(activity.getWindow().getDecorView()).startsWith("Plan ("));
+            assertTrue(selectedLabel(activity.getWindow().getDecorView()).startsWith(planPrefix));
         });
     }
 
@@ -113,8 +115,11 @@ public class CredentialsAndNavigationRegressionTest {
         return null;
     }
     private String selectedLabel(View view) {
-        if (view instanceof TextView && view.isSelected() && (((TextView) view).getText().toString().startsWith("Oceny (")
-                || ((TextView) view).getText().toString().startsWith("Plan ("))) return ((TextView) view).getText().toString();
+        MainActivity activity = rule.getActivity();
+        String gradesPrefix = activity.getString(R.string.history_chip_grades, 0).split("\\(")[0].trim() + " (";
+        String planPrefix = activity.getString(R.string.history_chip_plan, 0).split("\\(")[0].trim() + " (";
+        if (view instanceof TextView && view.isSelected() && (((TextView) view).getText().toString().startsWith(gradesPrefix)
+                || ((TextView) view).getText().toString().startsWith(planPrefix))) return ((TextView) view).getText().toString();
         if (view instanceof ViewGroup) for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
             String found = selectedLabel(((ViewGroup) view).getChildAt(i)); if (!found.isEmpty()) return found;
         }

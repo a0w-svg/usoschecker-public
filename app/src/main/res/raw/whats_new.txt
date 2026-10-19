@@ -1,7 +1,4 @@
-• Prostszy ekran startowy bez banera, szybkich skrótów, stanu monitorowania i podsumowania najbliższych 7 dni.
-• Wspólne Ustawienia: konto, wygląd, synchronizacja, powiadomienia, widżety, semestr akademicki i informacje o aplikacji.
-• Usunięte powtarzające się nagłówki ekranów i zdublowane wejścia do ustawień.
-• Menu planu zajęć przeniesione na lewą stronę.
-• Spokojniejsze akcenty na ekranie startowym: wyróżnione trwające lub najbliższe zajęcia.
-• Neutralny kolor tekstu w obu motywach; zieleń pozostaje w ikonach i wybranych tłach.
-• Usunięte nazwy ekranów z górnego paska, zbędne opisy i puste sekcje; krótszy podgląd kolejnych zajęć.
+• Architektura Kotlin Multiplatform + Compose Multiplatform (:shared, :desktopApp, :app) współdzieląca logikę domenową, parsery USOS, repozytorium i interfejs na Androidzie oraz komputerach (Windows/macOS/Linux).
+• Nowa aplikacja Desktop (JVM) z szyfrowanym magazynem AES-GCM (DesktopVault), powiadomieniami systemowymi, harmonogramem synchronizacji w tle i skrótami klawiszowymi (Ctrl+1..5).
+• Nawigacja gestem przesunięcia między zakładkami, rozbudowana sekcja Narzędzi oraz obsługa języków polskiego, angielskiego i ukraińskiego.
+• Wzmocnione bezpieczeństwo sieciowe (network_security_config wymuszający wyłącznie HTTPS i systemowe urzędy certyfikacji) oraz optymalizacja wydajności osi czasu zajęć (brak alokacji w onMeasure/onDraw) i zasobów językowych APK.

@@ -31,11 +31,14 @@ android {
         applicationId 'pl.vistula.checker'
         minSdk 31
         targetSdk 36
-        versionCode 8
-        versionName '1.0.7'
+        versionCode 10
+        versionName '1.1.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField "String", "USOS_KEY", '""'
         buildConfigField "String", "USOS_SECRET", '""'
+    }
+    androidResources {
+        localeFilters += ['pl', 'en', 'uk']
     }
     buildFeatures {
         buildConfig = true
@@ -101,7 +104,7 @@ tasks.matching { it.name in ['assembleRelease', 'bundleRelease'] }.configureEach
 }
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
-    implementation project(':core')
+    implementation project(':shared')
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'androidx.work:work-runtime:2.10.1'
     implementation 'androidx.core:core:1.15.0'

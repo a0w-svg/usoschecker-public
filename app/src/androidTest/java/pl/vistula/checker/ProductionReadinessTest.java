@@ -54,25 +54,35 @@ public class ProductionReadinessTest {
             try { Thread.sleep(50); } catch (InterruptedException ignored) {}
         }
     }
-    @Test public void platformBackClosesDrawerWithoutLeavingHome() {
-        DrawerIdle idle = new DrawerIdle(rule.getActivity().findViewById(R.id.drawer_layout));
-        androidx.test.espresso.IdlingRegistry.getInstance().register(idle);
-        try {
-            onView(withContentDescription(R.string.menu_open)).perform(click());
-            onView(withId(R.id.drawer_layout)).check((view, failure) -> {
-                if (failure != null) throw failure;
-                assertTrue(((androidx.drawerlayout.widget.DrawerLayout) view).isDrawerOpen(androidx.core.view.GravityCompat.START));
+    @Test public void toolsReturnToMoreWithBackAndNavigationReselect() {
+        onView(withId(R.id.nav_item_more)).perform(click());
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> rule.getActivity().navigate(7));
+        onView(withId(R.id.tasks_more)).check(matches(isDisplayed()));
+        systemBack();
+        onView(withId(R.id.nav_item_more)).check(matches(isSelected()));
+        onView(withId(R.id.tasks_more)).check(androidx.test.espresso.assertion.ViewAssertions.doesNotExist());
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> rule.getActivity().navigate(7));
+        onView(withId(R.id.nav_item_more)).perform(click());
+        onView(withId(R.id.tasks_more)).check(androidx.test.espresso.assertion.ViewAssertions.doesNotExist());
+    }
+    @Test public void moreContainsEverySecondaryDestination() {
+        int[] labels = {R.string.cards_title, R.string.documents_title, R.string.tool_gpa_title,
+            R.string.tool_attendance_title, R.string.tool_tasks_title, R.string.tool_payments_title,
+            R.string.tool_news_title, R.string.tool_campus_title, R.string.tool_account_title, R.string.tool_api_title};
+        for (int label : labels) {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+                rule.getActivity().navigate(6);
+                android.widget.LinearLayout content = rule.getActivity().findViewById(R.id.main_content);
+                String name = rule.getActivity().getString(label);
+                android.view.View destination = null;
+                for (int i = 0; i < content.getChildCount(); i++) {
+                    android.view.View candidate = content.getChildAt(i);
+                    if (candidate.getContentDescription() != null && candidate.getContentDescription().toString().startsWith(name + ". ")) destination = candidate;
+                }
+                assertNotNull("Missing destination: " + name, destination);
+                assertTrue(destination.performClick());
+                assertNull("Destination did not open: " + name, destination.getParent());
             });
-            idle.setExpectClose(true);
-            systemBack();
-            onView(withId(R.id.nav_item_home)).check(matches(isSelected()));
-            onView(withId(R.id.drawer_layout)).check((view, failure) -> {
-                if (failure != null) throw failure;
-                assertFalse(((androidx.drawerlayout.widget.DrawerLayout) view).isDrawerOpen(androidx.core.view.GravityCompat.START));
-            });
-        } finally {
-            androidx.test.espresso.IdlingRegistry.getInstance().unregister(idle);
-            idle.drawer.removeDrawerListener(idle);
         }
     }
     private void systemBack() {
@@ -91,29 +101,5 @@ public class ProductionReadinessTest {
         PackageInfo pkg = rule.getActivity().getPackageManager().getPackageInfo(info.packageName, PackageManager.GET_PROVIDERS);
         if (!BuildConfig.DEBUG && pkg.providers != null) for (android.content.pm.ProviderInfo provider : pkg.providers)
             assertFalse(provider.authority != null && provider.authority.contains("debugexports"));
-    }
-    private static final class DrawerIdle implements androidx.drawerlayout.widget.DrawerLayout.DrawerListener, androidx.test.espresso.IdlingResource {
-        private final androidx.drawerlayout.widget.DrawerLayout drawer;
-        private int state = androidx.drawerlayout.widget.DrawerLayout.STATE_IDLE;
-        private boolean expectClose;
-        private ResourceCallback callback;
-        DrawerIdle(androidx.drawerlayout.widget.DrawerLayout drawer) { this.drawer = drawer; drawer.addDrawerListener(this); }
-        public String getName() { return "Drawer animation"; }
-        public boolean isIdleNow() {
-            if (expectClose && drawer.isDrawerOpen(androidx.core.view.GravityCompat.START)) return false;
-            return state == androidx.drawerlayout.widget.DrawerLayout.STATE_IDLE;
-        }
-        public void setExpectClose(boolean expectClose) { this.expectClose = expectClose; }
-        public void registerIdleTransitionCallback(ResourceCallback callback) { this.callback = callback; }
-        public void onDrawerSlide(android.view.View view, float offset) {}
-        public void onDrawerOpened(android.view.View view) {}
-        public void onDrawerClosed(android.view.View view) {
-            expectClose = false;
-            if (callback != null) callback.onTransitionToIdle();
-        }
-        @Override public void onDrawerStateChanged(int state) {
-            this.state = state;
-            if (isIdleNow() && callback != null) callback.onTransitionToIdle();
-        }
     }
 }

@@ -3,6 +3,7 @@ package pl.vistula.checker;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.util.Locale;
 import pl.vistula.checker.ui.HistoryScreenController;
 import pl.vistula.checker.ui.PaymentsScreenController;
 import pl.vistula.checker.ui.UiHelper;
@@ -74,6 +75,20 @@ public class UiFormattersTest {
         String formatted = HistoryScreenController.formatFullDate(date);
         assertTrue(formatted.contains("2026"));
         assertTrue(formatted.contains("październik"));
+    }
+
+    @Test
+    public void testFormatFullDateLocales() {
+        String iso = "2026-10-15T14:30:00";
+        String formattedEn = HistoryScreenController.formatFullDate(Locale.ENGLISH, iso);
+        assertTrue(formattedEn.contains("2026"));
+        assertTrue(formattedEn.contains("14:30"));
+        assertTrue(formattedEn.toLowerCase(Locale.ENGLISH).contains("october"));
+
+        String formattedUk = HistoryScreenController.formatFullDate(Locale.forLanguageTag("uk"), iso);
+        assertTrue(formattedUk.contains("2026"));
+        assertTrue(formattedUk.contains("14:30"));
+        assertTrue(formattedUk.toLowerCase(Locale.forLanguageTag("uk")).contains("жовт"));
     }
 
     @Test

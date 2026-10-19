@@ -242,6 +242,12 @@
     <string name="share_change_title">Udostępnij szczegóły zmiany</string>
     <string name="history_share_subject">Zmiana w USOS: %1$s (%2$s)</string>
     <string name="history_share_footer">Wysłano z aplikacji Vistula Checker</string>
+    <string name="history_detected_prefix">Wykryto: %1$s</string>
+    <string name="history_server_time">Czas z serwera USOS: %1$s</string>
+    <string name="history_time_today">Dzisiaj, %1$s</string>
+    <string name="history_time_yesterday">Wczoraj, %1$s</string>
+    <string name="time_just_now">przed chwilą</string>
+    <string name="time_minutes_ago">%1$d min temu</string>
 
     <!-- Tasks Screen -->
     <string name="tasks_title">Twoje zadania</string>
@@ -747,6 +753,18 @@
         <item>Jasny</item>
         <item>Ciemny OLED</item>
     </string-array>
+    <string name="language_title">Język</string>
+    <string name="language_description">Domyślny systemowy lub wybierz: Polski, English, Українська</string>
+    <string name="language_system">Domyślny systemowy</string>
+    <string name="language_pl">Polski</string>
+    <string name="language_en">English</string>
+    <string name="language_uk">Українська</string>
+    <string-array name="language_modes">
+        <item>Domyślny systemowy</item>
+        <item>Polski</item>
+        <item>English</item>
+        <item>Українська</item>
+    </string-array>
     <string name="attendance_unassigned">Do przypisania</string>
     <string name="attendance_semester">Semestr</string>
     <string name="attendance_semester_hint">Kod semestru (np. 2026Z)</string>
@@ -795,4 +813,22 @@
     <string name="updates_current">Masz aktualną wersję aplikacji.</string>
     <string name="updates_not_checked">Sprawdź, czy jest dostępna nowsza wersja.</string>
     <string name="updates_error">Nie udało się sprawdzić aktualizacji. Sprawdź połączenie i spróbuj później. Zapisane informacje pozostają dostępne.</string>
+    <string name="history_options">Opcje historii zmian</string>
+    <string name="history_search_action">Szukaj zmian</string>
+    <string name="history_clear_filter">Wyczyść filtr</string>
+    <string name="grades_options">Opcje ocen</string>
+    <string name="grades_search_action">Szukaj ocen</string>
+    <string name="grades_data_status">Aktualność danych</string>
+    <string name="grades_filter_type">Typ ocen</string>
+    <string name="grades_values_description">Oceny: %1$s</string>
+    <string name="grades_value_caption">Ocena</string>
+    <string name="grades_scope_course">Protokół przedmiotu</string>
+    <string name="grades_scope_unit">Protokół zajęć</string>
+    <string name="grades_type_unknown">Forma zajęć niepodana</string>
+    <string name="tasks_options">Opcje zadań</string>
+    <string name="tasks_search_action">Szukaj zadań</string>
+    <string name="tasks_filter_title">Filtruj zadania</string>
+    <string name="tasks_task_options">Opcje zadania: %1$s</string>
+    <string name="tool_options">Opcje: %1$s</string>
+    <string name="tool_api_methods">Metody API</string>
 </resources>

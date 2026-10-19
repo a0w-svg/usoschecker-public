@@ -33,25 +33,25 @@ public class GradeNotificationRegressionTest {
 
     @Test public void removedGradeIsLabeledAsRemovedAndIncludesTheOldValue() throws Exception {
         Notification notification = publish(new Change(grade("5"), null, 1));
-        assertEquals("Usunięta ocena: Finanse", notification.extras.getString(Notification.EXTRA_TITLE));
+        assertEquals(context.getString(R.string.notification_grade_removed, "Finanse"), notification.extras.getString(Notification.EXTRA_TITLE));
         assertTrue(notification.extras.getString(Notification.EXTRA_TEXT).startsWith("5"));
     }
 
     @Test public void modifiedGradeShowsBothValuesInsteadOfClaimingItIsNew() throws Exception {
         Notification notification = publish(new Change(grade("4"), grade("5"), 1));
-        assertEquals("Zmieniona ocena: Finanse", notification.extras.getString(Notification.EXTRA_TITLE));
+        assertEquals(context.getString(R.string.notification_grade_modified, "Finanse"), notification.extras.getString(Notification.EXTRA_TITLE));
         assertTrue(notification.extras.getString(Notification.EXTRA_TEXT).contains("4 → 5"));
     }
 
     @Test public void newlyAddedGradeKeepsItsNewGradeLabel() throws Exception {
         Notification notification = publish(new Change(null, grade("5"), 1));
-        assertEquals("Nowa ocena: Finanse", notification.extras.getString(Notification.EXTRA_TITLE));
+        assertEquals(context.getString(R.string.notification_grade_added, "Finanse"), notification.extras.getString(Notification.EXTRA_TITLE));
     }
 
     @Test public void mixedBatchDescribesChangesAndPreservesRemovedValues() throws Exception {
         NotificationHelper.notifyChanges(context, List.of(new Change(grade("4"), null, 1), new Change(null, grade("5"), 2)));
         Notification notification = posted();
-        assertEquals("Zmiany ocen w USOS (2)", notification.extras.getString(Notification.EXTRA_TITLE));
+        assertEquals(context.getString(R.string.notification_grade_changes, 2), notification.extras.getString(Notification.EXTRA_TITLE));
         assertFalse(notification.extras.getString(Notification.EXTRA_TEXT).contains("nowych ocen"));
         CharSequence[] lines = notification.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES);
         assertNotNull(lines);

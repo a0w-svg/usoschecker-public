@@ -9,6 +9,51 @@ dist/
 __pycache__/
 **/bin/
 *.hprof
+*.idsig
+
+# Android & Native Build
+.externalNativeBuild/
+.cxx/
+output-metadata.json
+
+# IDEs & Editors
+.vscode/
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Python caches & virtual environments
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Backup & temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+*.orig
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
+
+# Agent & local assistant files
+.agent/
+.agents/
 
 # Credentials, signing material, private exports and compiled artifacts
 .env
@@ -30,3 +75,4 @@ __pycache__/
 captures/
 private/
 security-reports/
+

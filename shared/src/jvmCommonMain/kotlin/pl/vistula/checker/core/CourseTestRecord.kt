@@ -1,0 +1,37 @@
+package pl.vistula.checker.core
+
+import org.json.JSONException
+import org.json.JSONObject
+
+class CourseTestRecord @JvmOverloads constructor(
+    @JvmField val id: String,
+    @JvmField val courseId: String,
+    @JvmField val courseName: String,
+    @JvmField val testName: String,
+    @JvmField val points: Double,
+    @JvmField val maxPoints: Double,
+    @JvmField val grade: String,
+    @JvmField val date: String,
+    @JvmField val term: String = "",
+) {
+    fun percentage(): Double = if (maxPoints > 0) (points / maxPoints) * 100.0 else Double.NaN
+
+    @Throws(JSONException::class)
+    fun json(): JSONObject = JSONObject().put("id", id).put("courseId", courseId).put("courseName", courseName)
+        .put("testName", testName).put("points", points).put("maxPoints", maxPoints)
+        .put("grade", grade).put("date", date).put("term", term)
+
+    companion object {
+        @JvmStatic
+        fun from(o: JSONObject?): CourseTestRecord {
+            if (o == null) return CourseTestRecord("", "", "", "", 0.0, 0.0, "", "")
+            return CourseTestRecord(
+                o.optString("id", ""), o.optString("courseId", ""),
+                o.optString("courseName", ""), o.optString("testName", ""),
+                o.optDouble("points", 0.0), o.optDouble("maxPoints", 0.0),
+                o.optString("grade", ""), o.optString("date", ""), o.optString("term", ""),
+            )
+        }
+    }
+}
+

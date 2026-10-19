@@ -163,7 +163,7 @@ public class StorageReminderRegressionTest {
         state.getJSONObject("snapshot").getJSONArray("records").getJSONObject(0).put("title", "");
         vault.write(state);
         new ClassReminderReceiver().onReceive(context, reminder(lesson));
-        assertEquals("Zbliżające się zajęcia: Zajęcia", notifications().getActiveNotifications()[0].getNotification().extras.getString("android.title"));
+        assertEquals("Zbliżające się zajęcia: " + context.getString(R.string.reminder_unnamed_lesson), notifications().getActiveNotifications()[0].getNotification().extras.getString("android.title"));
         assertEquals(1, vault.read().getJSONArray("reminderDeliveries").length());
         assertNull(pendingReminder());
     }

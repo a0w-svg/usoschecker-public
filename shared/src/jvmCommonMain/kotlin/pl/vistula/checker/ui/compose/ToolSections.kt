@@ -7,19 +7,23 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -433,7 +437,8 @@ fun TasksSection(
 @Composable
 fun AttendanceSection(
     snapshot: Snapshot?,
-    preferences: KeyValueStore
+    preferences: KeyValueStore,
+    strings: UiStrings = UiStrings.PL
 ) {
     var savedJson by remember(snapshot) {
         val raw = preferences.getString("attendance_data", "{}")
@@ -446,8 +451,8 @@ fun AttendanceSection(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Kontrola nieobecności (limit: ${AttendanceTracker.LIMIT})", style = MaterialTheme.typography.titleLarge)
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("${strings.sectionAttendance} (limit: ${AttendanceTracker.LIMIT})", style = MaterialTheme.typography.titleLarge)
             val keys = savedJson.keys().asSequence().toList().sorted()
             if (keys.isEmpty()) {
                 Text("Brak zajęć w planie do śledzenia obecności.", style = MaterialTheme.typography.bodyMedium)
@@ -455,50 +460,90 @@ fun AttendanceSection(
                 keys.forEach { key ->
                     val entry = savedJson.optJSONObject(key) ?: return@forEach
                     val count = entry.optInt("absences", 0)
-                    val limit = entry.optInt("limit", AttendanceTracker.LIMIT)
+                    val limit = entry.optInt("limit", AttendanceTracker.LIMIT).coerceAtLeast(1)
                     val name = entry.optString("name", key)
                     val classType = entry.optString("classType")
                     val term = entry.optString("term")
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    val isExceeded = AttendanceTracker.exceeded(count)
+                    val isWarning = AttendanceTracker.warning(count)
+                    val statusColor = when {
+                        isExceeded -> MaterialTheme.colorScheme.error
+                        isWarning -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.primary
+                    }
+                    val statusContainer = when {
+                        isExceeded -> MaterialTheme.colorScheme.errorContainer
+                        isWarning -> MaterialTheme.colorScheme.tertiaryContainer
+                        else -> MaterialTheme.colorScheme.primaryContainer
+                    }
+                    val statusOnContainer = when {
+                        isExceeded -> MaterialTheme.colorScheme.onErrorContainer
+                        isWarning -> MaterialTheme.colorScheme.onTertiaryContainer
+                        else -> MaterialTheme.colorScheme.onPrimaryContainer
+                    }
+                    val statusLabel = when {
+                        isExceeded -> "! ${strings.attendanceExceeded} ($count/$limit)"
+                        isWarning -> "⚠ ${strings.attendanceWarning} ($count/$limit)"
+                        else -> "✓ ${strings.attendanceOk} ($count/$limit)"
+                    }
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(name, style = MaterialTheme.typography.titleMedium)
-                            val meta = listOfNotNull(
-                                classType.takeIf { it.isNotEmpty() },
-                                term.takeIf { it.isNotEmpty() }
-                            ).joinToString(" · ")
-                            if (meta.isNotEmpty()) Text(meta, style = MaterialTheme.typography.bodyMedium)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(name, style = MaterialTheme.typography.titleMedium)
+                                val meta = listOfNotNull(
+                                    classType.takeIf { it.isNotEmpty() },
+                                    term.takeIf { it.isNotEmpty() }
+                                ).joinToString(" · ")
+                                if (meta.isNotEmpty()) {
+                                    Text(meta, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Surface(
+                                    color = statusContainer,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        text = statusLabel,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = statusOnContainer
+                                    )
+                                }
+                                OutlinedButton(
+                                    modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
+                                    onClick = {
+                                        val next = JSONObject(savedJson.toString())
+                                        next.getJSONObject(key).put("absences", (count - 1).coerceAtLeast(0))
+                                        preferences.putString("attendance_data", next.toString())
+                                        savedJson = next
+                                    }
+                                ) { Text("−", style = MaterialTheme.typography.titleMedium) }
+                                OutlinedButton(
+                                    modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
+                                    onClick = {
+                                        val next = JSONObject(savedJson.toString())
+                                        next.getJSONObject(key).put("absences", count + 1)
+                                        preferences.putString("attendance_data", next.toString())
+                                        savedJson = next
+                                    }
+                                ) { Text("+", style = MaterialTheme.typography.titleMedium) }
+                            }
                         }
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                text = "$count / $limit",
-                                fontWeight = FontWeight.Bold,
-                                color = when {
-                                    AttendanceTracker.exceeded(count) -> MaterialTheme.colorScheme.error
-                                    AttendanceTracker.warning(count) -> MaterialTheme.colorScheme.tertiary
-                                    else -> MaterialTheme.colorScheme.primary
-                                }
-                            )
-                            OutlinedButton(
-                                onClick = {
-                                    val next = JSONObject(savedJson.toString())
-                                    next.getJSONObject(key).put("absences", (count - 1).coerceAtLeast(0))
-                                    preferences.putString("attendance_data", next.toString())
-                                    savedJson = next
-                                }
-                            ) { Text("−") }
-                            OutlinedButton(
-                                onClick = {
-                                    val next = JSONObject(savedJson.toString())
-                                    next.getJSONObject(key).put("absences", count + 1)
-                                    preferences.putString("attendance_data", next.toString())
-                                    savedJson = next
-                                }
-                            ) { Text("+") }
-                        }
+                        LinearProgressIndicator(
+                            progress = { (count.toFloat() / limit.toFloat()).coerceIn(0f, 1f) },
+                            modifier = Modifier.fillMaxWidth().height(6.dp),
+                            color = statusColor,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     }
                 }
             }

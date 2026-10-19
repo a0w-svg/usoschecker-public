@@ -1,4 +1,6 @@
-• Architektura Kotlin Multiplatform + Compose Multiplatform (:shared, :desktopApp, :app) współdzieląca logikę domenową, parsery USOS, repozytorium i interfejs na Androidzie oraz komputerach (Windows/macOS/Linux).
-• Nowa aplikacja Desktop (JVM) z szyfrowanym magazynem AES-GCM (DesktopVault), powiadomieniami systemowymi, harmonogramem synchronizacji w tle i skrótami klawiszowymi (Ctrl+1..5).
-• Nawigacja gestem przesunięcia między zakładkami, rozbudowana sekcja Narzędzi oraz obsługa języków polskiego, angielskiego i ukraińskiego.
-• Wzmocnione bezpieczeństwo sieciowe (network_security_config wymuszający wyłącznie HTTPS i systemowe urzędy certyfikacji) oraz optymalizacja wydajności osi czasu zajęć (brak alokacji w onMeasure/onDraw) i zasobów językowych APK.
+• Profesjonalne ikony wektorowe (VistulaIcons) oraz semantyczne odznaki statusu (✓/⚠/!) zastępujące emotikony w nawigacji i narzędziach.
+• Kontrast barw zgodny ze standardem dostępności WCAG AA (≥ 4.5:1) w motywach jasnym, ciemnym oraz OLED, potwierdzony automatycznymi testami kontrastu.
+• Wielokolumnowa, interaktywna oś czasu zajęć z obsługą nakładających się lekcji, linią bieżącej godziny oraz podglądem szczegółów po kliknięciu.
+• Pełna wielojęzyczność interfejsu Compose Multiplatform (polski, angielski, ukraiński), karta powitalna Onboarding (USOS vs Demo) oraz płynne animacje zakładek.
+• Całkowita migracja kodu źródłowego i testów do 100% języka Kotlin (0 plików Java), paski postępu punktów z kolokwiów i frekwencji, cele dotykowe 48 dp oraz nowe skróty klawiszowe na komputerze (Ctrl+R / F5, Ctrl+D).
+

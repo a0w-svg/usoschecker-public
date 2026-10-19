@@ -26,7 +26,7 @@ class GradeNotificationRegressionTest {
 
     @Before
     fun setUp() {
-        context = InstrumentationRegistry.getInstrumentation().targetContext
+        context = pl.vistula.checker.ui.Language.localizedContext(InstrumentationRegistry.getInstrumentation().targetContext)
         Assume.assumeTrue("Run with -PisolatedTests", context.packageName.endsWith(".qa"))
         val nm = context.getSystemService(NotificationManager::class.java)
         manager = nm
@@ -70,7 +70,7 @@ class GradeNotificationRegressionTest {
         assertFalse(notification.extras.getString(Notification.EXTRA_TEXT)!!.contains("nowych ocen"))
         val lines = notification.extras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)
         assertNotNull(lines)
-        assertTrue(lines!![0].toString().contains("Usunięto · Finanse: 4"))
+        assertTrue(lines!![0].toString().contains(context.getString(R.string.history_action_removed) + " · Finanse: 4"))
     }
 
     private fun grade(value: String): Record = Record("grade", "ocena", "Finanse", value, "", "")

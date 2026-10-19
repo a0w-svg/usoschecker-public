@@ -114,6 +114,7 @@ class ApiExplorerController private constructor() {
             if (favoritesOnly) {
                 UiHelper.note(activity, content, activity.getString(R.string.api_fav_filter), UiHelper.MUTED)
             }
+            UiHelper.note(activity, content, activity.getString(R.string.api_catalog_scope_note), UiHelper.MUTED)
             val modules = ApiCatalog.modules(catalog)
             UiHelper.note(
                 activity,
@@ -286,7 +287,7 @@ class ApiExplorerController private constructor() {
                     R.string.api_auth_details,
                     auth.optString("consumer"),
                     auth.optString("token"),
-                    auth.optJSONArray("scopes").toString(),
+                    (auth.optJSONArray("scopes") ?: JSONArray()).toString(),
                     if (auth.optBoolean("administrative_only")) activity.getString(R.string.api_admin_key_required) else ""
                 ),
                 13,
@@ -311,11 +312,12 @@ class ApiExplorerController private constructor() {
                 UiHelper.note(
                     activity,
                     docs,
-                    activity.getString(R.string.api_deprecated_note, UiHelper.plain(metadata.opt("deprecated").toString())),
+                    activity.getString(R.string.api_deprecated_note, UiHelper.plain(metadata.opt("deprecated")?.toString().orEmpty())),
                     Color.rgb(167, 99, 24)
                 )
             }
-            UiHelper.add(activity, docs, UiHelper.plain(metadata.optString("description")), 14, UiHelper.INK, false)
+            val documentation = UiHelper.disclosure(activity, docs, "api.documentation", R.string.api_documentation)
+            UiHelper.add(activity, documentation, UiHelper.plain(metadata.optString("description")), 14, UiHelper.INK, false)
 
             val arguments = metadata.getJSONArray("arguments")
             val inputs = LinkedHashMap<String, EditText>()
@@ -540,13 +542,11 @@ class ApiExplorerController private constructor() {
             output.addView(saveResponse)
             output.addView(copyResponse)
             if (metadata.optString("returns").isNotEmpty()) {
-                val fields = UiHelper.section(activity, content, Color.WHITE)
-                UiHelper.add(activity, fields, activity.getString(R.string.api_result_fields), 18, UiHelper.INK, true)
+                val fields = UiHelper.disclosure(activity, content, "api.resultFields", R.string.api_result_fields)
                 UiHelper.add(activity, fields, UiHelper.plain(metadata.optString("returns")), 14, UiHelper.MUTED, false)
             }
             if (metadata.optString("errors").isNotEmpty()) {
-                val errors = UiHelper.section(activity, content, Color.WHITE)
-                UiHelper.add(activity, errors, activity.getString(R.string.api_errors_reference), 18, UiHelper.INK, true)
+                val errors = UiHelper.disclosure(activity, content, "api.errors", R.string.api_errors_reference)
                 UiHelper.add(activity, errors, UiHelper.plain(metadata.optString("errors")), 14, UiHelper.MUTED, false)
             }
 

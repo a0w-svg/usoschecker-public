@@ -1,6 +1,6 @@
 <resources>
     <string name="cards_title">Student IDs</string>
-    <string name="cards_description">Student ID card and mLegitymacja status from USOS.</string>
+    <string name="cards_description">Card status and validity</string>
     <string name="cards_information_only">This is a USOS data preview. Present the electronic document in the official mObywatel app.</string>
     <string name="cards_refresh">Fetch ID card data</string>
     <string name="cards_empty">No student ID in preview</string>
@@ -42,7 +42,7 @@
     <string name="mcard_revoked">Revoked by system</string>
     <string name="mcard_unknown">USOS status: %1$s</string>
     <string name="documents_title">Documents &amp; Decisions</string>
-    <string name="documents_description">Administrative documents, publication dates, and available files.</string>
+    <string name="documents_description">Decisions, files and receipts</string>
     <string name="documents_refresh">Fetch document list</string>
     <string name="documents_search">Search document, status, or date</string>
     <string name="documents_empty">No matching documents</string>

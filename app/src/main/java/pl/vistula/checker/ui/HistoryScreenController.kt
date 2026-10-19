@@ -259,7 +259,7 @@ class HistoryScreenController private constructor() {
                         box.addView(
                             UiHelper.button(
                                 activity,
-                                "Pokaż wszystkie zmiany",
+                                activity.getString(R.string.history_show_all),
                                 { onFilterChanged.accept("wszystkie") },
                                 false
                             )

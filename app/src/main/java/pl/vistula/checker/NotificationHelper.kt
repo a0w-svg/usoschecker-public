@@ -22,33 +22,34 @@ class NotificationHelper private constructor() {
 
         @JvmStatic
         fun createChannels(context: Context) {
+            val textContext = pl.vistula.checker.ui.Language.localizedContext(context)
             if (Build.VERSION.SDK_INT < 26) return
             val manager = context.getSystemService(NotificationManager::class.java) ?: return
 
             // Channel 1: Grades - HIGH importance (sound, heads-up display)
             val gradesChannel = NotificationChannel(
                 CHANNEL_GRADES,
-                "Nowe oceny z USOS",
+                textContext.getString(R.string.notification_grades_channel),
                 NotificationManager.IMPORTANCE_HIGH
             )
-            gradesChannel.description = "Powiadomienia o nowych i zmienionych ocenach"
+            gradesChannel.description = textContext.getString(R.string.notification_grades_description)
             gradesChannel.enableVibration(true)
 
             // Channel 2: Schedule changes - DEFAULT importance
             val scheduleChannel = NotificationChannel(
                 CHANNEL_SCHEDULE,
-                "Zmiany w planie zajęć",
+                textContext.getString(R.string.notification_schedule_channel),
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            scheduleChannel.description = "Powiadomienia o zmianach sal, godzin i odwołaniach zajęć"
+            scheduleChannel.description = textContext.getString(R.string.notification_schedule_description)
 
             // Channel 3: Reminders - DEFAULT importance
             val remindersChannel = NotificationChannel(
                 CHANNEL_REMINDERS,
-                "Przypomnienia akademickie",
+                textContext.getString(R.string.notification_reminders_channel),
                 NotificationManager.IMPORTANCE_DEFAULT
             )
-            remindersChannel.description = "Przypomnienia o zbliżających się zajęciach i terminach opłat"
+            remindersChannel.description = textContext.getString(R.string.notification_reminders_description)
 
             manager.createNotificationChannel(gradesChannel)
             manager.createNotificationChannel(scheduleChannel)
@@ -57,6 +58,7 @@ class NotificationHelper private constructor() {
 
         @JvmStatic
         fun notifyChanges(context: Context, changes: List<Change>?) {
+            val textContext = pl.vistula.checker.ui.Language.localizedContext(context)
             if (changes.isNullOrEmpty()) return
             if (Build.VERSION.SDK_INT >= 33 &&
                 context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
@@ -99,7 +101,7 @@ class NotificationHelper private constructor() {
                 )
 
                 val title = if (gradeChanges.size == 1) {
-                    context.getString(
+                    textContext.getString(
                         when (gradeChanges[0].action) {
                             "Dodano" -> R.string.notification_grade_added
                             "Usunięto" -> R.string.notification_grade_removed
@@ -108,7 +110,7 @@ class NotificationHelper private constructor() {
                         gradeChanges[0].title
                     )
                 } else {
-                    context.getString(R.string.notification_grade_changes, gradeChanges.size)
+                    textContext.getString(R.string.notification_grade_changes, gradeChanges.size)
                 }
 
                 val builder = NotificationCompat.Builder(context, CHANNEL_GRADES)
@@ -142,11 +144,11 @@ class NotificationHelper private constructor() {
                     for (i in 0 until min(5, gradeChanges.size)) {
                         val g = gradeChanges[i]
                         val gDate = HistoryScreenController.formatFullDate(g.date)
-                        inbox.addLine("${g.action} · ${g.title}: ${gradeValue(g)}" + if (gDate.isNotEmpty()) " ($gDate)" else "")
+                        inbox.addLine("${actionLabel(textContext, g.action)} · ${g.title}: ${gradeValue(g)}" + if (gDate.isNotEmpty()) " ($gDate)" else "")
                     }
-                    if (gradeChanges.size > 5) inbox.setSummaryText("+ jeszcze ${gradeChanges.size - 5} ocen")
+                    if (gradeChanges.size > 5) inbox.setSummaryText(textContext.getString(R.string.notification_more_changes, gradeChanges.size - 5))
                     builder.setStyle(inbox)
-                    builder.setContentText(context.getString(R.string.notification_grade_changes_body, gradeChanges.size))
+                    builder.setContentText(textContext.getString(R.string.notification_grade_changes_body, gradeChanges.size))
                 }
 
                 try {
@@ -168,9 +170,9 @@ class NotificationHelper private constructor() {
                 )
 
                 val title = if (scheduleChanges.size == 1) {
-                    "Zmiana w planie: ${scheduleChanges[0].title}"
+                    textContext.getString(R.string.notification_schedule_single, scheduleChanges[0].title)
                 } else {
-                    "Zmiany w planie zajęć (${scheduleChanges.size})"
+                    textContext.getString(R.string.notification_schedule_count, scheduleChanges.size)
                 }
 
                 val builder = NotificationCompat.Builder(context, CHANNEL_SCHEDULE)
@@ -179,18 +181,18 @@ class NotificationHelper private constructor() {
                     .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                     .setContentIntent(pending)
                     .setAutoCancel(true)
-                    .addAction(R.drawable.ic_nav_plan, "Zobacz plan", pending)
+                    .addAction(R.drawable.ic_nav_plan, textContext.getString(R.string.notification_open_schedule), pending)
 
                 if (scheduleChanges.size == 1) {
                     val single = scheduleChanges[0]
                     val diffList = ArrayList<String>()
-                    if (single.optMeta("diffDate").isNotEmpty()) diffList.add("Data: " + single.optMeta("diffDate"))
-                    if (single.optMeta("diffTime").isNotEmpty()) diffList.add("Godziny: " + single.optMeta("diffTime"))
-                    if (single.optMeta("diffRoom").isNotEmpty()) diffList.add("Sala: " + single.optMeta("diffRoom"))
-                    if (single.optMeta("diffLecturers").isNotEmpty()) diffList.add("Wykładowca: " + single.optMeta("diffLecturers"))
-                    if (single.optMeta("diffBuilding").isNotEmpty()) diffList.add("Budynek: " + single.optMeta("diffBuilding"))
-                    if (single.optMeta("diffGroup").isNotEmpty()) diffList.add("Grupa: " + single.optMeta("diffGroup"))
-                    val diff = if (diffList.isNotEmpty()) diffList.joinToString(" · ") else "${single.action}: ${single.title}"
+                    if (single.optMeta("diffDate").isNotEmpty()) diffList.add(textContext.getString(R.string.notification_diff_0) + " " + single.optMeta("diffDate"))
+                    if (single.optMeta("diffTime").isNotEmpty()) diffList.add(textContext.getString(R.string.notification_diff_1) + " " + single.optMeta("diffTime"))
+                    if (single.optMeta("diffRoom").isNotEmpty()) diffList.add(textContext.getString(R.string.notification_diff_2) + " " + single.optMeta("diffRoom"))
+                    if (single.optMeta("diffLecturers").isNotEmpty()) diffList.add(textContext.getString(R.string.notification_diff_3) + " " + single.optMeta("diffLecturers"))
+                    if (single.optMeta("diffBuilding").isNotEmpty()) diffList.add(textContext.getString(R.string.notification_diff_4) + " " + single.optMeta("diffBuilding"))
+                    if (single.optMeta("diffGroup").isNotEmpty()) diffList.add(textContext.getString(R.string.notification_diff_5) + " " + single.optMeta("diffGroup"))
+                    val diff = if (diffList.isNotEmpty()) diffList.joinToString(" · ") else "${actionLabel(textContext, single.action)}: ${single.title}"
 
                     val dateText = if (single.beforeDate.isNotEmpty() && single.afterDate.isNotEmpty() && single.beforeDate != single.afterDate) {
                         HistoryScreenController.formatFullDate(single.beforeDate) + " → " + HistoryScreenController.formatFullDate(single.afterDate)
@@ -200,7 +202,7 @@ class NotificationHelper private constructor() {
                     builder.setContentText(diff + if (dateText.isNotEmpty()) " · $dateText" else "")
                     builder.setStyle(
                         NotificationCompat.BigTextStyle().bigText(
-                            diff + if (dateText.isNotEmpty()) "\nTermin: $dateText" else ""
+                            diff + if (dateText.isNotEmpty()) "\n" + textContext.getString(R.string.notification_diff_0) + " " + dateText else ""
                         )
                     )
                 } else {
@@ -214,12 +216,12 @@ class NotificationHelper private constructor() {
                         }
                         var sDiff = s.optMeta("diffRoom")
                         if (sDiff.isEmpty()) sDiff = s.optMeta("diffTime")
-                        if (sDiff.isEmpty()) sDiff = s.action
+                        if (sDiff.isEmpty()) sDiff = actionLabel(textContext, s.action)
                         inbox.addLine("${s.title}: $sDiff" + if (sDate.isNotEmpty()) " ($sDate)" else "")
                     }
-                    if (scheduleChanges.size > 5) inbox.setSummaryText("+ jeszcze ${scheduleChanges.size - 5} zmian")
+                    if (scheduleChanges.size > 5) inbox.setSummaryText(textContext.getString(R.string.notification_more_changes, scheduleChanges.size - 5))
                     builder.setStyle(inbox)
-                    builder.setContentText("Wykryto zmiany sal lub godzin zajęć (${scheduleChanges.size}).")
+                    builder.setContentText(textContext.getString(R.string.notification_schedule_body, scheduleChanges.size))
                 }
 
                 try {
@@ -229,6 +231,12 @@ class NotificationHelper private constructor() {
             }
         }
 
+        private fun actionLabel(context: Context, action: String): String = context.getString(when (action) {
+            "Dodano" -> R.string.history_action_added
+            "Usunięto" -> R.string.history_action_removed
+            else -> R.string.history_action_modified
+        })
+
         private fun gradeValue(change: Change): String {
             if ("Usunięto" == change.action) return change.before
             if ("Zmieniono" == change.action && change.before != change.after) return "${change.before} → ${change.after}"
@@ -237,6 +245,7 @@ class NotificationHelper private constructor() {
 
         @JvmStatic
         fun sendTestNotification(context: Context) {
+            val textContext = pl.vistula.checker.ui.Language.localizedContext(context)
             if (Build.VERSION.SDK_INT >= 33 &&
                 context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -256,17 +265,17 @@ class NotificationHelper private constructor() {
 
             val builder = NotificationCompat.Builder(context, CHANNEL_GRADES)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle("Test powiadomień: Nowa ocena!")
-                .setContentText("Inżynieria Oprogramowania: 5.0 (bardzo dobry) · 6 ECTS")
+                .setContentTitle(textContext.getString(R.string.notification_test_title))
+                .setContentText(textContext.getString(R.string.notification_test_body))
                 .setStyle(
                     NotificationCompat.BigTextStyle().bigText(
-                        "Inżynieria Oprogramowania: 5.0 (bardzo dobry) · 6 ECTS\nPowiadomienia działają prawidłowo! Dotknij, aby przejść do ocen."
+                        textContext.getString(R.string.notification_test_body) + "\n" + textContext.getString(R.string.notification_test_detail)
                     )
                 )
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setContentIntent(pending)
-                .addAction(R.drawable.ic_nav_grades, "Otwórz oceny", pending)
+                .addAction(R.drawable.ic_nav_grades, textContext.getString(R.string.notification_open_grades), pending)
 
             try {
                 NotificationManagerCompat.from(context).notify(99, builder.build())

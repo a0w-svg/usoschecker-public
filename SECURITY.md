@@ -74,3 +74,26 @@ Usunięcie pliku lub commita nie unieważnia klucza. Zatrzymaj push,
 oczyść wszystkie dotknięte referencje historii, ponów skan i usuń publiczne
 artefakty/logi zawierające sekret. Czyszczenie współdzielonej historii wymaga
 koordynacji z innymi autorami; skaner nie zmienia historii automatycznie.
+
+## Publiczne aktualności uczelni
+
+Ekran aktualności pobiera publiczne wpisy z `https://vistula.edu.pl/wp-json/wp/v2/posts`.
+Ten osobny transport nie przyjmuje kluczy aplikacji, tokenów ani danych konta USOS.
+Pobiera po 20 wpisów w języku polskim i angielskim; dla ukraińskiego interfejsu
+pokazuje oznaczoną wersję angielską. Serwer widzi adres IP i ogólny User-Agent.
+Przekierowania są odrzucane, rozmiar odpowiedzi i czas odczytu są ograniczone,
+a linki artykułów muszą wskazywać dokładnie domenę `vistula.edu.pl` przez HTTPS.
+HTML jest wyświetlany jako tekst. Źródło USOS można wybrać oddzielnie; jego pusta
+lista nie jest przedstawiana jako brak wiadomości na publicznej stronie uczelni.
+
+Odbiór decyzji i wybór planu rat są operacjami wykonywanymi wyłącznie na żądanie
+użytkownika po potwierdzeniu. Przed wysłaniem aplikacja sprawdza konto, zgody
+i aktualną dostępność działania. Nie ponawia automatycznie operacji zapisu.
+Kody odbioru nie trafiają do cache ani zapisanego stanu formularza.
+
+Wybór filii opiera się na identyfikatorze jednostki i jej hierarchii z aktywnego programu
+studiów USOS. Nadpisanie ręczne jest zapisywane w szyfrowanym stanie konta, a komunikaty
+są oznaczane identyfikatorem kampusu. Zmiana filii usuwa cache wiadomości; stary cache
+innej filii nie jest wyświetlany. Publiczny kanał strony głównej jest dostępny dla Warszawy;
+pozostałe filie korzystają z filtrowanych komunikatów USOS oraz zweryfikowanych linków.
+Nie wysyłamy identyfikatora studenta ani danych konta do publicznej strony uczelni.

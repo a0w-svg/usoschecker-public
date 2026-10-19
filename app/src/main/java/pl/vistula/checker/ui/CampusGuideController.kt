@@ -16,6 +16,10 @@ class CampusGuideController private constructor() {
         @JvmStatic
         fun render(activity: MainActivity, content: LinearLayout) {
             ToolScreenUi.header(activity, content, R.string.tool_campus_title, null)
+            if (pl.vistula.checker.core.CampusAffiliation.selected(activity.serviceAccountState()) != "0000") {
+                CampusSettingsController.campusInformation(activity, content, activity.serviceAccountState())
+                return
+            }
             // Campus Location
             val campusCard = UiHelper.section(activity, content, Color.WHITE)
             UiHelper.add(activity, campusCard, activity.getString(R.string.campus_name), 18, UiHelper.INK, true)
@@ -52,8 +56,7 @@ class CampusGuideController private constructor() {
             )
 
             // Dziekanat
-            val dziekanatCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_title), 18, UiHelper.INK, true)
+            val dziekanatCard = UiHelper.disclosure(activity, content, "campus.dziekanat", R.string.campus_dziekanat_title)
             UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_desc), 13, UiHelper.MUTED, false)
             UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_hours), 13, UiHelper.INK, false)
             dziekanatCard.addView(
@@ -84,8 +87,7 @@ class CampusGuideController private constructor() {
             )
 
             // Finance
-            val financeCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, financeCard, activity.getString(R.string.campus_finanse_title), 18, UiHelper.INK, true)
+            val financeCard = UiHelper.disclosure(activity, content, "campus.finance", R.string.campus_finanse_title)
             UiHelper.add(activity, financeCard, activity.getString(R.string.campus_finanse_desc), 13, UiHelper.MUTED, false)
             financeCard.addView(
                 UiHelper.actionRow(
@@ -110,8 +112,7 @@ class CampusGuideController private constructor() {
             )
 
             // Library
-            val libraryCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, libraryCard, activity.getString(R.string.campus_library_title), 18, UiHelper.INK, true)
+            val libraryCard = UiHelper.disclosure(activity, content, "campus.library", R.string.campus_library_title)
             UiHelper.add(activity, libraryCard, activity.getString(R.string.campus_library_desc), 13, UiHelper.MUTED, false)
             libraryCard.addView(
                 UiHelper.actionRow(
@@ -142,8 +143,7 @@ class CampusGuideController private constructor() {
             )
 
             // IT Support
-            val itCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, itCard, activity.getString(R.string.campus_it_title), 18, UiHelper.INK, true)
+            val itCard = UiHelper.disclosure(activity, content, "campus.it", R.string.campus_it_title)
             UiHelper.add(activity, itCard, activity.getString(R.string.campus_it_desc), 13, UiHelper.MUTED, false)
             itCard.addView(
                 UiHelper.actionRow(
@@ -160,8 +160,7 @@ class CampusGuideController private constructor() {
             )
 
             // Regulations
-            val linksCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, linksCard, activity.getString(R.string.campus_rules_title), 18, UiHelper.INK, true)
+            val linksCard = UiHelper.disclosure(activity, content, "campus.links", R.string.campus_rules_title)
             linksCard.addView(
                 UiHelper.actionRow(
                     activity,

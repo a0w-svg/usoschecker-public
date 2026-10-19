@@ -1,6 +1,6 @@
 <resources>
     <string name="cards_title">Студентські квитки</string>
-    <string name="cards_description">Студентський квиток та статус mLegitymacja з USOS.</string>
+    <string name="cards_description">Стан і термін дії посвідчення</string>
     <string name="cards_information_only">Це попередній перегляд даних USOS. Електронний документ пред\'являйте в офіційному додатку mObywatel.</string>
     <string name="cards_refresh">Отримати дані студентського</string>
     <string name="cards_empty">Немає студентського квитка для перегляду</string>
@@ -42,7 +42,7 @@
     <string name="mcard_revoked">Анульована системою</string>
     <string name="mcard_unknown">Статус USOS: %1$s</string>
     <string name="documents_title">Документи та рішення</string>
-    <string name="documents_description">Адміністративні документи, дати публікації та доступні файли.</string>
+    <string name="documents_description">Рішення, файли та підтвердження</string>
     <string name="documents_refresh">Отримати список документів</string>
     <string name="documents_search">Шукати документ, статус або дату</string>
     <string name="documents_empty">Немає відповідних документів</string>

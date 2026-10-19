@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/app_muted"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 
     <TextView

@@ -408,7 +408,7 @@ class ScheduleScreenController private constructor() {
                     conflictBadge.visibility = if (isConflict) View.VISIBLE else View.GONE
 
                     titleView.text = lesson.record.title
-                    var summary = lessonSummary(lesson)
+                    var summary = lessonSummary(lesson, activity)
                     val roomView = card.findViewById<TextView>(R.id.lesson_item_room)
                     val room = lessonRoom(lesson.record)
                     if (room.isNotEmpty()) {
@@ -416,7 +416,7 @@ class ScheduleScreenController private constructor() {
                         roomView.text = activity.getString(R.string.lesson_room_label, room)
                         val secondary = ArrayList<String>()
                         for (line in summary.split("\n")) {
-                            if (!line.startsWith("Sala ")) secondary.add(line)
+                            if (line != activity.getString(R.string.notification_class_room, room)) secondary.add(line)
                         }
                         summary = secondary.joinToString("\n")
                     }
@@ -491,7 +491,7 @@ class ScheduleScreenController private constructor() {
                     }) +
                     lesson.end.format(DateTimeFormatter.ofPattern("HH:mm"))
             )
-            val summary = lessonSummary(lesson)
+            val summary = lessonSummary(lesson, activity)
             if (summary.isNotEmpty()) UiHelper.note(activity, body, summary, UiHelper.INK)
             for (key in arrayOf("building", "groupNumber")) {
                 val value = lesson.record.optMeta(key)
@@ -573,7 +573,8 @@ class ScheduleScreenController private constructor() {
 
         /** Avoid repeating the time and building on cards. Old snapshots still keep their readable description. */
         @JvmStatic
-        fun lessonSummary(lesson: LessonTime): String {
+        @JvmOverloads
+        fun lessonSummary(lesson: LessonTime, context: android.content.Context? = null): String {
             val record = lesson.record
             val lines = ArrayList<String>()
             var type = record.optMeta("classType")
@@ -594,9 +595,9 @@ class ScheduleScreenController private constructor() {
             }
             if (type.isEmpty()) type = legacyType.joinToString("\n")
             if (type.isNotEmpty()) lines.add(type)
-            if (room.isNotEmpty()) lines.add("Sala $room")
-            if (lecturers.isNotEmpty()) lines.add("Prowadzący: $lecturers")
-            if (lesson.tentative()) lines.add("Termin orientacyjny")
+            if (room.isNotEmpty()) lines.add(context?.getString(R.string.notification_class_room, room) ?: "Sala $room")
+            if (lecturers.isNotEmpty()) lines.add((context?.getString(R.string.notification_diff_3) ?: "Prowadzący:") + " " + lecturers)
+            if (lesson.tentative()) lines.add(context?.getString(R.string.schedule_tentative_badge) ?: "Termin orientacyjny")
             return lines.joinToString("\n")
         }
 
@@ -647,7 +648,7 @@ class ScheduleScreenController private constructor() {
         private fun exportPlanToIcs(activity: MainActivity, rows: List<Record>) {
             if (rows.isEmpty()) return
             try {
-                activity.saveCalendar(IcsExporter.export(rows))
+                activity.saveCalendar(pl.vistula.checker.core.ApiLanguage.`in`(Language.currentLocale(activity).language) { IcsExporter.export(rows) })
             } catch (_: Exception) {
                 Toast.makeText(activity, R.string.toast_export_calendar_error, Toast.LENGTH_SHORT).show()
             }

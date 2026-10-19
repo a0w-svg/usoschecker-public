@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_network">Не вдалося підключитися. Перевірте інтернет і спробуйте ще раз.</string>
+    <string name="error_timeout">Сервер не відповів вчасно. Спробуйте ще раз.</string>
+    <string name="error_format">Невідомий формат відповіді. Попередні дані збережено.</string>
+    <string name="error_access">Немає доступу. Перевірте дозволи облікового запису в налаштуваннях.</string>
+    <string name="error_rate_limit">Сервер просить зачекати. Спробуйте пізніше.</string>
+    <string name="error_server">Сервер тимчасово недоступний. Спробуйте пізніше.</string>
+    <string name="error_operation">Не вдалося виконати дію. Перевірте дані та спробуйте ще раз.</string>
+    <string name="error_signature">USOS відхилив запит. Перевірте ключ застосунку та годинник телефону.</string>
+    <string name="settings_debug_credentials">Локальний ключ застосунку завантажено для цієї тестової збірки.</string>
+    <string name="notification_grades_channel">Нові оцінки USOS</string>
+    <string name="notification_grades_description">Нові та змінені оцінки</string>
+    <string name="notification_schedule_channel">Зміни розкладу</string>
+    <string name="notification_schedule_description">Зміни аудиторій, часу та скасування занять</string>
+    <string name="notification_reminders_channel">Навчальні нагадування</string>
+    <string name="notification_reminders_description">Нагадування про заняття та терміни</string>
+    <string name="notification_schedule_single">Зміна розкладу: %1$s</string>
+    <string name="notification_schedule_count">Зміни розкладу (%1$d)</string>
+    <string name="notification_schedule_body">Виявлено зміни у %1$d заняттях.</string>
+    <string name="notification_more_changes">+ ще %1$d змін</string>
+    <string name="notification_open_schedule">Відкрити розклад</string>
+    <string name="notification_open_grades">Відкрити оцінки</string>
+    <string name="notification_test_title">Тест сповіщень: нова оцінка</string>
+    <string name="notification_test_body">Приклад дисципліни: 5.0 · 6 ECTS</string>
+    <string name="notification_test_detail">Сповіщення працюють. Торкніться, щоб відкрити оцінки.</string>
+    <string name="notification_class_title">Незабаром заняття: %1$s</string>
+    <string name="notification_class_time">Через %1$d хв · %2$s</string>
+    <string name="notification_class_room">Аудиторія %1$s</string>
+    <string name="notification_schedule_hint">Торкніться, щоб відкрити розклад.</string>
+    <string name="history_show_all">Показати всі зміни</string>
+    <string name="class_lecture">Лекція</string>
+    <string name="class_exercises">Практичне заняття</string>
+    <string name="class_lab">Лабораторна робота</string>
+    <string name="class_project">Проєкт</string>
+    <string name="class_seminar">Семінар</string>
+    <string name="class_language">Мовне заняття</string>
+    <string name="class_discussion">Дискусійне заняття</string>
+    <string name="class_other">Інше</string>
+    <string name="notification_diff_0">Дата:</string>
+    <string name="notification_diff_1">Час:</string>
+    <string name="notification_diff_2">Аудиторія:</string>
+    <string name="notification_diff_3">Викладач:</string>
+    <string name="notification_diff_4">Корпус:</string>
+    <string name="notification_diff_5">Група:</string>
+    <string name="schedule_tentative_badge">Орієнтовна дата</string>
+</resources>

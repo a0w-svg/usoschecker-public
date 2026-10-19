@@ -89,12 +89,12 @@ class ProductionReadinessTest {
     @Test
     fun toolsReturnToMoreWithBackAndNavigationReselect() {
         onView(withId(R.id.nav_item_more)).perform(click())
-        InstrumentationRegistry.getInstrumentation().runOnMainSync { rule.activity.navigate(7) }
+        openDestination(R.string.tool_tasks_title)
         onView(withId(R.id.tasks_more)).check(matches(isDisplayed()))
         systemBack()
         onView(withId(R.id.nav_item_more)).check(matches(isSelected()))
         onView(withId(R.id.tasks_more)).check(doesNotExist())
-        InstrumentationRegistry.getInstrumentation().runOnMainSync { rule.activity.navigate(7) }
+        openDestination(R.string.tool_tasks_title)
         onView(withId(R.id.nav_item_more)).perform(click())
         onView(withId(R.id.tasks_more)).check(doesNotExist())
     }
@@ -114,8 +114,8 @@ class ProductionReadinessTest {
             R.string.tool_api_title
         )
         for (label in labels) {
+            onView(withId(R.id.nav_item_more)).perform(click())
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                rule.activity.navigate(6)
                 val content = rule.activity.findViewById<LinearLayout>(R.id.main_content)
                 val name = rule.activity.getString(label)
                 var destination: View? = null
@@ -129,6 +129,17 @@ class ProductionReadinessTest {
                 assertTrue(destination!!.performClick())
                 assertNull("Destination did not open: $name", destination.parent)
             }
+        }
+    }
+
+    private fun openDestination(label: Int) {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val content = rule.activity.findViewById<LinearLayout>(R.id.main_content)
+            val name = rule.activity.getString(label)
+            val destination = (0 until content.childCount).map { content.getChildAt(it) }
+                .firstOrNull { it.contentDescription?.toString()?.startsWith("$name. ") == true }
+            assertNotNull("Missing destination: $name", destination)
+            assertTrue(destination!!.performClick())
         }
     }
 

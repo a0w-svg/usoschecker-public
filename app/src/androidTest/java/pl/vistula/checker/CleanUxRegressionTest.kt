@@ -165,7 +165,7 @@ class CleanUxRegressionTest {
                 throw AssertionError(e)
             }
         }
-        onView(withText("Sala 201")).inRoot(isDialog()).check(matches(isDisplayed()))
+        onView(withText(rule.activity.getString(R.string.notification_class_room, "201"))).inRoot(isDialog()).check(matches(isDisplayed()))
         onView(withText(containsString("unit-fixture"))).inRoot(isDialog())
             .check(matches(not(isDisplayed())))
         onView(withText(R.string.grades_full_data)).inRoot(isDialog()).perform(click())

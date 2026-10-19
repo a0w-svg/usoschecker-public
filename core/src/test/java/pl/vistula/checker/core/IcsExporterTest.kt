@@ -60,8 +60,9 @@ class IcsExporterTest {
         assertTrue(ics.contains("SUMMARY:Matematyka Dyskretna (Ćwiczenia)\r\n"))
         assertTrue(ics.contains("DTSTART:20261015T070000Z\r\n"))
         assertTrue(ics.contains("DTEND:20261015T083000Z\r\n"))
-        assertTrue(ics.contains("LOCATION:Sala 204\\, Budynek Główny\\, Akademia Finansów i Biznesu Vistula"))
+        assertTrue(ics.contains("LOCATION:Sala 204\\, Budynek Główny"))
         assertTrue(ics.contains("Prowadzący: Dr Anna Kowalska"))
+        assertFalse("Do not invent a Warsaw address for another campus", ics.contains("Stokłosy"))
         assertTrue(ics.endsWith("END:VCALENDAR\r\n"))
     }
 }

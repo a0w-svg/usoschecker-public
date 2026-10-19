@@ -158,14 +158,15 @@ class StudentCardsController private constructor() {
             } else if (card.expiresSoon(today)) {
                 UiHelper.note(activity, box, activity.getString(R.string.cards_expires_soon), statusColor)
             }
+            val details = UiHelper.disclosure(activity, box, "cards.physical.details", R.string.simple_details)
             if (card.issued.isNotEmpty()) {
-                UiHelper.note(activity, box, activity.getString(R.string.cards_issue_date, HistoryScreenController.formatFullDate(card.issued)), UiHelper.MUTED)
+                UiHelper.note(activity, details, activity.getString(R.string.cards_issue_date, HistoryScreenController.formatFullDate(card.issued)), UiHelper.MUTED)
             }
             if (card.type.isNotEmpty()) {
-                UiHelper.note(activity, box, activity.getString(R.string.cards_type, card.type), UiHelper.MUTED)
+                UiHelper.note(activity, details, activity.getString(R.string.cards_type, card.type), UiHelper.MUTED)
             }
             if (card.barcode.isNotEmpty()) {
-                box.addView(
+                details.addView(
                     UiHelper.button(
                         activity,
                         activity.getString(R.string.cards_show_number),
@@ -201,12 +202,17 @@ class StudentCardsController private constructor() {
                 )
             }
             if (entry.optString("error").isNotEmpty()) {
+                if (entry.has("data")) UiHelper.note(activity, content, activity.getString(R.string.services_cached_note), UiHelper.MUTED)
                 UiHelper.note(
                     activity,
                     content,
-                    activity.getString(R.string.services_refresh_error, entry.optString("error")),
+                    activity.getString(R.string.services_refresh_error, ApiErrorUi.cached(activity, entry)),
                     Color.rgb(160, 48, 40)
                 )
+            }
+            if (entry.optLong("retryAt") > System.currentTimeMillis()) {
+                UiHelper.note(activity, content, activity.getString(R.string.services_retry_at,
+                    UiHelper.timestamp(entry.optLong("retryAt"))), UiHelper.MUTED)
             }
         }
 

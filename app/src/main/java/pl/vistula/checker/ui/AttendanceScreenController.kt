@@ -100,7 +100,7 @@ class AttendanceScreenController private constructor() {
                 when {
                     t == "all" -> activity.getString(R.string.attendance_all_types)
                     t.isEmpty() -> activity.getString(R.string.attendance_unknown_type)
-                    else -> t
+                    else -> classType(activity, t)
                 }
             }
             var totalCourses = 0
@@ -180,6 +180,7 @@ class AttendanceScreenController private constructor() {
                 UiHelper.note(activity, content, activity.getString(R.string.attendance_note_warning, warningCount), UiHelper.MUTED)
             }
 
+            UiHelper.note(activity, content, activity.getString(R.string.local_data_note), UiHelper.MUTED)
             val list = LinearLayout(activity)
             list.orientation = LinearLayout.VERTICAL
             content.addView(list)
@@ -219,7 +220,7 @@ class AttendanceScreenController private constructor() {
                     if (item.optString("classType").isEmpty()) {
                         activity.getString(R.string.attendance_unknown_type)
                     } else {
-                        item.optString("classType")
+                        classType(activity, item.optString("classType"))
                     },
                     UiHelper.MUTED
                 )
@@ -317,6 +318,14 @@ class AttendanceScreenController private constructor() {
             }
         }
 
+        private fun classType(activity: MainActivity, value: String): String {
+            val labels = mapOf("Wykład" to R.string.class_lecture, "Ćwiczenia" to R.string.class_exercises,
+                "Laboratorium" to R.string.class_lab, "Projekt" to R.string.class_project,
+                "Seminarium" to R.string.class_seminar, "Lektorat" to R.string.class_language,
+                "Konwersatorium" to R.string.class_discussion, "Inne" to R.string.class_other)
+            return labels[value]?.let { activity.getString(it) } ?: value
+        }
+
         private fun matches(item: JSONObject, term: String, type: String): Boolean {
             return term == item.optString("term") && (type == "all" || type == item.optString("classType"))
         }
@@ -367,7 +376,7 @@ class AttendanceScreenController private constructor() {
             val typeField = Spinner(activity)
             val typeLabels = Array(typeOptions.size) { i ->
                 val t = typeOptions[i]
-                if (t.isEmpty()) activity.getString(R.string.attendance_unknown_type) else t
+                if (t.isEmpty()) activity.getString(R.string.attendance_unknown_type) else classType(activity, t)
             }
             typeField.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, typeLabels)
             typeField.setSelection(max(0, typeOptions.indexOf(oldType)))

@@ -130,26 +130,26 @@
     <!-- Tools / More Screen -->
     <string name="tools_title">Narzędzia Studenta</string>
     <string name="tools_subtitle">Kompletny zestaw funkcji wspomagających studia w Vistuli</string>
-    <string name="section_studies">Twoje Studia i Wyniki</string>
-    <string name="section_university">Uczelnia i Finanse</string>
-    <string name="section_app">Aplikacja i Dane</string>
+    <string name="section_studies">Studia</string>
+    <string name="section_university">Uczelnia</string>
+    <string name="section_app">Aplikacja</string>
     <string name="tools_privacy_note">Wszystkie Twoje notatki, zadania i liczniki są przechowywane w bezpiecznym sejfie na Twoim telefonie.</string>
-    <string name="tool_gpa_title">Kalkulator średniej i stypendium</string>
-    <string name="tool_gpa_desc">Średnia ważona ECTS, cele i symulator stypendium rektora</string>
-    <string name="tool_attendance_title">Licznik nieobecności na zajęciach</string>
-    <string name="tool_attendance_desc">Semestry i rodzaje zajęć · limit 3 nieobecności</string>
-    <string name="tool_tasks_title">Zadania i terminy projektów</string>
-    <string name="tool_tasks_desc">Osobisty planer kolokwiów, esejów i zadań z powiadomieniami</string>
-    <string name="tool_payments_title">Płatności i subkonta USOS</string>
-    <string name="tool_payments_desc">Indywidualne konta IBAN do wpłat czesnego i terminy rat</string>
-    <string name="tool_news_title">Komunikaty i ogłoszenia uczelni</string>
-    <string name="tool_news_desc">Oficjalne wiadomości, zarządzenia i komunikaty Dziekanatu</string>
-    <string name="tool_campus_title">Niezbędnik i kampus Vistula</string>
-    <string name="tool_campus_desc">Godziny Dziekanatu, biblioteka, numery sal, WiFi eduroam</string>
+    <string name="tool_gpa_title">Średnia ocen</string>
+    <string name="tool_gpa_desc">Obliczenia i symulacja celu</string>
+    <string name="tool_attendance_title">Nieobecności</string>
+    <string name="tool_attendance_desc">Własny licznik obecności</string>
+    <string name="tool_tasks_title">Zadania</string>
+    <string name="tool_tasks_desc">Własne zadania i terminy</string>
+    <string name="tool_payments_title">Płatności</string>
+    <string name="tool_payments_desc">Należności, raty i wpłaty</string>
+    <string name="tool_news_title">Aktualności</string>
+    <string name="tool_news_desc">Wiadomości Vistuli i USOS</string>
+    <string name="tool_campus_title">Kampus i kontakty</string>
+    <string name="tool_campus_desc">Dojazd, biura i pomoc</string>
     <string name="tool_account_title">Ustawienia</string>
-    <string name="tool_account_desc">Konto, wygląd, synchronizacja, powiadomienia i semestr akademicki</string>
+    <string name="tool_account_desc">Konto i preferencje</string>
     <string name="tool_api_title">Katalog USOS API</string>
-    <string name="tool_api_desc">Interaktywne testowanie zapytań dla studentów i deweloperów</string>
+    <string name="tool_api_desc">Zaawansowane narzędzia API</string>
 
     <!-- Account & OAuth -->
     <string name="account_title">Ustawienia</string>

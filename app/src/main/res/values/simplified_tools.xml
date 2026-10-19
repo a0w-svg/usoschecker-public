@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="details_expanded">Rozwinięte</string>
+    <string name="details_collapsed">Zwinięte</string>
+    <string name="simple_details">Szczegóły</string>
+    <string name="settings_title">Ustawienia</string>
+    <string name="settings_profile">Profil studenta</string>
+    <string name="settings_access">Dostęp do danych USOS</string>
+    <string name="settings_access_hint">Wybierz potrzebne funkcje. Dostęp potwierdzisz podczas logowania w USOS.</string>
+    <string name="settings_scope_advanced">Zaawansowane zakresy zgody</string>
+    <string name="settings_sync_hint">Telefon może opóźniać sprawdzanie w tle, aby oszczędzać baterię.</string>
+    <string name="settings_about">Informacje i pomoc</string>
+    <string name="settings_personalization">Wygląd i język</string>
+    <string name="settings_basic_access">Oceny i studia</string>
+    <string name="settings_tests_access">Wyniki sprawdzianów</string>
+    <string name="settings_profile_access">Zdjęcie i e-mail</string>
+    <string name="services_cached_note">Wyświetlam zapisane dane. Odświeżenie nie powiodło się.</string>
+    <string name="services_not_loaded">Dane nie zostały jeszcze pobrane.</string>
+    <string name="services_retry_at">Ponów po: %1$s</string>
+    <string name="local_data_note">Własne zapisy — nie są potwierdzeniem z USOS.</string>
+    <string name="gpa_assumptions">Zasady i dodatkowe wyliczenia</string>
+    <string name="api_documentation">Dokumentacja metody</string>
+    <string name="api_catalog_scope_note">Lista metod nie oznacza, że konto ma do nich dostęp.</string>
+    <string name="payments_currency_total">Suma nieopłaconych rat: %1$.2f %2$s</string>
+    <string name="services_news_limit">Wyświetlam do 50 najnowszych komunikatów.</string>
+</resources>

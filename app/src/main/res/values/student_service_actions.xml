@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="news_source_university">Źródło: oficjalna strona Vistuli</string>
+    <string name="news_source_usos">Źródło: USOS — komunikaty uczelni</string>
+    <string name="news_usos_action">Pobierz komunikaty z USOS</string>
+    <string name="news_university_action">Pobierz aktualności ze strony Vistuli</string>
+    <string name="news_language_fallback">Artykuły są dostępne w języku polskim i angielskim.</string>
+    <string name="payments_history">Wpłaty i rozliczenia</string>
+    <string name="payments_history_refresh">Pobierz wpłaty</string>
+    <string name="payments_details">Szczegóły należności i plany rat</string>
+    <string name="payments_plan_choose">Wybierz ten plan rat</string>
+    <string name="payments_plan_confirmation">Potwierdź zmianę planu rat dla: %1$s.\n\n%2$s\n\nZmiana zostanie wysłana do USOS.</string>
+    <string name="payments_plan_chosen">USOS potwierdził wybór planu rat.</string>
+    <string name="payments_balance_value">Saldo: %1$s %2$s</string>
+    <string name="payments_interest_value">Odsetki: %1$s %2$s</string>
+    <string name="payments_remittance_remaining">Pozostało do rozliczenia: %1$s %2$s</string>
+    <string name="payments_plan_label">Plan %1$s</string>
+    <string name="payments_plan_line">%1$s — %2$s %3$s</string>
+    <string name="payments_accounts_information">Subkonta wydziałów mają charakter informacyjny. Do wpłaty użyj rachunku przypisanego do konkretnej należności.</string>
+    <string name="documents_code_confirm">Wyślij kod odbioru dokumentu „%1$s” na adres e-mail zapisany w USOS?</string>
+    <string name="documents_code_sent">USOS wysłał kod na: %1$s\n%2$s</string>
+    <string name="documents_code_label">Kod odbioru z wiadomości e-mail</string>
+    <string name="documents_receive_confirm">Potwierdzasz odbiór dokumentu „%1$s” w USOS. Sprawdź dokument przed potwierdzeniem.</string>
+    <string name="documents_received">USOS potwierdził odbiór dokumentu.</string>
+    <string name="service_action_unavailable">Ta czynność nie jest już dostępna. Odśwież dane i spróbuj ponownie.</string>
+    <string name="service_action_uncertain">Nie udało się potwierdzić wyniku. Sprawdź aktualny stan w USOS przed ponowieniem.</string>
+    <string name="payments_api_amount">Kwota wskazana przez USOS: %1$s %2$s</string>
+    <string name="payments_bonus_value">Zniżka: %1$s %2$s, termin: %3$s</string>
+    <string name="payments_default_choice">Automatyczny wybór planu: %1$s</string>
+    <string name="payments_selected_plan">Aktualnie wybrany plan</string>
+    <string name="payments_settled">Rozliczona</string>
+    <string name="payments_not_settled">Oczekuje na rozliczenie</string>
+    <string name="payment_status_scheduled">Zaplanowana</string>
+    <string name="payment_status_cancelled">Anulowana</string>
+    <string name="payment_status_underpaid">Niedopłata</string>
+    <string name="payments_installment_total_label">Suma nieopłaconych rat</string>
+    <string name="payments_currency_amount">%1$.2f %2$s</string>
+</resources>

@@ -1,6 +1,6 @@
-• Profesjonalne ikony wektorowe (VistulaIcons) oraz semantyczne odznaki statusu (✓/⚠/!) zastępujące emotikony w nawigacji i narzędziach.
-• Kontrast barw zgodny ze standardem dostępności WCAG AA (≥ 4.5:1) w motywach jasnym, ciemnym oraz OLED, potwierdzony automatycznymi testami kontrastu.
-• Wielokolumnowa, interaktywna oś czasu zajęć z obsługą nakładających się lekcji, linią bieżącej godziny oraz podglądem szczegółów po kliknięciu.
-• Pełna wielojęzyczność interfejsu Compose Multiplatform (polski, angielski, ukraiński), karta powitalna Onboarding (USOS vs Demo) oraz płynne animacje zakładek.
-• Całkowita migracja kodu źródłowego i testów do 100% języka Kotlin (0 plików Java), paski postępu punktów z kolokwiów i frekwencji, cele dotykowe 48 dp oraz nowe skróty klawiszowe na komputerze (Ctrl+R / F5, Ctrl+D).
-
+• Wykrywanie filii z aktywnych studiów USOS, ręczny wybór oraz informacje i komunikaty dopasowane do kampusu.
+• Prostsze ekrany Więcej i ustawień, czytelniejsze opisy i szczegóły rozwijane na żądanie.
+• Działające aktualności z oficjalnej strony Vistuli oraz osobne źródło komunikatów USOS. Wiadomości można pobrać bez konta.
+• Osobne odświeżanie płatności, plany rat, historia wpłat oraz formularze odbioru decyzji. Zmiany wymagają potwierdzenia i uprawnień USOS.
+• Poprawione tłumaczenia, komunikaty błędów, powiadomienia oraz prezentacja danych zapisanych offline.
+• Ochrona przed nieaktualnymi warunkami planu rat, zmianą konta w trakcie operacji i zbyt długimi odpowiedziami API.

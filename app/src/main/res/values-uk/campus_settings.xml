@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_back">Назад до налаштувань</string>
+    <string name="settings_connected">Обліковий запис USOS підключено</string>
+    <string name="settings_disconnected">Підключіть обліковий запис для завантаження даних</string>
+    <string name="campus_affiliation_title">Моя філія та кампус</string>
+    <string name="campus_unknown">Виберіть свою філію</string>
+    <string name="campus_choose">Вибрати філію</string>
+    <string name="campus_detect">Визначити за обліковим записом USOS</string>
+    <string name="campus_automatic">Автоматично з USOS</string>
+    <string name="campus_automatic_hint">Визначення використовує підрозділ активної програми навчання. Якщо даних немає або знайдено кілька філій, виберіть вручну.</string>
+    <string name="campus_manual_hint">Філію вибрано вручну. Можна повернутися до автоматичного визначення.</string>
+    <string name="campus_filter_hint">Інформація університету й оголошення відповідають вашій філії. Оцінки, розклад, платежі та рішення завжди походять із вашого облікового запису.</string>
+    <string name="campus_official_site">Відкрити офіційний сайт філії</string>
+    <string name="campus_news_empty">Немає оголошень для цієї філії</string>
+    <string name="campus_news_hint">Новини інших філій приховано. Перевірте офіційний сайт своєї філії.</string>
+    <string name="settings_account_access">Обліковий запис і доступ до USOS</string>
+    <string name="campus_contacts_unavailable">USOS не надав контактів цієї філії. Контакти інших кампусів приховано.</string>
+    <string name="campus_student_portal">Відкрити USOSweb</string>
+</resources>

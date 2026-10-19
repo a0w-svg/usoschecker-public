@@ -51,11 +51,12 @@ class StudentDocumentsController private constructor() {
                         if (document.status.isNotEmpty()) {
                             UiHelper.badge(activity, card, document.status, Color.rgb(214, 241, 229), UiHelper.GREEN)
                         }
+                        val details = UiHelper.disclosure(activity, card, "documents.details", R.string.simple_details)
                         if (document.typeName.isNotEmpty()) {
-                            UiHelper.note(activity, card, document.typeName, UiHelper.MUTED)
+                            UiHelper.note(activity, details, document.typeName, UiHelper.MUTED)
                         }
-                        StudentCardsController.line(activity, card, R.string.documents_published, HistoryScreenController.formatFullDate(document.published))
-                        StudentCardsController.line(activity, card, R.string.documents_delivered, HistoryScreenController.formatFullDate(document.delivered))
+                        StudentCardsController.line(activity, details, R.string.documents_published, HistoryScreenController.formatFullDate(document.published))
+                        StudentCardsController.line(activity, details, R.string.documents_delivered, HistoryScreenController.formatFullDate(document.delivered))
                         val row = LinearLayout(activity)
                         row.gravity = Gravity.CENTER_VERTICAL
                         val title = card.getChildAt(0)
@@ -83,21 +84,11 @@ class StudentDocumentsController private constructor() {
                                 }
                             }
                             if (document.actions.contains("RECEIVE_DOCUMENT")) {
-                                ToolScreenUi.action(menu, R.string.documents_get_code) {
-                                    activity.openApiMethod(
-                                        "services/adm_documents/generate_code",
-                                        mapOf(
-                                            "id" to document.id,
-                                            "lang" to if ("pl" == Language.currentLocale(activity).language) "pl" else "en"
-                                        )
-                                    )
-                                }
-                                ToolScreenUi.action(menu, R.string.documents_receive) {
-                                    activity.openApiMethod("services/adm_documents/receive", mapOf("id" to document.id))
-                                }
+                                ToolScreenUi.action(menu, R.string.documents_get_code) { StudentActionsController.sendCode(activity, document) }
+                                ToolScreenUi.action(menu, R.string.documents_receive) { StudentActionsController.receive(activity, document) }
                             }
                             ToolScreenUi.action(menu, R.string.documents_details) {
-                                activity.openApiMethod("services/adm_documents/document", mapOf("id" to document.id))
+                                StudentActionsController.documentDetails(activity, document)
                             }
                         }
                         options.id = R.id.document_more

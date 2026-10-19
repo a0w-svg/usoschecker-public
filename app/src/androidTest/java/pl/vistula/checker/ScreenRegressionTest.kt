@@ -261,7 +261,7 @@ class ScreenRegressionTest {
     }
 
     private fun dialogHas(text: String) {
-        Espresso.onView(ViewMatchers.isRoot()).check { view, _ ->
+        Espresso.onView(ViewMatchers.isRoot()).inRoot(RootMatchers.isDialog()).check { view, _ ->
             assertNotNull(text, find(view, text))
         }
     }
@@ -278,7 +278,7 @@ class ScreenRegressionTest {
     }
 
     @Test
-    fun documentSearchAndPrefilledDetailsUseTheSelectedDocument() {
+    fun documentSearchAndReadableDetailsUseTheSelectedDocument() {
         main { rule.activity.navigate(14) }
         has("Zaświadczenie o studiowaniu")
         has("Decyzja stypendialna")
@@ -287,8 +287,9 @@ class ScreenRegressionTest {
         has("Zaświadczenie o studiowaniu")
         absent("Decyzja stypendialna")
         click(rule.activity.getString(R.string.documents_details))
-        awaitText("adm_documents/document")
-        has("demo-doc-1")
+        Espresso.onView(ViewMatchers.withId(R.id.student_document_details)).inRoot(RootMatchers.isDialog())
+            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        Espresso.onView(ViewMatchers.withText(R.string.btn_close)).inRoot(RootMatchers.isDialog()).perform(ViewActions.click())
         main { rule.activity.navigate(14) }
         main { assertEquals("zaswiadczenie", input(decor())!!.text.toString()) }
     }

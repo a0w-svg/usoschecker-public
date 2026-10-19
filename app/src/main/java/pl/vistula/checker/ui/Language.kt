@@ -2,6 +2,7 @@ package pl.vistula.checker.ui
 
 import android.app.LocaleManager
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -24,6 +25,13 @@ class Language private constructor() {
             if (locales.isEmpty) return ""
             val loc = locales[0]
             return loc?.language ?: ""
+        }
+
+        @JvmStatic
+        fun localizedContext(context: Context): Context {
+            val configuration = Configuration(context.resources.configuration)
+            configuration.setLocale(currentLocale(context))
+            return context.createConfigurationContext(configuration)
         }
 
         @JvmStatic
@@ -53,7 +61,8 @@ class Language private constructor() {
                 } catch (_: Exception) {
                 }
             }
-            return Locale.forLanguageTag("pl-PL")
+            val system = Locale.getDefault()
+            return if (system.language in setOf("pl", "en", "uk")) system else Locale.forLanguageTag("pl-PL")
         }
 
         @JvmStatic

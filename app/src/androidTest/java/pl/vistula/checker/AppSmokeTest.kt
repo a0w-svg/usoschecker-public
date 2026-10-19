@@ -705,8 +705,8 @@ class AppSmokeTest {
             val calendar = String(Files.readAllBytes(output.toPath()), StandardCharsets.UTF_8)
             assertTrue(calendar.contains("BEGIN:VCALENDAR"))
             assertTrue(calendar.contains("SUMMARY:Statystyka opisowa"))
-            assertTrue(calendar.contains("LOCATION:Sala 204"))
-            assertTrue(calendar.replace("\r\n ", "").contains("Prowadzący: Anna Kowalska"))
+            assertTrue(calendar.contains("LOCATION:" + activity().getString(R.string.notification_class_room, "204")))
+            assertTrue(calendar.replace("\r\n ", "").contains(activity().getString(R.string.notification_diff_3) + " Anna Kowalska"))
             assertEquals(8, calendar.split("BEGIN:VEVENT").size - 1)
         } finally {
             Intents.release()
@@ -754,7 +754,7 @@ class AppSmokeTest {
         searchFor("Kowalska")
         has("Statystyka opisowa")
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            assertTrue(containsText(activity().window.decorView, "Prowadzący: Anna Kowalska"))
+            assertTrue(containsText(activity().window.decorView, activity().getString(R.string.notification_diff_3) + " Anna Kowalska"))
         }
     }
 

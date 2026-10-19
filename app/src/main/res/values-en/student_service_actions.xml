@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="news_source_university">Source: official Vistula website</string>
+    <string name="news_source_usos">Source: USOS announcements</string>
+    <string name="news_usos_action">Load USOS announcements</string>
+    <string name="news_university_action">Load Vistula website news</string>
+    <string name="news_language_fallback">Articles are available in Polish and English.</string>
+    <string name="payments_history">Remittances and settlements</string>
+    <string name="payments_history_refresh">Load remittances</string>
+    <string name="payments_details">Payment details and installment plans</string>
+    <string name="payments_plan_choose">Choose this installment plan</string>
+    <string name="payments_plan_confirmation">Confirm the installment plan change for: %1$s.\n\n%2$s\n\nThis change will be sent to USOS.</string>
+    <string name="payments_plan_chosen">USOS confirmed your installment plan choice.</string>
+    <string name="payments_balance_value">Balance: %1$s %2$s</string>
+    <string name="payments_interest_value">Interest: %1$s %2$s</string>
+    <string name="payments_remittance_remaining">Remaining to settle: %1$s %2$s</string>
+    <string name="payments_plan_label">Plan %1$s</string>
+    <string name="payments_plan_line">%1$s — %2$s %3$s</string>
+    <string name="payments_accounts_information">Faculty accounts are informational. Use the account attached to the specific payment when making a transfer.</string>
+    <string name="documents_code_confirm">Send a receipt code for “%1$s” to the email address registered in USOS?</string>
+    <string name="documents_code_sent">USOS sent a code to: %1$s\n%2$s</string>
+    <string name="documents_code_label">Receipt code from your email</string>
+    <string name="documents_receive_confirm">You are confirming receipt of “%1$s” in USOS. Review the document before confirming.</string>
+    <string name="documents_received">USOS confirmed receipt of the document.</string>
+    <string name="service_action_unavailable">This action is no longer available. Refresh the data and try again.</string>
+    <string name="service_action_uncertain">The result could not be confirmed. Check the current status in USOS before trying again.</string>
+    <string name="payments_api_amount">Amount reported by USOS: %1$s %2$s</string>
+    <string name="payments_bonus_value">Bonus: %1$s %2$s, deadline: %3$s</string>
+    <string name="payments_default_choice">Automatic plan choice: %1$s</string>
+    <string name="payments_selected_plan">Currently selected plan</string>
+    <string name="payments_settled">Settled</string>
+    <string name="payments_not_settled">Awaiting settlement</string>
+    <string name="payment_status_scheduled">Scheduled</string>
+    <string name="payment_status_cancelled">Cancelled</string>
+    <string name="payment_status_underpaid">Underpaid</string>
+    <string name="payments_installment_total_label">Unpaid installments</string>
+    <string name="payments_currency_amount">%1$.2f %2$s</string>
+</resources>

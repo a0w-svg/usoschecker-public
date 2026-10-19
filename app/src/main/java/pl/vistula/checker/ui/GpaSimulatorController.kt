@@ -8,6 +8,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import pl.vistula.checker.MainActivity
 import pl.vistula.checker.R
+import pl.vistula.checker.core.ApiLanguage
 import pl.vistula.checker.core.GpaCalculator
 import pl.vistula.checker.core.GradeSummary
 import pl.vistula.checker.core.Snapshot
@@ -109,10 +110,11 @@ class GpaSimulatorController private constructor() {
                 false
             )
 
+            val estimates = UiHelper.disclosure(activity, content, "gpa.estimates", R.string.gpa_assumptions)
             // Rector's Scholarship
-            val scholarCard = UiHelper.section(activity, content, Color.WHITE)
+            val scholarCard = UiHelper.section(activity, estimates, Color.WHITE)
             UiHelper.add(activity, scholarCard, activity.getString(R.string.gpa_rector_title), 18, UiHelper.INK, true)
-            val scholarText = GpaCalculator.scholarshipStatus(currentWeighted)
+            val scholarText = ApiLanguage.`in`(Language.currentLocale(activity).language) { GpaCalculator.scholarshipStatus(currentWeighted) }
             val qualifiesScholar = currentWeighted >= GpaCalculator.SCHOLARSHIP_THRESHOLD
             UiHelper.add(
                 activity,
@@ -125,9 +127,9 @@ class GpaSimulatorController private constructor() {
             UiHelper.note(activity, scholarCard, activity.getString(R.string.gpa_rector_rule), UiHelper.MUTED)
 
             // Honors Diploma
-            val honorsCard = UiHelper.section(activity, content, Color.WHITE)
+            val honorsCard = UiHelper.section(activity, estimates, Color.WHITE)
             UiHelper.add(activity, honorsCard, activity.getString(R.string.gpa_honors_title), 18, UiHelper.INK, true)
-            val honorsText = GpaCalculator.honorsStatus(currentWeighted)
+            val honorsText = ApiLanguage.`in`(Language.currentLocale(activity).language) { GpaCalculator.honorsStatus(currentWeighted) }
             val qualifiesHonors = currentWeighted >= GpaCalculator.HONORS_THRESHOLD
             UiHelper.add(
                 activity,
@@ -187,7 +189,7 @@ class GpaSimulatorController private constructor() {
             }
 
             val currentEcts = if (!summary.totalEcts.isNaN() && summary.totalEcts > 0) summary.totalEcts else 30.0
-            val sim = GpaCalculator.simulate(currentWeighted, currentEcts, targetGpa, remainingEcts)
+            val sim = ApiLanguage.`in`(Language.currentLocale(activity).language) { GpaCalculator.simulate(currentWeighted, currentEcts, targetGpa, remainingEcts) }
 
             val simResultBox = UiHelper.section(
                 activity,

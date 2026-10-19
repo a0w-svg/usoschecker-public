@@ -35,13 +35,13 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Kontrola wydania nie powiodla sie. Sprawdz raporty Gradle przed publikacja.' }
     if ($DeviceTests) {
         $expectedTests = 0
-        Get-ChildItem -LiteralPath (Join-Path $projectDirectory 'app/src/androidTest') -Recurse -Filter '*Test.java' | ForEach-Object {
+        Get-ChildItem -LiteralPath (Join-Path $projectDirectory 'app/src/androidTest') -Recurse -Include '*Test.java','*Test.kt' | ForEach-Object {
             $expectedTests += [regex]::Matches([System.IO.File]::ReadAllText($_.FullName), '@Test\b').Count
         }
         Assert-DeviceReport 'debug' $expectedTests
         & (Join-Path $projectDirectory 'gradlew.bat') ':app:connectedOptimizedQaAndroidTest' '-PoptimizedQa' '-Pandroid.testInstrumentationRunnerArguments.class=pl.vistula.checker.ProductionReadinessTest'
         if ($LASTEXITCODE -ne 0) { throw 'Testy zoptymalizowanej wersji QA nie powiodly sie.' }
-        $expectedOptimizedTests = [regex]::Matches([System.IO.File]::ReadAllText((Join-Path $projectDirectory 'app/src/androidTest/java/pl/vistula/checker/ProductionReadinessTest.java')), '@Test\b').Count
+        $expectedOptimizedTests = [regex]::Matches([System.IO.File]::ReadAllText((Join-Path $projectDirectory 'app/src/androidTest/java/pl/vistula/checker/ProductionReadinessTest.kt')), '@Test\b').Count
         Assert-DeviceReport 'optimizedQa' $expectedOptimizedTests
     }
 } finally {

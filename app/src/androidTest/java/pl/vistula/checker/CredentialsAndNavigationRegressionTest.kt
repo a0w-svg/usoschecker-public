@@ -101,8 +101,8 @@ class CredentialsAndNavigationRegressionTest {
     fun historyDeepLinksSelectTheCategoryAndClearAnOldSearch() {
         main {
             val activity = rule.activity
-            val gradesPrefix = activity.getString(R.string.history_chip_grades, 0).split("\\(")[0].trim() + " ("
-            val planPrefix = activity.getString(R.string.history_chip_plan, 0).split("\\(")[0].trim() + " ("
+            val gradesPrefix = activity.getString(R.string.history_chip_grades, 0).substringBefore("(").trim() + " ("
+            val planPrefix = activity.getString(R.string.history_chip_plan, 0).substringBefore("(").trim() + " ("
             activity.navigate(1)
             val search = input(activity.window.decorView)
             assertNotNull(search)
@@ -170,8 +170,8 @@ class CredentialsAndNavigationRegressionTest {
 
     private fun selectedLabel(view: View): String {
         val activity = rule.activity
-        val gradesPrefix = activity.getString(R.string.history_chip_grades, 0).split("\\(")[0].trim() + " ("
-        val planPrefix = activity.getString(R.string.history_chip_plan, 0).split("\\(")[0].trim() + " ("
+        val gradesPrefix = activity.getString(R.string.history_chip_grades, 0).substringBefore("(").trim() + " ("
+        val planPrefix = activity.getString(R.string.history_chip_plan, 0).substringBefore("(").trim() + " ("
         if (view is TextView && view.isSelected &&
             (view.text.toString().startsWith(gradesPrefix) || view.text.toString().startsWith(planPrefix))
         ) {

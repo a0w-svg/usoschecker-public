@@ -76,3 +76,6 @@ captures/
 private/
 security-reports/
 
+
+# Kotlin compiler session cache
+.kotlin/

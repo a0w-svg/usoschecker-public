@@ -17,8 +17,7 @@ kotlin {
     applyDefaultHierarchyTemplate {
         common {
             group("jvmCommon") {
-                withAndroidTarget()
-                withJvm()
+                withCompilations { true }
             }
         }
     }

@@ -21,7 +21,7 @@ function Assert-DeviceReport([string]$Variant, [int]$MinimumTests) {
     Write-Output "Zweryfikowany raport ${Variant}: $passed testow."
 }
 
-$checks = @(':core:test', ':app:testDebugUnitTest', ':app:lintRelease',
+$checks = @(':core:test', ':shared:desktopTest', ':desktopApp:compileKotlin', ':app:testDebugUnitTest', ':app:lintRelease',
     ':app:verifyReleaseConfiguration', ':app:assembleRelease', ':app:bundleRelease', '-PisolatedTests')
 if ($DeviceTests) { $checks += ':app:connectedDebugAndroidTest' }
 

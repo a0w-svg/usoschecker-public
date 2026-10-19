@@ -76,9 +76,23 @@ final class DayTimelineView extends FrameLayout {
         int w = MeasureSpec.getSize(widthSpec);
         for (Item item : items) {
             int width = Math.max(dp(24), (w - dp(GUTTER + 8)) / item.columns);
-            LayoutParams p = new LayoutParams(Math.max(dp(20), width - dp(4)), Math.max(dp(24), dp((item.end - item.start) * HOUR_HEIGHT / 60f) - dp(2)));
-            p.leftMargin = dp(GUTTER) + item.column * width; p.topMargin = dp((item.start - firstHour * 60) * HOUR_HEIGHT / 60f + 8);
-            item.view.setLayoutParams(p);
+            int targetWidth = Math.max(dp(20), width - dp(4));
+            int targetHeight = Math.max(dp(24), dp((item.end - item.start) * HOUR_HEIGHT / 60f) - dp(2));
+            int targetLeft = dp(GUTTER) + item.column * width;
+            int targetTop = dp((item.start - firstHour * 60) * HOUR_HEIGHT / 60f + 8);
+            ViewGroup.LayoutParams rawLp = item.view.getLayoutParams();
+            if (rawLp instanceof LayoutParams) {
+                LayoutParams p = (LayoutParams) rawLp;
+                p.width = targetWidth;
+                p.height = targetHeight;
+                p.leftMargin = targetLeft;
+                p.topMargin = targetTop;
+            } else {
+                LayoutParams p = new LayoutParams(targetWidth, targetHeight);
+                p.leftMargin = targetLeft;
+                p.topMargin = targetTop;
+                item.view.setLayoutParams(p);
+            }
         }
         super.onMeasure(widthSpec, heightSpec);
     }
@@ -87,20 +101,38 @@ final class DayTimelineView extends FrameLayout {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final boolean nowOnly;
         private final String[] hourLabels = new String[lastHour - firstHour + 1];
-        Lines(Context context, boolean nowOnly) { super(context); this.nowOnly = nowOnly; for (int i = 0; i < hourLabels.length; i++) hourLabels[i] = String.format(java.util.Locale.ROOT, "%02d:00", firstHour + i); setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO); }
+        private final int labelColor;
+        private final int outlineColor;
+        private final int nowColor;
+        Lines(Context context, boolean nowOnly) {
+            super(context);
+            this.nowOnly = nowOnly;
+            this.labelColor = UiHelper.foreground(context, Color.rgb(104, 119, 110));
+            this.outlineColor = context.getColor(R.color.app_outline_soft);
+            this.nowColor = UiHelper.foreground(context, Color.rgb(192, 49, 49));
+            for (int i = 0; i < hourLabels.length; i++) {
+                hourLabels[i] = String.format(java.util.Locale.ROOT, "%02d:00", firstHour + i);
+            }
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        }
         @Override protected void onDraw(Canvas canvas) {
             if (!nowOnly) {
                 paint.setTextSize(11 * getResources().getDisplayMetrics().scaledDensity);
                 for (int hour = firstHour; hour <= lastHour; hour++) {
                     float y = dp((hour - firstHour) * HOUR_HEIGHT + 8);
-                    paint.setColor(UiHelper.foreground(getContext(), Color.rgb(104, 119, 110))); canvas.drawText(hourLabels[hour - firstHour], dp(1), y + dp(4), paint);
-                    paint.setColor(getContext().getColor(R.color.app_outline_soft)); paint.setStrokeWidth(dp(1)); canvas.drawLine(dp(GUTTER), y, getWidth(), y, paint);
+                    paint.setColor(labelColor);
+                    canvas.drawText(hourLabels[hour - firstHour], dp(1), y + dp(4), paint);
+                    paint.setColor(outlineColor);
+                    paint.setStrokeWidth(dp(1));
+                    canvas.drawLine(dp(GUTTER), y, getWidth(), y, paint);
                 }
             } else if (date.equals(LocalDate.now(LessonTime.ZONE))) {
                 float y = nowOffset();
                 if (y >= 0 && y <= getHeight()) {
-                    paint.setColor(UiHelper.foreground(getContext(), Color.rgb(192, 49, 49))); paint.setStrokeWidth(dp(2));
-                    canvas.drawCircle(dp(GUTTER), y, dp(4), paint); canvas.drawLine(dp(GUTTER), y, getWidth(), y, paint);
+                    paint.setColor(nowColor);
+                    paint.setStrokeWidth(dp(2));
+                    canvas.drawCircle(dp(GUTTER), y, dp(4), paint);
+                    canvas.drawLine(dp(GUTTER), y, getWidth(), y, paint);
                 }
             }
         }

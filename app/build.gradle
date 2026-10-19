@@ -31,11 +31,14 @@ android {
         applicationId 'pl.vistula.checker'
         minSdk 31
         targetSdk 36
-        versionCode 9
-        versionName '1.0.8'
+        versionCode 10
+        versionName '1.1.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField "String", "USOS_KEY", '""'
         buildConfigField "String", "USOS_SECRET", '""'
+    }
+    androidResources {
+        localeFilters += ['pl', 'en', 'uk']
     }
     buildFeatures {
         buildConfig = true

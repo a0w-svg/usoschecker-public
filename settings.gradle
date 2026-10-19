@@ -4,4 +4,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = 'VistulaChecker'
-include ':app', ':core', ':shared'
+include ':app', ':core', ':shared', ':desktopApp'

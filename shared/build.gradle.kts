@@ -1,6 +1,8 @@
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.compose")
 }
 
 kotlin {
@@ -23,6 +25,12 @@ kotlin {
     }
 
     sourceSets {
+        commonMain.dependencies {
+            api(compose.runtime)
+            api(compose.foundation)
+            api(compose.material3)
+            api(compose.ui)
+        }
         val jvmCommonMain by getting {
             dependencies {
                 // Android ships org.json in the platform; desktop gets the real library below.
@@ -32,6 +40,7 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation("org.json:json:20240303")
+                api(compose.desktop.currentOs)
             }
         }
         commonTest.dependencies {

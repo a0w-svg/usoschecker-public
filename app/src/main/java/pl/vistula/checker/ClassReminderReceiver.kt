@@ -52,6 +52,7 @@ class ClassReminderReceiver : BroadcastReceiver() {
         }
 
         private fun deliverLocked(context: Context, intent: Intent) {
+            val textContext = pl.vistula.checker.ui.Language.localizedContext(context)
             val prefs = context.getSharedPreferences("student_tools", Context.MODE_PRIVATE)
             if (!prefs.getBoolean(PREF_REMINDERS_ENABLED, false)) {
                 cancel(context)
@@ -100,13 +101,13 @@ class ClassReminderReceiver : BroadcastReceiver() {
                     PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
                 )
 
-                val content = "Za $minutes min · " + (if (room.isNotEmpty()) "Sala $room · " else "") + time
+                val content = textContext.getString(R.string.notification_class_time, minutes, (if (room.isNotEmpty()) textContext.getString(R.string.notification_class_room, room) + " · " else "") + time)
                 val builder = NotificationCompat.Builder(context, NotificationHelper.CHANNEL_REMINDERS)
                     .setSmallIcon(R.drawable.ic_notification)
-                    .setContentTitle("Zbliżające się zajęcia: $title")
+                    .setContentTitle(textContext.getString(R.string.notification_class_title, title))
                     .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                     .setContentText(content)
-                    .setStyle(NotificationCompat.BigTextStyle().bigText("$content\nKliknij, aby otworzyć plan zajęć."))
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(content + "\n" + textContext.getString(R.string.notification_schedule_hint)))
                     .setContentIntent(pi)
                     .setAutoCancel(true)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)

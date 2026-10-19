@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_network">Could not connect. Check your connection and try again.</string>
+    <string name="error_timeout">The server did not respond in time. Try again.</string>
+    <string name="error_format">The response format was not recognized. Previous data was preserved.</string>
+    <string name="error_access">Access denied. Check your account permissions in Settings.</string>
+    <string name="error_rate_limit">The server requests a pause. Try again later.</string>
+    <string name="error_server">The server is temporarily unavailable. Try again later.</string>
+    <string name="error_operation">The operation could not be completed. Check the details and try again.</string>
+    <string name="error_signature">USOS rejected the request. Check your application credentials and phone clock.</string>
+    <string name="settings_debug_credentials">Local application credentials loaded for this debug build.</string>
+    <string name="notification_grades_channel">USOS grade updates</string>
+    <string name="notification_grades_description">New and changed grades</string>
+    <string name="notification_schedule_channel">Timetable changes</string>
+    <string name="notification_schedule_description">Room and time changes, and cancelled classes</string>
+    <string name="notification_reminders_channel">Academic reminders</string>
+    <string name="notification_reminders_description">Upcoming classes and deadlines</string>
+    <string name="notification_schedule_single">Timetable change: %1$s</string>
+    <string name="notification_schedule_count">Timetable changes (%1$d)</string>
+    <string name="notification_schedule_body">Changes detected in %1$d classes.</string>
+    <string name="notification_more_changes">+ %1$d more changes</string>
+    <string name="notification_open_schedule">Open timetable</string>
+    <string name="notification_open_grades">Open grades</string>
+    <string name="notification_test_title">Notification test: new grade</string>
+    <string name="notification_test_body">Example course: 5.0 · 6 ECTS</string>
+    <string name="notification_test_detail">Notifications are working. Tap to open grades.</string>
+    <string name="notification_class_title">Upcoming class: %1$s</string>
+    <string name="notification_class_time">In %1$d min · %2$s</string>
+    <string name="notification_class_room">Room %1$s</string>
+    <string name="notification_schedule_hint">Tap to open the timetable.</string>
+    <string name="history_show_all">Show all changes</string>
+    <string name="class_lecture">Lecture</string>
+    <string name="class_exercises">Exercises</string>
+    <string name="class_lab">Laboratory</string>
+    <string name="class_project">Project</string>
+    <string name="class_seminar">Seminar</string>
+    <string name="class_language">Language class</string>
+    <string name="class_discussion">Discussion class</string>
+    <string name="class_other">Other</string>
+    <string name="notification_diff_0">Date:</string>
+    <string name="notification_diff_1">Time:</string>
+    <string name="notification_diff_2">Room:</string>
+    <string name="notification_diff_3">Lecturer:</string>
+    <string name="notification_diff_4">Building:</string>
+    <string name="notification_diff_5">Group:</string>
+    <string name="schedule_tentative_badge">Tentative date</string>
+</resources>

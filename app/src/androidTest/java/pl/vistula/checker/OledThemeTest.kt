@@ -44,7 +44,10 @@ class OledThemeTest {
             context.getSharedPreferences("appearance", Context.MODE_PRIVATE).edit()
                 .putInt("nightMode", AppCompatDelegate.MODE_NIGHT_NO).commit()
             ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-                scenario.onActivity { a -> a.navigate(4) }
+                scenario.onActivity { a ->
+                    a.navigate(4)
+                    a.openAccountPage("settings.appearance")
+                }
                 onView(withText(R.string.appearance_title)).perform(scrollTo(), click())
                 onView(withText(modes[2])).perform(click())
                 scenario.onActivity(::assertOled)

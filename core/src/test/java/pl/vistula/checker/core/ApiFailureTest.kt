@@ -33,7 +33,7 @@ class ApiFailureTest {
     @Test
     fun malformedResponsesAndRetryHeadersAreSafe() {
         for (header in arrayOf("garbage", "-1", "9223372036854775807")) {
-            assertEquals(0L, ApiFailure(429, "{}", header, 1000).retryAt)
+            assertEquals(31000L, ApiFailure(429, "{}", header, 1000).retryAt)
         }
         for (body in arrayOf("secret text", "oauth_problem=%ZZ", "{\"code\":\"token=secret\"}", "oauth_problem=token_rejected_extra")) {
             val failure = ApiFailure(400, body, null, 1000)

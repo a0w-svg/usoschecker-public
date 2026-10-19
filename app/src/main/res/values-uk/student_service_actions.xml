@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="news_source_university">Джерело: офіційний сайт Vistula</string>
+    <string name="news_source_usos">Джерело: оголошення USOS</string>
+    <string name="news_usos_action">Завантажити оголошення USOS</string>
+    <string name="news_university_action">Завантажити новини сайту Vistula</string>
+    <string name="news_language_fallback">Статті доступні польською та англійською мовами.</string>
+    <string name="payments_history">Надходження та розрахунки</string>
+    <string name="payments_history_refresh">Завантажити надходження</string>
+    <string name="payments_details">Подробиці платежів і плани розстрочки</string>
+    <string name="payments_plan_choose">Вибрати цей план розстрочки</string>
+    <string name="payments_plan_confirmation">Підтвердьте зміну плану розстрочки для: %1$s.\n\n%2$s\n\nЗміну буде надіслано до USOS.</string>
+    <string name="payments_plan_chosen">USOS підтвердив вибір плану розстрочки.</string>
+    <string name="payments_balance_value">Баланс: %1$s %2$s</string>
+    <string name="payments_interest_value">Відсотки: %1$s %2$s</string>
+    <string name="payments_remittance_remaining">Залишок до розрахунку: %1$s %2$s</string>
+    <string name="payments_plan_label">План %1$s</string>
+    <string name="payments_plan_line">%1$s — %2$s %3$s</string>
+    <string name="payments_accounts_information">Рахунки факультетів мають інформаційний характер. Для переказу використовуйте рахунок конкретного платежу.</string>
+    <string name="documents_code_confirm">Надіслати код отримання документа «%1$s» на електронну адресу, вказану в USOS?</string>
+    <string name="documents_code_sent">USOS надіслав код на: %1$s\n%2$s</string>
+    <string name="documents_code_label">Код отримання з електронного листа</string>
+    <string name="documents_receive_confirm">Ви підтверджуєте отримання документа «%1$s» в USOS. Перевірте документ перед підтвердженням.</string>
+    <string name="documents_received">USOS підтвердив отримання документа.</string>
+    <string name="service_action_unavailable">Ця дія більше недоступна. Оновіть дані та спробуйте ще раз.</string>
+    <string name="service_action_uncertain">Не вдалося підтвердити результат. Перевірте стан у USOS перед повторною спробою.</string>
+    <string name="payments_api_amount">Сума за даними USOS: %1$s %2$s</string>
+    <string name="payments_bonus_value">Знижка: %1$s %2$s, термін: %3$s</string>
+    <string name="payments_default_choice">Автоматичний вибір плану: %1$s</string>
+    <string name="payments_selected_plan">Поточний вибраний план</string>
+    <string name="payments_settled">Розраховано</string>
+    <string name="payments_not_settled">Очікує розрахунку</string>
+    <string name="payment_status_scheduled">Заплановано</string>
+    <string name="payment_status_cancelled">Скасовано</string>
+    <string name="payment_status_underpaid">Недоплата</string>
+    <string name="payments_installment_total_label">Сума несплачених внесків</string>
+    <string name="payments_currency_amount">%1$.2f %2$s</string>
+</resources>

@@ -84,7 +84,8 @@ class StudentServiceLoaderTest {
             val store = JSONObject()
             val proceed = StudentServiceLoader.fetch(store, "cards") { throw UsosClient.ApiException(status, "api_error") }
             assertFalse("Must stop after HTTP $status", proceed)
-            assertEquals(0L, store.getJSONObject("cards").getLong("retryAt"))
+            if (status == 401) assertEquals(0L, store.getJSONObject("cards").getLong("retryAt"))
+            else assertTrue(store.getJSONObject("cards").getLong("retryAt") > System.currentTimeMillis())
         }
         assertFalse(StudentServiceLoader.fetch(JSONObject(), "cards") { throw SocketTimeoutException() })
         assertTrue(StudentServiceLoader.fetch(JSONObject(), "cards") { throw UsosClient.ApiException(403, "api_error") })

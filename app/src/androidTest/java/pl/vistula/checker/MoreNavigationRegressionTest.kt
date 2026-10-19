@@ -57,7 +57,9 @@ class MoreNavigationRegressionTest {
         }
         assertTrue(ready[0])
         main {
+            rule.activity.getSharedPreferences("tool_layout", android.content.Context.MODE_PRIVATE).edit().clear().commit()
             rule.activity.setDemo(true)
+            rule.activity.selectCampus("0000")
             rule.activity.navigate(0)
         }
     }
@@ -161,8 +163,9 @@ class MoreNavigationRegressionTest {
             assertEquals(10, count)
         }
         screenshot("more")
-        val tabs = intArrayOf(8, 9, 10, 11, 12, 13, 14, 3, 4)
+        val tabs = intArrayOf(7, 8, 9, 10, 11, 12, 13, 14, 3, 4)
         val titles = intArrayOf(
+            R.string.tool_tasks_title,
             R.string.tool_payments_title,
             R.string.tool_gpa_title,
             R.string.tool_campus_title,
@@ -181,6 +184,47 @@ class MoreNavigationRegressionTest {
                 assertTrue(contains(rule.activity.findViewById(R.id.main_content), rule.activity.getString(title)))
             }
             screenshot("tool-$tab")
+        }
+    }
+
+    @Test
+    fun settingsPagesKeepTheSelectedSectionAndReturnToTheOverview() {
+        main {
+            val activity = rule.activity
+            activity.navigate(4)
+            var content = activity.findViewById<LinearLayout>(R.id.main_content)
+            fun find(view: View, text: String): TextView? {
+                if (view is TextView && text.contentEquals(view.text)) return view
+                if (view is ViewGroup) for (i in 0 until view.childCount) {
+                    val found = find(view.getChildAt(i), text)
+                    if (found != null) return found
+                }
+                return null
+            }
+            val appearance = activity.getString(R.string.appearance_title)
+            assertTrue(find(content, appearance)?.visibility == View.VISIBLE)
+            assertTrue(find(content, appearance)?.isShown == false)
+            find(content, activity.getString(R.string.settings_personalization))!!.performClick()
+            assertTrue(find(content, appearance)!!.isShown)
+            activity.render()
+            content = activity.findViewById(R.id.main_content)
+            assertTrue(find(content, appearance)!!.isShown)
+            find(content, activity.getString(R.string.settings_back))!!.performClick()
+            assertTrue(!find(content, appearance)!!.isShown)
+        }
+    }
+
+    @Test
+    fun branchPreviewDoesNotShowWarsawAddressOrContacts() {
+        main {
+            val activity = rule.activity
+            activity.selectCampus("O0000")
+            activity.navigate(10)
+            val content = activity.findViewById<LinearLayout>(R.id.main_content)
+            assertTrue(contains(content, "Olsztyn"))
+            assertTrue(!contains(content, activity.getString(R.string.campus_address)))
+            assertTrue(!contains(content, activity.getString(R.string.campus_dziekanat_call)))
+            activity.selectCampus("0000")
         }
     }
 

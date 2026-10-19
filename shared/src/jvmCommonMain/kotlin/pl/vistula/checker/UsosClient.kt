@@ -20,6 +20,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
 import pl.vistula.checker.core.ApiFailure
+import pl.vistula.checker.core.RequestBudget
 import pl.vistula.checker.core.ApiLanguage
 import pl.vistula.checker.core.GradeBrowser
 import pl.vistula.checker.core.OAuth
@@ -124,6 +125,7 @@ class UsosClient @JvmOverloads constructor(
             throw IllegalArgumentException("Plik wymaga POST i nie może przekraczać 8 MB.")
         }
         val url = path(endpoint)
+        val budget = RequestBudget()
         var values: MutableMap<String, String> = TreeMap(params)
         if (signed) {
             if (key.isEmpty() || secret.isEmpty()) {
@@ -162,6 +164,7 @@ class UsosClient @JvmOverloads constructor(
         connection.setRequestProperty("Accept", "application/json, text/plain, */*")
         if (authorization.isNotEmpty()) connection.setRequestProperty("Authorization", authorization)
         try {
+            connection.readTimeout = budget.readTimeout()
             if (post) {
                 connection.doOutput = true
                 val body: ByteArray
@@ -186,6 +189,7 @@ class UsosClient @JvmOverloads constructor(
                 connection.setFixedLengthStreamingMode(body.size)
                 connection.outputStream.use { stream -> stream.write(body) }
             }
+            connection.readTimeout = budget.readTimeout()
             val status = connection.responseCode
             if (status in 300..399) {
                 throw IOException("API zwróciło przekierowanie. Otwórz tę metodę w przeglądarce przez dokumentację.")
@@ -198,6 +202,7 @@ class UsosClient @JvmOverloads constructor(
                     ByteArrayOutputStream().use { buffer ->
                         val chunk = ByteArray(8192)
                         while (true) {
+                            connection.readTimeout = budget.readTimeout()
                             val count = stream.read(chunk)
                             if (count == -1) break
                             if (buffer.size() + count > 8 * 1024 * 1024) {

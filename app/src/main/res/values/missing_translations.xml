@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_network">Nie udało się połączyć. Sprawdź internet i spróbuj ponownie.</string>
+    <string name="error_timeout">Serwer nie odpowiedział na czas. Spróbuj ponownie.</string>
+    <string name="error_format">Odpowiedź ma nieznany format. Zachowano poprzednie dane.</string>
+    <string name="error_access">Brak dostępu. Sprawdź zgody konta w ustawieniach.</string>
+    <string name="error_rate_limit">Serwer prosi o przerwę. Spróbuj ponownie później.</string>
+    <string name="error_server">Serwer jest chwilowo niedostępny. Spróbuj później.</string>
+    <string name="error_operation">Nie udało się wykonać operacji. Sprawdź dane i spróbuj ponownie.</string>
+    <string name="error_signature">USOS nie zaakceptował żądania. Sprawdź klucz aplikacji i zegar telefonu.</string>
+    <string name="settings_debug_credentials">Wczytano lokalny klucz aplikacji dla wersji debug.</string>
+    <string name="notification_grades_channel">Nowe oceny z USOS</string>
+    <string name="notification_grades_description">Nowe i zmienione oceny</string>
+    <string name="notification_schedule_channel">Zmiany w planie zajęć</string>
+    <string name="notification_schedule_description">Zmiany sal, godzin i odwołania zajęć</string>
+    <string name="notification_reminders_channel">Przypomnienia akademickie</string>
+    <string name="notification_reminders_description">Przypomnienia o zajęciach i terminach</string>
+    <string name="notification_schedule_single">Zmiana w planie: %1$s</string>
+    <string name="notification_schedule_count">Zmiany w planie (%1$d)</string>
+    <string name="notification_schedule_body">Wykryto zmiany w %1$d zajęciach.</string>
+    <string name="notification_more_changes">+ jeszcze %1$d zmian</string>
+    <string name="notification_open_schedule">Otwórz plan</string>
+    <string name="notification_open_grades">Otwórz oceny</string>
+    <string name="notification_test_title">Test powiadomień: nowa ocena</string>
+    <string name="notification_test_body">Przykładowy przedmiot: 5.0 · 6 ECTS</string>
+    <string name="notification_test_detail">Powiadomienia działają. Dotknij, aby otworzyć oceny.</string>
+    <string name="notification_class_title">Zbliżające się zajęcia: %1$s</string>
+    <string name="notification_class_time">Za %1$d min · %2$s</string>
+    <string name="notification_class_room">Sala %1$s</string>
+    <string name="notification_schedule_hint">Dotknij, aby otworzyć plan zajęć.</string>
+    <string name="history_show_all">Pokaż wszystkie zmiany</string>
+    <string name="class_lecture">Wykład</string>
+    <string name="class_exercises">Ćwiczenia</string>
+    <string name="class_lab">Laboratorium</string>
+    <string name="class_project">Projekt</string>
+    <string name="class_seminar">Seminarium</string>
+    <string name="class_language">Lektorat</string>
+    <string name="class_discussion">Konwersatorium</string>
+    <string name="class_other">Inne</string>
+    <string name="notification_diff_0">Data:</string>
+    <string name="notification_diff_1">Godziny:</string>
+    <string name="notification_diff_2">Sala:</string>
+    <string name="notification_diff_3">Prowadzący:</string>
+    <string name="notification_diff_4">Budynek:</string>
+    <string name="notification_diff_5">Grupa:</string>
+    <string name="schedule_tentative_badge">Termin orientacyjny</string>
+</resources>

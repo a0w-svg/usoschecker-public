@@ -83,7 +83,7 @@ class UiFormattersTest {
     @Test
     fun testFormatFullDateIso() {
         val iso = "2026-10-15T14:30:00"
-        val formatted = HistoryScreenController.formatFullDate(iso)
+        val formatted = HistoryScreenController.formatFullDate(Locale.forLanguageTag("pl"), iso)
         assertTrue(formatted.contains("2026"))
         assertTrue(formatted.contains("14:30"))
         assertTrue(formatted.contains("październik"))
@@ -92,9 +92,20 @@ class UiFormattersTest {
     @Test
     fun testFormatFullDateSimple() {
         val date = "2026-10-15"
-        val formatted = HistoryScreenController.formatFullDate(date)
+        val formatted = HistoryScreenController.formatFullDate(Locale.forLanguageTag("pl"), date)
         assertTrue(formatted.contains("2026"))
         assertTrue(formatted.contains("październik"))
+    }
+
+    @Test
+    fun datesWithoutContextFollowASupportedSystemLanguage() {
+        val previous = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.ENGLISH)
+            assertTrue(HistoryScreenController.formatFullDate("2026-10-15").contains("October"))
+        } finally {
+            Locale.setDefault(previous)
+        }
     }
 
     @Test

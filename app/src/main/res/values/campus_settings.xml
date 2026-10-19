@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_back">Wróć do ustawień</string>
+    <string name="settings_connected">Konto USOS połączone</string>
+    <string name="settings_disconnected">Połącz konto, aby pobrać swoje dane</string>
+    <string name="campus_affiliation_title">Moja filia i kampus</string>
+    <string name="campus_unknown">Wybierz swoją filię</string>
+    <string name="campus_choose">Wybierz filię</string>
+    <string name="campus_detect">Wykryj na podstawie konta USOS</string>
+    <string name="campus_automatic">Automatycznie z USOS</string>
+    <string name="campus_automatic_hint">Wykrywanie korzysta z jednostki prowadzącej aktywne studia. Przy braku danych lub kilku filiach wybierz filię ręcznie.</string>
+    <string name="campus_manual_hint">Filia wybrana ręcznie. Możesz wrócić do wykrywania z USOS.</string>
+    <string name="campus_filter_hint">Informacje uczelni i komunikaty są dopasowane do filii. Oceny, plan, płatności i decyzje pochodzą zawsze z Twojego konta.</string>
+    <string name="campus_official_site">Otwórz oficjalną stronę filii</string>
+    <string name="campus_news_empty">Brak komunikatów przypisanych do tej filii</string>
+    <string name="campus_news_hint">Nie pokazujemy wiadomości z innych filii. Sprawdź oficjalną stronę swojej jednostki.</string>
+    <string name="settings_account_access">Konto i dostęp do USOS</string>
+    <string name="campus_contacts_unavailable">USOS nie udostępnił danych kontaktowych tej filii. Nie pokazujemy kontaktów z innego kampusu.</string>
+    <string name="campus_student_portal">Otwórz USOSweb</string>
+</resources>

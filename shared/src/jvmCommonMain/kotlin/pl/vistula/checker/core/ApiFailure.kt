@@ -12,7 +12,10 @@ class ApiFailure(status: Int, body: String, retryAfter: String?, now: Long) {
     @JvmField val authorization: Boolean = code == "token_expired" || code == "token_rejected" ||
         code == "invalid_token" || (status == 401 && code == "api_error")
     @JvmField val retryable: Boolean = !authorization && (status == 408 || status == 429 || status >= 500)
-    @JvmField val retryAt: Long = if (retryable) retryTime(retryAfter, now) else 0
+    @JvmField val retryAt: Long = if (retryable) {
+        val serverTime = retryTime(retryAfter, now)
+        if (serverTime > 0) serverTime else now + if (status == 429) 30_000L else 5_000L
+    } else 0
 
     companion object {
         private val CODE_PATTERN = Regex("[a-zA-Z0-9_]{1,80}")

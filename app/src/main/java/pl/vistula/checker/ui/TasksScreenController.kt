@@ -106,6 +106,7 @@ class TasksScreenController private constructor() {
             more.id = R.id.tasks_more
             header.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
 
+            UiHelper.note(activity, content, activity.getString(R.string.local_data_note), UiHelper.MUTED)
             val filterKeys = arrayOf("all", "open", "done", "platon", "today", "week", "overdue")
             val filterLabels = intArrayOf(
                 R.string.tasks_chip_all,

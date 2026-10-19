@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_back">Back to Settings</string>
+    <string name="settings_connected">USOS account connected</string>
+    <string name="settings_disconnected">Connect your account to load your data</string>
+    <string name="campus_affiliation_title">My branch and campus</string>
+    <string name="campus_unknown">Choose your branch</string>
+    <string name="campus_choose">Choose branch</string>
+    <string name="campus_detect">Detect from my USOS account</string>
+    <string name="campus_automatic">Automatically from USOS</string>
+    <string name="campus_automatic_hint">Detection uses the faculty responsible for your active programme. If data is missing or several branches are found, choose manually.</string>
+    <string name="campus_manual_hint">Branch selected manually. You can return to automatic detection.</string>
+    <string name="campus_filter_hint">University information and announcements follow your branch. Grades, timetable, payments and decisions always come from your own account.</string>
+    <string name="campus_official_site">Open the official branch website</string>
+    <string name="campus_news_empty">No announcements assigned to this branch</string>
+    <string name="campus_news_hint">News from other branches is hidden. Check your branch’s official website.</string>
+    <string name="settings_account_access">Account and USOS access</string>
+    <string name="campus_contacts_unavailable">USOS did not provide contact details for this branch. Contacts from other campuses are hidden.</string>
+    <string name="campus_student_portal">Open USOSweb</string>
+</resources>

@@ -1,32 +1,39 @@
 package pl.vistula.checker
 
 import java.io.IOException
+import java.net.SocketTimeoutException
 import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONException
 import pl.vistula.checker.core.StudentServices
+import pl.vistula.checker.core.CampusAffiliation
 
 /** On-demand services keep their own encrypted cache separate from grade/plan monitoring. */
 object StudentServiceLoader {
     @JvmStatic
+    @JvmOverloads
     @Throws(Exception::class)
-    fun refresh(repository: StateRepository, section: String) {
+    fun refresh(repository: StateRepository, section: String,
+                clients: SharedRepository.ClientFactory = SharedRepository.ClientFactory { UsosClient(it) },
+                publicNews: () -> JSONObject = { UniversityNews.load() }) {
         val credentials = repository.read()
-        if (credentials.optString("token").isEmpty() || credentials.optBoolean("authorizationError")) {
+        val publicRequest = section == "news" && CampusAffiliation.canShowPublicNews(credentials)
+        if (!publicRequest && (credentials.optString("token").isEmpty() || credentials.optBoolean("authorizationError"))) {
             throw IllegalStateException("Połącz konto USOS, aby pobrać dane.")
         }
-        if (credentials.optLong("retryAt") > System.currentTimeMillis()) {
+        if (!publicRequest && credentials.optLong("retryAt") > System.currentTimeMillis()) {
             throw IllegalStateException("USOS prosi o przerwę. Spróbuj później.")
         }
-        if (section != "cards" && section != "documents") {
+        if (section !in setOf("cards", "documents", "payments", "news", "usosNews", "remittances", "affiliation")) {
             throw IllegalArgumentException("Nieznana usługa.")
         }
-        val scope = if (section == "cards") "cards" else "adm_documents"
-        if (!StudentServices.hasScope(credentials.optString("scopes"), scope)) {
+        val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; else -> section }
+        if (section !in setOf("news", "usosNews", "affiliation") && !StudentServices.hasScope(credentials.optString("scopes"), scope)) {
             throw IllegalStateException(
                 "Brak zakresu zgody „$scope”. Dodaj go w ustawieniach konta i połącz konto ponownie."
             )
         }
-        val client = UsosClient(credentials)
+        val client = clients.create(credentials)
         val previous = credentials.optJSONObject("studentServices")
         val updates = JSONObject()
         if (section == "cards") {
@@ -47,7 +54,7 @@ object StudentServiceLoader {
                     )
                 }
             }
-        } else {
+        } else if (section == "documents") {
             fetch(updates, previous, "documents") {
                 StudentServices.safeDocuments(
                     JSONArray(
@@ -58,6 +65,16 @@ object StudentServiceLoader {
                     )
                 )
             }
+        } else {
+            val key = if (section == "usosNews") "news" else section
+            fetch(updates, previous, key) {
+                val campus = CampusAffiliation.selected(credentials)
+                if (section == "news" && CampusAffiliation.canShowPublicNews(credentials)) publicNews().put("campus", campus)
+                else if (section == "news" || section == "usosNews") {
+                    check(campus.isNotEmpty()) { "Campus selection required" }
+                    ToolServiceData.fetch(client, key, campus)
+                } else ToolServiceData.fetch(client, key)
+            }
         }
         repository.update { state -> applyUpdates(state, credentials, updates) }
     }
@@ -65,7 +82,9 @@ object StudentServiceLoader {
     @JvmStatic
     @Throws(Exception::class)
     fun applyUpdates(state: JSONObject, credentials: JSONObject, updates: JSONObject) {
-        if (!SharedRepository.sameAccount(credentials, state)) {
+        val anonymousNews = credentials.optString("token").isEmpty() && state.optString("token").isEmpty() &&
+            updates.length() == 1 && updates.has("news")
+        if (!anonymousNews && !SharedRepository.sameAccount(credentials, state)) {
             throw IllegalStateException("Konto zmieniło się podczas pobierania.")
         }
         var services = state.optJSONObject("studentServices")
@@ -111,10 +130,18 @@ object StudentServiceLoader {
             entry.put("data", fetch.get())
                 .put("fetchedAt", System.currentTimeMillis())
                 .put("error", "")
+                .put("errorKind", "").put("httpStatus", 0)
                 .put("retryAt", 0)
                 .put("authorizationError", false)
         } catch (e: Exception) {
             entry.put("error", SharedRepository.message(e))
+            entry.put("errorKind", when (e) {
+                is UsosClient.ApiException -> "http"
+                is SocketTimeoutException -> "timeout"
+                is JSONException -> "format"
+                is IOException -> "network"
+                else -> "operation"
+            }).put("httpStatus", if (e is UsosClient.ApiException) e.status else 0)
             if (e is UsosClient.ApiException) {
                 entry.put("retryAt", e.retryAt).put("authorizationError", e.authorization)
                 proceed = !e.retryable && !e.authorization && e.status != 401

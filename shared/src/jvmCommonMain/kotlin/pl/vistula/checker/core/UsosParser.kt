@@ -546,7 +546,7 @@ object UsosParser {
                     val fullName = if (piDesc.isNotEmpty()) {
                         if (payDesc.isNotEmpty()) "$payDesc – $piDesc" else piDesc
                     } else {
-                        if (payDesc.isNotEmpty()) "$payDesc (rata $num)" else "Rata $num"
+                        if (payDesc.isNotEmpty()) "$payDesc (${ApiLanguage.label("rata", "installment", "внесок")} $num)" else "${ApiLanguage.label("Rata", "Installment", "Внесок")} $num"
                     }
                     val instAmount = pi.optDouble("amount", 0.0)
                     var instCurrency = optionalText(pi, "currency")
@@ -559,7 +559,7 @@ object UsosParser {
                     if (status.isEmpty()) {
                         status = when {
                             "paid".equals(payState, ignoreCase = true) -> ApiLanguage.label("Opłacona", "Paid", "Сплачено")
-                            "cancelled".equals(payState, ignoreCase = true) -> "Anulowana"
+                            "cancelled".equals(payState, ignoreCase = true) -> ApiLanguage.label("Anulowana", "Cancelled", "Скасовано")
                             else -> {
                                 var overdue = false
                                 if (deadline.isNotEmpty()) {
@@ -588,7 +588,7 @@ object UsosParser {
                     "unsettled".equals(status, ignoreCase = true) -> ApiLanguage.label("Do zapłaty", "Due", "До сплати")
                     "overdue".equals(status, ignoreCase = true) -> ApiLanguage.label("Po terminie", "Overdue", "Прострочено")
                     "underpaid".equals(status, ignoreCase = true) -> ApiLanguage.label("Niedopłata", "Underpaid", "Недоплата")
-                    "cancelled".equals(status, ignoreCase = true) -> "Anulowana"
+                    "cancelled".equals(status, ignoreCase = true) -> ApiLanguage.label("Anulowana", "Cancelled", "Скасовано")
                     status.isEmpty() -> {
                         var overdue = false
                         if (payDeadline.isNotEmpty()) {
@@ -630,7 +630,7 @@ object UsosParser {
                 val clean = inst.bankAccountNumber.replace(Regex("\\s+"), "")
                 if (clean.isNotEmpty() && !knownAccounts.contains(clean)) {
                     knownAccounts.add(clean)
-                    val accName = "Subkonto do wpłat: " + inst.name
+                    val accName = ApiLanguage.label("Subkonto do wpłat: ", "Payment account: ", "Рахунок для платежів: ") + inst.name
                     accounts.add(
                         PaymentInfo.Account(
                             "acc:pay:${knownAccounts.size}", accName,
@@ -736,7 +736,7 @@ object UsosParser {
             val courseName = courseNames?.getOrDefault(courseId, courseId) ?: courseId
             val nameObj = test.optJSONObject("name")
             var testName = if (nameObj != null) language(nameObj) else optionalText(test, "name")
-            if (testName.isEmpty()) testName = "Sprawdzian"
+            if (testName.isEmpty()) testName = ApiLanguage.label("Sprawdzian", "Test", "Тест")
             val points = test.optDouble("points", 0.0)
             val maxPoints = test.optDouble("max_points", 0.0)
             val grade = optionalText(test, "grade")

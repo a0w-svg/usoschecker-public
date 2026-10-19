@@ -131,7 +131,7 @@ class SharedRepository @JvmOverloads constructor(
                     .put("tokenSecret", access["oauth_token_secret"])
                     .put("accountSession", UUID.randomUUID().toString())
                 for (field in arrayOf(
-                    "requestToken", "requestSecret", "authAttempt", "snapshot", "history", "studentServices",
+                    "requestToken", "requestSecret", "authAttempt", "snapshot", "history", "studentServices", "campusOverride",
                     "retryAt", "authorizationError", "studentNumber", "email", "programme", "studentStatus",
                     "stage", "admissionDate", "photoUrl", "profileTranslations", "reminderDeliveries"
                 )) {

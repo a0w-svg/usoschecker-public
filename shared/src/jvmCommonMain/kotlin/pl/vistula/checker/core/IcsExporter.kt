@@ -10,7 +10,7 @@ object IcsExporter {
 
     @JvmStatic
     @JvmOverloads
-    fun export(records: Collection<Record>, calendarTitle: String? = "Plan zajęć Vistula"): String {
+    fun export(records: Collection<Record>, calendarTitle: String? = ApiLanguage.label("Plan zajęć Vistula", "Vistula timetable", "Розклад Vistula")): String {
         val sb = StringBuilder()
         sb.append("BEGIN:VCALENDAR\r\n")
         sb.append("VERSION:2.0\r\n")
@@ -38,19 +38,18 @@ object IcsExporter {
 
             val room = r.optMeta("room")
             val building = r.optMeta("building")
-            val location = (if (room.isNotEmpty()) "Sala $room" else "") +
-                (if (building.isNotEmpty()) (if (room.isNotEmpty()) ", " else "") + building else "") +
-                ", Akademia Finansów i Biznesu Vistula, ul. Stokłosy 3, Warszawa"
+            val location = (if (room.isNotEmpty()) ApiLanguage.label("Sala ", "Room ", "Аудиторія ") + room else "") +
+                (if (building.isNotEmpty()) (if (room.isNotEmpty()) ", " else "") + building else "")
             sb.append("LOCATION:").append(escape(location)).append("\r\n")
 
             val desc = StringBuilder()
             val lecturers = r.optMeta("lecturers")
-            if (lecturers.isNotEmpty()) desc.append("Prowadzący: ").append(lecturers).append("\n")
+            if (lecturers.isNotEmpty()) desc.append(ApiLanguage.label("Prowadzący: ", "Lecturer: ", "Викладач: ")).append(lecturers).append("\n")
             val group = r.optMeta("groupNumber")
-            if (group.isNotEmpty()) desc.append("Grupa: ").append(group).append("\n")
+            if (group.isNotEmpty()) desc.append(ApiLanguage.label("Grupa: ", "Group: ", "Група: ")).append(group).append("\n")
             val courseId = r.optMeta("courseId")
-            if (courseId.isNotEmpty()) desc.append("Kod przedmiotu: ").append(courseId).append("\n")
-            if (r.term.isNotEmpty()) desc.append("Semestr: ").append(r.term).append("\n")
+            if (courseId.isNotEmpty()) desc.append(ApiLanguage.label("Kod przedmiotu: ", "Course code: ", "Код дисципліни: ")).append(courseId).append("\n")
+            if (r.term.isNotEmpty()) desc.append(ApiLanguage.label("Semestr: ", "Term: ", "Семестр: ")).append(r.term).append("\n")
             if (desc.isEmpty()) desc.append(r.value)
 
             sb.append("DESCRIPTION:").append(escape(desc.toString())).append("\r\n")

@@ -94,7 +94,7 @@ class MoreScreenController private constructor() {
                 activity.getString(R.string.tool_api_desc)
             ) { activity.navigate(3) }
 
-            UiHelper.note(activity, content, activity.getString(R.string.tools_privacy_note), UiHelper.MUTED)
+
         }
     }
 }

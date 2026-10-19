@@ -45,11 +45,13 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import pl.vistula.checker.core.ApiCatalog
+import pl.vistula.checker.core.CampusAffiliation
 import pl.vistula.checker.core.LessonTime
 import pl.vistula.checker.core.OAuth
 import pl.vistula.checker.core.StudentServices
 import pl.vistula.checker.core.TaskTools
 import pl.vistula.checker.ui.AccountScreenController
+import pl.vistula.checker.ui.ApiErrorUi
 import pl.vistula.checker.ui.ApiExplorerController
 import pl.vistula.checker.ui.Appearance
 import pl.vistula.checker.ui.AttendanceScreenController
@@ -122,6 +124,8 @@ class MainActivity : AppCompatActivity() {
     private var demoPlanDays: Int = 56
     private var renderedMinute: Long = 0
     private var loadingState: Boolean = false
+    private var settingsPage: String? = null
+    private var demoCampus: String = "0000"
 
     // API catalog state
     private var apiQuery: String = ""
@@ -164,7 +168,9 @@ class MainActivity : AppCompatActivity() {
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (busy) return
-                    if (currentMethod != null) {
+                    if (tab == 4 && settingsPage != null && settingsPage != "overview") {
+                        openAccountPage(null)
+                    } else if (currentMethod != null) {
                         currentMethod = null
                         currentMethodJson = null
                         render()
@@ -186,6 +192,8 @@ class MainActivity : AppCompatActivity() {
         )
 
         if (bundle != null) {
+            settingsPage = bundle.getString("settingsPage")
+            demoCampus = bundle.getString("demoCampus", "0000")
             demo = bundle.getBoolean("demo")
             demoChanged = bundle.getBoolean("demoChanged")
             tab = bundle.getInt("tab")
@@ -313,6 +321,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(out: Bundle) {
+        out.putString("settingsPage", settingsPage)
+        out.putString("demoCampus", demoCampus)
         out.putString("documentQuery", documentQuery)
         out.putString("apiModule", apiModule)
         out.putString("currentMethod", currentMethod)
@@ -386,6 +396,7 @@ class MainActivity : AppCompatActivity() {
         if (tab == 4 && state.optString("requestToken").isNotEmpty() && !connected()) {
             checkClipboardForPin()
         }
+        if (::content.isInitialized && !busy && tab == 4 && settingsPage == "settings.notifications") render()
     }
 
     override fun onPause() {
@@ -423,6 +434,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigate(target: Int, focusCurrent: Boolean) {
+        if (target != tab) settingsPage = null
         if (target != tab) {
             val focused = currentFocus
             focused?.clearFocus()
@@ -435,6 +447,16 @@ class MainActivity : AppCompatActivity() {
         tab = target
         scroll.scrollTo(0, 0)
         render()
+        if (!demo && !busy) {
+            if (target == 10 && connected() && studentServices().optJSONObject("affiliation") == null) {
+                refreshStudentServices("affiliation")
+                return
+            }
+            val section = when (target) { 11 -> "news"; 13 -> "cards"; 14 -> "documents"; 8 -> "payments"; else -> null }
+            if (target == 11 && !connected() && CampusAffiliation.selected(state).isEmpty()) return
+            if (section != null && (section == "news" || connected()) &&
+                System.currentTimeMillis() - (studentServices().optJSONObject(section)?.optLong("attemptAt") ?: 0L) > 15 * 60_000L) refreshStudentServices(section)
+        }
     }
 
     fun render() {
@@ -630,6 +652,7 @@ class MainActivity : AppCompatActivity() {
                                 { s ->
                                     state = s
                                     detectedPin = ""
+                                    settingsPage = null
                                     demo = false
                                     tab = 0
                                     ensureSchedule()
@@ -787,7 +810,7 @@ class MainActivity : AppCompatActivity() {
                     { tq -> taskQuery = tq },
                     taskCallback()
                 )
-                8 -> PaymentsScreenController.render(this, content, display(), state, connected()) { sync() }
+                8 -> PaymentsScreenController.render(this, content, display(), state, connected()) { refreshStudentServices("payments") }
                 9 -> GpaSimulatorController.render(
                     this,
                     content,
@@ -810,7 +833,8 @@ class MainActivity : AppCompatActivity() {
                     display(),
                     newsQuery,
                     { q -> newsQuery = q },
-                    { if (demo) render() else sync() }
+                    { refreshStudentServices("news") },
+                    studentServices().optJSONObject("news") ?: JSONObject()
                 )
                 12 -> AttendanceScreenController.render(
                     this,
@@ -825,7 +849,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         } catch (e: Exception) {
-            UiHelper.note(this, content, Repository.message(e), Color.rgb(167, 49, 49))
+            UiHelper.note(this, content, ApiErrorUi.message(this, e), Color.rgb(167, 49, 49))
         }
         updateBusy(busy)
     }
@@ -875,7 +899,7 @@ class MainActivity : AppCompatActivity() {
         documentQuery = query
     }
 
-    fun serviceAccountState(): JSONObject = if (demo) JSONObject() else state
+    fun serviceAccountState(): JSONObject = if (demo) JSONObject().put("campusOverride", demoCampus) else state
 
     @Throws(Exception::class)
     private fun studentServices(): JSONObject {
@@ -888,15 +912,98 @@ class MainActivity : AppCompatActivity() {
             render()
             return
         }
+        val publicNews = section == "news" && CampusAffiliation.canShowPublicNews(state)
+        if (!publicNews) {
+            if (!connected() || state.optBoolean("authorizationError")) {
+                error(getString(if (state.optBoolean("authorizationError")) R.string.account_session_expired else R.string.services_connect_first))
+                return
+            }
+            if (state.optLong("retryAt") > System.currentTimeMillis()) {
+                error(getString(R.string.services_retry_at, UiHelper.timestamp(state.optLong("retryAt"))))
+                return
+            }
+            val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; else -> section }
+            if (section !in setOf("news", "usosNews", "affiliation") && !StudentServices.hasScope(state.optString("scopes"), scope)) {
+                error(getString(R.string.services_scope_required, scope))
+                return
+            }
+        }
         task(
             {
+                if (section in setOf("news", "usosNews") && connected() && !state.optBoolean("authorizationError") &&
+                    repository.read().optJSONObject("studentServices")?.optJSONObject("affiliation") == null) {
+                    StudentServiceLoader.refresh(repository, "affiliation")
+                }
                 StudentServiceLoader.refresh(repository, section)
                 repository.read()
             },
             { result ->
                 state = result
                 render()
+                if (section == "affiliation" && tab == 11 && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
             }
+        )
+    }
+
+    fun accountPage(): String? = settingsPage
+    fun rememberAccountPage(page: String) { settingsPage = page }
+
+    fun openAccountPage(page: String?) {
+        settingsPage = page ?: "overview"
+        render()
+        scroll.scrollTo(0, 0)
+    }
+
+    fun selectCampus(campus: String) {
+        if (campus.isNotEmpty() && !CampusAffiliation.campuses.containsKey(campus)) return
+        if (demo) { demoCampus = campus.ifEmpty { "0000" }; render(); return }
+        val session = repository.editSession(state)
+        task({
+            repository.update(session) { latest ->
+                if (campus.isEmpty()) latest.remove("campusOverride") else latest.put("campusOverride", campus)
+                latest.optJSONObject("studentServices")?.remove("news")
+            }
+            repository.read()
+        }, { latest ->
+            state = latest
+            render()
+            if (tab == 11 && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
+        })
+    }
+
+    /** Actions are single-shot and may only deliver a result to the account that initiated them. */
+    fun <T> studentAction(scope: String, operation: (UsosClient, JSONObject) -> T, done: (T) -> Unit) {
+        if (!liveService(scope)) return
+        task(
+            {
+                val credentials = serviceCredentials(scope)
+                val result = try {
+                    val guarded = UsosClient(credentials, {}, { address ->
+                        check(Repository.sameAccount(credentials, serviceCredentials(scope))) {
+                            getString(R.string.service_action_unavailable)
+                        }
+                        java.net.URI(address).toURL().openConnection() as java.net.HttpURLConnection
+                    })
+                    operation(guarded, credentials)
+                } catch (failure: Exception) {
+                    if (failure is UsosClient.ApiException) {
+                        repository.update { latest ->
+                            if (Repository.sameAccount(credentials, latest)) {
+                                if (failure.retryAt > latest.optLong("retryAt")) latest.put("retryAt", failure.retryAt)
+                                if (failure.authorization) latest.put("authorizationError", true).put("enabled", false)
+                            }
+                        }
+                    }
+                    if (failure is IOException && failure !is UsosClient.ApiException) {
+                        throw IllegalStateException(getString(R.string.service_action_uncertain))
+                    }
+                    if (failure is IllegalStateException) throw IllegalStateException(getString(R.string.service_action_unavailable))
+                    throw failure
+                }
+                check(Repository.sameAccount(credentials, repository.read())) { getString(R.string.service_action_unavailable) }
+                result
+            },
+            { done(it) }
         )
     }
 
@@ -912,7 +1019,7 @@ class MainActivity : AppCompatActivity() {
         try {
             apiDrafts.put(method, JSONObject(parameters))
         } catch (e: JSONException) {
-            error(Repository.message(e))
+            error(ApiErrorUi.message(this, e))
             return
         }
         tab = 3
@@ -959,7 +1066,7 @@ class MainActivity : AppCompatActivity() {
             throw IllegalStateException(getString(R.string.services_scope_required, scope))
         }
         if (credentials.optLong("retryAt") > System.currentTimeMillis()) {
-            throw IllegalStateException("USOS prosi o przerwę. Spróbuj później.")
+            throw IllegalStateException(getString(R.string.error_rate_limit))
         }
         return credentials
     }
@@ -1158,7 +1265,7 @@ class MainActivity : AppCompatActivity() {
                 demoTasks = TaskTools.save(demoTasks, entry)
                 render()
             } catch (e: Exception) {
-                error(Repository.message(e))
+                error(ApiErrorUi.message(this, e))
             }
         } else {
             task(
@@ -1199,7 +1306,7 @@ class MainActivity : AppCompatActivity() {
                 render()
                 if (undoEntry != null) offerTaskUndo(undoEntry, wasDemo, session)
             } catch (e: JSONException) {
-                error(Repository.message(e))
+                error(ApiErrorUi.message(this, e))
             }
         } else {
             task(
@@ -1224,7 +1331,7 @@ class MainActivity : AppCompatActivity() {
                     demoTasks = TaskTools.restore(demoTasks, entry)
                     render()
                 } catch (e: Exception) {
-                    error(Repository.message(e))
+                    error(ApiErrorUi.message(this, e))
                 }
             } else {
                 task(
@@ -1292,6 +1399,11 @@ class MainActivity : AppCompatActivity() {
                             if (!isDestroyed) progress.text = message
                         }
                     }
+                    val latest = repository.read()
+                    val lastAffiliation = latest.optJSONObject("studentServices")?.optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L
+                    if (System.currentTimeMillis() - lastAffiliation > 24 * 60 * 60_000L) {
+                        try { StudentServiceLoader.refresh(repository, "affiliation") } catch (_: Exception) { /* Optional campus data must not discard a valid grade sync. */ }
+                    }
                     ClassReminderReceiver.scheduleNext(this)
                     TodayScheduleWidget.updateAll(this)
                     QuickStatusWidget.updateAll(this)
@@ -1333,15 +1445,33 @@ class MainActivity : AppCompatActivity() {
     ) {
         task(
             {
-                var credentials = JSONObject(repository.read().toString())
+                val expected = repository.read()
+                val wasDemo = demo
+                var credentials = JSONObject(expected.toString())
                 if (demo) credentials = JSONObject()
+                check(demo || expected.optLong("retryAt") <= System.currentTimeMillis()) { getString(R.string.error_rate_limit) }
                 if (credentials.optString("key").isEmpty() && !BuildConfig.USOS_KEY.isNullOrEmpty()) {
                     credentials.put("key", BuildConfig.USOS_KEY.trim())
                     credentials.put("secret", if (BuildConfig.USOS_SECRET != null) BuildConfig.USOS_SECRET.trim() else "")
                 }
-                UsosClient(credentials).explore(metadata, values, method, upload, "upload.bin")
+                val response = try {
+                    UsosClient(credentials).explore(metadata, values, method, upload, "upload.bin")
+                } catch (failure: UsosClient.ApiException) {
+                    if (!wasDemo) repository.update { latest ->
+                        if (Repository.sameAccount(expected, latest)) {
+                            if (failure.retryAt > latest.optLong("retryAt")) latest.put("retryAt", failure.retryAt)
+                            if (failure.authorization) latest.put("authorizationError", true).put("enabled", false)
+                        }
+                    }
+                    throw failure
+                }
+                val latest = repository.read()
+                check(demo == wasDemo && listOf("key", "secret", "token", "tokenSecret", "accountSession").all {
+                    expected.optString(it) == latest.optString(it)
+                }) { getString(R.string.service_action_unavailable) }
+                response
             },
-            { onSuccess.accept(it) },
+            { if (tab == 3 && currentMethod == metadata.optString("name")) onSuccess.accept(it) },
             onFailure
         )
     }
@@ -1403,7 +1533,7 @@ class MainActivity : AppCompatActivity() {
                     try {
                         done.accept(result)
                     } catch (e: Exception) {
-                        error(Repository.message(e))
+                        error(ApiErrorUi.message(this, e))
                     }
                 }
             } catch (e: Exception) {
@@ -1419,8 +1549,8 @@ class MainActivity : AppCompatActivity() {
                     state = recovered
                     updateBusy(false)
                     if (tab == 0 || tab == 1 || tab == 2 || tab == 5 || tab == 7) render()
-                    failed.accept(Repository.message(e))
-                    error(Repository.message(e))
+                    failed.accept(ApiErrorUi.message(this, e))
+                    error(ApiErrorUi.message(this, e))
                 }
             }
         }

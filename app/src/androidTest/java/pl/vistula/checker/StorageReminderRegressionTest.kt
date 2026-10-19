@@ -162,7 +162,7 @@ class StorageReminderRegressionTest {
         ClassReminderReceiver().onReceive(ctx, reminder(lesson).putExtra("title", "Stale private title"))
         val active = notifications().activeNotifications
         assertEquals(1, active.size)
-        assertEquals("Zbliżające się zajęcia: Current lesson", active[0].notification.extras.getString("android.title"))
+        assertEquals(pl.vistula.checker.ui.Language.localizedContext(ctx).getString(R.string.notification_class_title, "Current lesson"), active[0].notification.extras.getString("android.title"))
     }
 
     @Test
@@ -206,7 +206,7 @@ class StorageReminderRegressionTest {
         vault.write(state)
         ClassReminderReceiver().onReceive(ctx, reminder(lesson))
         assertEquals(
-            "Zbliżające się zajęcia: " + ctx.getString(R.string.reminder_unnamed_lesson),
+            pl.vistula.checker.ui.Language.localizedContext(ctx).getString(R.string.notification_class_title, pl.vistula.checker.ui.Language.localizedContext(ctx).getString(R.string.reminder_unnamed_lesson)),
             notifications().activeNotifications[0].notification.extras.getString("android.title")
         )
         assertEquals(1, vault.read().getJSONArray("reminderDeliveries").length())

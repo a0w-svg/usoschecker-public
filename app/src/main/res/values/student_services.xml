@@ -1,6 +1,6 @@
 <resources>
     <string name="cards_title">Legitymacje</string>
-    <string name="cards_description">Legitymacja studencka i status mLegitymacji z USOS.</string>
+    <string name="cards_description">Status i ważność legitymacji</string>
     <string name="cards_information_only">To podgląd danych USOS. Dokument elektroniczny okazuj w oficjalnej aplikacji mObywatel.</string>
     <string name="cards_refresh">Pobierz dane legitymacji</string>
     <string name="cards_empty">Brak legitymacji w podglądzie</string>
@@ -42,7 +42,7 @@
     <string name="mcard_revoked">Unieważniona przez system</string>
     <string name="mcard_unknown">Status USOS: %1$s</string>
     <string name="documents_title">Dokumenty i decyzje</string>
-    <string name="documents_description">Dokumenty administracyjne, terminy publikacji i dostępne pliki.</string>
+    <string name="documents_description">Decyzje, pliki i potwierdzenia</string>
     <string name="documents_refresh">Pobierz listę dokumentów</string>
     <string name="documents_search">Szukaj dokumentu, statusu lub daty</string>
     <string name="documents_empty">Brak pasujących dokumentów</string>

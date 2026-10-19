@@ -175,6 +175,38 @@ class UiHelper private constructor() {
             return box
         }
 
+        /** Secondary content stays reachable without competing with the screen's main task. */
+        @JvmStatic
+        fun disclosure(context: Context, parent: LinearLayout, key: String, title: Int): LinearLayout {
+            val prefs = context.getSharedPreferences("tool_layout", Context.MODE_PRIVATE)
+            val group = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
+            val body = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(context, 8), dp(context, 8), dp(context, 8), dp(context, 8))
+            }
+            var expanded = prefs.getBoolean(key, false)
+            val toggle = actionRow(context, context.getString(title), {}, false)
+            fun update() {
+                body.visibility = if (expanded) View.VISIBLE else View.GONE
+                toggle.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                    if (expanded) R.drawable.ic_tool_collapse else R.drawable.ic_tool_expand, 0)
+                ViewCompat.setStateDescription(toggle, context.getString(
+                    if (expanded) R.string.details_expanded else R.string.details_collapsed
+                ))
+            }
+            toggle.setOnClickListener {
+                expanded = !expanded
+                prefs.edit().putBoolean(key, expanded).apply()
+                update()
+            }
+            group.addView(toggle)
+            group.addView(body)
+            group.setBackgroundResource(R.drawable.bg_section_divider)
+            parent.addView(group, LinearLayout.LayoutParams(-1, -2))
+            update()
+            return body
+        }
+
         @JvmStatic
         fun button(context: Context, label: String?, action: Runnable, primary: Boolean): Button {
             val b = MaterialButton(context)
@@ -320,7 +352,7 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun note(context: Context, parent: LinearLayout, value: String?, color: Int) {
-            add(context, parent, value, 12, color, false)
+            add(context, parent, value, 14, color, false)
         }
 
         @JvmStatic

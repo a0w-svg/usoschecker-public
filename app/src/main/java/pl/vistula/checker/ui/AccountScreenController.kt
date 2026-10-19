@@ -26,6 +26,7 @@ import pl.vistula.checker.NotificationHelper
 import pl.vistula.checker.R
 import pl.vistula.checker.UsosClient
 import pl.vistula.checker.core.AcademicTerm
+import pl.vistula.checker.core.FeatureAccess
 import pl.vistula.checker.core.OAuth
 import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.core.StudentServices
@@ -60,12 +61,22 @@ class AccountScreenController private constructor() {
             listener: AccountListener
         ) {
             ToolScreenUi.header(activity, content, R.string.nav_account, null)
+            val pages = SettingsPages(activity, content)
+            if (!demo) UiHelper.note(activity, content, activity.getString(when {
+                state.optBoolean("authorizationError") -> R.string.account_session_expired
+                state.optString("token").isNotEmpty() -> R.string.settings_connected
+                else -> R.string.settings_disconnected
+            }), UiHelper.MUTED)
+            val campus = pages.page("settings.campus", R.string.campus_affiliation_title)
+            CampusSettingsController.render(activity, campus, if (demo) activity.serviceAccountState() else state)
+            val appearance = pages.page("settings.appearance", R.string.settings_personalization)
             if (demo) {
                 content.addView(UiHelper.button(activity, activity.getString(R.string.btn_end_demo), { listener.onEndDemo() }, true))
+                content.addView(UiHelper.button(activity, activity.getString(R.string.btn_simulate_changes), { activity.sync() }, false))
             }
 
             val connected = state.optString("token").isNotEmpty()
-            content.addView(
+            appearance.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.appearance_title),
@@ -73,7 +84,7 @@ class AccountScreenController private constructor() {
                     false
                 )
             )
-            content.addView(
+            appearance.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.language_title),
@@ -82,6 +93,7 @@ class AccountScreenController private constructor() {
                 )
             )
 
+            var profileBody: LinearLayout? = null
             if (connected || demo) {
                 val raw = d?.optJSONObject("snapshot")
                 var snapshot: Snapshot? = null
@@ -92,7 +104,8 @@ class AccountScreenController private constructor() {
                     }
                 }
 
-                val profile = UiHelper.section(activity, content, Color.WHITE)
+                val profile = pages.page("settings.profile", R.string.settings_profile)
+                profileBody = profile
                 val userName = if (demo) "Jan Kowalski" else state.optString("user", "Student USOS")
                 val studentNr = if (demo) "34589" else state.optString("studentNumber", "")
                 val email = if (demo) "j.kowalski@vistula.edu.pl" else state.optString("email", "")
@@ -181,22 +194,17 @@ class AccountScreenController private constructor() {
                 }
             }
 
-            renderAcademicTerm(activity, content, d)
-
-            if (demo || connected) {
-                content.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(if (demo) R.string.btn_simulate_changes else R.string.btn_check_now),
-                        { activity.sync() },
-                        false
-                    )
-                )
+            profileBody?.let { profile ->
+                renderAcademicTerm(activity, UiHelper.disclosure(activity, profile, "profile.term", R.string.academic_calendar_title), d)
             }
 
             if (connected) {
-                val box = UiHelper.section(activity, content, Color.WHITE)
-                UiHelper.add(activity, box, activity.getString(R.string.sync_settings_title), 19, UiHelper.INK, true)
+                if (state.optBoolean("authorizationError")) {
+                    UiHelper.note(activity, content, activity.getString(R.string.account_session_expired), activity.getColor(R.color.app_error))
+                }
+                val box = pages.page("settings.sync", R.string.sync_settings_title)
+                UiHelper.note(activity, box, activity.getString(R.string.settings_sync_hint), UiHelper.MUTED)
+                box.addView(UiHelper.button(activity, activity.getString(R.string.btn_check_now), { activity.sync() }, true))
                 UiHelper.note(
                     activity,
                     box,
@@ -205,7 +213,7 @@ class AccountScreenController private constructor() {
                     UiHelper.MUTED
                 )
                 if (state.optString("error").isNotEmpty()) {
-                    UiHelper.note(activity, box, state.optString("error"), Color.rgb(167, 49, 49))
+                    UiHelper.note(activity, box, ApiErrorUi.cached(activity, state), Color.rgb(167, 49, 49))
                     if (state.optLong("retryAt") > System.currentTimeMillis()) {
                         UiHelper.note(
                             activity,
@@ -215,10 +223,12 @@ class AccountScreenController private constructor() {
                         )
                     }
                 }
+                val accountControls = pages.page("settings.account", R.string.settings_account_access)
                 val authorizedScopes = state.optString("scopes")
-                UiHelper.add(activity, box, activity.getString(R.string.account_oauth_consent, authorizedScopes), 13, UiHelper.MUTED, false)
+                val access = UiHelper.disclosure(activity, accountControls, "settings.granted", R.string.settings_access)
+                UiHelper.add(activity, access, activity.getString(R.string.account_oauth_consent, authorizedScopes), 14, UiHelper.MUTED, false)
                 if (!StudentServices.hasScope(authorizedScopes, "payments")) {
-                    UiHelper.note(activity, box, activity.getString(R.string.account_warn_no_payments_scope), Color.rgb(180, 110, 0))
+                    UiHelper.note(activity, accountControls, activity.getString(R.string.account_warn_no_payments_scope), Color.rgb(180, 110, 0))
                 }
                 val toggle = MaterialSwitch(activity)
                 toggle.setText(R.string.background_check)
@@ -259,7 +269,7 @@ class AccountScreenController private constructor() {
                         false
                     )
                 )
-                box.addView(
+                accountControls.addView(
                     UiHelper.button(
                         activity,
                         activity.getString(R.string.btn_disconnect_account),
@@ -276,9 +286,8 @@ class AccountScreenController private constructor() {
                         false
                     )
                 )
-            } else {
-                val box = UiHelper.section(activity, content, Color.WHITE)
-                UiHelper.add(activity, box, activity.getString(R.string.connect_usos_title), 20, UiHelper.INK, true)
+            } else if (!demo) {
+                val box = pages.page("settings.connection", R.string.connect_usos_title, true)
                 UiHelper.add(activity, box, activity.getString(R.string.connect_usos_desc), 14, UiHelper.MUTED, false)
 
                 val buildKey = BuildConfig.USOS_KEY?.trim() ?: ""
@@ -339,69 +348,52 @@ class AccountScreenController private constructor() {
                     UiHelper.note(
                         activity,
                         advanced,
-                        "Wczytano klucz aplikacji (Consumer Key & Secret) z pliku local.properties.",
+                        activity.getString(R.string.settings_debug_credentials),
                         UiHelper.GREEN
                     )
                 }
+                val rawScopes = UiHelper.disclosure(activity, advanced, "settings.rawScopes", R.string.settings_scope_advanced)
                 val scopes = UiHelper.field(
-                    activity,
-                    advanced,
-                    "Zakresy zgody OAuth (oddzielone |)",
-                    state.optString("scopes", "grades|studies|payments|cards|adm_documents|crstests|offline_access"),
-                    false
+                    activity, rawScopes, activity.getString(R.string.settings_scope_advanced),
+                    state.optString("scopes", "grades|studies|payments|cards|adm_documents|crstests|offline_access"), false
                 )
-                val scopeScroll = HorizontalScrollView(activity)
-                scopeScroll.isHorizontalScrollBarEnabled = false
-                val scopeRow = LinearLayout(activity)
-                scopeRow.orientation = LinearLayout.HORIZONTAL
-                val b1 = UiHelper.button(
-                    activity,
-                    activity.getString(R.string.scope_recommended),
-                    { scopes.setText("grades|studies|payments|cards|adm_documents|crstests|offline_access") },
-                    false
+                val access = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+                setup.addView(access)
+                UiHelper.heading(activity, access, activity.getString(R.string.settings_access))
+                UiHelper.note(activity, access, activity.getString(R.string.settings_access_hint), UiHelper.MUTED)
+                val features = linkedMapOf(
+                    "payments" to R.string.tool_payments_title,
+                    "cards" to R.string.cards_title,
+                    "documents" to R.string.documents_title,
+                    "tests" to R.string.settings_tests_access,
+                    "profile" to R.string.settings_profile_access
                 )
-                val b2 = UiHelper.button(
-                    activity,
-                    activity.getString(R.string.scope_basic),
-                    { scopes.setText("grades|studies|offline_access") },
-                    false
-                )
-                val b3 = UiHelper.button(
-                    activity,
-                    activity.getString(R.string.scope_complete),
-                    { scopes.setText("grades|studies|payments|cards|adm_documents|crstests|photo|events|email|offline_access") },
-                    false
-                )
-                b1.minHeight = UiHelper.dp(activity, 48)
-                b1.textSize = 12f
-                b2.minHeight = UiHelper.dp(activity, 48)
-                b2.textSize = 12f
-                b3.minHeight = UiHelper.dp(activity, 48)
-                b3.textSize = 12f
-                val sp = LinearLayout.LayoutParams(-2, -2)
-                sp.rightMargin = UiHelper.dp(activity, 6)
-                scopeRow.addView(b1, sp)
-                scopeRow.addView(b2, sp)
-                scopeRow.addView(b3, sp)
-                val cardsScopes = UiHelper.button(
-                    activity,
-                    activity.getString(R.string.cards_scope_profile),
-                    {
-                        val values = LinkedHashSet<String>()
-                        for (value in scopes.text.toString().split("|")) {
-                            if (value.trim().isNotEmpty()) values.add(value.trim())
+                var updatingChoices = false
+                val choices = linkedMapOf<String, MaterialSwitch>()
+                for ((feature, title) in features) {
+                    val choice = MaterialSwitch(activity).apply {
+                        text = activity.getString(title)
+                        minHeight = UiHelper.dp(activity, 48)
+                        setTextColor(UiHelper.foreground(activity, UiHelper.INK))
+                        isChecked = FeatureAccess.selected(scopes.text.toString(), feature)
+                    }
+                    choices[feature] = choice
+                    access.addView(choice)
+                    choice.setOnCheckedChangeListener { _, enabled ->
+                        if (!updatingChoices) {
+                            val next = FeatureAccess.change(scopes.text.toString(), feature, enabled)
+                            if (next != scopes.text.toString()) scopes.setText(next)
                         }
-                        values.add("cards")
-                        values.add("adm_documents")
-                        scopes.setText(values.joinToString("|"))
-                    },
-                    false
-                )
-                scopeRow.addView(cardsScopes, LinearLayout.LayoutParams(-2, -2))
-                scopeScroll.addView(scopeRow)
-                advanced.addView(scopeScroll)
-                UiHelper.add(activity, advanced, activity.getString(R.string.account_scopes_hint), 12, UiHelper.MUTED, false)
-                UiHelper.note(activity, advanced, activity.getString(R.string.services_scope_hint), UiHelper.MUTED)
+                    }
+                }
+                UiHelper.watchSearch(scopes) { value ->
+                    updatingChoices = true
+                    for ((feature, choice) in choices) {
+                        val selected = FeatureAccess.selected(value, feature)
+                        if (choice.isChecked != selected) choice.isChecked = selected
+                    }
+                    updatingChoices = false
+                }
 
                 setup.addView(
                     UiHelper.button(
@@ -502,8 +494,7 @@ class AccountScreenController private constructor() {
             }
 
             // Notifications
-            val notices = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, notices, activity.getString(R.string.account_notices_heading), 18, UiHelper.INK, true)
+            val notices = pages.page("settings.notifications", R.string.account_notices_heading)
             UiHelper.add(
                 activity,
                 notices,
@@ -588,8 +579,7 @@ class AccountScreenController private constructor() {
             UiHelper.note(activity, notices, activity.getString(R.string.account_channels_note), UiHelper.MUTED)
 
             // Widgets
-            val widgetsCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, widgetsCard, activity.getString(R.string.account_widgets_heading), 18, UiHelper.INK, true)
+            val widgetsCard = pages.page("settings.widgets", R.string.account_widgets_heading)
             UiHelper.add(activity, widgetsCard, activity.getString(R.string.account_widgets_desc), 13, UiHelper.MUTED, false)
             widgetsCard.addView(
                 UiHelper.button(
@@ -604,7 +594,8 @@ class AccountScreenController private constructor() {
                 )
             )
 
-            content.addView(
+            val about = pages.page("settings.about", R.string.settings_about)
+            about.addView(
                 UiHelper.button(
                     activity,
                     activity.getString(R.string.account_btn_open_usosapps),
@@ -612,7 +603,8 @@ class AccountScreenController private constructor() {
                     false
                 )
             )
-            AppInfo.render(activity, content)
+            AppInfo.render(activity, about)
+            pages.finish(if (!connected && state.optString("requestToken").isNotEmpty()) "settings.connection" else null)
         }
 
         private fun renderAcademicTerm(activity: MainActivity, content: LinearLayout, data: JSONObject?) {

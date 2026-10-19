@@ -78,9 +78,9 @@ android {
         unitTests.returnDefaultValues = true
     }
     if (project.hasProperty('optimizedQa')) testBuildType 'optimizedQa'
-    if (project.hasProperty('liveApiTests')) sourceSets.androidTest.java.srcDir 'src/liveTest/java'
-    if (project.hasProperty('upgradeTests')) sourceSets.androidTest.java.srcDir 'src/upgradeTest/java'
-    if (project.hasProperty('notificationPermissionTests')) sourceSets.androidTest.java.srcDir 'src/notificationPermissionTest/java'
+    if (project.hasProperty('liveApiTests')) sourceSets.androidTest.kotlin.srcDir 'src/liveTest/java'
+    if (project.hasProperty('upgradeTests')) sourceSets.androidTest.kotlin.srcDir 'src/upgradeTest/java'
+    if (project.hasProperty('notificationPermissionTests')) sourceSets.androidTest.kotlin.srcDir 'src/notificationPermissionTest/java'
 }
 
 tasks.register('verifyReleaseConfiguration') {

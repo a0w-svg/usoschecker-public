@@ -221,7 +221,7 @@ fun VistulaApp(
                     }
                 }
             } catch (e: Exception) {
-                statusMessage = SharedRepository.message(e)
+                statusMessage = pl.vistula.checker.core.SyncProgress.error(e, language)
             }
         }
     }
@@ -444,7 +444,7 @@ private fun TopStatusBar(
                 )
                 val sub = statusMessage.ifEmpty {
                     val error = state.optString("error")
-                    if (error.isNotEmpty()) error else strings.statusReady
+                    if (error.isNotEmpty()) pl.vistula.checker.core.SyncProgress.cachedError(state, strings.languageCode) else strings.statusReady
                 }
                 Text(
                     text = sub,

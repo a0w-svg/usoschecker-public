@@ -284,6 +284,7 @@ class SharedRepository @JvmOverloads constructor(
                         if (s.has(field)) latest.put(field, s.get(field))
                     }
                     latest.put("history", history).put("snapshot", snapshot).put("successAt", now).put("error", "")
+                        .put("errorKind", "").put("httpStatus", 0)
                     // Do not erase a cooldown or authorization failure reported by another request during this sync.
                     if (latest.optLong("retryAt") == s.optLong("retryAt")) latest.remove("retryAt")
                     if (latest.optBoolean("authorizationError") == s.optBoolean("authorizationError")) {
@@ -304,6 +305,8 @@ class SharedRepository @JvmOverloads constructor(
                     if (sameAccount(s, latest)) {
                         latest.put("error", message(e))
                         val cause = cause(e)
+                        latest.put("errorKind", pl.vistula.checker.core.SyncProgress.errorKind(cause))
+                            .put("httpStatus", if (cause is UsosClient.ApiException) cause.status else 0)
                         if (cause is UsosClient.ApiException && cause.authorization) {
                             latest.put("enabled", false)
                         }

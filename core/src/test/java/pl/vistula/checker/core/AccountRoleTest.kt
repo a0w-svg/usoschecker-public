@@ -24,4 +24,16 @@ class AccountRoleTest {
         assertEquals("Pobieranie ocen", SyncProgress.localized("Pobieranie ocen", "pl"))
         assertEquals("Refreshing data…", SyncProgress.localized("New stage", "en"))
     }
+    @Test fun cachedRefreshErrorsFollowLanguageChangesWithoutExposingExceptionText() {
+        val error = java.net.SocketTimeoutException("fixture private details")
+        val english = SyncProgress.error(error, "en")
+        val ukrainian = SyncProgress.error(error, "uk")
+        assertFalse(english.contains("fixture"))
+        assertNotEquals(english, ukrainian)
+        val state = JSONObject().put("errorKind", "http").put("httpStatus", 403)
+        assertFalse(SyncProgress.cachedError(state, "en").contains("Brak"))
+        state.put("authorizationError", true)
+        assertNotEquals(SyncProgress.cachedError(state, "en"), english)
+    }
+
 }

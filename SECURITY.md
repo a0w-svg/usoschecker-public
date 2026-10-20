@@ -56,7 +56,10 @@ Po utworzeniu repozytorium administrator powinien:
 4. Ustawić domyślne uprawnienia Actions na odczyt. Nie przekazywać danych USOS do CI.
 
 Workflow używa `pull_request`, uprawnień tylko do odczytu i akcji przypiętych do SHA.
-Nie publikuje artefaktów ani nie uruchamia testów na prawdziwym koncie.
+Testy nie korzystają z prawdziwego konta. Zadanie desktopowe udostępnia instalator
+Linuksa z sumą SHA-256 do przeglądu PR; przy błędzie testu okna dołącza wyłącznie
+zrzuty i log aplikacji ze sztucznego konta testowego. Sejf, klucze i dane profilu
+testowego nie są dołączane do tych artefaktów.
 Dependabot proponuje aktualizacje Gradle i GitHub Actions do przeglądu.
 
 Dokumentacja: [GitHub Push protection](https://docs.github.com/en/code-security/concepts/secret-security/push-protection)

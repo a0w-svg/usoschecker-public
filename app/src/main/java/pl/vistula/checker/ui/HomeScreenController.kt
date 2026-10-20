@@ -21,6 +21,7 @@ import pl.vistula.checker.core.Record
 import pl.vistula.checker.core.ScheduleConflictDetector
 import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.core.TaskTools
+import pl.vistula.checker.core.GradeBrowser
 
 /**
  * Controller for rendering the Home dashboard screen.
@@ -39,7 +40,33 @@ class HomeScreenController private constructor() {
             demoTasks: JSONArray?,
             onLessonDetails: Consumer<LessonTime>
         ) {
+            UiHelper.add(activity, content, activity.getString(R.string.dashboard_title), 26, UiHelper.INK, true)
+            UiHelper.note(activity, content, LocalDate.now(UsosClient.ZONE)
+                .format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity))), UiHelper.MUTED)
+            val shortcuts = arrayOf(
+                Triple(R.id.home_open_schedule, R.string.dashboard_plan, 5),
+                Triple(R.id.home_open_grades, R.string.dashboard_grades, 2),
+                Triple(R.id.home_open_tasks, R.string.dashboard_tasks, 7),
+                Triple(R.id.home_open_news, R.string.dashboard_news, 11)
+            )
+            for (pair in shortcuts.toList().chunked(2)) {
+                val row = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
+                pair.forEachIndexed { index, (id, title, destination) ->
+                    val button = UiHelper.button(activity, activity.getString(title), {
+                        if (destination == 5) {
+                            activity.setCalendarQuery("")
+                            activity.setCalendarMode("day")
+                            activity.openScheduleDate(LocalDate.now(UsosClient.ZONE).toString())
+                        } else activity.navigate(destination)
+                    }, false).apply { this.id = id }
+                    row.addView(button, LinearLayout.LayoutParams(0, -2, 1f).apply {
+                        if (index > 0) marginStart = UiHelper.dp(activity, 8)
+                    })
+                }
+                content.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = UiHelper.dp(activity, 4) })
+            }
             renderKpis(activity, content, d, state, demo, demoTasks, onLessonDetails)
+            renderJournal(activity, content, d, onLessonDetails)
             renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"))
 
             // Payments alert, schedule conflict, latest news
@@ -67,7 +94,8 @@ class HomeScreenController private constructor() {
                             if (payments.hasOverdue()) Color.rgb(160, 48, 40) else UiHelper.GREEN,
                             true
                         )
-                        UiHelper.add(activity, payBox, activity.getString(R.string.home_payments_due, unpaid), 19, UiHelper.INK, true)
+                        UiHelper.add(activity, payBox, activity.getString(R.string.home_payments_due,
+                            pl.vistula.checker.core.PaymentAmounts.unpaid(payments, Language.currentLocale(activity).language)), 19, UiHelper.INK, true)
                         if (payments.accounts.isNotEmpty()) {
                             UiHelper.add(
                                 activity,
@@ -156,6 +184,32 @@ class HomeScreenController private constructor() {
 
             // Recent changes
             renderRecentChanges(activity, content, d)
+        }
+
+        private fun renderJournal(activity: MainActivity, parent: LinearLayout, data: JSONObject, details: Consumer<LessonTime>) {
+            val snapshot = data.optJSONObject("snapshot")?.let { Snapshot.from(it) }
+            val records = snapshot?.records?.values ?: emptyList()
+            UiHelper.heading(activity, parent, activity.getString(R.string.dashboard_today))
+            val plan = UiHelper.card(activity, parent, Color.WHITE)
+            val today = LocalDate.now(UsosClient.ZONE)
+            val lessons = LessonTime.sorted(records).filter { it.intersects(today) }
+            if (lessons.isEmpty()) UiHelper.note(activity, plan,
+                activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.dashboard_no_classes), UiHelper.MUTED)
+            lessons.take(4).forEach { lesson ->
+                val time = lesson.start.format(DateTimeFormatter.ofPattern("HH:mm")) + "–" + lesson.end.format(DateTimeFormatter.ofPattern("HH:mm"))
+                plan.addView(UiHelper.actionRow(activity, "$time  ·  ${lesson.record.title}", { details.accept(lesson) }, false))
+            }
+            plan.addView(UiHelper.button(activity, activity.getString(R.string.dashboard_full_plan), {
+                activity.setCalendarQuery(""); activity.setCalendarMode("day"); activity.openScheduleDate(today.toString())
+            }, false))
+            UiHelper.heading(activity, parent, activity.getString(R.string.dashboard_grades))
+            val grades = UiHelper.card(activity, parent, Color.WHITE)
+            val latest = GradeBrowser.select(records, "", "all", "recent", "", snapshot).take(3)
+            if (latest.isEmpty()) UiHelper.note(activity, grades, activity.getString(R.string.dashboard_no_grades), UiHelper.MUTED)
+            latest.forEach { grade ->
+                grades.addView(UiHelper.actionRow(activity, "${GradeBrowser.symbol(grade)}  ·  ${grade.title}", { activity.navigate(2) }, false))
+            }
+            grades.addView(UiHelper.button(activity, activity.getString(R.string.dashboard_all_grades), { activity.navigate(2) }, false))
         }
 
         @Throws(Exception::class)

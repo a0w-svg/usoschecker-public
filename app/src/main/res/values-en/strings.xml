@@ -184,7 +184,7 @@ Parameters preserved. Fix them or retry the request.</string>
     <string name="home_term_ended">Ended: %1$s</string>
     <string name="home_payments_attention">PAYMENTS · ATTENTION REQUIRED</string>
     <string name="home_payments_regular">PAYMENTS &amp; TUITION</string>
-    <string name="home_payments_due">Amount due: %1$.2f PLN</string>
+    <string name="home_payments_due">Amount due: %1$s</string>
     <string name="home_payments_subaccount">Subaccount: %1$s</string>
     <string name="home_payments_btn">View payment schedule</string>
     <string name="home_recent_changes">Recent changes</string>

@@ -15,7 +15,7 @@
     <string name="payments_interest_value">Interest: %1$s %2$s</string>
     <string name="payments_remittance_remaining">Remaining to settle: %1$s %2$s</string>
     <string name="payments_plan_label">Plan %1$s</string>
-    <string name="payments_plan_line">%1$s — %2$s %3$s</string>
+    <string name="payments_plan_line">%1$s — %2$s</string>
     <string name="payments_accounts_information">Faculty accounts are informational. Use the account attached to the specific payment when making a transfer.</string>
     <string name="documents_code_confirm">Send a receipt code for “%1$s” to the email address registered in USOS?</string>
     <string name="documents_code_sent">USOS sent a code to: %1$s\n%2$s</string>

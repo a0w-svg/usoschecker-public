@@ -1,0 +1,13 @@
+<resources>
+    <string name="dashboard_title">Твій день в університеті</string>
+    <string name="dashboard_plan">План дня</string>
+    <string name="dashboard_grades">Останні оцінки</string>
+    <string name="dashboard_tasks">Завдання та терміни</string>
+    <string name="dashboard_news">Оголошення</string>
+    <string name="dashboard_today">Розклад на сьогодні</string>
+    <string name="dashboard_full_plan">Відкрити весь розклад</string>
+    <string name="dashboard_no_data">Немає збережених даних. Підключіть обліковий запис і оновіть або спробуйте демо.</string>
+    <string name="dashboard_no_classes">У збереженому розкладі сьогодні немає занять.</string>
+    <string name="dashboard_no_grades">Оцінок ще немає.</string>
+    <string name="dashboard_all_grades">Усі оцінки</string>
+</resources>

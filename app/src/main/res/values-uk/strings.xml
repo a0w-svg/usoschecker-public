@@ -184,7 +184,7 @@
     <string name="home_term_ended">Завершено: %1$s</string>
     <string name="home_payments_attention">ОПЛАТИ · ПОТРІБНА УВАГА</string>
     <string name="home_payments_regular">ОПЛАТИ ТА НАВЧАННЯ</string>
-    <string name="home_payments_due">До сплати: %1$.2f PLN</string>
+    <string name="home_payments_due">До сплати: %1$s</string>
     <string name="home_payments_subaccount">Субрахунок: %1$s</string>
     <string name="home_payments_btn">Переглянути графік оплат</string>
     <string name="home_recent_changes">Останні зміни</string>

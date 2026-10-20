@@ -33,13 +33,20 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "pl.vistula.checker.desktop.MainKt"
+        providers.gradleProperty("desktopJavaHome").orNull?.let { javaHome = it }
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb, TargetFormat.Dmg)
             packageName = "VistulaChecker"
-            packageVersion = "1.3.2"
+            packageVersion = "1.4.0"
             description = "Vistula USOS Checker Desktop (Compose Multiplatform)"
             vendor = "Vistula Checker"
             modules("java.net.http", "java.prefs", "java.sql", "jdk.crypto.ec")
+            windows {
+                perUserInstall = true
+                dirChooser = true
+                menuGroup = "Vistula Checker"
+                upgradeUuid = "4c949fa7-868b-4f3a-80e9-71c78c455768"
+            }
         }
     }
 }

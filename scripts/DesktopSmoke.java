@@ -28,7 +28,7 @@ public class DesktopSmoke {
         Path root = Path.of(args[1]).toAbsolutePath().normalize();
         Path allowed = Path.of("work/desktop-smoke").toAbsolutePath().normalize();
         if (!root.startsWith(allowed)) throw new IllegalArgumentException("A disposable fixture directory is required");
-        Path data = root.resolve("profile/vistula-checker");
+        Path data = root.resolve(System.getProperty("os.name").startsWith("Windows") ? "profile/VistulaChecker" : "profile/vistula-checker");
         if (args[0].equals("seed")) {
             JSONObject fixture = Demo.state(false).put("token", "fixture-personal-token").put("enabled", false)
                 .put("user", "Personal desktop fixture").put("accountSession", "fixture-session");
@@ -37,6 +37,14 @@ public class DesktopSmoke {
             DesktopKeyValueStore prefs = new DesktopKeyValueStore(data.resolve("preferences.json").toFile());
             prefs.putString("ui_language", "en"); prefs.putString("ui_theme_mode", "light");
             Files.write(root.resolve("original-state.bin"), Files.readAllBytes(data.resolve("state.bin")));
+            return;
+        }
+        if (args[0].equals("probe")) {
+            try (DesktopInstanceLock ignored = new DesktopInstanceLock(data.toFile())) {
+                throw new AssertionError("The packaged app did not hold the fixture instance lock");
+            } catch (DesktopInstanceLock.AlreadyRunning expected) { }
+            if (!Arrays.equals(Files.readAllBytes(root.resolve("original-state.bin")), Files.readAllBytes(data.resolve("state.bin"))))
+                throw new AssertionError("Launch modified the saved fixture account");
             return;
         }
         Robot robot = new Robot(); robot.delay(7000);

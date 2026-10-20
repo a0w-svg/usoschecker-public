@@ -256,6 +256,7 @@ class PaymentsScreenController private constructor() {
         }
 
         private fun renderDetails(activity: MainActivity, content: LinearLayout, data: JSONObject?) {
+            val language = Language.currentLocale(activity).language
             val items = data?.optJSONArray("details") ?: return
             if (items.length() == 0) return
             val body = UiHelper.disclosure(activity, content, "payments.details", R.string.payments_details)
@@ -286,7 +287,8 @@ class PaymentsScreenController private constructor() {
                         val row = rows.getJSONObject(n)
                         activity.getString(R.string.payments_plan_line,
                             HistoryScreenController.formatFullDate(StudentServices.text(row, "payment_date")),
-                            StudentServices.text(row, "amount"), StudentServices.text(plan, "currency"))
+                            pl.vistula.checker.core.PaymentAmounts.format(row.opt("amount"),
+                                pl.vistula.checker.core.PaymentAmounts.currency(plan, item), language))
                     }
                     UiHelper.add(activity, box, activity.getString(R.string.payments_plan_label, plan.optString("id")), 16, UiHelper.INK, true)
                     UiHelper.note(activity, box, description, UiHelper.MUTED)

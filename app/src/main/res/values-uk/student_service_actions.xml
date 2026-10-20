@@ -15,7 +15,7 @@
     <string name="payments_interest_value">Відсотки: %1$s %2$s</string>
     <string name="payments_remittance_remaining">Залишок до розрахунку: %1$s %2$s</string>
     <string name="payments_plan_label">План %1$s</string>
-    <string name="payments_plan_line">%1$s — %2$s %3$s</string>
+    <string name="payments_plan_line">%1$s — %2$s</string>
     <string name="payments_accounts_information">Рахунки факультетів мають інформаційний характер. Для переказу використовуйте рахунок конкретного платежу.</string>
     <string name="documents_code_confirm">Надіслати код отримання документа «%1$s» на електронну адресу, вказану в USOS?</string>
     <string name="documents_code_sent">USOS надіслав код на: %1$s\n%2$s</string>

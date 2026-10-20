@@ -1,0 +1,13 @@
+<resources>
+    <string name="dashboard_title">Your day at university</string>
+    <string name="dashboard_plan">Day plan</string>
+    <string name="dashboard_grades">Recent grades</string>
+    <string name="dashboard_tasks">Tasks and deadlines</string>
+    <string name="dashboard_news">Announcements</string>
+    <string name="dashboard_today">Today’s timetable</string>
+    <string name="dashboard_full_plan">Open full timetable</string>
+    <string name="dashboard_no_data">No saved data. Connect your account and refresh, or try demo.</string>
+    <string name="dashboard_no_classes">No classes today in the saved timetable.</string>
+    <string name="dashboard_no_grades">No grades saved yet.</string>
+    <string name="dashboard_all_grades">See all grades</string>
+</resources>

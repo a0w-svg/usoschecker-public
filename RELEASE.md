@@ -136,8 +136,8 @@ Nie uznawaj błędu konfiguracji skanera ani braku wyników za potwierdzenie bra
 
 ## Weryfikacja desktopu
 
-Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.3.2`, Android
-`versionCode` 14). Z pełnym JDK 21 i SDK Android 36:
+Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.4.0`, Android
+`versionCode` 15). Z pełnym JDK 21 i SDK Android 36:
 
 ```sh
 bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb
@@ -149,3 +149,22 @@ wejście i wyjście z demo, odświeżenie oraz skróty nawigacji i sprawdza, czy
 magazyn konta pozostał bez zmian. Nie testuje rzeczywistego USOS. Na Windows i macOS
 nadal wymagane są testy na tych systemach; pakietu Linuksa nie traktujemy jako
 weryfikacji instalatorów MSI/EXE/DMG.
+
+### Windows x64
+
+Job `Windows verification` buduje MSI oraz przenośny ZIP z własnym środowiskiem Java.
+Lokalnie wymagane są pełny JDK z `jpackage` i narzędzia WiX dostępne w `PATH`:
+
+```powershell
+./tools/build-windows.ps1
+python scripts/windows_smoke.py
+```
+
+Można przekazać `-PackagingJavaHome` do skryptu, jeśli Gradle działa na innym JDK.
+Wyniki i SHA-256 znajdują się w `desktopApp/build/windows-publication`.
+MSI instaluje aplikację dla bieżącego użytkownika; stały `upgradeUuid` zachowuje
+tożsamość instalatora przy kolejnych aktualizacjach. ZIP uruchamia się przez
+`VistulaChecker/VistulaChecker.exe`; nie wymaga osobnej instalacji Javy.
+Test Windows rozpakowuje MSI administracyjnie bez instalacji na osobistym profilu,
+uruchamia wynik z syntetycznym kontem i sprawdza blokadę procesu oraz zachowanie
+magazynu. Nie zastępuje ręcznej kontroli całego interfejsu Windows.

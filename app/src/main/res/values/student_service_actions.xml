@@ -15,7 +15,7 @@
     <string name="payments_interest_value">Odsetki: %1$s %2$s</string>
     <string name="payments_remittance_remaining">Pozostało do rozliczenia: %1$s %2$s</string>
     <string name="payments_plan_label">Plan %1$s</string>
-    <string name="payments_plan_line">%1$s — %2$s %3$s</string>
+    <string name="payments_plan_line">%1$s — %2$s</string>
     <string name="payments_accounts_information">Subkonta wydziałów mają charakter informacyjny. Do wpłaty użyj rachunku przypisanego do konkretnej należności.</string>
     <string name="documents_code_confirm">Wyślij kod odbioru dokumentu „%1$s” na adres e-mail zapisany w USOS?</string>
     <string name="documents_code_sent">USOS wysłał kod na: %1$s\n%2$s</string>

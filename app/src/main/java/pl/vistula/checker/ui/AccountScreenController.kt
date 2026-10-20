@@ -131,11 +131,11 @@ class AccountScreenController private constructor() {
                 val nameCol = LinearLayout(activity)
                 nameCol.orientation = LinearLayout.VERTICAL
                 nameCol.layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-                UiHelper.add(activity, nameCol, activity.getString(R.string.student_card_badge), 11, UiHelper.GREEN, true)
+                UiHelper.add(activity, nameCol, activity.getString(if (pl.vistula.checker.core.AccountRole.lecturer(state)) R.string.lecturer_title else R.string.student_card_badge), 11, UiHelper.GREEN, true)
                 UiHelper.add(activity, nameCol, userName, 20, UiHelper.INK, true)
                 if (studentNr.isNotEmpty()) {
-                    val nrView = UiHelper.text(activity, "Nr albumu: $studentNr  📋", 14, UiHelper.INK, true)
-                    nrView.setOnClickListener { UiHelper.copyToClipboard(activity, "Numer albumu", studentNr) }
+                    val nrView = UiHelper.text(activity, activity.getString(R.string.cards_student_number, studentNr) + "  📋", 14, UiHelper.INK, true)
+                    nrView.setOnClickListener { UiHelper.copyToClipboard(activity, activity.getString(R.string.cards_student_number, studentNr), studentNr) }
                     nameCol.addView(nrView)
                 }
                 topRow.addView(nameCol)

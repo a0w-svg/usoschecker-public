@@ -17,6 +17,36 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class UsosClientTest {
     @Test
+    fun lecturerOnlySyncUsesCombinedTimetableWithoutStudentModules() {
+        val calls = AtomicInteger()
+        val state = credentials().put("staffStatus", 2).put("studentStatusCode", 0).put("scopes", "offline_access")
+        val client = UsosClient(state, {}) { address ->
+            assertTrue(address, address.contains("/tt/user?"))
+            calls.incrementAndGet()
+            Connection().apply { body = "[]" }
+        }
+        val snapshot = client.snapshot()
+        assertEquals(8, calls.get())
+        assertTrue(snapshot.courses.isEmpty())
+        assertNull(snapshot.payments)
+    }
+
+    @Test
+    fun studentLecturerKeepsStudentDataAndUsesCombinedTimetable() {
+        val state = credentials().put("staffStatus", 2).put("studentStatusCode", 2)
+        val pages = AtomicInteger()
+        val client = UsosClient(state, {}) { address ->
+            assertFalse(address.contains("/tt/student?"))
+            if (address.contains("/tt/user?")) {
+                pages.incrementAndGet()
+                Connection().apply { body = "[]" }
+            } else snapshotConnection(address)
+        }
+        assertNotNull(client.snapshot().payments)
+        assertEquals(8, pages.get())
+    }
+
+    @Test
     fun basicConsentSkipsPaymentRequestsAndStillLoadsGradesAndPlan() {
         for (scopes in listOf("grades|studies|offline_access", " grades | studies | other_payments | offline_access ")) {
             val planPages = AtomicInteger()

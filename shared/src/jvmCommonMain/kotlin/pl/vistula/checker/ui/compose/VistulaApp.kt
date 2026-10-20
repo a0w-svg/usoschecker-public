@@ -206,7 +206,7 @@ fun VistulaApp(
                 } else {
                     val changes = repository.sync(
                         true,
-                        { s -> UsosClient(s, java.util.function.Consumer { msg -> statusMessage = msg }).snapshot() },
+                        { s -> UsosClient(s, java.util.function.Consumer { msg -> statusMessage = pl.vistula.checker.core.SyncProgress.localized(msg, language) }).snapshot() },
                         { diff ->
                             if (diff.isNotEmpty() && state.optBoolean("notifications", true)) {
                                 notifier?.notifyChanges(diff)
@@ -1687,7 +1687,11 @@ fun MoreScreen(
                 "tasks" to strings.sectionTasks,
                 "attendance" to strings.sectionAttendance,
                 "services" to strings.sectionServices
-            ).forEach { (id, title) ->
+            ).let { sections ->
+                if (pl.vistula.checker.core.AccountRole.lecturer(state)) sections + ("teaching" to when (language) {
+                    "en" -> "Lecturer panel"; "uk" -> "Панель викладача"; else -> "Panel wykładowcy"
+                }) else sections
+            }.forEach { (id, title) ->
                 FilterChip(
                     selected = activeSection == id,
                     onClick = { activeSection = id },
@@ -1697,6 +1701,7 @@ fun MoreScreen(
         }
 
         when (activeSection) {
+            "teaching" -> LecturerSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
             "account" -> AccountSection(
                 state = state,
                 repository = repository,
@@ -1725,6 +1730,7 @@ fun MoreScreen(
             )
             "services" -> PaymentsAndServicesSection(
                 state = state,
+                language = language,
                 snapshot = snapshot,
                 repository = repository,
                 onOpenUrl = onOpenUrl,

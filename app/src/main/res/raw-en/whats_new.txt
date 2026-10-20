@@ -1,6 +1,7 @@
-• Branch detection from active USOS programmes, manual selection, and campus-aware university information and announcements.
-• Simpler More screens and Settings, clearer labels, and details available on demand.
-• Working news from the official Vistula website and a separate USOS announcements source. University news works without an account.
-• Independent payment refresh, installment plans, remittance history, and document receipt forms. Changes require confirmation and USOS permission.
-• Improved translations, error messages, notifications, and offline cache states.
-• Protection against changed installment terms, account changes during requests, and excessively long API responses.
+1.3.1
+
+• Fixed campus and contact loading, including manually selected branches.
+• Translated refresh progress into English and Ukrainian.
+• Student cards: issue, fetch mObywatel activation data and revoke mobile cards.
+• Automatic lecturer detection, teaching timetable and courses panel.
+• Hardened desktop storage writes and API catalog paths.

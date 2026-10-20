@@ -8,7 +8,8 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.LinkOption
+import java.nio.file.attribute.PosixFilePermissions
 import java.security.SecureRandom
 import java.time.Instant
 import java.util.Locale
@@ -49,34 +50,37 @@ object DesktopPlatform {
     }
 
     internal fun restrictPermissions(file: File) {
-        try {
-            val path = file.toPath()
-            if (path.fileSystem.supportedFileAttributeViews().contains("posix")) {
-                Files.setPosixFilePermissions(
-                    path,
-                    setOf(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE)
-                )
-            } else {
-                file.setReadable(false, false)
-                file.setReadable(true, true)
-                file.setWritable(false, false)
-                file.setWritable(true, true)
+        val path = file.toPath()
+        if (Files.isSymbolicLink(path)) throw IOException("Symbolic links are not allowed for private storage")
+        if (path.fileSystem.supportedFileAttributeViews().contains("posix")) {
+            Files.setPosixFilePermissions(path, PosixFilePermissions.fromString(if (file.isDirectory) "rwx------" else "rw-------"))
+        } else {
+            if (!file.setReadable(false, false) || !file.setReadable(true, true) ||
+                !file.setWritable(false, false) || !file.setWritable(true, true)) {
+                throw IOException("Cannot restrict private storage permissions")
             }
-        } catch (ignored: Exception) {}
+        }
     }
 
     internal fun atomicWrite(target: File, bytes: ByteArray) {
-        val parent = target.parentFile
-        if (parent != null && !parent.exists()) parent.mkdirs()
-        val temp = File(parent, target.name + ".tmp")
-        Files.write(temp.toPath(), bytes)
-        restrictPermissions(temp)
+        val parent = target.absoluteFile.parentFile
+        Files.createDirectories(parent.toPath())
+        val posix = parent.toPath().fileSystem.supportedFileAttributeViews().contains("posix")
+        // Create a unique file with private permissions before any key material is written.
+        val attrs = if (posix) arrayOf(PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"))) else emptyArray()
+        val temp = Files.createTempFile(parent.toPath(), ".vistula-", ".tmp", *attrs)
         try {
-            Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
-        } catch (e: IOException) {
-            Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            restrictPermissions(temp.toFile())
+            Files.write(temp, bytes)
+            try {
+                Files.move(temp, target.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
+            } catch (e: java.nio.file.AtomicMoveNotSupportedException) {
+                Files.move(temp, target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            }
+            restrictPermissions(target)
+        } finally {
+            Files.deleteIfExists(temp)
         }
-        restrictPermissions(target)
     }
 }
 
@@ -94,10 +98,13 @@ class DesktopVault @JvmOverloads constructor(
     @Synchronized
     @Throws(Exception::class)
     private fun key(): SecretKey {
-        if (keyFile.exists()) {
+        if (Files.exists(keyFile.toPath(), LinkOption.NOFOLLOW_LINKS)) {
+            DesktopPlatform.restrictPermissions(keyFile)
             val raw = Files.readAllBytes(keyFile.toPath())
-            if (raw.size == 32) return SecretKeySpec(raw, "AES")
+            if (raw.size != 32) throw IOException("Invalid vault key; existing data was preserved")
+            return SecretKeySpec(raw, "AES")
         }
+        if (stateFile.exists()) throw IOException("Missing vault key; existing data was preserved")
         val raw = ByteArray(32)
         SecureRandom().nextBytes(raw)
         DesktopPlatform.atomicWrite(keyFile, raw)

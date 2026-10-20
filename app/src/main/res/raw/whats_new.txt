@@ -1,6 +1,7 @@
-• Wykrywanie filii z aktywnych studiów USOS, ręczny wybór oraz informacje i komunikaty dopasowane do kampusu.
-• Prostsze ekrany Więcej i ustawień, czytelniejsze opisy i szczegóły rozwijane na żądanie.
-• Działające aktualności z oficjalnej strony Vistuli oraz osobne źródło komunikatów USOS. Wiadomości można pobrać bez konta.
-• Osobne odświeżanie płatności, plany rat, historia wpłat oraz formularze odbioru decyzji. Zmiany wymagają potwierdzenia i uprawnień USOS.
-• Poprawione tłumaczenia, komunikaty błędów, powiadomienia oraz prezentacja danych zapisanych offline.
-• Ochrona przed nieaktualnymi warunkami planu rat, zmianą konta w trakcie operacji i zbyt długimi odpowiedziami API.
+1.3.1
+
+• Poprawione pobieranie danych kampusu i kontaktów, także po ręcznym wyborze filii.
+• Tłumaczenia postępu odświeżania na język angielski i ukraiński.
+• Legitymacje: wydawanie, dane aktywacji w mObywatelu i unieważnianie mLegitymacji.
+• Wykrywanie konta wykładowcy, plan prowadzonych zajęć i panel przedmiotów.
+• Zabezpieczenie zapisu magazynu na komputerze i ścieżek katalogu API.

@@ -25,6 +25,13 @@ object CampusAffiliation {
             units.put(JSONObject().put("id", StudentServices.text(faculty, "id"))
                 .put("name", ApiLanguage.safe(faculty.opt("name"))).put("campus", campus)
                 .put("address", StudentServices.text(faculty, "postal_address"))
+                .put("phones", JSONArray().apply {
+                    val phones = faculty.optJSONArray("phone_numbers") ?: JSONArray()
+                    for (n in 0 until phones.length()) {
+                        val phone = phones.opt(n)
+                        if (phone is String && phone.isNotBlank()) put(phone)
+                    }
+                })
                 .put("email", StudentServices.text(faculty, "email"))
                 .put("homepage", StudentServices.text(faculty, "homepage_url")))
         }

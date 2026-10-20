@@ -13,36 +13,44 @@ class MoreScreenController private constructor() {
         @JvmStatic
         fun render(activity: MainActivity, content: LinearLayout) {
             ToolScreenUi.header(activity, content, R.string.nav_more, null)
-            UiHelper.note(activity, content, activity.getString(R.string.section_studies), UiHelper.MUTED)
-            UiHelper.toolTile(
-                activity,
-                content,
-                R.drawable.ic_nav_card,
-                activity.getString(R.string.cards_title),
-                activity.getString(R.string.cards_description)
-            ) { activity.navigate(13) }
-            UiHelper.toolTile(
-                activity,
-                content,
-                R.drawable.ic_nav_documents,
-                activity.getString(R.string.documents_title),
-                activity.getString(R.string.documents_description)
-            ) { activity.navigate(14) }
-            UiHelper.toolTile(
-                activity,
-                content,
-                R.drawable.ic_nav_grades,
-                activity.getString(R.string.tool_gpa_title),
-                activity.getString(R.string.tool_gpa_desc)
-            ) { activity.navigate(9) }
+            val account = activity.serviceAccountState()
+            if (pl.vistula.checker.core.AccountRole.lecturer(account)) {
+                UiHelper.toolTile(activity, content, R.drawable.ic_nav_home, activity.getString(R.string.lecturer_title),
+                    activity.getString(R.string.lecturer_description)) { activity.navigate(15) }
+            }
+            if (!pl.vistula.checker.core.AccountRole.lecturerOnly(account)) {
+                UiHelper.note(activity, content, activity.getString(R.string.section_studies), UiHelper.MUTED)
+                UiHelper.toolTile(
+                    activity,
+                    content,
+                    R.drawable.ic_nav_card,
+                    activity.getString(R.string.cards_title),
+                    activity.getString(R.string.cards_description)
+                ) { activity.navigate(13) }
+                UiHelper.toolTile(
+                    activity,
+                    content,
+                    R.drawable.ic_nav_documents,
+                    activity.getString(R.string.documents_title),
+                    activity.getString(R.string.documents_description)
+                ) { activity.navigate(14) }
+                UiHelper.toolTile(
+                    activity,
+                    content,
+                    R.drawable.ic_nav_grades,
+                    activity.getString(R.string.tool_gpa_title),
+                    activity.getString(R.string.tool_gpa_desc)
+                ) { activity.navigate(9) }
 
-            UiHelper.toolTile(
-                activity,
-                content,
-                R.drawable.ic_nav_attendance,
-                activity.getString(R.string.tool_attendance_title),
-                activity.getString(R.string.tool_attendance_desc)
-            ) { activity.navigate(12) }
+                UiHelper.toolTile(
+                    activity,
+                    content,
+                    R.drawable.ic_nav_attendance,
+                    activity.getString(R.string.tool_attendance_title),
+                    activity.getString(R.string.tool_attendance_desc)
+                ) { activity.navigate(12) }
+
+            }
 
             UiHelper.toolTile(
                 activity,

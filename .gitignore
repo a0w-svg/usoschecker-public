@@ -79,3 +79,6 @@ security-reports/
 
 # Kotlin compiler session cache
 .kotlin/
+
+# Local verification tools and downloaded JDK
+work/

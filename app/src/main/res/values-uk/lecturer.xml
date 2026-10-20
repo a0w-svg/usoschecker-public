@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lecturer_title">Панель викладача</string>
+    <string name="lecturer_description">Предмети та розклад занять вашого облікового запису викладача.</string>
+    <string name="lecturer_schedule">Розклад викладання</string>
+    <string name="lecturer_empty">USOS не повернув активних предметів викладання.</string>
+    <string name="lecturer_usosweb">Функції викладача в USOSweb</string>
+</resources>

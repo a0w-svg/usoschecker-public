@@ -20,6 +20,7 @@ class CampusGuideController private constructor() {
                 CampusSettingsController.campusInformation(activity, content, activity.serviceAccountState())
                 return
             }
+            CampusSettingsController.campusInformation(activity, content, activity.serviceAccountState())
             // Campus Location
             val campusCard = UiHelper.section(activity, content, Color.WHITE)
             UiHelper.add(activity, campusCard, activity.getString(R.string.campus_name), 18, UiHelper.INK, true)

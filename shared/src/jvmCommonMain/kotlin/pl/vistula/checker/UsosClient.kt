@@ -40,6 +40,8 @@ class UsosClient @JvmOverloads constructor(
     private val token: String = state.optString("token")
     private val tokenSecret: String = state.optString("tokenSecret")
     private val scopes: String = StudentServices.normalizeScopes(state.optString("scopes"))
+    private val lecturer = pl.vistula.checker.core.AccountRole.lecturer(state)
+    private val lecturerOnly = pl.vistula.checker.core.AccountRole.lecturerOnly(state)
     private val planDays: Int = min(112, max(56, state.optInt("planDays", 56) / 7 * 7))
 
     fun interface ConnectionSource {
@@ -316,7 +318,7 @@ class UsosClient @JvmOverloads constructor(
 
     @Throws(Exception::class)
     private fun fetchSnapshot(): Snapshot {
-        for (required in listOf("grades", "studies")) {
+        for (required in if (lecturerOnly) emptyList() else listOf("grades", "studies")) {
             if (!StudentServices.hasScope(scopes, required)) {
                 throw IllegalStateException(
                     "Brak zakresu zgody „$required”. Połącz konto ponownie z zakresami grades|studies|offline_access."
@@ -326,6 +328,10 @@ class UsosClient @JvmOverloads constructor(
         val start = LocalDate.now(ZONE).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val s = Snapshot(start.toString(), start.plusDays(planDays.toLong()).toString())
         for (language in arrayOf("en", "uk")) s.localized[language] = Snapshot(s.start, s.end)
+        if (lecturerOnly) {
+            loadTimetable(s, start)
+            return s
+        }
         reportProgress("Pobieranie semestrów · courses/user")
         val editions = JSONObject(
             get(
@@ -405,7 +411,10 @@ class UsosClient @JvmOverloads constructor(
         val missingPayments = paymentsScopeMissing
         val paymentMessage = paymentsNotice
         parseLanguages(s) { variant ->
-            variant.payments = UsosParser.payments(accountData, paymentData, missingPayments, paymentMessage)
+            variant.payments = UsosParser.payments(accountData, paymentData, missingPayments,
+                if (paymentMessage.isEmpty()) "" else ApiLanguage.label(paymentMessage,
+                    "Payment access is unavailable. Enable the payments scope and reconnect your account.",
+                    "Немає доступу до платежів. Увімкніть дозвіл payments і підключіть обліковий запис знову."))
         }
 
         reportProgress("Pobieranie prac dyplomowych · theses/user")
@@ -477,13 +486,31 @@ class UsosClient @JvmOverloads constructor(
             parseLanguages(s) { variant -> UsosParser.grades(variant, grades, UsosParser.courseNames(editions), points) }
             i += 8
         }
+        loadTimetable(s, start)
+        enrichGradeUnits(s)
+        for (translation in s.localized.values) {
+            for (record in translation.records.values) {
+                val canonical = s.records[record.id]
+                if (canonical != null) {
+                    record.metadata.put(
+                        "classTypeCanonical",
+                        if (canonical.kind == "ocena") GradeBrowser.classType(canonical, s) else canonical.optMeta("classType")
+                    )
+                }
+            }
+        }
+        return s
+    }
+
+    @Throws(Exception::class)
+    private fun loadTimetable(s: Snapshot, start: LocalDate) {
         val weeks = TimetableLoader.load(
             start,
             planDays,
             { pageStart, days ->
                 JSONArray(
                     get(
-                        "services/tt/student",
+                        if (lecturer) "services/tt/user" else "services/tt/student",
                         mapOf(
                             "start" to pageStart.toString(),
                             "days" to days.toString(),
@@ -503,26 +530,12 @@ class UsosClient @JvmOverloads constructor(
                 )
             )
         }
-        reportProgress("Odczyt planu zajęć · tt/student")
+        reportProgress("Odczyt planu zajęć · " + if (lecturer) "tt/user" else "tt/student")
         for (rows in weeks) {
             parseLanguages(s) { variant -> UsosParser.timetable(variant, rows, lecturerNames) }
         }
-        enrichGradeUnits(s)
-        for (translation in s.localized.values) {
-            for (record in translation.records.values) {
-                val canonical = s.records[record.id]
-                if (canonical != null) {
-                    record.metadata.put(
-                        "classTypeCanonical",
-                        if (canonical.kind == "ocena") GradeBrowser.classType(canonical, s) else canonical.optMeta("classType")
-                    )
-                }
-            }
-        }
-        return s
     }
 
-    @Throws(Exception::class)
     private fun enrichGradeUnits(snapshot: Snapshot) {
         val unitIds = ArrayList(
             snapshot.records.values
@@ -628,7 +641,7 @@ class UsosClient @JvmOverloads constructor(
         @JvmStatic
         fun profileFields(state: JSONObject): String {
             val scopes = state.optString("scopes")
-            var fields = "id|first_name|last_name|student_status"
+            var fields = "id|first_name|last_name|student_status|staff_status"
             if (StudentServices.hasScope(scopes, "studies")) {
                 fields += "|student_number|student_programmes[programme[name]|admission_date|stages|status]"
             }

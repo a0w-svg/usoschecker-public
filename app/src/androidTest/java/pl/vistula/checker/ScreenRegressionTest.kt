@@ -267,12 +267,13 @@ class ScreenRegressionTest {
     }
 
     @Test
-    fun cardDemoHasPhysicalAndMobileStatusAndDoesNotUseLiveAccount() {
+    fun cardDemoSupportsActivationWithoutPhysicalCardAndDoesNotUseLiveAccount() {
         main { rule.activity.navigate(13) }
-        has("Aleksandra Nowak · DEMO")
         has(rule.activity.getString(R.string.mcard_ready))
+        has(rule.activity.getString(R.string.cards_activation))
+        absent(rule.activity.getString(R.string.cards_physical_title))
         capture("student-cards")
-        main { rule.activity.showMobileActivation("demo-order") }
+        main { rule.activity.mobileCardAction(false, "demo-order") }
         has(rule.activity.getString(R.string.mcard_ready))
         assertFalse(Repository(rule.activity).read().toString().contains("demo-order"))
     }

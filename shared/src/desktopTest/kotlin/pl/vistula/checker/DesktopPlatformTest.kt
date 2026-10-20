@@ -9,6 +9,33 @@ import org.json.JSONObject
 
 class DesktopPlatformTest {
     @Test
+    fun atomicWritesIgnorePredictableTempSymlinksAndKeepFilesPrivate() {
+        val directory = Files.createTempDirectory("vistula-private-test")
+        try {
+            if (!directory.fileSystem.supportedFileAttributeViews().contains("posix")) return
+            val victim = directory.resolve("victim")
+            Files.writeString(victim, "keep")
+            Files.createSymbolicLink(directory.resolve("vault.key.tmp"), victim)
+            DesktopVault(directory.toFile()).write(JSONObject().put("token", "fixture"))
+            assertEquals("keep", Files.readString(victim))
+            assertEquals(java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"),
+                Files.getPosixFilePermissions(directory.resolve("vault.key")))
+            Files.list(directory).use { files -> assertFalse(files.anyMatch { it.fileName.toString().startsWith(".vistula-") }) }
+        } finally { directory.toFile().deleteRecursively() }
+    }
+
+    @Test
+    fun invalidExistingKeyIsNeverReplaced() {
+        val directory = Files.createTempDirectory("vistula-invalid-key")
+        try {
+            val key = directory.resolve("vault.key")
+            Files.writeString(key, "invalid")
+            kotlin.test.assertFailsWith<java.io.IOException> { DesktopVault(directory.toFile()).write(JSONObject()) }
+            assertEquals("invalid", Files.readString(key))
+        } finally { directory.toFile().deleteRecursively() }
+    }
+
+    @Test
     fun desktopVaultRoundTripsAndEncryptsState() {
         val tempDir = Files.createTempDirectory("vistula_desktop_vault_test").toFile()
         try {

@@ -97,3 +97,10 @@ są oznaczane identyfikatorem kampusu. Zmiana filii usuwa cache wiadomości; sta
 innej filii nie jest wyświetlany. Publiczny kanał strony głównej jest dostępny dla Warszawy;
 pozostałe filie korzystają z filtrowanych komunikatów USOS oraz zweryfikowanych linków.
 Nie wysyłamy identyfikatora studenta ani danych konta do publicznej strony uczelni.
+
+Dane aktywacji mLegitymacji (`token`, `distribution_pass`) pobieramy wyłącznie
+na żądanie z `services/cards/mcard_order2`. Nie trafiają do cache, logów ani
+zapisanego stanu ekranu. Sprawdzamy identyfikator zamówienia i status gotowości
+(`ready_to_receive` lub `ready`). Android zasłania okno aktywacji przed zrzutami
+ekranu i zamyka je po przejściu aplikacji w tło. Wydanie i unieważnienie wymagają
+potwierdzenia; status nie jest ponawiany jako zapis po niepewnej odpowiedzi.

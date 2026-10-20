@@ -556,6 +556,7 @@ fun AttendanceSection(
 fun PaymentsAndServicesSection(
     state: JSONObject,
     snapshot: Snapshot?,
+    language: String = "pl",
     repository: SharedRepository,
     onOpenUrl: (String) -> Unit,
     onReloadState: () -> Unit,
@@ -631,16 +632,7 @@ fun PaymentsAndServicesSection(
                     }
                 }
             }
-            val cardsArr = services?.optJSONObject("cards")?.optJSONArray("data")
-            if (cardsArr != null && cardsArr.length() > 0) {
-                for (i in 0 until cardsArr.length()) {
-                    val card = StudentServices.Card(cardsArr.getJSONObject(i))
-                    Text(
-                        "Legitymacja #${card.id} (${card.studentNumber}) · ważna do: ${card.expires.ifEmpty { "—" }}",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
+            MobileCardControls(state, repository, language, onReloadState, onStatusMessage, runAsync)
             val docsArr = services?.optJSONObject("documents")?.optJSONArray("data")
             if (docsArr != null && docsArr.length() > 0) {
                 for (i in 0 until docsArr.length()) {
@@ -651,8 +643,8 @@ fun PaymentsAndServicesSection(
                     )
                 }
             }
-            if ((cardsArr == null || cardsArr.length() == 0) && (docsArr == null || docsArr.length() == 0)) {
-                Text("Brak pobranych legitymacji lub dokumentów.", style = MaterialTheme.typography.bodyMedium)
+            if (docsArr == null || docsArr.length() == 0) {
+                Text("Brak pobranych dokumentów.", style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
@@ -689,3 +681,125 @@ fun PaymentsAndServicesSection(
     }
 }
 
+
+@Composable
+private fun MobileCardControls(
+    state: JSONObject, repository: SharedRepository, language: String,
+    onReloadState: () -> Unit, onStatusMessage: (String) -> Unit, runAsync: (() -> Unit) -> Unit
+) {
+    fun label(polish: String, en: String, uk: String) = when (pl.vistula.checker.core.ApiLanguage.normalize(language)) {
+        "en" -> en; "uk" -> uk; else -> polish
+    }
+    val data = state.optJSONObject("studentServices")?.optJSONObject("mcard")?.optJSONObject("data")
+    val latest = data?.optJSONObject("latest_order")
+    val id = latest?.optString("id").orEmpty()
+    val live = state.optString("token").isNotEmpty() && state.optString("token") != "demo" &&
+        !state.optBoolean("authorizationError") && StudentServices.hasScope(state.optString("scopes"), "cards")
+    var pending by remember(state.optString("accountSession"), id) { mutableStateOf<Boolean?>(null) }
+    var activation by remember(state.optString("accountSession"), id) { mutableStateOf<JSONObject?>(null) }
+    Text(label("mLegitymacja", "Mobile student card", "Мобільне студентське посвідчення"), style = MaterialTheme.typography.titleMedium)
+    for (order in listOf(true, false)) {
+        val field = if (order) "why_cannot_order" else "why_cannot_revoke"
+        val reason = StudentServices.localized(data?.opt(field), language)
+        if (reason.isNotEmpty()) Text(reason)
+        val known = data?.optBoolean(if (order) "orderEligibilityKnown" else "revokeEligibilityKnown") == true
+        if (known && reason.isEmpty() && (order || id.isNotEmpty())) {
+            OutlinedButton(enabled = live, onClick = { pending = order }) {
+                Text(if (order) label("Wydaj", "Issue", "Видати") else label("Unieważnij", "Revoke", "Анулювати"))
+            }
+        }
+    }
+    if (id.isNotEmpty() && pl.vistula.checker.MobileCardActions.ready(latest?.optString("status").orEmpty())) {
+        OutlinedButton(enabled = live, onClick = {
+            runAsync {
+                try {
+                    val credentials = repository.read()
+                    check(SharedRepository.sameAccount(state, credentials))
+                    val result = pl.vistula.checker.MobileCardActions.activation(UsosClient(credentials), id)
+                    check(SharedRepository.sameAccount(credentials, repository.read()))
+                    activation = result
+                } catch (_: Exception) {
+                    onStatusMessage(label("Dane aktywacji nie są jeszcze dostępne.", "Activation data is not available yet.", "Дані активації ще недоступні."))
+                }
+            }
+        }) { Text(label("Pobierz dane aktywacji", "Fetch activation data", "Отримати дані активації")) }
+    }
+    activation?.let { data ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { activation = null },
+            title = { Text(label("Aktywacja w mObywatelu", "Activation in mObywatel", "Активація в mObywatel")) },
+            text = {
+                androidx.compose.foundation.text.selection.SelectionContainer {
+                    Column {
+                        Text(label("Token aktywacji", "Activation token", "Токен активації"))
+                        Text(StudentServices.text(data, "token"))
+                        Text(label("Kod dystrybucyjny", "Distribution password", "Пароль розповсюдження"))
+                        Text(StudentServices.text(data, "distribution_pass"))
+                    }
+                }
+            },
+            confirmButton = { Button(onClick = { activation = null }) { Text(label("Zamknij", "Close", "Закрити")) } }
+        )
+    }
+    pending?.let { order ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pending = null },
+            title = { Text(if (order) label("Wydać mLegitymację?", "Issue mobile card?", "Видати посвідчення?")
+                else label("Unieważnić mLegitymację?", "Revoke mobile card?", "Анулювати посвідчення?")) },
+            confirmButton = {
+                Button(onClick = {
+                    pending = null
+                    runAsync {
+                        try {
+                            val credentials = repository.read()
+                            check(SharedRepository.sameAccount(state, credentials))
+                            pl.vistula.checker.MobileCardActions.perform(UsosClient(credentials), credentials, order, id) {
+                                check(SharedRepository.sameAccount(credentials, repository.read()))
+                            }
+                            StudentServiceLoader.refresh(repository, "cards")
+                            onReloadState()
+                        } catch (_: pl.vistula.checker.MobileCardActions.Uncertain) {
+                            onStatusMessage(label("Wynik nieznany. Odśwież status przed ponowieniem.",
+                                "Result unknown. Refresh the status before trying again.", "Результат невідомий. Оновіть статус перед повтором."))
+                        } catch (_: Exception) {
+                            onStatusMessage(label("Nie udało się wykonać operacji.", "Could not complete the action.", "Не вдалося виконати дію."))
+                        }
+                    }
+                }) { Text(label("Potwierdź", "Confirm", "Підтвердити")) }
+            },
+            dismissButton = { OutlinedButton(onClick = { pending = null }) { Text(label("Anuluj", "Cancel", "Скасувати")) } }
+        )
+    }
+}
+
+@Composable
+fun LecturerSection(
+    state: JSONObject, repository: SharedRepository, language: String, onOpenUrl: (String) -> Unit,
+    onReloadState: () -> Unit, onStatusMessage: (String) -> Unit, runAsync: (() -> Unit) -> Unit
+) {
+    if (!pl.vistula.checker.core.AccountRole.lecturer(state)) return
+    fun label(polish: String, english: String, ukrainian: String) = when (pl.vistula.checker.core.ApiLanguage.normalize(language)) {
+        "en" -> english; "uk" -> ukrainian; else -> polish
+    }
+    Text(label("Panel wykładowcy", "Lecturer panel", "Панель викладача"), style = MaterialTheme.typography.titleLarge)
+    OutlinedButton(onClick = {
+        runAsync {
+            try {
+                StudentServiceLoader.refresh(repository, "teaching")
+                onReloadState()
+            } catch (_: Exception) {
+                onStatusMessage(label("Nie udało się pobrać przedmiotów.", "Could not load courses.", "Не вдалося завантажити предмети."))
+            }
+        }
+    }) { Text(label("Odśwież", "Refresh", "Оновити")) }
+    val courses = state.optJSONObject("studentServices")?.optJSONObject("teaching")?.optJSONObject("data")?.optJSONArray("courses")
+    if (courses == null || courses.length() == 0) Text(label("Brak pobranych przedmiotów.", "No courses loaded.", "Немає завантажених предметів."))
+    else for (i in 0 until courses.length()) {
+        val course = courses.getJSONObject(i)
+        Text(StudentServices.localized(course.opt("name"), language), style = MaterialTheme.typography.titleMedium)
+        Text(StudentServices.localized(course.opt("term"), language))
+    }
+    OutlinedButton(onClick = { onOpenUrl("https://usosweb.vistula.edu.pl/kontroler.php?_action=dla_prac") }) {
+        Text(label("Funkcje wykładowcy w USOSweb", "Lecturer tools in USOSweb", "Функції викладача в USOSweb"))
+    }
+}

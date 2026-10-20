@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lecturer_title">Panel wykładowcy</string>
+    <string name="lecturer_description">Prowadzone przedmioty i plan zajęć wykrytego konta wykładowcy.</string>
+    <string name="lecturer_schedule">Plan prowadzonych zajęć</string>
+    <string name="lecturer_empty">USOS nie zwrócił aktywnych prowadzonych przedmiotów.</string>
+    <string name="lecturer_usosweb">Funkcje wykładowcy w USOSweb</string>
+</resources>

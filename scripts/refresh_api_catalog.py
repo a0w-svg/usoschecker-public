@@ -2,6 +2,7 @@
 """Refresh the public API reference bundled with the app. No credentials are sent."""
 import concurrent.futures
 import json
+import re
 from pathlib import Path
 import time
 import urllib.parse
@@ -16,10 +17,13 @@ def read(path):
 
 def method(entry):
     name = entry['name']
+    if not isinstance(name, str) or not re.fullmatch(r'services/(?:[a-z0-9_]+/)+[a-z0-9_]+', name):
+        raise ValueError('Invalid API method name')
     for attempt in range(3):
         try:
             data = read('services/apiref/method?' + urllib.parse.urlencode({'name': name}))
-            assert data['name'] == name
+            if data.get('name') != name:
+                raise ValueError('API method name mismatch')
             target = DEST / (name.replace('/', '__') + '.json')
             target.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
             time.sleep(0.25)

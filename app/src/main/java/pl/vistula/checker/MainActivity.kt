@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity() {
     private var demo: Boolean = false
     private var demoChanged: Boolean = false
     private var busy: Boolean = false
+    private var mobileActivationDialog: androidx.appcompat.app.AlertDialog? = null
     private var tab: Int = 0
 
     // State preserved across configuration changes
@@ -400,6 +401,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        mobileActivationDialog?.dismiss()
+        mobileActivationDialog = null
         super.onPause()
         handler.removeCallbacks(refresh)
     }
@@ -448,14 +451,14 @@ class MainActivity : AppCompatActivity() {
         scroll.scrollTo(0, 0)
         render()
         if (!demo && !busy) {
-            if (target == 10 && connected() && studentServices().optJSONObject("affiliation") == null) {
+            if (target == 10 && connected() && System.currentTimeMillis() - (studentServices().optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L) > 24 * 60 * 60_000L) {
                 refreshStudentServices("affiliation")
                 return
             }
-            val section = when (target) { 11 -> "news"; 13 -> "cards"; 14 -> "documents"; 8 -> "payments"; else -> null }
+            val section = when (target) { 11 -> "news"; 13 -> "cards"; 14 -> "documents"; 8 -> "payments"; 15 -> "teaching"; else -> null }
             if (target == 11 && !connected() && CampusAffiliation.selected(state).isEmpty()) return
             if (section != null && (section == "news" || connected()) &&
-                System.currentTimeMillis() - (studentServices().optJSONObject(section)?.optLong("attemptAt") ?: 0L) > 15 * 60_000L) refreshStudentServices(section)
+                System.currentTimeMillis() - (studentServices().optJSONObject(if (section == "cards") "mcard" else section)?.optLong("attemptAt") ?: 0L) > 15 * 60_000L) refreshStudentServices(section)
         }
     }
 
@@ -475,7 +478,7 @@ class MainActivity : AppCompatActivity() {
                 2 -> R.id.nav_item_grades
                 5 -> R.id.nav_item_plan
                 1 -> R.id.nav_item_history
-                6, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14 -> R.id.nav_item_more
+                6, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15 -> R.id.nav_item_more
                 else -> R.id.nav_item_home
             }
             nav.menu.findItem(navMenuId).isChecked = true
@@ -485,6 +488,7 @@ class MainActivity : AppCompatActivity() {
             if (demo) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.MUTED)
 
             when (tab) {
+                15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, state)
                 13 -> StudentCardsController.render(
                     this,
                     content,
@@ -923,7 +927,7 @@ class MainActivity : AppCompatActivity() {
                 return
             }
             val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; else -> section }
-            if (section !in setOf("news", "usosNews", "affiliation") && !StudentServices.hasScope(state.optString("scopes"), scope)) {
+            if (section !in setOf("news", "usosNews", "affiliation", "teaching") && !StudentServices.hasScope(state.optString("scopes"), scope)) {
                 error(getString(R.string.services_scope_required, scope))
                 return
             }
@@ -963,6 +967,9 @@ class MainActivity : AppCompatActivity() {
                 if (campus.isEmpty()) latest.remove("campusOverride") else latest.put("campusOverride", campus)
                 latest.optJSONObject("studentServices")?.remove("news")
             }
+            val credentials = repository.read()
+            if (credentials.optString("token").isNotEmpty() && !credentials.optBoolean("authorizationError") &&
+                credentials.optLong("retryAt") <= System.currentTimeMillis()) StudentServiceLoader.refresh(repository, "affiliation")
             repository.read()
         }, { latest ->
             state = latest
@@ -1082,30 +1089,10 @@ class MainActivity : AppCompatActivity() {
                     {
                         val credentials = serviceCredentials("cards")
                         val client = UsosClient(credentials)
-                        val eligibility = JSONObject(
-                            client.get("services/cards/mcard2", mapOf("fields" to "why_cannot_order|why_cannot_revoke"))
-                        )
-                        if (!eligibility.has(if (order) "why_cannot_order" else "why_cannot_revoke")) {
-                            throw IllegalStateException(getString(R.string.cards_action_rejected))
-                        }
-                        val reason = StudentServices.localized(
-                            eligibility.opt(if (order) "why_cannot_order" else "why_cannot_revoke"),
-                            Language.currentLocale(this).language
-                        )
-                        if (reason.isNotEmpty()) throw IllegalStateException(reason)
-                        val endpoint = if (order) "services/cards/make_mcard_order" else "services/cards/revoke_mcard"
-                        val response = JSONObject(
-                            client.request(
-                                "POST",
-                                endpoint,
-                                if (order) emptyMap() else mapOf("order_id" to id),
-                                true,
-                                credentials.optString("token"),
-                                credentials.optString("tokenSecret")
-                            )
-                        )
-                        if (!response.optBoolean("success")) {
-                            throw IllegalStateException(getString(R.string.cards_action_rejected))
+                        pl.vistula.checker.MobileCardActions.perform(client, credentials, order, id) {
+                            check(SharedRepository.sameAccount(credentials, repository.read())) {
+                                getString(R.string.service_action_unavailable)
+                            }
                         }
                         StudentServiceLoader.refresh(repository, "cards")
                         repository.read()
@@ -1122,33 +1109,30 @@ class MainActivity : AppCompatActivity() {
 
     fun showMobileActivation(id: String) {
         if (!liveService("cards")) return
-        task(
-            {
-                JSONObject(
-                    UsosClient(serviceCredentials("cards")).get(
-                        "services/cards/mcard_order2",
-                        mapOf("order_id" to id, "fields" to "status|token|distribution_pass")
-                    )
-                )
-            },
-            { data ->
-                val token = StudentServices.text(data, "token")
-                val password = StudentServices.text(data, "distribution_pass")
-                if ("ready_to_receive" != StudentServices.text(data, "status") || token.isEmpty() || password.isEmpty()) {
-                    error(getString(R.string.cards_activation_unavailable))
-                    return@task
-                }
-                val dialog = MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.cards_activation_title)
-                    .setMessage(getString(R.string.cards_activation_data, token, password))
-                    .setPositiveButton(R.string.btn_close, null)
-                    .create()
-                dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-                dialog.show()
-                val message = dialog.findViewById<TextView?>(android.R.id.message)
-                message?.setTextIsSelectable(true)
+        task({
+            val credentials = serviceCredentials("cards")
+            val data = MobileCardActions.activation(UsosClient(credentials), id)
+            Pair(credentials, data)
+        }, { result ->
+            if (!SharedRepository.sameAccount(result.first, repository.read()) ||
+                !lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED)) return@task
+            val data = result.second
+            mobileActivationDialog?.dismiss()
+            val dialog = MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.cards_activation_title)
+                .setMessage(getString(R.string.cards_activation_data,
+                    StudentServices.text(data, "token"), StudentServices.text(data, "distribution_pass")))
+                .setPositiveButton(R.string.btn_close, null).create()
+            dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            dialog.setOnDismissListener {
+                dialog.findViewById<TextView>(android.R.id.message)?.text = ""
+                mobileActivationDialog = null
             }
-        )
+            mobileActivationDialog = dialog
+            dialog.show()
+            dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+            dialog.findViewById<TextView>(android.R.id.message)?.setTextIsSelectable(true)
+        })
     }
 
     fun downloadStudentDocument(endpoint: String, argument: String, id: String, name: String) {
@@ -1396,7 +1380,7 @@ class MainActivity : AppCompatActivity() {
                 {
                     val changes = repository.syncAndNotify(true) { message ->
                         runOnUiThread {
-                            if (!isDestroyed) progress.text = message
+                            if (!isDestroyed) progress.text = pl.vistula.checker.core.SyncProgress.localized(message, Language.currentLocale(this).language)
                         }
                     }
                     val latest = repository.read()

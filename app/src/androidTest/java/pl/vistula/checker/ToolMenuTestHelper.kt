@@ -23,7 +23,6 @@ internal object ToolMenuTestHelper {
             R.string.api_all_methods,
             R.string.api_fav_filter,
             R.string.cards_refresh,
-            R.string.cards_all_methods,
             R.string.documents_refresh,
             R.string.documents_all_methods,
             R.string.news_refresh_btn,

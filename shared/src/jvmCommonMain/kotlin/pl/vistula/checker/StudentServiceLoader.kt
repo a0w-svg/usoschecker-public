@@ -24,11 +24,11 @@ object StudentServiceLoader {
         if (!publicRequest && credentials.optLong("retryAt") > System.currentTimeMillis()) {
             throw IllegalStateException("USOS prosi o przerwę. Spróbuj później.")
         }
-        if (section !in setOf("cards", "documents", "payments", "news", "usosNews", "remittances", "affiliation")) {
+        if (section !in setOf("cards", "documents", "payments", "news", "usosNews", "remittances", "affiliation", "teaching")) {
             throw IllegalArgumentException("Nieznana usługa.")
         }
         val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; else -> section }
-        if (section !in setOf("news", "usosNews", "affiliation") && !StudentServices.hasScope(credentials.optString("scopes"), scope)) {
+        if (section !in setOf("news", "usosNews", "affiliation", "teaching") && !StudentServices.hasScope(credentials.optString("scopes"), scope)) {
             throw IllegalStateException(
                 "Brak zakresu zgody „$scope”. Dodaj go w ustawieniach konta i połącz konto ponownie."
             )
@@ -37,22 +37,10 @@ object StudentServiceLoader {
         val previous = credentials.optJSONObject("studentServices")
         val updates = JSONObject()
         if (section == "cards") {
-            val proceed = fetch(updates, previous, "cards") {
-                StudentServices.safeCards(JSONArray(client.get("services/cards/user", emptyMap())))
-            }
-            if (proceed) {
-                fetch(updates, previous, "mcard") {
-                    StudentServices.safeMobileCard(
-                        JSONObject(
-                            client.get(
-                                "services/cards/mcard2",
-                                mapOf(
-                                    "fields" to "why_cannot_order|why_cannot_revoke|expected_expiration_date|latest_order[id|order_date|status|student_number|expiration_date]|orders[id|order_date|status|student_number|expiration_date]"
-                                )
-                            )
-                        )
-                    )
-                }
+            fetch(updates, previous, "mcard") {
+                StudentServices.safeMobileCard(JSONObject(client.get("services/cards/mcard2", mapOf(
+                    "fields" to "why_cannot_order|why_cannot_revoke|expected_expiration_date|latest_order[id|order_date|status|expiration_date]"
+                ))))
             }
         } else if (section == "documents") {
             fetch(updates, previous, "documents") {
@@ -73,7 +61,7 @@ object StudentServiceLoader {
                 else if (section == "news" || section == "usosNews") {
                     check(campus.isNotEmpty()) { "Campus selection required" }
                     ToolServiceData.fetch(client, key, campus)
-                } else ToolServiceData.fetch(client, key)
+                } else ToolServiceData.fetch(client, key, CampusAffiliation.selected(credentials), credentials)
             }
         }
         repository.update { state -> applyUpdates(state, credentials, updates) }

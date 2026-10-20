@@ -338,7 +338,8 @@ class ScreenRegressionTest {
             rule.activity.navigate(13)
         }
         has(rule.activity.getString(R.string.services_scope_required, "cards"))
-        has(rule.activity.getString(R.string.cards_empty))
+        has(rule.activity.getString(R.string.cards_mobile_empty))
+        absent(rule.activity.getString(R.string.cards_physical_title))
         main { rule.activity.navigate(14) }
         has(rule.activity.getString(R.string.services_scope_required, "adm_documents"))
     }

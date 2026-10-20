@@ -27,7 +27,7 @@ import pl.vistula.checker.core.*
 @Composable
 internal fun StudentDashboard(
     state: JSONObject, snapshot: Snapshot?, strings: UiStrings, isWide: Boolean,
-    onNavigateTab: (VistulaTab) -> Unit, onNavigateTool: (String) -> Unit,
+    onNavigateTab: (VistulaTab) -> Unit, onNavigateTool: (String) -> Unit, onOpenScheduleDate: (LocalDate) -> Unit,
     onEnableDemo: () -> Unit, onOpenUrl: (String) -> Unit
 ) {
     val language = strings.languageCode
@@ -60,7 +60,7 @@ internal fun StudentDashboard(
         }
         // Clickable summary strip, with honest unknown/empty payment states.
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            DashboardTile(strings.tabSchedule, "${lessons.count { it.intersects(today) }}", Modifier.weight(1f).widthIn(min = 140.dp)) { onNavigateTab(VistulaTab.SCHEDULE) }
+            DashboardTile(strings.tabSchedule, "${lessons.count { it.intersects(today) }}", Modifier.weight(1f).widthIn(min = 140.dp)) { onOpenScheduleDate(today) }
             DashboardTile(strings.tabGrades, "${grades.size}", Modifier.weight(1f).widthIn(min = 140.dp)) { onNavigateTab(VistulaTab.GRADES) }
             DashboardTile(strings.sectionTasks, "${tasks.size}", Modifier.weight(1f).widthIn(min = 140.dp)) { onNavigateTool("tasks") }
             DashboardTile(strings.kpiPaymentsTitle, when {
@@ -96,7 +96,7 @@ internal fun StudentDashboard(
                         }
                     }
                 }
-                OutlinedButton(onClick = { onNavigateTab(VistulaTab.SCHEDULE) }) { Text(strings.btnOpenSchedule) }
+                OutlinedButton(onClick = { onOpenScheduleDate(day) }) { Text(strings.btnOpenSchedule) }
             }
         }
         val deadlines: @Composable () -> Unit = {

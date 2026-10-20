@@ -73,6 +73,7 @@ class HomeDashboardRegressionTest {
     @Test fun installmentPreviewIncludesParentCurrencyWhenPlanHasNoUnit() {
         main {
             val a = rule.activity
+            a.setDemo(false)
             val language = a.resources.configuration.locales[0].language
             val plan = JSONObject().put("id", "fixture-plan").put("installments",
                 JSONArray().put(JSONObject().put("amount", 1250).put("payment_date", "2027-01-15")))

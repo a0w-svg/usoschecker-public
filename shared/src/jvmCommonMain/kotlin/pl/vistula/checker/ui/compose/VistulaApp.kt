@@ -149,6 +149,7 @@ fun VistulaApp(
     var state by remember { mutableStateOf(JSONObject()) }
     var currentTab by remember { mutableStateOf(VistulaTab.HOME) }
     var moreSection by remember { mutableStateOf("account") }
+    var homeScheduleDate by remember { mutableStateOf<LocalDate?>(null) }
     var themeMode by remember {
         mutableStateOf(
             preferences.getString("ui_theme_mode", preferences.getString("theme", "dark") ?: "dark") ?: "dark"
@@ -165,6 +166,8 @@ fun VistulaApp(
 
     LaunchedEffect(externalTabTrigger, externalNavigationTrigger) {
         if (externalTabTrigger != null) {
+            homeScheduleDate = null
+            moreSection = "account"
             currentTab = externalTabTrigger
         }
     }
@@ -299,7 +302,7 @@ fun VistulaApp(
                             val label = tab.label(strings)
                             NavigationRailItem(
                                 selected = currentTab == tab,
-                                onClick = { moreSection = "account"; currentTab = tab },
+                                onClick = { homeScheduleDate = null; moreSection = "account"; currentTab = tab },
                                 icon = {
                                     Icon(
                                         imageVector = tab.icon,
@@ -330,6 +333,8 @@ fun VistulaApp(
                                 TabContent(
                                     currentTab = tab,
                                     moreSection = moreSection,
+                                    homeScheduleDate = homeScheduleDate,
+                                    onOpenScheduleDate = { homeScheduleDate = it; currentTab = VistulaTab.SCHEDULE },
                                     onNavigateTool = { moreSection = it; currentTab = VistulaTab.MORE },
                                     isWide = true,
                                     state = state,
@@ -368,7 +373,7 @@ fun VistulaApp(
                                 val label = tab.label(strings)
                                 NavigationBarItem(
                                     selected = currentTab == tab,
-                                    onClick = { moreSection = "account"; currentTab = tab },
+                                    onClick = { homeScheduleDate = null; moreSection = "account"; currentTab = tab },
                                     icon = {
                                         Icon(
                                             imageVector = tab.icon,
@@ -400,6 +405,8 @@ fun VistulaApp(
                                 TabContent(
                                     currentTab = tab,
                                     moreSection = moreSection,
+                                    homeScheduleDate = homeScheduleDate,
+                                    onOpenScheduleDate = { homeScheduleDate = it; currentTab = VistulaTab.SCHEDULE },
                                     onNavigateTool = { moreSection = it; currentTab = VistulaTab.MORE },
                                     isWide = false,
                                     state = state,
@@ -494,6 +501,8 @@ private fun TopStatusBar(
 private fun TabContent(
     currentTab: VistulaTab,
     moreSection: String,
+    homeScheduleDate: LocalDate?,
+    onOpenScheduleDate: (LocalDate) -> Unit,
     onNavigateTool: (String) -> Unit,
     isWide: Boolean,
     state: JSONObject,
@@ -516,6 +525,7 @@ private fun TabContent(
     val snapshot = remember(state, language) { parseSnapshot(state, language) }
     when (currentTab) {
         VistulaTab.HOME -> HomeScreen(
+            onOpenScheduleDate = onOpenScheduleDate,
             onNavigateTool = onNavigateTool,
             state = state,
             snapshot = snapshot,
@@ -526,6 +536,7 @@ private fun TabContent(
             onOpenUrl = onOpenUrl
         )
         VistulaTab.SCHEDULE -> ScheduleScreen(
+            initialDate = homeScheduleDate,
             snapshot = snapshot,
             strings = strings,
             isWide = isWide,
@@ -568,8 +579,8 @@ private val TIME_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 fun HomeScreen(
     state: JSONObject, snapshot: Snapshot?, strings: UiStrings, isWide: Boolean,
     onNavigateTab: (VistulaTab) -> Unit, onEnableDemo: () -> Unit,
-    onOpenUrl: (String) -> Unit, onNavigateTool: (String) -> Unit
-) = StudentDashboard(state, snapshot, strings, isWide, onNavigateTab, onNavigateTool, onEnableDemo, onOpenUrl)
+    onOpenUrl: (String) -> Unit, onNavigateTool: (String) -> Unit, onOpenScheduleDate: (LocalDate) -> Unit
+) = StudentDashboard(state, snapshot, strings, isWide, onNavigateTab, onNavigateTool, onOpenScheduleDate, onEnableDemo, onOpenUrl)
 
 @Composable
 internal fun OnboardingWelcomeCard(
@@ -726,11 +737,12 @@ fun ScheduleScreen(
     strings: UiStrings,
     isWide: Boolean,
     onExportText: (filename: String, mimeType: String, content: String) -> Boolean,
-    onStatusMessage: (String) -> Unit
+    onStatusMessage: (String) -> Unit,
+    initialDate: LocalDate? = null
 ) {
     val allRecords = snapshot?.records?.values ?: emptyList()
     val allLessons = remember(snapshot) { LessonTime.sorted(allRecords) }
-    var selectedDate by remember { mutableStateOf(LocalDate.now(UsosClient.ZONE)) }
+    var selectedDate by remember(initialDate) { mutableStateOf(initialDate ?: LocalDate.now(UsosClient.ZONE)) }
     var viewMode by remember { mutableStateOf("day") } // day | week | agenda
     var searchQuery by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("") }

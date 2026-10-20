@@ -1,4 +1,5 @@
 • Nowy pulpit: plan dnia, ostatnie oceny, zadania i bezpośrednie skróty do najważniejszych ekranów.
 • Desktop: układ dopasowany do szerokiego okna, podgląd planu na dziś i jutro oraz szybkie wejście do zadań i płatności.
 • Windows x64: instalator MSI i wersja przenośna ZIP z dołączonym środowiskiem Java.
+• Kwoty rat mają dwie cyfry po przecinku i jednostkę waluty, także gdy walutę podaje nadrzędna płatność.
 • Osobny build i test uruchomienia Windows w CI oraz poprawione stany braku danych na pulpicie.

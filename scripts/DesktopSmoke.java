@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 import org.json.JSONObject;
 import pl.vistula.checker.Demo;
 import pl.vistula.checker.DesktopVault;
+import pl.vistula.checker.DesktopInstanceLock;
 import pl.vistula.checker.DesktopKeyValueStore;
 
 /** Exercises a packaged app against a disposable fixture account, never a user's data directory. */
@@ -40,6 +41,10 @@ public class DesktopSmoke {
         }
         Robot robot = new Robot(); robot.delay(7000);
         BufferedImage before = shot(robot, root, "personal-before");
+        try (DesktopInstanceLock ignored = new DesktopInstanceLock(data.toFile())) {
+            throw new AssertionError("The packaged app did not hold the account's instance lock");
+        } catch (DesktopInstanceLock.AlreadyRunning expected) { }
+
         shortcut(robot, KeyEvent.VK_D);
         robot.keyPress(KeyEvent.VK_F5); robot.keyRelease(KeyEvent.VK_F5); robot.delay(1500);
         BufferedImage demo = shot(robot, root, "demo");
@@ -48,7 +53,7 @@ public class DesktopSmoke {
             if (before.getRGB(x, y) != demo.getRGB(x, y)) changed++;
         if (changed < 100) throw new AssertionError("Demo did not visibly change the application");
         shortcut(robot, KeyEvent.VK_2); shot(robot, root, "schedule");
-        shortcut(robot, KeyEvent.VK_1); shortcut(robot, KeyEvent.VK_2); shot(robot, root, "schedule-repeat");
+        shortcut(robot, KeyEvent.VK_1); shot(robot, root, "home-between"); shortcut(robot, KeyEvent.VK_2); shot(robot, root, "schedule-repeat");
         shortcut(robot, KeyEvent.VK_5); shot(robot, root, "more");
         shortcut(robot, KeyEvent.VK_D); shot(robot, root, "personal-after");
         if (!Arrays.equals(Files.readAllBytes(root.resolve("original-state.bin")), Files.readAllBytes(data.resolve("state.bin"))))

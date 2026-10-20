@@ -12,6 +12,16 @@ import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.ui.compose.ToolReadModels
 
 class DesktopRegressionTest {
+    @Test fun aSecondDesktopInstanceCannotOpenTheSameAccountDirectory() {
+        val directory = Files.createTempDirectory("desktop-instance-regression").toFile()
+        try {
+            DesktopInstanceLock(directory).use {
+                assertFailsWith<DesktopInstanceLock.AlreadyRunning> { DesktopInstanceLock(directory) }
+            }
+            DesktopInstanceLock(directory).use { assertTrue(directory.resolve(".instance.lock").exists()) }
+        } finally { directory.deleteRecursively() }
+    }
+
     @Test fun legacyDemoRecoveryCannotClearAnAuthenticatedAccount() {
         val directory = Files.createTempDirectory("legacy-demo-recovery").toFile()
         try {

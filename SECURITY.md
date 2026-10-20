@@ -112,3 +112,6 @@ dowiązania i zbyt duże pliki oraz blokuje zapis pomiędzy instancjami i proces
 Odłączenie konta usuwa również klucz szyfrujący lokalny sejf. Interfejs otwiera
 wyłącznie zwykłe adresy HTTP/HTTPS; eksport wymaga wybrania pliku i potwierdzenia
 zastąpienia istniejącego pliku. Sekret OAuth i PIN są domyślnie maskowane.
+Drugie uruchomienie desktopu nie otwiera tego samego magazynu: blokada instancji
+jest utrzymywana przez cały czas życia procesu, również podczas jego zamykania.
+Chroni to operacje konta przed wzajemnym nadpisaniem przez dwie aplikacje.

@@ -71,3 +71,13 @@ jobs:
             desktopApp/build/compose/binaries/main/deb/*.deb
             desktopApp/build/compose/binaries/main/deb/SHA256SUMS.txt
           retention-days: 7
+      - name: Display-test diagnostics (fixture data only)
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-fixture-diagnostics-${{ github.sha }}
+          path: |
+            work/desktop-smoke/fixture-*/*.png
+            work/desktop-smoke/fixture-*/application.log
+          if-no-files-found: ignore
+          retention-days: 3

@@ -2,6 +2,7 @@
 """Run under xvfb-run on Linux; all account data is a disposable fixture in work/."""
 import argparse
 import os
+import re
 import shutil
 from pathlib import Path
 import subprocess
@@ -46,8 +47,12 @@ def main():
                 raise RuntimeError('Demo was not recognized as an isolated demo account')
             if 'personal desktop fixture' not in visible_text('personal-after.png'):
                 raise RuntimeError('Leaving demo did not restore the saved account')
-            if 'day summary' not in visible_text('schedule-repeat.png'):
+            schedule_text = re.sub(r'[^a-z]', '', visible_text('schedule-repeat.png'))
+            if not any(label in schedule_text for label in ('daytimeline', 'daysummary', 'visualtimeline')):
                 raise RuntimeError('Repeating the timetable shortcut did not navigate back to the timetable')
+            home_text = re.sub(r'[^a-z]', '', visible_text('home-between.png'))
+            if not any(label in home_text for label in ('recentgrades', 'universitynews')):
+                raise RuntimeError('The home shortcut did not leave the timetable')
 
         finally:
             process.terminate()

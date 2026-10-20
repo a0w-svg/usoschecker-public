@@ -20,6 +20,7 @@ import java.awt.Desktop
 import java.awt.FileDialog
 import java.io.File
 import javax.swing.JOptionPane
+import pl.vistula.checker.DesktopInstanceLock
 import pl.vistula.checker.DesktopKeyValueStore
 import pl.vistula.checker.DesktopNotifier
 import pl.vistula.checker.DesktopPlatform
@@ -31,9 +32,12 @@ import pl.vistula.checker.ui.compose.VistulaApp
 import pl.vistula.checker.ui.compose.VistulaTab
 
 private class DesktopSession {
-    val preferences = DesktopKeyValueStore()
+    private val directory = DesktopPlatform.defaultDataDir()
+    private val instance = DesktopInstanceLock(directory)
+    init { Runtime.getRuntime().addShutdownHook(Thread({ instance.close() }, "desktop-instance-lock")) }
+    val preferences = DesktopKeyValueStore(File(directory, "preferences.json"))
     val notifier = DesktopNotifier()
-    val repository = SharedRepository(DesktopVault(),
+    val repository = SharedRepository(DesktopVault(directory),
         { language() }, { preferences.putString("attendance_data", "{}") }, notifier)
     val scheduler = DesktopSyncScheduler(repository)
     fun language() = ApiLanguage.normalize(preferences.getString("ui_language", preferences.getString("language", "pl")))
@@ -70,7 +74,9 @@ fun main() = application {
         if (session == null) {
             androidx.compose.material3.MaterialTheme {
                 androidx.compose.foundation.layout.Column {
-                    androidx.compose.material3.Text("Nie można otworzyć prywatnego magazynu aplikacji. / Cannot open private application storage.")
+                    androidx.compose.material3.Text(if (startup.exceptionOrNull() is DesktopInstanceLock.AlreadyRunning)
+                        "Aplikacja jest już uruchomiona. / The application is already running."
+                        else "Nie można otworzyć prywatnego magazynu aplikacji. / Cannot open private application storage.")
                     androidx.compose.material3.Button(onClick = ::exitApplication) { androidx.compose.material3.Text("Zamknij / Close") }
                 }
             }

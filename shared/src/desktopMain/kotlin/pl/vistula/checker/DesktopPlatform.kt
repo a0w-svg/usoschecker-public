@@ -108,6 +108,28 @@ object DesktopPlatform {
     }
 }
 
+/** A second desktop process must not race account-level read/modify/write operations. */
+class DesktopInstanceLock @Throws(IOException::class) constructor(directory: File) : AutoCloseable {
+    class AlreadyRunning : IOException("Another desktop instance is already running")
+    private val channel: java.nio.channels.FileChannel
+    private val lock: java.nio.channels.FileLock
+    init {
+        Files.createDirectories(directory.toPath())
+        DesktopPlatform.restrictPermissions(directory)
+        val file = File(directory, ".instance.lock")
+        channel = java.nio.channels.FileChannel.open(file.toPath(), java.nio.file.StandardOpenOption.CREATE,
+            java.nio.file.StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS)
+        try {
+            DesktopPlatform.restrictPermissions(file)
+            lock = try { channel.tryLock() ?: throw AlreadyRunning() }
+                catch (_: java.nio.channels.OverlappingFileLockException) { throw AlreadyRunning() }
+        } catch (failure: Exception) { channel.close(); throw failure }
+    }
+    override fun close() {
+        try { if (lock.isValid) lock.release() } finally { channel.close() }
+    }
+}
+
 /**
  * AES-256-GCM encrypted state store for Desktop with the same framing (`[1, iv(12), ciphertext]`)
  * as Android's Keystore Vault.

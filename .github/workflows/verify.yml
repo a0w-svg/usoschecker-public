@@ -63,6 +63,14 @@ jobs:
         run: xvfb-run -a python3 scripts/desktop_smoke.py
       - name: Checksum the Linux installer
         run: cd desktopApp/build/compose/binaries/main/deb && sha256sum *.deb > SHA256SUMS.txt
+      - name: Dashboard preview using synthetic data
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: desktop-dashboard-preview-${{ github.sha }}
+          path: |
+            work/desktop-smoke/fixture-*/home-between.png
+            work/desktop-smoke/fixture-*/demo.png
+          retention-days: 3
       - name: Installer for PR review
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -81,3 +89,35 @@ jobs:
             work/desktop-smoke/fixture-*/application.log
           if-no-files-found: ignore
           retention-days: 3
+
+  windows:
+    name: Windows verification
+    needs: security
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Locate Windows installer tools
+        shell: pwsh
+        run: |
+          $wixDirectory = Get-ChildItem "${env:ProgramFiles(x86)}" -Directory -Filter 'WiX Toolset*' | Select-Object -First 1
+          if (-not $wixDirectory) { throw 'WiX Toolset missing on Windows runner' }
+          Join-Path $wixDirectory.FullName 'bin' | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Test and build Windows MSI and portable app
+        shell: pwsh
+        run: ./tools/build-windows.ps1
+      - name: Launch Windows app with disposable account and verify MSI extraction
+        shell: pwsh
+        run: python scripts/windows_smoke.py
+      - name: Windows packages and checksums
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: VistulaChecker-Windows-${{ github.sha }}
+          path: desktopApp/build/windows-publication/*
+          retention-days: 7

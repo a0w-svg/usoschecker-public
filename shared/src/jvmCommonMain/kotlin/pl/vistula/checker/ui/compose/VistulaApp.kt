@@ -148,6 +148,7 @@ fun VistulaApp(
     val gate = remember { pl.vistula.checker.OperationGate() }
     var state by remember { mutableStateOf(JSONObject()) }
     var currentTab by remember { mutableStateOf(VistulaTab.HOME) }
+    var moreSection by remember { mutableStateOf("account") }
     var themeMode by remember {
         mutableStateOf(
             preferences.getString("ui_theme_mode", preferences.getString("theme", "dark") ?: "dark") ?: "dark"
@@ -298,7 +299,7 @@ fun VistulaApp(
                             val label = tab.label(strings)
                             NavigationRailItem(
                                 selected = currentTab == tab,
-                                onClick = { currentTab = tab },
+                                onClick = { moreSection = "account"; currentTab = tab },
                                 icon = {
                                     Icon(
                                         imageVector = tab.icon,
@@ -328,6 +329,8 @@ fun VistulaApp(
                                 androidx.compose.runtime.key(activeRepository, state.optString("accountSession")) {
                                 TabContent(
                                     currentTab = tab,
+                                    moreSection = moreSection,
+                                    onNavigateTool = { moreSection = it; currentTab = VistulaTab.MORE },
                                     isWide = true,
                                     state = state,
                                     strings = strings,
@@ -365,7 +368,7 @@ fun VistulaApp(
                                 val label = tab.label(strings)
                                 NavigationBarItem(
                                     selected = currentTab == tab,
-                                    onClick = { currentTab = tab },
+                                    onClick = { moreSection = "account"; currentTab = tab },
                                     icon = {
                                         Icon(
                                             imageVector = tab.icon,
@@ -396,6 +399,8 @@ fun VistulaApp(
                                 androidx.compose.runtime.key(activeRepository, state.optString("accountSession")) {
                                 TabContent(
                                     currentTab = tab,
+                                    moreSection = moreSection,
+                                    onNavigateTool = { moreSection = it; currentTab = VistulaTab.MORE },
                                     isWide = false,
                                     state = state,
                                     strings = strings,
@@ -488,6 +493,8 @@ private fun TopStatusBar(
 @Composable
 private fun TabContent(
     currentTab: VistulaTab,
+    moreSection: String,
+    onNavigateTool: (String) -> Unit,
     isWide: Boolean,
     state: JSONObject,
     strings: UiStrings,
@@ -509,6 +516,7 @@ private fun TabContent(
     val snapshot = remember(state, language) { parseSnapshot(state, language) }
     when (currentTab) {
         VistulaTab.HOME -> HomeScreen(
+            onNavigateTool = onNavigateTool,
             state = state,
             snapshot = snapshot,
             strings = strings,
@@ -534,6 +542,7 @@ private fun TabContent(
             strings = strings
         )
         VistulaTab.MORE -> MoreScreen(
+            initialSection = moreSection,
             state = state,
             snapshot = snapshot,
             strings = strings,
@@ -555,186 +564,15 @@ private fun TabContent(
 
 private val TIME_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
-    state: JSONObject,
-    snapshot: Snapshot?,
-    strings: UiStrings,
-    isWide: Boolean,
-    onNavigateTab: (VistulaTab) -> Unit,
-    onEnableDemo: () -> Unit,
-    onOpenUrl: (String) -> Unit
-) {
-    val nowInstant = Instant.now()
-    val today = LocalDate.now(UsosClient.ZONE)
-    val isConnected = state.optString("token").isNotEmpty()
-    val allRecords = snapshot?.records?.values ?: emptyList()
-    val lessons = remember(snapshot) { LessonTime.sorted(allRecords) }
-    val grades = remember(snapshot) {
-        GradeBrowser.select(allRecords, "", "all", "recent", "", snapshot)
-    }
-    val gradeSummary = remember(snapshot) { GradeSummary.of(allRecords) }
-    val currentLessons = remember(lessons, nowInstant) { LessonTime.current(allRecords, nowInstant) }
-    val nextLesson = remember(lessons, nowInstant) {
-        lessons.firstOrNull { !it.tentative() && it.start.toInstant().isAfter(nowInstant) }
-    }
-    val todaySummary = remember(lessons, today) { DaySummary.of(lessons, today) }
-    val openTasksCount = remember(state, today) {
-        val rawTasks = state.optJSONArray("tasks") ?: JSONArray()
-        TaskTools.sorted(rawTasks, "due").count { TaskTools.matches(it, "open", "", today) }
-    }
-    val overdueTasksCount = remember(state, today) {
-        val rawTasks = state.optJSONArray("tasks") ?: JSONArray()
-        TaskTools.sorted(rawTasks, "due").count { TaskTools.matches(it, "overdue", "", today) }
-    }
-    val news = snapshot?.news ?: emptyList()
-
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        if (!isConnected) {
-            OnboardingWelcomeCard(
-                strings = strings,
-                onEnableDemo = onEnableDemo,
-                onConnectAccount = { onNavigateTab(VistulaTab.MORE) }
-            )
-        }
-
-        // Hero Card: Current / Next Class
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                val activeLesson = currentLessons.firstOrNull() ?: nextLesson
-                Text(
-                    text = when {
-                        currentLessons.isNotEmpty() -> {
-                            val minsLeft = Duration.between(nowInstant, currentLessons.first().end.toInstant()).toMinutes().coerceAtLeast(0)
-                            "${strings.heroOngoingClass} ($minsLeft min)"
-                        }
-                        nextLesson != null -> {
-                            val minsUntil = Duration.between(nowInstant, nextLesson.start.toInstant()).toMinutes().coerceAtLeast(0)
-                            "${strings.heroNextClass} ($minsUntil min)"
-                        }
-                        else -> "${strings.heroToday} ($today)"
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
-                )
-                if (activeLesson != null) {
-                    val r = activeLesson.record
-                    Text(
-                        text = r.title,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.semantics { heading() }
-                    )
-                    val timeLabel = "${activeLesson.start.format(TIME_FMT)} – ${activeLesson.end.format(TIME_FMT)}"
-                    val room = r.optMeta("room")
-                    val building = r.optMeta("building")
-                    val location = listOfNotNull(
-                        room.takeIf { it.isNotEmpty() }?.let { "Sala $it" },
-                        building.takeIf { it.isNotEmpty() }
-                    ).joinToString(", ")
-                    Text(
-                        text = listOfNotNull(
-                            timeLabel,
-                            location.takeIf { it.isNotEmpty() },
-                            r.optMeta("classType").takeIf { it.isNotEmpty() }
-                        ).joinToString(" · "),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                } else {
-                    Text(
-                        text = if (todaySummary.meetings > 0) {
-                            "${strings.heroFinishedToday} (${todaySummary.meetings})"
-                        } else {
-                            strings.heroNoClassesToday
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.semantics { heading() }
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = { onNavigateTab(VistulaTab.SCHEDULE) }) {
-                        Text(strings.btnOpenSchedule)
-                    }
-                    OutlinedButton(onClick = { onNavigateTab(VistulaTab.GRADES) }) {
-                        Text(strings.btnViewGrades)
-                    }
-                }
-            }
-        }
-
-        // KPI Grid
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            val avgVal = if (!gradeSummary.ectsAverage.isNaN()) gradeSummary.ectsAverage else gradeSummary.average
-            KpiStatCard(
-                title = strings.kpiAverageTitle,
-                value = if (!avgVal.isNaN()) String.format(Locale.US, "%.2f", avgVal) else "—",
-                subtitle = "ECTS: ${String.format(Locale.US, "%.0f", gradeSummary.totalEcts)} (${gradeSummary.numeric + gradeSummary.other})",
-                modifier = Modifier.weight(1f).width(160.dp)
-            )
-            KpiStatCard(
-                title = strings.kpiTodayPlanTitle,
-                value = "${todaySummary.meetings}",
-                subtitle = if (todaySummary.meetings > 0) "${todaySummary.busyMinutes} min" else strings.kpiFreeDay,
-                modifier = Modifier.weight(1f).width(160.dp)
-            )
-            KpiStatCard(
-                title = strings.kpiTasksTitle,
-                value = "$openTasksCount",
-                subtitle = if (overdueTasksCount > 0) "! $overdueTasksCount" else strings.kpiNoOverdue,
-                modifier = Modifier.weight(1f).width(160.dp)
-            )
-            val payments = snapshot?.payments
-            val installmentsCount = payments?.installments?.size ?: 0
-            KpiStatCard(
-                title = strings.kpiPaymentsTitle,
-                value = if (installmentsCount > 0) "$installmentsCount" else strings.kpiSettled,
-                subtitle = payments?.statusNotice?.ifEmpty { strings.kpiSettled } ?: strings.kpiSettled,
-                modifier = Modifier.weight(1f).width(160.dp)
-            )
-        }
-
-        if (isWide) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(modifier = Modifier.weight(1f)) {
-                    RecentGradesCard(
-                        grades = grades.take(5),
-                        snapshot = snapshot,
-                        strings = strings,
-                        onSeeAll = { onNavigateTab(VistulaTab.GRADES) }
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    NewsListCard(news = news.take(5), strings = strings, onOpenUrl = onOpenUrl)
-                }
-            }
-        } else {
-            RecentGradesCard(
-                grades = grades.take(5),
-                snapshot = snapshot,
-                strings = strings,
-                onSeeAll = { onNavigateTab(VistulaTab.GRADES) }
-            )
-            NewsListCard(news = news.take(5), strings = strings, onOpenUrl = onOpenUrl)
-        }
-    }
-}
+    state: JSONObject, snapshot: Snapshot?, strings: UiStrings, isWide: Boolean,
+    onNavigateTab: (VistulaTab) -> Unit, onEnableDemo: () -> Unit,
+    onOpenUrl: (String) -> Unit, onNavigateTool: (String) -> Unit
+) = StudentDashboard(state, snapshot, strings, isWide, onNavigateTab, onNavigateTool, onEnableDemo, onOpenUrl)
 
 @Composable
-private fun OnboardingWelcomeCard(
+internal fun OnboardingWelcomeCard(
     strings: UiStrings,
     onEnableDemo: () -> Unit,
     onConnectAccount: () -> Unit
@@ -782,7 +620,7 @@ private fun KpiStatCard(title: String, value: String, subtitle: String, modifier
 }
 
 @Composable
-private fun RecentGradesCard(
+internal fun RecentGradesCard(
     grades: List<Record>,
     snapshot: Snapshot?,
     strings: UiStrings,
@@ -837,7 +675,7 @@ private fun RecentGradesCard(
 }
 
 @Composable
-private fun NewsListCard(news: List<NewsArticle>, strings: UiStrings, onOpenUrl: (String) -> Unit) {
+internal fun NewsListCard(news: List<NewsArticle>, strings: UiStrings, onOpenUrl: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -1696,9 +1534,10 @@ fun MoreScreen(
     onOpenUrl: (String) -> Unit,
     onReloadState: () -> Unit,
     onStatusMessage: (String) -> Unit,
-    runAsync: (() -> Unit) -> Unit
+    runAsync: (() -> Unit) -> Unit,
+    initialSection: String = "account"
 ) {
-    var activeSection by remember { mutableStateOf("account") }
+    var activeSection by remember(initialSection) { mutableStateOf(initialSection) }
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),

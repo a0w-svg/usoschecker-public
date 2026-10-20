@@ -192,7 +192,7 @@
     <string name="home_term_ended">Zakończony: %1$s</string>
     <string name="home_payments_attention">PŁATNOŚCI · WYMAGANA UWAGA</string>
     <string name="home_payments_regular">PŁATNOŚCI I CZESNE</string>
-    <string name="home_payments_due">Do zapłaty: %1$.2f PLN</string>
+    <string name="home_payments_due">Do zapłaty: %1$s</string>
     <string name="home_payments_subaccount">Subkonto: %1$s</string>
     <string name="home_payments_btn">Zobacz harmonogram opłat</string>
     <string name="home_recent_changes">Ostatnie zmiany</string>

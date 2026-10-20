@@ -1,7 +1,4 @@
-• Fixed campus contacts and selection, lecturer accounts and mobile student card activation in mObywatel.
-• Live and cached refresh messages follow language changes.
-• Desktop demo uses separate memory and preserves your saved account.
-• Fixed keyboard shortcuts, background refresh and overlapping operations.
-• Campus selection, contacts, payment refresh and improved desktop tasks.
-• Masked OAuth secret, safe browser links and reliable file exports.
-• Hardened storage against symlinks, concurrent writes and lost keys.
+• New dashboard with day plan, recent grades, deadlines and shortcuts to the main screens.
+• Desktop: a responsive wide layout, today and tomorrow previews, and direct access to tasks and payments.
+• Windows x64: MSI installer and portable ZIP with a bundled Java runtime.
+• Dedicated Windows build and launch checks in CI, plus clearer dashboard empty states.

@@ -481,7 +481,7 @@ fun PaymentsAndServicesSection(
                             Text(inst.name, style = MaterialTheme.typography.titleMedium)
                             Text("${inst.deadline.ifEmpty { "—" }} · ${inst.status}", style = MaterialTheme.typography.bodyMedium)
                         }
-                        Text("${inst.amount} ${inst.currency}", fontWeight = FontWeight.Bold)
+                        Text(pl.vistula.checker.core.PaymentAmounts.format(inst.amount, inst.currency, language), fontWeight = FontWeight.Bold)
                     }
                 }
             }

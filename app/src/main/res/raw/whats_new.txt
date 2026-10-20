@@ -1,7 +1,4 @@
-• Poprawione kontakty i wybór filii, konta prowadzących oraz aktywacja mLegitymacji w mObywatelu.
-• Komunikaty odświeżania, także zapisane wcześniej, reagują na zmianę języka.
-• Desktop: demo działa w osobnej pamięci i zachowuje zapisane konto.
-• Poprawione skróty klawiaturowe, odświeżanie w tle i blokada równoległych operacji.
-• Wybór kampusu, kontakty, odświeżanie płatności i poprawione zadania na komputerze.
-• Ukrywanie sekretu OAuth, bezpieczne otwieranie linków i zapis plików.
-• Ochrona magazynu przed dowiązaniami, równoległym zapisem i utratą klucza.
+• Nowy pulpit: plan dnia, ostatnie oceny, zadania i bezpośrednie skróty do najważniejszych ekranów.
+• Desktop: układ dopasowany do szerokiego okna, podgląd planu na dziś i jutro oraz szybkie wejście do zadań i płatności.
+• Windows x64: instalator MSI i wersja przenośna ZIP z dołączonym środowiskiem Java.
+• Osobny build i test uruchomienia Windows w CI oraz poprawione stany braku danych na pulpicie.

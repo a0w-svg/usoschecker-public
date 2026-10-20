@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lecturer_title">Lecturer panel</string>
+    <string name="lecturer_description">Courses taught and timetable for your lecturer account.</string>
+    <string name="lecturer_schedule">Teaching timetable</string>
+    <string name="lecturer_empty">USOS returned no active courses taught.</string>
+    <string name="lecturer_usosweb">Lecturer tools in USOSweb</string>
+</resources>

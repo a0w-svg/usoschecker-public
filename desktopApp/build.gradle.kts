@@ -36,7 +36,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb, TargetFormat.Dmg)
             packageName = "VistulaChecker"
-            packageVersion = "1.2.0"
+            packageVersion = "1.3.2"
             description = "Vistula USOS Checker Desktop (Compose Multiplatform)"
             vendor = "Vistula Checker"
             modules("java.net.http", "java.prefs", "java.sql", "jdk.crypto.ec")

@@ -77,7 +77,7 @@ class GradesScreenController private constructor() {
             listener: GradesListener
         ) {
             if (!demo && state.optString("error").isNotEmpty()) {
-                UiHelper.note(activity, content, state.optString("error"), Color.rgb(160, 48, 40))
+                UiHelper.note(activity, content, ApiErrorUi.cached(activity, state), Color.rgb(160, 48, 40))
             }
 
             val raw = d.optJSONObject("snapshot")

@@ -39,8 +39,6 @@ import java.time.LocalDate
 import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONObject
-import pl.vistula.checker.Demo
-import pl.vistula.checker.DemoStudentServices
 import pl.vistula.checker.KeyValueStore
 import pl.vistula.checker.SharedRepository
 import pl.vistula.checker.StudentServiceLoader
@@ -65,194 +63,127 @@ fun AccountSection(
     language: String,
     onThemeChanged: (String) -> Unit,
     onLanguageChanged: (String) -> Unit,
+    onEnableDemo: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onReloadState: () -> Unit,
     onStatusMessage: (String) -> Unit,
-    runAsync: ((() -> Unit) -> Unit)
+    runAsync: (() -> Unit) -> Unit
 ) {
-    val connected = state.optString("token").isNotEmpty()
+    fun t(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val demo = state.optString("token") == "demo"
+    val connected = state.optString("token").isNotEmpty() && !demo
     val pendingToken = state.optString("requestToken")
     var keyInput by remember(state.optString("key")) { mutableStateOf(state.optString("key")) }
     var secretInput by remember(state.optString("secret")) { mutableStateOf(state.optString("secret")) }
     var scopesInput by remember(state.optString("scopes")) {
-        mutableStateOf(
-            state.optString("scopes").ifEmpty {
-                "grades|studies|payments|crstests|cards|adm_documents|email|photo|offline_access"
-            }
-        )
+        mutableStateOf(state.optString("scopes").ifEmpty { "grades|studies|payments|crstests|cards|adm_documents|email|photo|offline_access" })
     }
-    var pinInput by remember { mutableStateOf("") }
+    var pinInput by remember(pendingToken) { mutableStateOf("") }
+    var showSecret by remember(state.optString("secret"), state.optString("accountSession")) { mutableStateOf(false) }
+    var confirmDisconnect by remember(state.optString("accountSession")) { mutableStateOf(false) }
+    val editSession = remember(state.optString("accountSession"), state.optString("token")) { repository.editSession(state) }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Konto USOS i wygląd", style = MaterialTheme.typography.titleLarge)
-            if (connected) {
-                Text(
-                    text = state.optString("user", "Student USOS"),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                val details = listOfNotNull(
-                    state.optString("studentNumber").takeIf { it.isNotEmpty() }?.let { "Album: $it" },
-                    state.optString("programme").takeIf { it.isNotEmpty() },
-                    state.optString("stage").takeIf { it.isNotEmpty() },
-                    state.optString("studentStatus").takeIf { it.isNotEmpty() },
-                    state.optString("email").takeIf { it.isNotEmpty() }
-                )
-                if (details.isNotEmpty()) {
-                    Text(details.joinToString(" · "), style = MaterialTheme.typography.bodyMedium)
+    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(t("Konto USOS i wygląd", "USOS account and appearance", "Обліковий запис USOS і вигляд"), style = MaterialTheme.typography.titleLarge)
+            when {
+                demo -> {
+                    Text(t("Demo nie zmienia zapisanego konta ani jego danych.", "Demo leaves your saved account and its data intact.", "Демо зберігає ваш обліковий запис і його дані без змін."))
+                    Button(onClick = onEnableDemo) { Text(t("Zakończ demo", "Exit demo", "Вийти з демо")) }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(
-                        onClick = {
-                            repository.disconnect()
-                            onReloadState()
-                            onStatusMessage("Odłączono konto USOS i wyczyszczono sejf.")
-                        },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                    ) {
-                        Text("Odłącz konto")
+                connected -> {
+                    Text(state.optString("user"), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    val details = listOf("studentNumber", "programme", "stage", "studentStatus", "email")
+                        .map { state.optString(it) }.filter { it.isNotBlank() }
+                    if (details.isNotEmpty()) Text(details.joinToString(" · "))
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        androidx.compose.material3.Switch(checked = state.optBoolean("enabled"), onCheckedChange = { enabled ->
+                            runAsync { repository.update(editSession) { it.put("enabled", enabled) }; onReloadState() }
+                        })
+                        Text(t("Odświeżanie w tle", "Background refresh", "Фонове оновлення"))
+                    }
+                    OutlinedButton(onClick = { confirmDisconnect = true },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
+                        Text(t("Odłącz konto", "Disconnect account", "Відключити обліковий запис"))
                     }
                 }
-            } else {
-                Text(
-                    "Połącz konto USOS za pomocą klucza OAuth 1.0a lub uruchom tryb demonstracyjny.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                OutlinedTextField(
-                    value = keyInput,
-                    onValueChange = { keyInput = it },
-                    label = { Text("Consumer Key") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = secretInput,
-                    onValueChange = { secretInput = it },
-                    label = { Text("Consumer Secret") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = scopesInput,
-                    onValueChange = { scopesInput = it },
-                    label = { Text("Zakresy zgody (scopes)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        onClick = {
-                            val k = keyInput.trim()
-                            val s = secretInput.trim()
-                            val sc = scopesInput.trim()
+                else -> {
+                    Text(t("Połącz konto własnym kluczem OAuth i kodem PIN z USOS.",
+                        "Connect with your OAuth credentials and the PIN from USOS.", "Підключіться власними даними OAuth і PIN-кодом USOS."))
+                    OutlinedTextField(value = keyInput, onValueChange = { keyInput = it }, label = { Text("Consumer Key") },
+                        modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    OutlinedTextField(value = secretInput, onValueChange = { secretInput = it }, label = { Text("Consumer Secret") },
+                        modifier = Modifier.fillMaxWidth(), singleLine = true,
+                        visualTransformation = if (showSecret) androidx.compose.ui.text.input.VisualTransformation.None
+                            else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                        trailingIcon = { androidx.compose.material3.TextButton(onClick = { showSecret = !showSecret }) {
+                            Text(if (showSecret) t("Ukryj", "Hide", "Приховати") else t("Pokaż", "Show", "Показати"))
+                        } })
+                    OutlinedTextField(value = scopesInput, onValueChange = { scopesInput = it },
+                        label = { Text(t("Zakresy zgody", "Permission scopes", "Дозволи доступу")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(enabled = keyInput.isNotBlank() && secretInput.isNotBlank(), onClick = {
+                            val key = keyInput.trim(); val secret = secretInput.trim(); val scopes = scopesInput.trim()
                             runAsync {
-                                try {
-                                    repository.begin(k, s, sc)
-                                    val updated = repository.read()
-                                    val reqTok = updated.optString("requestToken")
-                                    if (reqTok.isNotEmpty()) {
-                                        onOpenUrl(
-                                            UsosClient.BASE + "services/oauth/authorize?oauth_token=" +
-                                                OAuth.encode(reqTok)
-                                        )
-                                    }
-                                    onReloadState()
-                                    onStatusMessage("Autoryzuj aplikację w przeglądarce i wklej kod PIN.")
-                                } catch (e: Exception) {
-                                    onStatusMessage(SharedRepository.message(e))
-                                }
+                                repository.begin(key, secret, scopes)
+                                val token = repository.read().optString("requestToken")
+                                check(token.isNotBlank())
+                                onOpenUrl(UsosClient.BASE + "services/oauth/authorize?oauth_token=" + OAuth.encode(token))
+                                onReloadState()
+                                onStatusMessage(t("Autoryzuj w przeglądarce i wklej PIN.", "Authorize in your browser and paste the PIN.", "Авторизуйтеся в браузері та вставте PIN."))
                             }
-                        }
-                    ) {
-                        Text("1. Rozpocznij logowanie")
+                        }) { Text(t("1. Rozpocznij logowanie", "1. Start sign-in", "1. Почати вхід")) }
+                        OutlinedButton(onClick = onEnableDemo) { Text(t("Wypróbuj demo", "Try demo", "Спробувати демо")) }
                     }
-                    OutlinedButton(
-                        onClick = {
-                            val demo = Demo.state(true)
-                            demo.put("studentServices", DemoStudentServices.data())
-                            repository.update { s ->
-                                for (k in demo.keys()) s.put(k, demo.get(k))
-                            }
-                            onReloadState()
-                            onStatusMessage("Wczytano dane demonstracyjne.")
-                        }
-                    ) {
-                        Text("Tryb Demo")
-                    }
-                }
-                if (pendingToken.isNotEmpty()) {
-                    OutlinedTextField(
-                        value = pinInput,
-                        onValueChange = { pinInput = it },
-                        label = { Text("Kod PIN z USOS") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    Button(
-                        onClick = {
-                            val pin = pinInput.trim()
+                    if (pendingToken.isNotEmpty()) {
+                        OutlinedTextField(value = pinInput, onValueChange = { pinInput = it },
+                            label = { Text(t("PIN z USOS", "PIN from USOS", "PIN із USOS")) }, modifier = Modifier.fillMaxWidth(), singleLine = true,
+                            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
+                        Button(enabled = pinInput.isNotBlank(), onClick = {
+                            val pin = pinInput.trim(); pinInput = ""
                             runAsync {
                                 try {
                                     repository.finish(pin)
+                                    secretInput = ""; showSecret = false
                                     repository.sync(true)
-                                    onReloadState()
-                                    onStatusMessage("Połączono i zsynchronizowano konto USOS.")
-                                } catch (e: Exception) {
-                                    onReloadState()
-                                    onStatusMessage(SharedRepository.message(e))
-                                }
+                                    onStatusMessage(t("Połączono i odświeżono konto.", "Account connected and refreshed.", "Обліковий запис підключено та оновлено."))
+                                } finally { onReloadState() }
                             }
-                        }
-                    ) {
-                        Text("2. Zatwierdź PIN")
+                        }) { Text(t("2. Zatwierdź PIN", "2. Confirm PIN", "2. Підтвердити PIN")) }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
-            Text("Motyw kolorystyczny", style = MaterialTheme.typography.titleMedium)
+            Text(t("Motyw", "Theme", "Тема"), style = MaterialTheme.typography.titleMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(
-                    "system" to "Systemowy",
-                    "light" to "Jasny",
-                    "dark" to "Ciemny",
-                    "oled" to "OLED Czarny"
-                ).forEach { (mode, label) ->
-                    FilterChip(
-                        selected = themeMode == mode,
-                        onClick = {
-                            preferences.putString("theme", mode)
-                            onThemeChanged(mode)
-                        },
-                        label = { Text(label) }
-                    )
+                listOf("system" to t("Systemowy", "System", "Системна"), "light" to t("Jasny", "Light", "Світла"),
+                    "dark" to t("Ciemny", "Dark", "Темна"), "oled" to "OLED").forEach { (mode, label) ->
+                    FilterChip(selected = themeMode == mode, onClick = { onThemeChanged(mode) }, label = { Text(label) })
                 }
             }
-
-            Text("Język interfejsu i danych USOS", style = MaterialTheme.typography.titleMedium)
+            Text(t("Język interfejsu i danych", "Interface and data language", "Мова інтерфейсу та даних"), style = MaterialTheme.typography.titleMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("pl" to "Polski", "en" to "English", "uk" to "Українська").forEach { (lang, label) ->
-                    FilterChip(
-                        selected = language == lang,
-                        onClick = {
-                            preferences.putString("language", lang)
-                            onLanguageChanged(lang)
-                        },
-                        label = { Text(label) }
-                    )
+                listOf("pl" to "Polski", "en" to "English", "uk" to "Українська").forEach { (tag, label) ->
+                    FilterChip(selected = language == tag, onClick = { onLanguageChanged(tag) }, label = { Text(label) })
                 }
             }
         }
     }
+    if (confirmDisconnect) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { confirmDisconnect = false },
+        title = { Text(t("Odłączyć konto?", "Disconnect account?", "Відключити обліковий запис?")) },
+        text = { Text(t("Usunie to lokalne dane konta z tego urządzenia.", "This removes local account data from this device.", "Це видалить локальні дані облікового запису з цього пристрою.")) },
+        confirmButton = { Button(onClick = {
+            confirmDisconnect = false
+            runAsync { repository.disconnect(); secretInput = ""; pinInput = ""; onReloadState() }
+        }) { Text(t("Odłącz", "Disconnect", "Відключити")) } },
+        dismissButton = { OutlinedButton(onClick = { confirmDisconnect = false }) { Text(t("Anuluj", "Cancel", "Скасувати")) } }
+    )
 }
 
 @Composable
-fun GpaSimulatorSection(snapshot: Snapshot?) {
+fun GpaSimulatorSection(snapshot: Snapshot?, language: String = "pl") {
+    fun t(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
     val summary = remember(snapshot) {
         if (snapshot == null) GradeSummary.of(emptyList()) else GpaCalculator.calculate(snapshot.records.values)
     }
@@ -260,7 +191,7 @@ fun GpaSimulatorSection(snapshot: Snapshot?) {
     val currentEcts = if (summary.totalEcts > 0) summary.totalEcts else summary.numeric * 4.0
     var targetGpa by remember { mutableDoubleStateOf(GpaCalculator.SCHOLARSHIP_THRESHOLD) }
     var remainingEcts by remember { mutableDoubleStateOf(15.0) }
-    val sim = GpaCalculator.simulate(currentGpa, currentEcts, targetGpa, remainingEcts)
+    val sim = pl.vistula.checker.core.ApiLanguage.`in`(language) { GpaCalculator.simulate(currentGpa, currentEcts, targetGpa, remainingEcts) }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -268,22 +199,22 @@ fun GpaSimulatorSection(snapshot: Snapshot?) {
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Symulator GPA i stypendium", style = MaterialTheme.typography.titleLarge)
+            Text(t("Symulator GPA i stypendium", "GPA and scholarship simulator", "Симулятор GPA та стипендії"), style = MaterialTheme.typography.titleLarge)
             Text(
                 text = String.format(
-                    Locale.forLanguageTag("pl-PL"),
-                    "Obecna średnia ważona: %s (ECTS: %.1f)",
-                    if (currentGpa > 0) String.format(Locale.forLanguageTag("pl-PL"), "%.2f", currentGpa) else "—",
+                    Locale.forLanguageTag(language),
+                    t("Obecna średnia ważona: %s (ECTS: %.1f)", "Current weighted average: %s (ECTS: %.1f)", "Поточний середньозважений бал: %s (ECTS: %.1f)"),
+                    if (currentGpa > 0) String.format(Locale.forLanguageTag(language), "%.2f", currentGpa) else "—",
                     currentEcts
                 ),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
-            Text(GpaCalculator.scholarshipStatus( if (currentGpa > 0) currentGpa else Double.NaN ), style = MaterialTheme.typography.bodyMedium)
-            Text(GpaCalculator.honorsStatus( if (currentGpa > 0) currentGpa else Double.NaN ), style = MaterialTheme.typography.bodyMedium)
+            Text(pl.vistula.checker.core.ApiLanguage.`in`(language) { GpaCalculator.scholarshipStatus(if (currentGpa > 0) currentGpa else Double.NaN) }, style = MaterialTheme.typography.bodyMedium)
+            Text(pl.vistula.checker.core.ApiLanguage.`in`(language) { GpaCalculator.honorsStatus(if (currentGpa > 0) currentGpa else Double.NaN) }, style = MaterialTheme.typography.bodyMedium)
 
             Text(
-                String.format(Locale.forLanguageTag("pl-PL"), "Docelowa średnia: %.2f", targetGpa),
+                String.format(Locale.forLanguageTag(language), t("Docelowa średnia: %.2f", "Target average: %.2f", "Бажаний середній бал: %.2f"), targetGpa),
                 style = MaterialTheme.typography.labelMedium
             )
             Slider(
@@ -292,7 +223,7 @@ fun GpaSimulatorSection(snapshot: Snapshot?) {
                 valueRange = 3.0f..5.0f
             )
             Text(
-                String.format(Locale.forLanguageTag("pl-PL"), "Pozostałe punkty ECTS: %.0f", remainingEcts),
+                String.format(Locale.forLanguageTag(language), t("Pozostałe punkty ECTS: %.0f", "Remaining ECTS credits: %.0f", "Залишок кредитів ECTS: %.0f"), remainingEcts),
                 style = MaterialTheme.typography.labelMedium
             )
             Slider(
@@ -313,132 +244,78 @@ fun GpaSimulatorSection(snapshot: Snapshot?) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TasksSection(
-    state: JSONObject,
-    repository: SharedRepository,
-    onReloadState: () -> Unit
+    state: JSONObject, repository: SharedRepository, language: String,
+    onReloadState: () -> Unit, runAsync: (() -> Unit) -> Unit
 ) {
+    fun t(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
     var titleInput by remember { mutableStateOf("") }
     var courseInput by remember { mutableStateOf("") }
     var dueInput by remember { mutableStateOf(LocalDate.now(UsosClient.ZONE).plusDays(7).toString()) }
     var filter by remember { mutableStateOf("open") }
-    val rawTasks = state.optJSONArray("tasks") ?: JSONArray()
-    val today = LocalDate.now(UsosClient.ZONE)
-    val sorted = TaskTools.sorted(rawTasks, "due").filter { TaskTools.matches(it, filter, "", today) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Zadania i terminy", style = MaterialTheme.typography.titleLarge)
+    var deleteTarget by remember { mutableStateOf<JSONObject?>(null) }
+    val dueValid = dueInput.isBlank() || runCatching { LocalDate.parse(dueInput) }.isSuccess
+    val sorted = TaskTools.sorted(state.optJSONArray("tasks"), "due")
+        .filter { TaskTools.matches(it, filter, "", LocalDate.now(UsosClient.ZONE)) }
+    val session = repository.editSession(state)
+    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(t("Zadania i terminy", "Tasks and deadlines", "Завдання та терміни"), style = MaterialTheme.typography.titleLarge)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("active" to "Do zrobienia", "overdue" to "Po terminie", "done" to "Ukończone", "all" to "Wszystkie").forEach { (key, label) ->
-                    FilterChip(selected = filter == key, onClick = { filter = key }, label = { Text(label) })
+                listOf("open" to t("Do zrobienia", "To do", "До виконання"), "overdue" to t("Po terminie", "Overdue", "Прострочені"),
+                    "done" to t("Ukończone", "Completed", "Виконані"), "all" to t("Wszystkie", "All", "Усі")).forEach { (id, label) ->
+                    FilterChip(selected = filter == id, onClick = { filter = id }, label = { Text(label) })
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = titleInput,
-                    onValueChange = { titleInput = it },
-                    label = { Text("Nowe zadanie") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = courseInput,
-                    onValueChange = { courseInput = it },
-                    label = { Text("Przedmiot") },
-                    modifier = Modifier.width(140.dp),
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = dueInput,
-                    onValueChange = { dueInput = it },
-                    label = { Text("Termin (YYYY-MM-DD)") },
-                    modifier = Modifier.width(150.dp),
-                    singleLine = true
-                )
-                Button(
-                    onClick = {
-                        if (titleInput.isNotBlank()) {
-                            repository.update { s ->
-                                val arr = s.optJSONArray("tasks") ?: JSONArray()
-                                arr.put(
-                                    JSONObject()
-                                        .put("title", titleInput.trim())
-                                        .put("course", courseInput.trim())
-                                        .put("due", dueInput.trim())
-                                        .put("done", false)
-                                        .put("createdAt", System.currentTimeMillis())
-                                )
-                                s.put("tasks", arr)
-                            }
-                            titleInput = ""
+            OutlinedTextField(value = titleInput, onValueChange = { titleInput = it }, singleLine = true,
+                label = { Text(t("Nowe zadanie", "New task", "Нове завдання")) }, modifier = Modifier.fillMaxWidth(), isError = titleInput.length > 200)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = courseInput, onValueChange = { courseInput = it }, singleLine = true,
+                    label = { Text(t("Przedmiot", "Course", "Предмет")) }, modifier = Modifier.width(210.dp), isError = courseInput.length > 200)
+                OutlinedTextField(value = dueInput, onValueChange = { dueInput = it }, singleLine = true,
+                    label = { Text(t("Termin (YYYY-MM-DD)", "Due date (YYYY-MM-DD)", "Термін (YYYY-MM-DD)")) }, modifier = Modifier.width(210.dp), isError = !dueValid)
+            }
+            Button(enabled = titleInput.isNotBlank() && titleInput.length <= 200 && courseInput.length <= 200 && dueValid, onClick = {
+                val title = titleInput; val course = courseInput; val due = dueInput
+                runAsync {
+                    repository.update(session) { it.put("tasks", pl.vistula.checker.DesktopTaskActions.create(it.optJSONArray("tasks"), title, course, due)) }
+                    if (titleInput == title) titleInput = ""
+                    onReloadState()
+                }
+            }) { Text(t("Dodaj", "Add", "Додати")) }
+            if (sorted.isEmpty()) Text(t("Brak zadań w wybranym widoku.", "No tasks in this view.", "У цьому перегляді немає завдань."))
+            for (task in sorted) {
+                Column(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text((if (task.optBoolean("done")) "✓ " else "") + task.optString("title"), style = MaterialTheme.typography.titleMedium)
+                    Text(listOf(task.optString("course"), task.optString("due")).filter { it.isNotBlank() }.joinToString(" · "))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { runAsync {
+                            repository.update(session) { it.put("tasks", pl.vistula.checker.DesktopTaskActions.toggle(it.optJSONArray("tasks"), task)) }
                             onReloadState()
-                        }
-                    },
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Text("Dodaj")
-                }
-            }
-            if (sorted.isEmpty()) {
-                Text("Brak zadań w wybranym widoku.", style = MaterialTheme.typography.bodyMedium)
-            } else {
-                sorted.forEach { task ->
-                    val done = task.optBoolean("done")
-                    val created = task.optLong("createdAt")
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = (if (done) "✓ " else "") + task.optString("title"),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            val sub = listOfNotNull(
-                                task.optString("course").takeIf { it.isNotEmpty() },
-                                task.optString("due").takeIf { it.isNotEmpty() }?.let { "Termin: $it" }
-                            ).joinToString(" · ")
-                            if (sub.isNotEmpty()) {
-                                Text(sub, style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            OutlinedButton(
-                                onClick = {
-                                    repository.update { s ->
-                                        val arr = s.optJSONArray("tasks") ?: JSONArray()
-                                        for (i in 0 until arr.length()) {
-                                            val item = arr.optJSONObject(i) ?: continue
-                                            if (item.optLong("createdAt") == created && item.optString("title") == task.optString("title")) {
-                                                item.put("done", !done)
-                                                break
-                                            }
-                                        }
-                                        s.put("tasks", arr)
-                                    }
-                                    onReloadState()
-                                }
-                            ) {
-                                Text(if (done) "Cofnij" else "Gotowe")
-                            }
-                        }
+                        } }) { Text(if (task.optBoolean("done")) t("Cofnij", "Reopen", "Поновити") else t("Gotowe", "Complete", "Виконано")) }
+                        OutlinedButton(onClick = { deleteTarget = task }) { Text(t("Usuń", "Delete", "Видалити")) }
                     }
                 }
             }
         }
     }
+    deleteTarget?.let { task -> androidx.compose.material3.AlertDialog(
+        onDismissRequest = { deleteTarget = null }, title = { Text(t("Usunąć zadanie?", "Delete task?", "Видалити завдання?")) },
+        text = { Text(task.optString("title")) }, confirmButton = {
+            Button(onClick = { deleteTarget = null; runAsync {
+                repository.update(session) { it.put("tasks", pl.vistula.checker.DesktopTaskActions.delete(it.optJSONArray("tasks"), task)) }
+                onReloadState()
+            } }) { Text(t("Usuń", "Delete", "Видалити")) }
+        }, dismissButton = { OutlinedButton(onClick = { deleteTarget = null }) { Text(t("Anuluj", "Cancel", "Скасувати")) } }
+    ) }
 }
 
 @Composable
 fun AttendanceSection(
     snapshot: Snapshot?,
     preferences: KeyValueStore,
-    strings: UiStrings = UiStrings.PL
+    strings: UiStrings = UiStrings.PL,
+    onStatusMessage: (String) -> Unit = {}
 ) {
     var savedJson by remember(snapshot) {
         val raw = preferences.getString("attendance_data", "{}")
@@ -455,7 +332,7 @@ fun AttendanceSection(
             Text("${strings.sectionAttendance} (limit: ${AttendanceTracker.LIMIT})", style = MaterialTheme.typography.titleLarge)
             val keys = savedJson.keys().asSequence().toList().sorted()
             if (keys.isEmpty()) {
-                Text("Brak zajęć w planie do śledzenia obecności.", style = MaterialTheme.typography.bodyMedium)
+                Text(toolText(strings.languageCode, "Brak zajęć w planie do śledzenia obecności.", "No classes available for attendance tracking.", "Немає занять для відстеження відвідуваності."), style = MaterialTheme.typography.bodyMedium)
             } else {
                 keys.forEach { key ->
                     val entry = savedJson.optJSONObject(key) ?: return@forEach
@@ -523,8 +400,10 @@ fun AttendanceSection(
                                     onClick = {
                                         val next = JSONObject(savedJson.toString())
                                         next.getJSONObject(key).put("absences", (count - 1).coerceAtLeast(0))
-                                        preferences.putString("attendance_data", next.toString())
-                                        savedJson = next
+                                        try {
+                                            preferences.putString("attendance_data", next.toString())
+                                            savedJson = next
+                                        } catch (e: Exception) { onStatusMessage(pl.vistula.checker.core.SyncProgress.error(e, strings.languageCode)) }
                                     }
                                 ) { Text("−", style = MaterialTheme.typography.titleMedium) }
                                 OutlinedButton(
@@ -532,8 +411,10 @@ fun AttendanceSection(
                                     onClick = {
                                         val next = JSONObject(savedJson.toString())
                                         next.getJSONObject(key).put("absences", count + 1)
-                                        preferences.putString("attendance_data", next.toString())
-                                        savedJson = next
+                                        try {
+                                            preferences.putString("attendance_data", next.toString())
+                                            savedJson = next
+                                        } catch (e: Exception) { onStatusMessage(pl.vistula.checker.core.SyncProgress.error(e, strings.languageCode)) }
                                     }
                                 ) { Text("+", style = MaterialTheme.typography.titleMedium) }
                             }
@@ -556,29 +437,37 @@ fun AttendanceSection(
 fun PaymentsAndServicesSection(
     state: JSONObject,
     snapshot: Snapshot?,
+    language: String = "pl",
     repository: SharedRepository,
     onOpenUrl: (String) -> Unit,
     onReloadState: () -> Unit,
     onStatusMessage: (String) -> Unit,
     runAsync: ((() -> Unit) -> Unit)
 ) {
-    val payments = snapshot?.payments
+    fun t(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val live = state.optString("token").isNotEmpty() && state.optString("token") != "demo" && !state.optBoolean("authorizationError")
+    val payments = ToolReadModels.payments(state, snapshot, language)
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Płatności i subkonta USOS", style = MaterialTheme.typography.titleLarge)
+            Text(t("Płatności i subkonta USOS", "USOS payments and accounts", "Платежі та рахунки USOS"), style = MaterialTheme.typography.titleLarge)
+            OutlinedButton(enabled = live && StudentServices.hasScope(state.optString("scopes"), "payments"), onClick = {
+                runAsync { StudentServiceLoader.refresh(repository, "payments"); onReloadState() }
+            }) { Text(t("Odśwież płatności", "Refresh payments", "Оновити платежі")) }
+            val paymentError = state.optJSONObject("studentServices")?.optJSONObject("payments")
+            if (!paymentError?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(paymentError!!, language), color = MaterialTheme.colorScheme.error)
             if (payments == null) {
-                Text("Brak danych o płatnościach. Zsynchronizuj konto.", style = MaterialTheme.typography.bodyMedium)
+                Text(t("Brak danych o płatnościach. Zsynchronizuj konto.", "No payment data. Refresh your account.", "Немає даних про платежі. Оновіть обліковий запис."), style = MaterialTheme.typography.bodyMedium)
             } else {
                 if (payments.statusNotice.isNotEmpty()) {
                     Text(payments.statusNotice, color = MaterialTheme.colorScheme.tertiary, style = MaterialTheme.typography.bodyMedium)
                 }
                 payments.accounts.forEach { acc ->
                     Text(
-                        "${acc.name}: ${acc.bankAccountNumber} (Saldo: ${acc.balance} ${acc.currency})",
+                        "${acc.name}: ${acc.bankAccountNumber} · ${acc.balance} ${acc.currency}",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium
                     )
@@ -590,7 +479,7 @@ fun PaymentsAndServicesSection(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(inst.name, style = MaterialTheme.typography.titleMedium)
-                            Text("Termin: ${inst.deadline.ifEmpty { "—" }} · ${inst.status}", style = MaterialTheme.typography.bodyMedium)
+                            Text("${inst.deadline.ifEmpty { "—" }} · ${inst.status}", style = MaterialTheme.typography.bodyMedium)
                         }
                         Text("${inst.amount} ${inst.currency}", fontWeight = FontWeight.Bold)
                     }
@@ -611,48 +500,47 @@ fun PaymentsAndServicesSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Legitymacje i dokumenty", style = MaterialTheme.typography.titleLarge)
+                Text(t("Legitymacje i dokumenty", "Student cards and documents", "Посвідчення та документи"), style = MaterialTheme.typography.titleLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(
+                        enabled = live && listOf("cards", "adm_documents").any { StudentServices.hasScope(state.optString("scopes"), it) },
                         onClick = {
                             runAsync {
                                 try {
-                                    StudentServiceLoader.refresh(repository, "cards")
-                                    StudentServiceLoader.refresh(repository, "documents")
+                                    for ((section, consent) in listOf("cards" to "cards", "documents" to "adm_documents")) {
+                                        if (StudentServices.hasScope(state.optString("scopes"), consent)) StudentServiceLoader.refresh(repository, section)
+                                    }
                                     onReloadState()
-                                    onStatusMessage("Odświeżono legitymacje i dokumenty.")
+                                    val entries = repository.read().optJSONObject("studentServices")
+                                    val failure = listOf("mcard", "documents").mapNotNull { entries?.optJSONObject(it) }.firstOrNull { it.optString("error").isNotEmpty() }
+                                    onStatusMessage(if (failure != null) pl.vistula.checker.core.SyncProgress.cachedError(failure, language) else t("Odświeżono legitymacje i dokumenty.", "Student cards and documents refreshed.", "Посвідчення та документи оновлено."))
                                 } catch (e: Exception) {
-                                    onStatusMessage(SharedRepository.message(e))
+                                    onStatusMessage(pl.vistula.checker.core.SyncProgress.error(e, language))
                                 }
                             }
                         }
                     ) {
-                        Text("Pobierz z USOS")
+                        Text(t("Pobierz z USOS", "Load from USOS", "Завантажити з USOS"))
                     }
                 }
             }
-            val cardsArr = services?.optJSONObject("cards")?.optJSONArray("data")
-            if (cardsArr != null && cardsArr.length() > 0) {
-                for (i in 0 until cardsArr.length()) {
-                    val card = StudentServices.Card(cardsArr.getJSONObject(i))
-                    Text(
-                        "Legitymacja #${card.id} (${card.studentNumber}) · ważna do: ${card.expires.ifEmpty { "—" }}",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+            for (key in listOf("mcard", "documents")) {
+                val entry = services?.optJSONObject(key)
+                if (!entry?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(entry!!, language), color = MaterialTheme.colorScheme.error)
             }
+            MobileCardControls(state, repository, language, onReloadState, onStatusMessage, runAsync)
             val docsArr = services?.optJSONObject("documents")?.optJSONArray("data")
             if (docsArr != null && docsArr.length() > 0) {
                 for (i in 0 until docsArr.length()) {
-                    val doc = StudentServices.Document(docsArr.getJSONObject(i))
+                    val doc = StudentServices.Document(docsArr.getJSONObject(i), language)
                     Text(
-                        "${doc.name} (${doc.typeName}) · Status: ${doc.status}",
+                        "${doc.name} (${doc.typeName}) · ${doc.status}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
-            if ((cardsArr == null || cardsArr.length() == 0) && (docsArr == null || docsArr.length() == 0)) {
-                Text("Brak pobranych legitymacji lub dokumentów.", style = MaterialTheme.typography.bodyMedium)
+            if (docsArr == null || docsArr.length() == 0) {
+                Text(t("Brak pobranych dokumentów.", "No documents loaded.", "Немає завантажених документів."), style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
@@ -665,9 +553,9 @@ fun PaymentsAndServicesSection(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Praca dyplomowa", style = MaterialTheme.typography.titleLarge)
+                Text(t("Praca dyplomowa", "Thesis", "Дипломна робота"), style = MaterialTheme.typography.titleLarge)
                 Text(thesis.title, style = MaterialTheme.typography.titleMedium)
-                Text("Status: ${thesis.status} · Promotor: ${thesis.supervisors}", style = MaterialTheme.typography.bodyMedium)
+                Text("${thesis.status} · ${thesis.supervisors}", style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
@@ -678,10 +566,10 @@ fun PaymentsAndServicesSection(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Szybkie linki uczelniane (USOS / Platon)", style = MaterialTheme.typography.titleLarge)
+            Text(t("Szybkie linki uczelniane (USOS / Platon)", "University links (USOS / Platon)", "Посилання університету (USOS / Platon)"), style = MaterialTheme.typography.titleLarge)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { onOpenUrl("https://usosweb.vistula.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index") }) { Text("USOSweb Oceny") }
-                OutlinedButton(onClick = { onOpenUrl("https://usosweb.vistula.edu.pl/kontroler.php?_action=home/plan") }) { Text("USOSweb Plan") }
+                OutlinedButton(onClick = { onOpenUrl("https://usosweb.vistula.edu.pl/kontroler.php?_action=dla_stud/studia/oceny/index") }) { Text(t("USOSweb Oceny", "USOSweb grades", "Оцінки USOSweb")) }
+                OutlinedButton(onClick = { onOpenUrl("https://usosweb.vistula.edu.pl/kontroler.php?_action=home/plan") }) { Text(t("USOSweb Plan", "USOSweb timetable", "Розклад USOSweb")) }
                 OutlinedButton(onClick = { onOpenUrl(PlatonLinks.HOME) }) { Text("Platon LMS") }
                 OutlinedButton(onClick = { onOpenUrl(WebLinks.apiDocumentation(null)) }) { Text("USOS API Docs") }
             }
@@ -689,3 +577,125 @@ fun PaymentsAndServicesSection(
     }
 }
 
+
+@Composable
+private fun MobileCardControls(
+    state: JSONObject, repository: SharedRepository, language: String,
+    onReloadState: () -> Unit, onStatusMessage: (String) -> Unit, runAsync: (() -> Unit) -> Unit
+) {
+    fun label(polish: String, en: String, uk: String) = when (pl.vistula.checker.core.ApiLanguage.normalize(language)) {
+        "en" -> en; "uk" -> uk; else -> polish
+    }
+    val data = state.optJSONObject("studentServices")?.optJSONObject("mcard")?.optJSONObject("data")
+    val latest = data?.optJSONObject("latest_order")
+    val id = latest?.optString("id").orEmpty()
+    val live = state.optString("token").isNotEmpty() && state.optString("token") != "demo" &&
+        !state.optBoolean("authorizationError") && StudentServices.hasScope(state.optString("scopes"), "cards")
+    var pending by remember(state.optString("accountSession"), id) { mutableStateOf<Boolean?>(null) }
+    var activation by remember(state.optString("accountSession"), id) { mutableStateOf<JSONObject?>(null) }
+    Text(label("mLegitymacja", "Mobile student card", "Мобільне студентське посвідчення"), style = MaterialTheme.typography.titleMedium)
+    for (order in listOf(true, false)) {
+        val field = if (order) "why_cannot_order" else "why_cannot_revoke"
+        val reason = StudentServices.localized(data?.opt(field), language)
+        if (reason.isNotEmpty()) Text(reason)
+        val known = data?.optBoolean(if (order) "orderEligibilityKnown" else "revokeEligibilityKnown") == true
+        if (known && reason.isEmpty() && (order || id.isNotEmpty())) {
+            OutlinedButton(enabled = live, onClick = { pending = order }) {
+                Text(if (order) label("Wydaj", "Issue", "Видати") else label("Unieważnij", "Revoke", "Анулювати"))
+            }
+        }
+    }
+    if (id.isNotEmpty() && pl.vistula.checker.MobileCardActions.ready(latest?.optString("status").orEmpty())) {
+        OutlinedButton(enabled = live, onClick = {
+            runAsync {
+                try {
+                    val credentials = repository.read()
+                    check(SharedRepository.sameAccount(state, credentials))
+                    val result = pl.vistula.checker.MobileCardActions.activation(UsosClient(credentials), id)
+                    check(SharedRepository.sameAccount(credentials, repository.read()))
+                    activation = result
+                } catch (_: Exception) {
+                    onStatusMessage(label("Dane aktywacji nie są jeszcze dostępne.", "Activation data is not available yet.", "Дані активації ще недоступні."))
+                }
+            }
+        }) { Text(label("Pobierz dane aktywacji", "Fetch activation data", "Отримати дані активації")) }
+    }
+    activation?.let { data ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { activation = null },
+            title = { Text(label("Aktywacja w mObywatelu", "Activation in mObywatel", "Активація в mObywatel")) },
+            text = {
+                androidx.compose.foundation.text.selection.SelectionContainer {
+                    Column {
+                        Text(label("Token aktywacji", "Activation token", "Токен активації"))
+                        Text(StudentServices.text(data, "token"))
+                        Text(label("Kod dystrybucyjny", "Distribution password", "Пароль розповсюдження"))
+                        Text(StudentServices.text(data, "distribution_pass"))
+                    }
+                }
+            },
+            confirmButton = { Button(onClick = { activation = null }) { Text(label("Zamknij", "Close", "Закрити")) } }
+        )
+    }
+    pending?.let { order ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pending = null },
+            title = { Text(if (order) label("Wydać mLegitymację?", "Issue mobile card?", "Видати посвідчення?")
+                else label("Unieważnić mLegitymację?", "Revoke mobile card?", "Анулювати посвідчення?")) },
+            confirmButton = {
+                Button(onClick = {
+                    pending = null
+                    runAsync {
+                        try {
+                            val credentials = repository.read()
+                            check(SharedRepository.sameAccount(state, credentials))
+                            pl.vistula.checker.MobileCardActions.perform(UsosClient(credentials), credentials, order, id) {
+                                check(SharedRepository.sameAccount(credentials, repository.read()))
+                            }
+                            StudentServiceLoader.refresh(repository, "cards")
+                            onReloadState()
+                        } catch (_: pl.vistula.checker.MobileCardActions.Uncertain) {
+                            onStatusMessage(label("Wynik nieznany. Odśwież status przed ponowieniem.",
+                                "Result unknown. Refresh the status before trying again.", "Результат невідомий. Оновіть статус перед повтором."))
+                        } catch (_: Exception) {
+                            onStatusMessage(label("Nie udało się wykonać operacji.", "Could not complete the action.", "Не вдалося виконати дію."))
+                        }
+                    }
+                }) { Text(label("Potwierdź", "Confirm", "Підтвердити")) }
+            },
+            dismissButton = { OutlinedButton(onClick = { pending = null }) { Text(label("Anuluj", "Cancel", "Скасувати")) } }
+        )
+    }
+}
+
+@Composable
+fun LecturerSection(
+    state: JSONObject, repository: SharedRepository, language: String, onOpenUrl: (String) -> Unit,
+    onReloadState: () -> Unit, onStatusMessage: (String) -> Unit, runAsync: (() -> Unit) -> Unit
+) {
+    if (!pl.vistula.checker.core.AccountRole.lecturer(state)) return
+    fun label(polish: String, english: String, ukrainian: String) = when (pl.vistula.checker.core.ApiLanguage.normalize(language)) {
+        "en" -> english; "uk" -> ukrainian; else -> polish
+    }
+    Text(label("Panel wykładowcy", "Lecturer panel", "Панель викладача"), style = MaterialTheme.typography.titleLarge)
+    OutlinedButton(onClick = {
+        runAsync {
+            try {
+                StudentServiceLoader.refresh(repository, "teaching")
+                onReloadState()
+            } catch (_: Exception) {
+                onStatusMessage(label("Nie udało się pobrać przedmiotów.", "Could not load courses.", "Не вдалося завантажити предмети."))
+            }
+        }
+    }) { Text(label("Odśwież", "Refresh", "Оновити")) }
+    val courses = state.optJSONObject("studentServices")?.optJSONObject("teaching")?.optJSONObject("data")?.optJSONArray("courses")
+    if (courses == null || courses.length() == 0) Text(label("Brak pobranych przedmiotów.", "No courses loaded.", "Немає завантажених предметів."))
+    else for (i in 0 until courses.length()) {
+        val course = courses.getJSONObject(i)
+        Text(StudentServices.localized(course.opt("name"), language), style = MaterialTheme.typography.titleMedium)
+        Text(StudentServices.localized(course.opt("term"), language))
+    }
+    OutlinedButton(onClick = { onOpenUrl("https://usosweb.vistula.edu.pl/kontroler.php?_action=dla_prac") }) {
+        Text(label("Funkcje wykładowcy w USOSweb", "Lecturer tools in USOSweb", "Функції викладача в USOSweb"))
+    }
+}

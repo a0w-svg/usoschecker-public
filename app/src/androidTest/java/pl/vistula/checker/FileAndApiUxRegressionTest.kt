@@ -62,7 +62,7 @@ class FileAndApiUxRegressionTest {
     @Test
     fun contentProviderExportTruncatesThePreviousDocument() {
         val activity = rule.activity
-        val directory = File(activity.cacheDir, "test-exports")
+        val directory = File(activity.filesDir, "test-exports")
         directory.mkdirs()
         val document = File(directory, "truncate-test.ics")
         Files.write(document.toPath(), "old-private-document-that-is-much-longer".toByteArray(StandardCharsets.UTF_8))

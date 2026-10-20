@@ -122,3 +122,30 @@ Podstawa konfiguracji: [optymalizacja R8](https://developer.android.com/topic/pe
 [zmiany Androida 16](https://developer.android.com/about/versions/16/behavior-changes-16),
 [wymagania target API Google Play](https://support.google.com/googleplay/android-developer/answer/11926878),
 [ryzyko sekretów w APK](https://developer.android.com/privacy-and-security/risks/hardcoded-cryptographic-secrets).
+
+## CodeQL dla Kotlin
+
+Workflow `.github/workflows/codeql.yml` analizuje Java/Kotlin po rzeczywistej
+kompilacji Androida i aplikacji desktopowej z JDK 21. Tryb `none` nie analizuje
+tego projektu Kotlin i kończył się błędem „could not process any of it”.
+Przed uruchomieniem tego workflow należy przełączyć Code scanning z Default setup
+na Advanced setup w ustawieniach Security repozytorium; GitHub odrzuca wyniki
+zaawansowanego workflow przy jednocześnie aktywnym Default setup.
+Python i GitHub Actions pozostają analizowane w osobnych pozycjach macierzy.
+Nie uznawaj błędu konfiguracji skanera ani braku wyników za potwierdzenie braku podatności.
+
+## Weryfikacja desktopu
+
+Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.3.2`, Android
+`versionCode` 14). Z pełnym JDK 21 i SDK Android 36:
+
+```sh
+bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb
+xvfb-run -a python3 scripts/desktop_smoke.py
+```
+
+Test okna wymaga Xvfb i Tesseract OCR. Korzysta wyłącznie z konta testowego w `work/desktop-smoke`, wykonuje
+wejście i wyjście z demo, odświeżenie oraz skróty nawigacji i sprawdza, czy zaszyfrowany
+magazyn konta pozostał bez zmian. Nie testuje rzeczywistego USOS. Na Windows i macOS
+nadal wymagane są testy na tych systemach; pakietu Linuksa nie traktujemy jako
+weryfikacji instalatorów MSI/EXE/DMG.

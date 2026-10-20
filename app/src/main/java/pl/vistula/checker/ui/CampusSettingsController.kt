@@ -61,8 +61,23 @@ object CampusSettingsController {
                     val value = StudentServices.text(unit, key)
                     if (value.isNotEmpty()) {
                         hasContacts = true
-                        UiHelper.add(activity, box, value, 16, UiHelper.INK, false)
+                        if (key == "email" && value.matches(Regex("[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+"))) {
+                            box.addView(UiHelper.actionRow(activity, value, {
+                                try { activity.startActivity(android.content.Intent(android.content.Intent.ACTION_SENDTO,
+                                    android.net.Uri.fromParts("mailto", value, null))) } catch (_: android.content.ActivityNotFoundException) { }
+                            }, false))
+                        } else UiHelper.add(activity, box, value, 16, UiHelper.INK, false)
                     }
+                }
+                val phones = unit.optJSONArray("phones") ?: org.json.JSONArray()
+                for (n in 0 until phones.length()) {
+                    val phone = phones.getString(n)
+                    hasContacts = true
+                    val number = phone.filter { it.isDigit() || it == '+' }
+                    if (number.isNotEmpty()) box.addView(UiHelper.actionRow(activity, phone, {
+                        try { activity.startActivity(android.content.Intent(android.content.Intent.ACTION_DIAL,
+                            android.net.Uri.fromParts("tel", number, null))) } catch (_: android.content.ActivityNotFoundException) { }
+                    }, false))
                 }
             }
             if (!hasContacts) UiHelper.note(activity, content, activity.getString(R.string.campus_contacts_unavailable), UiHelper.MUTED)
@@ -73,6 +88,8 @@ object CampusSettingsController {
                 content.addView(UiHelper.button(activity, activity.getString(R.string.campus_official_site), { UiHelper.browser(activity, website) }, true))
             }
         }
+        if (activity.connected() && !activity.isDemo()) content.addView(UiHelper.button(activity,
+            activity.getString(R.string.campus_detect), { activity.refreshStudentServices("affiliation") }, false))
         content.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_choose), {
             activity.navigate(4)
             activity.openAccountPage("settings.campus")

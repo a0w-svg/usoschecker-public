@@ -26,11 +26,136 @@ class ToolServicesTest {
 
     private fun credentials() = JSONObject().put("key", "fixture-key").put("secret", "fixture-secret")
         .put("token", "fixture-token").put("tokenSecret", "fixture-token-secret")
-        .put("scopes", "grades|studies|payments|adm_documents").put("accountSession", "fixture-session")
+        .put("scopes", "grades|studies|payments|adm_documents|cards").put("accountSession", "fixture-session")
 
     private class Store(var state: JSONObject) : StateRepository {
         override fun read() = JSONObject(state.toString())
         override fun update(operation: StateRepository.Update) = operation.apply(state)
+    }
+
+    @Test fun lecturerCampusUsesEmploymentRatherThanStudentProgrammes() {
+        val state = credentials().put("staffStatus", 2).put("studentStatusCode", 0)
+        val client = UsosClient(state, {}) { address ->
+            assertFalse(address.contains("progs/student"))
+            when {
+                address.contains("employment_positions") -> Connection("""[{"faculty":{"id":"O0000"}}]""")
+                else -> Connection("""{"id":"O0000","name":{"pl":"Filia"},"email":"office@example.org"}""")
+            }
+        }
+        assertEquals("O0000", ToolServiceData.fetch(client, "affiliation", "", state).getString("detected"))
+    }
+
+    @Test fun teachingCoursesKeepAllTranslationsAndDropUnrequestedFields() {
+        val state = credentials().put("staffStatus", 2)
+        val client = UsosClient(state, {}) { address ->
+            assertTrue(address.contains("services/users/user?"))
+            Connection("""{"course_editions_conducted":[{"id":"1","course":{"id":"C","name":{"pl":"Analiza","en":"Analysis"}},"term":{"id":"Z","name":{"en":"Winter"}},"private":"discard"}]}""")
+        }
+        val data = ToolServiceData.fetch(client, "teaching", "", state)
+        val course = data.getJSONArray("courses").getJSONObject(0)
+        assertEquals("Analysis", course.getJSONObject("name").getString("en"))
+        assertFalse(data.toString().contains("discard"))
+    }
+
+    @Test fun activationAcceptsBothReadyStatusesAndRequestsSecretsOnlyOnDemand() {
+        for (status in listOf("ready", "ready_to_receive")) {
+            var calls = 0
+            val client = UsosClient(credentials(), {}) { address ->
+                calls++
+                assertTrue(address.contains("/mcard_order2?"))
+                assertTrue(address.contains("order_id=issued"))
+                assertTrue(address.contains("token%7Cdistribution_pass"))
+                Connection("""{"id":"issued","status":"$status","token":"fixture-activation","distribution_pass":"fixture-password"}""")
+            }
+            val data = MobileCardActions.activation(client, "issued")
+            assertEquals("fixture-activation", data.getString("token"))
+            assertEquals("fixture-password", data.getString("distribution_pass"))
+            assertEquals(1, calls)
+            assertFalse(pl.vistula.checker.core.StudentServices.safeMobileCard(JSONObject().put("latest_order", data)).toString().contains("fixture-activation"))
+        }
+    }
+
+    @Test fun activationRejectsWrongOrderMissingCodesAndNonReadyStatuses() {
+        for (body in listOf(
+            """{"id":"other","status":"ready","token":"t","distribution_pass":"p"}""",
+            """{"id":"issued","status":"ready","token":null,"distribution_pass":"p"}""",
+            """{"id":"issued","status":"in_progress","token":"t","distribution_pass":"p"}"""
+        )) {
+            val client = UsosClient(credentials(), {}) { Connection(body) }
+            assertThrows(IllegalStateException::class.java) { MobileCardActions.activation(client, "issued") }
+        }
+    }
+
+    @Test fun simplifiedCardsRefreshOnlyMobileStatusAndNotActivationSecrets() {
+        val store = Store(credentials().put("scopes", "cards"))
+        var calls = 0
+        StudentServiceLoader.refresh(store, "cards", SharedRepository.ClientFactory { state ->
+            UsosClient(state, {}) { address ->
+                calls++
+                assertTrue(address.contains("services/cards/mcard2?"))
+                assertFalse(address.contains("distribution_pass"))
+                Connection("""{"why_cannot_order":null,"why_cannot_revoke":null,"latest_order":null}""")
+            }
+        })
+        assertEquals(1, calls)
+        assertTrue(store.state.getJSONObject("studentServices").getJSONObject("mcard").has("data"))
+    }
+
+    @Test fun revokingAnOldOrderNeverSendsAPost() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("/mcard2?"))
+            Connection("""{"why_cannot_revoke":null,"latest_order":{"id":"new","status":"received"}}""")
+        }
+        assertThrows(IllegalStateException::class.java) { MobileCardActions.perform(client, credentials(), false, "old") }
+    }
+
+    @Test fun cardActionsRecheckAccountAndSendExactlyOnce() {
+        var writes = 0
+        var checked = false
+        val client = UsosClient(credentials(), {}) { address ->
+            if (address.contains("/mcard2?")) Connection("""{"why_cannot_order":null}""")
+            else {
+                assertTrue(checked)
+                assertTrue(address.endsWith("/make_mcard_order"))
+                writes++
+                Connection("""{"success":true}""")
+            }
+        }
+        MobileCardActions.perform(client, credentials(), true, "") { checked = true }
+        assertEquals(1, writes)
+    }
+
+    @Test fun invalidEligibilityCannotEnableAnOrder() {
+        for (value in listOf("false", "123", "[]", "{\"en\":123}")) {
+            val client = UsosClient(credentials(), {}) { address ->
+                assertTrue(address.contains("/mcard2?"))
+                Connection("{\"why_cannot_order\":$value}")
+            }
+            assertThrows(IllegalStateException::class.java) { MobileCardActions.perform(client, credentials(), true, "") }
+        }
+    }
+
+    @Test fun manualCampusGetsContactsWithoutAnActiveProgramme() {
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("/progs/student?") -> Connection("[]")
+                else -> {
+                    assertTrue(address.contains("/fac/faculty?"))
+                    assertTrue(address.contains("fac_id=O0000"))
+                    Connection("""{"id":"O0000","name":{"pl":"Filia","en":"Branch"},"email":"office@example.org","phone_numbers":["+48 123"]}""")
+                }
+            }
+        }
+        val result = ToolServiceData.fetch(client, "affiliation", "O0000")
+        assertEquals("", result.getString("detected"))
+        val unit = result.getJSONArray("units").getJSONObject(0)
+        assertEquals("office@example.org", unit.getString("email"))
+        assertEquals("+48 123", unit.getJSONArray("phones").getString(0))
+    }
+
+    @Test fun teachingToolsRequireVerifiedLecturerRole() {
+        val client = UsosClient(credentials(), {}) { throw AssertionError("No request for non-lecturers") }
+        assertThrows(IllegalStateException::class.java) { ToolServiceData.fetch(client, "teaching") }
     }
 
     @Test fun paymentRefreshNeedsOnlyTwoRequestsAndPreservesOtherCaches() {

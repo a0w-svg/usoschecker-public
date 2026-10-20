@@ -1,6 +1,7 @@
-• Branch detection from active USOS programmes, manual selection, and campus-aware university information and announcements.
-• Simpler More screens and Settings, clearer labels, and details available on demand.
-• Working news from the official Vistula website and a separate USOS announcements source. University news works without an account.
-• Independent payment refresh, installment plans, remittance history, and document receipt forms. Changes require confirmation and USOS permission.
-• Improved translations, error messages, notifications, and offline cache states.
-• Protection against changed installment terms, account changes during requests, and excessively long API responses.
+• Fixed campus contacts and selection, lecturer accounts and mobile student card activation in mObywatel.
+• Live and cached refresh messages follow language changes.
+• Desktop demo uses separate memory and preserves your saved account.
+• Fixed keyboard shortcuts, background refresh and overlapping operations.
+• Campus selection, contacts, payment refresh and improved desktop tasks.
+• Masked OAuth secret, safe browser links and reliable file exports.
+• Hardened storage against symlinks, concurrent writes and lost keys.

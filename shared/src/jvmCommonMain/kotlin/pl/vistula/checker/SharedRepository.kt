@@ -133,7 +133,7 @@ class SharedRepository @JvmOverloads constructor(
                 for (field in arrayOf(
                     "requestToken", "requestSecret", "authAttempt", "snapshot", "history", "studentServices", "campusOverride",
                     "retryAt", "authorizationError", "studentNumber", "email", "programme", "studentStatus",
-                    "stage", "admissionDate", "photoUrl", "profileTranslations", "reminderDeliveries"
+                    "stage", "admissionDate", "photoUrl", "profileTranslations", "reminderDeliveries", "staffStatus", "studentStatusCode"
                 )) {
                     s.remove(field)
                 }
@@ -215,7 +215,7 @@ class SharedRepository @JvmOverloads constructor(
             val s: JSONObject
             synchronized(LOCK) {
                 s = vault.read()
-                if (s.optString("token").isEmpty() || (!manual && !s.optBoolean("enabled"))) return emptyList()
+                if (s.optString("token").isEmpty() || s.optString("token") == "demo" || (!manual && !s.optBoolean("enabled"))) return emptyList()
                 if (s.optLong("retryAt") > System.currentTimeMillis()) {
                     throw IllegalStateException(
                         "USOS prosi o przerwę w żądaniach. Spróbuj po " +
@@ -228,10 +228,10 @@ class SharedRepository @JvmOverloads constructor(
                 vault.write(s)
             }
             try {
-                if (s.optString("studentNumber").isEmpty() || (refreshProfile && !s.has("profileTranslations"))) {
+                if (refreshProfile || (s.optString("studentNumber").isEmpty() && !s.has("staffStatus"))) {
                     try {
                         val user = JSONObject(
-                            UsosClient(s).get(
+                            clients.create(s).get(
                                 "services/users/user",
                                 mapOf("fields" to UsosClient.profileFields(s))
                             )
@@ -279,11 +279,12 @@ class SharedRepository @JvmOverloads constructor(
                     val snapshot = current.json()
                     for (field in arrayOf(
                         "user", "studentNumber", "email", "programme", "studentStatus",
-                        "stage", "admissionDate", "photoUrl", "profileTranslations"
+                        "stage", "admissionDate", "photoUrl", "profileTranslations", "staffStatus", "studentStatusCode"
                     )) {
                         if (s.has(field)) latest.put(field, s.get(field))
                     }
                     latest.put("history", history).put("snapshot", snapshot).put("successAt", now).put("error", "")
+                        .put("errorKind", "").put("httpStatus", 0)
                     // Do not erase a cooldown or authorization failure reported by another request during this sync.
                     if (latest.optLong("retryAt") == s.optLong("retryAt")) latest.remove("retryAt")
                     if (latest.optBoolean("authorizationError") == s.optBoolean("authorizationError")) {
@@ -304,6 +305,8 @@ class SharedRepository @JvmOverloads constructor(
                     if (sameAccount(s, latest)) {
                         latest.put("error", message(e))
                         val cause = cause(e)
+                        latest.put("errorKind", pl.vistula.checker.core.SyncProgress.errorKind(cause))
+                            .put("httpStatus", if (cause is UsosClient.ApiException) cause.status else 0)
                         if (cause is UsosClient.ApiException && cause.authorization) {
                             latest.put("enabled", false)
                         }
@@ -317,6 +320,12 @@ class SharedRepository @JvmOverloads constructor(
                 throw e
             }
         }
+    }
+
+    /** Older desktop releases persisted demo in the personal vault. Never clear a real account during recovery. */
+    fun discardLegacyDemo(): Boolean = synchronized(LOCK) {
+        if (vault.read().optString("token") != "demo") false
+        else { disconnect(); true }
     }
 
     fun disconnect() {
@@ -365,6 +374,8 @@ class SharedRepository @JvmOverloads constructor(
         @Throws(Exception::class)
         private fun profileData(user: JSONObject): JSONObject {
             val fields = JSONObject()
+            fields.put("staffStatus", user.optInt("staff_status", -1))
+            fields.put("studentStatusCode", user.optInt("student_status", -1))
             val translations = JSONObject()
             for (language in ApiLanguage.SUPPORTED) {
                 val profile = ApiLanguage.`in`(language) { UsosParser.userProfile(user) }

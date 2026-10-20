@@ -17,6 +17,7 @@ object ApiErrorUi {
             R.string.services_connect_first, R.string.error_rate_limit).map { context.getString(it) }
         if (cause.message in explicit) return cause.message!!
         val label = when (cause) {
+            is pl.vistula.checker.MobileCardActions.Uncertain -> R.string.service_action_uncertain
             is UsosClient.ApiException -> http(cause.status, cause.authorization)
             is SocketTimeoutException -> R.string.error_timeout
             is JSONException -> R.string.error_format

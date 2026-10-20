@@ -75,8 +75,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import pl.vistula.checker.ChangeNotifier
-import pl.vistula.checker.Demo
-import pl.vistula.checker.DemoStudentServices
 import pl.vistula.checker.KeyValueStore
 import pl.vistula.checker.SharedRepository
 import pl.vistula.checker.SyncScheduler
@@ -127,20 +125,6 @@ private fun parseSnapshot(state: JSONObject, language: String): Snapshot? {
     }
 }
 
-private fun applyDemoState(repository: SharedRepository, changed: Boolean) {
-    val demo = Demo.state(changed)
-    demo.put("studentServices", DemoStudentServices.data())
-    repository.update { s ->
-        val existingKeys = s.keys().asSequence().toList()
-        for (k in existingKeys) s.remove(k)
-        val demoKeys = demo.keys()
-        while (demoKeys.hasNext()) {
-            val k = demoKeys.next()
-            s.put(k, demo.get(k))
-        }
-    }
-}
-
 @Composable
 fun VistulaApp(
     repository: SharedRepository,
@@ -148,14 +132,21 @@ fun VistulaApp(
     notifier: ChangeNotifier? = null,
     syncScheduler: SyncScheduler? = null,
     onOpenUrl: (String) -> Unit = {},
-    onExportText: (filename: String, mimeType: String, content: String) -> Unit = { _, _, _ -> },
+    onExportText: (filename: String, mimeType: String, content: String) -> Boolean = { _, _, _ -> false },
     externalTabTrigger: VistulaTab? = null,
     externalSyncTrigger: Int = 0,
-    externalDemoTrigger: Int = 0
+    externalDemoTrigger: Int = 0,
+    externalNavigationTrigger: Int = 0
 ) {
     val scope = rememberCoroutineScope()
     var stateVersion by remember { mutableIntStateOf(0) }
-    var state by remember(stateVersion) { mutableStateOf(repository.read()) }
+    val demoWorkspace = remember { pl.vistula.checker.DemoWorkspace() }
+    var demoMode by remember { mutableStateOf(false) }
+    var legacyDemo by remember { mutableStateOf(false) }
+    val activeRepository = if (demoMode) demoWorkspace.repository else repository
+    val activePreferences = if (demoMode) demoWorkspace.preferences else preferences
+    val gate = remember { pl.vistula.checker.OperationGate() }
+    var state by remember { mutableStateOf(JSONObject()) }
     var currentTab by remember { mutableStateOf(VistulaTab.HOME) }
     var themeMode by remember {
         mutableStateOf(
@@ -171,27 +162,71 @@ fun VistulaApp(
     var statusMessage by remember { mutableStateOf("") }
     var isRefreshing by remember { mutableStateOf(false) }
 
-    LaunchedEffect(externalTabTrigger) {
+    LaunchedEffect(externalTabTrigger, externalNavigationTrigger) {
         if (externalTabTrigger != null) {
             currentTab = externalTabTrigger
         }
     }
 
-    val reloadState: () -> Unit = {
-        stateVersion++
+    val setStatus: (String) -> Unit = { message -> scope.launch(Dispatchers.Main.immediate) { statusMessage = message } }
+    val reloadState: () -> Unit = { scope.launch(Dispatchers.Main.immediate) { stateVersion++ } }
+    LaunchedEffect(activeRepository, stateVersion, language) {
+        try {
+            val loaded = withContext(Dispatchers.IO) { SharedRepository.localizedView(activeRepository.read(), language) }
+            if (activeRepository === repository && loaded.optString("token") == "demo") {
+                legacyDemo = true
+                demoMode = true
+                state = demoWorkspace.repository.read()
+            } else state = loaded
+        } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            statusMessage = pl.vistula.checker.core.SyncProgress.error(e, language)
+        }
     }
-
+    LaunchedEffect(activeRepository) {
+        while (true) {
+            kotlinx.coroutines.delay(30_000L)
+            if (!gate.isRunning()) stateVersion++
+        }
+    }
     val runAsync: (() -> Unit) -> Unit = { block ->
-        scope.launch {
+        if (gate.tryStart()) {
             isRefreshing = true
-            try {
-                withContext(Dispatchers.IO) {
-                    block()
+            scope.launch {
+                try {
+                    withContext(Dispatchers.IO) { block() }
+                } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    setStatus(pl.vistula.checker.core.SyncProgress.error(e, language))
+                } finally {
+                    gate.finish()
+                    stateVersion++
+                    isRefreshing = false
                 }
-            } finally {
-                stateVersion++
-                isRefreshing = false
             }
+        }
+    }
+    val toggleDemo: () -> Unit = {
+        if (legacyDemo && !gate.isRunning()) {
+            runAsync {
+                repository.discardLegacyDemo()
+                scope.launch(Dispatchers.Main.immediate) {
+                    legacyDemo = false; demoMode = false; state = JSONObject(); stateVersion++
+                }
+            }
+        } else if (!gate.isRunning()) {
+            demoMode = !demoMode
+            state = JSONObject()
+            statusMessage = if (demoMode) strings.statusDemoMode else ""
+            stateVersion++
+        }
+    }
+    val openUrl: (String) -> Unit = { address ->
+        scope.launch(Dispatchers.Main.immediate) {
+            try {
+                require(pl.vistula.checker.core.WebLinks.isWebUrl(address))
+                onOpenUrl(address)
+            } catch (e: Exception) { statusMessage = pl.vistula.checker.core.SyncProgress.error(e, language) }
         }
     }
 
@@ -199,14 +234,14 @@ fun VistulaApp(
         runAsync {
             try {
                 if ("demo" == state.optString("token")) {
-                    applyDemoState(repository, true)
-                    statusMessage = "OK (${strings.statusDemoMode})"
+                    demoWorkspace.reset(true)
+                    setStatus("OK (${strings.statusDemoMode})")
                 } else if (state.optString("token").isEmpty()) {
-                    statusMessage = strings.onboardingPointOauth
+                    setStatus(strings.onboardingPointOauth)
                 } else {
-                    val changes = repository.sync(
+                    val changes = activeRepository.sync(
                         true,
-                        { s -> UsosClient(s, java.util.function.Consumer { msg -> statusMessage = msg }).snapshot() },
+                        { s -> UsosClient(s, java.util.function.Consumer { msg -> setStatus(pl.vistula.checker.core.SyncProgress.localized(msg, language)) }).snapshot() },
                         { diff ->
                             if (diff.isNotEmpty() && state.optBoolean("notifications", true)) {
                                 notifier?.notifyChanges(diff)
@@ -214,14 +249,10 @@ fun VistulaApp(
                         },
                         true
                     )
-                    statusMessage = if (changes.isNotEmpty()) {
-                        "Δ +${changes.size}"
-                    } else {
-                        "OK"
-                    }
+                    setStatus(if (changes.isNotEmpty()) "Δ +${changes.size}" else "OK")
                 }
             } catch (e: Exception) {
-                statusMessage = SharedRepository.message(e)
+                setStatus(pl.vistula.checker.core.SyncProgress.error(e, language))
             }
         }
     }
@@ -234,9 +265,7 @@ fun VistulaApp(
 
     LaunchedEffect(externalDemoTrigger) {
         if (externalDemoTrigger > 0) {
-            applyDemoState(repository, false)
-            reloadState()
-            statusMessage = strings.statusDemoMode
+            toggleDemo()
         }
     }
 
@@ -289,47 +318,41 @@ fun VistulaApp(
                             statusMessage = statusMessage,
                             isRefreshing = isRefreshing,
                             onRefresh = refreshAll,
-                            onEnableDemo = {
-                                applyDemoState(repository, false)
-                                reloadState()
-                                statusMessage = strings.statusDemoMode
-                            }
+                            onEnableDemo = toggleDemo
                         )
                         if (isRefreshing) {
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                             Crossfade(targetState = currentTab, label = "tabCrossfade") { tab ->
+                                androidx.compose.runtime.key(activeRepository, state.optString("accountSession")) {
                                 TabContent(
                                     currentTab = tab,
                                     isWide = true,
                                     state = state,
                                     strings = strings,
-                                    repository = repository,
-                                    preferences = preferences,
+                                    repository = activeRepository,
+                                    preferences = activePreferences,
                                     syncScheduler = syncScheduler,
                                     themeMode = themeMode,
                                     language = language,
                                     onThemeChanged = {
-                                        preferences.putString("ui_theme_mode", it)
-                                        themeMode = it
+                                        try { preferences.putString("ui_theme_mode", it); themeMode = it }
+                                        catch (e: Exception) { setStatus(pl.vistula.checker.core.SyncProgress.error(e, language)) }
                                     },
                                     onLanguageChanged = {
-                                        preferences.putString("ui_language", it)
-                                        language = it
+                                        try { preferences.putString("ui_language", it); language = it; statusMessage = "" }
+                                        catch (e: Exception) { setStatus(pl.vistula.checker.core.SyncProgress.error(e, language)) }
                                     },
                                     onNavigateTab = { currentTab = it },
-                                    onEnableDemo = {
-                                        applyDemoState(repository, false)
-                                        reloadState()
-                                        statusMessage = strings.statusDemoMode
-                                    },
-                                    onOpenUrl = onOpenUrl,
+                                    onEnableDemo = toggleDemo,
+                                    onOpenUrl = openUrl,
                                     onExportText = onExportText,
                                     onReloadState = reloadState,
-                                    onStatusMessage = { statusMessage = it },
+                                    onStatusMessage = setStatus,
                                     runAsync = runAsync
                                 )
+                                }
                             }
                         }
                     }
@@ -363,47 +386,41 @@ fun VistulaApp(
                             statusMessage = statusMessage,
                             isRefreshing = isRefreshing,
                             onRefresh = refreshAll,
-                            onEnableDemo = {
-                                applyDemoState(repository, false)
-                                reloadState()
-                                statusMessage = strings.statusDemoMode
-                            }
+                            onEnableDemo = toggleDemo
                         )
                         if (isRefreshing) {
                             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                             Crossfade(targetState = currentTab, label = "tabCrossfadeMobile") { tab ->
+                                androidx.compose.runtime.key(activeRepository, state.optString("accountSession")) {
                                 TabContent(
                                     currentTab = tab,
                                     isWide = false,
                                     state = state,
                                     strings = strings,
-                                    repository = repository,
-                                    preferences = preferences,
+                                    repository = activeRepository,
+                                    preferences = activePreferences,
                                     syncScheduler = syncScheduler,
                                     themeMode = themeMode,
                                     language = language,
                                     onThemeChanged = {
-                                        preferences.putString("ui_theme_mode", it)
-                                        themeMode = it
+                                        try { preferences.putString("ui_theme_mode", it); themeMode = it }
+                                        catch (e: Exception) { setStatus(pl.vistula.checker.core.SyncProgress.error(e, language)) }
                                     },
                                     onLanguageChanged = {
-                                        preferences.putString("ui_language", it)
-                                        language = it
+                                        try { preferences.putString("ui_language", it); language = it; statusMessage = "" }
+                                        catch (e: Exception) { setStatus(pl.vistula.checker.core.SyncProgress.error(e, language)) }
                                     },
                                     onNavigateTab = { currentTab = it },
-                                    onEnableDemo = {
-                                        applyDemoState(repository, false)
-                                        reloadState()
-                                        statusMessage = strings.statusDemoMode
-                                    },
-                                    onOpenUrl = onOpenUrl,
+                                    onEnableDemo = toggleDemo,
+                                    onOpenUrl = openUrl,
                                     onExportText = onExportText,
                                     onReloadState = reloadState,
-                                    onStatusMessage = { statusMessage = it },
+                                    onStatusMessage = setStatus,
                                     runAsync = runAsync
                                 )
+                                }
                             }
                         }
                     }
@@ -444,7 +461,7 @@ private fun TopStatusBar(
                 )
                 val sub = statusMessage.ifEmpty {
                     val error = state.optString("error")
-                    if (error.isNotEmpty()) error else strings.statusReady
+                    if (error.isNotEmpty()) pl.vistula.checker.core.SyncProgress.cachedError(state, strings.languageCode) else strings.statusReady
                 }
                 Text(
                     text = sub,
@@ -455,9 +472,9 @@ private fun TopStatusBar(
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (!isConnected) {
-                    OutlinedButton(onClick = onEnableDemo) {
-                        Text(strings.btnDemo)
+                if (!isConnected || isDemo) {
+                    OutlinedButton(onClick = onEnableDemo, enabled = !isRefreshing) {
+                        Text(if (isDemo) toolText(strings.languageCode, "Zakończ demo", "Exit demo", "Вийти з демо") else strings.btnDemo)
                     }
                 }
                 Button(onClick = onRefresh, enabled = !isRefreshing) {
@@ -484,7 +501,7 @@ private fun TabContent(
     onNavigateTab: (VistulaTab) -> Unit,
     onEnableDemo: () -> Unit,
     onOpenUrl: (String) -> Unit,
-    onExportText: (String, String, String) -> Unit,
+    onExportText: (String, String, String) -> Boolean,
     onReloadState: () -> Unit,
     onStatusMessage: (String) -> Unit,
     runAsync: (() -> Unit) -> Unit
@@ -527,6 +544,7 @@ private fun TabContent(
             language = language,
             onThemeChanged = onThemeChanged,
             onLanguageChanged = onLanguageChanged,
+            onEnableDemo = onEnableDemo,
             onOpenUrl = onOpenUrl,
             onReloadState = onReloadState,
             onStatusMessage = onStatusMessage,
@@ -869,7 +887,7 @@ fun ScheduleScreen(
     snapshot: Snapshot?,
     strings: UiStrings,
     isWide: Boolean,
-    onExportText: (filename: String, mimeType: String, content: String) -> Unit,
+    onExportText: (filename: String, mimeType: String, content: String) -> Boolean,
     onStatusMessage: (String) -> Unit
 ) {
     val allRecords = snapshot?.records?.values ?: emptyList()
@@ -950,8 +968,13 @@ fun ScheduleScreen(
                     OutlinedButton(
                         onClick = {
                             val ics = IcsExporter.export(filteredLessons.map { it.record })
-                            onExportText("vistula-schedule.ics", "text/calendar", ics)
-                            onStatusMessage("${strings.btnExportIcs} (${filteredLessons.size})")
+                            try {
+                                if (onExportText("vistula-schedule.ics", "text/calendar", ics)) {
+                                    onStatusMessage("${strings.btnExportIcs} (${filteredLessons.size})")
+                                }
+                            } catch (e: Exception) {
+                                onStatusMessage(pl.vistula.checker.core.SyncProgress.error(e, strings.languageCode))
+                            }
                         }
                     ) {
                         Text("${strings.btnExportIcs} (${filteredLessons.size})")
@@ -1669,6 +1692,7 @@ fun MoreScreen(
     language: String,
     onThemeChanged: (String) -> Unit,
     onLanguageChanged: (String) -> Unit,
+    onEnableDemo: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onReloadState: () -> Unit,
     onStatusMessage: (String) -> Unit,
@@ -1686,8 +1710,13 @@ fun MoreScreen(
                 "gpa" to strings.sectionGpa,
                 "tasks" to strings.sectionTasks,
                 "attendance" to strings.sectionAttendance,
+                "campus" to toolText(language, "Kampus i kontakty", "Campus and contacts", "Кампус і контакти"),
                 "services" to strings.sectionServices
-            ).forEach { (id, title) ->
+            ).let { sections ->
+                if (pl.vistula.checker.core.AccountRole.lecturer(state)) sections + ("teaching" to when (language) {
+                    "en" -> "Lecturer panel"; "uk" -> "Панель викладача"; else -> "Panel wykładowcy"
+                }) else sections
+            }.forEach { (id, title) ->
                 FilterChip(
                     selected = activeSection == id,
                     onClick = { activeSection = id },
@@ -1697,6 +1726,8 @@ fun MoreScreen(
         }
 
         when (activeSection) {
+            "campus" -> CampusSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
+            "teaching" -> LecturerSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
             "account" -> AccountSection(
                 state = state,
                 repository = repository,
@@ -1705,26 +1736,23 @@ fun MoreScreen(
                 language = language,
                 onThemeChanged = onThemeChanged,
                 onLanguageChanged = onLanguageChanged,
+                onEnableDemo = onEnableDemo,
                 onOpenUrl = onOpenUrl,
                 onReloadState = onReloadState,
                 onStatusMessage = onStatusMessage,
                 runAsync = runAsync
             )
-            "gpa" -> GpaSimulatorSection(
-                snapshot = snapshot
-            )
-            "tasks" -> TasksSection(
-                state = state,
-                repository = repository,
-                onReloadState = onReloadState
-            )
+            "gpa" -> GpaSimulatorSection(snapshot, language)
+            "tasks" -> TasksSection(state, repository, language, onReloadState, runAsync)
             "attendance" -> AttendanceSection(
                 snapshot = snapshot,
                 preferences = preferences,
-                strings = strings
+                strings = strings,
+                onStatusMessage = onStatusMessage
             )
             "services" -> PaymentsAndServicesSection(
                 state = state,
+                language = language,
                 snapshot = snapshot,
                 repository = repository,
                 onOpenUrl = onOpenUrl,

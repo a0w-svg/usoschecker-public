@@ -1,6 +1,6 @@
 <resources>
     <string name="cards_title">Legitymacje</string>
-    <string name="cards_description">Status i ważność legitymacji</string>
+    <string name="cards_description">Wydanie, aktywacja w mObywatelu i unieważnienie mLegitymacji</string>
     <string name="cards_information_only">To podgląd danych USOS. Dokument elektroniczny okazuj w oficjalnej aplikacji mObywatel.</string>
     <string name="cards_refresh">Pobierz dane legitymacji</string>
     <string name="cards_empty">Brak legitymacji w podglądzie</string>

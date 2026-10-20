@@ -56,7 +56,10 @@ Po utworzeniu repozytorium administrator powinien:
 4. Ustawić domyślne uprawnienia Actions na odczyt. Nie przekazywać danych USOS do CI.
 
 Workflow używa `pull_request`, uprawnień tylko do odczytu i akcji przypiętych do SHA.
-Nie publikuje artefaktów ani nie uruchamia testów na prawdziwym koncie.
+Testy nie korzystają z prawdziwego konta. Zadanie desktopowe udostępnia instalator
+Linuksa z sumą SHA-256 do przeglądu PR; przy błędzie testu okna dołącza wyłącznie
+zrzuty i log aplikacji ze sztucznego konta testowego. Sejf, klucze i dane profilu
+testowego nie są dołączane do tych artefaktów.
 Dependabot proponuje aktualizacje Gradle i GitHub Actions do przeglądu.
 
 Dokumentacja: [GitHub Push protection](https://docs.github.com/en/code-security/concepts/secret-security/push-protection)
@@ -97,3 +100,21 @@ są oznaczane identyfikatorem kampusu. Zmiana filii usuwa cache wiadomości; sta
 innej filii nie jest wyświetlany. Publiczny kanał strony głównej jest dostępny dla Warszawy;
 pozostałe filie korzystają z filtrowanych komunikatów USOS oraz zweryfikowanych linków.
 Nie wysyłamy identyfikatora studenta ani danych konta do publicznej strony uczelni.
+
+Dane aktywacji mLegitymacji (`token`, `distribution_pass`) pobieramy wyłącznie
+na żądanie z `services/cards/mcard_order2`. Nie trafiają do cache, logów ani
+zapisanego stanu ekranu. Sprawdzamy identyfikator zamówienia i status gotowości
+(`ready_to_receive` lub `ready`). Android zasłania okno aktywacji przed zrzutami
+ekranu i zamyka je po przejściu aplikacji w tło. Wydanie i unieważnienie wymagają
+potwierdzenia; status nie jest ponawiany jako zapis po niepewnej odpowiedzi.
+
+Desktop przechowuje demo w odrębnym magazynie pamięciowym, bez zapisu do sejfu
+użytkownika ani jego frekwencji. Operacje sieciowe na tokenie demo są odrzucane.
+Sejf desktopowy ogranicza dostęp do właściciela (POSIX lub ACL Windows), odrzuca
+dowiązania i zbyt duże pliki oraz blokuje zapis pomiędzy instancjami i procesami.
+Odłączenie konta usuwa również klucz szyfrujący lokalny sejf. Interfejs otwiera
+wyłącznie zwykłe adresy HTTP/HTTPS; eksport wymaga wybrania pliku i potwierdzenia
+zastąpienia istniejącego pliku. Sekret OAuth i PIN są domyślnie maskowane.
+Drugie uruchomienie desktopu nie otwiera tego samego magazynu: blokada instancji
+jest utrzymywana przez cały czas życia procesu, również podczas jego zamykania.
+Chroni to operacje konta przed wzajemnym nadpisaniem przez dwie aplikacje.

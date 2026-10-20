@@ -449,7 +449,7 @@ class AppSmokeTest {
 
     @Test
     fun weeklyViewExportsOnlyTheSelectedWeek() {
-        val exportDirectory = File(activity().cacheDir, "test-exports")
+        val exportDirectory = File(activity().filesDir, "test-exports")
         exportDirectory.mkdirs()
         val output = File(exportDirectory, "week-test.ics")
         Files.write(output.toPath(), ByteArray(0))
@@ -686,7 +686,7 @@ class AppSmokeTest {
 
     @Test
     fun timetableExportWritesVisibleEventsToSelectedDocument() {
-        val exportDirectory = File(activity().cacheDir, "test-exports")
+        val exportDirectory = File(activity().filesDir, "test-exports")
         exportDirectory.mkdirs()
         val output = File(exportDirectory, "calendar-test.ics")
         Files.write(output.toPath(), ByteArray(0))

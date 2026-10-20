@@ -1,6 +1,6 @@
 <resources>
     <string name="cards_title">Student IDs</string>
-    <string name="cards_description">Card status and validity</string>
+    <string name="cards_description">Issue, activate in mObywatel and revoke your mobile student card</string>
     <string name="cards_information_only">This is a USOS data preview. Present the electronic document in the official mObywatel app.</string>
     <string name="cards_refresh">Fetch ID card data</string>
     <string name="cards_empty">No student ID in preview</string>

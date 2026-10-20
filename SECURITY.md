@@ -104,3 +104,11 @@ zapisanego stanu ekranu. Sprawdzamy identyfikator zamówienia i status gotowośc
 (`ready_to_receive` lub `ready`). Android zasłania okno aktywacji przed zrzutami
 ekranu i zamyka je po przejściu aplikacji w tło. Wydanie i unieważnienie wymagają
 potwierdzenia; status nie jest ponawiany jako zapis po niepewnej odpowiedzi.
+
+Desktop przechowuje demo w odrębnym magazynie pamięciowym, bez zapisu do sejfu
+użytkownika ani jego frekwencji. Operacje sieciowe na tokenie demo są odrzucane.
+Sejf desktopowy ogranicza dostęp do właściciela (POSIX lub ACL Windows), odrzuca
+dowiązania i zbyt duże pliki oraz blokuje zapis pomiędzy instancjami i procesami.
+Odłączenie konta usuwa również klucz szyfrujący lokalny sejf. Interfejs otwiera
+wyłącznie zwykłe adresy HTTP/HTTPS; eksport wymaga wybrania pliku i potwierdzenia
+zastąpienia istniejącego pliku. Sekret OAuth i PIN są domyślnie maskowane.

@@ -55,11 +55,35 @@ object DesktopPlatform {
         if (path.fileSystem.supportedFileAttributeViews().contains("posix")) {
             Files.setPosixFilePermissions(path, PosixFilePermissions.fromString(if (file.isDirectory) "rwx------" else "rw-------"))
         } else {
-            if (!file.setReadable(false, false) || !file.setReadable(true, true) ||
-                !file.setWritable(false, false) || !file.setWritable(true, true)) {
-                throw IOException("Cannot restrict private storage permissions")
-            }
+            val acl = Files.getFileAttributeView(path, java.nio.file.attribute.AclFileAttributeView::class.java, LinkOption.NOFOLLOW_LINKS)
+                ?: throw IOException("Private storage permissions are unsupported")
+            val owner = acl.owner
+            val entry = java.nio.file.attribute.AclEntry.newBuilder()
+                .setType(java.nio.file.attribute.AclEntryType.ALLOW).setPrincipal(owner)
+                .setPermissions(java.util.EnumSet.allOf(java.nio.file.attribute.AclEntryPermission::class.java)).build()
+            acl.acl = listOf(entry)
         }
+    }
+
+    internal fun readPrivate(file: File, maxBytes: Int): ByteArray {
+        restrictPermissions(file)
+        if (Files.size(file.toPath()) > maxBytes) throw IOException("Private storage exceeds its size limit")
+        return Files.newInputStream(file.toPath(), LinkOption.NOFOLLOW_LINKS).use { stream ->
+            val bytes = stream.readNBytes(maxBytes + 1)
+            if (bytes.size > maxBytes) throw IOException("Private storage exceeds its size limit")
+            bytes
+        }
+    }
+
+    fun browserUri(address: String): java.net.URI {
+        require(pl.vistula.checker.core.WebLinks.isWebUrl(address)) { "Only ordinary web links can be opened" }
+        return java.net.URI(address)
+    }
+
+    fun writeExport(target: File, content: String) {
+        val bytes = content.toByteArray(StandardCharsets.UTF_8)
+        require(bytes.size <= 32 * 1024 * 1024) { "Export is too large" }
+        atomicWrite(target, bytes)
     }
 
     internal fun atomicWrite(target: File, bytes: ByteArray) {
@@ -93,45 +117,53 @@ class DesktopVault @JvmOverloads constructor(
 ) : VaultStore {
     private val stateFile = File(directory, "state.bin")
     private val keyFile = File(directory, "vault.key")
-    override val storePath: String = directory.absolutePath
+    override val storePath: String = directory.toPath().toAbsolutePath().normalize().toString()
+    private val storageLock = locks.computeIfAbsent(storePath) { Any() }
 
-    @Synchronized
-    @Throws(Exception::class)
+    init {
+        Files.createDirectories(directory.toPath())
+        DesktopPlatform.restrictPermissions(directory)
+    }
+
+    private fun <T> locked(operation: () -> T): T = synchronized(storageLock) {
+        val lockFile = File(directory, ".vault.lock")
+        java.nio.channels.FileChannel.open(lockFile.toPath(), java.nio.file.StandardOpenOption.CREATE,
+            java.nio.file.StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS).use { channel ->
+            DesktopPlatform.restrictPermissions(lockFile)
+            channel.lock().use { operation() }
+        }
+    }
+
     private fun key(): SecretKey {
         if (Files.exists(keyFile.toPath(), LinkOption.NOFOLLOW_LINKS)) {
-            DesktopPlatform.restrictPermissions(keyFile)
-            val raw = Files.readAllBytes(keyFile.toPath())
+            val raw = DesktopPlatform.readPrivate(keyFile, 32)
             if (raw.size != 32) throw IOException("Invalid vault key; existing data was preserved")
             return SecretKeySpec(raw, "AES")
         }
-        if (stateFile.exists()) throw IOException("Missing vault key; existing data was preserved")
+        if (Files.exists(stateFile.toPath(), LinkOption.NOFOLLOW_LINKS)) throw IOException("Missing vault key; existing data was preserved")
         val raw = ByteArray(32)
         SecureRandom().nextBytes(raw)
         DesktopPlatform.atomicWrite(keyFile, raw)
         return SecretKeySpec(raw, "AES")
     }
 
-    @Synchronized
-    @Throws(Exception::class)
-    override fun read(): JSONObject {
-        if (!stateFile.exists()) return JSONObject()
-        val bytes = Files.readAllBytes(stateFile.toPath())
-        if (bytes.size < 29 || bytes[0].toInt() != 1) {
-            throw IOException("Nie można odczytać zapisanych danych.")
-        }
+    override fun read(): JSONObject = locked {
+        if (!Files.exists(stateFile.toPath(), LinkOption.NOFOLLOW_LINKS)) return@locked JSONObject()
+        val bytes = DesktopPlatform.readPrivate(stateFile, MAX_STATE_BYTES)
+        if (bytes.size < 29 || bytes[0].toInt() != 1) throw IOException("Cannot read saved data")
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes, 1, 12))
-        return JSONObject(String(cipher.doFinal(bytes, 13, bytes.size - 13), StandardCharsets.UTF_8))
+        JSONObject(String(cipher.doFinal(bytes, 13, bytes.size - 13), StandardCharsets.UTF_8))
     }
 
-    @Synchronized
-    @Throws(Exception::class)
-    override fun write(state: JSONObject) {
+    override fun write(state: JSONObject): Unit = locked {
+        val plain = state.toString().toByteArray(StandardCharsets.UTF_8)
+        if (plain.size > MAX_STATE_BYTES - 29) throw IOException("Private storage exceeds its size limit")
         val iv = ByteArray(12)
         SecureRandom().nextBytes(iv)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key(), GCMParameterSpec(128, iv))
-        val encrypted = cipher.doFinal(state.toString().toByteArray(StandardCharsets.UTF_8))
+        val encrypted = cipher.doFinal(plain)
         val out = ByteArray(1 + iv.size + encrypted.size)
         out[0] = 1
         System.arraycopy(iv, 0, out, 1, iv.size)
@@ -139,9 +171,14 @@ class DesktopVault @JvmOverloads constructor(
         DesktopPlatform.atomicWrite(stateFile, out)
     }
 
-    @Synchronized
-    override fun clear() {
-        if (stateFile.exists()) stateFile.delete()
+    override fun clear(): Unit = locked {
+        Files.deleteIfExists(stateFile.toPath())
+        Files.deleteIfExists(keyFile.toPath())
+    }
+
+    companion object {
+        private const val MAX_STATE_BYTES = 32 * 1024 * 1024
+        private val locks = java.util.concurrent.ConcurrentHashMap<String, Any>()
     }
 }
 
@@ -153,7 +190,7 @@ class DesktopKeyValueStore @JvmOverloads constructor(
     private fun load(): JSONObject {
         if (!file.exists()) return JSONObject()
         return try {
-            JSONObject(Files.readString(file.toPath(), StandardCharsets.UTF_8))
+            JSONObject(String(DesktopPlatform.readPrivate(file, 1024 * 1024), StandardCharsets.UTF_8))
         } catch (e: Exception) {
             JSONObject()
         }
@@ -161,9 +198,7 @@ class DesktopKeyValueStore @JvmOverloads constructor(
 
     @Synchronized
     private fun save(json: JSONObject) {
-        try {
-            DesktopPlatform.atomicWrite(file, json.toString(2).toByteArray(StandardCharsets.UTF_8))
-        } catch (ignored: Exception) {}
+        DesktopPlatform.atomicWrite(file, json.toString(2).toByteArray(StandardCharsets.UTF_8))
     }
 
     @Synchronized
@@ -206,7 +241,7 @@ class DesktopKeyValueStore @JvmOverloads constructor(
 }
 
 /** System tray notification publisher for Desktop. */
-class DesktopNotifier : ChangeNotifier {
+class DesktopNotifier : ChangeNotifier, AutoCloseable {
     private var trayIcon: TrayIcon? = null
 
     @Synchronized
@@ -224,6 +259,11 @@ class DesktopNotifier : ChangeNotifier {
         } catch (ignored: Exception) {
             null
         }
+    }
+
+    override fun close() {
+        val icon = synchronized(this) { trayIcon.also { trayIcon = null } } ?: return
+        java.awt.EventQueue.invokeLater { if (SystemTray.isSupported()) SystemTray.getSystemTray().remove(icon) }
     }
 
     override fun notifyChanges(changes: List<Change>) {
@@ -275,12 +315,16 @@ class DesktopSyncScheduler(
         reminderFuture?.cancel(false)
         reminderFuture = null
         if (!enabled || snapshot == null) return
+        val account = repository.read()
+        if (account.optString("token").isEmpty() || account.optString("token") == "demo") return
         val now = Instant.now()
         val next = ReminderPlanner.next(snapshot, emptySet(), now) ?: return
         val delayMs = (ReminderPlanner.triggerAt(next, leadMinutes, now) - now.toEpochMilli()).coerceAtLeast(1000L)
         reminderFuture = executor.schedule(
             {
-                onReminderTriggered(next.record.title, next.record.value)
+                if (SharedRepository.sameAccount(account, repository.read())) {
+                    onReminderTriggered(next.record.title, next.record.value)
+                }
             },
             delayMs,
             TimeUnit.MILLISECONDS

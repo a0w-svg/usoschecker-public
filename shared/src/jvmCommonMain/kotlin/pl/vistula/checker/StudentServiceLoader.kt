@@ -17,6 +17,7 @@ object StudentServiceLoader {
                 clients: SharedRepository.ClientFactory = SharedRepository.ClientFactory { UsosClient(it) },
                 publicNews: () -> JSONObject = { UniversityNews.load() }) {
         val credentials = repository.read()
+        check(credentials.optString("token") != "demo") { "Demo data is offline" }
         val publicRequest = section == "news" && CampusAffiliation.canShowPublicNews(credentials)
         if (!publicRequest && (credentials.optString("token").isEmpty() || credentials.optBoolean("authorizationError"))) {
             throw IllegalStateException("Połącz konto USOS, aby pobrać dane.")

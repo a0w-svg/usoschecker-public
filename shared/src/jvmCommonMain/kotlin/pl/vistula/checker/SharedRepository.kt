@@ -215,7 +215,7 @@ class SharedRepository @JvmOverloads constructor(
             val s: JSONObject
             synchronized(LOCK) {
                 s = vault.read()
-                if (s.optString("token").isEmpty() || (!manual && !s.optBoolean("enabled"))) return emptyList()
+                if (s.optString("token").isEmpty() || s.optString("token") == "demo" || (!manual && !s.optBoolean("enabled"))) return emptyList()
                 if (s.optLong("retryAt") > System.currentTimeMillis()) {
                     throw IllegalStateException(
                         "USOS prosi o przerwę w żądaniach. Spróbuj po " +
@@ -228,10 +228,10 @@ class SharedRepository @JvmOverloads constructor(
                 vault.write(s)
             }
             try {
-                if (refreshProfile || !s.has("staffStatus")) {
+                if (refreshProfile || (s.optString("studentNumber").isEmpty() && !s.has("staffStatus"))) {
                     try {
                         val user = JSONObject(
-                            UsosClient(s).get(
+                            clients.create(s).get(
                                 "services/users/user",
                                 mapOf("fields" to UsosClient.profileFields(s))
                             )
@@ -320,6 +320,12 @@ class SharedRepository @JvmOverloads constructor(
                 throw e
             }
         }
+    }
+
+    /** Older desktop releases persisted demo in the personal vault. Never clear a real account during recovery. */
+    fun discardLegacyDemo(): Boolean = synchronized(LOCK) {
+        if (vault.read().optString("token") != "demo") false
+        else { disconnect(); true }
     }
 
     fun disconnect() {

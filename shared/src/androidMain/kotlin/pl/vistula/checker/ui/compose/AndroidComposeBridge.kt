@@ -5,8 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.view.View
 import androidx.compose.ui.platform.ComposeView
-import java.io.File
-import java.nio.charset.StandardCharsets
 import pl.vistula.checker.AndroidKeyValueStore
 import pl.vistula.checker.ChangeNotifier
 import pl.vistula.checker.SharedRepository
@@ -33,6 +31,7 @@ object AndroidComposeBridge {
                     syncScheduler = syncScheduler,
                     onOpenUrl = { url ->
                         try {
+                            require(pl.vistula.checker.core.WebLinks.isWebUrl(url))
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
@@ -42,8 +41,6 @@ object AndroidComposeBridge {
                     },
                     onExportText = { filename, mimeType, content ->
                         try {
-                            val outFile = File(context.cacheDir, filename)
-                            outFile.writeText(content, StandardCharsets.UTF_8)
                             val sendIntent = Intent(Intent.ACTION_SEND).apply {
                                 type = mimeType
                                 putExtra(Intent.EXTRA_TEXT, content)
@@ -52,7 +49,9 @@ object AndroidComposeBridge {
                             context.startActivity(Intent.createChooser(sendIntent, filename).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             })
+                            true
                         } catch (_: Exception) {
+                            false
                         }
                     }
                 )

@@ -133,3 +133,19 @@ na Advanced setup w ustawieniach Security repozytorium; GitHub odrzuca wyniki
 zaawansowanego workflow przy jednocześnie aktywnym Default setup.
 Python i GitHub Actions pozostają analizowane w osobnych pozycjach macierzy.
 Nie uznawaj błędu konfiguracji skanera ani braku wyników za potwierdzenie braku podatności.
+
+## Weryfikacja desktopu
+
+Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.3.2`, Android
+`versionCode` 14). Z pełnym JDK 21 i SDK Android 36:
+
+```sh
+bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb
+xvfb-run -a python3 scripts/desktop_smoke.py
+```
+
+Test okna wymaga Xvfb i Tesseract OCR. Korzysta wyłącznie z konta testowego w `work/desktop-smoke`, wykonuje
+wejście i wyjście z demo, odświeżenie oraz skróty nawigacji i sprawdza, czy zaszyfrowany
+magazyn konta pozostał bez zmian. Nie testuje rzeczywistego USOS. Na Windows i macOS
+nadal wymagane są testy na tych systemach; pakietu Linuksa nie traktujemy jako
+weryfikacji instalatorów MSI/EXE/DMG.

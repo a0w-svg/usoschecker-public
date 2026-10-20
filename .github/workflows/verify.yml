@@ -41,3 +41,33 @@ jobs:
         run: sed -i '/^toolchainVendor=/d' gradle/gradle-daemon-jvm.properties
       - name: Tests, lint and release build without personal credentials
         run: bash gradlew :core:test :shared:desktopTest :desktopApp:compileKotlin :app:testDebugUnitTest :app:lintRelease :app:verifyReleaseConfiguration :app:assembleRelease :app:bundleRelease -PisolatedTests --no-daemon
+
+  desktop:
+    name: Desktop verification
+    needs: security
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install desktop packaging and display-test tools
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y fakeroot xvfb tesseract-ocr
+      - name: Build and test the packaged desktop app
+        run: bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb --no-daemon
+      - name: Launch the packaged app with a disposable fixture account
+        run: xvfb-run -a python3 scripts/desktop_smoke.py
+      - name: Checksum the Linux installer
+        run: cd desktopApp/build/compose/binaries/main/deb && sha256sum *.deb > SHA256SUMS.txt
+      - name: Installer for PR review
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: VistulaChecker-Linux-${{ github.sha }}
+          path: |
+            desktopApp/build/compose/binaries/main/deb/*.deb
+            desktopApp/build/compose/binaries/main/deb/SHA256SUMS.txt
+          retention-days: 7

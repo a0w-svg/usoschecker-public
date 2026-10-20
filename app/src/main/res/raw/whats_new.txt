@@ -1,5 +1,5 @@
-1.3.2
-
+• Poprawione kontakty i wybór filii, konta prowadzących oraz aktywacja mLegitymacji w mObywatelu.
+• Komunikaty odświeżania, także zapisane wcześniej, reagują na zmianę języka.
 • Desktop: demo działa w osobnej pamięci i zachowuje zapisane konto.
 • Poprawione skróty klawiaturowe, odświeżanie w tle i blokada równoległych operacji.
 • Wybór kampusu, kontakty, odświeżanie płatności i poprawione zadania na komputerze.

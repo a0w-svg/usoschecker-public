@@ -1,5 +1,5 @@
-1.3.2
-
+• Fixed campus contacts and selection, lecturer accounts and mobile student card activation in mObywatel.
+• Live and cached refresh messages follow language changes.
 • Desktop demo uses separate memory and preserves your saved account.
 • Fixed keyboard shortcuts, background refresh and overlapping operations.
 • Campus selection, contacts, payment refresh and improved desktop tasks.

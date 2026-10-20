@@ -27,6 +27,7 @@ import androidx.test.rule.ActivityTestRule
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -90,13 +91,16 @@ class MoreNavigationRegressionTest {
 
     @Test
     fun scheduleContentStillChangesDateWhileBarChangesTabs() {
+        val today = LocalDate.now(UsosClient.ZONE)
         main {
+            rule.activity.setCalendarQuery("")
+            rule.activity.setCalendarMode("day")
             rule.activity.navigate(5)
-            rule.activity.setCalendarDate("2026-10-19")
+            rule.activity.setCalendarDate(today.toString())
             rule.activity.render()
         }
         onView(withId(R.id.main_scroll)).perform(swipeLeft())
-        main { assertEquals("2026-10-20", rule.activity.getCalendarDate()) }
+        main { assertEquals(today.plusDays(1).toString(), rule.activity.getCalendarDate()) }
         onView(withId(R.id.nav_item_plan)).check(matches(isSelected()))
         onView(withId(R.id.bottom_navigation)).perform(swipeRight())
         onView(withId(R.id.nav_item_grades)).check(matches(isSelected()))

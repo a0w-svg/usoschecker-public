@@ -20,6 +20,7 @@ import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.HorizontalScrollView
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
@@ -261,6 +262,20 @@ class MainActivity : AppCompatActivity() {
             val indicatorHeight = max(48, (40 * resources.configuration.fontScale).toInt())
             nav.itemActiveIndicatorExpandedHeight = UiHelper.dp(this, indicatorHeight)
             nav.minimumHeight = UiHelper.dp(this, indicatorHeight + 16)
+            if (resources.configuration.fontScale > 1.3f) {
+                // Keep full labels at accessibility sizes; let the user scroll the tabs.
+                val parent = nav.parent as LinearLayout
+                val position = parent.indexOfChild(nav)
+                val outerParams = nav.layoutParams
+                parent.removeView(nav)
+                val viewport = HorizontalScrollView(this).apply {
+                    isHorizontalScrollBarEnabled = true
+                    isFillViewport = true
+                }
+                val width = UiHelper.dp(this, (90 * resources.configuration.fontScale * nav.menu.size()).toInt())
+                viewport.addView(nav, android.widget.FrameLayout.LayoutParams(width, -2))
+                parent.addView(viewport, position, outerParams)
+            }
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
@@ -305,6 +320,9 @@ class MainActivity : AppCompatActivity() {
             }
             val next = current + direction
             if (next in tabs.indices) navigate(tabs[next])
+        }
+        if (resources.configuration.fontScale > 1.3f) {
+            (navigation as? SwipeNavigationView)?.setOnTabSwipe(null)
         }
 
         navigation?.setOnItemReselectedListener { item ->
@@ -508,6 +526,13 @@ class MainActivity : AppCompatActivity() {
                 else -> R.id.nav_item_home
             }
             nav.menu.findItem(navMenuId).isChecked = true
+            (nav.parent as? HorizontalScrollView)?.let { viewport ->
+                nav.post {
+                    nav.findViewById<View>(navMenuId)?.let { item ->
+                        viewport.smoothScrollTo(item.left - (viewport.width - item.width) / 2, 0)
+                    }
+                }
+            }
         }
 
         try {

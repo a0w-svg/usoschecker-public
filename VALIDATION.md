@@ -5,12 +5,14 @@
 - Release gate: `tools/production-check.ps1 -DeviceTests` passed on a separate Android 16 AVD (`CodexDesignQA`) with synthetic QA data.
 - JVM: **186 core + 20 shared desktop + 67 Android = 273 passed**, no failures or skips.
 - Android: **162 full debug QA tests + 6 optimized QA tests passed**, no failures or skips. First-run tests cover skip/relaunch, demo isolation, saved-key upgrade bypass, masked credentials and activity recreation. Dashboard tests cover concurrent classes, tentative times and shortcuts.
-- `lintRelease`: **0 errors**; existing warnings remain. Release configuration, APK/AAB builds and source/history secret scans passed. **10 Python security/localization/catalog tests passed**.
+- `lintRelease`: **0 errors**; existing warnings remain. Release configuration, APK/AAB builds and source/history secret scans passed. **14 Python security/localization/catalog/audit tests passed**.
 - UI checks: light/OLED Android previews, 200% system text and landscape; desktop light/dark smoke checks and synthetic previews in GitHub CI. The wide dashboard uses three columns. `docs/screenshots` contains only synthetic demo/first-run views.
+- Readability: larger body/caption text, stronger muted-text contrast and full-size navigation labels; at large system font sizes the tab bar scrolls horizontally.
+- Dependencies: direct stable versions verified; Gradle 9.8.2 and Compose 1.12.2; seven build-classpath advisories fixed, OSV 363 selected Maven versions with zero affected components. Full inventory: [DEPENDENCIES.md](DEPENDENCIES.md).
 - README is available in Polish and English, with mobile/desktop galleries and API setup instructions. Design co-author: [Kaydjen](https://github.com/Kaydjen).
 - The original AVD was short of storage. Tests used a new, separate profile without deleting original emulator data. Device animations were disabled for deterministic Espresso menu interaction; no production animation behavior was changed.
 - Public release requires the protected PR checks, the same signing certificate as earlier releases, version/package/alignment checks, decompressed artifact scans and SHA-256 files. The checked commit/tree, exact tests and artifact hashes are recorded in the release's `release-info.json`.
-- Limits: tests use fixtures rather than a live student account; Android 12 and macOS were not manually exercised. Advanced CodeQL can be rejected by GitHub while Default setup remains enabled; this is not a passing scan or a substitute for required checks.
+- Limits: tests use fixtures rather than a live student account; Android 12 and macOS were not manually exercised. Default CodeQL setup remains enabled. Additional manual-build analysis retains SARIF and checks findings without duplicate uploads.
 
 ---
 

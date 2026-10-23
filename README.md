@@ -160,3 +160,5 @@ On Windows, `tools/production-check.ps1 -DeviceTests` runs the release gate with
 </p>
 
 <p align="center">Licencja / License: <a href="LICENSE">MIT</a>. Biblioteki zewnętrzne zachowują własne licencje. / Third-party libraries retain their own licenses.</p>
+
+[Audyt zależności i poprawki podatności / Dependency review and vulnerability fixes](DEPENDENCIES.md)

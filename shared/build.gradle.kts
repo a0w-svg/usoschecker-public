@@ -34,12 +34,12 @@ kotlin {
         val jvmCommonMain by getting {
             dependencies {
                 // Android ships org.json in the platform; desktop gets the real library below.
-                compileOnly("org.json:json:20240303")
+                compileOnly("org.json:json:20260814")
             }
         }
         val desktopMain by getting {
             dependencies {
-                implementation("org.json:json:20240303")
+                implementation("org.json:json:20260814")
                 api(compose.desktop.currentOs)
             }
         }

@@ -10,6 +10,6 @@ kotlin {
 }
 dependencies {
     testImplementation project(':shared')
-    testImplementation 'org.json:json:20240303'
+    testImplementation 'org.json:json:20260814'
     testImplementation 'junit:junit:4.13.2'
 }

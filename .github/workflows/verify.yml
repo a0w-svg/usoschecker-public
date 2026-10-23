@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -30,17 +30,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
       - name: Allow installed JDK 21 on the CI runner
         run: sed -i '/^toolchainVendor=/d' gradle/gradle-daemon-jvm.properties
       - name: Tests, lint and release build without personal credentials
         run: bash gradlew :core:test :shared:desktopTest :desktopApp:compileKotlin :app:testDebugUnitTest :app:lintRelease :app:verifyReleaseConfiguration :app:assembleRelease :app:bundleRelease -PisolatedTests --no-daemon
+
+      - name: Audit resolved application, test and build dependencies against OSV
+        run: python3 scripts/audit_dependencies.py
 
   desktop:
     name: Desktop verification
@@ -48,13 +52,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
       - name: Install desktop packaging and display-test tools
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y fakeroot xvfb tesseract-ocr
       - name: Build and test the packaged desktop app
@@ -66,7 +71,7 @@ jobs:
       - name: Checksum the Linux installer
         run: cd desktopApp/build/compose/binaries/main/deb && sha256sum *.deb > SHA256SUMS.txt
       - name: Dashboard preview using synthetic data
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: desktop-dashboard-preview-${{ github.sha }}
           path: |
@@ -75,7 +80,7 @@ jobs:
             work/design-previews/*.png
           retention-days: 3
       - name: Installer for PR review
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: VistulaChecker-Linux-${{ github.sha }}
           path: |
@@ -84,7 +89,7 @@ jobs:
           retention-days: 7
       - name: Display-test diagnostics (fixture data only)
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: desktop-fixture-diagnostics-${{ github.sha }}
           path: |
@@ -99,13 +104,14 @@ jobs:
     runs-on: windows-2022
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: '21'
+          check-latest: true
       - name: Locate Windows installer tools
         shell: pwsh
         run: |
@@ -119,7 +125,7 @@ jobs:
         shell: pwsh
         run: python scripts/windows_smoke.py
       - name: Windows packages and checksums
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: VistulaChecker-Windows-${{ github.sha }}
           path: desktopApp/build/windows-publication/*

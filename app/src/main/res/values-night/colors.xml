@@ -1,8 +1,8 @@
 <resources>
     <color name="app_accent">#5AC4D8</color>
     <color name="app_ink">#EDEFF0</color>
-    <color name="app_muted">#A0A6A9</color>
-    <color name="app_faint">#92999D</color>
+    <color name="app_muted">#B7BEC2</color>
+    <color name="app_faint">#A5AFB5</color>
     <color name="app_error">#FFB4AB</color>
     <color name="app_outline_widget">#42484B</color>
     <color name="app_accent_container">#102B31</color>

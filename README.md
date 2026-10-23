@@ -89,7 +89,7 @@ Wskazania planu opierają się na ostatnio pobranych danych. Terminy orientacyjn
 
 ### Budowanie i testy
 
-Wymagane: **JDK 21**, **Android SDK 36** i dołączony wrapper Gradle. Otwórz katalog z `settings.gradle` w Android Studio. Instrukcja: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
+Wymagane: **JDK 21**, **Android SDK 37** i dołączony wrapper Gradle. Otwórz katalog z `settings.gradle` w Android Studio. Instrukcja: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
 
 ```powershell
 .\gradlew.bat :app:assembleDebug -PisolatedTests
@@ -140,7 +140,7 @@ Timetable indicators use the last downloaded data. Tentative times are labelled.
 
 ### Build and verify
 
-Requirements: **JDK 21**, **Android SDK 36** and the included Gradle wrapper. Open the folder containing `settings.gradle` in Android Studio; see [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
+Requirements: **JDK 21**, **Android SDK 37** and the included Gradle wrapper. Open the folder containing `settings.gradle` in Android Studio; see [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
 
 ```sh
 ./gradlew :app:assembleDebug -PisolatedTests

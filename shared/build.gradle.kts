@@ -8,7 +8,7 @@ plugins {
 kotlin {
     androidLibrary {
         namespace = "pl.vistula.checker.shared"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 31
     }
     jvm("desktop")

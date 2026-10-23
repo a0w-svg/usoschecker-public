@@ -257,6 +257,11 @@ class MainActivity : AppCompatActivity() {
         scroll = findViewById(R.id.main_scroll)
         content = findViewById(R.id.main_content)
         navigation = findViewById(R.id.bottom_navigation)
+        navigation?.let { nav ->
+            val indicatorHeight = max(48, (40 * resources.configuration.fontScale).toInt())
+            nav.itemActiveIndicatorExpandedHeight = UiHelper.dp(this, indicatorHeight)
+            nav.minimumHeight = UiHelper.dp(this, indicatorHeight + 16)
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

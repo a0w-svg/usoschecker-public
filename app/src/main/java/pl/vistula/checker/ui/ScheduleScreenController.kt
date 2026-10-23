@@ -164,7 +164,7 @@ class ScheduleScreenController private constructor() {
                     .show()
             }
             date.contentDescription = "${activity.getString(R.string.schedule_btn_choose_date)}: $dateLabel"
-            date.textSize = 16f
+            date.textSize = 18f
             date.setTextColor(activity.getColor(R.color.app_ink))
             date.minHeight = UiHelper.dp(activity, 64)
             date.minimumHeight = UiHelper.dp(activity, 64)

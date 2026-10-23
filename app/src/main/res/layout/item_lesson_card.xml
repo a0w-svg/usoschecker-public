@@ -22,7 +22,7 @@
         android:paddingTop="4dp"
         android:paddingBottom="4dp"
         android:textColor="@color/app_ink"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         android:visibility="gone" />
 
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/app_muted"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
@@ -63,7 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:textColor="@color/app_ink"
-        android:textSize="17sp"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <TextView
@@ -85,7 +85,7 @@
         android:layout_marginBottom="12dp"
         android:lineSpacingExtra="2dp"
         android:textColor="@color/app_muted"
-        android:textSize="14sp" />
+        android:textSize="15sp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/lesson_item_btn_details"
@@ -97,7 +97,7 @@
         android:text="@string/btn_class_details"
         android:textAllCaps="false"
         android:textColor="@color/app_ink"
-        android:textSize="14sp"
+        android:textSize="15sp"
         app:backgroundTint="@color/app_button_surface"
         app:cornerRadius="14dp" />
 </LinearLayout>

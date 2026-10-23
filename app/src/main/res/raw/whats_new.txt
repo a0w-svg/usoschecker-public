@@ -3,3 +3,4 @@
 • Neutralne powierzchnie, turkusowy akcent i zaokrąglona nawigacja w kolejności Dzisiaj, Plan, Oceny, Zmiany, Więcej.
 • Spójne karty planu, ocen i narzędzi; zachowane ustawienia motywu i wersje językowe PL/EN/UK.
 • Pierwsze uruchomienie: krótki przewodnik uzyskania własnego klucza API, przejście do bezpiecznego formularza i logowania przez PIN; możliwość pominięcia i uruchomienia demo.
+• Czytelniejszy tekst: większe opisy i godziny, mocniejszy kontrast tekstu pomocniczego oraz nawigacja skalująca się z systemową czcionką.

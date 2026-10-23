@@ -22,7 +22,7 @@ val LightColors = lightColorScheme(
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFE0F1F4),
     onPrimaryContainer = Color(0xFF123D46),
-    secondary = Color(0xFF596165),
+    secondary = Color(0xFF485156),
     onSecondary = Color(0xFFFFFFFF),
     secondaryContainer = Color(0xFFE4E8E9),
     onSecondaryContainer = Color(0xFF202326),
@@ -35,7 +35,7 @@ val LightColors = lightColorScheme(
     surface = Color(0xFFFFFFFF),
     onSurface = Color(0xFF202326),
     surfaceVariant = Color(0xFFF0F2F3),
-    onSurfaceVariant = Color(0xFF596165),
+    onSurfaceVariant = Color(0xFF485156),
     outline = Color(0xFFE1E4E5),
     outlineVariant = Color(0xFFE6E9EA),
     error = Color(0xFFB3261E),
@@ -49,7 +49,7 @@ val DarkColors = darkColorScheme(
     onPrimary = Color(0xFF09252B),
     primaryContainer = Color(0xFF102B31),
     onPrimaryContainer = Color(0xFFB7EDF6),
-    secondary = Color(0xFFA0A6A9),
+    secondary = Color(0xFFB7BEC2),
     onSecondary = Color(0xFF202325),
     secondaryContainer = Color(0xFF2B2E30),
     onSecondaryContainer = Color(0xFFEDEFF0),
@@ -62,7 +62,7 @@ val DarkColors = darkColorScheme(
     surface = Color(0xFF151718),
     onSurface = Color(0xFFEDEFF0),
     surfaceVariant = Color(0xFF1B1E20),
-    onSurfaceVariant = Color(0xFFA0A6A9),
+    onSurfaceVariant = Color(0xFFB7BEC2),
     outline = Color(0xFF242729),
     outlineVariant = Color(0xFF25282A),
     error = Color(0xFFFFB4AB),
@@ -122,19 +122,22 @@ val VistulaTypography = Typography(
         lineHeight = 22.sp
     ),
     bodyLarge = TextStyle(
-        fontSize = 15.sp,
+        fontSize = 16.sp,
         fontWeight = FontWeight.Normal,
-        lineHeight = 21.sp
+        lineHeight = 24.sp
     ),
     bodyMedium = TextStyle(
-        fontSize = 13.sp,
+        fontSize = 15.sp,
         fontWeight = FontWeight.Normal,
-        lineHeight = 19.sp
+        lineHeight = 22.sp
     ),
+    bodySmall = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
+    titleSmall = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold, lineHeight = 22.sp),
+    labelSmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
     labelMedium = TextStyle(
-        fontSize = 12.sp,
+        fontSize = 13.sp,
         fontWeight = FontWeight.Medium,
-        lineHeight = 16.sp
+        lineHeight = 18.sp
     )
 )
 

@@ -574,7 +574,7 @@ class GradesScreenController private constructor() {
             values.setTypeface(null, Typeface.NORMAL)
             values.text = preview
             values.maxWidth = UiHelper.dp(activity, if (rows.size > 1) 160 else 96)
-            values.textSize = 16f
+            values.textSize = 18f
             values.setLineSpacing(UiHelper.dp(activity, 5).toFloat(), 1f)
             values.contentDescription = activity.getString(R.string.grades_values_description, descriptions.joinToString(", "))
             val meta = row.findViewById<TextView>(R.id.grade_item_course_meta)

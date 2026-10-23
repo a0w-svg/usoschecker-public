@@ -139,7 +139,7 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun add(context: Context, target: LinearLayout, value: String?, size: Int, color: Int, bold: Boolean) {
-            val t = text(context, value, size, color, bold)
+            val t = text(context, value, max(15, size), color, bold)
             val p = LinearLayout.LayoutParams(-1, -2)
             p.bottomMargin = dp(context, 12)
             target.addView(t, p)
@@ -211,7 +211,7 @@ class UiHelper private constructor() {
             b.isSingleLine = false
             b.text = label
             b.isAllCaps = false
-            b.textSize = 14f
+            b.textSize = 15f
             val states = arrayOf(intArrayOf(-android.R.attr.state_enabled), intArrayOf())
             b.setTextColor(
                 ColorStateList(
@@ -349,7 +349,7 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun note(context: Context, parent: LinearLayout, value: String?, color: Int) {
-            add(context, parent, value, 14, color, false)
+            add(context, parent, value, 16, color, false)
         }
 
         @JvmStatic

@@ -188,8 +188,8 @@ class HomeScreenController private constructor() {
 
         private fun sectionLink(activity: MainActivity, parent: LinearLayout, title: Int, action: () -> Unit) {
             val label = UiHelper.actionRow(activity, activity.getString(title).uppercase(Language.currentLocale(activity)) + "  ›", { action() }, false)
-            label.textSize = 11f
-            label.letterSpacing = .12f
+            label.textSize = 13f
+            label.letterSpacing = .08f
             label.setTextColor(activity.getColor(R.color.app_muted))
             label.setPadding(0, UiHelper.dp(activity, 12), 0, 0)
             ViewCompat.setAccessibilityHeading(label, true)
@@ -210,7 +210,7 @@ class HomeScreenController private constructor() {
             val current = lessons.filter { !it.tentative() && it.current(now) }
             val focus = current.firstOrNull() ?: lessons.firstOrNull { it.start.toInstant().isAfter(now) }
             val updated = UiHelper.text(activity,
-                activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(data.optLong("successAt"))), 12, UiHelper.MUTED, false)
+                activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(data.optLong("successAt"))), 14, UiHelper.MUTED, false)
             updated.gravity = Gravity.CENTER
             parent.addView(updated, LinearLayout.LayoutParams(-1, -2).apply { topMargin = UiHelper.dp(activity, 12) })
 
@@ -226,9 +226,9 @@ class HomeScreenController private constructor() {
                 it.gravity = Gravity.CENTER
                 hero.addView(it, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = UiHelper.dp(activity, 12) })
             }
-            val caption = line(activity.getString(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class), 11, UiHelper.MUTED, false)
+            val caption = line(activity.getString(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class), 13, UiHelper.MUTED, false)
             caption.isAllCaps = true
-            caption.letterSpacing = .16f
+            caption.letterSpacing = .08f
             val title = line(focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming), 32, UiHelper.INK, true)
             ViewCompat.setAccessibilityHeading(title, true)
             if (focus != null) {
@@ -236,14 +236,14 @@ class HomeScreenController private constructor() {
                 val room = room(focus.record)
                 val date = if (focus.start.toLocalDate() == today) "" else UiHelper.shortDate(focus.start.toLocalDate()) + " · "
                 line(date + focus.start.format(clock) + "–" + focus.end.format(clock) +
-                    if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room), 15, UiHelper.INK, false)
+                    if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room), 17, UiHelper.INK, false)
                 val status = when {
                     focus.tentative() -> activity.getString(R.string.design_tentative)
                     current.isNotEmpty() -> activity.getString(R.string.home_classes_remaining_min, max(1L, (Duration.between(now, focus.end.toInstant()).seconds + 59) / 60))
                     focus.start.toLocalDate() == today -> activity.getString(R.string.design_starts_minutes, max(1L, (Duration.between(now, focus.start.toInstant()).seconds + 59) / 60))
                     else -> focus.start.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity)))
                 }
-                val badge = UiHelper.text(activity, status, 12, UiHelper.INK, false).apply {
+                val badge = UiHelper.text(activity, status, 14, UiHelper.INK, false).apply {
                     setTextColor(activity.getColor(R.color.app_accent))
                     gravity = Gravity.CENTER
                     setPadding(UiHelper.dp(activity, 14), UiHelper.dp(activity, 8), UiHelper.dp(activity, 14), UiHelper.dp(activity, 8))
@@ -322,7 +322,7 @@ class HomeScreenController private constructor() {
                 val button = UiHelper.button(activity,
                     day.format(DateTimeFormatter.ofPattern("EEE", Language.currentLocale(activity))).uppercase(Language.currentLocale(activity)) +
                         "\n" + day.dayOfMonth + "\n" + if (count == 0) "—" else "•".repeat(min(4, count)), { openDay(activity, day) }, false)
-                button.textSize = 12f
+                button.textSize = 14f
                 button.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8))
                 button.contentDescription = day.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity))) +
                     ": " + activity.getString(R.string.design_class_count, count)

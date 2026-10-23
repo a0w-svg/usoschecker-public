@@ -10,7 +10,7 @@ Publikacja źródeł na GitHubie: [SECURITY.md](SECURITY.md). Skrypt pakujący t
 wyłącznie `dist/publication/VistulaChecker-AndroidStudio.zip`; nie dołącza binariów
 ani mapowania R8. Nie publikuj starszych APK debug przechowywanych w `dist`.
 
-Projekt wymaga JDK 21 oraz Android SDK Platform 36. Korzystaj z dołączonego wrappera Gradle.
+Projekt wymaga JDK 21 oraz Android SDK Platform 37. Korzystaj z dołączonego wrappera Gradle.
 Kod aplikacji pozostaje zgodny z Androidem 12 (API 31) i nowszym; target SDK wynosi 36.
 Zmiana target SDK obejmuje obsługę przycisku i gestu Wstecz przez AndroidX.
 
@@ -137,7 +137,7 @@ Nie uznawaj błędu konfiguracji skanera ani braku wyników za potwierdzenie bra
 ## Weryfikacja desktopu
 
 Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.5.0`, Android
-`versionCode` 16). Z pełnym JDK 21 i SDK Android 36:
+`versionCode` 16). Z pełnym JDK 21 i SDK Android 37:
 
 ```sh
 bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb

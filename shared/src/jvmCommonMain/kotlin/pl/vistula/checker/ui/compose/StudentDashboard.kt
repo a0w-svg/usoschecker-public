@@ -1,6 +1,7 @@
 package pl.vistula.checker.ui.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import java.time.Duration
@@ -55,6 +56,7 @@ internal fun StudentDashboard(
         }
         val current = lessons.firstOrNull { !it.tentative() && it.current(now) }
         val next = current ?: lessons.firstOrNull { it.start.toInstant().isAfter(now) }
+        val focus: @Composable () -> Unit = {
         Column(Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Box(Modifier.width(28.dp).height(2.dp).background(MaterialTheme.colorScheme.primary))
@@ -80,6 +82,7 @@ internal fun StudentDashboard(
                     modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(24.dp)).padding(horizontal = 16.dp, vertical = 8.dp))
                 TextButton(onClick = { onOpenScheduleDate(next.start.toLocalDate()) }) { Text(strings.btnOpenSchedule) }
             }
+        }
         }
         val agenda: @Composable () -> Unit = {
             DashboardPanel(tr("Plan dnia", "Day plan", "План дня")) {
@@ -131,17 +134,59 @@ internal fun StudentDashboard(
                 OutlinedButton(onClick = { onNavigateTool("tasks") }) { Text(strings.sectionTasks) }
             }
         }
-        if (isWide) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Column(Modifier.weight(1.4f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                agenda()
-                RecentGradesCard(grades.take(4), snapshot, strings) { onNavigateTab(VistulaTab.GRADES) }
+        val changes: @Composable () -> Unit = {
+            DashboardPanel(tr("Ostatnie zmiany", "Recent changes", "Останні зміни")) {
+                val history = state.optJSONArray("history") ?: JSONArray()
+                val recent = (0 until history.length()).map { Change.from(history.getJSONObject(it)) }
+                    .sortedByDescending { it.effectiveTimestamp() }.take(3)
+                if (recent.isEmpty()) Text(tr("Brak zapisanych zmian.", "No saved changes.", "Немає збережених змін."), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                recent.forEachIndexed { index, change ->
+                    if (index > 0) HorizontalDivider()
+                    TextButton(onClick = { onNavigateTab(VistulaTab.HISTORY) }, modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(change.title, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleSmall)
+                            val summary = listOf("diffRoom", "diffTime", "diffGrade", "diffLecturers").map { change.optMeta(it) }.filter { it.isNotEmpty() }.joinToString(" · ")
+                            if (summary.isNotEmpty()) Text(summary, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+                TextButton(onClick = { onNavigateTab(VistulaTab.HISTORY) }) { Text(strings.tabHistory) }
             }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                deadlines()
-                NewsListCard(snapshot?.news?.take(3) ?: emptyList(), strings, onOpenUrl)
+        }
+        val week: @Composable () -> Unit = {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(tr("Ten tydzień", "This week", "Цей тиждень").uppercase(Locale.forLanguageTag(language)),
+                    style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    val monday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                    repeat(7) { index ->
+                        val date = monday.plusDays(index.toLong())
+                        val count = lessons.count { it.intersects(date) }
+                        Surface(onClick = { onOpenScheduleDate(date) }, shape = RoundedCornerShape(24.dp),
+                            color = if (date == today) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.background,
+                            modifier = Modifier.widthIn(min = 48.dp)) {
+                            Column(Modifier.padding(horizontal = 4.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(date.format(DateTimeFormatter.ofPattern("EEE", Locale.forLanguageTag(language))), style = MaterialTheme.typography.labelSmall)
+                                Text(date.dayOfMonth.toString(), style = MaterialTheme.typography.titleSmall)
+                                Text(if (snapshot == null) "?" else if (count == 0) "—" else "•".repeat(minOf(4, count)), style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (isWide) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                Column(Modifier.weight(1f)) { agenda() }
+                Column(Modifier.weight(1.2f), verticalArrangement = Arrangement.spacedBy(16.dp)) { focus(); week() }
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) { changes(); deadlines() }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                Box(Modifier.weight(1f)) { RecentGradesCard(grades.take(4), snapshot, strings) { onNavigateTab(VistulaTab.GRADES) } }
+                Box(Modifier.weight(1f)) { NewsListCard(snapshot?.news?.take(3) ?: emptyList(), strings, onOpenUrl) }
             }
         } else {
-            agenda(); deadlines()
+            focus(); agenda(); changes(); week(); deadlines()
             RecentGradesCard(grades.take(3), snapshot, strings) { onNavigateTab(VistulaTab.GRADES) }
             NewsListCard(snapshot?.news?.take(3) ?: emptyList(), strings, onOpenUrl)
         }

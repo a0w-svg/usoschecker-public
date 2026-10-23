@@ -328,7 +328,8 @@ class HomeScreenController private constructor() {
                     ": " + activity.getString(R.string.design_class_count, count)
                 button.backgroundTintList = android.content.res.ColorStateList.valueOf(activity.getColor(
                     if (day == today) R.color.app_secondary_container else R.color.app_background))
-                week.addView(button, LinearLayout.LayoutParams(UiHelper.dp(activity, 52), -2).apply { marginEnd = UiHelper.dp(activity, 3) })
+                val width = max(52, (52 * activity.resources.configuration.fontScale).toInt())
+                week.addView(button, LinearLayout.LayoutParams(UiHelper.dp(activity, width), -2).apply { marginEnd = UiHelper.dp(activity, 3) })
             }
         }
 

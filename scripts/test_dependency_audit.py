@@ -5,8 +5,11 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-import audit_dependencies
-import check_sarif
+if __package__:
+    from . import audit_dependencies, check_sarif
+else:
+    import audit_dependencies
+    import check_sarif
 
 
 class DependencyAuditTest(unittest.TestCase):

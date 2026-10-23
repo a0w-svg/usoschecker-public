@@ -24,6 +24,7 @@ jobs:
       - run: python3 scripts/security_check.py
       - run: python3 scripts/security_check.py --history
       - run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - run: python3 -m unittest scripts.test_security_check
   android:
     name: Android verification
     needs: security

@@ -61,13 +61,14 @@ internal fun StudentDashboard(
             Text((if (current != null) strings.heroOngoingClass else tr("Najbliższe zajęcia", "Next class", "Наступне заняття")).uppercase(Locale.forLanguageTag(language)),
                 style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 2.sp)
             Text(next?.record?.title ?: tr("Brak najbliższych zajęć", "No upcoming classes", "Немає наступних занять"),
-                style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
+                style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
             if (next != null) {
                 val room = next.record.optMeta("room")
                 Text((if (next.start.toLocalDate() == today) "" else next.start.format(dateFormat) + " · ") +
                     next.start.format(clock) + "–" + next.end.format(clock) +
                     if (room.isEmpty()) "" else " · " + tr("Sala ", "Room ", "Аудиторія ") + room,
-                    textAlign = TextAlign.Center)
+                    textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground)
                 val minutes = maxOf(1L, (Duration.between(now, if (current != null) next.end.toInstant() else next.start.toInstant()).seconds + 59) / 60)
                 val status = when {
                     next.tentative() -> tr("Termin orientacyjny", "Tentative time", "Орієнтовний час")

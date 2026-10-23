@@ -75,7 +75,7 @@ class UiHelper private constructor() {
         fun foreground(context: Context, color: Int): Int {
             if (color == INK) return context.getColor(R.color.app_ink)
             if (color == MUTED) return context.getColor(R.color.app_muted)
-            if (color == GREEN) return context.getColor(R.color.app_accent)
+            if (color == GREEN) return context.getColor(R.color.app_ink)
             if (color == Color.rgb(217, 119, 6) || color == Color.rgb(180, 83, 9)) {
                 return context.getColor(R.color.app_warning)
             }

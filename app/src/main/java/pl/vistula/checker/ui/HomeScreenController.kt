@@ -226,8 +226,8 @@ class HomeScreenController private constructor() {
                 it.gravity = Gravity.CENTER
                 hero.addView(it, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = UiHelper.dp(activity, 12) })
             }
-            val caption = line(activity.getString(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class)
-                .uppercase(Language.currentLocale(activity)), 11, UiHelper.MUTED, false)
+            val caption = line(activity.getString(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class), 11, UiHelper.MUTED, false)
+            caption.isAllCaps = true
             caption.letterSpacing = .16f
             val title = line(focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming), 32, UiHelper.INK, true)
             ViewCompat.setAccessibilityHeading(title, true)
@@ -285,6 +285,15 @@ class HomeScreenController private constructor() {
                     box.addView(row)
                 }
             }
+            val upcoming = lessons.firstOrNull { it.start.toInstant().isAfter(now) }
+            if (current.isNotEmpty() && upcoming != null && !upcoming.intersects(today)) {
+                sectionLink(activity, parent, R.string.design_next_class) { openDay(activity, upcoming.start.toLocalDate()) }
+                val nextBox = UiHelper.card(activity, parent, Color.WHITE)
+                nextBox.addView(UiHelper.actionRow(activity, upcoming.record.title, { details.accept(upcoming) }, false))
+                UiHelper.note(activity, nextBox, UiHelper.shortDate(upcoming.start.toLocalDate()) + " · " +
+                    upcoming.start.format(DateTimeFormatter.ofPattern("HH:mm")) +
+                    if (upcoming.tentative()) " · " + activity.getString(R.string.design_tentative) else "", UiHelper.MUTED)
+            }
         }
 
         private fun divider(activity: MainActivity, parent: LinearLayout) {
@@ -314,6 +323,7 @@ class HomeScreenController private constructor() {
                     day.format(DateTimeFormatter.ofPattern("EEE", Language.currentLocale(activity))).uppercase(Language.currentLocale(activity)) +
                         "\n" + day.dayOfMonth + "\n" + if (count == 0) "—" else "•".repeat(min(4, count)), { openDay(activity, day) }, false)
                 button.textSize = 12f
+                button.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8))
                 button.contentDescription = day.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity))) +
                     ": " + activity.getString(R.string.design_class_count, count)
                 button.backgroundTintList = android.content.res.ColorStateList.valueOf(activity.getColor(

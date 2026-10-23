@@ -57,6 +57,7 @@ internal object TasksMenuTestHelper {
         }
         if (submenu == 0 && !direct && !rowAction) return false
         if (rowAction) {
+            TestKeyboard.hide(activity)
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
                 activity.findViewById<View>(R.id.task_item_more).performClick()
             }

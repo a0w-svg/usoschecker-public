@@ -289,6 +289,7 @@ class AccountScreenController private constructor() {
             } else if (!demo) {
                 val box = pages.page("settings.connection", R.string.connect_usos_title, true)
                 UiHelper.add(activity, box, activity.getString(R.string.connect_usos_desc), 14, UiHelper.MUTED, false)
+                box.addView(UiHelper.actionRow(activity, activity.getString(R.string.welcome_reopen), { activity.showWelcome(1) }, false))
 
                 val buildKey = BuildConfig.USOS_KEY?.trim() ?: ""
                 val buildSecret = BuildConfig.USOS_SECRET?.trim() ?: ""

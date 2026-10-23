@@ -159,7 +159,7 @@ class OledThemeTest {
             )
         }
         assertNotEquals(activity.getColor(R.color.app_background), activity.getColor(R.color.app_card))
-        assertEquals(activity.getColor(R.color.app_ink), UiHelper.foreground(activity, UiHelper.GREEN))
+        assertEquals(activity.getColor(R.color.app_accent), UiHelper.foreground(activity, UiHelper.GREEN))
     }
 
     private fun assertGradeBadges(view: View) {

@@ -44,7 +44,7 @@
             android:maxWidth="128dp"
             android:gravity="end"
             android:textColor="@color/app_ink"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="20dp"

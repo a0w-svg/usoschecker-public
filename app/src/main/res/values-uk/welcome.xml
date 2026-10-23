@@ -1,0 +1,20 @@
+<resources>
+    <string name="welcome_progress">Швидкий старт · %1$d з 2</string>
+    <string name="welcome_title">Твій день в університеті. В одному місці.</string>
+    <string name="welcome_intro">Розклад, оцінки та зміни з USOS — почніть із короткого налаштування або перегляньте демо.</string>
+    <string name="welcome_own_key">Потрібен власний ключ API</string>
+    <string name="welcome_privacy">Ключ дозволяє застосунку з’єднатися з USOS вашого університету. Спільного ключа немає. Ключ і секрет зберігаються локально в зашифрованому сховищі після початку входу. Не передавайте їх іншим.</string>
+    <string name="welcome_login_explained">Ключ API не замінює вхід. Пароль університету вводьте лише на сайті USOS у браузері. Після надання доступу поверніться сюди з PIN-кодом.</string>
+    <string name="welcome_start">Налаштувати доступ</string>
+    <string name="welcome_key_title">Отримайте ключ. Вставте його тут.</string>
+    <string name="welcome_key_intro">Відкриється офіційний сайт USOSapps Vistula. Поверніться до застосунку, коли отримаєте обидва значення.</string>
+    <string name="welcome_get_key">1. Створіть ключ на сайті університету</string>
+    <string name="welcome_form_details">У розділі “Sign up for an API key” введіть назву, наприклад “My USOS Checker”, і дійсну електронну адресу. Поле вебсторінки застосунку можна залишити порожнім. Надішліть форму.</string>
+    <string name="welcome_copy_keys">2. Скопіюйте Consumer Key і Consumer Secret</string>
+    <string name="welcome_key_meaning">Consumer Key — ідентифікатор застосунку, Consumer Secret — його конфіденційний секрет. На наступному екрані вставте їх у відповідні поля та відкрийте вхід USOS. Перевірте дозволи в браузері, увійдіть, а потім поверніться та підтвердьте PIN.</string>
+    <string name="welcome_no_key">Форма недоступна або університет не видає ключі? Зверніться до підтримки USOS університету. Можна скористатися демо й повернутися до налаштування через Більше → Обліковий запис.</string>
+    <string name="welcome_enter_keys">Маю ключ і секрет — ввести дані</string>
+    <string name="welcome_back">Назад</string>
+    <string name="welcome_skip">Пропустити поки що</string>
+    <string name="welcome_reopen">Посібник: як підключити USOS</string>
+</resources>

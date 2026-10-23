@@ -154,6 +154,9 @@ fun AccountSection(
                     }
                 }
             }
+            TextButton(onClick = { onOpenUrl("https://github.com/Kaydjen") }) {
+                Text(t("Współautor designu: Kaydjen", "Design co-author: Kaydjen", "Співавтор дизайну: Kaydjen"))
+            }
             Text(t("Motyw", "Theme", "Тема"), style = MaterialTheme.typography.titleMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("system" to t("Systemowy", "System", "Системна"), "light" to t("Jasny", "Light", "Світла"),

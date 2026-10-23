@@ -1,6 +1,9 @@
 package pl.vistula.checker.ui.compose
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import java.time.Duration
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,31 +46,39 @@ internal fun StudentDashboard(
     val grades = GradeBrowser.select(records, "", "all", "recent", "", snapshot)
     val tasks = TaskTools.sorted(state.optJSONArray("tasks") ?: JSONArray(), "due")
         .filter { !it.optBoolean("done") }
-    val payments = ToolReadModels.payments(state, snapshot, language)
     val dateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.forLanguageTag(language))
     val clock = DateTimeFormatter.ofPattern("HH:mm")
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(if (isWide) 24.dp else 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(tr("Twój dzień na uczelni", "Your day at university", "Твій день в університеті"),
-                    style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
-                Text(today.format(dateFormat), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
         if (state.optString("token").isEmpty()) {
             OnboardingWelcomeCard(strings, onEnableDemo) { onNavigateTool("account") }
         }
-        // Clickable summary strip, with honest unknown/empty payment states.
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            DashboardTile(strings.tabSchedule, "${lessons.count { it.intersects(today) }}", Modifier.weight(1f).widthIn(min = 140.dp)) { onOpenScheduleDate(today) }
-            DashboardTile(strings.tabGrades, "${grades.size}", Modifier.weight(1f).widthIn(min = 140.dp)) { onNavigateTab(VistulaTab.GRADES) }
-            DashboardTile(strings.sectionTasks, "${tasks.size}", Modifier.weight(1f).widthIn(min = 140.dp)) { onNavigateTool("tasks") }
-            DashboardTile(strings.kpiPaymentsTitle, when {
-                payments == null -> tr("Brak danych", "No data", "Немає даних")
-                payments.totalUnpaidAmount() > 0 -> PaymentAmounts.unpaid(payments, language)
-                else -> strings.kpiSettled
-            }, Modifier.weight(1f).widthIn(min = 140.dp)) { onNavigateTool("services") }
+        val current = lessons.firstOrNull { !it.tentative() && it.current(now) }
+        val next = current ?: lessons.firstOrNull { it.start.toInstant().isAfter(now) }
+        Column(Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(Modifier.width(28.dp).height(2.dp).background(MaterialTheme.colorScheme.primary))
+            Text((if (current != null) strings.heroOngoingClass else tr("Najbliższe zajęcia", "Next class", "Наступне заняття")).uppercase(Locale.forLanguageTag(language)),
+                style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 2.sp)
+            Text(next?.record?.title ?: tr("Brak najbliższych zajęć", "No upcoming classes", "Немає наступних занять"),
+                style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
+            if (next != null) {
+                val room = next.record.optMeta("room")
+                Text((if (next.start.toLocalDate() == today) "" else next.start.format(dateFormat) + " · ") +
+                    next.start.format(clock) + "–" + next.end.format(clock) +
+                    if (room.isEmpty()) "" else " · " + tr("Sala ", "Room ", "Аудиторія ") + room,
+                    textAlign = TextAlign.Center)
+                val minutes = maxOf(1L, (Duration.between(now, if (current != null) next.end.toInstant() else next.start.toInstant()).seconds + 59) / 60)
+                val status = when {
+                    next.tentative() -> tr("Termin orientacyjny", "Tentative time", "Орієнтовний час")
+                    current != null -> tr("Do końca: $minutes min", "$minutes min remaining", "До кінця: $minutes хв")
+                    next.start.toLocalDate() == today -> tr("Początek za $minutes min", "Starts in $minutes min", "Початок за $minutes хв")
+                    else -> next.start.format(dateFormat)
+                }
+                Text(status, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(24.dp)).padding(horizontal = 16.dp, vertical = 8.dp))
+                TextButton(onClick = { onOpenScheduleDate(next.start.toLocalDate()) }) { Text(strings.btnOpenSchedule) }
+            }
         }
         val agenda: @Composable () -> Unit = {
             DashboardPanel(tr("Plan dnia", "Day plan", "План дня")) {
@@ -137,22 +148,9 @@ internal fun StudentDashboard(
 }
 
 @Composable
-private fun DashboardTile(title: String, value: String, modifier: Modifier, action: () -> Unit) {
-    Card(onClick = action, modifier = modifier, shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(value, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-        }
-    }
-}
-
-@Composable
 private fun DashboardPanel(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
             content()

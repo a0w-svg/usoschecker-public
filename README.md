@@ -242,3 +242,7 @@ i `apiref/method`; nazwy, opisy i wymagania są treścią dostarczoną przez USO
 - [Plan zajęć](https://usosapps.vistula.edu.pl/developers/api/services/tt/)
 - [Dokumentacja API jako dane](https://usosapps.vistula.edu.pl/developers/api/services/apiref/)
 - [Przesyłanie plików blobbox](https://usosapps.vistula.edu.pl/developers/api/services/blobbox/)
+
+## Współautorzy
+
+- [Kaydjen](https://github.com/Kaydjen) — współautor designu interfejsu; [prototyp](https://usoscheckerdesign.vercel.app/).

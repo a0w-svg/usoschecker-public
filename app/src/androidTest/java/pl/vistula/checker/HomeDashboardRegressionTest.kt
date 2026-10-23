@@ -90,4 +90,37 @@ class HomeDashboardRegressionTest {
             assertTrue("Installment must include its currency: $expected", includes(content))
         }
     }
+
+    @Test fun concurrentClassesRemainVisibleInTheNewFocusLayout() {
+        main {
+            val now = java.time.ZonedDateTime.now(pl.vistula.checker.UsosClient.ZONE)
+            val format = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val snapshot = pl.vistula.checker.core.Snapshot(now.toLocalDate().toString(), now.toLocalDate().plusDays(2).toString())
+            repeat(2) { index -> snapshot.add(pl.vistula.checker.core.Record(
+                "focus-$index", "plan", "Concurrent class $index", "", "", now.toLocalDate().toString(), "",
+                now.minusMinutes(10).format(format), now.plusMinutes(50).format(format))) }
+            val content = LinearLayout(rule.activity)
+            pl.vistula.checker.ui.HomeScreenController.render(rule.activity, content,
+                JSONObject().put("snapshot", snapshot.json()), JSONObject(), false, null) { }
+            fun texts(view: View): List<String> = (if (view is TextView) listOf(view.text.toString()) else emptyList()) +
+                (if (view is ViewGroup) (0 until view.childCount).flatMap { texts(view.getChildAt(it)) } else emptyList())
+            assertTrue(texts(content).containsAll(listOf("Concurrent class 0", "Concurrent class 1")))
+        }
+    }
+
+    @Test fun tentativeClassHasAnHonestLabelInsteadOfACountdown() {
+        main {
+            val now = java.time.ZonedDateTime.now(pl.vistula.checker.UsosClient.ZONE)
+            val format = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val snapshot = pl.vistula.checker.core.Snapshot(now.toLocalDate().toString(), now.toLocalDate().plusDays(3).toString())
+            snapshot.add(pl.vistula.checker.core.Record("tentative", "plan", "Tentative fixture", "", "", now.toLocalDate().toString(), "",
+                now.plusMinutes(30).format(format), now.plusMinutes(90).format(format), Double.NaN, JSONObject().put("frequency", "other")))
+            val content = LinearLayout(rule.activity)
+            pl.vistula.checker.ui.HomeScreenController.render(rule.activity, content,
+                JSONObject().put("snapshot", snapshot.json()), JSONObject(), false, null) { }
+            fun has(view: View): Boolean = (view is TextView && view.text.toString() == rule.activity.getString(R.string.design_tentative)) ||
+                (view is ViewGroup && (0 until view.childCount).any { has(view.getChildAt(it)) })
+            assertTrue(has(content))
+        }
+    }
 }

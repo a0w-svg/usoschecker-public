@@ -39,7 +39,7 @@
 %1$s
 
 Parameters preserved. Fix them or retry the request.</string>
-    <string name="nav_home">Home</string>
+    <string name="nav_home">@string/design_today</string>
     <string name="nav_grades">Grades</string>
     <string name="nav_plan">Schedule</string>
     <string name="nav_history">Changes</string>

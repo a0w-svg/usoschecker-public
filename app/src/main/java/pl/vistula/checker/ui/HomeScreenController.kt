@@ -2,6 +2,10 @@ package pl.vistula.checker.ui
 
 import android.graphics.Color
 import android.widget.LinearLayout
+import android.view.Gravity
+import android.view.View
+import android.graphics.drawable.GradientDrawable
+import androidx.core.view.ViewCompat
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -21,7 +25,6 @@ import pl.vistula.checker.core.Record
 import pl.vistula.checker.core.ScheduleConflictDetector
 import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.core.TaskTools
-import pl.vistula.checker.core.GradeBrowser
 
 /**
  * Controller for rendering the Home dashboard screen.
@@ -40,9 +43,11 @@ class HomeScreenController private constructor() {
             demoTasks: JSONArray?,
             onLessonDetails: Consumer<LessonTime>
         ) {
-            UiHelper.add(activity, content, activity.getString(R.string.dashboard_title), 26, UiHelper.INK, true)
-            UiHelper.note(activity, content, LocalDate.now(UsosClient.ZONE)
-                .format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity))), UiHelper.MUTED)
+            renderFocus(activity, content, d, onLessonDetails)
+            renderRecentChanges(activity, content, d)
+            renderWeek(activity, content, d)
+            renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"))
+            sectionLink(activity, content, R.string.design_shortcuts) { activity.navigate(6) }
             val shortcuts = arrayOf(
                 Triple(R.id.home_open_schedule, R.string.dashboard_plan, 5),
                 Triple(R.id.home_open_grades, R.string.dashboard_grades, 2),
@@ -65,9 +70,6 @@ class HomeScreenController private constructor() {
                 }
                 content.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = UiHelper.dp(activity, 4) })
             }
-            renderKpis(activity, content, d, state, demo, demoTasks, onLessonDetails)
-            renderJournal(activity, content, d, onLessonDetails)
-            renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"))
 
             // Payments alert, schedule conflict, latest news
             val rawSnap = d.optJSONObject("snapshot")
@@ -182,176 +184,141 @@ class HomeScreenController private constructor() {
                 }
             }
 
-            // Recent changes
-            renderRecentChanges(activity, content, d)
         }
 
-        private fun renderJournal(activity: MainActivity, parent: LinearLayout, data: JSONObject, details: Consumer<LessonTime>) {
+        private fun sectionLink(activity: MainActivity, parent: LinearLayout, title: Int, action: () -> Unit) {
+            val label = UiHelper.actionRow(activity, activity.getString(title).uppercase(Language.currentLocale(activity)) + "  ›", { action() }, false)
+            label.textSize = 11f
+            label.letterSpacing = .12f
+            label.setTextColor(activity.getColor(R.color.app_muted))
+            label.setPadding(0, UiHelper.dp(activity, 12), 0, 0)
+            ViewCompat.setAccessibilityHeading(label, true)
+            parent.addView(label)
+        }
+
+        private fun openDay(activity: MainActivity, day: LocalDate) {
+            activity.setCalendarQuery("")
+            activity.setCalendarMode("day")
+            activity.openScheduleDate(day.toString())
+        }
+
+        private fun renderFocus(activity: MainActivity, parent: LinearLayout, data: JSONObject, details: Consumer<LessonTime>) {
             val snapshot = data.optJSONObject("snapshot")?.let { Snapshot.from(it) }
-            val records = snapshot?.records?.values ?: emptyList()
-            UiHelper.heading(activity, parent, activity.getString(R.string.dashboard_today))
-            val plan = UiHelper.card(activity, parent, Color.WHITE)
-            val today = LocalDate.now(UsosClient.ZONE)
-            val lessons = LessonTime.sorted(records).filter { it.intersects(today) }
-            if (lessons.isEmpty()) UiHelper.note(activity, plan,
-                activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.dashboard_no_classes), UiHelper.MUTED)
-            lessons.take(4).forEach { lesson ->
-                val time = lesson.start.format(DateTimeFormatter.ofPattern("HH:mm")) + "–" + lesson.end.format(DateTimeFormatter.ofPattern("HH:mm"))
-                plan.addView(UiHelper.actionRow(activity, "$time  ·  ${lesson.record.title}", { details.accept(lesson) }, false))
-            }
-            plan.addView(UiHelper.button(activity, activity.getString(R.string.dashboard_full_plan), {
-                activity.setCalendarQuery(""); activity.setCalendarMode("day"); activity.openScheduleDate(today.toString())
-            }, false))
-            UiHelper.heading(activity, parent, activity.getString(R.string.dashboard_grades))
-            val grades = UiHelper.card(activity, parent, Color.WHITE)
-            val latest = GradeBrowser.select(records, "", "all", "recent", "", snapshot).take(3)
-            if (latest.isEmpty()) UiHelper.note(activity, grades, activity.getString(R.string.dashboard_no_grades), UiHelper.MUTED)
-            latest.forEach { grade ->
-                grades.addView(UiHelper.actionRow(activity, "${GradeBrowser.symbol(grade)}  ·  ${grade.title}", { activity.navigate(2) }, false))
-            }
-            grades.addView(UiHelper.button(activity, activity.getString(R.string.dashboard_all_grades), { activity.navigate(2) }, false))
-        }
-
-        @Throws(Exception::class)
-        private fun renderKpis(
-            activity: MainActivity,
-            content: LinearLayout,
-            d: JSONObject,
-            state: JSONObject,
-            demo: Boolean,
-            demoTasks: JSONArray?,
-            onLessonDetails: Consumer<LessonTime>
-        ) {
-            val raw = d.optJSONObject("snapshot")
-            val records = if (raw == null) ArrayList() else ArrayList(Snapshot.from(raw).records.values)
-            var grades = 0
-            var todayCount = 0
-            var openTasks = 0
             val now = Instant.now()
             val today = LocalDate.now(UsosClient.ZONE)
+            val lessons = LessonTime.sorted(snapshot?.records?.values ?: emptyList())
+            val current = lessons.filter { !it.tentative() && it.current(now) }
+            val focus = current.firstOrNull() ?: lessons.firstOrNull { it.start.toInstant().isAfter(now) }
+            val updated = UiHelper.text(activity,
+                activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(data.optLong("successAt"))), 12, UiHelper.MUTED, false)
+            updated.gravity = Gravity.CENTER
+            parent.addView(updated, LinearLayout.LayoutParams(-1, -2).apply { topMargin = UiHelper.dp(activity, 12) })
 
-            for (r in records) {
-                if (r.kind == "ocena") grades++
-                else if (LessonTime.of(r).intersects(today)) todayCount++
+            val hero = LinearLayout(activity).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setPadding(0, UiHelper.dp(activity, 32), 0, UiHelper.dp(activity, 32))
             }
-
-            val tasks = if (demo) {
-                demoTasks ?: JSONArray()
-            } else {
-                state.optJSONArray("tasks") ?: JSONArray()
+            parent.addView(hero, LinearLayout.LayoutParams(-1, -2))
+            hero.addView(View(activity).apply { setBackgroundColor(activity.getColor(R.color.app_accent)) },
+                LinearLayout.LayoutParams(UiHelper.dp(activity, 28), UiHelper.dp(activity, 2)).apply { bottomMargin = UiHelper.dp(activity, 16) })
+            fun line(value: String, size: Int, color: Int, bold: Boolean) = UiHelper.text(activity, value, size, color, bold).also {
+                it.gravity = Gravity.CENTER
+                hero.addView(it, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = UiHelper.dp(activity, 12) })
             }
-            for (i in 0 until tasks.length()) {
-                if (!tasks.getJSONObject(i).optBoolean("done")) openTasks++
-            }
-
-            val stats = LinearLayout(activity)
-            stats.orientation = LinearLayout.HORIZONTAL
-            val counts = intArrayOf(grades, todayCount, openTasks)
-            val titles = arrayOf(
-                activity.getString(R.string.stat_grades),
-                activity.getString(R.string.stat_today_classes),
-                activity.getString(R.string.stat_tasks)
-            )
-            val destinations = intArrayOf(2, 5, 7)
-
-            for (i in 0..2) {
-                val target = destinations[i]
-                val countColor = UiHelper.INK
-                val card = UiHelper.kpiCard(activity, stats, counts[i].toString(), titles[i], countColor) {
-                    activity.navigate(target)
+            val caption = line(activity.getString(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class)
+                .uppercase(Language.currentLocale(activity)), 11, UiHelper.MUTED, false)
+            caption.letterSpacing = .16f
+            val title = line(focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming), 32, UiHelper.INK, true)
+            ViewCompat.setAccessibilityHeading(title, true)
+            if (focus != null) {
+                val clock = DateTimeFormatter.ofPattern("HH:mm")
+                val room = room(focus.record)
+                val date = if (focus.start.toLocalDate() == today) "" else UiHelper.shortDate(focus.start.toLocalDate()) + " · "
+                line(date + focus.start.format(clock) + "–" + focus.end.format(clock) +
+                    if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room), 15, UiHelper.INK, false)
+                val status = when {
+                    focus.tentative() -> activity.getString(R.string.design_tentative)
+                    current.isNotEmpty() -> activity.getString(R.string.home_classes_remaining_min, max(1L, (Duration.between(now, focus.end.toInstant()).seconds + 59) / 60))
+                    focus.start.toLocalDate() == today -> activity.getString(R.string.design_starts_minutes, max(1L, (Duration.between(now, focus.start.toInstant()).seconds + 59) / 60))
+                    else -> focus.start.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity)))
                 }
-                if (i > 0) {
-                    val cp = card.layoutParams as LinearLayout.LayoutParams
-                    cp.marginStart = UiHelper.dp(activity, 8)
-                    card.layoutParams = cp
-                }
-            }
-            val statsParams = LinearLayout.LayoutParams(-1, -2)
-            statsParams.bottomMargin = UiHelper.dp(activity, 14)
-            content.addView(stats, statsParams)
-
-            // Ongoing lecture
-            renderOngoingLectures(activity, content, records, onLessonDetails)
-
-            // Upcoming lecture
-            UiHelper.heading(activity, content, activity.getString(R.string.classes_upcoming))
-            var upcoming: LessonTime? = null
-            for (lesson in LessonTime.sorted(records)) {
-                if (lesson.start.toInstant().isAfter(now)) {
-                    upcoming = lesson
-                    break
-                }
-            }
-
-            if (upcoming == null) {
-                UiHelper.empty(
-                    activity,
-                    content,
-                    activity.getString(R.string.classes_no_upcoming),
-                    if (raw == null) activity.getString(R.string.refresh_offline) else activity.getString(R.string.home_schedule_empty_hint)
-                )
-            } else {
-                val focused = LessonTime.current(records, now).isEmpty()
-                val box = UiHelper.card(activity, content, if (focused) Color.rgb(214, 241, 229) else Color.WHITE)
-                UiHelper.add(activity, box, upcoming.record.title, 20, UiHelper.INK, true)
-                UiHelper.add(activity, box, UiHelper.shortDate(upcoming.start.toLocalDate()), 13, UiHelper.MUTED, true)
-                renderLessonSummary(activity, box, upcoming)
-                val next = upcoming
-                box.isClickable = true
-                box.isFocusable = true
-                box.setOnClickListener { onLessonDetails.accept(next) }
-                box.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.btn_open_plan),
-                        {
-                            activity.setCalendarMode("day")
-                            activity.openScheduleDate(next.start.toLocalDate().toString())
-                        },
-                        focused
-                    )
-                )
-            }
-        }
-
-        private fun renderOngoingLectures(
-            activity: MainActivity,
-            parent: LinearLayout,
-            rows: Collection<Record>,
-            onLessonDetails: Consumer<LessonTime>
-        ) {
-            val current = LessonTime.current(rows, Instant.now())
-            if (current.isEmpty()) {
-                UiHelper.note(activity, parent, activity.getString(R.string.classes_no_ongoing), UiHelper.MUTED)
-                return
-            }
-            for (lesson in current) {
-                val box = UiHelper.card(activity, parent, if (lesson === current[0]) Color.rgb(214, 241, 229) else Color.WHITE)
-                UiHelper.add(activity, box, activity.getString(R.string.classes_ongoing), 11, UiHelper.GREEN, true)
-                UiHelper.add(activity, box, lesson.record.title, 22, UiHelper.INK, true)
-                renderLessonSummary(activity, box, lesson)
-                box.isClickable = true
-                box.isFocusable = true
-                box.setOnClickListener { onLessonDetails.accept(lesson) }
-                val remaining = max(1L, (Duration.between(Instant.now(), lesson.end.toInstant()).seconds + 59) / 60)
-                UiHelper.add(activity, box, activity.getString(R.string.home_classes_remaining_min, remaining), 12, UiHelper.GREEN, false)
-            }
-        }
-
-        private fun renderLessonSummary(activity: MainActivity, box: LinearLayout, lesson: LessonTime) {
-            val clock = DateTimeFormatter.ofPattern("HH:mm")
-            UiHelper.add(activity, box, "${lesson.start.format(clock)} – ${lesson.end.format(clock)}", 16, UiHelper.INK, true)
-            var room = lesson.record.metadata.optString("room").trim()
-            if (room.isEmpty()) {
-                for (line in lesson.record.value.split("\n")) {
-                    if (line.startsWith("Sala ")) {
-                        room = line.substring(5).trim()
-                        break
+                val badge = UiHelper.text(activity, status, 12, UiHelper.INK, false).apply {
+                    setTextColor(activity.getColor(R.color.app_accent))
+                    gravity = Gravity.CENTER
+                    setPadding(UiHelper.dp(activity, 14), UiHelper.dp(activity, 8), UiHelper.dp(activity, 14), UiHelper.dp(activity, 8))
+                    background = GradientDrawable().apply {
+                        setColor(activity.getColor(R.color.app_accent_container))
+                        cornerRadius = UiHelper.dp(activity, 24).toFloat()
                     }
                 }
+                hero.addView(badge, LinearLayout.LayoutParams(-2, -2))
+                hero.isClickable = true
+                hero.isFocusable = true
+                hero.setOnClickListener { details.accept(focus) }
+            } else {
+                line(activity.getString(if (snapshot == null) R.string.refresh_offline else R.string.home_schedule_empty_hint), 14, UiHelper.MUTED, false)
+                hero.addView(UiHelper.button(activity, activity.getString(if (snapshot == null) R.string.btn_connect else R.string.btn_open_plan), {
+                    if (snapshot == null) activity.navigate(4) else openDay(activity, today)
+                }, false))
             }
-            if (room.isNotEmpty()) {
-                UiHelper.add(activity, box, activity.getString(R.string.lesson_room_label, room), 14, UiHelper.MUTED, false)
+            // Concurrent classes and tentative times stay visible, without a false countdown.
+            val rest = lessons.filter { it !== focus && it.intersects(today) && it.end.toInstant().isAfter(now) }
+            if (rest.isNotEmpty()) {
+                sectionLink(activity, parent, R.string.design_later_today) { openDay(activity, today) }
+                val box = UiHelper.card(activity, parent, Color.WHITE)
+                rest.forEachIndexed { index, lesson ->
+                    if (index > 0) divider(activity, box)
+                    val row = LinearLayout(activity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        minimumHeight = UiHelper.dp(activity, 64)
+                        setPadding(0, UiHelper.dp(activity, 12), 0, UiHelper.dp(activity, 4))
+                        isClickable = true; isFocusable = true
+                        setOnClickListener { details.accept(lesson) }
+                    }
+                    UiHelper.add(activity, row, lesson.record.title, 16, UiHelper.INK, true)
+                    val clock = DateTimeFormatter.ofPattern("HH:mm")
+                    val room = room(lesson.record)
+                    UiHelper.add(activity, row, lesson.start.format(clock) + "–" + lesson.end.format(clock) +
+                        (if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room)) +
+                        (if (lesson.tentative()) " · " + activity.getString(R.string.design_tentative) else ""), 13, UiHelper.MUTED, false)
+                    box.addView(row)
+                }
+            }
+        }
+
+        private fun divider(activity: MainActivity, parent: LinearLayout) {
+            parent.addView(View(activity).apply { setBackgroundColor(activity.getColor(R.color.app_outline_inner)) },
+                LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 1)))
+        }
+
+        private fun room(record: Record): String = record.optMeta("room").trim().ifEmpty {
+            record.value.lineSequence().firstOrNull { it.startsWith("Sala ") }?.substring(5)?.trim().orEmpty()
+        }
+
+        private fun renderWeek(activity: MainActivity, parent: LinearLayout, data: JSONObject) {
+            val snapshot = data.optJSONObject("snapshot")?.let { Snapshot.from(it) } ?: return
+            val today = LocalDate.now(UsosClient.ZONE)
+            val monday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+            val lessons = LessonTime.sorted(snapshot.records.values)
+            sectionLink(activity, parent, R.string.design_this_week) { openDay(activity, today) }
+            // Horizontal scrolling retains 48dp targets at narrow widths and large font scales.
+            val scroll = android.widget.HorizontalScrollView(activity).apply { isHorizontalScrollBarEnabled = false }
+            val week = LinearLayout(activity)
+            scroll.addView(week)
+            parent.addView(scroll, LinearLayout.LayoutParams(-1, -2))
+            repeat(7) { index ->
+                val day = monday.plusDays(index.toLong())
+                val count = lessons.count { it.intersects(day) }
+                val button = UiHelper.button(activity,
+                    day.format(DateTimeFormatter.ofPattern("EEE", Language.currentLocale(activity))).uppercase(Language.currentLocale(activity)) +
+                        "\n" + day.dayOfMonth + "\n" + if (count == 0) "—" else "•".repeat(min(4, count)), { openDay(activity, day) }, false)
+                button.textSize = 12f
+                button.contentDescription = day.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity))) +
+                    ": " + activity.getString(R.string.design_class_count, count)
+                button.backgroundTintList = android.content.res.ColorStateList.valueOf(activity.getColor(
+                    if (day == today) R.color.app_secondary_container else R.color.app_background))
+                week.addView(button, LinearLayout.LayoutParams(UiHelper.dp(activity, 52), -2).apply { marginEnd = UiHelper.dp(activity, 3) })
             }
         }
 
@@ -406,23 +373,27 @@ class HomeScreenController private constructor() {
         private fun renderRecentChanges(activity: MainActivity, content: LinearLayout, d: JSONObject) {
             val rows = d.optJSONArray("history")
             if (rows != null && rows.length() != 0) {
-                UiHelper.heading(activity, content, activity.getString(R.string.home_recent_changes))
+                sectionLink(activity, content, R.string.home_recent_changes) { activity.navigate(1) }
                 val recent = ArrayList<Change>()
                 for (i in 0 until rows.length()) {
                     recent.add(Change.from(rows.getJSONObject(i)))
                 }
                 recent.sortWith { a, b -> b.effectiveTimestamp().compareTo(a.effectiveTimestamp()) }
-                for (i in 0 until min(3, recent.size)) {
-                    HistoryScreenController.renderChangeCard(activity, content, recent[i])
+                val box = UiHelper.card(activity, content, Color.WHITE)
+                recent.take(2).forEachIndexed { index, change ->
+                    if (index > 0) divider(activity, box)
+                    val row = LinearLayout(activity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        minimumHeight = UiHelper.dp(activity, 64)
+                        setPadding(0, UiHelper.dp(activity, 12), 0, 0)
+                        isClickable = true; isFocusable = true
+                        setOnClickListener { HistoryScreenController.showChangeDetails(activity, change) }
+                    }
+                    UiHelper.add(activity, row, change.title, 16, UiHelper.INK, true)
+                    val summary = HistoryScreenController.getDiffSummaryList(activity, change).joinToString(" · ")
+                    UiHelper.add(activity, row, summary.ifEmpty { HistoryScreenController.eventDateDescription(activity, change) }, 13, UiHelper.MUTED, false)
+                    box.addView(row)
                 }
-                content.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.home_all_history_btn),
-                        { activity.navigate(1) },
-                        false
-                    )
-                )
             }
         }
     }

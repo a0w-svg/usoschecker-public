@@ -58,9 +58,22 @@ class WelcomeRegressionTest {
     private fun views(view: View): List<View> = listOf(view) +
         if (view is ViewGroup) (0 until view.childCount).flatMap { views(view.getChildAt(it)) } else emptyList()
 
+    private fun capture(name: String) {
+        instrumentation.uiAutomation.waitForIdle(300, 3000)
+        val image = instrumentation.uiAutomation.takeScreenshot()
+        try {
+            val file = java.io.File(context.getExternalFilesDir(null), "$name.png")
+            java.io.FileOutputStream(file).use { image.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+            instrumentation.uiAutomation.executeShellCommand("cp ${file.absolutePath} /data/local/tmp/$name.png").use { descriptor ->
+                java.io.FileInputStream(descriptor.fileDescriptor).use { input -> while (input.read() != -1) { } }
+            }
+        } finally { image.recycle() }
+    }
+
     @Test fun firstLaunchGuidesToMaskedCredentialsAndSurvivesRecreation() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             awaitReady(scenario)
+            capture("usos-welcome")
             scenario.onActivity { activity ->
                 assertNotNull(activity.findViewById<View>(R.id.welcome_continue))
                 assertEquals(View.GONE, activity.findViewById<View>(R.id.bottom_navigation).visibility)
@@ -68,6 +81,7 @@ class WelcomeRegressionTest {
             }
             scenario.recreate()
             awaitReady(scenario)
+            capture("usos-welcome-keys")
             scenario.onActivity { activity ->
                 val texts = views(activity.findViewById(R.id.main_content)).filterIsInstance<TextView>().map { it.text.toString() }
                 assertTrue(texts.contains(activity.getString(R.string.welcome_key_title)))

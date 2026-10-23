@@ -531,7 +531,8 @@ class AppSmokeTest {
     @Test
     fun materialNavigationSeparatesGradesPlanAndTools() {
         startDemo()
-        has("Najbliższe zajęcia")
+        has("Ekonomia")
+        hasContaining(activity().getString(R.string.classes_ongoing).uppercase(pl.vistula.checker.ui.Language.currentLocale(activity())))
         click("Oceny")
         has(activity().getString(R.string.nav_grades))
         has("Podstawy finansów")

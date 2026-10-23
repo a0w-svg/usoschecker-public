@@ -60,7 +60,9 @@ jobs:
       - name: Build and test the packaged desktop app
         run: bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb --no-daemon
       - name: Launch the packaged app with a disposable fixture account
-        run: xvfb-run -a python3 scripts/desktop_smoke.py
+        run: |
+          xvfb-run -a python3 scripts/desktop_smoke.py --theme light
+          xvfb-run -a python3 scripts/desktop_smoke.py --theme dark
       - name: Checksum the Linux installer
         run: cd desktopApp/build/compose/binaries/main/deb && sha256sum *.deb > SHA256SUMS.txt
       - name: Dashboard preview using synthetic data
@@ -70,6 +72,7 @@ jobs:
           path: |
             work/desktop-smoke/fixture-*/home-between.png
             work/desktop-smoke/fixture-*/demo.png
+            work/design-previews/*.png
           retention-days: 3
       - name: Installer for PR review
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

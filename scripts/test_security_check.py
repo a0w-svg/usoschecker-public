@@ -1,23 +1,34 @@
 """Regression tests using disposable Git repositories and synthetic credentials."""
 from contextlib import redirect_stdout
 import io
+import os
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
-import security_check as guard
+if __package__:
+    from . import security_check as guard
+else:
+    import security_check as guard
 
 
 class SecurityCheckTest(unittest.TestCase):
     def setUp(self):
+        # Fixtures must not inherit signing, hooks, excludes, or a caller's Git
+        # worktree/index overrides. This also keeps every Git operation in temp.
+        environment = {key: value for key, value in os.environ.items() if not key.startswith('GIT_')}
+        environment.update(GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull)
+        isolated = patch.dict(os.environ, environment, clear=True)
+        isolated.start()
+        self.addCleanup(isolated.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.mock = patch.object(guard, 'ROOT', self.root)
         self.mock.start()
         self.addCleanup(self.mock.stop)
-        self.git('init', '-q')
+        self.git('init', '-q', '--template=')
         self.git('config', 'user.name', 'Security test')
         self.git('config', 'user.email', 'test@example.invalid')
 

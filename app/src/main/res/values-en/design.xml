@@ -1,0 +1,11 @@
+<resources>
+    <string name="design_today">Today</string>
+    <string name="design_next_class">Next class</string>
+    <string name="design_later_today">Later today</string>
+    <string name="design_this_week">This week</string>
+    <string name="design_shortcuts">Shortcuts</string>
+    <string name="design_starts_minutes">Starts in %1$d min</string>
+    <string name="design_tentative">Tentative time</string>
+    <string name="design_class_count">Classes: %1$d</string>
+    <string name="design_credit">Design co-author: Kaydjen</string>
+</resources>

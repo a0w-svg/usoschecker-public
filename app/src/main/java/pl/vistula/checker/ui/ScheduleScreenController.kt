@@ -164,7 +164,7 @@ class ScheduleScreenController private constructor() {
                     .show()
             }
             date.contentDescription = "${activity.getString(R.string.schedule_btn_choose_date)}: $dateLabel"
-            date.textSize = 20f
+            date.textSize = 18f
             date.setTextColor(activity.getColor(R.color.app_ink))
             date.minHeight = UiHelper.dp(activity, 64)
             date.minimumHeight = UiHelper.dp(activity, 64)
@@ -174,7 +174,7 @@ class ScheduleScreenController private constructor() {
                 UiHelper.dp(activity, 8),
                 UiHelper.dp(activity, 4)
             )
-            date.setTypeface(null, Typeface.BOLD)
+            date.setTypeface(null, Typeface.NORMAL)
             val more = headerIcon(activity, R.drawable.ic_schedule_more) {}
             more.id = R.id.schedule_more
             more.contentDescription = activity.getString(R.string.schedule_options)

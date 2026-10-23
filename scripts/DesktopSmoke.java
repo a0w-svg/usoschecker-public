@@ -35,7 +35,7 @@ public class DesktopSmoke {
             fixture.remove("profileTranslations");
             new DesktopVault(data.toFile()).write(fixture);
             DesktopKeyValueStore prefs = new DesktopKeyValueStore(data.resolve("preferences.json").toFile());
-            prefs.putString("ui_language", "en"); prefs.putString("ui_theme_mode", "light");
+            prefs.putString("ui_language", "en"); prefs.putString("ui_theme_mode", args.length > 2 ? args[2] : "light");
             Files.write(root.resolve("original-state.bin"), Files.readAllBytes(data.resolve("state.bin")));
             return;
         }

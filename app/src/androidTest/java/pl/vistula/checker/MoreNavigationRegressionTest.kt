@@ -68,8 +68,8 @@ class MoreNavigationRegressionTest {
     @Test
     fun barSwipesFollowTabOrderAndStopAtBothEnds() {
         for (id in intArrayOf(
-            R.id.nav_item_grades,
             R.id.nav_item_plan,
+            R.id.nav_item_grades,
             R.id.nav_item_history,
             R.id.nav_item_more,
             R.id.nav_item_more
@@ -79,8 +79,8 @@ class MoreNavigationRegressionTest {
         }
         for (id in intArrayOf(
             R.id.nav_item_history,
-            R.id.nav_item_plan,
             R.id.nav_item_grades,
+            R.id.nav_item_plan,
             R.id.nav_item_home,
             R.id.nav_item_home
         )) {
@@ -103,7 +103,7 @@ class MoreNavigationRegressionTest {
         main { assertEquals(today.plusDays(1).toString(), rule.activity.getCalendarDate()) }
         onView(withId(R.id.nav_item_plan)).check(matches(isSelected()))
         onView(withId(R.id.bottom_navigation)).perform(swipeRight())
-        onView(withId(R.id.nav_item_grades)).check(matches(isSelected()))
+        onView(withId(R.id.nav_item_home)).check(matches(isSelected()))
     }
 
     @Test

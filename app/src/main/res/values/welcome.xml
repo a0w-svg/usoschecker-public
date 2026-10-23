@@ -1,0 +1,20 @@
+<resources>
+    <string name="welcome_progress">Szybki start · %1$d z 2</string>
+    <string name="welcome_title">Twój dzień na uczelni. W jednym miejscu.</string>
+    <string name="welcome_intro">Plan, oceny i zmiany z USOS — zacznij od krótkiej konfiguracji albo obejrzyj demo.</string>
+    <string name="welcome_own_key">Potrzebujesz własnego klucza API</string>
+    <string name="welcome_privacy">Klucz pozwala tej aplikacji połączyć się z USOS Twojej uczelni. Aplikacja nie zawiera wspólnego klucza. Klucz i sekret zapisujemy lokalnie w szyfrowanym magazynie podczas rozpoczynania logowania. Nie udostępniaj ich innym osobom.</string>
+    <string name="welcome_login_explained">Klucz API nie zastępuje logowania. Hasło uczelniane wpiszesz dopiero na stronie USOS w przeglądarce. Po zatwierdzeniu dostępu wrócisz tutaj z kodem PIN.</string>
+    <string name="welcome_start">Skonfiguruj dostęp</string>
+    <string name="welcome_key_title">Uzyskaj klucz. Wklej go tutaj.</string>
+    <string name="welcome_key_intro">Otworzysz oficjalną stronę USOSapps Vistuli. Wróć do aplikacji, gdy otrzymasz oba pola.</string>
+    <string name="welcome_get_key">1. Utwórz klucz na stronie uczelni</string>
+    <string name="welcome_form_details">W sekcji „Sign up for an API key” podaj nazwę, np. „Mój USOS Checker”, i swój prawidłowy adres e-mail. Pole strony aplikacji możesz zostawić puste. Wyślij formularz.</string>
+    <string name="welcome_copy_keys">2. Skopiuj Consumer Key i Consumer Secret</string>
+    <string name="welcome_key_meaning">Consumer Key to identyfikator aplikacji, a Consumer Secret to jej poufny sekret. W następnym ekranie wklej je do pól o tych samych nazwach i wybierz „Otwórz logowanie USOS”. W przeglądarce sprawdź wybrane zgody, zaloguj się, a następnie wróć i potwierdź PIN.</string>
+    <string name="welcome_no_key">Formularz nie działa lub uczelnia nie wydaje kluczy? Skontaktuj się z pomocą USOS swojej uczelni. Możesz na razie używać demo i wrócić do konfiguracji w Więcej → Konto.</string>
+    <string name="welcome_enter_keys">Mam klucz i sekret — wpisz dane</string>
+    <string name="welcome_back">Wstecz</string>
+    <string name="welcome_skip">Pomiń na razie</string>
+    <string name="welcome_reopen">Przewodnik: jak połączyć USOS</string>
+</resources>

@@ -1,0 +1,20 @@
+<resources>
+    <string name="welcome_progress">Quick start · %1$d of 2</string>
+    <string name="welcome_title">Your university day. In one place.</string>
+    <string name="welcome_intro">Your USOS timetable, grades and changes — start with a quick setup or explore the demo.</string>
+    <string name="welcome_own_key">You need your own API key</string>
+    <string name="welcome_privacy">The key lets this app connect to your university’s USOS. The app has no shared key. Your key and secret are stored locally in encrypted storage when sign-in starts. Keep them private.</string>
+    <string name="welcome_login_explained">An API key does not replace sign-in. Enter your university password only on the USOS website in your browser. After approving access, return here with the PIN.</string>
+    <string name="welcome_start">Set up access</string>
+    <string name="welcome_key_title">Get a key. Paste it here.</string>
+    <string name="welcome_key_intro">You will open Vistula’s official USOSapps website. Return to the app once you have both values.</string>
+    <string name="welcome_get_key">1. Create a key on the university website</string>
+    <string name="welcome_form_details">Under “Sign up for an API key”, enter an application name, such as “My USOS Checker”, and your valid email address. You can leave the application webpage empty. Submit the form.</string>
+    <string name="welcome_copy_keys">2. Copy Consumer Key and Consumer Secret</string>
+    <string name="welcome_key_meaning">Consumer Key identifies the application; Consumer Secret is its confidential secret. On the next screen, paste them into the matching fields and open USOS sign-in. Review the requested permissions in your browser, sign in, then return and confirm the PIN.</string>
+    <string name="welcome_no_key">If the form is unavailable or your university does not issue keys, contact its USOS support. You can try the demo and return to setup under More → Account.</string>
+    <string name="welcome_enter_keys">I have both values — enter credentials</string>
+    <string name="welcome_back">Back</string>
+    <string name="welcome_skip">Skip for now</string>
+    <string name="welcome_reopen">Guide: how to connect USOS</string>
+</resources>

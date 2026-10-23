@@ -1,244 +1,164 @@
-# Vistula · zmiany — aplikacja Android
+<div align="center">
 
-Natywna aplikacja w języku polskim dla Akademii Finansów i Biznesu Vistula.
-Android 12 (API 31) lub nowszy. Nie jest oficjalną aplikacją uczelni.
+# USOS Checker
 
-## Autor i licencja
+### Twój dzień na uczelni. W jednym miejscu.
+### Your university day. In one place.
 
-Autor: **a0w-svg**. Copyright © 2026 a0w-svg.
+Plan zajęć, oceny i zmiany dla studentów Vistuli — Android i desktop.<br>
+Timetable, grades and changes for Vistula students — Android and desktop.
 
-Kod aplikacji jest udostępniany na licencji **MIT**. Pełny tekst znajduje się
-w pliku [LICENSE](LICENSE) oraz w aplikacji: **Więcej → O aplikacji** i **Konto → O aplikacji**.
-Biblioteki i materiały zewnętrzne podlegają własnym licencjom.
+**[Polski](#polski)** · **[English](#english)** · **[Pobierz / Download](https://github.com/a0w-svg/usoschecker-public/releases/latest)** · **[Prototyp / Design](https://usoscheckerdesign.vercel.app/)**
 
-Projekt można otworzyć bezpośrednio w **Android Studio**: wybierz katalog zawierający
-`settings.gradle`, wykonaj Gradle Sync i uruchom konfigurację `app`.
-Dokładne kroki: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
-Przygotowanie wydania, kontrole jakości i podpisywanie: [RELEASE.md](RELEASE.md).
+Android 12+ · Windows x64 · Linux · Kotlin · MIT
 
-Zasady publikacji na GitHubie, skanowanie sekretów i konfiguracja ochrony repozytorium:
-[SECURITY.md](SECURITY.md). Szablon lokalnej konfiguracji: `local.properties.example`.
+Nieoficjalna aplikacja. / Unofficial application.
 
-## Nawigacja i wygląd
+</div>
 
-W **Więcej → Aktualizacje i nowości** oraz **Konto → Aktualizacje i nowości** znajdziesz
-opis zainstalowanej wersji (także offline), ręczne sprawdzanie nowych wydań i pobieranie
-APK z GitHuba. Powiadomienia o stabilnych wersjach są domyślnie włączone; można je
-wyłączyć niezależnie od synchronizacji USOS. Wymagają systemowego zezwolenia na
-powiadomienia. Aplikacja sprawdza publiczne GitHub Releases w tle raz dziennie i przy
-uruchomieniu (udane automatyczne sprawdzenia co najwyżej co 12 godzin). Android może
-opóźniać pracę w tle. Ta sama wersja nie jest zgłaszana ponownie po usunięciu
-powiadomienia. Instalację pobranego APK zatwierdza użytkownik.
+---
 
-W **Więcej → Wygląd** oraz na ekranie **Konto → Wygląd** można wybrać motyw systemowy,
-który domyślnie automatycznie reaguje na zmianę motywu telefonu, lub wymusić motyw
-jasny albo **Ciemny OLED** z czarnym tłem. Wybór jest zapamiętywany na urządzeniu;
-motyw systemowy automatycznie używa wariantu OLED w trybie ciemnym.
+<h2 align="center">Dzisiaj — ciemny / Today — dark</h2>
 
-**Nowe:** w **Więcej** dostępne są **Legitymacje** (karta fizyczna i status mLegitymacji)
-oraz **Dokumenty i decyzje** z pobieraniem dostępnych plików. Wymagane zakresy zgody
-to odpowiednio `cards` i `adm_documents`. Katalog obejmuje wszystkie 571 metod
-z publicznego indeksu, z wyborem modułu, polskim wyszukiwaniem i eksportem odpowiedzi.
-Szczegóły zmian i zasad działania: [CHANGES_STUDENT_SERVICES.md](CHANGES_STUDENT_SERVICES.md).
+<table>
+  <tr><th>Desktop</th><th>Android</th></tr>
+  <tr>
+    <td width="74%" align="center"><img src="docs/screenshots/desktop-dark.png" alt="USOS Checker desktop — dark theme, demo data" width="800"></td>
+    <td width="26%" align="center"><img src="docs/screenshots/android-dark.png" alt="USOS Checker Android — dark OLED theme, demo data" width="280"></td>
+  </tr>
+</table>
 
-Material 3: ikony i etykiety w dolnym pasku **Start / Oceny / Plan / Zmiany / Więcej**,
-menu boczne otwierane przyciskiem w górnym pasku, obrysowane pola formularzy,
-przełącznik Material i spójne przyciski. Menu inspirowane dziennikiem ucznia;
-konto USOS i katalog API dostępne w **Więcej** oraz w menu bocznym.
+<h2 align="center">Dzisiaj — jasny / Today — light</h2>
 
-Start pokazuje liczbę ocen, zajęć dzisiaj, otwartych zadań i najbliższe zajęcia
-według zapisanego planu. **Zadania** pozwalają dodawać własne wpisy z terminem,
-oznaczać je jako ukończone, przywracać i usuwać. To osobista lista bez powiadomień
-o terminie i bez synchronizacji z uczelnią. Zadania są szyfrowane razem z lokalnymi
-danymi; odłączenie konta usuwa je wraz z magazynem. Zadania demonstracyjne są
-oddzielne i nie zapisują się w prawdziwym magazynie.
+<table>
+  <tr><th>Desktop</th><th>Android</th></tr>
+  <tr>
+    <td width="74%" align="center"><img src="docs/screenshots/desktop-light.png" alt="USOS Checker desktop — light theme, demo data" width="800"></td>
+    <td width="26%" align="center"><img src="docs/screenshots/android-light.png" alt="USOS Checker Android — light theme, demo data" width="280"></td>
+  </tr>
+</table>
 
-Oceny, plan i historia mają wyszukiwanie. Plan można zawęzić do dzisiaj lub
-najbliższych siedmiu dni. Katalog API udostępnia wszystkie wyniki przyciskiem
-„Pokaż kolejne metody”.
+<p align="center">Zrzuty działającej aplikacji z danymi demonstracyjnymi. / Screenshots of the running app using demo data.</p>
 
-## Nowe narzędzia studenckie
+---
 
-- Zadania mają priorytet niski / normalny / wysoki, notatkę do 2000 znaków i sortowanie
-  według terminu, priorytetu lub nazwy. Ukończone wpisy pozostają na końcu, a wybór
-  sortowania jest zapamiętywany. Wyszukiwanie obejmuje również notatki.
-- Pasek postępu pokazuje ukończone zadania. Po usunięciu dostępne jest „Cofnij” przez
-  10 sekund; przywracanie zachowuje treść, priorytet, termin i stan ukończenia.
-- Szczegóły zajęć umożliwiają utworzenie zadania z nazwą przedmiotu i otwarcie
-  systemowego wyboru aplikacji do udostępnienia informacji o zajęciach.
-- Start otwiera plan w dniu najbliższych zajęć. Filtry przewijają się poziomo,
-  mają przyciski o wysokości co najmniej 48 dp i widoczny stan wyboru.
-- Błędy synchronizacji wskazują etap operacji i metodę API. Opis można skopiować
-  z okna błędu; tokeny i surowe odpowiedzi serwera nie są dołączane.
-- Puste kolekcje ocen oraz opcjonalne daty i komentarze zwracane jako JSON `null`
-  nie przerywają synchronizacji. Brak wymaganych pól lub nieprawidłowy typ danych
-  nadal zatrzymuje zapis, zachowując poprzedni zestaw danych.
+## Polski
 
-- Oceny: rozwijane sekcje semestrów (domyślnie wszystkie rozwinięte), osobne podsumowania,
-  wyszukiwanie, filtry i sortowanie. Przedmioty bez ocen pozostają na liście z etykietą
-  „Brak ocen” po odświeżeniu danych. Nie wpływają na średnią ani historię zmian.
-  Prosta średnia obejmuje wpisy z różnych terminów egzaminów; szacunek ważony ECTS
-  pojawia się, gdy dostępne są odpowiednie dane. Nie są to oficjalne średnie uczelni.
-- Plan: eksport widocznych zajęć do pliku .ics przez systemowy wybór pliku. Wyszukiwanie
-  i zakres dat ograniczają eksport. Godziny są przeliczane z Europe/Warsaw do UTC.
-  Zapisany plik jest kopią danych, nie subskrypcją ani automatyczną synchronizacją kalendarza.
-- Zadania: edycja treści i terminu, wyszukiwanie, filtry otwarte / ukończone / dzisiaj /
-  po terminie. Ukończenie zadania pozostaje zachowane po edycji.
-- Start: trzy najbliższe otwarte zadania z oznaczeniem dzisiejszych i zaległych terminów.
-- **Komunikaty uczelni**: oficjalne ogłoszenia i zarządzenia Rektora pobierane bezpośrednio z USOS API (`services/news/search`), z podglądem na ekranie Start, wyszukiwarką, autorem, datą publikacji i możliwością kopiowania lub otwierania w przeglądarce.
-- **Licznik nieobecności na zajęciach**: osobiste narzędzie studenta do kontroli limitu opuszczeń zajęć (domyślnie 2 w semestrze zgodnie z regulaminem Vistuli). Przedmioty są automatycznie wykrywane z planu i ocen; aplikacja ostrzega przed wyczerpaniem lub przekroczeniem limitu.
-- **Detektor kolizji w planie zajęć**: automatyczne wykrywanie nakładających się czasowo zajęć z alertem na ekranie głównym i bezpośrednim oznaczeniem w kalendarzu.
-- **Konfiguracja kluczy API**: `apiKey` i `apiSecret` w `local.properties` (oraz `usos.key` / `usos.consumer.key`) są dostępne wyłącznie w zwykłym buildzie debug. Release i testy QA nie zawierają tych danych; klucze wpisuje się na ekranie konta.
+USOS Checker zbiera najważniejsze informacje z USOS Akademii Finansów i Biznesu Vistula. Otwierasz aplikację i widzisz bieżące lub najbliższe zajęcia, pozostały plan dnia oraz ostatnie zmiany. Motywy jasny i ciemny, neutralne karty i turkusowy akcent nawiązują do [projektu interfejsu](https://usoscheckerdesign.vercel.app/).
 
-## Kalendarz i aktualne zajęcia
+### Co znajdziesz w aplikacji
 
-Plan ma pasek wyboru dni tygodnia i strzałki zmiany tygodnia oraz widoki dnia, tygodnia
-i agendy. Karty pokazują godziny zajęć, konflikty i przerwy z długością oraz zakresem godzin.
-Przerwy są wyliczane z całego planu, także podczas wyszukiwania; ukryte zajęcia nie stają się
-czasem wolnym. Dotknięcie zajęć otwiera szczegóły. Agenda grupuje cały zapisany plan według dnia.
+| Ekran | Możliwości |
+| --- | --- |
+| **Dzisiaj** | Bieżące lub najbliższe zajęcia, odliczanie, dalszy plan dnia, ostatnie zmiany, podgląd tygodnia i skróty. |
+| **Plan** | Widoki dnia, tygodnia i agendy; wyszukiwanie, szczegóły zajęć, prowadzący, sale, kolizje, przerwy i eksport `.ics`. |
+| **Oceny** | Semestry, wyszukiwanie, filtry, terminy zaliczeń, przedmioty bez ocen oraz pomocnicze podsumowania średniej. |
+| **Zmiany** | Historia dodanych, zmienionych i usuniętych wpisów z wartościami przed i po zmianie. |
+| **Więcej** | Zadania, osobista frekwencja, płatności, legitymacje, dokumenty i decyzje, wiadomości uczelni, kampus, kalkulator GPA, konto i katalog API. |
 
-Na ekranie Start i w planie dzisiejszego dnia widać „TRWAJĄ TERAZ”, prowadzącego,
-salę i pozostały czas. Początek zajęć jest włączony do przedziału, koniec wyłączony;
-terminy orientacyjne nie są przedstawiane jako potwierdzone aktualne zajęcia.
-Wskazanie korzysta z ostatniego zapisu USOS, nie z informacji o faktycznej obecności.
-Prawdziwy plan przechowuje dokładne czasy początku i końca; starsze zapisy pozostają czytelne.
+Interfejs obsługuje **polski, angielski i ukraiński**. Android dopasowuje motyw do telefonu lub pozwala wybrać jasny albo ciemny OLED. Tryb demo działa oddzielnie od prawdziwego konta.
 
-Domyślnie aplikacja pobiera osiem tygodni od poniedziałku bieżącego tygodnia.
-Mechanizm pobierania obsługuje zakres do szesnastu tygodni.
-Maksymalnie trzy zapytania do USOS działają równocześnie, a pasek operacji pokazuje
-postęp tygodni i pobieranie prowadzących. Błąd dowolnej strony pozostawia stary
-plan w całości. Data w nagłówku oznacza rzeczywiście zapisany zakres; brak zajęć
-w danym tygodniu może oznaczać pustą odpowiedź USOS. Odczyty zapisu w tle nie
-blokują formularzy ani nie pokazują paska ładowania; zegar aktualizuje się co minutę.
+### Pobieranie
 
-## Funkcje
+Otwórz **[najnowsze wydanie](https://github.com/a0w-svg/usoschecker-public/releases/latest)**. Dla Androida pobierz `VistulaChecker-X.Y.Z.apk`; dla Windows wybierz instalator MSI lub przenośny ZIP, a dla Linuksa pakiet DEB, jeżeli są dołączone do wydania. Źródła i sumy SHA-256 znajdują się przy plikach wydania.
 
-- Katalog API: ulubione metody zapisywane na telefonie oraz filtr „Ulubione”, działające offline.
-  Zmiana ulubionych nie kasuje wpisanych parametrów. Lista zawiera tylko nazwy metod;
-  nie przechowuje odpowiedzi ani danych uwierzytelniających.
-- Obsługa błędów API: rozpoznawanie JSON i formularzy OAuth, rozróżnienie wygasłej sesji
-  od błędnego podpisu, podpowiedzi przy wymaganych polach i zachowanie parametrów po błędzie.
-  Potwierdzone nowe żądanie unieważnia poprzednią odpowiedź do eksportu; anulowanie
-  potwierdzenia i błędy formularza zachowują ostatni poprawny wynik.
-- Synchronizacja respektuje nagłówek `Retry-After` (sekundy lub data HTTP). Start pokazuje
-  ostatnią próbę i czas kolejnego dozwolonego sprawdzenia. Wygasła sesja wstrzymuje
-  monitorowanie i pokazuje skrót do ustawień konta.
+Android wymaga **wersji 12 lub nowszej**. Aktualizacje APK zachowują podpis poprzednich wydań. Instalację i uprawnienia zatwierdzasz w systemie.
 
-- Monitor ocen: nowe, zmienione i usunięte oceny; wartość, komentarz, termin egzaminu i czas modyfikacji z API.
-- Monitor planu na 8 tygodni (rozszerzalny do 16 tygodni): dodanie/usunięcie zajęć, godziny, sala, budynek i imiona i nazwiska prowadzących (lub ID, jeśli USOS nie udostępnia danych osoby).
-- Historia ostatnich 200 zmian z wartościami przed/po i czasem wykrycia w strefie Europe/Warsaw.
-- Ręczne odświeżanie i WorkManager w tle co 15, 30, 60 lub 120 minut.
-- Powiadomienia bez ujawniania ocen na ekranie blokady; zgoda na Androidzie 13+.
-- OAuth 1.0a w zewnętrznej przeglądarce i potwierdzenie kodem PIN (oob). Hasło do uczelni nie trafia do aplikacji.
-- Tokeny, dane i historia szyfrowane AES-GCM z kluczem Android Keystore; zapis atomowy, kopie zapasowe wyłączone.
-- Tryb demonstracyjny z symulacją zmiany oceny i sali, oddzielony od prawdziwego konta.
-- Pełny katalog **571 metod API** z dokumentacją offline: opisy, parametry, domyślne wartości, zakresy OAuth, wymagania administracyjne, pola odpowiedzi, błędy i oznaczenia beta/deprecated.
-- Uniwersalny klient metod: GET, formularz POST, multipart dla `blobbox/put` i `blobbox/put_unsigned`, podgląd JSON/tekstu, eksport odpowiedzi i pobieranie plików przez systemowy wybór dokumentu.
+### Pierwsze uruchomienie — własny klucz API
 
-Katalog odwzorowuje wszystkie metody obecne w publicznym indeksie Vistuli podczas pobrania.
-Każda metoda ma formularz generowany z własnej dokumentacji. To nie oznacza 571 odrębnych,
-zaprojektowanych ekranów użytkowych ani przyznania uprawnień administracyjnych. Własne ekrany
-studenckie obejmują oceny, plan i monitorowanie zmian. Serwer uczelni sprawdza uprawnienia
-każdego żądania. Niektóre metody wymagają dodatkowych zakresów zgody, specjalnego klucza
-lub interakcji w przeglądarce. Odpowiedzi OAuth zawierające tokeny są ukryte w uniwersalnym podglądzie.
-Transfery i pliki ograniczono do 8 MB, podgląd tekstowy do 100 000 znaków; eksport zachowuje pełną odpowiedź.
+1. W ekranie powitalnym wybierz **Skonfiguruj dostęp**. Możesz też uruchomić demo lub pominąć konfigurację.
+2. Otwórz [oficjalny formularz USOSapps Vistuli](https://usosapps.vistula.edu.pl/developers/). W sekcji **Sign up for an API key** podaj nazwę aplikacji i prawidłowy adres e-mail. Stronę aplikacji możesz zostawić pustą.
+3. Skopiuj **Consumer Key** i **Consumer Secret** do odpowiadających im pól w aplikacji. Nie udostępniaj sekretu.
+4. Wybierz zakresy dostępu i otwórz logowanie USOS. Hasło uczelniane wpisujesz na stronie uczelni w przeglądarce.
+5. Po zatwierdzeniu zgód wróć do aplikacji, wklej **PIN** i potwierdź połączenie.
 
-## Uruchomienie na telefonie
+Przewodnik można ponownie otworzyć w **Więcej → Konto → Połączenie z USOS**. Jeżeli formularz nie jest dostępny lub nie możesz uzyskać klucza, skontaktuj się z pomocą USOS uczelni; demo pozostaje dostępne.
 
-1. Zbuduj aplikację lokalnie w Android Studio. Do publicznej dystrybucji przygotuj
-   podpisany release według [RELEASE.md](RELEASE.md); debug może zawierać lokalne klucze.
-2. Bez klucza wybierz **Zobacz wersję demonstracyjną**. Katalog i dokumentacja API działają offline.
-3. Aby pobierać prywatne dane, w **Konto** podaj własny `Consumer Key` i `Consumer Secret`
-   z [USOSapps Vistuli](https://usosapps.vistula.edu.pl/developers/).
-4. Wybierz **Zaloguj w przeglądarce**, zaakceptuj zakresy dostępu na stronie USOS,
-   wróć do aplikacji i wpisz otrzymany PIN.
-5. Zezwól na powiadomienia. Pierwsze pobranie tworzy punkt odniesienia, kolejne zapisują różnice.
+<details>
+<summary>Podgląd przewodnika pierwszego uruchomienia</summary>
 
-Rejestracja klucza nie jest wykonywana przez aplikację. Klucz nie jest wpisany do kodu ani do APK.
-Domyślne zakresy to `grades|studies|payments|offline_access`. Zakres `payments` jest wymagany do pobierania subkont i harmonogramu płatności. Dla innych metod można dodać zakresy
-podane w katalogu przed logowaniem. Zmiana zakresów wymaga odłączenia konta i nowej autoryzacji.
-Nie należy publicznie rozpowszechniać wspólnego Consumer Secret w aplikacji mobilnej;
-wersja używa klucza podanego przez właściciela telefonu. Dla publikacji dla wielu osób
-oficjalna dokumentacja zaleca serwerowy pośrednik OAuth.
+<p align="center"><img src="docs/screenshots/welcome.png" alt="Android — first-run API setup guide" width="300"> <img src="docs/screenshots/welcome-keys.png" alt="Android — instructions for obtaining Consumer Key and Consumer Secret" width="300"></p>
 
-## Dokładność monitorowania
+</details>
 
-- Czas **wykrycia** to czas porównania na telefonie. Czas **modyfikacji w USOS** pochodzi
-  z `date_modified` oceny. API planu nie podaje czasu edycji; aplikacja nie udaje, że zna czas publikacji.
-- Android może opóźniać WorkManager, szczególnie w Doze, bez internetu lub po wymuszonym zatrzymaniu.
-  Interwał to częstotliwość zamówiona, nie gwarantowana. Monitorowanie nie jest usługą push uczelni.
-- Oceny pochodzą z semestrów zwróconych przez `courses/user` z `active_terms_only=false`
-  oraz `grades/terms2`. Nie obejmują wyników pojedynczych sprawdzianów z modułu `crstests`.
-- Plan pobierany jest w ośmiu żądaniach po siedem dni (do szesnastu po rozszerzeniu zakresu) do `tt/student`. Porównujemy tylko
-  wspólny zakres kolejnych pobrań: wejście nowego dnia w zakres i zakończenie starego dnia
-  nie tworzą fałszywych powiadomień.
-- Identyfikator `sm_id` pozwala rozpoznać przeniesienie potwierdzonego spotkania.
-  Dla planów generowanych (`classgroup`) identyfikator obejmuje datę; przeniesienie na inny
-  dzień może być pokazane jako usunięcie i dodanie. Nieznane typy używają tożsamości zastępczej.
-- Dla częstotliwości `other`/`once` API może zwracać możliwe, niepotwierdzone terminy.
-  Aplikacja oznacza je jako orientacyjne.
-- Pobranie jest zatwierdzane dopiero po powodzeniu wszystkich żądań i parsowania.
-  Błąd sieci/API nie zastępuje poprzedniego zapisu pustymi danymi. Nie wykrywamy zmian,
-  które pojawiły się i zniknęły całkowicie między sprawdzeniami.
+### Prywatność i dane
 
-## Budowanie
+Hasło uczelniane nie trafia do aplikacji. Android przechowuje klucze, tokeny i dane konta lokalnie w szyfrowanym magazynie opartym na Android Keystore. Release nie zawiera wspólnego Consumer Secret. Aplikacja łączy się bezpośrednio z USOS, pobiera publiczne wiadomości uczelni i sprawdza wydania na GitHubie. Szczegóły: **[SECURITY.md](SECURITY.md)**.
 
-Wymagane JDK 17, Android SDK Platform 35 i Build Tools 35.0.0.
-Gradle 8.11.1 i Android Gradle Plugin 8.10.1 są przypięte; wrapper sprawdza SHA-256 Gradle.
+Wskazania planu opierają się na ostatnio pobranych danych. Terminy orientacyjne są oznaczane. Średnie i osobista frekwencja są narzędziami pomocniczymi, nie oficjalną dokumentacją uczelni. Dostępność usług zależy od konta i udzielonych zgód.
 
-```sh
-export JAVA_HOME=/sciezka/do/jdk-17
-export ANDROID_HOME=/sciezka/do/android-sdk
-./gradlew :core:test :app:assembleDebug :app:lintDebug
+### Budowanie i testy
+
+Wymagane: **JDK 21**, **Android SDK 37** i dołączony wrapper Gradle. Otwórz katalog z `settings.gradle` w Android Studio. Instrukcja: [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
+
+```powershell
+.\gradlew.bat :app:assembleDebug -PisolatedTests
+.\tools\production-check.ps1 -DeviceTests
 ```
 
-APK: `app/build/outputs/apk/debug/app-debug.apk`.
-Na podłączonym telefonie/emulatorze:
+`-PisolatedTests` tworzy osobną aplikację QA (`pl.vistula.checker.qa`). Testy urządzenia wymagają emulatora lub urządzenia ADB. Przygotowanie podpisanego wydania: **[RELEASE.md](RELEASE.md)**. Kontrole i ich ograniczenia: [VALIDATION.md](VALIDATION.md). Konfiguracja lokalna: [local.properties.example](local.properties.example).
+
+---
+
+## English
+
+USOS Checker brings together key information from Vistula University’s USOS. Open the app to see your current or next class, the rest of the day and recent changes. Light and dark themes, neutral cards and a cyan accent follow the [interface prototype](https://usoscheckerdesign.vercel.app/).
+
+### What is inside
+
+| Screen | Features |
+| --- | --- |
+| **Today** | Current or next class, countdown, remaining classes, recent changes, week preview and shortcuts. |
+| **Schedule** | Day, week and agenda views; search, class details, lecturers, rooms, conflicts, breaks and `.ics` export. |
+| **Grades** | Semesters, search, filters, assessment attempts, ungraded courses and supporting average calculations. |
+| **Changes** | Added, updated and removed records, with before/after values. |
+| **More** | Tasks, personal attendance, payments, student cards, documents and decisions, university news, campus information, GPA calculator, account settings and API catalog. |
+
+The interface supports **Polish, English and Ukrainian**. Android follows the phone’s theme or uses a manual light/OLED dark setting. Demo mode is separate from your real account.
+
+### Download
+
+Open the **[latest release](https://github.com/a0w-svg/usoschecker-public/releases/latest)**. For Android, download `VistulaChecker-X.Y.Z.apk`; for Windows, choose the MSI installer or portable ZIP, and for Linux, the DEB package when included in that release. Source archives and SHA-256 checksums accompany the release files.
+
+Android requires **version 12 or later**. APK updates keep the signing identity of previous releases. You approve installation and permissions through the operating system.
+
+### First launch — bring your own API key
+
+1. Choose **Set up access** on the welcome screen. You can also explore the demo or skip setup.
+2. Open [Vistula’s official USOSapps form](https://usosapps.vistula.edu.pl/developers/). Under **Sign up for an API key**, enter an application name and a valid email address. The application webpage is optional.
+3. Copy **Consumer Key** and **Consumer Secret** into the matching fields in the app. Keep the secret private.
+4. Select access scopes and open USOS sign-in. Enter your university password on the university website in your browser.
+5. After approving access, return to the app, paste the **PIN** and confirm the connection.
+
+Reopen the guide under **More → Account → USOS connection**. If the form is unavailable or you cannot obtain a key, contact your university’s USOS support; demo mode remains available.
+
+### Privacy and data
+
+Your university password never enters the app. Android keeps keys, tokens and account data locally in encrypted storage backed by Android Keystore. Release builds contain no shared Consumer Secret. The app connects directly to USOS, fetches public university news and checks GitHub for releases. See **[SECURITY.md](SECURITY.md)** for details.
+
+Timetable indicators use the last downloaded data. Tentative times are labelled. Averages and personal attendance are supporting tools, not official university records. Available services depend on your account and granted scopes.
+
+### Build and verify
+
+Requirements: **JDK 21**, **Android SDK 37** and the included Gradle wrapper. Open the folder containing `settings.gradle` in Android Studio; see [ANDROID_STUDIO.md](ANDROID_STUDIO.md).
 
 ```sh
-./gradlew :app:connectedDebugAndroidTest
+./gradlew :app:assembleDebug -PisolatedTests
+./gradlew :core:test :shared:desktopTest :desktopApp:compileKotlin :app:testDebugUnitTest :app:lintRelease :app:assembleRelease -PisolatedTests
 ```
 
-Aby uruchomić testy w osobnej instalacji i zachować konto aplikacji na emulatorze:
+On Windows, `tools/production-check.ps1 -DeviceTests` runs the release gate with device tests. `-PisolatedTests` uses a separate QA application (`pl.vistula.checker.qa`). Device tests require an emulator or ADB device. Release signing and packaging: **[RELEASE.md](RELEASE.md)**. Verification scope: [VALIDATION.md](VALIDATION.md). Local configuration example: [local.properties.example](local.properties.example).
 
-```sh
-./gradlew -PisolatedTests :app:connectedDebugAndroidTest
-```
+---
 
-Opcja dodaje sufiks `.qa` do identyfikatora debugowej aplikacji. Zwykłe budowanie
-nie używa tego sufiksu. Testy demo wymagają instalacji bez połączonego konta.
+<h2 align="center">Autorzy / Contributors</h2>
 
-Testy JVM sprawdzają podpis OAuth z opublikowanym wektorem, kodowanie, parsowanie odpowiedzi,
-punkt odniesienia, zmiany ocen/sali/godzin, czas źródłowy, przesuwanie okna planu,
-odrzucanie niepełnych danych i serializację. Testy Android sprawdzają przepływ demo,
-wyszukiwanie w katalogu, zgodność wszystkich plików dokumentacji i szyfrowanie magazynu.
-Wyniki wykonania dla dostarczonego builda znajdują się w `VALIDATION.md`.
+<p align="center">
+  <a href="https://github.com/a0w-svg"><strong>a0w-svg</strong></a> — autor aplikacji / application author<br>
+  <a href="https://github.com/Kaydjen"><strong>Kaydjen</strong></a> — współautor designu / design co-author<br>
+  <a href="https://usoscheckerdesign.vercel.app/">Interaktywny prototyp / Interactive prototype</a>
+</p>
 
-Odświeżenie publicznej dokumentacji (Python 3, internet; bez klucza):
+<p align="center">Licencja / License: <a href="LICENSE">MIT</a>. Biblioteki zewnętrzne zachowują własne licencje. / Third-party libraries retain their own licenses.</p>
 
-```sh
-python3 scripts/refresh_api_catalog.py
-```
-
-## Prowadzący zajęcia
-
-Plan pobiera identyfikatory prowadzących z tt/student, a następnie zbiorczo pobiera
-first_name i last_name przez users/users. Powtarzające się identyfikatory z czterech
-tygodni planu są łączone; zapytania obejmują do 50 osób. Nazwiska są widoczne w planie,
-podglądzie najbliższych zajęć, wyszukiwaniu i opisie eksportu .ics.
-Jeżeli USOS zwraca null dla danej osoby, widoczne jest jej ID. Błąd sieci lub niepełna
-odpowiedź nie zatwierdza nowego zapisu danych. Po aktualizacji wybierz „Sprawdź teraz”,
-aby uzupełnić prowadzących w istniejącym planie.
-
-## Źródła API
-
-Serwer: https://usosapps.vistula.edu.pl/. Publiczny endpoint `services/apisrv/installation`
-potwierdził nazwę „Akademia Finansów i Biznesu Vistula z siedzibą w Warszawie”.
-Dokumentacja w `app/src/main/assets/api` pochodzi z oficjalnych metod `apiref/method_index`
-i `apiref/method`; nazwy, opisy i wymagania są treścią dostarczoną przez USOS API.
-
-- [Autoryzacja OAuth](https://usosapps.vistula.edu.pl/developers/api/authorization/)
-- [Oceny](https://usosapps.vistula.edu.pl/developers/api/services/grades/)
-- [Plan zajęć](https://usosapps.vistula.edu.pl/developers/api/services/tt/)
-- [Dokumentacja API jako dane](https://usosapps.vistula.edu.pl/developers/api/services/apiref/)
-- [Przesyłanie plików blobbox](https://usosapps.vistula.edu.pl/developers/api/services/blobbox/)
+[Audyt zależności i poprawki podatności / Dependency review and vulnerability fixes](DEPENDENCIES.md)

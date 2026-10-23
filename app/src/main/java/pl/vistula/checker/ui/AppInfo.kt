@@ -19,6 +19,9 @@ class AppInfo private constructor() {
             val card = UiHelper.card(context, parent, Color.WHITE)
             UiHelper.add(context, card, context.getString(R.string.about_title), 18, UiHelper.INK, true)
             UiHelper.add(context, card, context.getString(R.string.about_author), 14, UiHelper.INK, false)
+            card.addView(UiHelper.actionRow(context, context.getString(R.string.design_credit), {
+                UiHelper.browser(context, "https://github.com/Kaydjen")
+            }, false))
             UiHelper.note(context, card, context.getString(R.string.about_version, BuildConfig.VERSION_NAME), UiHelper.MUTED)
             if (context is AppCompatActivity) {
                 card.addView(

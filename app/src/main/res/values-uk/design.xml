@@ -1,0 +1,11 @@
+<resources>
+    <string name="design_today">Сьогодні</string>
+    <string name="design_next_class">Наступне заняття</string>
+    <string name="design_later_today">Пізніше сьогодні</string>
+    <string name="design_this_week">Цей тиждень</string>
+    <string name="design_shortcuts">Швидкий доступ</string>
+    <string name="design_starts_minutes">Початок за %1$d хв</string>
+    <string name="design_tentative">Орієнтовний час</string>
+    <string name="design_class_count">Занять: %1$d</string>
+    <string name="design_credit">Співавтор дизайну: Kaydjen</string>
+</resources>

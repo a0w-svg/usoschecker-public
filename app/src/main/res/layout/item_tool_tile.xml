@@ -3,17 +3,17 @@
     android:id="@+id/tool_tile_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="0dp"
-    android:background="@drawable/bg_section_divider"
+    android:layout_marginBottom="4dp"
+    android:background="@drawable/bg_card_white"
     android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="8dp"
-    android:paddingTop="14dp"
-    android:paddingEnd="8dp"
-    android:paddingBottom="14dp">
+    android:paddingStart="16dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="16dp">
 
     <TextView
         android:id="@+id/tool_tile_icon"
@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/app_ink"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
         <TextView
@@ -45,13 +45,13 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/app_muted"
-            android:textSize="14sp" />
+            android:textSize="15sp" />
     </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="8dp"
+        android:paddingStart="16dp"
         android:importantForAccessibility="no"
         android:text="›"
         android:textColor="@color/app_muted"

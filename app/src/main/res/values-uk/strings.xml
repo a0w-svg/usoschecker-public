@@ -39,7 +39,7 @@
 %1$s
 
 Параметри збережено. Виправте їх або повторіть запит.</string>
-    <string name="nav_home">Головна</string>
+    <string name="nav_home">@string/design_today</string>
     <string name="nav_grades">Оцінки</string>
     <string name="nav_plan">Розклад</string>
     <string name="nav_history">Зміни</string>

@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--app', type=Path, default=ROOT / 'desktopApp/build/compose/binaries/main/app/VistulaChecker')
+    parser.add_argument('--theme', choices=['light', 'dark'], default='light')
     args = parser.parse_args()
     work = ROOT / 'work/desktop-smoke'
     work.mkdir(parents=True, exist_ok=True)
@@ -24,7 +25,7 @@ def main():
                     str(ROOT / 'scripts/DesktopSmoke.java')], check=True, timeout=60, cwd=ROOT)
     classpath = str(profile) + os.pathsep + classpath
     driver = [str(java_home / 'bin/java'), '-cp', classpath, 'DesktopSmoke']
-    subprocess.run(driver + ['seed', str(profile)], check=True, timeout=30, cwd=ROOT)
+    subprocess.run(driver + ['seed', str(profile), args.theme], check=True, timeout=30, cwd=ROOT)
     environment = os.environ.copy()
     environment['XDG_DATA_HOME'] = str(profile / 'profile')
     environment['XDG_CACHE_HOME'] = str(profile / 'cache')
@@ -51,8 +52,11 @@ def main():
             if not any(label in schedule_text for label in ('daytimeline', 'daysummary', 'visualtimeline')):
                 raise RuntimeError('Repeating the timetable shortcut did not navigate back to the timetable')
             home_text = re.sub(r'[^a-z]', '', visible_text('home-between.png'))
-            if not any(label in home_text for label in ('recentgrades', 'universitynews')):
+            if not any(label in home_text for label in ('dayplan', 'recentgrades', 'universitynews')):
                 raise RuntimeError('The home shortcut did not leave the timetable')
+            previews = ROOT / 'work/design-previews'
+            previews.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(profile / 'home-between.png', previews / f'desktop-{args.theme}.png')
 
         finally:
             process.terminate()

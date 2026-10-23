@@ -39,7 +39,7 @@
     <string name="api_failed">Żądanie nie powiodło się.\n%1$s\n\nParametry zostały zachowane. Popraw je lub wykonaj żądanie ponownie.</string>
 
     <!-- Navigation -->
-    <string name="nav_home">Start</string>
+    <string name="nav_home">@string/design_today</string>
     <string name="nav_grades">Oceny</string>
     <string name="nav_plan">Plan</string>
     <string name="nav_history">Zmiany</string>

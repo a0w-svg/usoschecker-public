@@ -1,0 +1,5 @@
+<resources>
+    <item name="welcome_continue" type="id" />
+    <item name="welcome_demo" type="id" />
+    <item name="welcome_skip" type="id" />
+</resources>

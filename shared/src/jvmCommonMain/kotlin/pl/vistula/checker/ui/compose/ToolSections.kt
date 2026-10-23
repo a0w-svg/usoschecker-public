@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -153,6 +154,9 @@ fun AccountSection(
                         }) { Text(t("2. Zatwierdź PIN", "2. Confirm PIN", "2. Підтвердити PIN")) }
                     }
                 }
+            }
+            TextButton(onClick = { onOpenUrl("https://github.com/Kaydjen") }) {
+                Text(t("Współautor designu: Kaydjen", "Design co-author: Kaydjen", "Співавтор дизайну: Kaydjen"))
             }
             Text(t("Motyw", "Theme", "Тема"), style = MaterialTheme.typography.titleMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

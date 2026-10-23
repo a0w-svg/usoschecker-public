@@ -43,4 +43,22 @@
         <item name="android:textColor">@color/app_ink</item>
     </style>
     <style name="AppTheme" parent="AppThemeBase" />
+    <style name="PrototypeNavigationText" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="PrototypeNavigationIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/app_secondary_container</item>
+        <item name="android:height">48dp</item>
+        <item name="expandedHeight">48dp</item>
+        <item name="expandedWidth">match_parent</item>
+        <item name="expandedMarginHorizontal">2dp</item>
+        <item name="expandedActiveIndicatorPaddingStart">4dp</item>
+        <item name="expandedActiveIndicatorPaddingEnd">4dp</item>
+        <item name="shapeAppearance">@style/PrototypePillShape</item>
+    </style>
+    <style name="PrototypePillShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

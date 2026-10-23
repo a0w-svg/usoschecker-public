@@ -290,7 +290,7 @@ class GradesScreenController private constructor() {
                     val section = if (semester.isEmpty()) {
                         semesterSection(activity, list, term, label, termRows.size + pendingCourses.size, true)
                     } else {
-                        list
+                        UiHelper.card(activity, list, Color.WHITE)
                     }
                     for (group in GradeBrowser.groups(termRows)) {
                         renderCourseGroup(activity, section, group, snapshot, renderedTestIds, listener)
@@ -456,6 +456,8 @@ class GradesScreenController private constructor() {
         ): LinearLayout {
             val section = LinearLayout(activity)
             section.orientation = LinearLayout.VERTICAL
+            section.setBackgroundResource(R.drawable.bg_card_white)
+            section.setPadding(UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8), 0)
             var expanded = activity.gradeSemesterExpansion().getOrDefault(key, defaultExpanded)
             val header = arrayOfNulls<Button>(1)
             val update = Runnable {
@@ -572,7 +574,7 @@ class GradesScreenController private constructor() {
             values.setTypeface(null, Typeface.NORMAL)
             values.text = preview
             values.maxWidth = UiHelper.dp(activity, if (rows.size > 1) 160 else 96)
-            values.textSize = 20f
+            values.textSize = 18f
             values.setLineSpacing(UiHelper.dp(activity, 5).toFloat(), 1f)
             values.contentDescription = activity.getString(R.string.grades_values_description, descriptions.joinToString(", "))
             val meta = row.findViewById<TextView>(R.id.grade_item_course_meta)

@@ -20,6 +20,7 @@ import android.widget.Button
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.HorizontalScrollView
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
@@ -85,6 +86,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var root: LinearLayout
     private lateinit var content: LinearLayout
     private var navigation: BottomNavigationView? = null
+    private var welcomeStep = -1
     private var demoTasks: JSONArray = JSONArray()
     private lateinit var scroll: ScrollView
     private var swipeRefresh: SwipeRefreshLayout? = null
@@ -169,7 +171,9 @@ class MainActivity : AppCompatActivity() {
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (busy) return
-                    if (tab == 4 && settingsPage != null && settingsPage != "overview") {
+                    if (welcomeStep > 0) {
+                        showWelcome(welcomeStep - 1)
+                    } else if (tab == 4 && settingsPage != null && settingsPage != "overview") {
                         openAccountPage(null)
                     } else if (currentMethod != null) {
                         currentMethod = null
@@ -193,6 +197,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         if (bundle != null) {
+            welcomeStep = bundle.getInt("welcomeStep", -1)
             settingsPage = bundle.getString("settingsPage")
             demoCampus = bundle.getString("demoCampus", "0000")
             demo = bundle.getBoolean("demo")
@@ -253,12 +258,33 @@ class MainActivity : AppCompatActivity() {
         scroll = findViewById(R.id.main_scroll)
         content = findViewById(R.id.main_content)
         navigation = findViewById(R.id.bottom_navigation)
+        navigation?.let { nav ->
+            val indicatorHeight = max(48, (40 * resources.configuration.fontScale).toInt())
+            nav.itemActiveIndicatorExpandedHeight = UiHelper.dp(this, indicatorHeight)
+            nav.minimumHeight = UiHelper.dp(this, indicatorHeight + 16)
+            if (resources.configuration.fontScale > 1.3f) {
+                // Keep full labels at accessibility sizes; let the user scroll the tabs.
+                val parent = nav.parent as LinearLayout
+                val position = parent.indexOfChild(nav)
+                val outerParams = nav.layoutParams
+                parent.removeView(nav)
+                val viewport = HorizontalScrollView(this).apply {
+                    isHorizontalScrollBarEnabled = true
+                    isFillViewport = true
+                }
+                val width = UiHelper.dp(this, (90 * resources.configuration.fontScale * nav.menu.size()).toInt())
+                nav.minimumWidth = width
+                nav.setLabelMaxLines(1)
+                viewport.addView(nav, android.widget.FrameLayout.LayoutParams(width, -2))
+                parent.addView(viewport, position, outerParams)
+            }
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime())
             root.setPadding(bars.left, bars.top, bars.right, max(bars.bottom, keyboard.bottom))
-            navigation?.visibility = if (insets.isVisible(WindowInsetsCompat.Type.ime())) View.GONE else View.VISIBLE
+            navigation?.visibility = if (insets.isVisible(WindowInsetsCompat.Type.ime()) || (welcomeStep >= 0 && !demo)) View.GONE else View.VISIBLE
             WindowInsetsCompat.CONSUMED
         }
 
@@ -286,16 +312,19 @@ class MainActivity : AppCompatActivity() {
 
         (navigation as? SwipeNavigationView)?.setOnTabSwipe { direction ->
             if (busy) return@setOnTabSwipe
-            val tabs = intArrayOf(0, 2, 5, 1, 6)
+            val tabs = intArrayOf(0, 5, 2, 1, 6)
             val current = when (tab) {
                 0 -> 0
-                2 -> 1
-                5 -> 2
+                5 -> 1
+                2 -> 2
                 1 -> 3
                 else -> 4
             }
             val next = current + direction
             if (next in tabs.indices) navigate(tabs[next])
+        }
+        if (resources.configuration.fontScale > 1.3f) {
+            (navigation as? SwipeNavigationView)?.setOnTabSwipe(null)
         }
 
         navigation?.setOnItemReselectedListener { item ->
@@ -309,6 +338,14 @@ class MainActivity : AppCompatActivity() {
             },
             { result ->
                 state = result
+                val welcome = getSharedPreferences("welcome", MODE_PRIVATE)
+                if (!welcome.getBoolean("seen", false)) {
+                    if (state.optString("token").isNotEmpty() || state.optString("key").isNotEmpty()) {
+                        welcome.edit().putBoolean("seen", true).apply()
+                    } else if (!demo) {
+                        welcomeStep = welcome.getInt("step", 0).coerceIn(0, 1)
+                    }
+                }
                 ensureSchedule()
                 val method = currentMethod
                 if (method != null) {
@@ -322,6 +359,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSaveInstanceState(out: Bundle) {
+        out.putInt("welcomeStep", welcomeStep)
         out.putString("settingsPage", settingsPage)
         out.putString("demoCampus", demoCampus)
         out.putString("documentQuery", documentQuery)
@@ -437,6 +475,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigate(target: Int, focusCurrent: Boolean) {
+        welcomeStep = -1
         if (target != tab) settingsPage = null
         if (target != tab) {
             val focused = currentFocus
@@ -467,12 +506,19 @@ class MainActivity : AppCompatActivity() {
         renderedMinute = System.currentTimeMillis() / 60000
         content.removeAllViews()
         setScheduleNavigation(null)
+        val gutter = max(20, (resources.configuration.screenWidthDp - 560) / 2)
         content.setPadding(
-            UiHelper.dp(this, 20),
+            UiHelper.dp(this, gutter),
             UiHelper.dp(this, if (tab == 5) 0 else 12),
-            UiHelper.dp(this, 20),
+            UiHelper.dp(this, gutter),
             UiHelper.dp(this, 24)
         )
+        if (welcomeStep >= 0 && !demo && state.optString("token").isEmpty()) {
+            navigation?.visibility = View.GONE
+            pl.vistula.checker.ui.WelcomeScreenController.render(this, content, welcomeStep)
+            return
+        }
+        navigation?.visibility = View.VISIBLE
         navigation?.let { nav ->
             val navMenuId = when (tab) {
                 2 -> R.id.nav_item_grades
@@ -482,6 +528,13 @@ class MainActivity : AppCompatActivity() {
                 else -> R.id.nav_item_home
             }
             nav.menu.findItem(navMenuId).isChecked = true
+            (nav.parent as? HorizontalScrollView)?.let { viewport ->
+                nav.post {
+                    nav.findViewById<View>(navMenuId)?.let { item ->
+                        viewport.smoothScrollTo(item.left - (viewport.width - item.width) / 2, 0)
+                    }
+                }
+            }
         }
 
         try {
@@ -865,11 +918,36 @@ class MainActivity : AppCompatActivity() {
 
     fun isDemo(): Boolean = demo
 
+    fun showWelcome(step: Int = 0) {
+        welcomeStep = step.coerceIn(0, 1)
+        getSharedPreferences("welcome", MODE_PRIVATE).edit().putInt("step", welcomeStep).apply()
+        render()
+        scroll.scrollTo(0, 0)
+    }
+
+    fun finishWelcome(startDemo: Boolean, configure: Boolean) {
+        getSharedPreferences("welcome", MODE_PRIVATE).edit().putBoolean("seen", true).remove("step").apply()
+        welcomeStep = -1
+        if (startDemo) {
+            demo = true
+            navigate(0)
+        } else if (configure) {
+            demo = false
+            tab = 4
+            settingsPage = "settings.connection"
+            render()
+            scroll.scrollTo(0, 0)
+        } else {
+            navigate(0)
+        }
+    }
+
     fun attendancePreferences(): SharedPreferences =
         getSharedPreferences(if (demo) "attendance_tracker_demo" else "attendance_tracker", MODE_PRIVATE)
 
     fun setDemo(demo: Boolean) {
         this.demo = demo
+        if (demo) welcomeStep = -1
         render()
     }
 

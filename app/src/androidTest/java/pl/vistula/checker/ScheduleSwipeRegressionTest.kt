@@ -150,7 +150,8 @@ class ScheduleSwipeRegressionTest {
         } finally {
             image.recycle()
         }
-        Espresso.onView(ViewMatchers.withText(R.string.schedule_btn_today))
+        Espresso.onView(org.hamcrest.Matchers.allOf(ViewMatchers.withText(R.string.schedule_btn_today),
+            ViewMatchers.isDescendantOfA(ViewMatchers.withId(R.id.main_content))))
             .check(ViewAssertions.doesNotExist())
         PlanMenuTestHelper.select(rule.activity, rule.activity.getString(R.string.schedule_mode_week))
         assertEquals("week", rule.activity.getCalendarMode())

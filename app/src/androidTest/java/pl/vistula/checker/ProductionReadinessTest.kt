@@ -48,6 +48,8 @@ class ProductionReadinessTest {
     @Before
     fun qaOnly() {
         Assume.assumeTrue(rule.activity.packageName.endsWith(".qa"))
+        // Navigation tests begin after the optional first-run guide.
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { rule.activity.finishWelcome(false, false) }
         try {
             val now = SystemClock.uptimeMillis()
             val cancel = MotionEvent.obtain(now, now, MotionEvent.ACTION_CANCEL, 0f, 0f, 0)

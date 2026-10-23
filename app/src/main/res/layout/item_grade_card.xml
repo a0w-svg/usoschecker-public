@@ -27,7 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/app_ink"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
             <TextView
                 android:id="@+id/grade_item_course_meta"
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:textColor="@color/app_muted"
-                android:textSize="12sp" />
+                android:textSize="14sp" />
         </LinearLayout>
         <TextView
             android:id="@+id/grade_item_value_badge"
@@ -44,7 +44,7 @@
             android:maxWidth="128dp"
             android:gravity="end"
             android:textColor="@color/app_ink"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
         <TextView
             android:layout_width="20dp"

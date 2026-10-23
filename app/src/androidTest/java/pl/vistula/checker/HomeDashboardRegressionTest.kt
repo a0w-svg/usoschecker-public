@@ -59,6 +59,21 @@ class HomeDashboardRegressionTest {
     @Test fun dashboardPreviewAndShortcutsNeverWriteTheLiveAccount() {
         val original = Repository(rule.activity).read().toString()
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        main {
+            if (rule.activity.resources.configuration.fontScale > 1.3f) {
+                val nav = rule.activity.findViewById<View>(R.id.bottom_navigation)
+                assertTrue("Large-text tabs must scroll instead of squeezing labels", nav.parent is android.widget.HorizontalScrollView)
+                assertTrue("Large-text labels need more space than the viewport", nav.width > (nav.parent as View).width)
+                fun verifyLabels(view: View) {
+                    if (view is TextView && view.isShown && view.text.isNotEmpty()) {
+                        assertEquals("Full navigation labels stay on one line", 1, view.lineCount)
+                        assertEquals("Navigation labels must not be ellipsized", 0, view.layout.getEllipsisCount(0))
+                    }
+                    if (view is ViewGroup) for (index in 0 until view.childCount) verifyLabels(view.getChildAt(index))
+                }
+                verifyLabels(nav)
+            }
+        }
         instrumentation.uiAutomation.waitForIdle(300, 3000)
         val shot = instrumentation.uiAutomation.takeScreenshot()
         val file = File(rule.activity.getExternalFilesDir(null), "dashboard.png")
@@ -88,6 +103,39 @@ class HomeDashboardRegressionTest {
             fun includes(view: View): Boolean = (view is TextView && view.text.contains(expected)) ||
                 (view is ViewGroup && (0 until view.childCount).any { includes(view.getChildAt(it)) })
             assertTrue("Installment must include its currency: $expected", includes(content))
+        }
+    }
+
+    @Test fun concurrentClassesRemainVisibleInTheNewFocusLayout() {
+        main {
+            val now = java.time.ZonedDateTime.now(pl.vistula.checker.UsosClient.ZONE)
+            val format = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val snapshot = pl.vistula.checker.core.Snapshot(now.toLocalDate().toString(), now.toLocalDate().plusDays(2).toString())
+            repeat(2) { index -> snapshot.add(pl.vistula.checker.core.Record(
+                "focus-$index", "plan", "Concurrent class $index", "", "", now.toLocalDate().toString(), "",
+                now.minusMinutes(10).format(format), now.plusMinutes(50).format(format))) }
+            val content = LinearLayout(rule.activity)
+            pl.vistula.checker.ui.HomeScreenController.render(rule.activity, content,
+                JSONObject().put("snapshot", snapshot.json()), JSONObject(), false, null) { }
+            fun texts(view: View): List<String> = (if (view is TextView) listOf(view.text.toString()) else emptyList()) +
+                (if (view is ViewGroup) (0 until view.childCount).flatMap { texts(view.getChildAt(it)) } else emptyList())
+            assertTrue(texts(content).containsAll(listOf("Concurrent class 0", "Concurrent class 1")))
+        }
+    }
+
+    @Test fun tentativeClassHasAnHonestLabelInsteadOfACountdown() {
+        main {
+            val now = java.time.ZonedDateTime.now(pl.vistula.checker.UsosClient.ZONE)
+            val format = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            val snapshot = pl.vistula.checker.core.Snapshot(now.toLocalDate().toString(), now.toLocalDate().plusDays(3).toString())
+            snapshot.add(pl.vistula.checker.core.Record("tentative", "plan", "Tentative fixture", "", "", now.toLocalDate().toString(), "",
+                now.plusMinutes(30).format(format), now.plusMinutes(90).format(format), Double.NaN, JSONObject().put("frequency", "other")))
+            val content = LinearLayout(rule.activity)
+            pl.vistula.checker.ui.HomeScreenController.render(rule.activity, content,
+                JSONObject().put("snapshot", snapshot.json()), JSONObject(), false, null) { }
+            fun has(view: View): Boolean = (view is TextView && view.text.toString() == rule.activity.getString(R.string.design_tentative)) ||
+                (view is ViewGroup && (0 until view.childCount).any { has(view.getChildAt(it)) })
+            assertTrue(has(content))
         }
     }
 }

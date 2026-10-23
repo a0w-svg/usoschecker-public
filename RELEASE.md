@@ -136,8 +136,8 @@ Nie uznawaj błędu konfiguracji skanera ani braku wyników za potwierdzenie bra
 
 ## Weryfikacja desktopu
 
-Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.4.0`, Android
-`versionCode` 15). Z pełnym JDK 21 i SDK Android 36:
+Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.5.0`, Android
+`versionCode` 16). Z pełnym JDK 21 i SDK Android 36:
 
 ```sh
 bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb

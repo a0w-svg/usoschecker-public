@@ -75,6 +75,7 @@ android {
         coreLibraryDesugaringEnabled true
     }
     testOptions {
+        animationsDisabled = true
         unitTests.returnDefaultValues = true
     }
     if (project.hasProperty('optimizedQa')) testBuildType 'optimizedQa'

@@ -29,6 +29,15 @@ class SwipeNavigationView : BottomNavigationView {
         onSwipe = action
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // HorizontalScrollView offers unspecified width. Pass the accessibility
+        // minimum through to Material's menu before it divides space among tabs.
+        val widthSpec = if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED && minimumWidth > 0) {
+            MeasureSpec.makeMeasureSpec(minimumWidth, MeasureSpec.EXACTLY)
+        } else widthMeasureSpec
+        super.onMeasure(widthSpec, heightMeasureSpec)
+    }
+
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {

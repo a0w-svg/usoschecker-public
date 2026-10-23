@@ -59,6 +59,21 @@ class HomeDashboardRegressionTest {
     @Test fun dashboardPreviewAndShortcutsNeverWriteTheLiveAccount() {
         val original = Repository(rule.activity).read().toString()
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        main {
+            if (rule.activity.resources.configuration.fontScale > 1.3f) {
+                val nav = rule.activity.findViewById<View>(R.id.bottom_navigation)
+                assertTrue("Large-text tabs must scroll instead of squeezing labels", nav.parent is android.widget.HorizontalScrollView)
+                assertTrue("Large-text labels need more space than the viewport", nav.width > (nav.parent as View).width)
+                fun verifyLabels(view: View) {
+                    if (view is TextView && view.isShown && view.text.isNotEmpty()) {
+                        assertEquals("Full navigation labels stay on one line", 1, view.lineCount)
+                        assertEquals("Navigation labels must not be ellipsized", 0, view.layout.getEllipsisCount(0))
+                    }
+                    if (view is ViewGroup) for (index in 0 until view.childCount) verifyLabels(view.getChildAt(index))
+                }
+                verifyLabels(nav)
+            }
+        }
         instrumentation.uiAutomation.waitForIdle(300, 3000)
         val shot = instrumentation.uiAutomation.takeScreenshot()
         val file = File(rule.activity.getExternalFilesDir(null), "dashboard.png")

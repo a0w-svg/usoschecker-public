@@ -273,6 +273,8 @@ class MainActivity : AppCompatActivity() {
                     isFillViewport = true
                 }
                 val width = UiHelper.dp(this, (90 * resources.configuration.fontScale * nav.menu.size()).toInt())
+                nav.minimumWidth = width
+                nav.setLabelMaxLines(1)
                 viewport.addView(nav, android.widget.FrameLayout.LayoutParams(width, -2))
                 parent.addView(viewport, position, outerParams)
             }

@@ -7,7 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.time.LocalDate
 import org.json.JSONObject
 import org.junit.Assert.assertFalse
@@ -27,7 +27,7 @@ import pl.vistula.checker.ui.GradesScreenController
 class GradeSemestersUiTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     private fun fixture(currentGrade: Boolean): Snapshot {
         val now = LocalDate.now(UsosClient.ZONE)

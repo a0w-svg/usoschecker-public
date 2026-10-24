@@ -25,15 +25,15 @@ def escapeBuildConfig(String val) {
 }
 
 android {
-    namespace 'pl.vistula.checker'
-    compileSdk 37
+    namespace = 'pl.vistula.checker'
+    compileSdk = 37
     defaultConfig {
-        applicationId 'pl.vistula.checker'
-        minSdk 31
-        targetSdk 36
-        versionCode 16
-        versionName '1.5.0'
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        applicationId = 'pl.vistula.checker'
+        minSdk = 31
+        targetSdk = 36
+        versionCode = 17
+        versionName = '1.5.1'
+        testInstrumentationRunner = 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField "String", "USOS_KEY", '""'
         buildConfigField "String", "USOS_SECRET", '""'
     }
@@ -46,23 +46,23 @@ android {
     buildTypes {
         debug {
             // Optional separate installation for regression tests; keep personal account data intact.
-            if (project.hasProperty('isolatedTests')) applicationIdSuffix '.qa'
+            if (project.hasProperty('isolatedTests')) applicationIdSuffix = '.qa'
             if (!project.hasProperty('isolatedTests')) {
                 buildConfigField "String", "USOS_KEY", "\"${escapeBuildConfig(usosKey)}\""
                 buildConfigField "String", "USOS_SECRET", "\"${escapeBuildConfig(usosSecret)}\""
             }
         }
         release {
-            debuggable false
-            minifyEnabled true
-            shrinkResources true
+            debuggable = false
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         if (project.hasProperty('optimizedQa')) {
             optimizedQa {
                 initWith release
-                applicationIdSuffix '.qa'
-                signingConfig signingConfigs.debug
+                applicationIdSuffix = '.qa'
+                signingConfig = signingConfigs.debug
                 matchingFallbacks = ['release']
                 proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'optimized-qa-rules.pro'
                 testProguardFiles 'test-rules.pro'
@@ -70,15 +70,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-        coreLibraryDesugaringEnabled true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled = true
     }
     testOptions {
         animationsDisabled = true
         unitTests.returnDefaultValues = true
     }
-    if (project.hasProperty('optimizedQa')) testBuildType 'optimizedQa'
+    if (project.hasProperty('optimizedQa')) testBuildType = 'optimizedQa'
     if (project.hasProperty('liveApiTests')) sourceSets.androidTest.kotlin.srcDir 'src/liveTest/java'
     if (project.hasProperty('upgradeTests')) sourceSets.androidTest.kotlin.srcDir 'src/upgradeTest/java'
     if (project.hasProperty('notificationPermissionTests')) sourceSets.androidTest.kotlin.srcDir 'src/notificationPermissionTest/java'

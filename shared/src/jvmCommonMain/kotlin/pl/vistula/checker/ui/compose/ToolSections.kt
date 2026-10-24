@@ -446,12 +446,13 @@ fun PaymentsAndServicesSection(
     onOpenUrl: (String) -> Unit,
     onReloadState: () -> Unit,
     onStatusMessage: (String) -> Unit,
-    runAsync: ((() -> Unit) -> Unit)
+    runAsync: ((() -> Unit) -> Unit),
+    section: String = "services"
 ) {
     fun t(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
     val live = state.optString("token").isNotEmpty() && state.optString("token") != "demo" && !state.optBoolean("authorizationError")
     val payments = ToolReadModels.payments(state, snapshot, language)
-    Card(
+    if (section == "services" || section == "payments") Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -462,7 +463,7 @@ fun PaymentsAndServicesSection(
                 runAsync { StudentServiceLoader.refresh(repository, "payments"); onReloadState() }
             }) { Text(t("Odśwież płatności", "Refresh payments", "Оновити платежі")) }
             val paymentError = state.optJSONObject("studentServices")?.optJSONObject("payments")
-            if (!paymentError?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(paymentError!!, language), color = MaterialTheme.colorScheme.error)
+            if (!paymentError?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(paymentError, language), color = MaterialTheme.colorScheme.error)
             if (payments == null) {
                 Text(t("Brak danych o płatnościach. Zsynchronizuj konto.", "No payment data. Refresh your account.", "Немає даних про платежі. Оновіть обліковий запис."), style = MaterialTheme.typography.bodyMedium)
             } else {
@@ -493,7 +494,7 @@ fun PaymentsAndServicesSection(
     }
 
     val services = state.optJSONObject("studentServices")
-    Card(
+    if (section != "payments") Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -530,11 +531,11 @@ fun PaymentsAndServicesSection(
             }
             for (key in listOf("mcard", "documents")) {
                 val entry = services?.optJSONObject(key)
-                if (!entry?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(entry!!, language), color = MaterialTheme.colorScheme.error)
+                if (!entry?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(entry, language), color = MaterialTheme.colorScheme.error)
             }
-            MobileCardControls(state, repository, language, onReloadState, onStatusMessage, runAsync)
+            if (section != "documents") MobileCardControls(state, repository, language, onReloadState, onStatusMessage, runAsync)
             val docsArr = services?.optJSONObject("documents")?.optJSONArray("data")
-            if (docsArr != null && docsArr.length() > 0) {
+            if (section != "cards" && docsArr != null && docsArr.length() > 0) {
                 for (i in 0 until docsArr.length()) {
                     val doc = StudentServices.Document(docsArr.getJSONObject(i), language)
                     Text(
@@ -543,14 +544,14 @@ fun PaymentsAndServicesSection(
                     )
                 }
             }
-            if (docsArr == null || docsArr.length() == 0) {
+            if (section != "cards" && (docsArr == null || docsArr.length() == 0)) {
                 Text(t("Brak pobranych dokumentów.", "No documents loaded.", "Немає завантажених документів."), style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
 
     val thesis = snapshot?.thesis
-    if (thesis != null && thesis.hasThesis()) {
+    if (section == "services" && thesis != null && thesis.hasThesis()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -564,7 +565,7 @@ fun PaymentsAndServicesSection(
         }
     }
 
-    Card(
+    if (section == "services") Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)

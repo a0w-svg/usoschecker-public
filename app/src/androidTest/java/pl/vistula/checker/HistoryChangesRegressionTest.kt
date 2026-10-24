@@ -13,7 +13,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertFalse
@@ -29,7 +29,7 @@ import pl.vistula.checker.ui.HistoryScreenController
 class HistoryChangesRegressionTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
     fun scheduleCardShowsHoursAndRoomWithoutAGradeLabel() {

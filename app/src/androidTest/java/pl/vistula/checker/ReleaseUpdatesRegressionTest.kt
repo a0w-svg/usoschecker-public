@@ -218,8 +218,12 @@ class ReleaseUpdatesRegressionTest {
             ui.adoptShellPermissionIdentity("android.permission.START_ACTIVITIES_FROM_BACKGROUND")
             var options: Bundle? = null
             if (Build.VERSION.SDK_INT >= 34) {
+                // API 34/35 require the legacy flag; newer Android has the explicit replacement.
+                @Suppress("DEPRECATION")
+                val launchMode = if (Build.VERSION.SDK_INT >= 36) ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                    else ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
                 options = ActivityOptions.makeBasic()
-                    .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                    .setPendingIntentBackgroundActivityStartMode(launchMode)
                     .toBundle()
             }
             notification.contentIntent.send(ctx, 0, null, null, null, null, options)

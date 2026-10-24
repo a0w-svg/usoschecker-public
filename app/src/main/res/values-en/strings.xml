@@ -41,7 +41,7 @@
 Parameters preserved. Fix them or retry the request.</string>
     <string name="nav_home">@string/design_today</string>
     <string name="nav_grades">Grades</string>
-    <string name="nav_plan">Schedule</string>
+    <string name="nav_plan">Plan</string>
     <string name="nav_history">Changes</string>
     <string name="nav_more">More</string>
     <string name="nav_plan_full">Class schedule</string>

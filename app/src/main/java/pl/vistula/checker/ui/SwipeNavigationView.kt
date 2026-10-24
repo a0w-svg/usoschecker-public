@@ -1,16 +1,21 @@
 package pl.vistula.checker.ui
 
 import android.content.Context
+import android.annotation.SuppressLint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import android.view.View
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.navigation.NavigationBarMenuView
 import java.util.function.IntConsumer
 import kotlin.math.abs
 
 /** Horizontal swipes belong to navigation; taps retain the standard accessible behavior. */
 class SwipeNavigationView : BottomNavigationView {
     private var onSwipe: IntConsumer? = null
+    private var tabScrolling = false
     private val slop: Int
     private var downX = 0f
     private var downY = 0f
@@ -29,6 +34,16 @@ class SwipeNavigationView : BottomNavigationView {
         onSwipe = action
     }
 
+    fun setTabScrolling(scrolling: Boolean) { tabScrolling = scrolling }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        (background?.mutate() as? android.graphics.drawable.GradientDrawable)?.cornerRadius = h / 2f
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun createNavigationBarMenuView(context: Context): NavigationBarMenuView = PillMenuView(context)
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // HorizontalScrollView offers unspecified width. Pass the accessibility
         // minimum through to Material's menu before it divides space among tabs.
@@ -39,6 +54,8 @@ class SwipeNavigationView : BottomNavigationView {
     }
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        // A scrollable menu owns horizontal movement; otherwise the swipe changes pages.
+        parent.requestDisallowInterceptTouchEvent(!tabScrolling)
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 downX = event.x
@@ -68,11 +85,11 @@ class SwipeNavigationView : BottomNavigationView {
     }
 
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-        return (onSwipe != null && axis != 0) || super.onInterceptTouchEvent(event)
+        return (!tabScrolling && onSwipe != null && axis != 0) || super.onInterceptTouchEvent(event)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val swipe = onSwipe
+        val swipe = if (tabScrolling) null else onSwipe
         if (swipe != null && axis != 0) {
             if (axis == 1 && event.actionMasked == MotionEvent.ACTION_UP) {
                 val dx = event.x - downX
@@ -86,5 +103,56 @@ class SwipeNavigationView : BottomNavigationView {
     }
 
     override fun performClick(): Boolean = super.performClick()
+}
+
+/** Material's horizontal menu uses only 80% of the bar for five items. Text-only pills need
+ * equal full-width slots so labels, hit areas and indicators have the same centre.
+ * This small adapter is covered by label/indicator bounds tests against the pinned Material version.
+ */
+@SuppressLint("RestrictedApi")
+private class PillMenuView(context: Context) : BottomNavigationMenuView(context) {
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        repeat(childCount) { index ->
+            val item = getChildAt(index) as? android.view.ViewGroup ?: return@repeat
+            val indicator = item.findViewById<View>(com.google.android.material.R.id.navigation_bar_item_active_indicator_view) ?: return@repeat
+            val inner = item.findViewById<View>(com.google.android.material.R.id.navigation_bar_item_inner_content_container) ?: return@repeat
+            fun visibleLabel(view: View): android.widget.TextView? {
+                if (view is android.widget.TextView && view.isShown && view.text.isNotEmpty()) return view
+                if (view is android.view.ViewGroup) repeat(view.childCount) { visibleLabel(view.getChildAt(it))?.let { label -> return label } }
+                return null
+            }
+            val label = visibleLabel(inner) ?: return@repeat
+            val layout = label.layout ?: return@repeat
+            val textPosition = IntArray(2); label.getLocationInWindow(textPosition)
+            val pillPosition = IntArray(2); indicator.getLocationInWindow(pillPosition)
+            val textCentre = textPosition[0] + label.compoundPaddingLeft + layout.getLineLeft(0) + layout.getLineWidth(0) / 2
+            val delta = pillPosition[0] + indicator.width / 2f - textCentre
+            // Material's minimum indicator width adds space after a short iconless label.
+            // Centre the actual text in that space without changing its size or hit target.
+            if (abs(delta) > .5f) inner.translationX += delta
+        }
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val visible = (0 until childCount).map { getChildAt(it) }.filter { it.visibility != View.GONE }
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        if (visible.isEmpty()) { setMeasuredDimension(width, 0); return }
+        val heightSpec = if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.UNSPECIFIED) heightMeasureSpec
+            else MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.AT_MOST)
+        var height = 0
+        visible.forEachIndexed { index, child ->
+            fun centreLabels(view: View) {
+                if (view is android.widget.TextView && view.gravity != android.view.Gravity.CENTER) view.gravity = android.view.Gravity.CENTER
+                if (view is android.view.ViewGroup) repeat(view.childCount) { centreLabels(view.getChildAt(it)) }
+            }
+            centreLabels(child)
+            val childWidth = width / visible.size + if (index < width % visible.size) 1 else 0
+            child.measure(MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY), heightSpec)
+            child.layoutParams.width = childWidth
+            height = maxOf(height, child.measuredHeight)
+        }
+        setMeasuredDimension(width, height)
+    }
 }
 

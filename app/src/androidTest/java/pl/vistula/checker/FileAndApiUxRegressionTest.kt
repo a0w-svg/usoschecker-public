@@ -21,7 +21,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -41,7 +41,7 @@ import pl.vistula.checker.ui.ApiExplorerController
 class FileAndApiUxRegressionTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
     fun forgedFilePickerResultCannotOverwriteAPrivateFile() {
@@ -104,18 +104,18 @@ class FileAndApiUxRegressionTest {
                     null,
                     {},
                     object : ApiExplorerController.ApiCallback {
-                        override fun onSelectUploadFile(method: String) {}
+                        override fun onSelectUploadFile(currentMethod: String) {}
                         override fun onSaveResponse(response: UsosClient.Response) {}
                         override fun onExecuteRequest(
-                            meta: JSONObject,
+                            metadata: JSONObject,
                             values: Map<String, String>,
                             method: String,
-                            file: ByteArray?,
-                            success: Consumer<UsosClient.Response>,
-                            failure: Consumer<String>
+                            uploadBytes: ByteArray?,
+                            onSuccess: Consumer<UsosClient.Response>,
+                            onFailure: Consumer<String>
                         ) {
                             requests.incrementAndGet()
-                            success.accept(UsosClient.Response("{\"result\":1}".toByteArray(StandardCharsets.UTF_8), "application/json"))
+                            onSuccess.accept(UsosClient.Response("{\"result\":1}".toByteArray(StandardCharsets.UTF_8), "application/json"))
                         }
                     }
                 )

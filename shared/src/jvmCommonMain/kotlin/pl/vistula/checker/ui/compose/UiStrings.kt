@@ -81,7 +81,7 @@ data class UiStrings(
     companion object {
         val PL = UiStrings(
             languageCode = "pl",
-            tabHome = "Start",
+            tabHome = "Dzisiaj",
             tabSchedule = "Plan",
             tabGrades = "Oceny",
             tabHistory = "Zmiany",
@@ -158,8 +158,8 @@ data class UiStrings(
 
         val EN = UiStrings(
             languageCode = "en",
-            tabHome = "Home",
-            tabSchedule = "Schedule",
+            tabHome = "Today",
+            tabSchedule = "Plan",
             tabGrades = "Grades",
             tabHistory = "Changes",
             tabMore = "More",
@@ -235,7 +235,7 @@ data class UiStrings(
 
         val UK = UiStrings(
             languageCode = "uk",
-            tabHome = "Старт",
+            tabHome = "Сьогодні",
             tabSchedule = "Розклад",
             tabGrades = "Оцінки",
             tabHistory = "Зміни",

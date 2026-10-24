@@ -8,4 +8,7 @@
     <string name="design_tentative">Termin orientacyjny</string>
     <string name="design_class_count">Zajęcia: %1$d</string>
     <string name="design_credit">Współautor designu: Kaydjen</string>
+    <string name="design_updates">Aktualizacje</string>
+    <string name="design_history_description">Zmiany ocen i planu</string>
+    <string name="design_later_that_day">Później tego dnia</string>
 </resources>

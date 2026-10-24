@@ -114,7 +114,7 @@ class ScheduleScreenController private constructor() {
             ) {
                 requested = today
             }
-            val activeDate = PlanBrowser.nearestDay(lessonDays, requested)
+            val activeDate = if (activity.hasSelectedScheduleDay()) requested else PlanBrowser.nearestDay(lessonDays, requested)
             activity.setCalendarDate(activeDate.toString())
             val weekly = calendarMode == "week"
             val monday = activeDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
@@ -133,16 +133,16 @@ class ScheduleScreenController private constructor() {
 
             val navBar = LinearLayout(activity)
             navBar.gravity = Gravity.CENTER_VERTICAL
-            val previous = headerIcon(activity, R.drawable.ic_schedule_previous) { move.accept(-1) }
-            previous.contentDescription = activity.getString(if (weekly) R.string.schedule_previous_week else R.string.schedule_previous_day)
-            val next = headerIcon(activity, R.drawable.ic_schedule_next) { move.accept(1) }
-            next.contentDescription = activity.getString(if (weekly) R.string.schedule_next_week else R.string.schedule_next_day)
+            val previous = headerIcon(activity, R.drawable.ic_schedule_previous) { activity.selectScheduleDay(activeDate.minusWeeks(1).toString()) }
+            previous.contentDescription = activity.getString(R.string.schedule_previous_week)
+            val next = headerIcon(activity, R.drawable.ic_schedule_next) { activity.selectScheduleDay(activeDate.plusWeeks(1).toString()) }
+            next.contentDescription = activity.getString(R.string.schedule_next_week)
             val navLocale = Language.currentLocale(activity)
             val dateLabel = when {
                 calendarMode == "agenda" -> activity.getString(R.string.schedule_mode_agenda)
                 weekly -> monday.format(DateTimeFormatter.ofPattern("d MMM", navLocale)) + " – " +
                     monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", navLocale))
-                else -> activeDate.format(DateTimeFormatter.ofPattern("EEE, d MMM", navLocale))
+                else -> "${monday.dayOfMonth}–${monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", navLocale))}"
             }
             val date = headerButton(activity, dateLabel) {
                 val days = ArrayList(PlanBrowser.daysWithLessons(allLessons, activity.getCalendarQuery()))
@@ -164,7 +164,7 @@ class ScheduleScreenController private constructor() {
                     .show()
             }
             date.contentDescription = "${activity.getString(R.string.schedule_btn_choose_date)}: $dateLabel"
-            date.textSize = 18f
+            date.textSize = 14f
             date.setTextColor(activity.getColor(R.color.app_ink))
             date.minHeight = UiHelper.dp(activity, 64)
             date.minimumHeight = UiHelper.dp(activity, 64)
@@ -178,13 +178,18 @@ class ScheduleScreenController private constructor() {
             val more = headerIcon(activity, R.drawable.ic_schedule_more) {}
             more.id = R.id.schedule_more
             more.contentDescription = activity.getString(R.string.schedule_options)
-            previous.isEnabled = PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, -1) != null
-            next.isEnabled = PlanBrowser.adjacentDay(lessonDays, activeDate, weekly, 1) != null
+            previous.isEnabled = true
+            next.isEnabled = true
             navBar.addView(previous, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
             navBar.addView(date, LinearLayout.LayoutParams(0, -2, 1f))
             navBar.addView(next, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
             navBar.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
             content.addView(navBar)
+            if (calendarMode != "agenda") {
+                content.addView(PrototypeUi.week(activity, monday, activeDate, allLessons, true) {
+                    activity.selectScheduleDay(it.toString())
+                }.apply { id = R.id.schedule_week_strip }, LinearLayout.LayoutParams(-1, -2))
+            }
 
             val search = UiHelper.searchField(
                 activity,
@@ -228,7 +233,7 @@ class ScheduleScreenController private constructor() {
                             search.requestFocus()
                             search.post {
                                 (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                                    .showSoftInput(search, InputMethodManager.SHOW_IMPLICIT)
+                                    .showSoftInput(search, 0)
                             }
                         }
                         6 -> {
@@ -345,6 +350,7 @@ class ScheduleScreenController private constructor() {
                 }
             } else {
                 var currentSectionDay: LocalDate? = null
+                var dayTray: LinearLayout? = null
                 val inflater = LayoutInflater.from(activity)
                 val breaks = HashMap<Instant, ScheduleBreaks.Break>()
 
@@ -352,9 +358,8 @@ class ScheduleScreenController private constructor() {
                     val lessonDay = if (calendarMode == "day" || calendarMode == "list") activeDate else lesson.start.toLocalDate()
                     if (lessonDay != currentSectionDay) {
                         currentSectionDay = lessonDay
-                        if (calendarMode == "week" || calendarMode == "agenda") {
-                            UiHelper.heading(activity, content, lessonDay.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", contentLocale)))
-                        }
+                        UiHelper.sectionLabel(activity, content, lessonDay.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", contentLocale)))
+                        dayTray = UiHelper.tray(activity, content)
                         breaks.clear()
                         // Use the complete plan so a search cannot turn hidden meetings into free time.
                         for (gap in ScheduleBreaks.inDay(allLessons, lessonDay)) {
@@ -364,7 +369,7 @@ class ScheduleScreenController private constructor() {
 
                     val gap = breaks.remove(lesson.start.toInstant())
                     if (gap != null) {
-                        val breakCard = UiHelper.card(activity, content, Color.rgb(240, 245, 241))
+                        val breakCard = UiHelper.card(activity, dayTray!!, Color.rgb(240, 245, 241))
                         breakCard.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), 0)
                         UiHelper.add(activity, breakCard, activity.getString(R.string.schedule_break_title, gap.minutes), 14, UiHelper.GREEN, true)
                         UiHelper.add(
@@ -382,7 +387,10 @@ class ScheduleScreenController private constructor() {
                     }
 
                     val isConflict = conflictLessonKeys.contains(lesson.record.id)
-                    val card = inflater.inflate(R.layout.item_lesson_card, content, false)
+                    val card = inflater.inflate(R.layout.item_lesson_card, dayTray, false)
+                    (card.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
+                    card.setBackgroundColor(Color.TRANSPARENT)
+                    card.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 14), UiHelper.dp(activity, 16), UiHelper.dp(activity, 14))
                     val timeView = card.findViewById<TextView>(R.id.lesson_item_time)
                     val conflictBadge = card.findViewById<TextView>(R.id.lesson_item_conflict_badge)
                     val titleView = card.findViewById<TextView>(R.id.lesson_item_title)
@@ -408,6 +416,12 @@ class ScheduleScreenController private constructor() {
                     conflictBadge.visibility = if (isConflict) View.VISIBLE else View.GONE
 
                     titleView.text = lesson.record.title
+                    val titleParent = titleView.parent as LinearLayout
+                    titleParent.removeView(titleView); titleParent.addView(titleView, 0)
+                    (titleView.layoutParams as LinearLayout.LayoutParams).topMargin = 0
+                    titleView.textSize = 15f
+                    timeView.textSize = 13f; timeView.setTypeface(null, Typeface.NORMAL)
+
                     var summary = lessonSummary(lesson, activity)
                     val roomView = card.findViewById<TextView>(R.id.lesson_item_room)
                     val room = lessonRoom(lesson.record)
@@ -420,14 +434,21 @@ class ScheduleScreenController private constructor() {
                         }
                         summary = secondary.joinToString("\n")
                     }
-                    detailsView.text = summary
-                    detailsView.visibility = if (summary.isEmpty()) View.GONE else View.VISIBLE
+                    timeView.text = timeText + if (room.isNotEmpty()) " · " + activity.getString(R.string.lesson_room_label, room) else ""
+                    roomView.visibility = View.GONE
+                    detailsView.text = if (query.isNotBlank()) summary else activity.getString(R.string.design_tentative)
+                    detailsView.visibility = if (lesson.tentative() || query.isNotBlank()) View.VISIBLE else View.GONE
+                    card.contentDescription = lesson.record.title + ". " + timeView.text + ". " + summary
+                    val selectable = activity.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
+                    card.foreground = selectable.getDrawable(0); selectable.recycle()
 
                     card.isClickable = true
                     card.isFocusable = true
                     card.setOnClickListener { showLessonDetails(activity, lesson, listener) }
                     btnDetails.visibility = View.GONE
-                    content.addView(card)
+                    val targetTray = checkNotNull(dayTray)
+                    if (targetTray.childCount > 0) UiHelper.trayDivider(activity, targetTray)
+                    targetTray.addView(card)
                 }
             }
 
@@ -464,7 +485,7 @@ class ScheduleScreenController private constructor() {
         fun headerIcon(context: Context, icon: Int, action: Runnable): Button {
             val button = headerButton(context, "", action) as MaterialButton
             button.setIconResource(icon)
-            button.iconSize = UiHelper.dp(context, 28)
+            button.iconSize = UiHelper.dp(context, 20)
             button.iconPadding = 0
             button.iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
             button.iconTint = button.textColors

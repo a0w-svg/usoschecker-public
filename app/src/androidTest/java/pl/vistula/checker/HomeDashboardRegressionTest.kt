@@ -7,7 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class HomeDashboardRegressionTest {
-    @JvmField @Rule val rule = ActivityTestRule(MainActivity::class.java)
+    @JvmField @Rule val rule = ActivityScenarioRule(MainActivity::class.java)
     private fun main(action: () -> Unit) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(action)
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()

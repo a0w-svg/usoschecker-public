@@ -76,7 +76,7 @@ class ClassReminderReceiver : BroadcastReceiver() {
                 scheduleNext(context)
                 return
             }
-            val title = if (record!!.title == null || record.title.trim().isEmpty()) {
+            val title = if (record!!.title.trim().isEmpty()) {
                 context.getString(R.string.reminder_unnamed_lesson)
             } else {
                 record.title

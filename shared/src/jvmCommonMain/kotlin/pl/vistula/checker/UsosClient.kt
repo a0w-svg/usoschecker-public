@@ -33,7 +33,7 @@ import pl.vistula.checker.core.UsosParser
 class UsosClient @JvmOverloads constructor(
     state: JSONObject,
     private val progress: Consumer<String> = Consumer {},
-    private val connections: ConnectionSource = ConnectionSource { url -> URL(url).openConnection() as HttpURLConnection }
+    private val connections: ConnectionSource = ConnectionSource { url -> java.net.URI.create(url).toURL().openConnection() as HttpURLConnection }
 ) {
     private val key: String = state.optString("key")
     private val secret: String = state.optString("secret")

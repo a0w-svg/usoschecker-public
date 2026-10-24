@@ -5,11 +5,13 @@ plugins {
     id("org.jetbrains.compose")
 }
 
+@OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    androidLibrary {
+    android {
         namespace = "pl.vistula.checker.shared"
         compileSdk = 37
         minSdk = 31
+        withHostTest {}
     }
     jvm("desktop")
 
@@ -26,18 +28,18 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(compose.runtime)
-            api(compose.foundation)
-            api(compose.material3)
-            api(compose.ui)
+            api("org.jetbrains.compose.runtime:runtime:1.12.2")
+            api("org.jetbrains.compose.foundation:foundation:1.12.2")
+            api("org.jetbrains.compose.material3:material3:1.9.0")
+            api("org.jetbrains.compose.ui:ui:1.12.2")
         }
-        val jvmCommonMain by getting {
+        val jvmCommonMain = getByName("jvmCommonMain") {
             dependencies {
                 // Android ships org.json in the platform; desktop gets the real library below.
                 compileOnly("org.json:json:20260814")
             }
         }
-        val desktopMain by getting {
+        val desktopMain = getByName("desktopMain") {
             dependencies {
                 implementation("org.json:json:20260814")
                 api(compose.desktop.currentOs)

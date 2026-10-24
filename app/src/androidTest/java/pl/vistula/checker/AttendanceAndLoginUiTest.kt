@@ -8,7 +8,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -30,7 +30,7 @@ import pl.vistula.checker.ui.AttendanceScreenController
 class AttendanceAndLoginUiTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
     private var prefs: SharedPreferences? = null
     private lateinit var original: Map<String, *>
 

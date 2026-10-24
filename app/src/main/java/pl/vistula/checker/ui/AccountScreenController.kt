@@ -291,8 +291,8 @@ class AccountScreenController private constructor() {
                 UiHelper.add(activity, box, activity.getString(R.string.connect_usos_desc), 14, UiHelper.MUTED, false)
                 box.addView(UiHelper.actionRow(activity, activity.getString(R.string.welcome_reopen), { activity.showWelcome(1) }, false))
 
-                val buildKey = BuildConfig.USOS_KEY?.trim() ?: ""
-                val buildSecret = BuildConfig.USOS_SECRET?.trim() ?: ""
+                val buildKey = BuildConfig.USOS_KEY.trim()
+                val buildSecret = BuildConfig.USOS_SECRET.trim()
                 var defaultKey = state.optString("key", buildKey)
                 if (defaultKey.isEmpty()) defaultKey = buildKey
                 var defaultSecret = state.optString("secret", buildSecret)

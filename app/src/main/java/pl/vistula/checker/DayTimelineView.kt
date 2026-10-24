@@ -194,7 +194,7 @@ class DayTimelineView private constructor(
 
         override fun onDraw(canvas: Canvas) {
             if (!nowOnly) {
-                paint.textSize = 11 * resources.displayMetrics.scaledDensity
+                paint.textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 11f, resources.displayMetrics)
                 for (hour in firstHour..lastHour) {
                     val y = dp((hour - firstHour) * HOUR_HEIGHT + 8).toFloat()
                     paint.color = labelColor

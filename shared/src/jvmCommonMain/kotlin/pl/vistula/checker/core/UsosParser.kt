@@ -506,7 +506,7 @@ object UsosParser {
 
             // Direct legacy installment format
             if (item.has("amount") && !item.has("chosen_installment_plan") && !item.has("total_amount") && !item.has("type")) {
-                val id = item.opt("id").toString()
+                val id = optionalText(item, "id")
                 val nameObj = item.optJSONObject("name")
                 var name = if (nameObj != null) language(nameObj) else optionalText(item, "name")
                 if (name.isEmpty()) name = ApiLanguage.label("Należność", "Payment", "Платіж")
@@ -521,7 +521,7 @@ object UsosParser {
             }
 
             // Real USOS payment object format
-            val payId = item.opt("id").toString()
+            val payId = optionalText(item, "id")
             val descObj = item.optJSONObject("description")
             val payDesc = if (descObj != null) language(descObj) else optionalText(item, "description")
             val payType = optionalText(item, "type")
@@ -550,7 +550,7 @@ object UsosParser {
                     }
                     val instAmount = pi.optDouble("amount", 0.0)
                     var instCurrency = optionalText(pi, "currency")
-                    if (instCurrency.isEmpty() && plan != null) instCurrency = plan.optString("currency", payCurrency)
+                    if (instCurrency.isEmpty()) instCurrency = plan.optString("currency", payCurrency)
                     if (instCurrency.isEmpty()) instCurrency = payCurrency
                     var deadline = optionalText(pi, "payment_date")
                     if (deadline.isEmpty()) deadline = payDeadline
@@ -731,7 +731,7 @@ object UsosParser {
 
         for (i in 0 until list.length()) {
             val test = list.optJSONObject(i) ?: continue
-            val id = test.opt("id").toString()
+            val id = optionalText(test, "id")
             val courseId = optionalText(test, "course_id")
             val courseName = courseNames?.getOrDefault(courseId, courseId) ?: courseId
             val nameObj = test.optJSONObject("name")
@@ -794,10 +794,10 @@ object UsosParser {
                 CourseTestRecord(
                     id, courseId, courseName,
                     localizedText(node.opt("name")),
-                    if (hasPoints) points!!.optDouble("points", 0.0) else 0.0,
+                    if (hasPoints) points.optDouble("points", 0.0) else 0.0,
                     task?.optDouble("points_max", 0.0) ?: 0.0,
-                    if (hasGrade) optionalText(value!!, "symbol") else "",
-                    if (hasGrade) optionalText(grade!!, "last_changed") else (if (points != null) optionalText(points, "last_changed") else ""),
+                    if (hasGrade) optionalText(value, "symbol") else "",
+                    if (hasGrade) optionalText(grade, "last_changed") else (if (points != null) optionalText(points, "last_changed") else ""),
                     term
                 )
             )
@@ -827,7 +827,7 @@ object UsosParser {
             val it = items.optJSONObject(i) ?: continue
             val a = it.optJSONObject("article") ?: it
 
-            val id = a.opt("id").toString()
+            val id = optionalText(a, "id")
             val titleObj = a.optJSONObject("title")
             val title = if (titleObj != null) language(titleObj) else optionalText(a, "title")
             if (title.isEmpty()) continue

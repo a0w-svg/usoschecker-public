@@ -18,6 +18,8 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.HorizontalScrollView
+import pl.vistula.checker.ui.compose.GradeTable
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.PopupMenu
@@ -129,9 +131,9 @@ class GradesScreenController private constructor() {
                 showSemesterPicker(activity, snapshot, semester, onSemesterChanged)
             }
             termPicker.id = R.id.grades_semester
-            termPicker.textSize = 20f
+            termPicker.textSize = 13f
             termPicker.setTextColor(activity.getColor(R.color.app_ink))
-            termPicker.setTypeface(null, Typeface.BOLD)
+            termPicker.setTypeface(null, Typeface.NORMAL)
             termPicker.gravity = Gravity.START or Gravity.CENTER_VERTICAL
             termPicker.setPadding(
                 UiHelper.dp(activity, 8),
@@ -141,6 +143,9 @@ class GradesScreenController private constructor() {
             )
             termPicker.contentDescription = "${activity.getString(R.string.grade_picker_semester)}: $semesterLabel"
             header.addView(termPicker, LinearLayout.LayoutParams(0, -2, 1f))
+            val searchAction = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_search) {}
+            searchAction.contentDescription = activity.getString(R.string.grades_search_action)
+            header.addView(searchAction, LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2))
             val more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more) {}
             more.id = R.id.grades_more
             more.contentDescription = activity.getString(R.string.grades_options)
@@ -194,6 +199,11 @@ class GradesScreenController private constructor() {
             val searchBox = content.getChildAt(content.childCount - 1)
             searchContainer[0] = searchBox
             searchBox.visibility = if (gradeQuery.isEmpty()) View.GONE else View.VISIBLE
+            searchAction.setOnClickListener {
+                searchBox.visibility = View.VISIBLE
+                search.requestFocus()
+                search.post { (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(search, 0) }
+            }
             more.setOnClickListener {
                 val menu = PopupMenu(activity, more)
                 menu.menu.add(0, 1, 0, R.string.grades_search_action)
@@ -207,6 +217,7 @@ class GradesScreenController private constructor() {
                     sortMenu.add(2, 20 + i, i, orderLabels[i]).setCheckable(true).isChecked = orders[i] == gradeOrder
                 }
                 sortMenu.setGroupCheckable(2, true, true)
+                menu.menu.add(0, 7, 7, R.string.grades_tests_heading).setCheckable(true).isChecked = filtersExpanded
                 val visible = GradeBrowser.select(snapshot.records.values, semester, gradeType, gradeOrder, search.text.toString(), snapshot)
                 menu.menu.add(0, 2, 3, R.string.grades_summary_title).isEnabled = visible.isNotEmpty()
                 menu.menu.add(0, 3, 4, R.string.grades_calc_button)
@@ -224,7 +235,7 @@ class GradesScreenController private constructor() {
                             search.requestFocus()
                             search.post {
                                 (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                                    .showSoftInput(search, InputMethodManager.SHOW_IMPLICIT)
+                                    .showSoftInput(search, 0)
                             }
                         }
                         id == 2 -> {
@@ -251,6 +262,7 @@ class GradesScreenController private constructor() {
                                 .setPositiveButton(R.string.btn_close, null)
                                 .show()
                         }
+                        id == 7 -> onExpandToggled.accept(!filtersExpanded)
                         id == 3 -> activity.navigate(9)
                         id == 4 -> onRefresh.run()
                         id == 5 -> onResetFilters.run()
@@ -290,10 +302,38 @@ class GradesScreenController private constructor() {
                     val section = if (semester.isEmpty()) {
                         semesterSection(activity, list, term, label, termRows.size + pendingCourses.size, true)
                     } else {
-                        UiHelper.card(activity, list, Color.WHITE)
+                        LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL; list.addView(this) }
                     }
-                    for (group in GradeBrowser.groups(termRows)) {
-                        renderCourseGroup(activity, section, group, snapshot, renderedTestIds, listener)
+                    val columns = GradeTable.columns(termRows, snapshot)
+                    val scale = activity.resources.configuration.fontScale
+                    val columnPaint = android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 15f, activity.resources.displayMetrics)
+                        typeface = Typeface.DEFAULT_BOLD
+                    }
+                    val courseGroups = GradeBrowser.groups(termRows)
+                    val widths = columns.associateWith { column ->
+                        val labels = listOf(GradeTable.label(column, Language.currentLocale(activity).language)) + courseGroups.map { GradeTable.values(it, column, snapshot) }
+                        maxOf(UiHelper.dp(activity, 48), labels.maxOf { columnPaint.measureText(it) }.toInt() + UiHelper.dp(activity, 16))
+                    }
+                    val available = activity.resources.displayMetrics.widthPixels - UiHelper.dp(activity, 72)
+                    val stacked = scale > 1.3f || widths.values.sum() + UiHelper.dp(activity, 172) > available
+                    val table = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+                    if (!stacked && termRows.isNotEmpty()) {
+                        val headings = LinearLayout(activity).apply {
+                            gravity = Gravity.CENTER_VERTICAL
+                            setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 8), UiHelper.dp(activity, 16), UiHelper.dp(activity, 8))
+                        }
+                        headings.addView(View(activity), LinearLayout.LayoutParams(0, 1, 1f))
+                        columns.forEach { column ->
+                            headings.addView(UiHelper.text(activity, GradeTable.label(column, Language.currentLocale(activity).language), 11, UiHelper.MUTED, false).apply {
+                                gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                            }, LinearLayout.LayoutParams(widths.getValue(column), -2))
+                        }
+                        section.addView(headings)
+                    }
+                    UiHelper.tray(activity, section).addView(table, LinearLayout.LayoutParams(-1, -2))
+                    for (group in courseGroups) {
+                        renderCourseGroup(activity, table, group, snapshot, renderedTestIds, listener, columns, widths, stacked)
                     }
                     for (course in pendingCourses) {
                         renderUngradedCourse(activity, section, course)
@@ -309,7 +349,7 @@ class GradesScreenController private constructor() {
                     }
                 }
 
-                if (snapshot.tests != null && snapshot.tests.isNotEmpty()) {
+                if (filtersExpanded && snapshot.tests.isNotEmpty()) {
                     val unassigned = ArrayList<CourseTestRecord>()
                     for (ctr in snapshot.tests) {
                         val courseVisible = visible.any { r ->
@@ -528,58 +568,47 @@ class GradesScreenController private constructor() {
             rows: List<Record>,
             snapshot: Snapshot,
             renderedTestIds: MutableSet<String>,
-            listener: GradesListener
+            listener: GradesListener,
+            columns: List<String>,
+            widths: Map<String, Int>,
+            stacked: Boolean
         ) {
             val first = rows[0]
             val row = LayoutInflater.from(activity).inflate(R.layout.item_grade_card, parent, false)
             row.findViewById<TextView>(R.id.grade_item_course_name).text = first.title
-            val symbols = ArrayList<String>()
-            val forms = LinkedHashSet<String>()
-            for (grade in rows) {
-                symbols.add(GradeBrowser.symbol(grade))
-                val form = gradeFormLabel(activity, grade, snapshot)
-                if (form.isNotEmpty()) forms.add(form)
-            }
             val values = row.findViewById<TextView>(R.id.grade_item_value_badge)
-            val preview = SpannableStringBuilder()
-            val descriptions = ArrayList<String>()
-            for (i in rows.indices) {
-                val grade = rows[i]
-                val form = gradeFormLabel(activity, grade, snapshot)
-                val session = grade.metadata.optInt("sessionNumber", 0)
-                var label = form
-                if (session > 1) {
-                    label += " · " + activity.getString(R.string.grades_session_term, session.toString())
-                }
-                descriptions.add("$label: ${symbols[i]}")
-                if (i >= 3) continue
-                if (i > 0) preview.append("\n")
-                if (rows.size > 1) {
-                    val start = preview.length
-                    preview.append(label).append("  ")
-                    preview.setSpan(RelativeSizeSpan(0.65f), start, preview.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                    preview.setSpan(
-                        ForegroundColorSpan(activity.getColor(R.color.app_muted)),
-                        start,
-                        preview.length,
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    preview.setSpan(StyleSpan(Typeface.NORMAL), start, preview.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                }
-                val symbolStart = preview.length
-                preview.append(symbols[i])
-                preview.setSpan(StyleSpan(Typeface.BOLD), symbolStart, preview.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            val horizontal = values.parent as LinearLayout
+            val valueIndex = horizontal.indexOfChild(values)
+            horizontal.removeView(values)
+            // The chevron is redundant: the complete course row is the detail action.
+            while (horizontal.childCount > valueIndex) horizontal.removeViewAt(valueIndex)
+            val firstValueColumn = columns.firstOrNull { GradeTable.values(rows, it, snapshot) != "—" }
+            fun cell(column: String) = UiHelper.text(activity, GradeTable.values(rows, column, snapshot), 15, UiHelper.INK, true).apply {
+                if (column == firstValueColumn) id = R.id.grade_item_value_badge
+                gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                contentDescription = GradeTable.label(column, Language.currentLocale(activity).language) + ": " + text
             }
-            if (rows.size > 3) preview.append("\n+").append((rows.size - 3).toString())
-            values.setTypeface(null, Typeface.NORMAL)
-            values.text = preview
-            values.maxWidth = UiHelper.dp(activity, if (rows.size > 1) 160 else 96)
-            values.textSize = 18f
-            values.setLineSpacing(UiHelper.dp(activity, 5).toFloat(), 1f)
-            values.contentDescription = activity.getString(R.string.grades_values_description, descriptions.joinToString(", "))
+            if (stacked) {
+                horizontal.orientation = LinearLayout.VERTICAL
+                horizontal.getChildAt(0).layoutParams = LinearLayout.LayoutParams(-1, -2)
+                columns.chunked(3).forEach { chunk ->
+                    val assessments = LinearLayout(activity).apply { setPadding(0, UiHelper.dp(activity, 12), 0, 0) }
+                    chunk.forEach { column ->
+                        val assessment = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER }
+                        assessment.addView(UiHelper.text(activity, GradeTable.label(column, Language.currentLocale(activity).language), 11, UiHelper.MUTED, false).apply { gravity = Gravity.CENTER })
+                        assessment.addView(cell(column), LinearLayout.LayoutParams(-1, -2))
+                        assessments.addView(assessment, LinearLayout.LayoutParams(0, -2, 1f))
+                    }
+                    horizontal.addView(assessments, LinearLayout.LayoutParams(-1, -2))
+                }
+            } else columns.forEach { column ->
+                horizontal.addView(cell(column), LinearLayout.LayoutParams(widths.getValue(column), -2))
+            }
             val meta = row.findViewById<TextView>(R.id.grade_item_course_meta)
+            val forms = rows.map { gradeFormLabel(activity, it, snapshot) }.distinct()
             meta.text = forms.joinToString(" · ")
-            meta.visibility = if (rows.size > 1 || forms.isEmpty()) View.GONE else View.VISIBLE
+            meta.visibility = View.GONE
+            row.contentDescription = first.title + ". " + rows.joinToString(", ") { gradeFormLabel(activity, it, snapshot) + ": " + GradeBrowser.symbol(it) }
             row.setOnClickListener {
                 val all = ArrayList<Record>()
                 for (candidate in snapshot.records.values) {

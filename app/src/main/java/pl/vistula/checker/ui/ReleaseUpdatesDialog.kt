@@ -43,7 +43,7 @@ class ReleaseUpdatesDialog private constructor() {
             val download = UiHelper.button(
                 activity,
                 activity.getString(
-                    if (latest != null && latest!!.newerThan(BuildConfig.VERSION_NAME)) {
+                    if (latest != null && latest.newerThan(BuildConfig.VERSION_NAME)) {
                         R.string.updates_download
                     } else {
                         R.string.updates_release_history
@@ -137,7 +137,7 @@ class ReleaseUpdatesDialog private constructor() {
                             dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
                             if (checked != null) latest = checked
                             download.setText(
-                                if (latest != null && latest!!.newerThan(BuildConfig.VERSION_NAME)) {
+                                if (latest != null && latest.newerThan(BuildConfig.VERSION_NAME)) {
                                     R.string.updates_download
                                 } else {
                                     R.string.updates_release_history

@@ -21,7 +21,7 @@ import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -59,12 +59,10 @@ import pl.vistula.checker.ui.UiHelper
 class AppSmokeTest {
     @JvmField
     @Rule
-    val rule: ActivityTestRule<MainActivity> = object : ActivityTestRule<MainActivity>(MainActivity::class.java) {
-        override fun getActivityIntent(): Intent {
-            return Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
-    }
+    val rule = ActivityScenarioRule<MainActivity>(
+        Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+    )
 
     @Before
     fun resetNavigation() {
@@ -83,13 +81,14 @@ class AppSmokeTest {
         click("Więcej")
         click(activity().getString(R.string.tool_account_title))
         click(activity().getString(R.string.btn_start_demo))
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { rule.activity.selectGradeSemester("") }
     }
 
     private fun activity(): Activity = rule.activity
 
     private fun localized(text: String?): String? {
         if (text == null) return null
-        val a = rule.activity ?: return text
+        val a = rule.activity
         return when (text) {
             "Więcej" -> a.getString(R.string.nav_more)
             "Start" -> a.getString(R.string.nav_home)
@@ -227,6 +226,7 @@ class AppSmokeTest {
         click("Więcej")
         click(activity().getString(R.string.tool_account_title))
         click(activity().getString(R.string.btn_start_demo))
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { rule.activity.selectGradeSemester("") }
         click("Więcej")
         click(activity().getString(R.string.tool_account_title))
         click("Symuluj zmiany")
@@ -514,6 +514,7 @@ class AppSmokeTest {
         click("Więcej")
         click(activity().getString(R.string.tool_account_title))
         click(activity().getString(R.string.btn_start_demo))
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { rule.activity.selectGradeSemester("") }
         click("Więcej")
         click(activity().getString(R.string.tool_account_title))
         click("Symuluj zmiany")

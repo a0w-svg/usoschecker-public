@@ -203,7 +203,7 @@ class AttendanceScreenController private constructor() {
                 if (item == null || !matches(item, activeTerm, selectedType)) continue
                 val count = item.optInt("absences", 0)
                 val limit = AttendanceTracker.LIMIT
-                val name = item.optString("name", code)
+                val name = item.optString("name", code.orEmpty())
 
                 if ("warning" == filter && !AttendanceTracker.warning(count)) continue
                 if ("exceeded" == filter && !AttendanceTracker.exceeded(count)) continue
@@ -348,7 +348,7 @@ class AttendanceScreenController private constructor() {
                 activity,
                 form,
                 activity.getString(R.string.attendance_dialog_name_hint),
-                if (existing != null) existing.optString("name", code) else "",
+                if (existing != null) existing.optString("name", code.orEmpty()) else "",
                 false
             )
             val termField = UiHelper.field(
@@ -401,7 +401,7 @@ class AttendanceScreenController private constructor() {
                     if (existing == null) {
                         activity.getString(R.string.attendance_dialog_add)
                     } else {
-                        activity.getString(R.string.attendance_dialog_edit, existing.optString("name", code))
+                        activity.getString(R.string.attendance_dialog_edit, existing.optString("name", code.orEmpty()))
                     }
                 )
                 .setView(formScroll)
@@ -435,7 +435,7 @@ class AttendanceScreenController private constructor() {
                         return@setOnClickListener
                     }
                     try {
-                        val course = if (existing != null) existing.optString("courseId", code) else name
+                        val course = if (existing != null) existing.optString("courseId", code.orEmpty()) else name
                         val c = AttendanceTracker.key(term, course, type)
                         val target = saved.optJSONObject(c)
                         if (c != code && target != null && (target.optInt("absences") > 0 || target.optString("notes").isNotEmpty())) {

@@ -1,7 +1,5 @@
-• Odświeżony interfejs inspirowany prototypem usoscheckerdesign.vercel.app; współautor designu: Kaydjen (https://github.com/Kaydjen).
-• Dzisiaj: wyeksponowane bieżące lub najbliższe zajęcia, dalszy plan dnia, ostatnie zmiany i podgląd tygodnia.
-• Neutralne powierzchnie, turkusowy akcent i zaokrąglona nawigacja w kolejności Dzisiaj, Plan, Oceny, Zmiany, Więcej.
-• Spójne karty planu, ocen i narzędzi; zachowane ustawienia motywu i wersje językowe PL/EN/UK.
-• Pierwsze uruchomienie: krótki przewodnik uzyskania własnego klucza API, przejście do bezpiecznego formularza i logowania przez PIN; możliwość pominięcia i uruchomienia demo.
-• Czytelniejszy tekst: większe opisy i godziny, mocniejszy kontrast tekstu pomocniczego oraz nawigacja skalująca się z systemową czcionką.
-• Zaktualizowane biblioteki Androida i desktopu oraz poprawki podatnych zależności narzędzi budowania; audyt OSV dodany do CI.
+• Dokończony interfejs prototypu Kaydjen na Androidzie i desktopie: spokojne powierzchnie, grupowane listy i turkusowy akcent najbliższych zajęć.
+• Naprawiona nawigacja: pełne etykiety, poprawna aktywna karta, przewijanie przy dużej czcionce i właściwy odstęp od treści oraz pasków systemowych.
+• Oceny w wyrównanych kolumnach form zajęć; zachowane poprawki, dodatkowe typy ocen oraz pełne szczegóły przedmiotu.
+• Plan z paskiem tygodnia i kompaktowymi wierszami; wyszukiwanie, filtry, eksport i szczegóły nadal dostępne.
+• Pogrupowany ekran Więcej i czytelniejsza historia zmian, z dostępem do wszystkich dotychczasowych narzędzi.

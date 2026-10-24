@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -17,7 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isSelected
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.work.WorkerParameters
 import java.lang.reflect.Modifier
 import java.util.concurrent.TimeoutException
@@ -34,6 +35,8 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ProductionReadinessTest {
+    private fun descendants(view: View): List<View> = listOf(view) +
+        if (view is ViewGroup) (0 until view.childCount).flatMap { descendants(view.getChildAt(it)) } else emptyList()
     @Test
     fun releaseWorkerRemainsConstructibleAfterOptimization() {
         val constructor = Class.forName("pl.vistula.checker.ReleaseUpdateWorker")
@@ -43,7 +46,7 @@ class ProductionReadinessTest {
 
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     @Before
     fun qaOnly() {
@@ -121,15 +124,14 @@ class ProductionReadinessTest {
                 val content = rule.activity.findViewById<LinearLayout>(R.id.main_content)
                 val name = rule.activity.getString(label)
                 var destination: View? = null
-                for (i in 0 until content.childCount) {
-                    val candidate = content.getChildAt(i)
+                for (candidate in descendants(content)) {
                     if (candidate.contentDescription != null && candidate.contentDescription.toString().startsWith("$name. ")) {
                         destination = candidate
                     }
                 }
                 assertNotNull("Missing destination: $name", destination)
                 assertTrue(destination!!.performClick())
-                assertNull("Destination did not open: $name", destination.parent)
+                assertFalse("Destination did not open: $name", destination.isAttachedToWindow)
             }
         }
     }
@@ -138,7 +140,7 @@ class ProductionReadinessTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             val content = rule.activity.findViewById<LinearLayout>(R.id.main_content)
             val name = rule.activity.getString(label)
-            val destination = (0 until content.childCount).map { content.getChildAt(it) }
+            val destination = descendants(content)
                 .firstOrNull { it.contentDescription?.toString()?.startsWith("$name. ") == true }
             assertNotNull("Missing destination: $name", destination)
             assertTrue(destination!!.performClick())

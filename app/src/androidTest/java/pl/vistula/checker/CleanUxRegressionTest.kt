@@ -22,7 +22,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.android.material.textfield.TextInputLayout
 import java.io.File
 import java.io.FileOutputStream
@@ -58,7 +58,7 @@ import pl.vistula.checker.ui.UiHelper
 class CleanUxRegressionTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     @Before
     fun isolatedOnly() {
@@ -226,7 +226,7 @@ class CleanUxRegressionTest {
                 assertEquals("5", grade.text.toString())
                 assertNull(grade.background)
                 val source = content.findViewById<TextView>(R.id.grade_item_course_meta)
-                assertEquals(View.VISIBLE, source.visibility)
+                assertEquals(View.GONE, source.visibility)
                 assertEquals(activity.getString(R.string.grades_scope_course), source.text.toString())
                 val row = grade.parent.parent as View
                 assertTrue(row.isClickable)
@@ -328,7 +328,7 @@ class CleanUxRegressionTest {
                     {},
                     {},
                     object : TasksScreenController.TaskCallback {
-                        override fun onSaveTask(value: JSONObject) {}
+                        override fun onSaveTask(task: JSONObject) {}
                         override fun onMutateTask(id: String, remove: Boolean) {}
                     }
                 )
@@ -381,7 +381,7 @@ class CleanUxRegressionTest {
                 "Przygotować projekt",
                 0,
                 object : TasksScreenController.TaskCallback {
-                    override fun onSaveTask(value: JSONObject) {}
+                    override fun onSaveTask(task: JSONObject) {}
                     override fun onMutateTask(id: String, remove: Boolean) {}
                 }
             )

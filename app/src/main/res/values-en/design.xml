@@ -8,4 +8,7 @@
     <string name="design_tentative">Tentative time</string>
     <string name="design_class_count">Classes: %1$d</string>
     <string name="design_credit">Design co-author: Kaydjen</string>
+    <string name="design_updates">Updates</string>
+    <string name="design_history_description">Grade and schedule changes</string>
+    <string name="design_later_that_day">Later that day</string>
 </resources>

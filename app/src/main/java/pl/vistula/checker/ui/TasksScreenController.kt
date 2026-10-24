@@ -166,7 +166,7 @@ class TasksScreenController private constructor() {
                     searchBox.visibility = View.VISIBLE
                     search.requestFocus()
                     (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                        .showSoftInput(search, InputMethodManager.SHOW_IMPLICIT)
+                        .showSoftInput(search, 0)
                     true
                 }
                 val filters = menu.addSubMenu(R.string.tasks_filter_title)

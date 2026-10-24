@@ -49,10 +49,10 @@ def main():
             if 'personal desktop fixture' not in visible_text('personal-after.png'):
                 raise RuntimeError('Leaving demo did not restore the saved account')
             schedule_text = re.sub(r'[^a-z]', '', visible_text('schedule-repeat.png'))
-            if not any(label in schedule_text for label in ('daytimeline', 'daysummary', 'visualtimeline')):
+            if not any(label in schedule_text for label in ('chooseaday', 'noclassesonthisday', 'thisweek', 'backtothisweek')):
                 raise RuntimeError('Repeating the timetable shortcut did not navigate back to the timetable')
             home_text = re.sub(r'[^a-z]', '', visible_text('home-between.png'))
-            if not any(label in home_text for label in ('dayplan', 'recentgrades', 'universitynews')):
+            if not any(label in home_text for label in ('nextclass', 'ongoingclass', 'thisweek')):
                 raise RuntimeError('The home shortcut did not leave the timetable')
             previews = ROOT / 'work/design-previews'
             previews.mkdir(parents=True, exist_ok=True)

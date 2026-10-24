@@ -12,7 +12,7 @@ import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.io.File
 import java.io.FileOutputStream
 import java.time.DayOfWeek
@@ -34,7 +34,7 @@ import pl.vistula.checker.core.Snapshot
 class ScheduleSwipeRegressionTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     private fun main(action: Runnable) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(action)

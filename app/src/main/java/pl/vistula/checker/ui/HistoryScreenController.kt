@@ -83,17 +83,21 @@ class HistoryScreenController private constructor() {
             )
             val header = LinearLayout(activity)
             header.gravity = Gravity.CENTER_VERTICAL
-            val title = UiHelper.text(activity, activity.getString(R.string.history_title), 20, UiHelper.INK, true)
-            title.setPadding(UiHelper.dp(activity, 8), 0, 0, 0)
-            title.minHeight = UiHelper.dp(activity, 64)
-            header.addView(title, LinearLayout.LayoutParams(0, -2, 1f))
-            title.gravity = Gravity.CENTER_VERTICAL
+            for (i in 0..2) {
+                val button = UiHelper.button(activity, labels[i], { onFilterChanged.accept(filters[i]) }, false)
+                button.textSize = 12f
+                button.isSelected = filters[i] == filter
+                button.backgroundTintList = android.content.res.ColorStateList.valueOf(activity.getColor(
+                    if (button.isSelected) R.color.app_secondary_container else R.color.app_background))
+                button.setPadding(UiHelper.dp(activity, 4), UiHelper.dp(activity, 8), UiHelper.dp(activity, 4), UiHelper.dp(activity, 8))
+                header.addView(button, LinearLayout.LayoutParams(0, -2, 1f))
+            }
             val more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more) {}
             more.id = R.id.history_more
             more.contentDescription = activity.getString(R.string.history_options)
             header.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
             content.addView(header)
-            if (filter != "wszystkie") {
+            if (filter !in filters.take(3)) {
                 for (i in filters.indices) {
                     if (filters[i] == filter) {
                         val activeFilter = ScheduleScreenController.headerButton(activity, "${labels[i]} ×") {
@@ -143,7 +147,7 @@ class HistoryScreenController private constructor() {
                             search.requestFocus()
                             search.post {
                                 (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                                    .showSoftInput(search, InputMethodManager.SHOW_IMPLICIT)
+                                    .showSoftInput(search, 0)
                             }
                         }
                         id == 8 -> onSimulate?.run()
@@ -162,6 +166,7 @@ class HistoryScreenController private constructor() {
                 var count = 0
                 val currentQuery = search.text.toString()
                 var sectionDay: LocalDate? = null
+                var tray: LinearLayout? = null
 
                 for (c in rows) {
                     val diffList = getDiffSummaryList(activity, c)
@@ -209,10 +214,13 @@ class HistoryScreenController private constructor() {
                                 today.minusDays(1) -> activity.getString(R.string.date_heading_yesterday, UiHelper.shortDate(day))
                                 else -> UiHelper.shortDate(day)
                             }
-                            UiHelper.heading(activity, list, headerText)
+                            UiHelper.sectionLabel(activity, list, headerText)
+                            tray = UiHelper.tray(activity, list)
                             sectionDay = day
                         }
-                        renderChangeCard(activity, list, c)
+                        if (tray == null) tray = UiHelper.tray(activity, list)
+                        if (tray.childCount > 0) UiHelper.trayDivider(activity, tray)
+                        renderChangeRow(activity, tray, c)
                         ++count
                     }
                 }
@@ -440,6 +448,40 @@ class HistoryScreenController private constructor() {
                 diffs.add("💬 ${context.getString(R.string.change_comment)}: $diffComment")
             }
             return diffs
+        }
+
+        @JvmStatic
+        fun renderChangeRow(activity: MainActivity, parent: LinearLayout, change: Change) {
+            val row = LinearLayout(activity).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                minimumHeight = UiHelper.dp(activity, 64)
+                setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 14), UiHelper.dp(activity, 16), UiHelper.dp(activity, 14))
+                isClickable = true; isFocusable = true
+                val attrs = activity.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
+                foreground = attrs.getDrawable(0); attrs.recycle()
+                setOnClickListener { showChangeDetails(activity, change) }
+            }
+            val text = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+            text.addView(UiHelper.text(activity, change.title, 15, UiHelper.INK, true))
+            val diffs = getDiffSummaryList(activity, change).map { it.replaceFirst(Regex("^[^\\p{L}]+"), "") }
+            val firstDiff = diffs.firstOrNull().orEmpty()
+            val kind = firstDiff.substringBefore(":").ifEmpty { activity.getString(when (change.action) {
+                "Dodano" -> R.string.history_action_added
+                "Usunięto" -> R.string.history_action_removed
+                else -> R.string.history_action_modified
+            }) }
+            val detail = listOf(kind, formatRelativeTime(activity, change.effectiveTimestamp())).filter { it.isNotEmpty() }.joinToString(" · ")
+            text.addView(UiHelper.text(activity, detail, 13, UiHelper.MUTED, false))
+            row.addView(text, LinearLayout.LayoutParams(0, -2, 1f))
+            val value = if (firstDiff.contains(":")) firstDiff.substringAfter(":").trim()
+                else if (change.kind == "ocena") change.after.substringBefore(" · ") else ""
+            if (value.isNotEmpty()) row.addView(UiHelper.text(activity, value, 15, UiHelper.INK, true).apply {
+                maxWidth = activity.resources.displayMetrics.widthPixels / 3
+                gravity = Gravity.END
+            }, LinearLayout.LayoutParams(-2, -2).apply { marginStart = UiHelper.dp(activity, 12) })
+            row.contentDescription = (listOf(change.title, detail) + diffs).joinToString(". ")
+            ViewCompat.setScreenReaderFocusable(row, true)
+            parent.addView(row, LinearLayout.LayoutParams(-1, -2))
         }
 
         @JvmStatic

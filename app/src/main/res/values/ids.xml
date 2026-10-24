@@ -18,4 +18,5 @@
     <item name="tasks_add" type="id"/>
     <item name="tool_screen_more" type="id"/>
     <item name="document_more" type="id"/>
+    <item name="schedule_week_strip" type="id" />
 </resources>

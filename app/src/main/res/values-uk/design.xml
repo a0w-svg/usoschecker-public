@@ -8,4 +8,7 @@
     <string name="design_tentative">Орієнтовний час</string>
     <string name="design_class_count">Занять: %1$d</string>
     <string name="design_credit">Співавтор дизайну: Kaydjen</string>
+    <string name="design_updates">Оновлення</string>
+    <string name="design_history_description">Зміни оцінок і розкладу</string>
+    <string name="design_later_that_day">Пізніше цього дня</string>
 </resources>

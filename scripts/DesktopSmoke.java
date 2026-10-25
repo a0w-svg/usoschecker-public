@@ -1,6 +1,8 @@
 import java.awt.Robot;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
@@ -22,6 +24,18 @@ public class DesktopSmoke {
     static BufferedImage shot(Robot robot, Path folder, String name) throws Exception {
         BufferedImage image = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
         ImageIO.write(image, "png", folder.resolve(name + ".png").toFile());
+        if (name.startsWith("personal-")) {
+            // The prototype's account caption is 13 px. Enlarge its region for OCR;
+            // retain the original full-resolution capture for visual diagnostics.
+            int width = Math.min(600, image.getWidth()), height = Math.min(180, image.getHeight());
+            BufferedImage header = new BufferedImage(width * 3, height * 3, BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = header.createGraphics();
+            try {
+                graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                graphics.drawImage(image.getSubimage(0, 0, width, height), 0, 0, width * 3, height * 3, null);
+            } finally { graphics.dispose(); }
+            ImageIO.write(header, "png", folder.resolve(name + "-header.png").toFile());
+        }
         return image;
     }
     public static void main(String[] args) throws Exception {

@@ -44,12 +44,14 @@ def main():
                 result = subprocess.run(['tesseract', str(profile / name), 'stdout', '--psm', '11'], check=True,
                                         capture_output=True, text=True, timeout=20)
                 return ' '.join(result.stdout.lower().split())
-            if 'personal desktop fixture' not in visible_text('personal-before.png'):
-                raise RuntimeError('The fixture account did not load in the packaged application')
+            before_text = visible_text('personal-before-header.png')
+            if 'personal desktop fixture' not in before_text:
+                raise RuntimeError('The fixture account did not load in the packaged application: ' + before_text)
             if 'demo' not in visible_text('demo.png') or 'not connected to usos' in visible_text('demo.png'):
                 raise RuntimeError('Demo was not recognized as an isolated demo account')
-            if 'personal desktop fixture' not in visible_text('personal-after.png'):
-                raise RuntimeError('Leaving demo did not restore the saved account')
+            after_text = visible_text('personal-after-header.png')
+            if 'personal desktop fixture' not in after_text:
+                raise RuntimeError('Leaving demo did not restore the saved account: ' + after_text)
             schedule_text = re.sub(r'[^a-z]', '', visible_text('schedule-repeat.png'))
             if not any(label in schedule_text for label in ('chooseaday', 'noclassesonthisday', 'thisweek', 'backtothisweek')):
                 raise RuntimeError('Repeating the timetable shortcut did not navigate back to the timetable')

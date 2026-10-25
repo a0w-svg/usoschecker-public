@@ -1,5 +1,6 @@
 package pl.vistula.checker
 
+import androidx.core.content.edit
 import android.content.Context
 import java.util.function.Consumer
 import java.util.function.Supplier
@@ -36,7 +37,7 @@ class Repository(c: Context, clients: SharedRepository.ClientFactory) : StateRep
         delegate = SharedRepository(
             Vault(c),
             Supplier { Language.currentLocale(appContext).language },
-            Runnable { attendance.edit().clear().apply() },
+            Runnable { attendance.edit { clear() } },
             ChangeNotifier { changes -> NotificationHelper.notifyChanges(appContext, changes) },
             clients
         )

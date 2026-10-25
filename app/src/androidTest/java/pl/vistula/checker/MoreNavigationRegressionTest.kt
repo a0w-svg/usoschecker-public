@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -75,6 +77,7 @@ class MoreNavigationRegressionTest {
             R.id.nav_item_more
         )) {
             onView(withId(R.id.bottom_navigation)).perform(swipeLeft())
+            main { assertNavigation(id) }
             onView(withId(id)).check(matches(isSelected()))
         }
         for (id in intArrayOf(
@@ -85,8 +88,18 @@ class MoreNavigationRegressionTest {
             R.id.nav_item_home
         )) {
             onView(withId(R.id.bottom_navigation)).perform(swipeRight())
+            main { assertNavigation(id) }
             onView(withId(id)).check(matches(isSelected()))
         }
+    }
+
+    private fun assertNavigation(expected: Int) {
+        val bar = rule.activity.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)
+        val states = (0 until bar.menu.size).joinToString { index ->
+            val item = bar.menu[index]
+            "${item.title}:checked=${item.isChecked},selected=${bar.findViewById<View>(item.itemId).isSelected}"
+        }
+        assertEquals("Navigation state after gesture: $states; width=${bar.width}, viewport=${(bar.parent as View).width}", expected, bar.selectedItemId)
     }
 
     @Test

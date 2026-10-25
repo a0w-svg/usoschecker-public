@@ -60,11 +60,22 @@ class DesignNavigationRegressionTest {
             main {
                 val bar = rule.activity.findViewById<ViewGroup>(R.id.bottom_navigation)
                 val viewport = bar.parent as View
+                val itemIds = setOf(R.id.nav_item_home, R.id.nav_item_plan, R.id.nav_item_grades, R.id.nav_item_history, R.id.nav_item_more)
                 fun labels(view: View) {
                     if (view is TextView && view.isShown && view.text.isNotEmpty()) {
                         assertEquals("Full navigation label: ${view.text}", 1, view.lineCount)
-                        assertEquals("Clipped navigation label: ${view.text}", 0, view.layout.getEllipsisCount(0))
+                        assertEquals("Clipped navigation label: ${view.text}; textSize=${view.textSize}, measured=${view.paint.measureText(view.text.toString())}, width=${view.width}, padding=${view.compoundPaddingLeft + view.compoundPaddingRight}, bar=${bar.width}", 0, view.layout.getEllipsisCount(0))
                         assertTrue("Label wider than its slot", view.layout.getLineWidth(0) <= view.width - view.paddingLeft - view.paddingRight + 1)
+                        assertTrue("Scaled navigation text is clipped: ${view.text}", view.layout.getLineWidth(0) * view.scaleX <= view.width - view.compoundPaddingLeft - view.compoundPaddingRight + 1)
+                        val slot = generateSequence<View>(view) { it.parent as? View }.firstOrNull { it.id in itemIds }
+                        val slotBounds = Rect()
+                        if (slot != null && slot.getGlobalVisibleRect(slotBounds) && slotBounds.width() >= slot.width - 1) {
+                            val labelBounds = Rect(); assertTrue(view.getGlobalVisibleRect(labelBounds))
+                            val position = IntArray(2); view.getLocationInWindow(position)
+                            val start = position[0] + view.compoundPaddingLeft + view.layout.getLineLeft(0)
+                            val end = start + view.layout.getLineWidth(0) * view.scaleX
+                            assertTrue("Parent clips visible navigation text: ${view.text}", start >= labelBounds.left - 2 && end <= labelBounds.right + 2)
+                        }
                     }
                     if (view is ViewGroup) repeat(view.childCount) { labels(view.getChildAt(it)) }
                 }

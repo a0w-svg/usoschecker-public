@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <item name="home_open_schedule" type="id" />
     <item name="home_open_grades" type="id" />
     <item name="home_open_tasks" type="id" />

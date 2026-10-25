@@ -1,0 +1,12 @@
+<resources>
+<string name="hero_heading">A great day starts here.</string>
+<string name="quick_refresh">🔄 Refresh</string>
+<string name="classes_upcoming">Upcoming classes</string>
+    <string name="monitoring_title">Monitoring status</string>
+    <string name="grades_filter_expand">Filters &amp; sorting</string>
+<string name="grades_filter_collapse">Hide filters &amp; sorting</string>
+<string name="news_refresh_btn">Refresh announcements from USOS</string>
+    <string name="schedule_info">Info</string>
+    <string name="home_week_title">Next 7 days</string>
+    <string name="cards_physical_title">STUDENT ID · USOS DATA</string>
+</resources>

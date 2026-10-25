@@ -17,8 +17,14 @@
     <string name="notification_reminders_description">Upcoming classes and deadlines</string>
     <string name="notification_schedule_single">Timetable change: %1$s</string>
     <string name="notification_schedule_count">Timetable changes (%1$d)</string>
-    <string name="notification_schedule_body">Changes detected in %1$d classes.</string>
-    <string name="notification_more_changes">+ %1$d more changes</string>
+    <plurals name="notification_schedule_body">
+        <item quantity="one">Changes detected in %1$d class.</item>
+        <item quantity="other">Changes detected in %1$d classes.</item>
+    </plurals>
+    <plurals name="notification_more_changes">
+        <item quantity="one">+ %1$d more change</item>
+        <item quantity="other">+ %1$d more changes</item>
+    </plurals>
     <string name="notification_open_schedule">Open timetable</string>
     <string name="notification_open_grades">Open grades</string>
     <string name="notification_test_title">Notification test: new grade</string>

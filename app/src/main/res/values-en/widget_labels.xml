@@ -1,0 +1,9 @@
+<resources>
+    <string name="widget_status_brand">Vistula · Student Card</string>
+    <string name="widget_grades_heading">AVERAGE AND GRADES</string>
+    <string name="widget_payments_heading">PAYMENTS</string>
+    <string name="widget_open_app">Tap to open the app</string>
+    <string name="widget_schedule_brand">Vistula · Schedule</string>
+    <string name="widget_open_schedule">Tap to open the schedule</string>
+    <string name="lesson_conflict">CONFLICT</string>
+</resources>

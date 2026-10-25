@@ -33,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Vistula · Plan zajęć"
+                android:text="@string/widget_schedule_brand"
                 android:textColor="@color/app_ink"
                 android:textSize="13sp"
                 android:textStyle="bold" />
@@ -42,7 +42,8 @@
                 android:id="@+id/widget_date_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dzisiaj"
+                android:text="@string/widget_placeholder"
+                tools:text="Dzisiaj"
                 android:textColor="@color/app_ink"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -64,7 +65,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
-        android:text="Semestr akademicki"
+        android:text="@string/widget_placeholder"
+                tools:text="Semestr akademicki"
         android:textColor="@color/app_muted"
         android:textSize="11sp" />
 
@@ -93,9 +95,10 @@
                 android:paddingTop="2dp"
                 android:paddingEnd="6dp"
                 android:paddingBottom="2dp"
-                android:text="NAJBLIŻSZE"
+                android:text="@string/widget_placeholder"
+                tools:text="NAJBLIŻSZE"
                 android:textColor="@color/app_ink"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -103,7 +106,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="end"
-                android:text="09:00 – 10:30"
+                android:text="@string/widget_placeholder"
+                tools:text="09:00 – 10:30"
                 android:textColor="@color/app_ink"
                 android:textSize="12sp"
                 android:textStyle="bold" />
@@ -116,7 +120,8 @@
             android:layout_marginTop="4dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="Nazwa przedmiotu"
+            android:text="@string/widget_placeholder"
+                tools:text="Nazwa przedmiotu"
             android:textColor="@color/app_ink"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -128,7 +133,8 @@
             android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Sala i budynek"
+            android:text="@string/widget_placeholder"
+                tools:text="Sala i budynek"
             android:textColor="@color/app_muted"
             android:textSize="11sp" />
 
@@ -139,7 +145,8 @@
             android:layout_marginTop="1dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="Prowadzący"
+            android:text="@string/widget_placeholder"
+                tools:text="Prowadzący"
             android:textColor="@color/app_muted"
             android:textSize="11sp" />
     </LinearLayout>
@@ -151,7 +158,8 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="Brak kolejnych zajęć na dzisiaj."
+        android:text="@string/widget_placeholder"
+                tools:text="Brak kolejnych zajęć na dzisiaj."
         android:textColor="@color/app_muted"
         android:textSize="13sp"
         android:visibility="gone" />
@@ -163,7 +171,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:gravity="center"
-        android:text="Dotknij, aby otworzyć plan zajęć"
+        android:text="@string/widget_open_schedule"
         android:textColor="@color/app_ink"
         android:textSize="11sp" />
 </LinearLayout>

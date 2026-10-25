@@ -1,5 +1,9 @@
 package pl.vistula.checker
 
+import androidx.core.content.edit
+import androidx.core.view.isVisible
+import androidx.core.view.get
+import androidx.core.view.size
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.ClipboardManager
@@ -294,7 +298,13 @@ class MainActivity : AppCompatActivity() {
                 val viewport = HorizontalScrollView(this).apply {
                     isHorizontalScrollBarEnabled = false
                     isFillViewport = true
+                    background = nav.background
+                    clipToOutline = true
+                    addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
+                        (view.background?.mutate() as? android.graphics.drawable.GradientDrawable)?.cornerRadius = view.height / 2f
+                    }
                 }
+                nav.background = null
                 nav.setLabelMaxLines(1)
                 viewport.addView(nav, android.widget.FrameLayout.LayoutParams(-1, -2))
                 parent.addView(viewport, position, outerParams)
@@ -302,7 +312,8 @@ class MainActivity : AppCompatActivity() {
                     val paint = android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
                         textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
                     }
-                    val required = (0 until nav.menu.size()).maxOf { paint.measureText(nav.menu.getItem(it).title.toString()) }.toInt() + UiHelper.dp(this, 24)
+                    val required = (nav as? SwipeNavigationView)?.requiredItemWidth()
+                        ?: ((0 until nav.menu.size).maxOf { paint.measureText(nav.menu[it].title.toString()) }.toInt() + UiHelper.dp(this, 24))
                     val available = (root.width - root.paddingLeft - root.paddingRight - UiHelper.dp(this, 24)).coerceAtLeast(0)
                     val viewportWidth = minOf(available, UiHelper.dp(this, 560))
                     val params = viewport.layoutParams as LinearLayout.LayoutParams
@@ -310,7 +321,7 @@ class MainActivity : AppCompatActivity() {
                         params.width = viewportWidth; params.gravity = android.view.Gravity.CENTER_HORIZONTAL
                         viewport.layoutParams = params
                     }
-                    val width = max(viewportWidth, max(UiHelper.dp(this, 48), required) * nav.menu.size())
+                    val width = max(viewportWidth, max(UiHelper.dp(this, 48), required) * nav.menu.size)
                     if (nav.layoutParams.width != width) {
                         nav.minimumWidth = width
                         nav.layoutParams = nav.layoutParams.apply { this.width = width }
@@ -378,7 +389,7 @@ class MainActivity : AppCompatActivity() {
                 val welcome = getSharedPreferences("welcome", MODE_PRIVATE)
                 if (!welcome.getBoolean("seen", false)) {
                     if (state.optString("token").isNotEmpty() || state.optString("key").isNotEmpty()) {
-                        welcome.edit().putBoolean("seen", true).apply()
+                        welcome.edit { putBoolean("seen", true) }
                     } else if (!demo) {
                         welcomeStep = welcome.getInt("step", 0).coerceIn(0, 1)
                     }
@@ -584,7 +595,10 @@ class MainActivity : AppCompatActivity() {
             (nav.parent as? HorizontalScrollView)?.let { viewport ->
                 nav.post {
                     nav.findViewById<View>(navMenuId)?.let { item ->
-                        viewport.smoothScrollTo(item.left - (viewport.width - item.width) / 2, 0)
+                        // A zero-distance smooth scroll still starts a fling animation in
+                        // HorizontalScrollView and can consume the next tap or swipe.
+                        val target = if (nav.width > viewport.width) item.left - (viewport.width - item.width) / 2 else 0
+                        viewport.scrollTo(target.coerceAtLeast(0), 0)
                     }
                 }
             }
@@ -655,7 +669,7 @@ class MainActivity : AppCompatActivity() {
                     },
                     { go ->
                         gradeOrder = go
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit().putString("gradeOrder", go).apply()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", go) }
                         render()
                     },
                     { gq -> gradeQuery = gq },
@@ -665,7 +679,7 @@ class MainActivity : AppCompatActivity() {
                         gradeQuery = ""
                         gradeOrder = "name"
                         gradeSemesterExpansion.clear()
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit().putString("gradeOrder", gradeOrder).apply()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", gradeOrder) }
                         render()
                     },
                     { sync() },
@@ -925,7 +939,7 @@ class MainActivity : AppCompatActivity() {
                     },
                     { to ->
                         taskOrder = to
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit().putString("taskOrder", to).apply()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("taskOrder", to) }
                         render()
                     },
                     { tq -> taskQuery = tq },
@@ -984,13 +998,13 @@ class MainActivity : AppCompatActivity() {
 
     fun showWelcome(step: Int = 0) {
         welcomeStep = step.coerceIn(0, 1)
-        getSharedPreferences("welcome", MODE_PRIVATE).edit().putInt("step", welcomeStep).apply()
+        getSharedPreferences("welcome", MODE_PRIVATE).edit { putInt("step", welcomeStep) }
         render()
         scroll.scrollTo(0, 0)
     }
 
     fun finishWelcome(startDemo: Boolean, configure: Boolean) {
-        getSharedPreferences("welcome", MODE_PRIVATE).edit().putBoolean("seen", true).remove("step").apply()
+        getSharedPreferences("welcome", MODE_PRIVATE).edit { putBoolean("seen", true).remove("step") }
         welcomeStep = -1
         if (startDemo) {
             demo = true
@@ -1689,8 +1703,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateBusy(value: Boolean) {
         setButtons(root, !value)
         navigation?.let { nav ->
-            for (i in 0 until nav.menu.size()) {
-                nav.menu.getItem(i).isEnabled = !value
+            for (i in 0 until nav.menu.size) {
+                nav.menu[i].isEnabled = !value
             }
         }
         if (value) progress.setText(R.string.loading)

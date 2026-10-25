@@ -1,5 +1,8 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.withStyledAttributes
+import androidx.core.view.isGone
+import androidx.core.view.isNotEmpty
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -219,7 +222,7 @@ class HistoryScreenController private constructor() {
                             sectionDay = day
                         }
                         if (tray == null) tray = UiHelper.tray(activity, list)
-                        if (tray.childCount > 0) UiHelper.trayDivider(activity, tray)
+                        if (tray.isNotEmpty()) UiHelper.trayDivider(activity, tray)
                         renderChangeRow(activity, tray, c)
                         ++count
                     }
@@ -457,8 +460,7 @@ class HistoryScreenController private constructor() {
                 minimumHeight = UiHelper.dp(activity, 64)
                 setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 14), UiHelper.dp(activity, 16), UiHelper.dp(activity, 14))
                 isClickable = true; isFocusable = true
-                val attrs = activity.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
-                foreground = attrs.getDrawable(0); attrs.recycle()
+                activity.withStyledAttributes(attrs = intArrayOf(android.R.attr.selectableItemBackground)) { foreground = getDrawable(0) }
                 setOnClickListener { showChangeDetails(activity, change) }
             }
             val text = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
@@ -613,7 +615,7 @@ class HistoryScreenController private constructor() {
                     UiHelper.button(
                         activity,
                         activity.getString(R.string.grades_full_data),
-                        { allData.visibility = if (allData.visibility == View.GONE) View.VISIBLE else View.GONE },
+                        { allData.visibility = if (allData.isGone) View.VISIBLE else View.GONE },
                         false
                     )
                 )

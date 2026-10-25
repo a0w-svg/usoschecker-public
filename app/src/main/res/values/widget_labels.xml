@@ -1,0 +1,9 @@
+<resources>
+    <string name="widget_status_brand">Vistula · Karta Studenta</string>
+    <string name="widget_grades_heading">ŚREDNIA I OCENY</string>
+    <string name="widget_payments_heading">PŁATNOŚCI</string>
+    <string name="widget_open_app">Dotknij, aby otworzyć aplikację</string>
+    <string name="widget_schedule_brand">Vistula · Plan zajęć</string>
+    <string name="widget_open_schedule">Dotknij, aby otworzyć plan zajęć</string>
+    <string name="lesson_conflict">KOLIZJA</string>
+</resources>

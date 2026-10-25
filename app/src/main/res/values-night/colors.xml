@@ -10,8 +10,7 @@
     <color name="app_secondary_container">#2C2D2F</color>
     <color name="app_outline_inner">#25282A</color>
     <color name="app_button_surface">#202325</color>
-    <color name="app_mint_surface">#122126</color>
-    <color name="app_surface_high">#141516</color>
+<color name="app_surface_high">#141516</color>
     <color name="app_inner_surface">#1B1E20</color>
     <color name="app_background">#000000</color>
     <color name="app_card">#151618</color>

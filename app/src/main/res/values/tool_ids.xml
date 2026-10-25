@@ -1,1 +1,1 @@
-<resources><item name="student_document_details" type="id" /></resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl"><item name="student_document_details" type="id" /></resources>

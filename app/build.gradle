@@ -37,12 +37,19 @@ android {
         buildConfigField "String", "USOS_KEY", '""'
         buildConfigField "String", "USOS_SECRET", '""'
     }
+    // Ship every supported language for offline switching, including sideloaded APKs.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
     androidResources {
         localeFilters += ['pl', 'en', 'uk']
     }
     buildFeatures {
         buildConfig = true
     }
+    lint { warningsAsErrors = true }
     buildTypes {
         debug {
             // Optional separate installation for regression tests; keep personal account data intact.
@@ -88,6 +95,8 @@ tasks.register('verifyReleaseConfiguration') {
     group = 'verification'
     description = 'Rejects release configurations that expose developer credentials or disable release protection.'
     doLast {
+        if (android.bundle.language.enableSplit != false)
+            throw new GradleException('All supported languages must ship in the base bundle for offline language switching.')
         def release = android.buildTypes.release
         if (release.debuggable || !release.minifyEnabled || !release.shrinkResources)
             throw new GradleException('Release must be non-debuggable with code and resource optimization enabled.')

@@ -3,3 +3,4 @@
 • Oceny w wyrównanych kolumnach form zajęć; zachowane poprawki, dodatkowe typy ocen oraz pełne szczegóły przedmiotu.
 • Plan z paskiem tygodnia i kompaktowymi wierszami; wyszukiwanie, filtry, eksport i szczegóły nadal dostępne.
 • Pogrupowany ekran Więcej i czytelniejsza historia zmian, z dostępem do wszystkich dotychczasowych narzędzi.
+• Poprawione ostrzeżenia lint, tłumaczenia liczebników i czytelność widżetów.

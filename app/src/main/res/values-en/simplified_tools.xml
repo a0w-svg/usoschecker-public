@@ -3,16 +3,14 @@
     <string name="details_expanded">Expanded</string>
     <string name="details_collapsed">Collapsed</string>
     <string name="simple_details">Details</string>
-    <string name="settings_title">Settings</string>
-    <string name="settings_profile">Student profile</string>
+<string name="settings_profile">Student profile</string>
     <string name="settings_access">USOS data access</string>
     <string name="settings_access_hint">Choose the features you need. You will authorize access when signing in to USOS.</string>
     <string name="settings_scope_advanced">Advanced permission scopes</string>
     <string name="settings_sync_hint">Your phone may delay background checks to save battery.</string>
     <string name="settings_about">About and help</string>
     <string name="settings_personalization">Appearance and language</string>
-    <string name="settings_basic_access">Grades and studies</string>
-    <string name="settings_tests_access">Test results</string>
+<string name="settings_tests_access">Test results</string>
     <string name="settings_profile_access">Photo and email</string>
     <string name="services_cached_note">Showing saved data. Refresh failed.</string>
     <string name="services_not_loaded">Data has not been loaded yet.</string>
@@ -21,6 +19,4 @@
     <string name="gpa_assumptions">Assumptions and other estimates</string>
     <string name="api_documentation">Method documentation</string>
     <string name="api_catalog_scope_note">Listed methods may require permissions your account does not have.</string>
-    <string name="payments_currency_total">Unpaid installment total: %1$.2f %2$s</string>
-    <string name="services_news_limit">Showing up to 50 latest announcements.</string>
 </resources>

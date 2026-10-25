@@ -107,10 +107,10 @@ class CredentialsAndNavigationRegressionTest {
             val search = input(activity.window.decorView)
             assertNotNull(search)
             search!!.setText("old unrelated search")
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("showHistory", true).putExtra("historyKind", "ocena"))
+            activity.onNewIntent(Intent(activity.intent).putExtra("showHistory", true).putExtra("historyKind", "ocena"))
             assertEquals("", input(activity.window.decorView)!!.text.toString())
             assertTrue(selectedLabel(activity.window.decorView).startsWith(gradesPrefix))
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("showHistory", true).putExtra("historyKind", "plan"))
+            activity.onNewIntent(Intent(activity.intent).putExtra("showHistory", true).putExtra("historyKind", "plan"))
             assertTrue(selectedLabel(activity.window.decorView).startsWith(planPrefix))
         }
     }
@@ -119,12 +119,12 @@ class CredentialsAndNavigationRegressionTest {
     fun gradeAndScheduleDestinationsOpenTheirOwnScreens() {
         main {
             val activity = rule.activity
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("tab", 2))
+            activity.onNewIntent(Intent(activity.intent).putExtra("tab", 2))
             assertEquals(
                 R.id.nav_item_grades,
                 activity.findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId
             )
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("tab", 5))
+            activity.onNewIntent(Intent(activity.intent).putExtra("tab", 5))
             assertEquals(
                 R.id.nav_item_plan,
                 activity.findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId

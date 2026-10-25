@@ -1,5 +1,9 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.withStyledAttributes
+import androidx.core.content.edit
+import androidx.core.view.isGone
+import androidx.core.view.isNotEmpty
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -434,20 +438,19 @@ class ScheduleScreenController private constructor() {
                         }
                         summary = secondary.joinToString("\n")
                     }
-                    timeView.text = timeText + if (room.isNotEmpty()) " · " + activity.getString(R.string.lesson_room_label, room) else ""
+                    timeView.text = if (room.isNotEmpty()) activity.getString(R.string.design_inline_meta, timeText, activity.getString(R.string.lesson_room_label, room)) else timeText
                     roomView.visibility = View.GONE
                     detailsView.text = if (query.isNotBlank()) summary else activity.getString(R.string.design_tentative)
                     detailsView.visibility = if (lesson.tentative() || query.isNotBlank()) View.VISIBLE else View.GONE
                     card.contentDescription = lesson.record.title + ". " + timeView.text + ". " + summary
-                    val selectable = activity.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
-                    card.foreground = selectable.getDrawable(0); selectable.recycle()
+                    activity.withStyledAttributes(attrs = intArrayOf(android.R.attr.selectableItemBackground)) { card.foreground = getDrawable(0) }
 
                     card.isClickable = true
                     card.isFocusable = true
                     card.setOnClickListener { showLessonDetails(activity, lesson, listener) }
                     btnDetails.visibility = View.GONE
                     val targetTray = checkNotNull(dayTray)
-                    if (targetTray.childCount > 0) UiHelper.trayDivider(activity, targetTray)
+                    if (targetTray.isNotEmpty()) UiHelper.trayDivider(activity, targetTray)
                     targetTray.addView(card)
                 }
             }
@@ -533,7 +536,7 @@ class ScheduleScreenController private constructor() {
                     UiHelper.button(
                         activity,
                         activity.getString(R.string.grades_full_data),
-                        { raw.visibility = if (raw.visibility == View.GONE) View.VISIBLE else View.GONE },
+                        { raw.visibility = if (raw.isGone) View.VISIBLE else View.GONE },
                         false
                     )
                 )
@@ -634,11 +637,11 @@ class ScheduleScreenController private constructor() {
                 val id = AttendanceTracker.record(saved, snapshot, lesson.record)
                 val item = saved.getJSONObject(id)
                 count = item.optInt("absences")
-                prefs.edit()
-                    .putString("data", saved.toString())
-                    .putString("term", item.optString("term"))
-                    .putString("classType", "all")
-                    .apply()
+                prefs.edit {
+                    putString("data", saved.toString())
+                    putString("term", item.optString("term"))
+                    putString("classType", "all")
+                }
             } catch (_: Exception) {
                 Toast.makeText(activity, R.string.attendance_save_error, Toast.LENGTH_LONG).show()
                 return

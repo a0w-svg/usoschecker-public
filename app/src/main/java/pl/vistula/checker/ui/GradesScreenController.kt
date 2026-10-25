@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import androidx.core.view.isGone
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -502,7 +503,7 @@ class GradesScreenController private constructor() {
             val header = arrayOfNulls<Button>(1)
             val update = Runnable {
                 section.visibility = if (expanded) View.VISIBLE else View.GONE
-                header[0]!!.text = title + if (expanded) " ▾" else " ▸"
+                header[0]!!.text = activity.getString(R.string.design_toggle, title, if (expanded) "▾" else "▸")
                 header[0]!!.contentDescription = activity.getString(
                     R.string.grades_semester_toggle,
                     title,
@@ -671,7 +672,7 @@ class GradesScreenController private constructor() {
                         UiHelper.button(
                             activity,
                             activity.getString(R.string.grades_full_data),
-                            { rawView.visibility = if (rawView.visibility == View.GONE) View.VISIBLE else View.GONE },
+                            { rawView.visibility = if (rawView.isGone) View.VISIBLE else View.GONE },
                             false
                         )
                     )
@@ -718,7 +719,7 @@ class GradesScreenController private constructor() {
                             UiHelper.button(
                                 activity,
                                 activity.getString(R.string.grades_full_data),
-                                { text.visibility = if (text.visibility == View.GONE) View.VISIBLE else View.GONE },
+                                { text.visibility = if (text.isGone) View.VISIBLE else View.GONE },
                                 false
                             )
                         )

@@ -1,5 +1,6 @@
 package pl.vistula.checker
 
+import androidx.core.content.edit
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -42,7 +43,7 @@ class ReleaseUpdates private constructor() {
 
         @JvmStatic
         fun setEnabled(context: Context, enabled: Boolean) {
-            preferences(context).edit().putBoolean("enabled", enabled).apply()
+            preferences(context).edit { putBoolean("enabled", enabled) }
             if (!enabled) context.getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
             ReleaseUpdateWorker.schedule(context)
         }
@@ -77,7 +78,7 @@ class ReleaseUpdates private constructor() {
             }
             val json = source.fetch()
             release = AppRelease.parse(json) ?: throw IOException("Release not ready")
-            prefs.edit().putString("release", json.toString()).putLong("checkedAt", now).apply()
+            prefs.edit { putString("release", json.toString()).putLong("checkedAt", now) }
             notifyAvailable(context, release)
             return release
         }
@@ -158,7 +159,7 @@ class ReleaseUpdates private constructor() {
                         .setOnlyAlertOnce(true)
                         .build()
                 )
-                preferences(context).edit().putString("notified", release.version).apply()
+                preferences(context).edit { putString("notified", release.version) }
             } catch (ignored: SecurityException) {
                 /* Permission can change between the check and posting. */
             }

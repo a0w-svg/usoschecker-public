@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -64,6 +65,9 @@ class ScheduleScrollView : ScrollView {
         return (onSwipe != null && axis == 1) || super.onInterceptTouchEvent(event)
     }
 
+    // Only a resolved swipe is consumed here. Taps reach super/child views, which perform
+    // their own accessible clicks; invoking performClick for a swipe would invent a click.
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val swipe = onSwipe
         if (swipe != null && axis == 1) {

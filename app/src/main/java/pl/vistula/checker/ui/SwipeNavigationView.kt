@@ -20,6 +20,7 @@ class SwipeNavigationView : BottomNavigationView {
     private var downX = 0f
     private var downY = 0f
     private var axis = 0
+    private var childTouchCancelled = false
 
     @JvmOverloads
     constructor(context: Context, attrs: AttributeSet? = null) : super(context, attrs) {
@@ -35,6 +36,19 @@ class SwipeNavigationView : BottomNavigationView {
     }
 
     fun setTabScrolling(scrolling: Boolean) { tabScrolling = scrolling }
+
+    fun requiredItemWidth(): Int {
+        var textWidth = 0
+        fun measureLabel(view: View) {
+            if (view is android.widget.TextView && view.text.isNotEmpty()) {
+                textWidth = maxOf(textWidth, kotlin.math.ceil(view.paint.measureText(view.text.toString())).toInt() +
+                    view.compoundPaddingLeft + view.compoundPaddingRight)
+            }
+            if (view is android.view.ViewGroup) repeat(view.childCount) { measureLabel(view.getChildAt(it)) }
+        }
+        measureLabel(this)
+        return textWidth + UiHelper.dp(context, 24)
+    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -61,6 +75,7 @@ class SwipeNavigationView : BottomNavigationView {
                 downX = event.x
                 downY = event.y
                 axis = 0
+                childTouchCancelled = false
             }
             MotionEvent.ACTION_POINTER_DOWN -> {
                 axis = 2
@@ -77,32 +92,31 @@ class SwipeNavigationView : BottomNavigationView {
                 }
             }
         }
-        val handled = super.dispatchTouchEvent(event)
-        if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) {
-            axis = 0
-        }
-        return handled
-    }
-
-    override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
-        return (!tabScrolling && onSwipe != null && axis != 0) || super.onInterceptTouchEvent(event)
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
         val swipe = if (tabScrolling) null else onSwipe
         if (swipe != null && axis != 0) {
+            // Cancel the pressed Material item once, then own the entire gesture.
+            // Changing screens on UP must not let the old item receive that same UP.
+            if (!childTouchCancelled) {
+                val cancel = MotionEvent.obtain(event)
+                cancel.action = MotionEvent.ACTION_CANCEL
+                super.dispatchTouchEvent(cancel)
+                cancel.recycle()
+                childTouchCancelled = true
+            }
             if (axis == 1 && event.actionMasked == MotionEvent.ACTION_UP) {
                 val dx = event.x - downX
                 if (abs(dx) >= UiHelper.dp(context, 48) && abs(dx) > abs(event.y - downY)) {
                     swipe.accept(if (dx < 0) 1 else -1)
                 }
             }
+            if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) axis = 0
             return true
         }
-        return super.onTouchEvent(event)
+        // Ordinary taps retain Material's click and accessibility behavior.
+        val handled = super.dispatchTouchEvent(event)
+        if (event.actionMasked == MotionEvent.ACTION_UP || event.actionMasked == MotionEvent.ACTION_CANCEL) axis = 0
+        return handled
     }
-
-    override fun performClick(): Boolean = super.performClick()
 }
 
 /** Material's horizontal menu uses only 80% of the bar for five items. Text-only pills need
@@ -111,6 +125,8 @@ class SwipeNavigationView : BottomNavigationView {
  */
 @SuppressLint("RestrictedApi")
 private class PillMenuView(context: Context) : BottomNavigationMenuView(context) {
+    private val textPosition = IntArray(2)
+    private val pillPosition = IntArray(2)
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
         repeat(childCount) { index ->
@@ -123,11 +139,17 @@ private class PillMenuView(context: Context) : BottomNavigationMenuView(context)
                 return null
             }
             val label = visibleLabel(inner) ?: return@repeat
+            // Active and inactive text use the same 12 sp style. Material's cached
+            // scale factors can outlive a font-scale change and clip inactive text.
+            label.scaleX = 1f
+            label.scaleY = 1f
             val layout = label.layout ?: return@repeat
-            val textPosition = IntArray(2); label.getLocationInWindow(textPosition)
-            val pillPosition = IntArray(2); indicator.getLocationInWindow(pillPosition)
+            label.getLocationInWindow(textPosition)
+            indicator.getLocationInWindow(pillPosition)
             val textCentre = textPosition[0] + label.compoundPaddingLeft + layout.getLineLeft(0) + layout.getLineWidth(0) / 2
-            val delta = pillPosition[0] + indicator.width / 2f - textCentre
+            // Inactive indicators are scaled by Material. Their window position includes
+            // that transform, so use their displayed width to keep the centre stable.
+            val delta = pillPosition[0] + indicator.width * indicator.scaleX / 2f - textCentre
             // Material's minimum indicator width adds space after a short iconless label.
             // Centre the actual text in that space without changing its size or hit target.
             if (abs(delta) > .5f) inner.translationX += delta
@@ -143,7 +165,13 @@ private class PillMenuView(context: Context) : BottomNavigationMenuView(context)
         var height = 0
         visible.forEachIndexed { index, child ->
             fun centreLabels(view: View) {
-                if (view is android.widget.TextView && view.gravity != android.view.Gravity.CENTER) view.gravity = android.view.Gravity.CENTER
+                if (view is android.widget.TextView) {
+                    if (view.gravity != android.view.Gravity.CENTER) view.gravity = android.view.Gravity.CENTER
+                    view.scaleX = 1f
+                    view.scaleY = 1f
+                    val size = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
+                    if (abs(view.textSize - size) > .1f) view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, size)
+                }
                 if (view is android.view.ViewGroup) repeat(view.childCount) { centreLabels(view.getChildAt(it)) }
             }
             centreLabels(child)

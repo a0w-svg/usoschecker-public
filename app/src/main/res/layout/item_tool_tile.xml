@@ -52,8 +52,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="16dp"
+        android:paddingEnd="0dp"
         android:importantForAccessibility="no"
-        android:text="›"
+        android:text="@string/design_chevron"
         android:textColor="@color/app_muted"
         android:textSize="22sp" />
 </LinearLayout>

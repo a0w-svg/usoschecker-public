@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.edit
 import android.content.DialogInterface
 import android.graphics.Color
 import android.widget.ArrayAdapter
@@ -57,7 +58,7 @@ class AttendanceScreenController private constructor() {
             } catch (e: JSONException) {
                 throw IllegalStateException(e)
             }
-            prefs.edit().putString("data", saved.toString()).apply()
+            prefs.edit { putString("data", saved.toString()) }
             val terms = ArrayList<String>()
             if (snapshot != null) {
                 terms.addAll(GradeSemesters.ordered(snapshot, LocalDate.now(UsosClient.ZONE)))
@@ -81,7 +82,7 @@ class AttendanceScreenController private constructor() {
                     else -> id
                 }
             }
-            prefs.edit().putString("term", activeTerm).apply()
+            prefs.edit { putString("term", activeTerm) }
             var activeType = prefs.getString("classType", "all") ?: "all"
             val types = LinkedHashSet<String>()
             types.add("all")
@@ -131,7 +132,7 @@ class AttendanceScreenController private constructor() {
                     val next = terms[i]
                     semesters.add(termLabels[i]).setCheckable(true).setChecked(next == activeTerm)
                         .setOnMenuItemClickListener {
-                            prefs.edit().putString("term", next).apply()
+                            prefs.edit { putString("term", next) }
                             requestRender.run()
                             true
                         }
@@ -141,7 +142,7 @@ class AttendanceScreenController private constructor() {
                     val next = typeValues[i]
                     classTypes.add(typeLabels[i]).setCheckable(true).setChecked(next == selectedType)
                         .setOnMenuItemClickListener {
-                            prefs.edit().putString("classType", next).apply()
+                            prefs.edit { putString("classType", next) }
                             requestRender.run()
                             true
                         }
@@ -262,7 +263,7 @@ class AttendanceScreenController private constructor() {
                                 lessons.remove(lessons.length() - 1)
                             }
                             finalSavedRef.put(code, item)
-                            prefs.edit().putString("data", finalSavedRef.toString()).apply()
+                            prefs.edit { putString("data", finalSavedRef.toString()) }
                             requestRender.run()
                         } catch (_: JSONException) {
                         }
@@ -281,7 +282,7 @@ class AttendanceScreenController private constructor() {
                             if (lessons == null) lessons = JSONArray()
                             item.put("lessons", lessons.put(""))
                             finalSavedRef.put(code, item)
-                            prefs.edit().putString("data", finalSavedRef.toString()).apply()
+                            prefs.edit { putString("data", finalSavedRef.toString()) }
                             requestRender.run()
                         } catch (_: JSONException) {
                         }
@@ -411,7 +412,7 @@ class AttendanceScreenController private constructor() {
             if (existing != null) {
                 builder.setNeutralButton(activity.getString(R.string.attendance_dialog_delete)) { _, _ ->
                     saved.remove(code)
-                    prefs.edit().putString("data", saved.toString()).apply()
+                    prefs.edit { putString("data", saved.toString()) }
                     onComplete.run()
                 }
             }
@@ -452,7 +453,7 @@ class AttendanceScreenController private constructor() {
                         if (!item.has("absences")) item.put("absences", 0)
                         if (code != null && code != c) saved.remove(code)
                         saved.put(c, item)
-                        prefs.edit().putString("data", saved.toString()).apply()
+                        prefs.edit { putString("data", saved.toString()) }
                         dialog.dismiss()
                         onComplete.run()
                     } catch (_: JSONException) {

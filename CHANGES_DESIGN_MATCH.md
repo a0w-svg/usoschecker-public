@@ -19,6 +19,14 @@ Android's pending document data now lives in a ViewModel; upload/export/calendar
 results use registered Activity Result contracts. Test fixtures use ActivityScenario.
 Gradle configuration uses the current DSL without changing the pinned library versions.
 
+Release and debug lint findings are resolved, with warnings treated as errors.
+Unused production resources were removed; legacy UI fixtures live only in QA variants.
+Widgets have localized labels and at least 11 sp text; sample account data is preview-only.
+Notification plurals support Polish, English and Ukrainian. All languages ship in the
+base bundle for offline switching, enforced by the release configuration check.
+Narrowly scoped lint exceptions explain swipe-only handlers, the postal-code hyphen,
+the transparent window background and the pinned Material navigation adapter.
+
 Verification includes the full production gate, secret scans, device regressions,
 large-text/layout checks and protected PR CI. Exact results and remaining platform
 limitations are recorded in VALIDATION.md and release-info.json before publication.

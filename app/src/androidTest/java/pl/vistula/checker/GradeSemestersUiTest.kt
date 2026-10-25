@@ -40,7 +40,7 @@ class GradeSemestersUiTest {
         return s
     }
 
-    private fun render(snapshot: Snapshot, query: String): LinearLayout {
+    private fun render(snapshot: Snapshot, query: String, showTests: Boolean = false): LinearLayout {
         val a = rule.activity
         val content = LinearLayout(a)
         GradesScreenController.render(
@@ -53,7 +53,7 @@ class GradeSemestersUiTest {
             "all",
             "name",
             query,
-            false,
+            showTests,
             {},
             {},
             {},
@@ -145,7 +145,8 @@ class GradeSemestersUiTest {
             snapshot.add(Record("repeated-old", "ocena", "Repeated course", "3", "", "", "old"))
             snapshot.add(Record("repeated-new", "ocena", "Repeated course", "5", "", "", "now"))
             snapshot.tests.add(CourseTestRecord("ambiguous", "", "Repeated course", "Ambiguous test", 3.0, 5.0, "", ""))
-            val content = render(snapshot, "")
+            assertNull(find(render(snapshot, ""), "Ambiguous test", false))
+            val content = render(snapshot, "", showTests = true)
             assertFalse(visible(find(content, "Ambiguous test", false)))
             find(content, rule.activity.getString(R.string.grades_unassigned_tests), true)!!.performClick()
             assertTrue(visible(find(content, "Ambiguous test", false)))

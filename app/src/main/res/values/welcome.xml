@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <string name="welcome_progress">Szybki start · %1$d z 2</string>
     <string name="welcome_title">Twój dzień na uczelni. W jednym miejscu.</string>
     <string name="welcome_intro">Plan, oceny i zmiany z USOS — zacznij od krótkiej konfiguracji albo obejrzyj demo.</string>

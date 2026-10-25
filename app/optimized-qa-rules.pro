@@ -16,3 +16,9 @@
 # The separate test APK reads non-final resource fields from the app at runtime.
 -keep class pl.vistula.checker.R$id { *; }
 -keep class pl.vistula.checker.R$string { *; }
+# The separately optimized instrumentation APK enters demo through this fixture hook.
+-keepclassmembers class pl.vistula.checker.MainActivity {
+    public void setDemo(boolean);
+    public void navigate(int);
+    public void finishWelcome(boolean, boolean);
+}

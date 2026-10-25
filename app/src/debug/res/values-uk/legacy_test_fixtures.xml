@@ -1,0 +1,12 @@
+<resources>
+<string name="hero_heading">Гарний день починається тут.</string>
+<string name="quick_refresh">🔄 Оновити</string>
+<string name="classes_upcoming">Найближчі заняття</string>
+    <string name="monitoring_title">Стан моніторингу</string>
+    <string name="grades_filter_expand">Фільтри та сортування</string>
+<string name="grades_filter_collapse">Приховати фільтри та сортування</string>
+<string name="news_refresh_btn">Оновити оголошення з USOS</string>
+    <string name="schedule_info">Інфо</string>
+    <string name="home_week_title">Найближчі 7 днів</string>
+    <string name="cards_physical_title">СТУДЕНТСЬКИЙ КВИТОК · ДАНІ USOS</string>
+</resources>

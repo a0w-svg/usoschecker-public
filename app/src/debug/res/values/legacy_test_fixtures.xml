@@ -1,0 +1,12 @@
+<resources>
+<string name="hero_heading">Dobry dzień zaczyna się tutaj.</string>
+<string name="quick_refresh">🔄 Odśwież</string>
+<string name="classes_upcoming">Najbliższe zajęcia</string>
+    <string name="monitoring_title">Stan monitorowania</string>
+    <string name="grades_filter_expand">Filtry i sortowanie</string>
+<string name="grades_filter_collapse">Ukryj filtry i sortowanie</string>
+<string name="news_refresh_btn">Odśwież komunikaty z USOS</string>
+    <string name="schedule_info">Info</string>
+    <string name="home_week_title">Najbliższe 7 dni</string>
+    <string name="cards_physical_title">LEGITYMACJA · DANE USOS</string>
+</resources>

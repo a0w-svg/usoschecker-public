@@ -202,7 +202,7 @@ class ScheduleInteractionRegressionTest {
         ).check { view, error ->
             if (error != null) throw error
             assertTrue(view.height >= UiHelper.dp(rule.activity, 64))
-            assertEquals(android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 18f, rule.activity.resources.displayMetrics), (view as TextView).textSize, .5f)
+            assertEquals(android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 14f, rule.activity.resources.displayMetrics), (view as TextView).textSize, .5f)
         }
     }
 

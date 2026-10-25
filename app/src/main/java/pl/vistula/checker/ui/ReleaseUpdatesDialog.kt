@@ -145,7 +145,7 @@ class ReleaseUpdatesDialog private constructor() {
                             )
                             render(activity, status, latest, checked != null)
                             if (checked == null) {
-                                status.text = activity.getString(R.string.updates_error) + "\n\n" + status.text
+                                status.text = activity.getString(R.string.design_paragraphs, activity.getString(R.string.updates_error), status.text)
                             }
                         }
                     }
@@ -156,9 +156,11 @@ class ReleaseUpdatesDialog private constructor() {
 
         private fun render(context: Context, status: TextView, release: AppRelease?, fresh: Boolean) {
             if (release != null && release.newerThan(BuildConfig.VERSION_NAME)) {
-                status.text = context.getString(R.string.updates_available, release.version) + "\n\n" +
-                    (if (release.notes.isBlank()) context.getString(R.string.updates_notes_missing) else release.notes) +
-                    (if (fresh) "" else "\n\n" + context.getString(R.string.updates_cached))
+                val notes = release.notes.ifBlank { context.getString(R.string.updates_notes_missing) }
+                val message = context.getString(R.string.design_paragraphs,
+                    context.getString(R.string.updates_available, release.version), notes)
+                status.text = if (fresh) message else context.getString(R.string.design_paragraphs,
+                    message, context.getString(R.string.updates_cached))
             } else {
                 status.text = context.getString(if (fresh) R.string.updates_current else R.string.updates_not_checked)
             }

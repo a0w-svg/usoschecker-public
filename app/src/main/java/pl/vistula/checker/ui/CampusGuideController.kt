@@ -1,8 +1,8 @@
 package pl.vistula.checker.ui
 
+import androidx.core.net.toUri
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.widget.LinearLayout
 import pl.vistula.checker.MainActivity
 import pl.vistula.checker.R
@@ -34,7 +34,7 @@ class CampusGuideController private constructor() {
                         try {
                             val mapIntent = Intent(
                                 Intent.ACTION_VIEW,
-                                Uri.parse("geo:52.158145,21.034326?q=Akademia+Finansów+i+Biznesu+Vistula,+ul.+Stokłosy+3,+Warszawa")
+                                "geo:52.158145,21.034326?q=Akademia+Finansów+i+Biznesu+Vistula,+ul.+Stokłosy+3,+Warszawa".toUri()
                             )
                             activity.startActivity(mapIntent)
                         } catch (_: Exception) {
@@ -66,7 +66,7 @@ class CampusGuideController private constructor() {
                     activity.getString(R.string.campus_dziekanat_call),
                     {
                         try {
-                            activity.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:+48224572300")))
+                            activity.startActivity(Intent(Intent.ACTION_DIAL, "tel:+48224572300".toUri()))
                         } catch (_: Exception) {
                         }
                     },
@@ -79,7 +79,7 @@ class CampusGuideController private constructor() {
                     activity.getString(R.string.campus_dziekanat_email),
                     {
                         try {
-                            activity.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:dziekanat@vistula.edu.pl")))
+                            activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:dziekanat@vistula.edu.pl".toUri()))
                         } catch (_: Exception) {
                         }
                     },
@@ -104,7 +104,7 @@ class CampusGuideController private constructor() {
                     activity.getString(R.string.campus_finanse_email),
                     {
                         try {
-                            activity.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:finanse@vistula.edu.pl")))
+                            activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:finanse@vistula.edu.pl".toUri()))
                         } catch (_: Exception) {
                         }
                     },
@@ -121,7 +121,7 @@ class CampusGuideController private constructor() {
                     activity.getString(R.string.campus_library_email),
                     {
                         try {
-                            activity.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:biblioteka@vistula.edu.pl")))
+                            activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:biblioteka@vistula.edu.pl".toUri()))
                         } catch (_: Exception) {
                         }
                     },
@@ -152,7 +152,7 @@ class CampusGuideController private constructor() {
                     activity.getString(R.string.campus_it_email),
                     {
                         try {
-                            activity.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:pomocit@vistula.edu.pl")))
+                            activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:pomocit@vistula.edu.pl".toUri()))
                         } catch (_: Exception) {
                         }
                     },

@@ -39,7 +39,9 @@ def main():
             if not shutil.which('tesseract'):
                 raise RuntimeError('The desktop smoke test requires tesseract for visible-state assertions')
             def visible_text(name):
-                result = subprocess.run(['tesseract', str(profile / name), 'stdout'], check=True,
+                # The prototype has independent columns and a small account header.
+                # Sparse-text segmentation retains that header instead of treating it as noise.
+                result = subprocess.run(['tesseract', str(profile / name), 'stdout', '--psm', '11'], check=True,
                                         capture_output=True, text=True, timeout=20)
                 return ' '.join(result.stdout.lower().split())
             if 'personal desktop fixture' not in visible_text('personal-before.png'):

@@ -51,14 +51,29 @@ class ProductionReadinessTest {
     @Before
     fun qaOnly() {
         Assume.assumeTrue(rule.activity.packageName.endsWith(".qa"))
+        val deadline = SystemClock.uptimeMillis() + 10_000
+        var loading = true
+        while (loading && SystemClock.uptimeMillis() < deadline) {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                loading = rule.activity.findViewById<View>(R.id.progress_text).visibility != View.GONE
+            }
+            if (loading) SystemClock.sleep(50)
+        }
+        assertFalse("Initial account loading must finish before navigation", loading)
         // Navigation tests begin after the optional first-run guide.
-        InstrumentationRegistry.getInstrumentation().runOnMainSync { rule.activity.finishWelcome(false, false) }
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            rule.activity.finishWelcome(false, false)
+            rule.activity.setDemo(true)
+            rule.activity.navigate(0)
+        }
         try {
             val now = SystemClock.uptimeMillis()
             val cancel = MotionEvent.obtain(now, now, MotionEvent.ACTION_CANCEL, 0f, 0f, 0)
             InstrumentationRegistry.getInstrumentation().uiAutomation.injectInputEvent(cancel, true)
             cancel.recycle()
         } catch (ignored: Throwable) {}
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        InstrumentationRegistry.getInstrumentation().uiAutomation.waitForIdle(200, 5000)
     }
 
     @Test
@@ -129,7 +144,8 @@ class ProductionReadinessTest {
                         destination = candidate
                     }
                 }
-                assertNotNull("Missing destination: $name", destination)
+                assertNotNull("Missing destination: $name; visible destinations: " +
+                    descendants(content).mapNotNull { it.contentDescription?.toString() }.joinToString(), destination)
                 assertTrue(destination!!.performClick())
                 assertFalse("Destination did not open: $name", destination.isAttachedToWindow)
             }

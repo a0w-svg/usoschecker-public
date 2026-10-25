@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.edit
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -266,9 +267,9 @@ class ApiExplorerController private constructor() {
             favorite.setOnClickListener {
                 if (!favorites.remove(methodName)) favorites.add(methodName)
                 activity.getSharedPreferences("api_catalog", Context.MODE_PRIVATE)
-                    .edit()
-                    .putStringSet("favorites", HashSet(favorites))
-                    .apply()
+                    .edit {
+                        putStringSet("favorites", HashSet(favorites))
+                    }
                 favorite.text = if (favorites.contains(methodName)) {
                     activity.getString(R.string.api_btn_fav_remove)
                 } else {

@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.edit
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -215,7 +216,7 @@ class UiHelper private constructor() {
             }
             toggle.setOnClickListener {
                 expanded = !expanded
-                prefs.edit().putBoolean(key, expanded).apply()
+                prefs.edit { putBoolean(key, expanded) }
                 update()
             }
             group.addView(toggle)

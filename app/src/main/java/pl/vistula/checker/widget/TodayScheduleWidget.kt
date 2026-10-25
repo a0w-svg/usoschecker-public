@@ -64,7 +64,7 @@ class TodayScheduleWidget : AppWidgetProvider() {
                 context,
                 101,
                 openApp,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_root, pi)
 
@@ -74,7 +74,7 @@ class TodayScheduleWidget : AppWidgetProvider() {
                 context,
                 102,
                 refreshIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_refresh_button, refreshPi)
 

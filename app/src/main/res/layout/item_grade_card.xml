@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="?attr/selectableItemBackground"
+    android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
     <LinearLayout
@@ -50,7 +50,7 @@
             android:layout_width="20dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="›"
+            android:text="@string/design_chevron"
             android:textColor="@color/app_faint"
             android:textSize="22sp"
             android:gravity="end"

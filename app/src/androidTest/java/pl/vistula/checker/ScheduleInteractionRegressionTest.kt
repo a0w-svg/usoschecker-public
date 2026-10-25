@@ -232,11 +232,11 @@ class ScheduleInteractionRegressionTest {
             val a = rule.activity
             val card = a.findViewById<View>(R.id.schedule_current_lesson)
             assertNotNull(card)
-            val room = card.findViewById<TextView>(R.id.lesson_item_time)
+            val room = card.findViewById<TextView>(R.id.lesson_item_room)
             assertEquals(View.VISIBLE, room.visibility)
             assertTrue(room.text.toString().contains(a.getString(R.string.lesson_room_label, "101")))
-            assertEquals(View.GONE, card.findViewById<View>(R.id.lesson_item_room).visibility)
-            assertTrue(room.textSize >= android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 13f, a.resources.displayMetrics) - .5f)
+            assertFalse(card.findViewById<TextView>(R.id.lesson_item_time).text.toString().contains(a.getString(R.string.lesson_room_label, "101")))
+            assertTrue(room.textSize >= android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 14f, a.resources.displayMetrics) - .5f)
             assertFalse(card.findViewById<TextView>(R.id.lesson_item_details).text.toString().contains(a.getString(R.string.lesson_room_label, "101")))
             val bar = a.findViewById<View>(R.id.schedule_more).parent as ViewGroup
             for (i in 0 until bar.childCount) {

@@ -8,6 +8,12 @@ import pl.vistula.checker.core.Record
 import pl.vistula.checker.ui.compose.GradeTable
 
 class GradeTableTest {
+    @Test fun readableLabelsExpandKnownTypesAndPreserveAdditionalForms() {
+        assertEquals("Wykład", GradeTable.fullLabel("lecture", "pl"))
+        assertEquals("Exercises", GradeTable.fullLabel("exercises", "en"))
+        assertEquals("Лабораторна", GradeTable.fullLabel("lab", "uk"))
+        assertEquals("Projekt", GradeTable.fullLabel("Projekt", "pl"))
+    }
     private fun grade(id: String, type: String, value: String, session: Int = 1) =
         Record(id, "ocena", "Course", value, "", "2026Z").also {
             it.metadata.put("classType", type).put("sessionNumber", session)

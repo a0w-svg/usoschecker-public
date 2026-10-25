@@ -1,6 +1,4 @@
-• Dokończony interfejs prototypu Kaydjen na Androidzie i desktopie: spokojne powierzchnie, grupowane listy i turkusowy akcent najbliższych zajęć.
-• Naprawiona nawigacja: pełne etykiety, poprawna aktywna karta, przewijanie przy dużej czcionce i właściwy odstęp od treści oraz pasków systemowych.
-• Oceny w wyrównanych kolumnach form zajęć; zachowane poprawki, dodatkowe typy ocen oraz pełne szczegóły przedmiotu.
-• Plan z paskiem tygodnia i kompaktowymi wierszami; wyszukiwanie, filtry, eksport i szczegóły nadal dostępne.
-• Pogrupowany ekran Więcej i czytelniejsza historia zmian, z dostępem do wszystkich dotychczasowych narzędzi.
-• Poprawione ostrzeżenia lint, tłumaczenia liczebników i czytelność widżetów.
+• Czytelniejsze oceny: większe wartości, pełne nazwy form zajęć i więcej miejsca na nazwę przedmiotu.
+• Na telefonie oceny są ułożone pod przedmiotem, z etykietami przy każdej wartości. Układ dostosowuje się do dużej czcionki.
+• W planie godziny, nazwa przedmiotu i sala mają osobne miejsca. Forma zajęć jest widoczna na liście.
+• Większe odstępy i mocniejsza hierarchia tekstu na Androidzie i desktopie.

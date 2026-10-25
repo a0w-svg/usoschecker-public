@@ -136,8 +136,15 @@ Nie uznawaj błędu konfiguracji skanera ani braku wyników za potwierdzenie bra
 
 ## Weryfikacja desktopu
 
-Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.5.1`, Android
-`versionCode` 17). Z pełnym JDK 21 i SDK Android 37:
+Wydanie 1.5.2 poprawia czytelność ocen i planu na Androidzie i desktopie. Pełne
+nazwy form zajęć oraz większe oceny mają własne miejsce pod przedmiotem na wąskim
+ekranie; szeroki desktop zachowuje wyrównane kolumny. Godziny, nazwa przedmiotu
+i sala są rozdzielone, a rodzaj zajęć jest widoczny bez otwierania szczegółów.
+Regresja obejmuje pełne etykiety ocen i osobne pole sali. Test okna desktopowego
+sprawdza etykiety ocen oraz zachowuje zrzuty obu ekranów w jasnym i ciemnym motywie.
+
+Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.5.2`, Android
+`versionCode` 18). Z pełnym JDK 21 i SDK Android 37:
 
 ```sh
 bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb

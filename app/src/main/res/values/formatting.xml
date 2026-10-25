@@ -2,7 +2,6 @@
     <!-- Formatting symbols do not contain language-specific words. -->
     <string name="design_chevron" translatable="false">›</string>
     <string name="design_toggle" translatable="false">%1$s %2$s</string>
-    <string name="design_inline_meta" translatable="false">%1$s · %2$s</string>
     <string name="design_paragraphs" translatable="false">%1$s\n\n%2$s</string>
     <string name="widget_placeholder" translatable="false">—</string>
 </resources>

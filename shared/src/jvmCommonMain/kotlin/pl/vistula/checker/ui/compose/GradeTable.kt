@@ -36,4 +36,14 @@ object GradeTable {
     fun values(rows: List<Record>, column: String, snapshot: Snapshot?): String =
         rows.filter { key(it, snapshot) == column }
             .joinToString(" / ") { GradeBrowser.symbol(it) }.ifEmpty { "—" }
+
+    fun fullLabel(key: String, language: String): String = when (key) {
+        "lecture" -> toolText(language, "Wykład", "Lecture", "Лекція")
+        "exercises" -> toolText(language, "Ćwiczenia", "Exercises", "Практичні")
+        "lab" -> toolText(language, "Laboratorium", "Laboratory", "Лабораторна")
+        "Ocena z protokołu przedmiotu" -> toolText(language, "Ocena końcowa", "Final grade", "Підсумкова оцінка")
+        "Ocena z protokołu zajęć" -> toolText(language, "Ocena z zajęć", "Class grade", "Оцінка за заняття")
+        "Typ zajęć niepodany" -> toolText(language, "Pozostałe", "Other", "Інші")
+        else -> key
+    }
 }

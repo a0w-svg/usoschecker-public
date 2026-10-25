@@ -1035,22 +1035,38 @@ private fun ScheduleLessonCard(
     val building = r.optMeta("building")
     val lecturers = r.optMeta("lecturers")
     val group = r.optMeta("groupNumber")
-    val sub = listOfNotNull(
-        if (showDate) lesson.start.toLocalDate().toString() else null,
-        "${lesson.start.format(TIME_FMT)}–${lesson.end.format(TIME_FMT)}",
-        room.takeIf { it.isNotEmpty() }?.let { toolText(strings.languageCode, "Sala $it", "Room $it", "Аудиторія $it") },
-        if (lesson.tentative()) toolText(strings.languageCode, "Termin orientacyjny", "Tentative time", "Орієнтовний час") else null
-    ).joinToString(" · ")
-    Column(Modifier.fillMaxWidth()) {
-        ItemRow(r.title, sub, onClick = onClick)
+    val time = "${lesson.start.format(TIME_FMT)}–${lesson.end.format(TIME_FMT)}"
+    @Composable fun subject() {
+        Text(r.title, fontSize = 17.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold, color = t.text)
+        if (room.isNotEmpty()) Text(toolText(strings.languageCode, "Sala $room", "Room $room", "Аудиторія $room"),
+            fontSize = 14.sp, lineHeight = 21.sp, color = t.text, modifier = Modifier.padding(top = 6.dp))
+        val description = listOfNotNull(classType.takeIf { it.isNotEmpty() },
+            if (lesson.tentative()) toolText(strings.languageCode, "Termin orientacyjny", "Tentative time", "Орієнтовний час") else null).joinToString(" · ")
+        if (description.isNotEmpty()) Text(description, fontSize = 13.sp, lineHeight = 20.sp, color = t.muted, modifier = Modifier.padding(top = 4.dp))
+    }
+    Column(Modifier.fillMaxWidth().background(if (highlighted) t.fillSoft else Color.Transparent)) {
+        BoxWithConstraints(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).padding(16.dp, 18.dp)) {
+            val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+            if (maxWidth < 520.dp * scale) Column {
+                if (showDate) Text(lesson.start.toLocalDate().toString(), fontSize = 13.sp, color = t.muted)
+                Text(time, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = t.text, modifier = Modifier.padding(bottom = 8.dp))
+                subject()
+            } else Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                Column(Modifier.width(112.dp * scale)) {
+                    if (showDate) Text(lesson.start.toLocalDate().toString(), fontSize = 13.sp, color = t.muted)
+                    Text(lesson.start.format(TIME_FMT), fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = t.text)
+                    Text(lesson.end.format(TIME_FMT), fontSize = 14.sp, color = t.muted, modifier = Modifier.padding(top = 4.dp))
+                }
+                Column(Modifier.weight(1f)) { subject() }
+            }
+        }
         if (highlighted) {
             val meta = listOfNotNull(
-                classType.takeIf { it.isNotEmpty() },
                 building.takeIf { it.isNotEmpty() },
                 lecturers.takeIf { it.isNotEmpty() },
                 group.takeIf { it.isNotEmpty() }?.let { "Grupa $it" }
             ).joinToString(" · ")
-            if (meta.isNotEmpty()) Text(meta, fontSize = 13.sp, color = t.muted, modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp))
+            if (meta.isNotEmpty()) Text(meta, fontSize = 14.sp, lineHeight = 21.sp, color = t.muted, modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 18.dp))
         }
     }
 }
@@ -1103,7 +1119,7 @@ fun GradesScreen(
             Box(Modifier.weight(1f)) {
                 TextButton(onClick = { termMenu = true }) {
                     Text((snapshot?.terms?.get(selectedTerm)?.name ?: selectedTerm).ifEmpty { strings.filterAllSemesters } + "  ⌄",
-                        color = t.text, fontSize = 13.sp)
+                        color = t.text, fontSize = 15.sp)
                 }
                 DropdownMenu(expanded = termMenu, onDismissRequest = { termMenu = false }) {
                     (listOf("") + termOrder).forEach { term ->
@@ -1142,19 +1158,21 @@ fun GradesScreen(
         if (groups.isNotEmpty()) {
             // Extra class types get their own columns; scroll the whole table so headings stay aligned.
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                val tableWidth = maxOf(maxWidth, 160.dp + 52.dp * columns.size * androidx.compose.ui.platform.LocalDensity.current.fontScale)
+                val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+                val stacked = !isWide || maxWidth < 640.dp * scale
+                val tableWidth = if (stacked) maxWidth else maxOf(maxWidth, 240.dp + 112.dp * columns.size * scale)
                 Column(Modifier.horizontalScroll(rememberScrollState()).width(tableWidth)) {
-                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (!stacked) Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                         Spacer(Modifier.weight(1f))
                         columns.forEach { column ->
-                            Text(GradeTable.label(column, strings.languageCode), Modifier.width(52.dp * androidx.compose.ui.platform.LocalDensity.current.fontScale),
-                                color = t.muted, fontSize = 11.sp, textAlign = TextAlign.Center)
+                            Text(GradeTable.fullLabel(column, strings.languageCode), Modifier.width(112.dp * scale),
+                                color = t.muted, fontSize = 13.sp, lineHeight = 18.sp, textAlign = TextAlign.Center)
                         }
                     }
                     Tray {
                         groups.forEachIndexed { index, group ->
                             if (index > 0) TrayDivider()
-                            GradeGroupCard(group, snapshot, columns, strings, selectedTerm.isEmpty()) { selectedGroup = if (selectedGroup == group) null else group }
+                            GradeGroupCard(group, snapshot, columns, strings, selectedTerm.isEmpty(), stacked) { selectedGroup = if (selectedGroup == group) null else group }
                             if (selectedGroup == group) GradeGroupDetailCard(group, snapshot, strings) { selectedGroup = null }
                         }
                     }
@@ -1231,20 +1249,37 @@ fun GradesScreen(
 }
 
 @Composable
-private fun GradeGroupCard(group: List<Record>, snapshot: Snapshot?, columns: List<String>, strings: UiStrings, showTerm: Boolean, onClick: () -> Unit) {
+private fun GradeGroupCard(group: List<Record>, snapshot: Snapshot?, columns: List<String>, strings: UiStrings, showTerm: Boolean, stacked: Boolean, onClick: () -> Unit) {
     val first = group.firstOrNull() ?: return
     val t = VistulaDesign.tokens
-    Row(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).heightIn(min = 64.dp)
-        .padding(horizontal = 16.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(first.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = t.text)
+    val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+    @Composable fun course() {
+            Text(first.title, fontSize = 17.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold, color = t.text)
             if (showTerm && first.term.isNotEmpty()) Text(first.term, fontSize = 12.sp, color = t.muted)
-        }
-        columns.forEach { column ->
-            Text(GradeTable.values(group, column, snapshot),
-                Modifier.width(52.dp * androidx.compose.ui.platform.LocalDensity.current.fontScale)
-                    .semantics { contentDescription = GradeTable.label(column, strings.languageCode) + ": " + GradeTable.values(group, column, snapshot) },
-                fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = t.text, textAlign = TextAlign.Center)
+    }
+    @Composable fun grade(column: String, modifier: Modifier) {
+        Text(GradeTable.values(group, column, snapshot),
+            modifier.semantics { contentDescription = GradeTable.fullLabel(column, strings.languageCode) + ": " + GradeTable.values(group, column, snapshot) },
+            fontSize = if (stacked) 20.sp else 18.sp, lineHeight = 27.sp, fontWeight = FontWeight.SemiBold, color = t.text, textAlign = TextAlign.Center)
+    }
+    Column(Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick).padding(16.dp)) {
+        if (stacked) {
+            course()
+            val perRow = if (scale > 1.3f) 2 else 3
+            columns.chunked(perRow).forEach { chunk ->
+                Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    chunk.forEach { column ->
+                        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(GradeTable.fullLabel(column, strings.languageCode), fontSize = 13.sp, lineHeight = 18.sp, minLines = 2, color = t.muted, textAlign = TextAlign.Center)
+                            grade(column, Modifier.fillMaxWidth())
+                        }
+                    }
+                    repeat(perRow - chunk.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+        } else Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f).padding(end = 16.dp)) { course() }
+            columns.forEach { column -> grade(column, Modifier.width(112.dp * scale)) }
         }
     }
 }

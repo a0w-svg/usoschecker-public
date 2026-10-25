@@ -38,18 +38,18 @@ def main():
                 raise RuntimeError('Packaged desktop application exited during the smoke test')
             if not shutil.which('tesseract'):
                 raise RuntimeError('The desktop smoke test requires tesseract for visible-state assertions')
-            def visible_text(name):
+            def visible_text(name, segmentation='11'):
                 # The prototype has independent columns and a small account header.
                 # Sparse-text segmentation retains that header instead of treating it as noise.
-                result = subprocess.run(['tesseract', str(profile / name), 'stdout', '--psm', '11'], check=True,
+                result = subprocess.run(['tesseract', str(profile / name), 'stdout', '--psm', segmentation], check=True,
                                         capture_output=True, text=True, timeout=20)
                 return ' '.join(result.stdout.lower().split())
-            before_text = visible_text('personal-before-header.png')
+            before_text = visible_text('personal-before-header.png', '6')
             if 'personal desktop fixture' not in before_text:
                 raise RuntimeError('The fixture account did not load in the packaged application: ' + before_text)
             if 'demo' not in visible_text('demo.png') or 'not connected to usos' in visible_text('demo.png'):
                 raise RuntimeError('Demo was not recognized as an isolated demo account')
-            after_text = visible_text('personal-after-header.png')
+            after_text = visible_text('personal-after-header.png', '6')
             if 'personal desktop fixture' not in after_text:
                 raise RuntimeError('Leaving demo did not restore the saved account: ' + after_text)
             schedule_text = re.sub(r'[^a-z]', '', visible_text('schedule-repeat.png'))

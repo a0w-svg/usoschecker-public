@@ -27,12 +27,20 @@ public class DesktopSmoke {
         if (name.startsWith("personal-")) {
             // The prototype's account caption is 13 px. Enlarge its region for OCR;
             // retain the original full-resolution capture for visual diagnostics.
-            int width = Math.min(600, image.getWidth()), height = Math.min(180, image.getHeight());
-            BufferedImage header = new BufferedImage(width * 3, height * 3, BufferedImage.TYPE_INT_RGB);
+            int left = image.getWidth(), top = image.getHeight();
+            // xvfb has a black desktop. Locate the application surface before cropping
+            // so neither the desktop border nor navigation pills affect segmentation.
+            for (int y = 0; y < image.getHeight(); y++) for (int x = 0; x < image.getWidth(); x++) {
+                if ((image.getRGB(x, y) & 0x00ffffff) != 0) { left = Math.min(left, x); top = Math.min(top, y); }
+            }
+            if (left == image.getWidth()) throw new AssertionError("No visible desktop application surface");
+            int x = left + 16, y = top + 24;
+            int width = Math.min(280, image.getWidth() - x), height = Math.min(60, image.getHeight() - y);
+            BufferedImage header = new BufferedImage(width * 4, height * 4, BufferedImage.TYPE_INT_RGB);
             Graphics2D graphics = header.createGraphics();
             try {
                 graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                graphics.drawImage(image.getSubimage(0, 0, width, height), 0, 0, width * 3, height * 3, null);
+                graphics.drawImage(image.getSubimage(x, y, width, height), 0, 0, width * 4, height * 4, null);
             } finally { graphics.dispose(); }
             ImageIO.write(header, "png", folder.resolve(name + "-header.png").toFile());
         }

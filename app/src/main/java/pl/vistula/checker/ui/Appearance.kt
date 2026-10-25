@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.edit
 import android.app.UiModeManager
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
@@ -47,9 +48,9 @@ class Appearance private constructor() {
         fun setMode(context: Context, mode: Int) {
             require(supported(mode)) { "Nieprawidłowy tryb wyglądu." }
             context.getSharedPreferences("appearance", Context.MODE_PRIVATE)
-                .edit()
-                .putInt("nightMode", mode)
-                .apply()
+                .edit {
+                    putInt("nightMode", mode)
+                }
             apply(context)
         }
 

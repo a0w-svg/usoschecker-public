@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <style name="AppThemeBase" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="materialAlertDialogTheme">@style/NeutralAlertDialogTheme</item>
         <item name="android:textColorLink">@color/app_ink</item>
@@ -24,7 +24,7 @@
         <item name="colorOnSurfaceVariant">@color/app_muted</item>
         <item name="colorError">@color/app_error</item>
         <item name="android:colorBackground">@color/app_background</item>
-        <item name="android:windowBackground">@color/app_background</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorAccent">@color/app_accent</item>
         <item name="android:windowLightStatusBar">@bool/app_light_system_bars</item>
         <item name="android:windowLightNavigationBar">@bool/app_light_system_bars</item>
@@ -44,17 +44,17 @@
     </style>
     <style name="AppTheme" parent="AppThemeBase" />
     <style name="PrototypeNavigationText" parent="TextAppearance.Material3.LabelMedium">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">12sp</item>
         <item name="android:textStyle">normal</item>
     </style>
     <style name="PrototypeNavigationIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/app_secondary_container</item>
         <item name="android:height">48dp</item>
         <item name="expandedHeight">48dp</item>
-        <item name="expandedWidth">match_parent</item>
+        <item name="expandedWidth">wrap_content</item>
         <item name="expandedMarginHorizontal">2dp</item>
-        <item name="expandedActiveIndicatorPaddingStart">4dp</item>
-        <item name="expandedActiveIndicatorPaddingEnd">4dp</item>
+        <item name="expandedActiveIndicatorPaddingStart">8dp</item>
+        <item name="expandedActiveIndicatorPaddingEnd">8dp</item>
         <item name="shapeAppearance">@style/PrototypePillShape</item>
     </style>
     <style name="PrototypePillShape">

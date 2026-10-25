@@ -256,7 +256,7 @@ class UsosClientTest {
             assertTrue(failure.retryable)
             assertFalse(failure.authorization)
             assertTrue(failure.retryAt >= before + 60000)
-            assertFalse(failure.message!!.contains("private-token"))
+            assertFalse(failure.message.contains("private-token"))
         }
         assertTrue(connection.disconnected)
     }

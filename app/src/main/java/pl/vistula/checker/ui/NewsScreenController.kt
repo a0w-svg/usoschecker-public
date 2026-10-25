@@ -78,7 +78,7 @@ class NewsScreenController private constructor() {
                 UiHelper.note(activity, content, activity.getString(R.string.services_refresh_error,
                     activity.getString(R.string.error_operation)), activity.getColor(R.color.app_error))
             }
-            val articles = if (useCache) (0 until cached!!.length()).map { NewsArticle.from(cached.optJSONObject(it)) }
+            val articles = if (useCache) (0 until cached.length()).map { NewsArticle.from(cached.optJSONObject(it)) }
                 else snapshot?.news ?: emptyList()
             if (useCache) {
                 val university = entry.getJSONObject("data").optString("source") == "university"

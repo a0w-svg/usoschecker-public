@@ -1,13 +1,7 @@
-<resources>
-    <string name="dashboard_title">Twój dzień na uczelni</string>
-    <string name="dashboard_plan">Plan dnia</string>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
+<string name="dashboard_plan">Plan dnia</string>
     <string name="dashboard_grades">Ostatnie oceny</string>
     <string name="dashboard_tasks">Zadania i terminy</string>
     <string name="dashboard_news">Komunikaty</string>
-    <string name="dashboard_today">Plan na dziś</string>
-    <string name="dashboard_full_plan">Otwórz cały plan</string>
-    <string name="dashboard_no_data">Brak zapisanych danych. Połącz konto i odśwież lub uruchom demo.</string>
-    <string name="dashboard_no_classes">Brak zajęć na dziś w zapisanym planie.</string>
-    <string name="dashboard_no_grades">Nie zapisano jeszcze żadnych ocen.</string>
-    <string name="dashboard_all_grades">Zobacz wszystkie oceny</string>
+<string name="dashboard_no_data">Brak zapisanych danych. Połącz konto i odśwież lub uruchom demo.</string>
 </resources>

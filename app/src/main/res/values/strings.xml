@@ -1,11 +1,8 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <string name="grades_no_grade">Brak ocen</string>
     <string name="grades_semester_no_grades">Brak ocen w tym semestrze.</string>
-    <string name="grades_semester_overview">Oceny według semestrów. Rozwiń wybrany semestr, aby zobaczyć szczegóły.</string>
-    <string name="grades_semester_unknown">Bez przypisanego semestru</string>
-    <string name="grades_semester_current">%1$s · aktualny semestr</string>
-    <string name="grades_semester_latest_hint">Brak dat aktualnego semestru w zapisanych danych. Rozwinięto najnowszy dostępny semestr.</string>
-    <string name="grades_semester_toggle">%1$s · wpisy: %2$d · %3$s</string>
+<string name="grades_semester_unknown">Bez przypisanego semestru</string>
+<string name="grades_semester_toggle">%1$s · wpisy: %2$d · %3$s</string>
     <string name="grades_semester_expand">Rozwiń</string>
     <string name="grades_semester_collapse">Zwiń</string>
     <string name="grades_semester_empty">Brak ocen dla tego semestru przy wybranych filtrach.</string>
@@ -18,19 +15,19 @@
     <string name="notification_grade_removed">Usunięta ocena: %1$s</string>
     <string name="notification_grade_modified">Zmieniona ocena: %1$s</string>
     <string name="notification_grade_changes">Zmiany ocen w USOS (%1$d)</string>
-    <string name="notification_grade_changes_body">Wykryto %1$d zmian ocen. Sprawdź szczegóły.</string>
+    <plurals name="notification_grade_changes_body">
+        <item quantity="one">Wykryto %1$d zmianę ocen. Sprawdź szczegóły.</item>
+        <item quantity="few">Wykryto %1$d zmiany ocen. Sprawdź szczegóły.</item>
+        <item quantity="many">Wykryto %1$d zmian ocen. Sprawdź szczegóły.</item>
+        <item quantity="other">Wykryto %1$d zmiany ocen. Sprawdź szczegóły.</item>
+    </plurals>
     <string name="api_activation_hidden">Odpowiedź może zawierać token i hasło aktywacyjne mLegitymacji. Aby bezpiecznie je wyświetlić, otwórz ekran Legitymacje.</string>
     <string name="error_invalid_document_uri">Wybrany plik nie jest dostępny przez dostawcę dokumentów. Wybierz go ponownie w systemowej aplikacji Pliki.</string>
     <!-- App & General -->
-    <string name="app_name">Vistula</string>
-    <string name="app_subtitle">Twój dzień na uczelni</string>
-    <string name="app_assistant">Twój asystent uczelni</string>
-    <string name="menu_open">Otwórz menu</string>
-    <string name="loading">Wczytywanie…</string>
+<string name="loading">Wczytywanie…</string>
     <string name="sync_in_progress">Trwa wykonywanie operacji…</string>
     <string name="refresh_offline">Połącz konto z USOS, aby odświeżyć dane.</string>
-    <string name="choose_date_short">Data</string>
-    <string name="task_deleted">Zadanie usunięte</string>
+<string name="task_deleted">Zadanie usunięte</string>
     <string name="undo">Cofnij</string>
     <string name="background_check">Sprawdzanie w tle</string>
     <string name="selected_upload">Wybrano plik · rozmiar: %1$d B</string>
@@ -44,24 +41,14 @@
     <string name="nav_plan">Plan</string>
     <string name="nav_history">Zmiany</string>
     <string name="nav_more">Więcej</string>
-    <string name="nav_plan_full">Plan zajęć</string>
-    <string name="nav_history_full">Historia zmian</string>
-    <string name="nav_news">Komunikaty uczelni</string>
-    <string name="nav_attendance">Licznik nieobecności</string>
-    <string name="nav_gpa">Kalkulator średniej</string>
-    <string name="nav_payments">Płatności</string>
-    <string name="nav_tasks">Zadania</string>
-    <string name="nav_campus">Niezbędnik i Kampus</string>
-    <string name="nav_account">Ustawienia</string>
-    <string name="nav_api">Katalog API</string>
-
-    <!-- General Buttons & Actions -->
+<string name="nav_tasks">Zadania</string>
+<string name="nav_account">Ustawienia</string>
+<!-- General Buttons & Actions -->
     <string name="btn_close">Zamknij</string>
     <string name="btn_cancel">Anuluj</string>
     <string name="btn_ok">OK</string>
     <string name="btn_copy">Kopiuj</string>
-    <string name="btn_share">Udostępnij</string>
-    <string name="btn_save">Zapisz</string>
+<string name="btn_save">Zapisz</string>
     <string name="btn_refresh">Odśwież</string>
     <string name="btn_check_now">Sprawdź teraz</string>
     <string name="btn_simulate_changes">Symuluj zmiany</string>
@@ -75,66 +62,36 @@
     <string name="btn_more_options">Więcej opcji</string>
 
     <!-- Home Screen -->
-    <string name="hero_title">TWÓJ ASYSTENT UCZELNI</string>
-    <string name="hero_heading">Dobry dzień zaczyna się tutaj.</string>
-    <string name="quick_refresh">🔄 Odśwież</string>
-    <string name="quick_plan">📅 Mój plan</string>
-    <string name="quick_grades">🎓 Oceny</string>
-    <string name="quick_payments">💳 Płatności</string>
-    <string name="stat_grades">Oceny</string>
-    <string name="stat_today_classes">Dziś zajęcia</string>
-    <string name="stat_tasks">Zadania</string>
-    <string name="classes_ongoing">TRWAJĄ TERAZ</string>
-    <string name="classes_no_ongoing">Teraz nie masz zajęć według zapisanego planu.</string>
-    <string name="classes_upcoming">Najbliższe zajęcia</string>
-    <string name="classes_no_upcoming">Brak kolejnych zajęć w zapisanym planie</string>
+<string name="classes_ongoing">TRWAJĄ TERAZ</string>
+<string name="classes_no_upcoming">Brak kolejnych zajęć w zapisanym planie</string>
     <string name="academic_calendar_title">KALENDARZ AKADEMICKI</string>
     <string name="deadlines_upcoming">Najbliższe terminy</string>
-    <string name="monitoring_title">Stan monitorowania</string>
-    <string name="monitoring_enabled">Monitorowanie włączone</string>
-    <string name="monitoring_paused">Monitorowanie wstrzymane</string>
-    <string name="monitoring_demo">Podgląd demonstracyjny</string>
-    <string name="monitoring_demo_desc">Te dane służą do sprawdzenia działania aplikacji.</string>
-    <string name="monitoring_connect_desc">Zaloguj się przez stronę uczelni, aby śledzić swoje dane.</string>
-    <string name="monitoring_last_success">Ostatnie udane sprawdzenie</string>
-    <string name="monitoring_last_attempt">Ostatnia próba</string>
-    <string name="monitoring_fix_connection">Napraw połączenie konta</string>
-
-    <!-- Grades Screen -->
-    <string name="grades_heading">Twoje oceny</string>
-    <string name="grades_calc_button">Kalkulator średniej i symulator stypendium</string>
+<string name="monitoring_last_success">Ostatnie udane sprawdzenie</string>
+<!-- Grades Screen -->
+<string name="grades_calc_button">Kalkulator średniej i symulator stypendium</string>
     <string name="grades_summary_title">Podsumowanie ocen</string>
     <string name="grades_calc_goals">Kalkulator i cele</string>
     <string name="grades_share_report">📋 Udostępnij wykaz</string>
-    <string name="grades_filter_expand">Filtry i sortowanie</string>
-    <string name="grades_filter_collapse">Ukryj filtry i sortowanie</string>
-    <string name="grades_filter_reset">Wyczyść filtry ocen</string>
+<string name="grades_filter_reset">Wyczyść filtry ocen</string>
     <string name="grades_search_hint">Szukaj ocen…</string>
-    <string name="grades_search_desc">Szukaj ocen po przedmiocie, symbolu, komentarzu lub semestrze</string>
-    <string name="grades_no_data">Brak pobranych danych</string>
+<string name="grades_no_data">Brak pobranych danych</string>
     <string name="grades_no_match">Brak pasujących danych</string>
     <string name="grades_tests_heading">Sprawdziany i kolokwia</string>
     <string name="grades_refresh">Odśwież oceny</string>
 
     <!-- Schedule Screen -->
-    <string name="schedule_heading">Plan zajęć</string>
-    <string name="schedule_warsaw_zone">Godziny w strefie Warszawa</string>
+<string name="schedule_warsaw_zone">Godziny w strefie Warszawa</string>
     <string name="schedule_btn_today">Dzisiaj</string>
     <string name="schedule_btn_choose_date">Wybierz datę</string>
     <string name="schedule_btn_next_class">Kolejny dzień z zajęciami</string>
     <string name="schedule_export_ics">Eksportuj do kalendarza (.ics)</string>
     <string name="schedule_share_plan">Udostępnij plan</string>
     <string name="schedule_no_classes">Brak zaplanowanych zajęć w wybranym dniu.</string>
-    <string name="schedule_day_total">Łącznie zajęć: %1$d</string>
-
-    <!-- Tools / More Screen -->
-    <string name="tools_title">Narzędzia Studenta</string>
-    <string name="tools_subtitle">Kompletny zestaw funkcji wspomagających studia w Vistuli</string>
-    <string name="section_studies">Studia</string>
+<!-- Tools / More Screen -->
+<string name="section_studies">Studia</string>
     <string name="section_university">Uczelnia</string>
     <string name="section_app">Aplikacja</string>
-    <string name="tools_privacy_note">Wszystkie Twoje notatki, zadania i liczniki są przechowywane w bezpiecznym sejfie na Twoim telefonie.</string>
-    <string name="tool_gpa_title">Średnia ocen</string>
+<string name="tool_gpa_title">Średnia ocen</string>
     <string name="tool_gpa_desc">Obliczenia i symulacja celu</string>
     <string name="tool_attendance_title">Nieobecności</string>
     <string name="tool_attendance_desc">Własny licznik obecności</string>
@@ -152,18 +109,11 @@
     <string name="tool_api_desc">Zaawansowane narzędzia API</string>
 
     <!-- Account & OAuth -->
-    <string name="account_title">Ustawienia</string>
-    <string name="account_subtitle">Konto i preferencje aplikacji</string>
-    <string name="student_card_badge">KARTA STUDENTA VISTULA</string>
-    <string name="keystore_badge">BEZPIECZNY SEJF SPRZĘTOWY</string>
-    <string name="keystore_note">Szyfrowanie Android Keystore (AES-256-GCM). Wszystkie dane przechowywane wyłącznie lokalnie.</string>
-    <string name="connect_usos_title">Połącz z USOS</string>
+<string name="student_card_badge">KARTA STUDENTA VISTULA</string>
+<string name="connect_usos_title">Połącz z USOS</string>
     <string name="connect_usos_desc">Zaloguj się na stronie uczelni, zaakceptuj zgody i wklej otrzymany PIN. Hasło podajesz wyłącznie w przeglądarce.</string>
     <string name="btn_how_to_register">❓ Jak zarejestrować aplikację w USOSapps?</string>
-    <string name="scope_recommended">⭐ Zalecany (oceny, plan, płatności)</string>
-    <string name="scope_basic">Podstawowy (oceny i plan)</string>
-    <string name="scope_complete">Rozszerzony (+dokumenty, foto, mail)</string>
-    <string name="btn_login_browser">1. Otwórz logowanie USOS</string>
+<string name="btn_login_browser">1. Otwórz logowanie USOS</string>
     <string name="btn_confirm_pin">2. Połącz konto</string>
     <string name="btn_paste_pin">📋 Wklej PIN ze schowka</string>
     <string name="pin_detected_clipboard">📋 Wykryto kod PIN ze schowka</string>
@@ -174,21 +124,18 @@
     <string name="btn_save_frequency">Zapisz częstotliwość</string>
     <string name="btn_disconnect_account">Odłącz konto i usuń lokalne dane</string>
     <string name="demo_banner_note">TRYB DEMO · przykładowe dane, bez połączenia z USOS</string>
-    <string name="demo_account_subtitle">Konto demonstracyjne</string>
-    <string name="demo_see_version">Zobacz wersję demonstracyjną</string>
-    <string name="demo_plan_notice">Plan obejmuje 8 tygodni i można go rozszerzyć do 16 tygodni. Sprawdzanie w tle co %1$d min może być opóźnione przez Androida. Czas wykrycia nie oznacza czasu publikacji.</string>
-    <string name="api_key_help_title">Jak uzyskać klucz aplikacji USOS?</string>
+<string name="api_key_help_title">Jak uzyskać klucz aplikacji USOS?</string>
     <string name="api_key_help_message">Klucz aplikacji dodajesz tylko raz.\n\n1. Otwórz formularz USOSapps Developers przyciskiem poniżej.\n2. Podaj nazwę aplikacji i swój e-mail, aby utworzyć klucz.\n3. Skopiuj Consumer Key i Consumer Secret do ustawień połączenia.\n4. Otwórz logowanie USOS, zaloguj się danymi uczelnianymi i zaakceptuj zgody.\n5. Wróć do aplikacji i wklej PIN.</string>
     <string name="btn_register_usosapps">Zarejestruj w USOSapps</string>
 
     <!-- Home Screen Extras -->
     <string name="home_conflicts_title">KOLIZJE W PLANIE ZAJĘĆ (%1$d)</string>
     <string name="home_conflicts_heading">Wykryto nakładające się zajęcia!</string>
-    <string name="home_conflicts_more">+ %1$d innych kolizji w pobranym planie.</string>
+    <string name="home_conflicts_more">Pozostałe kolizje w pobranym planie: %1$d</string>
     <string name="home_conflicts_btn">Pokaż kolizję w planie zajęć</string>
     <string name="home_news_title">KOMUNIKATY I AKTUALNOŚCI UCZELNI</string>
     <string name="home_news_all_btn">Wszystkie komunikaty (%1$d)</string>
-    <string name="home_term_remaining">Do końca semestru: %1$d dni · koniec: %2$s</string>
+    <string name="home_term_remaining">Dni do końca semestru: %1$d · koniec: %2$s</string>
     <string name="home_term_ended">Zakończony: %1$s</string>
     <string name="home_payments_attention">PŁATNOŚCI · WYMAGANA UWAGA</string>
     <string name="home_payments_regular">PŁATNOŚCI I CZESNE</string>
@@ -196,21 +143,16 @@
     <string name="home_payments_subaccount">Subkonto: %1$s</string>
     <string name="home_payments_btn">Zobacz harmonogram opłat</string>
     <string name="home_recent_changes">Ostatnie zmiany</string>
-    <string name="home_all_history_btn">Otwórz całą historię</string>
-    <string name="home_no_changes_title">Jeszcze bez zmian</string>
-    <string name="home_no_changes_desc">Pierwsze pobranie zapisuje punkt odniesienia. Kolejne różnice zobaczysz tutaj.</string>
-    <string name="home_classes_remaining_min">Do końca: %1$d min</string>
+<string name="home_classes_remaining_min">Do końca: %1$d min</string>
 
     <!-- History Screen -->
     <string name="history_title">Historia zmian</string>
-    <string name="history_subtitle">Daty publikacji ocen i zmian pobrane z USOS.</string>
-    <string name="history_search_hint">Szukaj przedmiotu lub zmiany…</string>
+<string name="history_search_hint">Szukaj przedmiotu lub zmiany…</string>
     <string name="history_empty_title">Brak zapisanych zmian</string>
     <string name="history_empty_desc">Zmiany pojawią się po porównaniu kolejnych pobrań.</string>
     <string name="history_no_match_title">Brak pasujących zmian</string>
     <string name="history_no_match_desc">Zmień wyszukiwanie lub wybierz inną kategorię.</string>
-    <string name="history_count_note">Wyświetlono %1$d z %2$d zmian w tej kategorii. Historia: ostatnie 200 wpisów.</string>
-    <string name="history_action_added">+ DODANO</string>
+<string name="history_action_added">+ DODANO</string>
     <string name="history_action_removed">− USUNIĘTO</string>
     <string name="history_action_modified">Δ ZMIENIONO</string>
     <string name="history_category_grade">OCENA</string>
@@ -227,8 +169,7 @@
     <string name="history_chip_added">Dodano (%1$d)</string>
     <string name="history_chip_modified">Zmieniono (%1$d)</string>
     <string name="history_chip_removed">Usunięto (%1$d)</string>
-    <string name="history_diff_summary_title">Zmienione parametry:</string>
-    <string name="date_heading_today">Dzisiaj · %1$s</string>
+<string name="date_heading_today">Dzisiaj · %1$s</string>
     <string name="date_heading_yesterday">Wczoraj · %1$s</string>
     <string name="change_time">Godziny zajęć</string>
     <string name="change_group">Grupa</string>
@@ -250,9 +191,7 @@
     <string name="time_minutes_ago">%1$d min temu</string>
 
     <!-- Tasks Screen -->
-    <string name="tasks_title">Twoje zadania</string>
-    <string name="tasks_subtitle">Osobista lista na telefonie · bez wysyłania do USOS</string>
-    <string name="tasks_summary">Do zrobienia: %1$d · ukończone: %2$d</string>
+<string name="tasks_summary">Do zrobienia: %1$d · ukończone: %2$d</string>
     <string name="tasks_chip_all">Wszystkie</string>
     <string name="tasks_chip_open">Otwarte</string>
     <string name="tasks_chip_done">Ukończone</string>
@@ -279,8 +218,7 @@
     <string name="tasks_empty_desc">Dodaj termin projektu, naukę do egzaminu lub własną notatkę.</string>
     <string name="tasks_no_match_title">Brak pasujących zadań</string>
     <string name="tasks_no_match_desc">Zmień filtr lub wyszukiwanie.</string>
-    <string name="tasks_shown_count">Wyświetlono zadań: %1$d</string>
-    <string name="tasks_dialog_new_title">Nowe zadanie</string>
+<string name="tasks_dialog_new_title">Nowe zadanie</string>
     <string name="tasks_dialog_edit_title">Edytuj zadanie</string>
     <string name="tasks_dialog_title_hint">Co masz do zrobienia?</string>
     <string name="tasks_dialog_notes_hint">Notatka (opcjonalnie)</string>
@@ -291,12 +229,9 @@
     <string name="tasks_error_limit">Limit 200 zadań. Usuń ukończone wpisy.</string>
 
     <!-- Payments Screen -->
-    <string name="payments_title">Płatności i subkonto</string>
-    <string name="payments_subtitle">Subkonta bankowe i harmonogram należności USOS</string>
-    <string name="payments_data_freshness">Aktualność danych: %1$s</string>
+<string name="payments_data_freshness">Aktualność danych: %1$s</string>
     <string name="payments_no_data_title">Brak pobranych danych</string>
-    <string name="payments_no_data_desc">Połącz konto i odśwież dane.</string>
-    <string name="payments_missing_scope_badge">BRAK ZAKRESU PŁATNOŚCI W OAUTH</string>
+<string name="payments_missing_scope_badge">BRAK ZAKRESU PŁATNOŚCI W OAUTH</string>
     <string name="payments_missing_scope_title">Wymagane uprawnienie \'payments\'</string>
     <string name="payments_missing_scope_desc">Twoje połączone konto USOS ma aktualnie uprawnienia: [%1$s]. Moduł finansów uczelni (indywidualne subkonta bankowe, harmonogram rat i czesne) wymaga zgody na zakres \'payments\'.</string>
     <string name="payments_missing_scope_action_note">Aby pobierać dane o płatnościach, przejdź do ekranu Konto, odłącz konto i połącz je ponownie z zakresem: grades|studies|payments|offline_access.</string>
@@ -312,9 +247,7 @@
     <string name="payments_copy_iban">Kopiuj numer subkonta (IBAN)</string>
     <string name="payments_iban_copied">Numer subkonta skopiowany do schowka</string>
     <string name="payments_schedule_heading">Harmonogram należności</string>
-    <string name="payments_status_settlement">STAN ROZLICZEŃ</string>
-    <string name="payments_total_due">Łącznie do zapłaty: %1$.2f PLN</string>
-    <string name="payments_status_overdue_warn">Uwaga: Część rat jest po terminie płatności!</string>
+<string name="payments_status_overdue_warn">Uwaga: Część rat jest po terminie płatności!</string>
     <string name="payments_status_all_paid">Wszystkie należności są opłacone na bieżąco.</string>
     <string name="payments_status_pending">Pamiętaj o terminowym regulowaniu rat.</string>
     <string name="payments_amount">Kwota: %1$.2f %2$s</string>
@@ -326,9 +259,7 @@
     <string name="payments_refresh_btn">Odśwież płatności z USOS</string>
 
     <!-- GPA Simulator Screen -->
-    <string name="gpa_title">Kalkulator średniej i stypendium</string>
-    <string name="gpa_subtitle">Symulacja ocen, progi stypendium rektora i wyróżnienia</string>
-    <string name="gpa_empty_title">Brak danych ocen</string>
+<string name="gpa_empty_title">Brak danych ocen</string>
     <string name="gpa_empty_desc">Połącz konto lub włącz tryb demonstracyjny.</string>
     <string name="gpa_status_header">AKTUALNY STAN STUDIÓW</string>
     <string name="gpa_weighted">Średnia ważona ECTS: %1$.2f</string>
@@ -351,10 +282,9 @@
     <string name="gpa_btn_all_grades">Przejdź do pełnej listy ocen</string>
 
     <!-- Campus Guide Screen -->
-    <string name="campus_title">Niezbędnik studenta &amp; Kampus</string>
-    <string name="campus_subtitle">Najważniejsze działy, kontakty i lokalizacja Vistuli</string>
-    <string name="campus_name">Kampus Uczelni Vistula</string>
-    <string name="campus_address">ul. Stokłosy 3, 02-787 Warszawa</string>
+<string name="campus_name">Kampus Uczelni Vistula</string>
+    <!-- The hyphen belongs to the Polish postal code, not a numeric range. -->
+    <string name="campus_address" tools:ignore="TypographyDashes">ul. Stokłosy 3, 02-787 Warszawa</string>
     <string name="campus_metro">Metro M1: stacja Stokłosy (wyjście w stronę ul. Stokłosy, 200 m pieszo)</string>
     <string name="campus_btn_maps">Nawiguj do kampusu (Google Maps)</string>
     <string name="campus_btn_website">Strona główna uczelni (vistula.edu.pl)</string>
@@ -383,108 +313,75 @@
     <string name="campus_rules_programs">USOSweb – serwis studenta</string>
 
     <!-- News Screen -->
-    <string name="news_title">Komunikaty uczelni</string>
-    <string name="news_subtitle">Oficjalne ogłoszenia i zarządzenia Rektora AFiBV</string>
-    <string name="news_search_hint">Szukaj w komunikatach…</string>
+<string name="news_search_hint">Szukaj w komunikatach…</string>
     <string name="news_search_desc">Szukaj komunikatów po tytule, treści lub autorze</string>
     <string name="news_empty_title">Brak komunikatów w pamięci</string>
     <string name="news_empty_desc">Wybierz „Odśwież komunikaty”, aby pobrać najnowsze ogłoszenia z USOS.</string>
     <string name="news_no_match_title">Brak pasujących wyników</string>
     <string name="news_no_match_desc">Zmień frazę wyszukiwania.</string>
     <string name="news_count">Liczba komunikatów: %1$d</string>
-    <string name="news_read_full">Czytaj pełny komunikat</string>
-    <string name="news_refresh_btn">Odśwież komunikaty z USOS</string>
-    <string name="news_copy_content">Kopiuj treść</string>
+<string name="news_copy_content">Kopiuj treść</string>
     <string name="news_open_page">Otwórz stronę</string>
     <string name="news_copied_toast">Skopiowano treść komunikatu</string>
 
     <!-- Attendance Tracker -->
-    <string name="attendance_title">Licznik nieobecności</string>
-    <string name="attendance_subtitle">Osobno dla każdego semestru i rodzaju zajęć · limit 3</string>
-    <string name="attendance_status_exceeded">PRZEKROCZONY LIMIT NIEOBECNOŚCI</string>
-    <string name="attendance_status_warning">UWAGA NA LIMIT NIEOBECNOŚCI</string>
-    <string name="attendance_status_ok">STAN NIEOBECNOŚCI W NORMIE</string>
-    <string name="attendance_stats_summary">Śledzone grupy zajęć: %1$d · Suma nieobecności: %2$d</string>
+<string name="attendance_stats_summary">Śledzone grupy zajęć: %1$d · Suma nieobecności: %2$d</string>
     <string name="attendance_note_exceeded">Grupy zajęć z przekroczonym limitem: %1$d.</string>
     <string name="attendance_note_warning">Grupy zajęć blisko limitu lub z wykorzystanym limitem: %1$d.</string>
-    <string name="attendance_note_ok">Nie przekroczono limitu 3 nieobecności dla żadnej z wybranych grup zajęć.</string>
-    <string name="attendance_filter_all">Wszystkie (%1$d)</string>
+<string name="attendance_filter_all">Wszystkie (%1$d)</string>
     <string name="attendance_filter_warning">Ostrzeżenia (%1$d)</string>
     <string name="attendance_filter_exceeded">Przekroczone (%1$d)</string>
     <string name="attendance_btn_add_course">Dodaj przedmiot ręcznie</string>
-    <string name="attendance_course_id">Identyfikator: %1$s</string>
-    <string name="attendance_badge_exceeded">%1$d / %2$d · PRZEKROCZONO LIMIT (%3$d za dużo)</string>
+<string name="attendance_badge_exceeded">%1$d / %2$d · PRZEKROCZONO LIMIT · nadmiar: %3$d</string>
     <string name="attendance_badge_limit_reached">%1$d / %2$d · LIMIT WYCZERPANY</string>
     <string name="attendance_badge_last_one">%1$d / %2$d · Zostało 1 opuszczenie</string>
-    <string name="attendance_badge_safe">%1$d / %2$d · Bezpiecznie (zostało %3$d)</string>
-    <string name="attendance_notes_label">Notatki:\n%1$s</string>
-    <string name="attendance_btn_minus">− 1</string>
+    <string name="attendance_badge_safe">%1$d / %2$d · Bezpiecznie · pozostały limit: %3$d</string>
+<string name="attendance_btn_minus">− 1</string>
     <string name="attendance_btn_plus">+ 1 nieobecność</string>
-    <string name="attendance_btn_options">Opcje</string>
-    <string name="attendance_empty_filter">Brak przedmiotów na wybranym filtrze</string>
+<string name="attendance_empty_filter">Brak przedmiotów na wybranym filtrze</string>
     <string name="attendance_empty_desc">Zmień filtr lub dodaj przedmiot ręcznie.</string>
     <string name="attendance_rule_footer">Lokalny licznik: limit 3 nieobecności osobno dla przedmiotu, semestru i formy zajęć. Starsze wpisy bez tych informacji znajdziesz w „Do przypisania”.</string>
     <string name="attendance_dialog_add">Dodaj przedmiot</string>
     <string name="attendance_dialog_edit">Edycja: %1$s</string>
     <string name="attendance_dialog_name_hint">Nazwa przedmiotu</string>
-    <string name="attendance_dialog_limit_hint">Limit nieobecności: 3</string>
-    <string name="attendance_dialog_notes_hint">Notatki / Usprawiedliwienia (opcjonalnie)</string>
+<string name="attendance_dialog_notes_hint">Notatki / Usprawiedliwienia (opcjonalnie)</string>
     <string name="attendance_dialog_delete">Usuń</string>
     <string name="attendance_dialog_error_name">Wpisz nazwę przedmiotu</string>
-    <string name="attendance_dialog_error_limit">Podaj liczbę od 1 do 20</string>
-    <string name="attendance_alert_title">⚠️ Uwaga na limit nieobecności!</string>
+<string name="attendance_alert_title">⚠️ Uwaga na limit nieobecności!</string>
     <string name="attendance_alert_msg_exceeded">Przekroczono limit 3 nieobecności dla tego rodzaju zajęć w semestrze.</string>
     <string name="attendance_alert_msg_reached">Wykorzystano limit 3 nieobecności dla tego rodzaju zajęć w semestrze.</string>
-    <string name="attendance_alert_body">Zapisano nieobecność dla: %1$s.\n\nAktualna liczba opuszczeń: %2$d z dozwolonych %3$d.\n\n%4$s</string>
+    <string name="attendance_alert_body">Zapisano nieobecność dla: %1$s.\n\nNieobecności: %2$d · limit: %3$d.\n\n%4$s</string>
     <string name="attendance_alert_btn_open">Otwórz licznik</string>
     <string name="attendance_alert_btn_understand">Rozumiem</string>
     <string name="attendance_recorded_toast">Odnotowano nieobecność: %1$s (%2$d/%3$d)</string>
 
     <!-- Grades & Schedule Options -->
-    <string name="lesson_details_title">Szczegóły zajęć</string>
-    <string name="lesson_option_absence">📊 Odnotuj nieobecność na tych zajęciach</string>
+<string name="lesson_option_absence">📊 Odnotuj nieobecność na tych zajęciach</string>
     <string name="lesson_option_share">📤 Udostępnij zajęcia</string>
     <string name="lesson_option_copy">📋 Kopiuj szczegóły</string>
-    <string name="grades_details_title">Szczegóły przedmiotu</string>
-    <string name="subject_view_more">Zobacz więcej</string>
-    <string name="subject_view_less">Zobacz mniej</string>
-    <string name="subject_view_more_description">Zobacz więcej: %1$s</string>
-    <string name="subject_view_less_description">Zobacz mniej: %1$s</string>
-    <string name="schedule_when">Termin</string>
+<string name="schedule_when">Termin</string>
     <string name="schedule_building">Budynek</string>
     <string name="schedule_group">Grupa</string>
     <string name="grades_simulator_title">Kalkulator średniej i symulator ocen</string>
-    <string name="grades_simulator_desc">Sprawdź jak przyszłe oceny wpłyną na Twoją średnią ze studiów.</string>
-    <string name="grades_simulator_target">Docelowa średnia</string>
-
-    <!-- API Catalog -->
-    <string name="api_title">Katalog USOS API</string>
-    <string name="api_subtitle">Interaktywne testowanie metod API dla studentów i deweloperów</string>
-    <string name="api_search_hint">Szukaj metody API…</string>
-    <string name="api_search_desc">Wpisz nazwę metody, np. services/grades, courses, user</string>
-    <string name="api_fav_filter">Tylko ulubione</string>
+<!-- API Catalog -->
+<string name="api_search_hint">Szukaj metody API…</string>
+<string name="api_fav_filter">Tylko ulubione</string>
     <string name="api_execute_btn">Wykonaj zapytanie</string>
     <string name="api_response_title">Odpowiedź serwera USOS</string>
     <string name="api_copy_response">Kopiuj JSON</string>
     <string name="api_params_heading">Parametry żądania</string>
-    <string name="api_auth_required">Wymagana autoryzacja OAuth</string>
-
-    <!-- Additional Extracted Strings -->
-    <string name="schedule_mode_day">Dzień: %1$s</string>
-    <string name="schedule_mode_list">Lista</string>
-    <string name="schedule_mode_agenda">Agenda</string>
+<!-- Additional Extracted Strings -->
+<string name="schedule_mode_agenda">Agenda</string>
     <string name="toast_no_share_app">Brak aplikacji do udostępniania.</string>
     <string name="toast_export_calendar_error">Błąd eksportu do kalendarza</string>
     <string name="schedule_share_title">Plan zajęć Vistula — %1$s</string>
     <string name="schedule_clipboard_label">Plan zajęć</string>
-    <string name="toast_schedule_copied">Skopiowano plan zajęć do schowka</string>
-    <string name="payment_status_paid">Opłacona</string>
+<string name="payment_status_paid">Opłacona</string>
     <string name="payment_status_overdue">Po terminie</string>
     <string name="payment_status_to_pay">Do zapłaty</string>
     <string name="payment_clipboard_label">Konto wpłaty USOS</string>
     <string name="toast_cant_open_browser">Nie można otworzyć linku w przeglądarce</string>
-    <string name="tasks_progress_desc">Ukończone: %1$d / %2$d</string>
-    <string name="home_schedule_empty_hint">Sprawdź agendę lub wczytaj dalszy zakres.</string>
+<string name="home_schedule_empty_hint">Sprawdź agendę lub wczytaj dalszy zakres.</string>
     <string name="home_open_tasks">Otwórz zadania</string>
     <string name="home_next_retry">Kolejna próba po %1$s</string>
     <string name="history_btn_details">Szczegóły zmiany</string>
@@ -493,63 +390,31 @@
     <string name="history_clipboard_label">Szczegóły zmiany USOS</string>
     <string name="toast_history_details_copied">Skopiowano szczegóły zmiany</string>
     <string name="grades_chip_all">Wszystkie oceny</string>
-    <string name="grades_chip_labs">🧪 Laboratoria</string>
-    <string name="grades_chip_exercises">📝 Ćwiczenia</string>
-    <string name="grades_chip_numeric">Liczbowe</string>
+<string name="grades_chip_numeric">Liczbowe</string>
     <string name="grades_chip_other">Pozostałe</string>
     <string name="grades_sort_title">Sortowanie przedmiotów</string>
     <string name="grades_sort_subject">Przedmiot</string>
     <string name="grades_sort_recent">Ostatnia zmiana</string>
     <string name="grades_sort_value">Najwyższa ocena</string>
-    <string name="grades_filter_summary">%1$s · %2$s</string>
-    <string name="grades_type_numeric_label">liczbowe</string>
-    <string name="grades_type_other_label">pozostałe</string>
-    <string name="grades_type_labs_label">laboratoria</string>
+<string name="grades_type_labs_label">laboratoria</string>
     <string name="grades_type_exercises_label">ćwiczenia</string>
-    <string name="grades_type_all_label">wszystkie oceny</string>
-    <string name="grades_order_recent_label">ostatnia zmiana</string>
-    <string name="grades_order_value_label">najwyższa ocena</string>
-    <string name="grades_order_subject_label">wg przedmiotu</string>
-    <string name="grades_components_heading">Formy zajęć i zaliczenia</string>
-    <string name="grades_tests_subheading">Sprawdziany cząstkowe</string>
-    <string name="grades_session_term">Termin %1$s</string>
-    <string name="grades_session_retake">Termin %1$s (poprawka)</string>
-    <string name="grades_points_format">Punkty: %1$.1f / %2$.1f (%3$.1f%%)</string>
+<string name="grades_points_format">Punkty: %1$.1f / %2$.1f (%3$.1f%%)</string>
     <string name="grades_points_simple">Punkty: %1$.1f</string>
     <string name="grades_test_grade">Ocena: %1$s</string>
     <string name="grades_test_date">Termin: %1$s</string>
-    <string name="grades_status_passed">Zaliczona</string>
-    <string name="grades_status_failed">Niezaliczona</string>
-    <string name="grades_status_pending">W toku</string>
-    <string name="grades_btn_add_task">Dodaj zadanie do nauki</string>
-    <string name="grades_details_exam_id">ID egzaminu USOS: %1$s</string>
-    <string name="grades_details_author">Prowadzący / autor wpisu: %1$s</string>
-    <string name="grades_details_date_acq">Data uzyskania oceny: %1$s</string>
-    <string name="grades_details_average">Wliczana do średniej ocen: %1$s</string>
-    <string name="grades_details_counts_yes">Tak</string>
-    <string name="grades_details_counts_no">Nie</string>
-    <string name="grade_meta_term">Semestr: %1$s</string>
-    <string name="grade_meta_count">Liczba ocen: %1$d</string>
-    <string name="grade_meta_single">1 ocena</string>
-    <string name="grade_ects_points">Punkty ECTS: %1$s</string>
-    <string name="grade_comment_prefix">Komentarz: %1$s</string>
-    <string name="grade_details_classtype">Forma zajęć: %1$s</string>
-    <string name="grade_details_term">Semestr: %1$s</string>
-    <string name="grade_details_mod_usos">Modyfikacja w USOS: %1$s (Warszawa)</string>
-    <string name="grade_details_status">Status: %1$s</string>
-    <string name="grade_picker_semester">Semestr</string>
-    <string name="grades_task_prefix">Nauka: %1$s (%2$s)</string>
-    <string name="grades_sim_current_none">brak</string>
+<string name="grades_btn_add_task">Dodaj zadanie do nauki</string>
+<string name="grade_ects_points">Punkty ECTS: %1$s</string>
+<string name="grade_picker_semester">Semestr</string>
+<string name="grades_sim_current_none">brak</string>
     <string name="grades_no_match_hint">Zmień semestr, typ ocen lub wyszukiwanie.</string>
-    <string name="grades_count_summary">Wyświetlono %1$d wpisów · grup przedmiotów: %2$d</string>
-    <string name="grades_no_numeric_stats">Brak ocen liczbowych.\n\n</string>
+<string name="grades_no_numeric_stats">Brak ocen liczbowych.\n\n</string>
     <string name="grades_stats_simple">Średnia: %1$.2f\nMinimum: %2$.2f · maksimum: %3$.2f\n\n</string>
     <string name="grades_stats_weighted">Średnia ważona ECTS: %1$.2f\nSuma punktów ECTS: %2$.1f\n\n</string>
     <string name="grades_stats_disclaimer">Podsumowanie obejmuje widoczne wpisy po wyszukiwaniu i filtrach. Prosta średnia liczy wszystkie symbole liczbowe, także różne terminy. Szacunek ECTS wybiera najwyższy widoczny wpis na przedmiot i semestr, preferując protokół przedmiotu; pomija wpisy wykluczone ze średniej przez USOS. To nie jest oficjalna średnia uczelni.</string>
     <string name="grades_card_simple_avg">Prosta średnia</string>
     <string name="grades_card_no_numeric">Brak ocen liczbowych</string>
     <string name="grades_card_weighted_avg">Szacunek ECTS: %1$.2f (%2$.0f ECTS)</string>
-    <string name="grades_card_counts">Liczbowe: %1$d\nPozostałe: %2$d</string>
+    <string name="grades_card_counts">Oceny liczbowe: %1$d\nPozostałe oceny: %2$d</string>
     <string name="grades_card_note">Statystyki widocznych wpisów, nie oficjalna średnia uczelni. Szczegóły obliczeń pod przyciskiem „?”.</string>
     <string name="grades_share_header">Akademia Finansów i Biznesu Vistula — Wykaz ocen\n</string>
     <string name="grades_share_weighted">Szacunek ECTS: %1$.2f (%2$.0f ECTS) · najwyższe widoczne wpisy, z pierwszeństwem protokołu przedmiotu\n</string>
@@ -560,7 +425,7 @@
     <string name="grades_sim_target_hint">Docelowa średnia (np. 4.50)</string>
     <string name="grades_sim_count_hint">Liczba nowych ocen (do średniej prostej)</string>
     <string name="grades_sim_ects_hint">Punkty ECTS nowego kursu (do ważonej)</string>
-    <string name="grades_sim_req_simple">Średnia prosta: z kolejnych %1$d ocen potrzebujesz średniej %2$.2f</string>
+    <string name="grades_sim_req_simple">Średnia prosta: liczba kolejnych ocen: %1$d · wymagana średnia: %2$.2f</string>
     <string name="grades_sim_impossible"> (niemożliwe w obecnym semestrze, max 5.0!)</string>
     <string name="grades_sim_already_reached"> (cel osiągnięty nawet przy ocenie 3.0)</string>
     <string name="grades_sim_req_weighted">Średnia ważona ECTS: z przedmiotu za %1$.0f ECTS potrzebujesz oceny %2$.2f</string>
@@ -577,10 +442,7 @@
     <string name="gpa_chip_ects_30">30 ECTS (1 semestr)</string>
     <string name="gpa_chip_ects_45">45 ECTS</string>
     <string name="gpa_chip_ects_60">60 ECTS (cały rok)</string>
-    <string name="gpa_progress_title">Kwalifikacja do wyróżnień</string>
-    <string name="gpa_progress_scholarship">Stypendium Rektora (próg 4.50): %1$s</string>
-    <string name="gpa_progress_honors">Dyplom z wyróżnieniem (próg 4.75): %1$s</string>
-    <string name="share_generated_by">Wygenerowano z aplikacji Vistula Checker</string>
+<string name="share_generated_by">Wygenerowano z aplikacji Vistula Checker</string>
     <string name="grades_all_terms">Wszystkie semestry</string>
     <string name="grades_empty_title">Brak danych w tym zakresie</string>
     <string name="grades_share_subject">Wykaz ocen — Vistula USOS</string>
@@ -594,8 +456,7 @@
     <string name="account_disconnect_title">Odłączyć konto?</string>
     <string name="account_disconnect_message">Tokeny, zapis ocen, plan, historia i własne zadania zostaną usunięte z tego telefonu. Zgodę dla aplikacji możesz odwołać również w USOSapps.</string>
     <string name="account_disconnect_btn">Odłącz</string>
-    <string name="account_scopes_hint">Oceny i plan wymagają grades i studies, a sprawdzanie w tle offline_access. Płatności są opcjonalne i wymagają payments. Adres e-mail wymaga email. Zmiana zakresów wymaga ponownego połączenia konta i zgody w USOS.</string>
-    <string name="account_toast_enter_pin">Wpisz kod PIN wyświetlony przez USOS</string>
+<string name="account_toast_enter_pin">Wpisz kod PIN wyświetlony przez USOS</string>
     <string name="account_notif_system_allowed">System zezwala na powiadomienia.</string>
     <string name="account_notif_system_blocked">Powiadomienia są wyłączone w systemie. Włącz je, aby otrzymywać alerty o nowych ocenach i zmianach sal.</string>
     <string name="account_btn_system_notif_settings">Ustawienia powiadomień w systemie</string>
@@ -608,8 +469,7 @@
     <string name="account_channels_note">Dedykowane kanały: Oceny (wysoki priorytet z dźwiękiem), Plan zajęć oraz Przypomnienia.</string>
     <string name="account_widgets_heading">Widgety na ekranie głównym</string>
     <string name="account_widgets_desc">Dostępne są 2 interaktywne widgety na pulpit telefonu:\n1. Plan zajęć na dziś (najbliższe zajęcia, sala, czas, odliczanie)\n2. Karta Studenta i oceny (średnia ważona ECTS, status czesnego)\n\nAby je dodać, przytrzymaj palec na pustym miejscu ekranu głównego telefonu i wybierz „Widżety → Vistula”.</string>
-    <string name="account_security_keystore_note">Tokeny i historia są szyfrowane sprzętowo (Android Keystore). Aplikacja nie przechowuje hasła do uczelni i nie korzysta z pośredniczących serwerów.</string>
-    <string name="account_btn_open_usosapps">Otwórz USOSapps Vistuli</string>
+<string name="account_btn_open_usosapps">Otwórz USOSapps Vistuli</string>
     <string name="account_program">🎓 Kierunek: %1$s</string>
     <string name="account_stage">📚 Etap: %1$s</string>
     <string name="account_thesis_header">PRACA DYPLOMOWA</string>
@@ -617,8 +477,7 @@
     <string name="account_thesis_supervisor">Promotor: %1$s</string>
     <string name="account_thesis_reviewer">Recenzent: %1$s</string>
     <string name="account_oauth_consent">Zgoda OAuth: %1$s</string>
-    <string name="account_toast_enter_credentials">Wpisz Consumer Key i Consumer Secret</string>
-    <string name="account_pin_field_hint">PIN autoryzacji z USOS</string>
+<string name="account_pin_field_hint">PIN autoryzacji z USOS</string>
     <string name="account_toast_pin_pasted">Wklejono PIN</string>
     <string name="account_notices_heading">Powiadomienia i alerty</string>
     <string name="account_lead_time_15">15 minut przed</string>
@@ -635,7 +494,7 @@
     <string name="api_offline_note">Dokumentacja jest dostępna offline. Wykonanie żądania wymaga internetu oraz uprawnień wskazanych przy metodzie. Tryb demo nie podpisuje żądań przykładowym kontem.</string>
     <string name="api_key_services_heading">Szybki dostęp do kluczowych usług</string>
     <string name="api_count_none">Brak pasujących metod. Spróbuj innej nazwy lub opisu.</string>
-    <string name="api_count_match">Wyświetlono %1$d z %2$d pasujących metod.</string>
+    <string name="api_count_match">Pasujące metody: %1$d z %2$d.</string>
     <string name="api_btn_show_more">Pokaż kolejne metody</string>
     <string name="api_btn_back_catalog">← Wróć do katalogu</string>
     <string name="api_btn_fav_add">Dodaj do ulubionych</string>
@@ -644,17 +503,16 @@
     <string name="api_beta_note">Metoda beta — może zmienić zachowanie.</string>
     <string name="api_btn_select_file">Wybierz plik do wysłania (maks. 8 MB)</string>
     <string name="api_param_required_hint">Wymagany parametr</string>
-    <string name="api_param_optional_hint">Puste = domyślna wartość serwera</string>
-    <string name="api_param_default_val"> · domyślnie: %1$s</string>
+<string name="api_param_default_val"> · domyślnie: %1$s</string>
     <string name="api_response_placeholder">Odpowiedź pojawi się po wykonaniu żądania.</string>
     <string name="api_toast_fill_param">Wypełnij parametr: %1$s</string>
     <string name="api_confirm_title">Wykonać żądanie %1$s?</string>
     <string name="api_confirm_msg">%1$s\n\nWybrane parametry zostaną przekazane Vistuli. Niektóre metody mogą zmieniać lub usuwać dane w USOS.</string>
-    <string name="api_binary_response">Odpowiedź binarna: %1$s · %2$d bajtów. Użyj „Zapisz odpowiedź”.</string>
+    <string name="api_binary_response">Odpowiedź binarna: %1$s · rozmiar w bajtach: %2$d. Użyj „Zapisz odpowiedź”.</string>
     <string name="api_oauth_hidden">Wykonano operację OAuth. Odpowiedź ukryta ze względu na możliwe dane uwierzytelniające.</string>
     <string name="api_preview_limited">\n[Podgląd ograniczony do 100 000 znaków]</string>
     <string name="api_limits_note">GET, POST i wysyłanie plików blobbox przez multipart. Limit transferu: 8 MB. Interaktywne metody OAuth obsługuje ekran Konto. Uprawnienia sprawdza USOS.</string>
-    <string name="api_subtitle_methods">%1$d metod · oficjalna dokumentacja Vistuli</string>
+    <string name="api_subtitle_methods">Metody: %1$d · oficjalna dokumentacja Vistuli</string>
     <string name="api_all_methods">Wszystkie metody</string>
     <string name="api_btn_online_docs">Dokumentacja online</string>
     <string name="api_btn_execute">Wykonaj</string>
@@ -677,8 +535,7 @@
     <string name="error_dialog_title">Nie udało się wykonać operacji</string>
     <string name="error_dialog_copy">Skopiuj opis błędu</string>
     <string name="error_clipboard_label">Błąd aplikacji</string>
-    <string name="error_task_restore_account_changed">Konto zostało zmienione. Nie można przywrócić zadania.</string>
-    <string name="error_cant_open_file">Nie można otworzyć pliku</string>
+<string name="error_cant_open_file">Nie można otworzyć pliku</string>
     <string name="toast_api_response_saved">Zapisano odpowiedź API</string>
     <string name="first_sync_saved">Zapisano pierwsze pobranie ocen i planu</string>
     <string name="error_file_too_large">Plik przekracza limit 8 MB.</string>
@@ -692,7 +549,7 @@
     <string name="widget_status_upcoming_today">NAJBLIŻSZE DZISIAJ</string>
     <string name="widget_status_ended_today">DZISIAJ (ZAKOŃCZONE)</string>
     <string name="widget_extra_day_off">Dzisiaj brak zajęć · wolny dzień</string>
-    <string name="widget_extra_today_classes">Dzisiaj w planie: %1$d zajęć</string>
+    <string name="widget_extra_today_classes">Zajęcia zaplanowane na dzisiaj: %1$d</string>
     <string name="widget_empty_no_more">Brak kolejnych zajęć w pobranym planie.</string>
     <string name="widget_grade_sub_stipend">Ważona (%1$.0f ECTS) ★ Styp.</string>
     <string name="widget_grade_sub_weighted">Ważona (%1$.0f ECTS)</string>
@@ -709,62 +566,39 @@
     <string name="tasks_due_unknown">Brak poprawnego terminu</string>
     <string name="schedule_mode_week">Tydzień</string>
     <string name="schedule_previous_week">Poprzedni tydzień</string>
-    <string name="schedule_previous_day">Poprzedni dzień</string>
-    <string name="schedule_next_day">Następny dzień</string>
-    <string name="schedule_day_label">Dzień</string>
-    <string name="schedule_info">Info</string>
-    <string name="schedule_info_title">Informacje o planie</string>
+<string name="schedule_day_label">Dzień</string>
+<string name="schedule_info_title">Informacje o planie</string>
     <string name="schedule_options">Opcje planu</string>
-    <string name="schedule_demo_title">Plan zajęć · DEMO</string>
-    <string name="schedule_current_badge">TRWAJĄ TERAZ · jeszcze %1$d min</string>
+<string name="schedule_current_badge">TRWAJĄ TERAZ · jeszcze %1$d min</string>
     <string name="lesson_room_label">Sala %1$s</string>
     <string name="schedule_search_action">Szukaj w planie</string>
-    <string name="schedule_summary_compact">Zajęcia: %1$d · Łącznie %2$d godz. %3$d min</string>
+    <string name="schedule_summary_compact">Zajęcia: %1$d · Czas: %2$d h %3$d min</string>
     <string name="schedule_next_week">Następny tydzień</string>
     <string name="schedule_search_hint">Szukaj przedmiotu, sali lub prowadzącego</string>
-    <string name="schedule_day_summary">%1$d zajęć · %2$d godz. %3$d min\nPrzerwy między zajęciami: %4$d min</string>
-    <string name="schedule_summary_hint">Dla widocznych zajęć. Nakładające się godziny liczymy raz; terminy orientacyjne pozostają w zestawieniu.</string>
-    <string name="schedule_calendar_saved">Zapisano plik kalendarza</string>
-    <string name="home_week_title">Najbliższe 7 dni</string>
-    <string name="home_week_summary">%1$d zajęć · %2$d godz. %3$d min · %4$d terminów zadań</string>
-    <string name="home_week_day">%1$s · %2$d zajęć · %3$d zadań</string>
-    <string name="home_week_tasks">Zadania na najbliższe 7 dni</string>
-    <string name="home_week_overdue">Zaległe zadania: %1$d</string>
-    <string name="home_week_hint">Według zapisanego planu i osobistych zadań. Dotknij dnia, aby otworzyć plan.</string>
-    <string name="change_room">Sala</string>
+<string name="schedule_calendar_saved">Zapisano plik kalendarza</string>
+<string name="change_room">Sala</string>
     <string name="change_building">Budynek</string>
     <string name="change_lecturers">Prowadzący</string>
     <string name="change_comment">Komentarz</string>
-    <string name="change_description">Opis oceny</string>
-    <string name="change_term">Semestr</string>
+<string name="change_term">Semestr</string>
     <string name="change_date">Termin</string>
     <string name="grades_chip_retakes">Kolejne terminy</string>
-    <string name="grades_session_unknown">Termin niepodany</string>
-    <string name="schedule_saved_range">Zapisany zakres: %1$s – %2$s\nOstatnie pobranie: %3$s</string>
+<string name="schedule_saved_range">Zapisany zakres: %1$s – %2$s\nOstatnie pobranie: %3$s</string>
     <string name="schedule_no_search_results">Brak zajęć pasujących do wyszukiwania w wybranym zakresie.</string>
     <string name="schedule_week_empty">Brak zapisanych zajęć w wybranym tygodniu.</string>
     <string name="schedule_agenda_empty">Brak zajęć w zapisanym planie.</string>
     <string name="schedule_overnight">Koniec następnego dnia</string>
-    <string name="grades_overview_hint">Przedmioty, oceny i kolejne terminy. Wyszukuj także po kodzie przedmiotu.</string>
-    <string name="appearance_title">Wygląd</string>
-    <string name="appearance_description">Automatycznie według telefonu lub ręcznie: jasny / ciemny OLED</string>
-    <string-array name="appearance_modes">
+<string name="appearance_title">Wygląd</string>
+<string-array name="appearance_modes">
         <item>Systemowy</item>
         <item>Jasny</item>
         <item>Ciemny OLED</item>
     </string-array>
     <string name="language_title">Język</string>
-    <string name="language_description">Domyślny systemowy lub wybierz: Polski, English, Українська</string>
-    <string name="language_system">Domyślny systemowy</string>
+<string name="language_system">Domyślny systemowy</string>
     <string name="language_pl">Polski</string>
     <string name="language_en">English</string>
     <string name="language_uk">Українська</string>
-    <string-array name="language_modes">
-        <item>Domyślny systemowy</item>
-        <item>Polski</item>
-        <item>English</item>
-        <item>Українська</item>
-    </string-array>
     <string name="attendance_unassigned">Do przypisania</string>
     <string name="attendance_semester">Semestr</string>
     <string name="attendance_semester_hint">Kod semestru (np. 2026Z)</string>
@@ -820,9 +654,7 @@
     <string name="grades_search_action">Szukaj ocen</string>
     <string name="grades_data_status">Aktualność danych</string>
     <string name="grades_filter_type">Typ ocen</string>
-    <string name="grades_values_description">Oceny: %1$s</string>
-    <string name="grades_value_caption">Ocena</string>
-    <string name="grades_scope_course">Protokół przedmiotu</string>
+<string name="grades_scope_course">Protokół przedmiotu</string>
     <string name="grades_scope_unit">Protokół zajęć</string>
     <string name="grades_type_unknown">Forma zajęć niepodana</string>
     <string name="tasks_options">Opcje zadań</string>

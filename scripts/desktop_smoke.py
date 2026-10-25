@@ -38,21 +38,27 @@ def main():
                 raise RuntimeError('Packaged desktop application exited during the smoke test')
             if not shutil.which('tesseract'):
                 raise RuntimeError('The desktop smoke test requires tesseract for visible-state assertions')
-            def visible_text(name):
-                result = subprocess.run(['tesseract', str(profile / name), 'stdout'], check=True,
+            def visible_text(name, segmentation='11'):
+                # The prototype has independent columns and a small account header.
+                # Sparse-text segmentation retains that header instead of treating it as noise.
+                image_name = name if name.endswith('-header.png') else name.removesuffix('.png') + '-ocr.png'
+                result = subprocess.run(['tesseract', str(profile / image_name), 'stdout', '--psm', segmentation], check=True,
                                         capture_output=True, text=True, timeout=20)
                 return ' '.join(result.stdout.lower().split())
-            if 'personal desktop fixture' not in visible_text('personal-before.png'):
-                raise RuntimeError('The fixture account did not load in the packaged application')
-            if 'demo' not in visible_text('demo.png') or 'not connected to usos' in visible_text('demo.png'):
-                raise RuntimeError('Demo was not recognized as an isolated demo account')
-            if 'personal desktop fixture' not in visible_text('personal-after.png'):
-                raise RuntimeError('Leaving demo did not restore the saved account')
+            before_text = visible_text('personal-before-header.png', '6')
+            if 'personal desktop fixture' not in before_text:
+                raise RuntimeError('The fixture account did not load in the packaged application: ' + before_text)
+            demo_text = visible_text('demo-header.png', '6')
+            if 'demo' not in demo_text or 'not connected to usos' in demo_text:
+                raise RuntimeError('Demo was not recognized as an isolated demo account: ' + demo_text)
+            after_text = visible_text('personal-after-header.png', '6')
+            if 'personal desktop fixture' not in after_text:
+                raise RuntimeError('Leaving demo did not restore the saved account: ' + after_text)
             schedule_text = re.sub(r'[^a-z]', '', visible_text('schedule-repeat.png'))
-            if not any(label in schedule_text for label in ('daytimeline', 'daysummary', 'visualtimeline')):
+            if not any(label in schedule_text for label in ('chooseaday', 'noclassesonthisday', 'thisweek', 'backtothisweek')):
                 raise RuntimeError('Repeating the timetable shortcut did not navigate back to the timetable')
             home_text = re.sub(r'[^a-z]', '', visible_text('home-between.png'))
-            if not any(label in home_text for label in ('dayplan', 'recentgrades', 'universitynews')):
+            if not any(label in home_text for label in ('nextclass', 'ongoingclass', 'thisweek')):
                 raise RuntimeError('The home shortcut did not leave the timetable')
             previews = ROOT / 'work/design-previews'
             previews.mkdir(parents=True, exist_ok=True)

@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.edit
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -152,12 +153,34 @@ class UiHelper private constructor() {
             box.setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 8))
             val shape = GradientDrawable()
             shape.setColor(background(context, color))
-            shape.cornerRadius = dp(context, 16).toFloat()
+            shape.cornerRadius = dp(context, 14).toFloat()
             box.background = shape
             val p = LinearLayout.LayoutParams(-1, -2)
             p.bottomMargin = dp(context, 14)
             parent.addView(box, p)
             return box
+        }
+
+        @JvmStatic
+        fun tray(context: Context, parent: LinearLayout): LinearLayout = card(context, parent, Color.WHITE).apply {
+            setPadding(0, 0, 0, 0)
+            clipToOutline = true
+        }
+
+        @JvmStatic
+        fun trayDivider(context: Context, parent: LinearLayout) {
+            parent.addView(View(context).apply { setBackgroundColor(context.getColor(R.color.app_outline_inner)) },
+                LinearLayout.LayoutParams(-1, dp(context, 1)).apply { marginStart = dp(context, 16); marginEnd = dp(context, 16) })
+        }
+
+        @JvmStatic
+        fun sectionLabel(context: Context, parent: LinearLayout, title: String) {
+            parent.addView(text(context, title, 11, MUTED, false).apply {
+                isAllCaps = true
+                letterSpacing = .12f
+                setPadding(dp(context, 4), dp(context, 24), dp(context, 4), dp(context, 14))
+                ViewCompat.setAccessibilityHeading(this, true)
+            })
         }
 
         @JvmStatic
@@ -193,7 +216,7 @@ class UiHelper private constructor() {
             }
             toggle.setOnClickListener {
                 expanded = !expanded
-                prefs.edit().putBoolean(key, expanded).apply()
+                prefs.edit { putBoolean(key, expanded) }
                 update()
             }
             group.addView(toggle)

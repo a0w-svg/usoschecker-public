@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:text="Vistula · Karta Studenta"
+            android:text="@string/widget_status_brand"
             android:textColor="@color/app_ink"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -51,7 +51,8 @@
         android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="Jan Kowalski"
+        android:text="@string/widget_placeholder"
+                tools:text="Jan Kowalski"
         android:textColor="@color/app_ink"
         android:textSize="15sp"
         android:textStyle="bold" />
@@ -63,15 +64,16 @@
         android:layout_marginBottom="8dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="Nr albumu: 34589"
+        android:text="@string/widget_placeholder"
+                tools:text="Nr albumu: 34589"
         android:textColor="@color/app_muted"
         android:textSize="11sp" />
 
     <!-- Two Metric Cards -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
         <!-- Grade Average Box -->
@@ -88,9 +90,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ŚREDNIA &amp; OCENY"
+                android:text="@string/widget_grades_heading"
                 android:textColor="@color/app_ink"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -98,7 +100,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="4.67"
+                android:text="@string/widget_placeholder"
+                tools:text="4.67"
                 android:textColor="@color/app_ink"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -108,9 +111,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Średnia ważona ECTS"
+                android:text="@string/widget_placeholder"
+                tools:text="Średnia ważona ECTS"
                 android:textColor="@color/app_muted"
-                android:textSize="10sp" />
+                android:textSize="11sp" />
         </LinearLayout>
 
         <!-- Payments Box -->
@@ -127,9 +131,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PŁATNOŚCI"
+                android:text="@string/widget_payments_heading"
                 android:textColor="@color/app_ink"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -137,7 +141,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="0,00 PLN"
+                android:text="@string/widget_placeholder"
+                tools:text="0,00 PLN"
                 android:textColor="@color/app_ink"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -147,9 +152,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Wszystko opłacone"
+                android:text="@string/widget_placeholder"
+                tools:text="Wszystko opłacone"
                 android:textColor="@color/app_muted"
-                android:textSize="10sp" />
+                android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -160,7 +166,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:gravity="center"
-        android:text="Dotknij, aby otworzyć aplikację"
+        android:text="@string/widget_open_app"
         android:textColor="@color/app_ink"
         android:textSize="11sp" />
 </LinearLayout>

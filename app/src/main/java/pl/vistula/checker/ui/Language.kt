@@ -1,5 +1,7 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.edit
+import android.annotation.SuppressLint
 import android.app.LocaleManager
 import android.content.Context
 import android.content.res.Configuration
@@ -28,6 +30,9 @@ class Language private constructor() {
         }
 
         @JvmStatic
+        // All supported languages ship in the base bundle (language.enableSplit=false),
+        // enforced by verifyReleaseConfiguration. This context also serves offline workers.
+        @SuppressLint("AppBundleLocaleChanges")
         fun localizedContext(context: Context): Context {
             val configuration = Configuration(context.resources.configuration)
             configuration.setLocale(currentLocale(context))
@@ -98,9 +103,9 @@ class Language private constructor() {
                 .setSingleChoiceItems(items, selected) { dialog, which ->
                     dialog.dismiss()
                     activity.getSharedPreferences("api_language", Context.MODE_PRIVATE)
-                        .edit()
-                        .putString("tag", TAGS[which])
-                        .apply()
+                        .edit {
+                            putString("tag", TAGS[which])
+                        }
                     setLanguage(TAGS[which])
                 }
                 .setNegativeButton(R.string.btn_close, null)

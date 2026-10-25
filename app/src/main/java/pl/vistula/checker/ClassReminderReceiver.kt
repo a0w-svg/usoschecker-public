@@ -76,7 +76,7 @@ class ClassReminderReceiver : BroadcastReceiver() {
                 scheduleNext(context)
                 return
             }
-            val title = if (record!!.title == null || record.title.trim().isEmpty()) {
+            val title = if (record!!.title.trim().isEmpty()) {
                 context.getString(R.string.reminder_unnamed_lesson)
             } else {
                 record.title
@@ -98,7 +98,7 @@ class ClassReminderReceiver : BroadcastReceiver() {
                     context,
                     301,
                     openPlan,
-                    PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 val content = textContext.getString(R.string.notification_class_time, minutes, (if (room.isNotEmpty()) textContext.getString(R.string.notification_class_room, room) + " · " else "") + time)
@@ -184,14 +184,10 @@ class ClassReminderReceiver : BroadcastReceiver() {
                 context,
                 302,
                 fillIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            if (Build.VERSION.SDK_INT >= 23) {
-                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetEpochMs, scheduledPi)
-            } else {
-                am.set(AlarmManager.RTC_WAKEUP, targetEpochMs, scheduledPi)
-            }
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetEpochMs, scheduledPi)
         }
 
         @JvmStatic

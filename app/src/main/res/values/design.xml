@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <string name="design_today">Dzisiaj</string>
     <string name="design_next_class">Najbliższe zajęcia</string>
     <string name="design_later_today">Później dzisiaj</string>
@@ -8,4 +8,7 @@
     <string name="design_tentative">Termin orientacyjny</string>
     <string name="design_class_count">Zajęcia: %1$d</string>
     <string name="design_credit">Współautor designu: Kaydjen</string>
+    <string name="design_updates">Aktualizacje</string>
+    <string name="design_history_description">Zmiany ocen i planu</string>
+    <string name="design_later_that_day">Później tego dnia</string>
 </resources>

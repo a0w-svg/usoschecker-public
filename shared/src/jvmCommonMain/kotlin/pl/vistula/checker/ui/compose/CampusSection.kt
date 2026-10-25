@@ -57,7 +57,7 @@ fun CampusSection(
         runAsync { StudentServiceLoader.refresh(repository, "affiliation"); onReloadState() }
     }) { Text(t("Odśwież kontakty", "Refresh contacts", "Оновити контакти")) }
     val entry = state.optJSONObject("studentServices")?.optJSONObject("affiliation")
-    if (!entry?.optString("error").isNullOrEmpty()) Text(SyncProgress.cachedError(entry!!, language), color = MaterialTheme.colorScheme.error)
+    if (!entry?.optString("error").isNullOrEmpty()) Text(SyncProgress.cachedError(entry, language), color = MaterialTheme.colorScheme.error)
     val units = entry?.optJSONObject("data")?.optJSONArray("units")
     var count = 0
     if (units != null) for (i in 0 until units.length()) {

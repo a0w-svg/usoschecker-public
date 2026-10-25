@@ -13,7 +13,7 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.nio.charset.StandardCharsets
 import java.util.function.Consumer
@@ -33,7 +33,7 @@ import pl.vistula.checker.ui.ApiExplorerController
 class CredentialsAndNavigationRegressionTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     @Test
     fun activationResponsesAreNeitherDisplayedNorAvailableToCopyOrExport() {
@@ -58,20 +58,20 @@ class CredentialsAndNavigationRegressionTest {
                         null,
                         {},
                         object : ApiExplorerController.ApiCallback {
-                            override fun onSelectUploadFile(method: String) {}
+                            override fun onSelectUploadFile(currentMethod: String) {}
                             override fun onSaveResponse(response: UsosClient.Response) {
                                 fail("Secret response exported")
                             }
 
                             override fun onExecuteRequest(
-                                meta: JSONObject,
+                                metadata: JSONObject,
                                 values: Map<String, String>,
                                 method: String,
-                                file: ByteArray?,
-                                success: Consumer<UsosClient.Response>,
-                                failure: Consumer<String>
+                                uploadBytes: ByteArray?,
+                                onSuccess: Consumer<UsosClient.Response>,
+                                onFailure: Consumer<String>
                             ) {
-                                success.accept(
+                                onSuccess.accept(
                                     UsosClient.Response(
                                         "{\"token\":\"private-activation-token\",\"distribution_pass\":\"private-password\"}"
                                             .toByteArray(StandardCharsets.UTF_8),
@@ -107,10 +107,10 @@ class CredentialsAndNavigationRegressionTest {
             val search = input(activity.window.decorView)
             assertNotNull(search)
             search!!.setText("old unrelated search")
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("showHistory", true).putExtra("historyKind", "ocena"))
+            activity.onNewIntent(Intent(activity.intent).putExtra("showHistory", true).putExtra("historyKind", "ocena"))
             assertEquals("", input(activity.window.decorView)!!.text.toString())
             assertTrue(selectedLabel(activity.window.decorView).startsWith(gradesPrefix))
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("showHistory", true).putExtra("historyKind", "plan"))
+            activity.onNewIntent(Intent(activity.intent).putExtra("showHistory", true).putExtra("historyKind", "plan"))
             assertTrue(selectedLabel(activity.window.decorView).startsWith(planPrefix))
         }
     }
@@ -119,12 +119,12 @@ class CredentialsAndNavigationRegressionTest {
     fun gradeAndScheduleDestinationsOpenTheirOwnScreens() {
         main {
             val activity = rule.activity
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("tab", 2))
+            activity.onNewIntent(Intent(activity.intent).putExtra("tab", 2))
             assertEquals(
                 R.id.nav_item_grades,
                 activity.findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId
             )
-            activity.onNewIntent(Intent(activity, MainActivity::class.java).putExtra("tab", 5))
+            activity.onNewIntent(Intent(activity.intent).putExtra("tab", 5))
             assertEquals(
                 R.id.nav_item_plan,
                 activity.findViewById<BottomNavigationView>(R.id.bottom_navigation).selectedItemId

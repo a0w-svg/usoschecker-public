@@ -1,5 +1,8 @@
 package pl.vistula.checker.ui
 
+import androidx.core.content.edit
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
@@ -291,8 +294,8 @@ class AccountScreenController private constructor() {
                 UiHelper.add(activity, box, activity.getString(R.string.connect_usos_desc), 14, UiHelper.MUTED, false)
                 box.addView(UiHelper.actionRow(activity, activity.getString(R.string.welcome_reopen), { activity.showWelcome(1) }, false))
 
-                val buildKey = BuildConfig.USOS_KEY?.trim() ?: ""
-                val buildSecret = BuildConfig.USOS_SECRET?.trim() ?: ""
+                val buildKey = BuildConfig.USOS_KEY.trim()
+                val buildSecret = BuildConfig.USOS_SECRET.trim()
                 var defaultKey = state.optString("key", buildKey)
                 if (defaultKey.isEmpty()) defaultKey = buildKey
                 var defaultSecret = state.optString("secret", buildSecret)
@@ -325,11 +328,11 @@ class AccountScreenController private constructor() {
                         activity,
                         activity.getString(R.string.login_settings),
                         {
-                            if (setup.visibility == View.GONE) {
+                            if (setup.isGone) {
                                 setup.visibility = View.VISIBLE
                                 advanced.visibility = View.VISIBLE
                             } else {
-                                advanced.visibility = if (advanced.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+                                advanced.visibility = if (advanced.isVisible) View.GONE else View.VISIBLE
                             }
                         },
                         false
@@ -541,7 +544,7 @@ class AccountScreenController private constructor() {
             reminderSwitch.isChecked = remindersOn
             reminderSwitch.setTextColor(UiHelper.foreground(activity, UiHelper.INK))
             reminderSwitch.setOnCheckedChangeListener { _, isChecked ->
-                toolsPrefs.edit().putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, isChecked).apply()
+                toolsPrefs.edit { putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, isChecked) }
                 if (isChecked) {
                     ClassReminderReceiver.scheduleNext(activity)
                     if (!ClassReminderReceiver.canNotify(activity)) listener.onRequestNotifications()
@@ -571,7 +574,7 @@ class AccountScreenController private constructor() {
                     reminderMin.toString()
                 ) { value ->
                     val min = value.toInt()
-                    toolsPrefs.edit().putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, min).apply()
+                    toolsPrefs.edit { putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, min) }
                     ClassReminderReceiver.scheduleNext(activity)
                     activity.navigate(4)
                 }

@@ -3,16 +3,14 @@
     <string name="details_expanded">Розгорнуто</string>
     <string name="details_collapsed">Згорнуто</string>
     <string name="simple_details">Подробиці</string>
-    <string name="settings_title">Налаштування</string>
-    <string name="settings_profile">Профіль студента</string>
+<string name="settings_profile">Профіль студента</string>
     <string name="settings_access">Доступ до даних USOS</string>
     <string name="settings_access_hint">Виберіть потрібні функції. Доступ підтверджується під час входу в USOS.</string>
     <string name="settings_scope_advanced">Розширені дозволи</string>
     <string name="settings_sync_hint">Телефон може затримувати фонові перевірки для економії заряду.</string>
     <string name="settings_about">Інформація та допомога</string>
     <string name="settings_personalization">Вигляд і мова</string>
-    <string name="settings_basic_access">Оцінки та навчання</string>
-    <string name="settings_tests_access">Результати тестів</string>
+<string name="settings_tests_access">Результати тестів</string>
     <string name="settings_profile_access">Фото та електронна пошта</string>
     <string name="services_cached_note">Показано збережені дані. Оновлення не вдалося.</string>
     <string name="services_not_loaded">Дані ще не завантажено.</string>
@@ -21,6 +19,4 @@
     <string name="gpa_assumptions">Правила й додаткові розрахунки</string>
     <string name="api_documentation">Документація методу</string>
     <string name="api_catalog_scope_note">Перелік методів не означає, що ваш обліковий запис має до них доступ.</string>
-    <string name="payments_currency_total">Сума несплачених внесків: %1$.2f %2$s</string>
-    <string name="services_news_limit">Показано до 50 останніх оголошень.</string>
 </resources>

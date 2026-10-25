@@ -45,6 +45,21 @@ class LocalizationTest(unittest.TestCase):
                 if key[0] == "string-array":
                     self.assertEqual(len(original), len(translated[key]), f"{language}/{key}")
 
+    def test_plural_forms_preserve_format_arguments(self):
+        pattern = re.compile(r"%(?:(\d+)\$)?[\d.]*([sdf])")
+        base = resources("values")
+        for language in ("values", "values-en", "values-uk"):
+            translated = resources(language)
+            for key, original in base.items():
+                if key[0] != "plurals":
+                    continue
+                expected = sorted(pattern.findall(original.find("item[@quantity='other']").text))
+                forms = translated[key]
+                required = {"one", "other"} if language == "values-en" else {"one", "few", "many", "other"}
+                self.assertTrue(required.issubset({item.get("quantity") for item in forms}), f"{language}/{key}")
+                for item in forms:
+                    self.assertEqual(expected, sorted(pattern.findall(item.text)), f"{language}/{key}/{item.get('quantity')}")
+
 
 if __name__ == "__main__":
     unittest.main()

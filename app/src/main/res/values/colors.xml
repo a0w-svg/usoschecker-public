@@ -1,20 +1,19 @@
-<resources>
-    <color name="app_accent">#08768A</color>
-    <color name="app_ink">#202326</color>
-    <color name="app_muted">#485156</color>
-    <color name="app_faint">#555F65</color>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
+    <color name="app_accent">#07708F</color>
+    <color name="app_ink">#1B1E21</color>
+    <color name="app_muted">#5B6268</color>
+    <color name="app_faint">#626A70</color>
     <color name="app_error">#B3261E</color>
     <color name="app_outline_widget">#C4CACD</color>
-    <color name="app_accent_container">#E0F1F4</color>
+    <color name="app_accent_container">#DCEBF0</color>
     <color name="app_outline_soft">#E1E4E5</color>
-    <color name="app_secondary_container">#E4E8E9</color>
+    <color name="app_secondary_container">#E9E9EA</color>
     <color name="app_outline_inner">#E6E9EA</color>
     <color name="app_button_surface">#EDF0F1</color>
-    <color name="app_mint_surface">#F0F7F8</color>
-    <color name="app_surface_high">#FFFFFF</color>
+<color name="app_surface_high">#FBFBFC</color>
     <color name="app_inner_surface">#F0F2F3</color>
-    <color name="app_background">#F6F7F8</color>
-    <color name="app_card">#FFFFFF</color>
+    <color name="app_background">#EEF0F2</color>
+    <color name="app_card">#FBFBFC</color>
     <color name="app_brand_surface">#123D46</color>
     <color name="app_warning">#875000</color>
     <color name="app_disabled_content">#555F65</color>

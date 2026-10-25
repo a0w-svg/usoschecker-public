@@ -21,10 +21,10 @@ kotlin {
 dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.material3)
-    implementation(compose.ui)
+    implementation("org.jetbrains.compose.runtime:runtime:1.12.2")
+    implementation("org.jetbrains.compose.foundation:foundation:1.12.2")
+    implementation("org.jetbrains.compose.material3:material3:1.9.0")
+    implementation("org.jetbrains.compose.ui:ui:1.12.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.11.0")
     implementation("org.json:json:20260814")
@@ -37,7 +37,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb, TargetFormat.Dmg)
             packageName = "VistulaChecker"
-            packageVersion = "1.5.0"
+            packageVersion = "1.5.1"
             description = "Vistula USOS Checker Desktop (Compose Multiplatform)"
             vendor = "Vistula Checker"
             modules("java.net.http", "java.prefs", "java.sql", "jdk.crypto.ec")

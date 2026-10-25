@@ -10,6 +10,19 @@ import androidx.compose.ui.unit.dp
 
 /** Pure-Kotlin vector icons for Compose Multiplatform (no emoji icons). */
 object VistulaIcons {
+    val Search: ImageVector by lazy {
+        ImageVector.Builder(name = "Search", defaultWidth = 24.dp, defaultHeight = 24.dp,
+            viewportWidth = 24f, viewportHeight = 24f).apply {
+            path(stroke = SolidColor(Color.Black), strokeLineWidth = 1.7f,
+                strokeLineCap = StrokeCap.Round, strokeLineJoin = StrokeJoin.Round) {
+                moveTo(20f, 20f); lineTo(15.5f, 15.5f)
+                moveTo(17f, 10f)
+                arcTo(7f, 7f, 0f, true, true, 3f, 10f)
+                arcTo(7f, 7f, 0f, true, true, 17f, 10f)
+                close()
+            }
+        }.build()
+    }
     val Home: ImageVector by lazy {
         ImageVector.Builder(
             name = "Home",

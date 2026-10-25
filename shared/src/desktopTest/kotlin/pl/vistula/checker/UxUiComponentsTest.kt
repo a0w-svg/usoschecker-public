@@ -9,6 +9,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import pl.vistula.checker.core.LessonTime
 import pl.vistula.checker.ui.compose.DarkColors
+import pl.vistula.checker.ui.compose.DarkTokens
+import pl.vistula.checker.ui.compose.LightTokens
 import pl.vistula.checker.ui.compose.LightColors
 import pl.vistula.checker.ui.compose.OledColors
 import pl.vistula.checker.ui.compose.TimelineLanePlanner
@@ -17,6 +19,16 @@ import pl.vistula.checker.ui.compose.VistulaContrast
 import pl.vistula.checker.ui.compose.VistulaIcons
 
 class UxUiComponentsTest {
+
+    @Test fun prototypeSecondaryTextKeepsContrastOnEveryReadingSurface() {
+        for (tokens in listOf(DarkTokens, LightTokens)) {
+            for (text in listOf(tokens.text, tokens.muted, tokens.quiet)) {
+                for (surface in listOf(tokens.bg, tokens.surface, tokens.surface2)) {
+                    assertTrue(VistulaContrast.contrastRatio(text, surface) >= 4.5)
+                }
+            }
+        }
+    }
 
     @Test
     fun uiStringsAllLanguagesAreCompleteAndNonBlank() {
@@ -36,9 +48,9 @@ class UxUiComponentsTest {
             assertFalse(s.btnSync.isBlank(), "btnSync blank for $lang")
             assertFalse(s.attendanceOk.isBlank(), "attendanceOk blank for $lang")
         }
-        assertEquals("Start", UiStrings.forLanguage("pl").tabHome)
-        assertEquals("Home", UiStrings.forLanguage("en").tabHome)
-        assertEquals("Старт", UiStrings.forLanguage("uk").tabHome)
+        assertEquals("Dzisiaj", UiStrings.forLanguage("pl").tabHome)
+        assertEquals("Today", UiStrings.forLanguage("en").tabHome)
+        assertEquals("Сьогодні", UiStrings.forLanguage("uk").tabHome)
     }
 
     @Test
@@ -72,13 +84,13 @@ class UxUiComponentsTest {
         val lessons = listOf(
             LessonTime.of(
                 pl.vistula.checker.core.Record("1", "plan", "Algorytmy (Wykład)", "08:00 - 09:30", "B1", "2026-10-19", "", "2026-10-19 08:00:00", "2026-10-19 09:30:00")
-            )!!,
+            ),
             LessonTime.of(
                 pl.vistula.checker.core.Record("2", "plan", "Bazy danych (Lab)", "08:30 - 10:00", "309", "2026-10-19", "", "2026-10-19 08:30:00", "2026-10-19 10:00:00")
-            )!!,
+            ),
             LessonTime.of(
                 pl.vistula.checker.core.Record("3", "plan", "Sieci komputerowe", "10:15 - 11:45", "112", "2026-10-19", "", "2026-10-19 10:15:00", "2026-10-19 11:45:00")
-            )!!
+            )
         )
         val placed = TimelineLanePlanner.placeLessons(lessons, day)
         assertEquals(3, placed.size)

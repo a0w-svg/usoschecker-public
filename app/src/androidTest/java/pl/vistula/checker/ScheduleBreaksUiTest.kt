@@ -6,7 +6,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.util.regex.Pattern
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -23,7 +23,7 @@ import pl.vistula.checker.ui.ScheduleScreenController
 class ScheduleBreaksUiTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     private fun lesson(id: String, time: String): Record = Record(id, "plan", id, time, "", "2026-10-15")
 

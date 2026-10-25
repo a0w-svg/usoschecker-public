@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.replaceText
@@ -23,7 +25,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -40,7 +42,7 @@ import org.junit.runner.RunWith
 class MoreNavigationRegressionTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     private fun main(action: Runnable) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(action)
@@ -75,6 +77,7 @@ class MoreNavigationRegressionTest {
             R.id.nav_item_more
         )) {
             onView(withId(R.id.bottom_navigation)).perform(swipeLeft())
+            main { assertNavigation(id) }
             onView(withId(id)).check(matches(isSelected()))
         }
         for (id in intArrayOf(
@@ -85,8 +88,18 @@ class MoreNavigationRegressionTest {
             R.id.nav_item_home
         )) {
             onView(withId(R.id.bottom_navigation)).perform(swipeRight())
+            main { assertNavigation(id) }
             onView(withId(id)).check(matches(isSelected()))
         }
+    }
+
+    private fun assertNavigation(expected: Int) {
+        val bar = rule.activity.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_navigation)
+        val states = (0 until bar.menu.size).joinToString { index ->
+            val item = bar.menu[index]
+            "${item.title}:checked=${item.isChecked},selected=${bar.findViewById<View>(item.itemId).isSelected}"
+        }
+        assertEquals("Navigation state after gesture: $states; width=${bar.width}, viewport=${(bar.parent as View).width}", expected, bar.selectedItemId)
     }
 
     @Test
@@ -156,15 +169,18 @@ class MoreNavigationRegressionTest {
             rule.activity.navigate(6)
             val content = rule.activity.findViewById<LinearLayout>(R.id.main_content)
             var count = 0
-            for (i in 0 until content.childCount) {
-                val icon = content.getChildAt(i).findViewById<TextView>(R.id.tool_tile_icon)
-                if (icon != null) {
+            fun verifyRows(view: View) {
+                if (view.id == R.id.tool_tile_root) {
+                    val icon = view.findViewById<TextView>(R.id.tool_tile_icon)
                     count++
                     assertEquals("", icon.text.toString())
-                    assertNotNull(icon.compoundDrawables[0])
+                    assertEquals(View.GONE, icon.visibility)
+                    assertTrue(view.isClickable && view.isFocusable)
                 }
+                if (view is ViewGroup) repeat(view.childCount) { verifyRows(view.getChildAt(it)) }
             }
-            assertEquals(10, count)
+            verifyRows(content)
+            assertEquals(11, count)
         }
         screenshot("more")
         val tabs = intArrayOf(7, 8, 9, 10, 11, 12, 13, 14, 3, 4)

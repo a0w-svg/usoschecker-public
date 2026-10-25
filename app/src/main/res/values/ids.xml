@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <item name="home_open_schedule" type="id" />
     <item name="home_open_grades" type="id" />
     <item name="home_open_tasks" type="id" />
@@ -18,4 +18,5 @@
     <item name="tasks_add" type="id"/>
     <item name="tool_screen_more" type="id"/>
     <item name="document_more" type="id"/>
+    <item name="schedule_week_strip" type="id" />
 </resources>

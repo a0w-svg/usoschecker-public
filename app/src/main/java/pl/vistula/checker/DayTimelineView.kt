@@ -140,7 +140,7 @@ class DayTimelineView private constructor(
             block.isClickable = true
             block.isFocusable = true
             block.setOnClickListener { click.accept(item.lesson) }
-            addView(block)
+            addView(block, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         }
         finishGroup(group)
         addView(Lines(context, true), LayoutParams(-1, -1))
@@ -160,18 +160,11 @@ class DayTimelineView private constructor(
             val targetHeight = max(dp(24), dp((item.end - item.start) * HOUR_HEIGHT / 60f) - dp(2))
             val targetLeft = dp(GUTTER) + item.column * width
             val targetTop = dp((item.start - firstHour * 60) * HOUR_HEIGHT / 60f + 8)
-            val rawLp = item.view.layoutParams
-            if (rawLp is LayoutParams) {
-                rawLp.width = targetWidth
-                rawLp.height = targetHeight
-                rawLp.leftMargin = targetLeft
-                rawLp.topMargin = targetTop
-            } else {
-                val p = LayoutParams(targetWidth, targetHeight)
-                p.leftMargin = targetLeft
-                p.topMargin = targetTop
-                item.view.layoutParams = p
-            }
+            val params = item.view.layoutParams as LayoutParams
+            params.width = targetWidth
+            params.height = targetHeight
+            params.leftMargin = targetLeft
+            params.topMargin = targetTop
         }
         super.onMeasure(widthSpec, heightSpec)
     }
@@ -194,7 +187,7 @@ class DayTimelineView private constructor(
 
         override fun onDraw(canvas: Canvas) {
             if (!nowOnly) {
-                paint.textSize = 11 * resources.displayMetrics.scaledDensity
+                paint.textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 11f, resources.displayMetrics)
                 for (hour in firstHour..lastHour) {
                     val y = dp((hour - firstHour) * HOUR_HEIGHT + 8).toFloat()
                     paint.color = labelColor

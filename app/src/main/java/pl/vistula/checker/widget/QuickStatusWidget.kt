@@ -58,7 +58,7 @@ class QuickStatusWidget : AppWidgetProvider() {
                 context,
                 201,
                 openHome,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_status_root, piHome)
 
@@ -70,7 +70,7 @@ class QuickStatusWidget : AppWidgetProvider() {
                 context,
                 202,
                 openGrades,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_grades_box, piGrades)
 
@@ -82,7 +82,7 @@ class QuickStatusWidget : AppWidgetProvider() {
                 context,
                 203,
                 openPayments,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_payments_box, piPayments)
 
@@ -92,7 +92,7 @@ class QuickStatusWidget : AppWidgetProvider() {
                 context,
                 204,
                 refreshIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_status_refresh, refreshPi)
 

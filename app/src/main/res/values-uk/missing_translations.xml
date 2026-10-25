@@ -17,8 +17,18 @@
     <string name="notification_reminders_description">Нагадування про заняття та терміни</string>
     <string name="notification_schedule_single">Зміна розкладу: %1$s</string>
     <string name="notification_schedule_count">Зміни розкладу (%1$d)</string>
-    <string name="notification_schedule_body">Виявлено зміни у %1$d заняттях.</string>
-    <string name="notification_more_changes">+ ще %1$d змін</string>
+    <plurals name="notification_schedule_body">
+        <item quantity="one">Виявлено зміни в %1$d занятті.</item>
+        <item quantity="few">Виявлено зміни в %1$d заняттях.</item>
+        <item quantity="many">Виявлено зміни в %1$d заняттях.</item>
+        <item quantity="other">Виявлено зміни в %1$d заняття.</item>
+    </plurals>
+    <plurals name="notification_more_changes">
+        <item quantity="one">+ ще %1$d зміна</item>
+        <item quantity="few">+ ще %1$d зміни</item>
+        <item quantity="many">+ ще %1$d змін</item>
+        <item quantity="other">+ ще %1$d зміни</item>
+    </plurals>
     <string name="notification_open_schedule">Відкрити розклад</string>
     <string name="notification_open_grades">Відкрити оцінки</string>
     <string name="notification_test_title">Тест сповіщень: нова оцінка</string>

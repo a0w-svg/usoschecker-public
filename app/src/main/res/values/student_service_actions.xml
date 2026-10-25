@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <string name="news_source_university">Źródło: oficjalna strona Vistuli</string>
     <string name="news_source_usos">Źródło: USOS — komunikaty uczelni</string>
     <string name="news_usos_action">Pobierz komunikaty z USOS</string>

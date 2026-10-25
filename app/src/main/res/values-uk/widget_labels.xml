@@ -1,0 +1,9 @@
+<resources>
+    <string name="widget_status_brand">Vistula · Картка студента</string>
+    <string name="widget_grades_heading">СЕРЕДНІЙ БАЛ ТА ОЦІНКИ</string>
+    <string name="widget_payments_heading">ПЛАТЕЖІ</string>
+    <string name="widget_open_app">Торкніться, щоб відкрити застосунок</string>
+    <string name="widget_schedule_brand">Vistula · Розклад</string>
+    <string name="widget_open_schedule">Торкніться, щоб відкрити розклад</string>
+    <string name="lesson_conflict">КОНФЛІКТ</string>
+</resources>

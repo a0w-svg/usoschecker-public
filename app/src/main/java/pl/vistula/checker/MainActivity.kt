@@ -1,5 +1,9 @@
 package pl.vistula.checker
 
+import androidx.core.content.edit
+import androidx.core.view.isVisible
+import androidx.core.view.get
+import androidx.core.view.size
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.ClipboardManager
@@ -25,6 +29,9 @@ import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.OneShotPreDrawListener
@@ -111,11 +118,13 @@ class MainActivity : AppCompatActivity() {
     fun gradeSemesterExpansion(): MutableMap<String, Boolean> = gradeSemesterExpansion
 
     private var semester: String = ""
+    private var semesterInitialized = false
     private var taskFilter: String = "all"
     private var taskQuery: String = ""
     private var pendingCalendar: String? = null
     private var taskOrder: String = "due"
     private var calendarDate: String = ""
+    private var calendarDateSelected: Boolean = false
     private var calendarMode: String = "list"
     private var calendarQuery: String = ""
     private var focusCurrentSchedule: Boolean = false
@@ -137,9 +146,23 @@ class MainActivity : AppCompatActivity() {
     private var apiFavorites: MutableSet<String> = HashSet()
     private var currentMethod: String? = null
     private var currentMethodJson: JSONObject? = null
-    private var uploadBytes: ByteArray? = null
+    private lateinit var pendingFiles: PendingFilesModel
+    private var uploadBytes: ByteArray?
+        get() = pendingFiles.upload
+        set(value) { pendingFiles.upload = value }
     private var uploadMethod: String? = null
-    private var exportResponse: UsosClient.Response? = null
+    private var exportResponse: UsosClient.Response?
+        get() = pendingFiles.export
+        set(value) { pendingFiles.export = value }
+    private val selectUpload = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        onDocumentResult(21, result.resultCode, result.data)
+    }
+    private val createExport = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        onDocumentResult(22, result.resultCode, result.data)
+    }
+    private val createCalendar = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        onDocumentResult(23, result.resultCode, result.data)
+    }
 
     private lateinit var repository: Repository
     private val handler: Handler = Handler(Looper.getMainLooper())
@@ -160,11 +183,13 @@ class MainActivity : AppCompatActivity() {
         Appearance.apply(this)
         super.onCreate(bundle)
         ReleaseUpdateWorker.schedule(applicationContext)
-        val retained = lastCustomNonConfigurationInstance
-        if (retained is PendingFiles) {
-            exportResponse = retained.export
-            uploadBytes = retained.upload
-        }
+        pendingFiles = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                require(modelClass == PendingFilesModel::class.java)
+                return PendingFilesModel() as T
+            }
+        })[PendingFilesModel::class.java]
         repository = Repository(this)
         onBackPressedDispatcher.addCallback(
             this,
@@ -216,10 +241,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             calendarDate = bundle.getString("calendarDate", "")
+            calendarDateSelected = bundle.getBoolean("calendarDateSelected", false)
             calendarQuery = bundle.getString("calendarQuery", "")
             calendarMode = bundle.getString("calendarMode", calendarMode)
             demoPlanDays = bundle.getInt("demoPlanDays", 56)
             semester = bundle.getString("semester", "")
+            semesterInitialized = bundle.getBoolean("semesterInitialized", bundle.containsKey("semester"))
             taskFilter = bundle.getString("taskFilter", "all")
             taskQuery = bundle.getString("taskQuery", "")
             pendingCalendar = bundle.getString("pendingCalendar")
@@ -262,21 +289,45 @@ class MainActivity : AppCompatActivity() {
             val indicatorHeight = max(48, (40 * resources.configuration.fontScale).toInt())
             nav.itemActiveIndicatorExpandedHeight = UiHelper.dp(this, indicatorHeight)
             nav.minimumHeight = UiHelper.dp(this, indicatorHeight + 16)
-            if (resources.configuration.fontScale > 1.3f) {
-                // Keep full labels at accessibility sizes; let the user scroll the tabs.
+            run {
+                // Measure translated labels, rather than assuming a font-scale threshold fits every phone.
                 val parent = nav.parent as LinearLayout
                 val position = parent.indexOfChild(nav)
                 val outerParams = nav.layoutParams
                 parent.removeView(nav)
                 val viewport = HorizontalScrollView(this).apply {
-                    isHorizontalScrollBarEnabled = true
+                    isHorizontalScrollBarEnabled = false
                     isFillViewport = true
+                    background = nav.background
+                    clipToOutline = true
+                    addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
+                        (view.background?.mutate() as? android.graphics.drawable.GradientDrawable)?.cornerRadius = view.height / 2f
+                    }
                 }
-                val width = UiHelper.dp(this, (90 * resources.configuration.fontScale * nav.menu.size()).toInt())
-                nav.minimumWidth = width
+                nav.background = null
                 nav.setLabelMaxLines(1)
-                viewport.addView(nav, android.widget.FrameLayout.LayoutParams(width, -2))
+                viewport.addView(nav, android.widget.FrameLayout.LayoutParams(-1, -2))
                 parent.addView(viewport, position, outerParams)
+                root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+                    val paint = android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 12f, resources.displayMetrics)
+                    }
+                    val required = (nav as? SwipeNavigationView)?.requiredItemWidth()
+                        ?: ((0 until nav.menu.size).maxOf { paint.measureText(nav.menu[it].title.toString()) }.toInt() + UiHelper.dp(this, 24))
+                    val available = (root.width - root.paddingLeft - root.paddingRight - UiHelper.dp(this, 24)).coerceAtLeast(0)
+                    val viewportWidth = minOf(available, UiHelper.dp(this, 560))
+                    val params = viewport.layoutParams as LinearLayout.LayoutParams
+                    if (params.width != viewportWidth) {
+                        params.width = viewportWidth; params.gravity = android.view.Gravity.CENTER_HORIZONTAL
+                        viewport.layoutParams = params
+                    }
+                    val width = max(viewportWidth, max(UiHelper.dp(this, 48), required) * nav.menu.size)
+                    if (nav.layoutParams.width != width) {
+                        nav.minimumWidth = width
+                        nav.layoutParams = nav.layoutParams.apply { this.width = width }
+                    }
+                    (nav as? SwipeNavigationView)?.setTabScrolling(width > viewportWidth)
+                }
             }
         }
 
@@ -284,7 +335,7 @@ class MainActivity : AppCompatActivity() {
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime())
             root.setPadding(bars.left, bars.top, bars.right, max(bars.bottom, keyboard.bottom))
-            navigation?.visibility = if (insets.isVisible(WindowInsetsCompat.Type.ime()) || (welcomeStep >= 0 && !demo)) View.GONE else View.VISIBLE
+            setNavigationVisible(!(welcomeStep >= 0 && !demo), insets.isVisible(WindowInsetsCompat.Type.ime()))
             WindowInsetsCompat.CONSUMED
         }
 
@@ -323,9 +374,6 @@ class MainActivity : AppCompatActivity() {
             val next = current + direction
             if (next in tabs.indices) navigate(tabs[next])
         }
-        if (resources.configuration.fontScale > 1.3f) {
-            (navigation as? SwipeNavigationView)?.setOnTabSwipe(null)
-        }
 
         navigation?.setOnItemReselectedListener { item ->
             if (!busy && item.itemId == R.id.nav_item_more && tab != 6) navigate(6)
@@ -341,7 +389,7 @@ class MainActivity : AppCompatActivity() {
                 val welcome = getSharedPreferences("welcome", MODE_PRIVATE)
                 if (!welcome.getBoolean("seen", false)) {
                     if (state.optString("token").isNotEmpty() || state.optString("key").isNotEmpty()) {
-                        welcome.edit().putBoolean("seen", true).apply()
+                        welcome.edit { putBoolean("seen", true) }
                     } else if (!demo) {
                         welcomeStep = welcome.getInt("step", 0).coerceIn(0, 1)
                     }
@@ -358,51 +406,53 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    override fun onSaveInstanceState(out: Bundle) {
-        out.putInt("welcomeStep", welcomeStep)
-        out.putString("settingsPage", settingsPage)
-        out.putString("demoCampus", demoCampus)
-        out.putString("documentQuery", documentQuery)
-        out.putString("apiModule", apiModule)
-        out.putString("currentMethod", currentMethod)
-        out.putString("uploadMethod", uploadMethod)
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("welcomeStep", welcomeStep)
+        outState.putString("settingsPage", settingsPage)
+        outState.putString("demoCampus", demoCampus)
+        outState.putString("documentQuery", documentQuery)
+        outState.putString("apiModule", apiModule)
+        outState.putString("currentMethod", currentMethod)
+        outState.putString("uploadMethod", uploadMethod)
         try {
-            out.putString("apiDrafts", ApiCatalog.restorableDrafts(apiDrafts).toString())
+            outState.putString("apiDrafts", ApiCatalog.restorableDrafts(apiDrafts).toString())
         } catch (ignored: JSONException) {
         }
-        out.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
-        out.putString("calendarQuery", calendarQuery)
-        out.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
-        out.putDouble("simTargetGpa", simTargetGpa)
-        out.putDouble("simRemainingEcts", simRemainingEcts)
-        super.onSaveInstanceState(out)
-        out.putBoolean("demo", demo)
-        out.putBoolean("demoChanged", demoChanged)
-        out.putInt("tab", tab)
-        out.putString("filter", filter)
-        out.putString("semester", semester)
-        out.putString("taskFilter", taskFilter)
-        out.putString("taskQuery", taskQuery)
-        out.putString("taskOrder", taskOrder)
-        out.putString("calendarDate", calendarDate)
-        out.putString("calendarMode", calendarMode)
-        out.putInt("demoPlanDays", demoPlanDays)
-        out.putString("pendingCalendar", pendingCalendar)
-        out.putString("newsQuery", newsQuery)
-        out.putString("attendanceFilter", attendanceFilter)
-        out.putString("demoTasks", demoTasks.toString())
-        out.putString("historyQuery", historyQuery)
-        out.putString("gradeQuery", gradeQuery)
-        out.putString("gradeType", gradeType)
-        out.putString("gradeOrder", gradeOrder)
-        out.putBoolean("gradeFiltersExpanded", gradeFiltersExpanded)
+        outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
+        outState.putString("calendarQuery", calendarQuery)
+        outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
+        outState.putDouble("simTargetGpa", simTargetGpa)
+        outState.putDouble("simRemainingEcts", simRemainingEcts)
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("demo", demo)
+        outState.putBoolean("demoChanged", demoChanged)
+        outState.putInt("tab", tab)
+        outState.putString("filter", filter)
+        outState.putString("semester", semester)
+        outState.putBoolean("semesterInitialized", semesterInitialized)
+        outState.putString("taskFilter", taskFilter)
+        outState.putString("taskQuery", taskQuery)
+        outState.putString("taskOrder", taskOrder)
+        outState.putString("calendarDate", calendarDate)
+        outState.putBoolean("calendarDateSelected", calendarDateSelected)
+        outState.putString("calendarMode", calendarMode)
+        outState.putInt("demoPlanDays", demoPlanDays)
+        outState.putString("pendingCalendar", pendingCalendar)
+        outState.putString("newsQuery", newsQuery)
+        outState.putString("attendanceFilter", attendanceFilter)
+        outState.putString("demoTasks", demoTasks.toString())
+        outState.putString("historyQuery", historyQuery)
+        outState.putString("gradeQuery", gradeQuery)
+        outState.putString("gradeType", gradeType)
+        outState.putString("gradeOrder", gradeOrder)
+        outState.putBoolean("gradeFiltersExpanded", gradeFiltersExpanded)
         val expandedTerms = Bundle()
         for ((key, value) in gradeSemesterExpansion) {
             expandedTerms.putBoolean(key, value)
         }
-        out.putBundle("gradeSemesterExpansion", expandedTerms)
-        out.putString("apiQuery", apiQuery)
-        out.putInt("apiLimit", apiLimit)
+        outState.putBundle("gradeSemesterExpansion", expandedTerms)
+        outState.putString("apiQuery", apiQuery)
+        outState.putInt("apiLimit", apiLimit)
     }
 
     public override fun onNewIntent(intent: Intent) {
@@ -457,13 +507,11 @@ class MainActivity : AppCompatActivity() {
         io.shutdown()
     }
 
-    override fun onRetainCustomNonConfigurationInstance(): Any =
-        PendingFiles(exportResponse, uploadBytes)
-
-    private class PendingFiles(
-        val export: UsosClient.Response?,
-        val upload: ByteArray?
-    )
+    private class PendingFilesModel : ViewModel() {
+        var export: UsosClient.Response? = null
+        var upload: ByteArray? = null
+        override fun onCleared() { export = null; upload = null }
+    }
 
     fun navigate(target: Int) {
         navigate(target, true)
@@ -471,8 +519,16 @@ class MainActivity : AppCompatActivity() {
 
     fun openScheduleDate(date: String) {
         calendarDate = date
+        calendarDateSelected = true
         navigate(5, false)
     }
+
+    fun selectScheduleDay(date: String) {
+        calendarMode = "day"
+        openScheduleDate(date)
+    }
+
+    fun hasSelectedScheduleDay(): Boolean = calendarDateSelected
 
     private fun navigate(target: Int, focusCurrent: Boolean) {
         welcomeStep = -1
@@ -484,6 +540,7 @@ class MainActivity : AppCompatActivity() {
             keyboard?.hideSoftInputFromWindow(root.windowToken, 0)
         }
         focusCurrentSchedule = focusCurrent && target == 5 && tab != 5
+        if (focusCurrentSchedule) calendarDateSelected = false
         currentMethod = null
         currentMethodJson = null
         tab = target
@@ -501,12 +558,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setNavigationVisible(visible: Boolean, keyboardVisible: Boolean = ViewCompat.getRootWindowInsets(root)?.isVisible(WindowInsetsCompat.Type.ime()) == true) {
+        val nav = navigation ?: return
+        val visibility = if (visible && !keyboardVisible) View.VISIBLE else View.GONE
+        nav.visibility = visibility
+        (nav.parent as? HorizontalScrollView)?.visibility = visibility
+    }
+
     fun render() {
         if (isDestroyed) return
         renderedMinute = System.currentTimeMillis() / 60000
         content.removeAllViews()
         setScheduleNavigation(null)
-        val gutter = max(20, (resources.configuration.screenWidthDp - 560) / 2)
+        val gutter = max(16, (resources.configuration.screenWidthDp - 560) / 2)
         content.setPadding(
             UiHelper.dp(this, gutter),
             UiHelper.dp(this, if (tab == 5) 0 else 12),
@@ -514,11 +578,11 @@ class MainActivity : AppCompatActivity() {
             UiHelper.dp(this, 24)
         )
         if (welcomeStep >= 0 && !demo && state.optString("token").isEmpty()) {
-            navigation?.visibility = View.GONE
+            setNavigationVisible(false)
             pl.vistula.checker.ui.WelcomeScreenController.render(this, content, welcomeStep)
             return
         }
-        navigation?.visibility = View.VISIBLE
+        setNavigationVisible(true)
         navigation?.let { nav ->
             val navMenuId = when (tab) {
                 2 -> R.id.nav_item_grades
@@ -531,14 +595,20 @@ class MainActivity : AppCompatActivity() {
             (nav.parent as? HorizontalScrollView)?.let { viewport ->
                 nav.post {
                     nav.findViewById<View>(navMenuId)?.let { item ->
-                        viewport.smoothScrollTo(item.left - (viewport.width - item.width) / 2, 0)
+                        // A zero-distance smooth scroll still starts a fling animation in
+                        // HorizontalScrollView and can consume the next tap or swipe.
+                        val target = if (nav.width > viewport.width) item.left - (viewport.width - item.width) / 2 else 0
+                        viewport.scrollTo(target.coerceAtLeast(0), 0)
                     }
                 }
             }
         }
 
         try {
-            if (demo) UiHelper.note(this, content, getString(R.string.demo_banner_note), UiHelper.MUTED)
+            if (demo) content.addView(UiHelper.text(this, getString(R.string.demo_banner_note), 11, UiHelper.MUTED, false).apply {
+                gravity = android.view.Gravity.CENTER
+                setPadding(0, 0, 0, UiHelper.dp(this@MainActivity, 8))
+            })
 
             when (tab) {
                 15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, state)
@@ -564,7 +634,16 @@ class MainActivity : AppCompatActivity() {
                     { q -> historyQuery = q },
                     { sync() }
                 )
-                2 -> GradesScreenController.render(
+                2 -> {
+                    if (!semesterInitialized) {
+                        display().optJSONObject("snapshot")?.let { raw ->
+                            val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
+                            semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
+                                ?: pl.vistula.checker.core.GradeSemesters.ordered(snapshot, java.time.LocalDate.now(UsosClient.ZONE)).firstOrNull().orEmpty()
+                            semesterInitialized = true
+                        }
+                    }
+                    GradesScreenController.render(
                     this,
                     content,
                     display(),
@@ -590,7 +669,7 @@ class MainActivity : AppCompatActivity() {
                     },
                     { go ->
                         gradeOrder = go
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit().putString("gradeOrder", go).apply()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", go) }
                         render()
                     },
                     { gq -> gradeQuery = gq },
@@ -600,7 +679,7 @@ class MainActivity : AppCompatActivity() {
                         gradeQuery = ""
                         gradeOrder = "name"
                         gradeSemesterExpansion.clear()
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit().putString("gradeOrder", gradeOrder).apply()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", gradeOrder) }
                         render()
                     },
                     { sync() },
@@ -614,6 +693,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 )
+                }
                 3 -> {
                     val method = currentMethod
                     val methodJson = currentMethodJson
@@ -635,23 +715,20 @@ class MainActivity : AppCompatActivity() {
                                     metadata: JSONObject,
                                     values: Map<String, String>,
                                     method: String,
-                                    upload: ByteArray?,
+                                    uploadBytes: ByteArray?,
                                     onSuccess: Consumer<UsosClient.Response>,
                                     onFailure: Consumer<String>
                                 ) {
-                                    executeApiRequest(metadata, values, method, upload, onSuccess, onFailure)
+                                    executeApiRequest(metadata, values, method, uploadBytes, onSuccess, onFailure)
                                 }
 
-                                override fun onSelectUploadFile(method: String) {
-                                    uploadMethod = method
-                                    startActivityForResult(
-                                        Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE),
-                                        21
-                                    )
+                                override fun onSelectUploadFile(currentMethod: String) {
+                                    uploadMethod = currentMethod
+                                    selectUpload.launch(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE))
                                 }
 
-                                override fun onSaveResponse(resp: UsosClient.Response) {
-                                    saveResponseFile(resp, "usos-response")
+                                override fun onSaveResponse(response: UsosClient.Response) {
+                                    saveResponseFile(response, "usos-response")
                                 }
                             }
                         )
@@ -783,6 +860,7 @@ class MainActivity : AppCompatActivity() {
                         override fun onStartDemo() {
                             gradeSemesterExpansion.clear()
                             semester = ""
+                            semesterInitialized = false
                             demo = true
                             tab = 0
                             render()
@@ -861,7 +939,7 @@ class MainActivity : AppCompatActivity() {
                     },
                     { to ->
                         taskOrder = to
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit().putString("taskOrder", to).apply()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("taskOrder", to) }
                         render()
                     },
                     { tq -> taskQuery = tq },
@@ -920,13 +998,13 @@ class MainActivity : AppCompatActivity() {
 
     fun showWelcome(step: Int = 0) {
         welcomeStep = step.coerceIn(0, 1)
-        getSharedPreferences("welcome", MODE_PRIVATE).edit().putInt("step", welcomeStep).apply()
+        getSharedPreferences("welcome", MODE_PRIVATE).edit { putInt("step", welcomeStep) }
         render()
         scroll.scrollTo(0, 0)
     }
 
     fun finishWelcome(startDemo: Boolean, configure: Boolean) {
-        getSharedPreferences("welcome", MODE_PRIVATE).edit().putBoolean("seen", true).remove("step").apply()
+        getSharedPreferences("welcome", MODE_PRIVATE).edit { putBoolean("seen", true).remove("step") }
         welcomeStep = -1
         if (startDemo) {
             demo = true
@@ -949,6 +1027,12 @@ class MainActivity : AppCompatActivity() {
         this.demo = demo
         if (demo) welcomeStep = -1
         render()
+    }
+
+    fun selectGradeSemester(term: String) {
+        semester = term
+        semesterInitialized = true
+        if (tab == 2) render()
     }
 
     fun getCalendarDate(): String = calendarDate
@@ -1248,12 +1332,11 @@ class MainActivity : AppCompatActivity() {
         if (filename.length > 100) filename = filename.substring(0, 100)
         if (filename.trim().isEmpty()) filename = "usos-document"
         try {
-            startActivityForResult(
+            createExport.launch(
                 Intent(Intent.ACTION_CREATE_DOCUMENT)
                     .setType(response.mime)
                     .addCategory(Intent.CATEGORY_OPENABLE)
-                    .putExtra(Intent.EXTRA_TITLE, filename + extension),
-                22
+                    .putExtra(Intent.EXTRA_TITLE, filename + extension)
             )
         } catch (e: ActivityNotFoundException) {
             exportResponse = null
@@ -1269,12 +1352,11 @@ class MainActivity : AppCompatActivity() {
     fun saveCalendar(ics: String) {
         pendingCalendar = ics
         try {
-            startActivityForResult(
+            createCalendar.launch(
                 Intent(Intent.ACTION_CREATE_DOCUMENT)
                     .setType("text/calendar")
                     .addCategory(Intent.CATEGORY_OPENABLE)
-                    .putExtra(Intent.EXTRA_TITLE, "plan_zajec_vistula.ics"),
-                23
+                    .putExtra(Intent.EXTRA_TITLE, "plan_zajec_vistula.ics")
             )
         } catch (e: ActivityNotFoundException) {
             pendingCalendar = null
@@ -1305,9 +1387,9 @@ class MainActivity : AppCompatActivity() {
         val session = repository.editSession(state)
         val wasDemo = demo
         return object : TasksScreenController.TaskCallback {
-            override fun onSaveTask(t: JSONObject) {
+            override fun onSaveTask(task: JSONObject) {
                 if (demo != wasDemo) return
-                savePersonalTask(t, session)
+                savePersonalTask(task, session)
             }
 
             override fun onMutateTask(id: String, remove: Boolean) {
@@ -1514,7 +1596,7 @@ class MainActivity : AppCompatActivity() {
                 check(demo || expected.optLong("retryAt") <= System.currentTimeMillis()) { getString(R.string.error_rate_limit) }
                 if (credentials.optString("key").isEmpty() && !BuildConfig.USOS_KEY.isNullOrEmpty()) {
                     credentials.put("key", BuildConfig.USOS_KEY.trim())
-                    credentials.put("secret", if (BuildConfig.USOS_SECRET != null) BuildConfig.USOS_SECRET.trim() else "")
+                    credentials.put("secret", BuildConfig.USOS_SECRET.trim())
                 }
                 val response = try {
                     UsosClient(credentials).explore(metadata, values, method, upload, "upload.bin")
@@ -1621,8 +1703,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateBusy(value: Boolean) {
         setButtons(root, !value)
         navigation?.let { nav ->
-            for (i in 0 until nav.menu.size()) {
-                nav.menu.getItem(i).isEnabled = !value
+            for (i in 0 until nav.menu.size) {
+                nav.menu[i].isEnabled = !value
             }
         }
         if (value) progress.setText(R.string.loading)
@@ -1708,8 +1790,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private fun onDocumentResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 23 && resultCode != RESULT_OK) pendingCalendar = null
         if (requestCode == 22 && resultCode != RESULT_OK) exportResponse = null
         val uri = data?.data

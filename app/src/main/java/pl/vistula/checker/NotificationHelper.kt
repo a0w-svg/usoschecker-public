@@ -23,7 +23,6 @@ class NotificationHelper private constructor() {
         @JvmStatic
         fun createChannels(context: Context) {
             val textContext = pl.vistula.checker.ui.Language.localizedContext(context)
-            if (Build.VERSION.SDK_INT < 26) return
             val manager = context.getSystemService(NotificationManager::class.java) ?: return
 
             // Channel 1: Grades - HIGH importance (sound, heads-up display)
@@ -86,7 +85,7 @@ class NotificationHelper private constructor() {
                     context,
                     1,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 val historyIntent = Intent(context, MainActivity::class.java)
@@ -97,7 +96,7 @@ class NotificationHelper private constructor() {
                     context,
                     2,
                     historyIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 val title = if (gradeChanges.size == 1) {
@@ -146,9 +145,9 @@ class NotificationHelper private constructor() {
                         val gDate = HistoryScreenController.formatFullDate(g.date)
                         inbox.addLine("${actionLabel(textContext, g.action)} · ${g.title}: ${gradeValue(g)}" + if (gDate.isNotEmpty()) " ($gDate)" else "")
                     }
-                    if (gradeChanges.size > 5) inbox.setSummaryText(textContext.getString(R.string.notification_more_changes, gradeChanges.size - 5))
+                    if (gradeChanges.size > 5) inbox.setSummaryText(textContext.resources.getQuantityString(R.plurals.notification_more_changes, gradeChanges.size - 5, gradeChanges.size - 5))
                     builder.setStyle(inbox)
-                    builder.setContentText(textContext.getString(R.string.notification_grade_changes_body, gradeChanges.size))
+                    builder.setContentText(textContext.resources.getQuantityString(R.plurals.notification_grade_changes_body, gradeChanges.size, gradeChanges.size))
                 }
 
                 try {
@@ -166,7 +165,7 @@ class NotificationHelper private constructor() {
                     context,
                     3,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
 
                 val title = if (scheduleChanges.size == 1) {
@@ -219,9 +218,9 @@ class NotificationHelper private constructor() {
                         if (sDiff.isEmpty()) sDiff = actionLabel(textContext, s.action)
                         inbox.addLine("${s.title}: $sDiff" + if (sDate.isNotEmpty()) " ($sDate)" else "")
                     }
-                    if (scheduleChanges.size > 5) inbox.setSummaryText(textContext.getString(R.string.notification_more_changes, scheduleChanges.size - 5))
+                    if (scheduleChanges.size > 5) inbox.setSummaryText(textContext.resources.getQuantityString(R.plurals.notification_more_changes, scheduleChanges.size - 5, scheduleChanges.size - 5))
                     builder.setStyle(inbox)
-                    builder.setContentText(textContext.getString(R.string.notification_schedule_body, scheduleChanges.size))
+                    builder.setContentText(textContext.resources.getQuantityString(R.plurals.notification_schedule_body, scheduleChanges.size, scheduleChanges.size))
                 }
 
                 try {
@@ -260,7 +259,7 @@ class NotificationHelper private constructor() {
                 context,
                 99,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
             val builder = NotificationCompat.Builder(context, CHANNEL_GRADES)

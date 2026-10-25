@@ -1,3 +1,17 @@
+# Validation — 2026-10-25
+
+## Prototype completion and lint cleanup — 1.5.1 (17)
+
+- Regression coverage: 186 core, 23 shared desktop and 67 Android JVM tests; 165 full debug QA tests and 6 optimized QA tests. The separate QA AVD uses synthetic data.
+- Navigation checks cover all five destinations, rapid consecutive swipes, reselecting More, translated label bounds, active-pill centring, parent clipping and clearance above the system navigation area.
+- Additional layout runs execute the three design regressions at 200% system text and in landscape; original emulator settings are restored afterward. Grade checks retain full course names and every displayed assessment value.
+- Release and debug lint have zero findings; warnings are treated as errors. Notification plurals and localized widget labels have format/parity checks. Fifteen Python script tests cover source security, localization, the API catalog and audit handling.
+- Release verification includes APK/AAB builds, the offline-language configuration guard, source/history secret scans, Linux and Windows package launch checks in required PR CI, signer continuity, version/package/alignment checks and decompressed artifact scans.
+- The final tested commit/tree, report counts and artifact SHA-256 values are recorded in the published release's `release-info.json`. Publication follows the required PR checks.
+- Limits: fixture-based account actions on Android 16; Android 12, macOS and a live student account are not manually covered. AGP 9.4.1 still emits its own Gradle deprecation notice; project Kotlin compilation and lint are clean.
+
+---
+
 # Validation — 2026-10-23
 
 ## Design, first-run guide and bilingual documentation — 1.5.0 (16)

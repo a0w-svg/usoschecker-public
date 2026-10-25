@@ -64,7 +64,7 @@ class PaymentsScreenController private constructor() {
 
             val authorizedScopes = state.optString("scopes", "")
             val hasPaymentsScope = StudentServices.hasScope(authorizedScopes, "payments")
-            val scopeMissing = (payments != null && payments.scopeMissing) ||
+            val scopeMissing = payments.scopeMissing ||
                 (connected && authorizedScopes.isNotEmpty() && !hasPaymentsScope)
 
             if (scopeMissing) {

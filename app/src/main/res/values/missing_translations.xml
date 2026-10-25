@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <string name="error_network">Nie udało się połączyć. Sprawdź internet i spróbuj ponownie.</string>
     <string name="error_timeout">Serwer nie odpowiedział na czas. Spróbuj ponownie.</string>
     <string name="error_format">Odpowiedź ma nieznany format. Zachowano poprzednie dane.</string>
@@ -17,8 +17,18 @@
     <string name="notification_reminders_description">Przypomnienia o zajęciach i terminach</string>
     <string name="notification_schedule_single">Zmiana w planie: %1$s</string>
     <string name="notification_schedule_count">Zmiany w planie (%1$d)</string>
-    <string name="notification_schedule_body">Wykryto zmiany w %1$d zajęciach.</string>
-    <string name="notification_more_changes">+ jeszcze %1$d zmian</string>
+    <plurals name="notification_schedule_body">
+        <item quantity="one">Wykryto zmiany w %1$d zajęciu.</item>
+        <item quantity="few">Wykryto zmiany w %1$d zajęciach.</item>
+        <item quantity="many">Wykryto zmiany w %1$d zajęciach.</item>
+        <item quantity="other">Wykryto zmiany w %1$d zajęciach.</item>
+    </plurals>
+    <plurals name="notification_more_changes">
+        <item quantity="one">+ jeszcze %1$d zmiana</item>
+        <item quantity="few">+ jeszcze %1$d zmiany</item>
+        <item quantity="many">+ jeszcze %1$d zmian</item>
+        <item quantity="other">+ jeszcze %1$d zmiany</item>
+    </plurals>
     <string name="notification_open_schedule">Otwórz plan</string>
     <string name="notification_open_grades">Otwórz oceny</string>
     <string name="notification_test_title">Test powiadomień: nowa ocena</string>

@@ -17,7 +17,7 @@ import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -37,7 +37,7 @@ import org.junit.runner.RunWith
 class ScreenRegressionTest {
     @JvmField
     @Rule
-    val rule = ActivityTestRule(MainActivity::class.java)
+    val rule = ActivityScenarioRule(MainActivity::class.java)
 
     private fun main(action: Runnable) {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(action)
@@ -141,7 +141,7 @@ class ScreenRegressionTest {
             if (!ready[0]) Thread.sleep(100)
         }
         assertTrue(ready[0])
-        main { rule.activity.setDemo(true) }
+        main { rule.activity.setDemo(true); rule.activity.selectGradeSemester("") }
     }
 
     @Test
@@ -317,8 +317,10 @@ class ScreenRegressionTest {
         search("finansów")
         main {
             val values = rule.activity.findViewById<TextView>(R.id.grade_item_value_badge)
-            assertTrue(values.text.toString().contains("4,0"))
-            assertTrue(values.text.toString().contains("5,0"))
+            var course = values.parent as View
+            while (!course.isClickable) course = course.parent as View
+            assertTrue(course.contentDescription.toString().contains("4,0"))
+            assertTrue(course.contentDescription.toString().contains("5,0"))
         }
         click("Podstawy finansów")
         dialogHas("4,0")

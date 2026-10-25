@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <item name="welcome_continue" type="id" />
     <item name="welcome_demo" type="id" />
     <item name="welcome_skip" type="id" />

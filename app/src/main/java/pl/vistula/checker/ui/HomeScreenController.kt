@@ -152,7 +152,7 @@ class HomeScreenController private constructor() {
                     )
                 }
 
-                if (snap.news != null && snap.news.isNotEmpty()) {
+                if (snap.news.isNotEmpty()) {
                     val top = snap.news[0]
                     val newsBox = UiHelper.card(activity, content, Color.WHITE)
                     UiHelper.add(activity, newsBox, activity.getString(R.string.home_news_title), 11, UiHelper.MUTED, true)
@@ -229,7 +229,7 @@ class HomeScreenController private constructor() {
             val caption = line(activity.getString(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class), 13, UiHelper.MUTED, false)
             caption.isAllCaps = true
             caption.letterSpacing = .08f
-            val title = line(focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming), 32, UiHelper.INK, true)
+            val title = line(focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming), 34, UiHelper.INK, true)
             ViewCompat.setAccessibilityHeading(title, true)
             if (focus != null) {
                 val clock = DateTimeFormatter.ofPattern("HH:mm")
@@ -263,9 +263,10 @@ class HomeScreenController private constructor() {
                 }, false))
             }
             // Concurrent classes and tentative times stay visible, without a false countdown.
-            val rest = lessons.filter { it !== focus && it.intersects(today) && it.end.toInstant().isAfter(now) }
+            val focusDate = focus?.start?.toLocalDate() ?: today
+            val rest = lessons.filter { it !== focus && it.intersects(focusDate) && it.end.toInstant().isAfter(now) }
             if (rest.isNotEmpty()) {
-                sectionLink(activity, parent, R.string.design_later_today) { openDay(activity, today) }
+                sectionLink(activity, parent, if (focusDate == today) R.string.design_later_today else R.string.design_later_that_day) { openDay(activity, focusDate) }
                 val box = UiHelper.card(activity, parent, Color.WHITE)
                 rest.forEachIndexed { index, lesson ->
                     if (index > 0) divider(activity, box)
@@ -311,26 +312,7 @@ class HomeScreenController private constructor() {
             val monday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
             val lessons = LessonTime.sorted(snapshot.records.values)
             sectionLink(activity, parent, R.string.design_this_week) { openDay(activity, today) }
-            // Horizontal scrolling retains 48dp targets at narrow widths and large font scales.
-            val scroll = android.widget.HorizontalScrollView(activity).apply { isHorizontalScrollBarEnabled = false }
-            val week = LinearLayout(activity)
-            scroll.addView(week)
-            parent.addView(scroll, LinearLayout.LayoutParams(-1, -2))
-            repeat(7) { index ->
-                val day = monday.plusDays(index.toLong())
-                val count = lessons.count { it.intersects(day) }
-                val button = UiHelper.button(activity,
-                    day.format(DateTimeFormatter.ofPattern("EEE", Language.currentLocale(activity))).uppercase(Language.currentLocale(activity)) +
-                        "\n" + day.dayOfMonth + "\n" + if (count == 0) "—" else "•".repeat(min(4, count)), { openDay(activity, day) }, false)
-                button.textSize = 14f
-                button.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8))
-                button.contentDescription = day.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity))) +
-                    ": " + activity.getString(R.string.design_class_count, count)
-                button.backgroundTintList = android.content.res.ColorStateList.valueOf(activity.getColor(
-                    if (day == today) R.color.app_secondary_container else R.color.app_background))
-                val width = max(52, (52 * activity.resources.configuration.fontScale).toInt())
-                week.addView(button, LinearLayout.LayoutParams(UiHelper.dp(activity, width), -2).apply { marginEnd = UiHelper.dp(activity, 3) })
-            }
+            parent.addView(PrototypeUi.week(activity, monday, today, lessons, false) { openDay(activity, it) }, LinearLayout.LayoutParams(-1, -2))
         }
 
         @Throws(JSONException::class)
@@ -390,20 +372,10 @@ class HomeScreenController private constructor() {
                     recent.add(Change.from(rows.getJSONObject(i)))
                 }
                 recent.sortWith { a, b -> b.effectiveTimestamp().compareTo(a.effectiveTimestamp()) }
-                val box = UiHelper.card(activity, content, Color.WHITE)
+                val box = UiHelper.tray(activity, content)
                 recent.take(2).forEachIndexed { index, change ->
-                    if (index > 0) divider(activity, box)
-                    val row = LinearLayout(activity).apply {
-                        orientation = LinearLayout.VERTICAL
-                        minimumHeight = UiHelper.dp(activity, 64)
-                        setPadding(0, UiHelper.dp(activity, 12), 0, 0)
-                        isClickable = true; isFocusable = true
-                        setOnClickListener { HistoryScreenController.showChangeDetails(activity, change) }
-                    }
-                    UiHelper.add(activity, row, change.title, 16, UiHelper.INK, true)
-                    val summary = HistoryScreenController.getDiffSummaryList(activity, change).joinToString(" · ")
-                    UiHelper.add(activity, row, summary.ifEmpty { HistoryScreenController.eventDateDescription(activity, change) }, 13, UiHelper.MUTED, false)
-                    box.addView(row)
+                    if (index > 0) UiHelper.trayDivider(activity, box)
+                    HistoryScreenController.renderChangeRow(activity, box, change)
                 }
             }
         }

@@ -308,16 +308,16 @@ class GradesScreenController private constructor() {
                     val columns = GradeTable.columns(termRows, snapshot)
                     val scale = activity.resources.configuration.fontScale
                     val columnPaint = android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                        textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 15f, activity.resources.displayMetrics)
+                        textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 18f, activity.resources.displayMetrics)
                         typeface = Typeface.DEFAULT_BOLD
                     }
                     val courseGroups = GradeBrowser.groups(termRows)
                     val widths = columns.associateWith { column ->
-                        val labels = listOf(GradeTable.label(column, Language.currentLocale(activity).language)) + courseGroups.map { GradeTable.values(it, column, snapshot) }
+                        val labels = listOf(GradeTable.fullLabel(column, Language.currentLocale(activity).language)) + courseGroups.map { GradeTable.values(it, column, snapshot) }
                         maxOf(UiHelper.dp(activity, 48), labels.maxOf { columnPaint.measureText(it) }.toInt() + UiHelper.dp(activity, 16))
                     }
                     val available = activity.resources.displayMetrics.widthPixels - UiHelper.dp(activity, 72)
-                    val stacked = scale > 1.3f || widths.values.sum() + UiHelper.dp(activity, 172) > available
+                    val stacked = activity.resources.configuration.screenWidthDp < 600 || scale > 1.3f || widths.values.sum() + UiHelper.dp(activity, 220) > available
                     val table = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
                     if (!stacked && termRows.isNotEmpty()) {
                         val headings = LinearLayout(activity).apply {
@@ -326,8 +326,8 @@ class GradesScreenController private constructor() {
                         }
                         headings.addView(View(activity), LinearLayout.LayoutParams(0, 1, 1f))
                         columns.forEach { column ->
-                            headings.addView(UiHelper.text(activity, GradeTable.label(column, Language.currentLocale(activity).language), 11, UiHelper.MUTED, false).apply {
-                                gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                            headings.addView(UiHelper.text(activity, GradeTable.fullLabel(column, Language.currentLocale(activity).language), 13, UiHelper.MUTED, false).apply {
+                                gravity = Gravity.CENTER
                             }, LinearLayout.LayoutParams(widths.getValue(column), -2))
                         }
                         section.addView(headings)
@@ -576,30 +576,44 @@ class GradesScreenController private constructor() {
         ) {
             val first = rows[0]
             val row = LayoutInflater.from(activity).inflate(R.layout.item_grade_card, parent, false)
-            row.findViewById<TextView>(R.id.grade_item_course_name).text = first.title
+            row.findViewById<TextView>(R.id.grade_item_course_name).apply {
+                text = first.title
+                textSize = 17f
+                setLineSpacing(UiHelper.dp(activity, 3).toFloat(), 1f)
+            }
             val values = row.findViewById<TextView>(R.id.grade_item_value_badge)
             val horizontal = values.parent as LinearLayout
+            horizontal.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 16), UiHelper.dp(activity, 16), UiHelper.dp(activity, 16))
             val valueIndex = horizontal.indexOfChild(values)
             horizontal.removeView(values)
             // The chevron is redundant: the complete course row is the detail action.
             while (horizontal.childCount > valueIndex) horizontal.removeViewAt(valueIndex)
             val firstValueColumn = columns.firstOrNull { GradeTable.values(rows, it, snapshot) != "—" }
-            fun cell(column: String) = UiHelper.text(activity, GradeTable.values(rows, column, snapshot), 15, UiHelper.INK, true).apply {
+            fun cell(column: String) = UiHelper.text(activity, GradeTable.values(rows, column, snapshot), if (stacked) 20 else 18, UiHelper.INK, true).apply {
                 if (column == firstValueColumn) id = R.id.grade_item_value_badge
-                gravity = Gravity.END or Gravity.CENTER_VERTICAL
-                contentDescription = GradeTable.label(column, Language.currentLocale(activity).language) + ": " + text
+                gravity = Gravity.CENTER
+                contentDescription = GradeTable.fullLabel(column, Language.currentLocale(activity).language) + ": " + text
             }
             if (stacked) {
                 horizontal.orientation = LinearLayout.VERTICAL
                 horizontal.getChildAt(0).layoutParams = LinearLayout.LayoutParams(-1, -2)
-                columns.chunked(3).forEach { chunk ->
+                val cellsPerRow = if (activity.resources.configuration.fontScale > 1.3f || activity.resources.configuration.screenWidthDp < 360) 2 else 3
+                columns.chunked(cellsPerRow).forEach { chunk ->
                     val assessments = LinearLayout(activity).apply { setPadding(0, UiHelper.dp(activity, 12), 0, 0) }
                     chunk.forEach { column ->
-                        val assessment = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER }
-                        assessment.addView(UiHelper.text(activity, GradeTable.label(column, Language.currentLocale(activity).language), 11, UiHelper.MUTED, false).apply { gravity = Gravity.CENTER })
+                        val assessment = LinearLayout(activity).apply {
+                            orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
+                            setPadding(UiHelper.dp(activity, 6), UiHelper.dp(activity, 4), UiHelper.dp(activity, 6), UiHelper.dp(activity, 4))
+                        }
+                        assessment.addView(UiHelper.text(activity, GradeTable.fullLabel(column, Language.currentLocale(activity).language), 13, UiHelper.MUTED, false).apply {
+                            gravity = Gravity.CENTER
+                            minLines = 2
+                            setPadding(0, 0, 0, UiHelper.dp(activity, 4))
+                        })
                         assessment.addView(cell(column), LinearLayout.LayoutParams(-1, -2))
                         assessments.addView(assessment, LinearLayout.LayoutParams(0, -2, 1f))
                     }
+                    repeat(cellsPerRow - chunk.size) { assessments.addView(View(activity), LinearLayout.LayoutParams(0, 1, 1f)) }
                     horizontal.addView(assessments, LinearLayout.LayoutParams(-1, -2))
                 }
             } else columns.forEach { column ->

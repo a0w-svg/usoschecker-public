@@ -90,6 +90,7 @@ public class DesktopSmoke {
             if (before.getRGB(x, y) != demo.getRGB(x, y)) changed++;
         if (changed < 100) throw new AssertionError("Demo did not visibly change the application");
         shortcut(robot, KeyEvent.VK_2); shot(robot, root, "schedule");
+        shortcut(robot, KeyEvent.VK_3); shot(robot, root, "grades");
         shortcut(robot, KeyEvent.VK_1); shot(robot, root, "home-between"); shortcut(robot, KeyEvent.VK_2); shot(robot, root, "schedule-repeat");
         shortcut(robot, KeyEvent.VK_5); shot(robot, root, "more");
         shortcut(robot, KeyEvent.VK_D); shot(robot, root, "personal-after");

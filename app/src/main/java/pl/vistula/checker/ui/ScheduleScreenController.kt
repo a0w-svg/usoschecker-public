@@ -394,7 +394,7 @@ class ScheduleScreenController private constructor() {
                     val card = inflater.inflate(R.layout.item_lesson_card, dayTray, false)
                     (card.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
                     card.setBackgroundColor(Color.TRANSPARENT)
-                    card.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 14), UiHelper.dp(activity, 16), UiHelper.dp(activity, 14))
+                    card.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 18), UiHelper.dp(activity, 16), UiHelper.dp(activity, 18))
                     val timeView = card.findViewById<TextView>(R.id.lesson_item_time)
                     val conflictBadge = card.findViewById<TextView>(R.id.lesson_item_conflict_badge)
                     val titleView = card.findViewById<TextView>(R.id.lesson_item_title)
@@ -420,11 +420,11 @@ class ScheduleScreenController private constructor() {
                     conflictBadge.visibility = if (isConflict) View.VISIBLE else View.GONE
 
                     titleView.text = lesson.record.title
-                    val titleParent = titleView.parent as LinearLayout
-                    titleParent.removeView(titleView); titleParent.addView(titleView, 0)
-                    (titleView.layoutParams as LinearLayout.LayoutParams).topMargin = 0
-                    titleView.textSize = 15f
-                    timeView.textSize = 13f; timeView.setTypeface(null, Typeface.NORMAL)
+                    titleView.textSize = 17f
+                    titleView.setLineSpacing(UiHelper.dp(activity, 3).toFloat(), 1f)
+                    timeView.textSize = 15f
+                    timeView.setTypeface(null, Typeface.BOLD)
+                    timeView.setTextColor(activity.getColor(R.color.app_ink))
 
                     var summary = lessonSummary(lesson, activity)
                     val roomView = card.findViewById<TextView>(R.id.lesson_item_room)
@@ -432,17 +432,22 @@ class ScheduleScreenController private constructor() {
                     if (room.isNotEmpty()) {
                         roomView.visibility = View.VISIBLE
                         roomView.text = activity.getString(R.string.lesson_room_label, room)
+                        roomView.textSize = 14f
+                        roomView.setTypeface(null, Typeface.NORMAL)
                         val secondary = ArrayList<String>()
                         for (line in summary.split("\n")) {
                             if (line != activity.getString(R.string.notification_class_room, room)) secondary.add(line)
                         }
                         summary = secondary.joinToString("\n")
                     }
-                    timeView.text = if (room.isNotEmpty()) activity.getString(R.string.design_inline_meta, timeText, activity.getString(R.string.lesson_room_label, room)) else timeText
-                    roomView.visibility = View.GONE
-                    detailsView.text = if (query.isNotBlank()) summary else activity.getString(R.string.design_tentative)
-                    detailsView.visibility = if (lesson.tentative() || query.isNotBlank()) View.VISIBLE else View.GONE
-                    card.contentDescription = lesson.record.title + ". " + timeView.text + ". " + summary
+                    val basicDetails = listOf(lesson.record.optMeta("classType"),
+                        if (lesson.tentative()) activity.getString(R.string.design_tentative) else "")
+                        .filter { it.isNotBlank() }.joinToString(" · ")
+                    detailsView.text = if (query.isNotBlank()) summary else basicDetails
+                    detailsView.textSize = 13f
+                    detailsView.visibility = if (detailsView.text.isNotBlank()) View.VISIBLE else View.GONE
+                    (detailsView.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
+                    card.contentDescription = listOf(lesson.record.title, timeText, roomView.text.toString(), summary).filter { it.isNotBlank() }.joinToString(". ")
                     activity.withStyledAttributes(attrs = intArrayOf(android.R.attr.selectableItemBackground)) { card.foreground = getDrawable(0) }
 
                     card.isClickable = true

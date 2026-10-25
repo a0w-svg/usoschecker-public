@@ -60,9 +60,14 @@ def main():
             home_text = re.sub(r'[^a-z]', '', visible_text('home-between.png'))
             if not any(label in home_text for label in ('nextclass', 'ongoingclass', 'thisweek')):
                 raise RuntimeError('The home shortcut did not leave the timetable')
+            grades_text = visible_text('grades.png')
+            if not all(label in grades_text for label in ('lecture', 'exercises', 'laboratory')):
+                raise RuntimeError('The grades view did not show readable assessment labels: ' + grades_text)
             previews = ROOT / 'work/design-previews'
             previews.mkdir(parents=True, exist_ok=True)
             shutil.copy2(profile / 'home-between.png', previews / f'desktop-{args.theme}.png')
+            for screen in ('grades', 'schedule'):
+                shutil.copy2(profile / f'{screen}.png', previews / f'desktop-{screen}-{args.theme}.png')
 
         finally:
             process.terminate()

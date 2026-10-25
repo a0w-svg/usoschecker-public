@@ -228,7 +228,7 @@ class CleanUxRegressionTest {
                 val source = content.findViewById<TextView>(R.id.grade_item_course_meta)
                 assertEquals(View.GONE, source.visibility)
                 assertEquals(activity.getString(R.string.grades_scope_course), source.text.toString())
-                val row = grade.parent.parent as View
+                val row = generateSequence<View>(grade) { it.parent as? View }.first { it.isClickable }
                 assertTrue(row.isClickable)
                 assertTrue(row.isFocusable)
                 row.performClick()

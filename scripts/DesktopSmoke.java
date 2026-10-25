@@ -24,27 +24,34 @@ public class DesktopSmoke {
     static BufferedImage shot(Robot robot, Path folder, String name) throws Exception {
         BufferedImage image = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
         ImageIO.write(image, "png", folder.resolve(name + ".png").toFile());
-        if (name.startsWith("personal-")) {
-            // The prototype's account caption is 13 px. Enlarge its region for OCR;
-            // retain the original full-resolution capture for visual diagnostics.
-            int left = image.getWidth(), top = image.getHeight();
-            // xvfb has a black desktop. Locate the application surface before cropping
-            // so neither the desktop border nor navigation pills affect segmentation.
-            for (int y = 0; y < image.getHeight(); y++) for (int x = 0; x < image.getWidth(); x++) {
-                if ((image.getRGB(x, y) & 0x00ffffff) != 0) { left = Math.min(left, x); top = Math.min(top, y); }
+        int left = image.getWidth(), top = image.getHeight(), right = 0, bottom = 0;
+        // xvfb has a black desktop. Exclude it from OCR, retaining untouched captures
+        // for visual review. The small prototype captions need a higher OCR resolution.
+        for (int y = 0; y < image.getHeight(); y++) for (int x = 0; x < image.getWidth(); x++) {
+            if ((image.getRGB(x, y) & 0x00ffffff) != 0) {
+                left = Math.min(left, x); top = Math.min(top, y);
+                right = Math.max(right, x); bottom = Math.max(bottom, y);
             }
-            if (left == image.getWidth()) throw new AssertionError("No visible desktop application surface");
+        }
+        if (left == image.getWidth()) throw new AssertionError("No visible desktop application surface");
+        writeOcr(image, new Rectangle(left, top, right - left + 1, bottom - top + 1), 2,
+            folder.resolve(name + "-ocr.png"));
+        if (name.startsWith("personal-") || name.equals("demo")) {
             int x = left + 16, y = top + 24;
             int width = Math.min(280, image.getWidth() - x), height = Math.min(60, image.getHeight() - y);
-            BufferedImage header = new BufferedImage(width * 4, height * 4, BufferedImage.TYPE_INT_RGB);
-            Graphics2D graphics = header.createGraphics();
-            try {
-                graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                graphics.drawImage(image.getSubimage(x, y, width, height), 0, 0, width * 4, height * 4, null);
-            } finally { graphics.dispose(); }
-            ImageIO.write(header, "png", folder.resolve(name + "-header.png").toFile());
+            writeOcr(image, new Rectangle(x, y, width, height), 4, folder.resolve(name + "-header.png"));
         }
         return image;
+    }
+    static void writeOcr(BufferedImage image, Rectangle area, int scale, Path target) throws Exception {
+        BufferedImage enlarged = new BufferedImage(area.width * scale, area.height * scale, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = enlarged.createGraphics();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            graphics.drawImage(image.getSubimage(area.x, area.y, area.width, area.height),
+                0, 0, enlarged.getWidth(), enlarged.getHeight(), null);
+        } finally { graphics.dispose(); }
+        ImageIO.write(enlarged, "png", target.toFile());
     }
     public static void main(String[] args) throws Exception {
         Path root = Path.of(args[1]).toAbsolutePath().normalize();

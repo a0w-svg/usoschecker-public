@@ -41,14 +41,16 @@ def main():
             def visible_text(name, segmentation='11'):
                 # The prototype has independent columns and a small account header.
                 # Sparse-text segmentation retains that header instead of treating it as noise.
-                result = subprocess.run(['tesseract', str(profile / name), 'stdout', '--psm', segmentation], check=True,
+                image_name = name if name.endswith('-header.png') else name.removesuffix('.png') + '-ocr.png'
+                result = subprocess.run(['tesseract', str(profile / image_name), 'stdout', '--psm', segmentation], check=True,
                                         capture_output=True, text=True, timeout=20)
                 return ' '.join(result.stdout.lower().split())
             before_text = visible_text('personal-before-header.png', '6')
             if 'personal desktop fixture' not in before_text:
                 raise RuntimeError('The fixture account did not load in the packaged application: ' + before_text)
-            if 'demo' not in visible_text('demo.png') or 'not connected to usos' in visible_text('demo.png'):
-                raise RuntimeError('Demo was not recognized as an isolated demo account')
+            demo_text = visible_text('demo-header.png', '6')
+            if 'demo' not in demo_text or 'not connected to usos' in demo_text:
+                raise RuntimeError('Demo was not recognized as an isolated demo account: ' + demo_text)
             after_text = visible_text('personal-after-header.png', '6')
             if 'personal desktop fixture' not in after_text:
                 raise RuntimeError('Leaving demo did not restore the saved account: ' + after_text)

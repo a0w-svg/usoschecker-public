@@ -1,7 +1,7 @@
 {
   "source": "https://api.osv.dev/v1/querybatch",
-  "checked_at": "2026-10-23T18:37:48.028169+00:00",
-  "components": 363,
+  "checked_at": "2026-10-27T20:17:17.565975+00:00",
+  "components": 364,
   "results": [
     {
       "name": "androidx.activity:activity",
@@ -990,7 +990,7 @@
     },
     {
       "name": "com.google.errorprone:error_prone_annotations",
-      "version": "2.36.0",
+      "version": "2.50.0",
       "advisories": []
     },
     {
@@ -1000,12 +1000,12 @@
     },
     {
       "name": "com.google.guava:failureaccess",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "advisories": []
     },
     {
       "name": "com.google.guava:guava",
-      "version": "33.4.0-jre",
+      "version": "33.7.2-jre",
       "advisories": []
     },
     {
@@ -1020,7 +1020,7 @@
     },
     {
       "name": "com.google.j2objc:j2objc-annotations",
-      "version": "3.0.0",
+      "version": "3.1",
       "advisories": []
     },
     {
@@ -1165,7 +1165,7 @@
     },
     {
       "name": "org.checkerframework:checker-qual",
-      "version": "3.43.0",
+      "version": "2.5.8",
       "advisories": []
     },
     {
@@ -1776,6 +1776,11 @@
     {
       "name": "org.jspecify:jspecify",
       "version": "1.0.0",
+      "advisories": []
+    },
+    {
+      "name": "org.jspecify:jspecify",
+      "version": "1.0.1",
       "advisories": []
     },
     {

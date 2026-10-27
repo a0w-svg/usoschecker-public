@@ -17,6 +17,13 @@ object UsosParser {
     private fun optionalText(o: JSONObject, field: String): String =
         if (o.isNull(field)) "" else o.optString(field, "")
 
+    private fun finiteAmount(o: JSONObject, field: String, fallback: Double = 0.0): Double {
+        if (!o.has(field) || o.isNull(field)) return fallback
+        val value = o.optDouble(field, Double.NaN)
+        if (!value.isFinite()) throw JSONException("Invalid payment amount")
+        return value
+    }
+
     @JvmStatic
     fun language(o: JSONObject?): String = ApiLanguage.text(o)
 
@@ -90,7 +97,6 @@ object UsosParser {
                     val value = clean.toDouble()
                     if (value.isFinite() && value >= 0) {
                         map["$term\u0000$course"] = value
-                        map.putIfAbsent(course, value)
                     }
                 } catch (ignored: NumberFormatException) {}
             }
@@ -123,28 +129,19 @@ object UsosParser {
         var admissionDate = ""
         val progs = user.optJSONArray("student_programmes")
         if (progs != null) {
+            var selected: JSONObject? = null
             for (i in 0 until progs.length()) {
                 val sp = progs.optJSONObject(i) ?: continue
-                if (admissionDate.isEmpty()) admissionDate = optionalText(sp, "admission_date")
-                val stages = sp.optJSONArray("stages")
-                if (stages != null && stages.length() > 0) {
-                    val lastStage = stages.optJSONObject(stages.length() - 1)
-                    if (lastStage != null) {
-                        val stId = optionalText(lastStage, "stage_id")
-                        if (stId.isNotEmpty()) stage = stId
-                    }
-                }
-                val p = sp.optJSONObject("programme")
-                if (p != null) {
-                    val pName = p.optJSONObject("name")
-                    if (pName != null) {
-                        val candidate = language(pName)
-                        if (candidate.isNotEmpty()) {
-                            programme = candidate
-                            if ("active" == sp.optString("status", "")) break
-                        }
-                    }
-                }
+                selected = sp
+                if ("active" == sp.optString("status", "")) break
+            }
+            if (selected != null) {
+                val pName = selected.optJSONObject("programme")?.optJSONObject("name")
+                if (pName != null) programme = language(pName)
+                admissionDate = optionalText(selected, "admission_date")
+                val stages = selected.optJSONArray("stages")
+                val lastStage = if (stages != null && stages.length() > 0) stages.optJSONObject(stages.length() - 1) else null
+                stage = if (lastStage == null) "" else optionalText(lastStage, "stage_id")
             }
         }
 
@@ -226,9 +223,7 @@ object UsosParser {
         ectsPoints: Map<String, Double>,
         unitId: String?
     ) {
-        var ectsVal = ectsPoints["$term\u0000$course"]
-        if (ectsVal == null) ectsVal = ectsPoints[course]
-        val ects = ectsVal ?: Double.NaN
+        val ects = ectsPoints["$term\u0000$course"] ?: Double.NaN
 
         for (i in 0 until exams.length()) {
             val sessions = exams.getJSONObject(i) ?: continue
@@ -471,7 +466,7 @@ object UsosParser {
             var currency = optionalText(a, "currency")
             if (currency.isEmpty()) currency = "PLN"
 
-            val balance = a.optDouble("balance", 0.0)
+            val balance = finiteAmount(a, "balance")
             val owner = optionalText(a, "account_owner")
             val swift = optionalText(a, "swift")
 
@@ -510,7 +505,7 @@ object UsosParser {
                 val nameObj = item.optJSONObject("name")
                 var name = if (nameObj != null) language(nameObj) else optionalText(item, "name")
                 if (name.isEmpty()) name = ApiLanguage.label("Należność", "Payment", "Платіж")
-                val amount = item.optDouble("amount", 0.0)
+                val amount = finiteAmount(item, "amount")
                 var currency = optionalText(item, "currency")
                 if (currency.isEmpty()) currency = "PLN"
                 val deadline = optionalText(item, "deadline")
@@ -531,7 +526,7 @@ object UsosParser {
             if (payDeadline.isEmpty()) payDeadline = optionalText(item, "deadline")
             var payCurrency = optionalText(item, "currency")
             if (payCurrency.isEmpty()) payCurrency = "PLN"
-            val totalAmount = item.optDouble("total_amount", item.optDouble("amount", 0.0))
+            val totalAmount = if (item.has("total_amount") && !item.isNull("total_amount")) finiteAmount(item, "total_amount") else finiteAmount(item, "amount")
 
             val plan = item.optJSONObject("chosen_installment_plan")
             val planInsts = plan?.optJSONArray("installments")
@@ -548,34 +543,19 @@ object UsosParser {
                     } else {
                         if (payDesc.isNotEmpty()) "$payDesc (${ApiLanguage.label("rata", "installment", "внесок")} $num)" else "${ApiLanguage.label("Rata", "Installment", "Внесок")} $num"
                     }
-                    val instAmount = pi.optDouble("amount", 0.0)
+                    val instAmount = finiteAmount(pi, "amount")
                     var instCurrency = optionalText(pi, "currency")
                     if (instCurrency.isEmpty()) instCurrency = plan.optString("currency", payCurrency)
                     if (instCurrency.isEmpty()) instCurrency = payCurrency
                     var deadline = optionalText(pi, "payment_date")
                     if (deadline.isEmpty()) deadline = payDeadline
 
-                    var status = optionalText(pi, "status")
-                    if (status.isEmpty()) {
-                        status = when {
-                            "paid".equals(payState, ignoreCase = true) -> ApiLanguage.label("Opłacona", "Paid", "Сплачено")
-                            "cancelled".equals(payState, ignoreCase = true) -> ApiLanguage.label("Anulowana", "Cancelled", "Скасовано")
-                            else -> {
-                                var overdue = false
-                                if (deadline.isNotEmpty()) {
-                                    try {
-                                        val d = if (deadline.length > 10) deadline.substring(0, 10) else deadline
-                                        overdue = LocalDate.parse(d).isBefore(LocalDate.now())
-                                    } catch (ignored: Exception) {}
-                                }
-                                if (overdue) ApiLanguage.label("Po terminie", "Overdue", "Прострочено") else ApiLanguage.label("Do zapłaty", "Due", "До сплати")
-                            }
-                        }
+                    val status = when {
+                        "paid".equals(payState, ignoreCase = true) -> ApiLanguage.label("Opłacona", "Paid", "Сплачено")
+                        "cancelled".equals(payState, ignoreCase = true) -> ApiLanguage.label("Anulowana", "Cancelled", "Скасовано")
+                        else -> "scheduled"
                     }
-                    var paymentDate = optionalText(pi, "payment_date_settled")
-                    if (paymentDate.isEmpty() && "paid".equals(payState, ignoreCase = true)) {
-                        paymentDate = optionalText(item, "date_of_plan_choice")
-                    }
+                    val paymentDate = optionalText(pi, "payment_date_settled")
                     results.add(PaymentInfo.Installment(instId, fullName, instAmount, instCurrency, deadline, status, paymentDate, payAcc, payType))
                 }
             } else {
@@ -585,21 +565,8 @@ object UsosParser {
                 if (status.isEmpty()) status = payState
                 status = when {
                     "paid".equals(status, ignoreCase = true) -> ApiLanguage.label("Opłacona", "Paid", "Сплачено")
-                    "unsettled".equals(status, ignoreCase = true) -> ApiLanguage.label("Do zapłaty", "Due", "До сплати")
-                    "overdue".equals(status, ignoreCase = true) -> ApiLanguage.label("Po terminie", "Overdue", "Прострочено")
-                    "underpaid".equals(status, ignoreCase = true) -> ApiLanguage.label("Niedopłata", "Underpaid", "Недоплата")
                     "cancelled".equals(status, ignoreCase = true) -> ApiLanguage.label("Anulowana", "Cancelled", "Скасовано")
-                    status.isEmpty() -> {
-                        var overdue = false
-                        if (payDeadline.isNotEmpty()) {
-                            try {
-                                val d = if (payDeadline.length > 10) payDeadline.substring(0, 10) else payDeadline
-                                overdue = LocalDate.parse(d).isBefore(LocalDate.now())
-                            } catch (ignored: Exception) {}
-                        }
-                        if (overdue) ApiLanguage.label("Po terminie", "Overdue", "Прострочено") else ApiLanguage.label("Do zapłaty", "Due", "До сплати")
-                    }
-                    else -> status
+                    else -> "settlement_unknown"
                 }
                 val paymentDate = optionalText(item, "payment_date")
                 results.add(PaymentInfo.Installment(instId, fullName, totalAmount, payCurrency, payDeadline, status, paymentDate, payAcc, payType))
@@ -682,12 +649,13 @@ object UsosParser {
         if (thesesRaw is JSONArray) {
             if (thesesRaw.length() > 0) tObj = thesesRaw.optJSONObject(0)
         } else if (thesesRaw is JSONObject) {
-            val arr = thesesRaw.optJSONArray("theses")
+            val arr = thesesRaw.optJSONArray("authored_theses") ?: thesesRaw.optJSONArray("theses")
             tObj = if (arr != null && arr.length() > 0) arr.optJSONObject(0) else thesesRaw
         }
         if (tObj == null) return ThesisInfo("", "", "", "")
-        val titleObj = tObj.optJSONObject("title")
-        val title = if (titleObj != null) language(titleObj) else optionalText(tObj, "title")
+        val titleObj = tObj.optJSONObject("titles") ?: tObj.optJSONObject("title")
+        val translatedTitle = if (titleObj != null) language(titleObj) else ""
+        val title = translatedTitle.ifEmpty { optionalText(tObj, "title") }
         val statusObj = tObj.optJSONObject("status")
         val status = if (statusObj != null) language(statusObj) else optionalText(tObj, "status")
 
@@ -789,16 +757,19 @@ object UsosParser {
         val value = grade?.optJSONObject("grade_value")
         val hasPoints = points != null && !points.isNull("points") && points.has("points")
         val hasGrade = value != null && optionalText(value, "symbol").isNotEmpty()
+        val pointValue = if (hasPoints) points.optDouble("points", Double.NaN) else 0.0
+        val maximum = if (task != null && task.has("points_max") && !task.isNull("points_max")) task.optDouble("points_max", Double.NaN) else 0.0
+        if (!pointValue.isFinite() || !maximum.isFinite()) throw JSONException("Invalid course-test points")
         if (hasPoints || hasGrade) {
             result.add(
                 CourseTestRecord(
                     id, courseId, courseName,
                     localizedText(node.opt("name")),
-                    if (hasPoints) points.optDouble("points", 0.0) else 0.0,
-                    task?.optDouble("points_max", 0.0) ?: 0.0,
+                    pointValue,
+                    maximum,
                     if (hasGrade) optionalText(value, "symbol") else "",
                     if (hasGrade) optionalText(grade, "last_changed") else (if (points != null) optionalText(points, "last_changed") else ""),
-                    term
+                    term, hasPoints
                 )
             )
         }

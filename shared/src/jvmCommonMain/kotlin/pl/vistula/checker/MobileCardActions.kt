@@ -6,6 +6,7 @@ import pl.vistula.checker.core.StudentServices
 /** Activation data stays transient; issue/revoke rechecks eligibility before a single POST. */
 object MobileCardActions {
     class Uncertain(cause: Exception) : java.io.IOException("Card action result unknown", cause)
+    class ConfirmedRefreshFailed(cause: Exception) : java.io.IOException("Card action confirmed but refresh failed", cause)
     fun ready(status: String): Boolean = status == "ready_to_receive" || status == "ready"
 
     fun activation(client: UsosClient, id: String): JSONObject {
@@ -29,11 +30,9 @@ object MobileCardActions {
             "fields" to "why_cannot_order|why_cannot_revoke|latest_order[id|status]"
         )))
         val field = if (order) "why_cannot_order" else "why_cannot_revoke"
-        check(current.has(field)) { "Card eligibility unavailable" }
+        check(StudentServices.validEligibility(current, field)) { "Card eligibility unavailable" }
         // Null and an empty language dictionary both mean no rejection; malformed values fail closed.
         val reason = current.opt(field)
-        check(reason == JSONObject.NULL || reason is String || reason is JSONObject) { "Invalid card eligibility" }
-        if (reason is JSONObject) check(reason.keys().asSequence().all { reason.opt(it) is String }) { "Invalid card eligibility" }
         check(StudentServices.localized(reason).isBlank()) { "Card action unavailable" }
         if (!order) {
             val latest = current.optJSONObject("latest_order")
@@ -45,8 +44,12 @@ object MobileCardActions {
             if (order) "services/cards/make_mcard_order" else "services/cards/revoke_mcard",
             if (order) emptyMap() else mapOf("order_id" to id), true,
             state.optString("token"), state.optString("tokenSecret")))
-        } catch (e: UsosClient.ApiException) { throw e
+        } catch (e: UsosClient.ApiException) { if (e.status == 408 || e.status >= 500) throw Uncertain(e) else throw e
         } catch (e: Exception) { throw Uncertain(e) }
-        check(response.opt("success") == true) { "Card action rejected" }
+        when (response.opt("success")) {
+            true -> Unit
+            false -> error("Card action rejected")
+            else -> throw Uncertain(IllegalStateException("Unexpected card response"))
+        }
     }
 }

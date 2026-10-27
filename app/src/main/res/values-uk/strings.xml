@@ -238,6 +238,13 @@
     <string name="payments_schedule_heading">Графік платежів</string>
 <string name="payments_status_overdue_warn">Увага: Частина платежів прострочена!</string>
     <string name="payments_status_all_paid">Усі платежі здійснено вчасно.</string>
+    <string name="payments_status_none_due">У завантажених внесках немає сум до сплати.</string>
+    <string name="payments_settlement_unknown">Статус оплати деяких позицій невідомий. Перевірте поточний баланс у USOSweb.</string>
+    <string name="payment_status_unknown">Статус оплати невідомий</string>
+    <string name="grades_points_without_max">Бали: %1$.2f</string>
+    <string name="grades_tests_unavailable">Не вдалося повністю завантажити результати тестів. Дані можуть бути недоступні або перевищувати ліміт завантаження.</string>
+    <string name="account_thesis_unavailable">Не вдалося завантажити дані дипломної роботи. Спробуйте синхронізувати ще раз.</string>
+    <string name="payments_usage_guide">Оновіть платежі, щоб побачити дані USOS. Перед переказом перевірте термін, валюту та номер рахунку. Історія платежів оновлюється окремо. Якщо даних бракує, перевірте дозвіл payments у налаштуваннях облікового запису.</string>
     <string name="payments_status_pending">Не забувайте вчасно сплачувати внески.</string>
     <string name="payments_amount">Сума: %1$.2f %2$s</string>
     <string name="payments_deadline">Термін оплати: %1$s</string>
@@ -557,6 +564,7 @@
     <string name="widget_payment_all_paid">Усе сплачено</string>
     <string name="widget_payment_to_pay">До сплати</string>
     <string name="widget_payment_none">Немає заборгованостей</string>
+    <string name="widget_payment_unavailable">Дані недоступні</string>
     <string name="btn_understand">Зрозуміло</string>
     <string name="account_album_number">Номер альбому: %1$s</string>
     <string name="grades_share_term">Семестр: %1$s</string>

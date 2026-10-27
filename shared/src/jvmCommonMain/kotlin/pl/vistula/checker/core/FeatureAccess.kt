@@ -7,6 +7,7 @@ object FeatureAccess {
         "cards" to setOf("cards"),
         "documents" to setOf("adm_documents"),
         "tests" to setOf("crstests"),
+        "lecturer" to setOf("staff_perspective", "crstests"),
         "profile" to setOf("photo", "email")
     )
 

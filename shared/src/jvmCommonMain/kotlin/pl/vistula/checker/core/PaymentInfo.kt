@@ -43,9 +43,10 @@ class PaymentInfo @JvmOverloads constructor(
             @JvmStatic
             fun from(o: JSONObject?): Account {
                 if (o == null) return Account("", "", "PLN", "", 0.0)
+                val balance = o.optDouble("balance", 0.0).takeIf { it.isFinite() } ?: 0.0
                 return Account(
                     o.optString("id", ""), o.optString("name", ""), o.optString("currency", "PLN"),
-                    o.optString("bankAccountNumber", ""), o.optDouble("balance", 0.0),
+                    o.optString("bankAccountNumber", ""), balance,
                     o.optString("faculty", ""), o.optString("accountOwner", ""), o.optString("swift", ""),
                 )
             }
@@ -83,10 +84,22 @@ class PaymentInfo @JvmOverloads constructor(
                 "oplacona".equals(status, ignoreCase = true) || "settled".equals(status, ignoreCase = true) ||
                 "rozliczona".equals(status, ignoreCase = true) || "сплачено".equals(status, ignoreCase = true)
 
+        fun isCancelled(): Boolean =
+            "cancelled".equals(status, ignoreCase = true) || "anulowana".equals(status, ignoreCase = true) ||
+                "скасовано".equals(status, ignoreCase = true)
+
+        // A plan describes scheduled amounts, not the settlement of each row.
+        // The ID check also protects cached rows written by older versions.
+        fun isSettlementUnknown(): Boolean = !isPaid() && !isCancelled() &&
+            (id.contains(":rata:") || id.matches(Regex("inst:[0-9]+:[0-9]+")) ||
+                "scheduled".equals(status, ignoreCase = true) || "settlement_unknown".equals(status, ignoreCase = true))
+
+        fun isUnpaid(): Boolean = !isPaid() && !isCancelled() && !isSettlementUnknown()
+
         fun isOverdue(): Boolean {
+            if (!isUnpaid()) return false
             if ("overdue".equals(status, ignoreCase = true) || "przeterminowana".equals(status, ignoreCase = true) ||
                 "po terminie".equals(status, ignoreCase = true) || "прострочено".equals(status, ignoreCase = true)) return true
-            if (isPaid()) return false
             if (deadline.isNotEmpty()) {
                 try {
                     val d = if (deadline.length > 10) deadline.substring(0, 10) else deadline
@@ -101,9 +114,10 @@ class PaymentInfo @JvmOverloads constructor(
             @JvmStatic
             fun from(o: JSONObject?): Installment {
                 if (o == null) return Installment("", "", 0.0, "PLN", "", "", "")
+                val amount = if (!o.has("amount") || o.isNull("amount")) 0.0 else o.optDouble("amount", Double.NaN)
                 return Installment(
-                    o.optString("id", ""), o.optString("name", ""), o.optDouble("amount", 0.0),
-                    o.optString("currency", "PLN"), o.optString("deadline", ""), o.optString("status", ""),
+                    o.optString("id", ""), o.optString("name", ""), if (amount.isFinite()) amount else 0.0,
+                    o.optString("currency", "PLN"), o.optString("deadline", ""), if (amount.isFinite()) o.optString("status", "") else "settlement_unknown",
                     o.optString("paymentDate", ""), o.optString("bankAccountNumber", ""), o.optString("type", ""),
                 )
             }
@@ -113,7 +127,7 @@ class PaymentInfo @JvmOverloads constructor(
     fun totalUnpaidAmount(): Double {
         var sum = 0.0
         for (inst in installments) {
-            if (!inst.isPaid() && inst.amount > 0) sum += inst.amount
+            if (inst.isUnpaid() && inst.amount > 0) sum += inst.amount
         }
         return sum
     }
@@ -125,6 +139,8 @@ class PaymentInfo @JvmOverloads constructor(
         return false
     }
 
+    fun hasUnknownSettlement(): Boolean = installments.any { it.isSettlementUnknown() }
+
     @Throws(JSONException::class)
     fun json(): JSONObject {
         val accArr = JSONArray()
@@ -132,7 +148,7 @@ class PaymentInfo @JvmOverloads constructor(
         val instArr = JSONArray()
         for (i in installments) instArr.put(i.json())
         return JSONObject().put("accounts", accArr).put("installments", instArr)
-            .put("scopeMissing", scopeMissing).put("statusNotice", statusNotice)
+            .put("scopeMissing", scopeMissing).put("statusNotice", statusNotice).put("settlementModelVersion", 1)
     }
 
     companion object {
@@ -148,9 +164,16 @@ class PaymentInfo @JvmOverloads constructor(
             }
             val instList = ArrayList<Installment>()
             val instArr = o.optJSONArray("installments")
+            val legacy = o.optInt("settlementModelVersion", 0) < 1
             if (instArr != null) {
                 for (i in 0 until instArr.length()) {
-                    instList.add(Installment.from(instArr.optJSONObject(i)))
+                    val original = Installment.from(instArr.optJSONObject(i))
+                    if (legacy) {
+                        val oldPlan = original.id.contains(":rata:") || original.id.matches(Regex("inst:[0-9]+:[0-9]+"))
+                        instList.add(Installment(original.id, original.name, original.amount, original.currency, original.deadline,
+                            if (original.isPaid() || original.isCancelled()) original.status else "settlement_unknown",
+                            if (oldPlan) "" else original.paymentDate, original.bankAccountNumber, original.type))
+                    } else instList.add(original)
                 }
             }
             val scopeMissing = o.optBoolean("scopeMissing", false)

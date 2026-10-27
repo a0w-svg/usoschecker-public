@@ -49,6 +49,10 @@ class StudentServicesTest {
         assertFalse(result.toString().contains("PASSWORD"))
         assertFalse(result.optBoolean("orderEligibilityKnown"))
         assertTrue(StudentServices.safeMobileCard(JSONObject().put("why_cannot_order", JSONObject.NULL)).optBoolean("orderEligibilityKnown"))
+        assertTrue(StudentServices.safeMobileCard(JSONObject().put("why_cannot_order", JSONObject().put("pl", JSONObject.NULL))).optBoolean("orderEligibilityKnown"))
+        for (bad in listOf(false, 123, JSONArray(), JSONObject().put("en", 123), JSONObject().put("reason", "not eligible"))) {
+            assertFalse(StudentServices.safeMobileCard(JSONObject().put("why_cannot_order", bad)).optBoolean("orderEligibilityKnown"))
+        }
         val cards = StudentServices.safeCards(JSONArray().put(JSONObject().put("id", "1").put("card_key", "SECRET")))
         assertFalse(cards.toString().contains("SECRET"))
     }

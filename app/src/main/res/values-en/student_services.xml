@@ -1,5 +1,11 @@
 <resources>
     <string name="cards_title">Student IDs</string>
+    <string name="cards_confirmed_refresh_failed">USOS confirmed the action, but the status could not be refreshed. Refresh it before trying again.</string>
+    <string name="cards_physical_title">Physical cards</string>
+    <string name="cards_type">Card type: %1$s</string>
+    <string name="cards_physical_empty">USOS returned no physical cards.</string>
+    <string name="cards_issue_date">Issued: %1$s</string>
+    <string name="cards_usage_guide">Refresh your card information. If your university permits an order, select it and confirm. Once the card is ready, open the activation details and use them in mObywatel. Keep the codes private. Revocation requires separate confirmation.</string>
     <string name="cards_description">Issue, activate in mObywatel and revoke your mobile student card</string>
 <string name="cards_refresh">Fetch ID card data</string>
 <string name="cards_mobile_title">mLegitymacja</string>

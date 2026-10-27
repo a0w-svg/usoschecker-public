@@ -155,15 +155,17 @@ class QuickStatusWidget : AppWidgetProvider() {
             val p = snapshot?.payments
             if (p != null) {
                 val unpaid = p.totalUnpaidAmount()
-                views.setTextViewText(R.id.widget_status_payment_value, String.format(widgetLocale, "%.2f PLN", unpaid))
+                views.setTextViewText(R.id.widget_status_payment_value, if (p.scopeMissing || p.hasUnknownSettlement()) "—" else pl.vistula.checker.core.PaymentAmounts.unpaid(p, widgetLocale.language))
                 when {
+                    p.scopeMissing -> views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_unavailable))
                     p.hasOverdue() -> views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_overdue))
-                    unpaid == 0.0 -> views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_all_paid))
+                    p.hasUnknownSettlement() -> views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.payment_status_unknown))
+                    unpaid == 0.0 -> views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_none))
                     else -> views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_to_pay))
                 }
             } else {
-                views.setTextViewText(R.id.widget_status_payment_value, "0,00 PLN")
-                views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_none))
+                views.setTextViewText(R.id.widget_status_payment_value, "—")
+                views.setTextViewText(R.id.widget_status_payment_sub, context.getString(R.string.widget_payment_unavailable))
             }
 
             manager.updateAppWidget(appWidgetId, views)

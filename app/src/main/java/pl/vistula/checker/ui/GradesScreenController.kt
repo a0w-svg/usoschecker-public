@@ -160,7 +160,7 @@ class GradesScreenController private constructor() {
                     if ("crstests" == reason) {
                         activity.getString(R.string.services_scope_required, "crstests")
                     } else {
-                        activity.getString(R.string.services_refresh_error, reason)
+                        activity.getString(R.string.grades_tests_unavailable)
                     },
                     UiHelper.MUTED
                 )
@@ -719,6 +719,8 @@ class GradesScreenController private constructor() {
                                 UiHelper.INK,
                                 false
                             )
+                        } else if (test.hasPoints) {
+                            UiHelper.add(activity, body, activity.getString(R.string.grades_points_without_max, test.points), 15, UiHelper.INK, false)
                         }
                         if (test.grade.isNotEmpty()) {
                             UiHelper.add(activity, body, activity.getString(R.string.grades_test_grade, test.grade), 15, UiHelper.INK, true)

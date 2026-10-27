@@ -112,9 +112,34 @@ Desktop przechowuje demo w odrębnym magazynie pamięciowym, bez zapisu do sejfu
 użytkownika ani jego frekwencji. Operacje sieciowe na tokenie demo są odrzucane.
 Sejf desktopowy ogranicza dostęp do właściciela (POSIX lub ACL Windows), odrzuca
 dowiązania i zbyt duże pliki oraz blokuje zapis pomiędzy instancjami i procesami.
-Odłączenie konta usuwa również klucz szyfrujący lokalny sejf. Interfejs otwiera
-wyłącznie zwykłe adresy HTTP/HTTPS; eksport wymaga wybrania pliku i potwierdzenia
+Odłączenie konta usuwa również klucz szyfrujący lokalny sejf. Na systemie Windows klucz `vault.key` jest dodatkowo opakowany przez DPAPI (`CryptProtectData` z nagłówkiem `VKW1` w kontekście bieżącego użytkownika), a istniejące surowe klucze 32-bajtowe są migrowane automatycznie przy odczycie. Interfejs otwiera
+wyłącznie adresy HTTPS (`WebLinks.isWebUrl`); eksport wymaga wybrania pliku i potwierdzenia
 zastąpienia istniejącego pliku. Sekret OAuth i PIN są domyślnie maskowane.
 Drugie uruchomienie desktopu nie otwiera tego samego magazynu: blokada instancji
 jest utrzymywana przez cały czas życia procesu, również podczas jego zamykania.
 Chroni to operacje konta przed wzajemnym nadpisaniem przez dwie aplikacje.
+
+## Tryb wykładowcy i eksperymentalny zapis ocen
+
+Tryb konta (`STUDENT`, `LECTURER`, `BOTH`) jest wykrywany automatycznie na podstawie
+profilu USOS (`staff_status`, `student_status`, aktywne prowadzone przedmioty i grupy).
+W trybie studenta wszystkie nowe widoki są wyłącznie do odczytu, a metody zapisu
+wykładowcy są ukryte w katalogu API i blokowane w kliencie (`UsosClient.explore`).
+W szyfrowanym stanie konta zapisywane są wyłącznie zminimalizowane pola potrzebne do
+widoku offline (np. `lecturerGroups`, `lecturerTests`, `lecturerMeetings`, `staffDirectory`,
+`registrations`, `exams`, `academicCalendar`) z limitem liczby elementów i bez prywatnych
+komentarzy, adresów e-mail czy zdjęć uczestników grup.
+
+Zapis ocen, punktów i właściwości węzłów sprawdzianów (`services/crstests/update_grades`,
+`services/crstests/update_points`, `services/crstests/change_grade_node_properties`,
+`services/crstests/change_task_node_properties`) jest oznaczony jako **Eksperymentalny**
+(zaimplementowany wyłącznie na podstawie dokumentacji USOS API):
+
+- Wymaga aktywnej roli wykładowcy, zgód `staff_perspective` oraz `crstests`,
+  włączenia przełącznika w ustawieniach konta i jednorazowego potwierdzenia komunikatu.
+- Każdy zapis poprzedza weryfikacja uprawnień węzła (`services/crstests/node2`), okno
+  potwierdzenia wskazujące węzeł, studenta i nową wartość oraz pojedyncze żądanie POST
+  bez automatycznych ponowień po błędzie sieci lub przekroczeniu czasu (`Uncertain`).
+- Po zapisie aplikacja ponownie odczytuje węzeł z USOS w celu autorytatywnego
+  potwierdzenia wyniku i zapisuje lokalny wpis audytowy zawierający wyłącznie
+  znacznik czasu, nazwę metody, identyfikator węzła i status (bez ocen ani danych osobowych).

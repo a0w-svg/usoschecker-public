@@ -6,6 +6,12 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class OptionalModulesParserTest {
+    @Test fun malformedCourseTestPointsAreNotTurnedIntoZero() {
+        val node = JSONObject().put("id", "task").put("task_node_details",
+            JSONObject().put("points_max", 20).put("students_points", JSONObject().put("points", "unknown")))
+        val tests = JSONArray().put(JSONObject().put("root", node))
+        assertThrows(org.json.JSONException::class.java) { UsosParser.courseTestTrees(tests, emptyMap()) }
+    }
     @Test
     fun courseTreesKeepZeroPointsSkipMissingResultsAndPreserveSemester() {
         val task = JSONObject().put("id", "quiz").put("name", JSONObject().put("pl", "Kolokwium").put("en", "Quiz"))
@@ -27,6 +33,7 @@ class OptionalModulesParserTest {
         val quiz = result[0]
         assertEquals("Quiz", quiz.testName)
         assertEquals(0.0, quiz.points, 0.0)
+        assertTrue(quiz.hasPoints)
         assertEquals(20.0, quiz.maxPoints, 0.0)
         assertEquals("2026Z", CourseTestRecord.from(quiz.json()).term)
         assertEquals("2026Z", GradeSemesters.testTerm(Snapshot("", ""), quiz))
@@ -46,6 +53,8 @@ class OptionalModulesParserTest {
             )
         val grade = UsosParser.courseTestTrees(JSONArray().put(JSONObject().put("root", node)), emptyMap())[0]
         assertEquals("4,5", grade.grade)
+        assertFalse(grade.hasPoints)
+        assertFalse(CourseTestRecord.from(grade.json()).hasPoints)
         assertEquals(0.0, grade.maxPoints, 0.0)
         assertEquals("2026-10-18", grade.date)
     }

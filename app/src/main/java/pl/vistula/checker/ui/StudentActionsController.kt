@@ -96,7 +96,8 @@ object StudentActionsController {
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.payments_plan_choose) { _, _ ->
                 activity.studentAction("payments", { client, state ->
-                    StudentServiceActions.choosePlan(client, state, payment.getString("id"), payment.getString("type"), plan.getString("id"), plan)
+                    StudentServiceActions.choosePlan(client, state, payment.getString("id"), payment.getString("type"), plan.getString("id"), plan,
+                        pl.vistula.checker.core.PaymentAmounts.currency(plan, payment))
                 }) {
                     Toast.makeText(activity, R.string.payments_plan_chosen, Toast.LENGTH_LONG).show()
                     activity.refreshStudentServices("payments")

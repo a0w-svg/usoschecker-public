@@ -10,6 +10,26 @@ import pl.vistula.checker.core.CampusAffiliation
 
 /** On-demand services keep their own encrypted cache separate from grade/plan monitoring. */
 object StudentServiceLoader {
+    val SUPPORTED_SECTIONS = setOf(
+        "cards", "documents", "payments", "news", "usosNews", "remittances",
+        "affiliation", "teaching", "lecturerGroups", "lecturerTests",
+        "lecturerMeetings", "staffDirectory", "registrations", "exams", "academicCalendar"
+    )
+
+    private val SCOPE_OPTIONAL_SECTIONS = setOf(
+        "news", "usosNews", "affiliation", "teaching", "lecturerGroups",
+        "lecturerMeetings", "staffDirectory", "academicCalendar"
+    )
+
+    @JvmStatic
+    fun requiredScope(section: String): String = when (section) {
+        "documents" -> "adm_documents"
+        "remittances" -> "payments"
+        "lecturerTests" -> "crstests"
+        "registrations", "exams" -> "studies"
+        else -> section
+    }
+
     @JvmStatic
     @JvmOverloads
     @Throws(Exception::class)
@@ -25,11 +45,11 @@ object StudentServiceLoader {
         if (!publicRequest && credentials.optLong("retryAt") > System.currentTimeMillis()) {
             throw IllegalStateException("USOS prosi o przerwę. Spróbuj później.")
         }
-        if (section !in setOf("cards", "documents", "payments", "news", "usosNews", "remittances", "affiliation", "teaching")) {
+        if (section !in SUPPORTED_SECTIONS) {
             throw IllegalArgumentException("Nieznana usługa.")
         }
-        val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; else -> section }
-        if (section !in setOf("news", "usosNews", "affiliation", "teaching") && !StudentServices.hasScope(credentials.optString("scopes"), scope)) {
+        val scope = requiredScope(section)
+        if (section !in SCOPE_OPTIONAL_SECTIONS && !StudentServices.hasScope(credentials.optString("scopes"), scope)) {
             throw IllegalStateException(
                 "Brak zakresu zgody „$scope”. Dodaj go w ustawieniach konta i połącz konto ponownie."
             )
@@ -38,10 +58,13 @@ object StudentServiceLoader {
         val previous = credentials.optJSONObject("studentServices")
         val updates = JSONObject()
         if (section == "cards") {
-            fetch(updates, previous, "mcard") {
+            val proceed = fetch(updates, previous, "mcard") {
                 StudentServices.safeMobileCard(JSONObject(client.get("services/cards/mcard2", mapOf(
                     "fields" to "why_cannot_order|why_cannot_revoke|expected_expiration_date|latest_order[id|order_date|status|expiration_date]"
                 ))))
+            }
+            if (proceed) fetch(updates, previous, "physicalCards") {
+                StudentServices.safeCards(JSONArray(client.get("services/cards/user", emptyMap())))
             }
         } else if (section == "documents") {
             fetch(updates, previous, "documents") {
@@ -142,4 +165,3 @@ object StudentServiceLoader {
         return proceed
     }
 }
-

@@ -296,7 +296,8 @@ fun VistulaApp(
         BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             // Prototype breakpoints: the menu moves to the top and the Today stage opens up at 1100dp.
             val isWide = maxWidth >= 1100.dp * maxOf(1f, androidx.compose.ui.platform.LocalDensity.current.fontScale)
-            val tabs = VistulaTab.entries.map { it to it.label(strings) }
+            val lecturerOnly = pl.vistula.checker.core.AccountRole.lecturerOnly(state)
+            val tabs = VistulaTab.entries.map { it to if (it == VistulaTab.GRADES && lecturerOnly) toolText(language, "Dydaktyka", "Teaching", "Викладання") else it.label(strings) }
             val selectTab: (VistulaTab) -> Unit = { homeScheduleDate = null; moreSection = ""; currentTab = it; tabSelection++ }
             val statusBar: @Composable (@Composable (() -> Unit)?) -> Unit = { nav ->
                 TopStatusBar(
@@ -488,7 +489,11 @@ private fun TabContent(
             onExportText = onExportText,
             onStatusMessage = onStatusMessage
         )
-        VistulaTab.GRADES -> GradesScreen(
+        VistulaTab.GRADES -> if (pl.vistula.checker.core.AccountRole.lecturerOnly(state)) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                LecturerWorkspaceSection(state, repository, preferences, language, "teaching", onOpenUrl, onReloadState, onStatusMessage, runAsync)
+            }
+        } else GradesScreen(
             snapshot = snapshot,
             strings = strings,
             isWide = isWide
@@ -1198,6 +1203,17 @@ fun GradesScreen(
             }
         }
 
+        if (showOptions && snapshot?.serviceErrors?.containsKey("crstests") == true) {
+            val missingScope = snapshot.serviceErrors["crstests"] == "crstests"
+            Text(if (missingScope) toolText(strings.languageCode,
+                "Aby pobrać sprawdziany, dodaj zgodę crstests i połącz konto ponownie.",
+                "To load course tests, grant the crstests permission and reconnect your account.",
+                "Щоб завантажити тести, надайте дозвіл crstests і повторно підключіть обліковий запис.")
+            else toolText(strings.languageCode,
+                "Nie udało się w całości pobrać sprawdzianów. Spróbuj ponownie później.",
+                "Course tests could not be loaded completely. Try again later.",
+                "Не вдалося повністю завантажити тести. Спробуйте пізніше."), color = MaterialTheme.colorScheme.error)
+        }
         if (showOptions && crstests.isNotEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -1222,8 +1238,13 @@ fun GradesScreen(
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium
                                 )
+                                val result = listOfNotNull(
+                                    if (test.hasPoints) (if (test.maxPoints > 0) "${test.points} / ${test.maxPoints}" else "${test.points}") +
+                                        " " + toolText(strings.languageCode, "pkt", "points", "балів") else null,
+                                    test.grade.takeIf { it.isNotEmpty() }
+                                ).joinToString(" · ")
                                 Text(
-                                    text = "${test.points} / ${test.maxPoints} pkt" + (if (test.grade.isNotEmpty()) " (${test.grade})" else ""),
+                                    text = result,
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.primary
@@ -1387,29 +1408,44 @@ fun MoreScreen(
     val t = VistulaDesign.tokens
     fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
     var activeSection by remember(initialSection) { mutableStateOf(initialSection) }
-    val lecturer = pl.vistula.checker.core.AccountRole.lecturer(state)
-    // Group title -> (id, title, description)
-    val groups = listOf(
-        tr("Aktualizacje", "Updates", "Оновлення") to listOf(
+    val mode = pl.vistula.checker.core.AccountRole.mode(state)
+    val groups = buildList {
+        add(tr("Aktualizacje", "Updates", "Оновлення") to listOf(
             Triple("history", tr("Historia zmian", "Change history", "Історія змін"), tr("Zmiany ocen i planu", "Grade and schedule changes", "Зміни оцінок і розкладу"))
-        ),
-        tr("Student", "Student", "Студент") to listOf(
-            Triple("cards", tr("Legitymacja", "Student ID", "Студентський квиток"), tr("Status i ważność legitymacji", "Card status and validity", "Статус і термін дії квитка")),
-            Triple("documents", tr("Dokumenty", "Documents", "Документи"), tr("Dokumenty i decyzje", "Documents and decisions", "Документи та рішення")),
-            Triple("payments", tr("Płatności", "Payments", "Платежі"), tr("Opłaty i terminy", "Fees and due dates", "Платежі й терміни")),
-            Triple("tasks", strings.sectionTasks, tr("Własne zadania i terminy", "Your own tasks and deadlines", "Власні завдання й терміни")),
-            Triple("attendance", strings.sectionAttendance, tr("Nieobecności według przedmiotów", "Absences by course", "Пропуски за предметами")),
-            Triple("services", strings.sectionServices, tr("Pozostałe usługi i linki uczelniane", "Other services and university links", "Інші послуги та посилання університету"))
-        ),
+        ))
+        if (mode != pl.vistula.checker.core.AccountRole.Mode.LECTURER) {
+            add(tr("Student", "Student", "Студент") to listOf(
+                Triple("cards", tr("Legitymacja", "Student ID", "Студентський квиток"), tr("Status i ważność legitymacji", "Card status and validity", "Статус і термін дії квитка")),
+                Triple("documents", tr("Dokumenty", "Documents", "Документи"), tr("Dokumenty i decyzje", "Documents and decisions", "Документи та рішення")),
+                Triple("payments", tr("Płatności", "Payments", "Платежі"), tr("Opłaty i terminy", "Fees and due dates", "Платежі й терміни")),
+                Triple("registrations", tr("Rejestracje", "Registrations", "Реєстрації"), tr("Tury zapisów i koszyki", "Course registration rounds", "Тури реєстрації на предмети")),
+                Triple("tasks", strings.sectionTasks, tr("Własne zadania i terminy", "Your own tasks and deadlines", "Власні завдання й терміни")),
+                Triple("attendance", strings.sectionAttendance, tr("Nieobecności według przedmiotów", "Absences by course", "Пропуски за предметами")),
+                Triple("services", strings.sectionServices, tr("Pozostałe usługi i linki uczelniane", "Other services and university links", "Інші послуги та посилання університету"))
+            ))
+        }
+        if (mode != pl.vistula.checker.core.AccountRole.Mode.STUDENT) {
+            add(tr("Wykładowca", "Lecturer", "Викладач") to buildList {
+                add(Triple("teaching", tr("Panel wykładowcy", "Lecturer panel", "Панель викладача"), tr("Prowadzone przedmioty i dyżury", "Conducted courses and office hours", "Предмети викладання та консультації")))
+                add(Triple("lecturerGroups", tr("Grupy i uczestnicy", "Class groups & rosters", "Групи та учасники"), tr("Prowadzone grupy i koordynowane przedmioty", "Taught groups and coordinated courses", "Групи викладання та координовані предмети")))
+                add(Triple("lecturerTests", tr("Sprawdziany i oceny", "Course tests & grading", "Перевірки та оцінювання"), tr("Drzewo sprawdzianów i wpisywanie ocen (Eksperymentalne)", "Test trees and experimental grading", "Дерево перевірок і виставлення оцінок (Експериментально)")))
+                add(Triple("lecturerMeetings", tr("Konsultacje i spotkania", "Consultations & meetings", "Консультації та зустрічі"), tr("Harmonogram dyżurów i spotkań", "Office hours and meetings", "Розклад консультацій і зустрічей")))
+                if (mode == pl.vistula.checker.core.AccountRole.Mode.LECTURER) {
+                    add(Triple("tasks", strings.sectionTasks, tr("Własne zadania i terminy", "Your own tasks and deadlines", "Власні завдання й терміни")))
+                }
+            })
+        }
+    } + listOf(
         tr("Uczelnia", "University", "Університет") to listOf(
             Triple("news", tr("Aktualności", "News", "Новини"), tr("Ogłoszenia uczelni", "University announcements", "Оголошення університету")),
-            Triple("campus", tr("Kampus i kontakty", "Campus & contacts", "Кампус і контакти"), tr("Adresy i dane kontaktowe", "Addresses and contact details", "Адреси та контакти"))
+            Triple("campus", tr("Kampus i kontakty", "Campus & contacts", "Кампус і контакти"), tr("Adresy i dane kontaktowe", "Addresses and contact details", "Адреси та контакти")),
+            Triple("academicCalendar", tr("Kalendarz akademicki", "Academic calendar", "Академічний календар"), tr("Wydarzenia i terminy roku akademickiego", "Academic year events and dates", "Події та дати навчального року")),
+            Triple("staffDirectory", tr("Katalog pracowników", "Staff directory", "Каталог працівників"), tr("Wyszukiwarka prowadzących i konsultacji", "Search lecturers and office hours", "Пошук викладачів і консультацій"))
         ),
         tr("Aplikacja i narzędzia", "App & tools", "Застосунок і інструменти") to buildList {
             add(Triple("account", strings.sectionAccount, tr("Połączenie, wygląd i synchronizacja", "Connection, appearance and sync", "Підключення, вигляд і синхронізація")))
-            add(Triple("gpa", strings.sectionGpa, tr("Oblicz docelową średnią", "Calculate a target average", "Обчисліть цільовий середній бал")))
+            if (mode != pl.vistula.checker.core.AccountRole.Mode.LECTURER) add(Triple("gpa", strings.sectionGpa, tr("Oblicz docelową średnią", "Calculate a target average", "Обчисліть цільовий середній бал")))
             add(Triple("catalog", tr("Katalog API USOS", "USOS API catalog", "Каталог API USOS"), tr("Dokumentacja metod API", "Browse API documentation", "Документація методів API")))
-            if (lecturer) add(Triple("teaching", tr("Panel wykładowcy", "Lecturer panel", "Панель викладача"), tr("Narzędzia prowadzącego", "Teaching tools", "Інструменти викладача")))
         }
     )
     val title = groups.flatMap { it.second }.firstOrNull { it.first == activeSection }?.second ?: ""
@@ -1447,7 +1483,9 @@ fun MoreScreen(
         when (activeSection) {
             "" -> Unit
             "campus" -> CampusSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
-            "teaching" -> LecturerSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
+            "teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings" -> LecturerWorkspaceSection(state, repository, preferences, language, activeSection, onOpenUrl, onReloadState, onStatusMessage, runAsync)
+            "staffDirectory" -> StaffDirectorySection(state, repository, language, onReloadState, onStatusMessage, runAsync)
+            "registrations", "exams", "academicCalendar" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
             "account" -> AccountSection(
                 state = state,
                 repository = repository,

@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="lecturer_title">Lecturer panel</string>
-    <string name="lecturer_description">Courses taught and timetable for your lecturer account.</string>
+    <string name="lecturer_description">Courses taught, class groups, course tests and office hours for your lecturer account.</string>
     <string name="lecturer_schedule">Teaching timetable</string>
     <string name="lecturer_empty">USOS returned no active courses taught.</string>
     <string name="lecturer_usosweb">Lecturer tools in USOSweb</string>
+    <string name="section_lecturer">Lecturer</string>
+    <string name="lecturer_groups_title">Class groups and coordinated courses</string>
+    <string name="lecturer_groups_empty">No taught groups in the current term.</string>
+    <string name="lecturer_tests_title">Course tests and grading</string>
+    <string name="lecturer_tests_empty">No course test trees found for taught courses.</string>
+    <string name="lecturer_meetings_title">Consultations and meetings</string>
+    <string name="lecturer_meetings_empty">No consultations or meetings found.</string>
+    <string name="lecturer_experimental_badge">Experimental</string>
+    <string name="lecturer_experimental_setting">Grade &amp; test writes (Experimental)</string>
+    <string name="lecturer_experimental_notice_title">Experimental feature</string>
+    <string name="lecturer_experimental_notice_body">Writing grades, points and node visibility to USOS is implemented strictly from API documentation. Always verify the student ID, node ID and value before confirming.</string>
+    <string name="lecturer_experimental_ack">I understand and enable</string>
+    <string name="lecturer_write_points">Save points</string>
+    <string name="lecturer_write_grade">Save grade</string>
+    <string name="lecturer_write_confirm_title">Confirm USOS write (Experimental)</string>
+    <string name="lecturer_write_confirm_body">Node #%1$s · Student #%2$s · New value: %3$s</string>
+    <string name="lecturer_write_success">Saved and verified in USOS.</string>
+    <string name="staff_directory_title">Staff directory</string>
+    <string name="staff_directory_desc">Search lecturers, offices and consultation hours</string>
+    <string name="academic_extras_title">Registrations, exams &amp; calendar</string>
+    <string name="academic_extras_desc">Course registration rounds, exams and academic events</string>
 </resources>

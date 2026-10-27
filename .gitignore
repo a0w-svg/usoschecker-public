@@ -10,6 +10,7 @@ __pycache__/
 **/bin/
 *.hprof
 *.idsig
+.claude/
 
 # Android & Native Build
 .externalNativeBuild/
@@ -54,6 +55,7 @@ replay_pid*
 # Agent & local assistant files
 .agent/
 .agents/
+skills-lock.json
 
 # Credentials, signing material, private exports and compiled artifacts
 .env

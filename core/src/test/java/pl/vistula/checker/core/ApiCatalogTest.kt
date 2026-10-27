@@ -18,11 +18,12 @@ class ApiCatalogTest {
     @Test
     fun restoredDraftsExcludeCredentialsAndActivationData() {
         val draft = JSONObject().put("order_id", "42").put("token", "secret").put("distribution_pass", "secret")
-            .put("code", "secret").put("fields", "id|status").put("__transport", 1)
+            .put("code", "secret").put("key", "secret").put("fields", "id|status").put("__transport", 1)
         val safe = ApiCatalog.restorableDrafts(JSONObject().put("services/cards/mcard_order2", draft))
         assertFalse(safe.toString().contains("secret"))
         assertTrue(safe.toString().contains("42"))
         assertTrue(safe.toString().contains("__transport"))
+        assertTrue(ApiCatalog.sensitiveParameter("key"))
     }
 
     @Test

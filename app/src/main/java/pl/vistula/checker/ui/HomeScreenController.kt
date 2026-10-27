@@ -78,7 +78,7 @@ class HomeScreenController private constructor() {
                 val payments = snap.payments
                 if (payments != null) {
                     val unpaid = payments.totalUnpaidAmount()
-                    if (unpaid > 0 || payments.hasOverdue()) {
+                    if (payments.hasOverdue() || (!payments.hasUnknownSettlement() && unpaid > 0)) {
                         val payBox = UiHelper.card(
                             activity,
                             content,
@@ -96,8 +96,9 @@ class HomeScreenController private constructor() {
                             if (payments.hasOverdue()) Color.rgb(160, 48, 40) else UiHelper.GREEN,
                             true
                         )
-                        UiHelper.add(activity, payBox, activity.getString(R.string.home_payments_due,
-                            pl.vistula.checker.core.PaymentAmounts.unpaid(payments, Language.currentLocale(activity).language)), 19, UiHelper.INK, true)
+                        UiHelper.add(activity, payBox, if (payments.hasUnknownSettlement()) activity.getString(R.string.payments_settlement_unknown)
+                            else activity.getString(R.string.home_payments_due,
+                                pl.vistula.checker.core.PaymentAmounts.unpaid(payments, Language.currentLocale(activity).language)), 19, UiHelper.INK, true)
                         if (payments.accounts.isNotEmpty()) {
                             UiHelper.add(
                                 activity,

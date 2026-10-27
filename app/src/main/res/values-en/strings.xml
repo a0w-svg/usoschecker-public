@@ -236,6 +236,13 @@ Parameters preserved. Fix them or retry the request.</string>
     <string name="payments_schedule_heading">Installment schedule</string>
 <string name="payments_status_overdue_warn">Attention: Some installments are past due date!</string>
     <string name="payments_status_all_paid">All payments are up to date.</string>
+    <string name="payments_status_none_due">No amount is due in the downloaded installments.</string>
+    <string name="payments_settlement_unknown">Settlement is not known for every item. Check your current balance in USOSweb.</string>
+    <string name="payment_status_unknown">Settlement unknown</string>
+    <string name="grades_points_without_max">Points: %1$.2f</string>
+    <string name="grades_tests_unavailable">Course-test results could not be loaded completely. Data may be unavailable or exceed the download limit.</string>
+    <string name="account_thesis_unavailable">Thesis information could not be loaded. Try syncing again.</string>
+    <string name="payments_usage_guide">Refresh payments to see the data from USOS. Check the deadline, currency and account number before making a transfer. Payment history is refreshed separately. If data is missing, check the payments permission in account settings.</string>
     <string name="payments_status_pending">Remember to settle installments on time.</string>
     <string name="payments_amount">Amount: %1$.2f %2$s</string>
     <string name="payments_deadline">Payment deadline: %1$s</string>
@@ -555,6 +562,7 @@ ADMINISTRATIVE UNIVERSITY KEY REQUIRED</string>
     <string name="widget_payment_all_paid">Fully paid</string>
     <string name="widget_payment_to_pay">Amount due</string>
     <string name="widget_payment_none">No dues</string>
+    <string name="widget_payment_unavailable">Data unavailable</string>
     <string name="btn_understand">Understood</string>
     <string name="account_album_number">Student ID: %1$s</string>
     <string name="grades_share_term">Semester: %1$s</string>

@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <string name="lecturer_title">Panel wykładowcy</string>
-    <string name="lecturer_description">Prowadzone przedmioty i plan zajęć wykrytego konta wykładowcy.</string>
+    <string name="lecturer_description">Prowadzone przedmioty, grupy, sprawdziany i konsultacje konta wykładowcy.</string>
     <string name="lecturer_schedule">Plan prowadzonych zajęć</string>
     <string name="lecturer_empty">USOS nie zwrócił aktywnych prowadzonych przedmiotów.</string>
     <string name="lecturer_usosweb">Funkcje wykładowcy w USOSweb</string>
+    <string name="section_lecturer">Wykładowca</string>
+    <string name="lecturer_groups_title">Grupy i koordynowane przedmioty</string>
+    <string name="lecturer_groups_empty">Brak prowadzonych grup w wybranym semestrze.</string>
+    <string name="lecturer_tests_title">Sprawdziany i oceny</string>
+    <string name="lecturer_tests_empty">Brak drzew sprawdzianów dla prowadzonych przedmiotów.</string>
+    <string name="lecturer_meetings_title">Konsultacje i spotkania</string>
+    <string name="lecturer_meetings_empty">Brak zapisanych konsultacji i spotkań.</string>
+    <string name="lecturer_experimental_badge">Eksperymentalne</string>
+    <string name="lecturer_experimental_setting">Zapis ocen i sprawdzianów (Eksperymentalne)</string>
+    <string name="lecturer_experimental_notice_title">Funkcja eksperymentalna</string>
+    <string name="lecturer_experimental_notice_body">Zapis ocen, punktów i widoczności węzłów w USOS został zaimplementowany wyłącznie na podstawie dokumentacji API. Przed potwierdzeniem zawsze sprawdź identyfikator studenta, węzeł i wartość.</string>
+    <string name="lecturer_experimental_ack">Rozumiem i włączam</string>
+    <string name="lecturer_write_points">Zapisz punkty</string>
+    <string name="lecturer_write_grade">Zapisz ocenę</string>
+    <string name="lecturer_write_confirm_title">Potwierdź zapis w USOS (Eksperymentalne)</string>
+    <string name="lecturer_write_confirm_body">Węzeł #%1$s · Student #%2$s · Nowa wartość: %3$s</string>
+    <string name="lecturer_write_success">Zapisano i zweryfikowano w USOS.</string>
+    <string name="staff_directory_title">Katalog pracowników</string>
+    <string name="staff_directory_desc">Wyszukiwarka prowadzących, pokoi i konsultacji</string>
+    <string name="academic_extras_title">Rejestracje, egzaminy i kalendarz</string>
+    <string name="academic_extras_desc">Tury zapisów, egzaminy i wydarzenia akademickie</string>
 </resources>

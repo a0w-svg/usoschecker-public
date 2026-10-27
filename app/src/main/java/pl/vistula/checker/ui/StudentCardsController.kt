@@ -16,7 +16,24 @@ class StudentCardsController private constructor() {
                 ToolScreenUi.action(menu, R.string.cards_refresh) { activity.refreshStudentServices("cards") }
             }
             renderAccess(activity, content, state, "cards")
+            UiHelper.heading(activity, content, activity.getString(R.string.cards_physical_title))
+            val physical = entry(services, "physicalCards")
+            status(activity, content, physical)
+            val cards = physical.optJSONArray("data")
+            if (cards == null || cards.length() == 0) {
+                UiHelper.note(activity, content, activity.getString(if (cards == null) R.string.services_load_hint else R.string.cards_physical_empty), UiHelper.MUTED)
+            } else {
+                for (i in 0 until cards.length()) {
+                    val card = StudentServices.Card(cards.optJSONObject(i))
+                    val cardBox = UiHelper.section(activity, content, Color.WHITE)
+                    line(activity, cardBox, R.string.cards_type, card.type)
+                    line(activity, cardBox, R.string.cards_student_number, card.studentNumber)
+                    line(activity, cardBox, R.string.cards_issue_date, HistoryScreenController.formatFullDate(card.issued))
+                    line(activity, cardBox, R.string.cards_expiration, HistoryScreenController.formatFullDate(card.expires))
+                }
+            }
             UiHelper.heading(activity, content, activity.getString(R.string.cards_mobile_title))
+            UiHelper.note(activity, content, activity.getString(R.string.cards_usage_guide), UiHelper.MUTED)
             val mobile = entry(services, "mcard")
             status(activity, content, mobile)
             val data = mobile.optJSONObject("data")

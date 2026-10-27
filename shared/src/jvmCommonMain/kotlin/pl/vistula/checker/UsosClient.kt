@@ -3,6 +3,7 @@ package pl.vistula.checker
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.time.DayOfWeek
@@ -17,6 +18,7 @@ import java.util.function.Consumer
 import kotlin.math.max
 import kotlin.math.min
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import org.json.JSONTokener
 import pl.vistula.checker.core.ApiFailure
@@ -119,6 +121,11 @@ class UsosClient @JvmOverloads constructor(
         suppliedSecret: String,
         file: ByteArray?,
         filename: String?
+    ): Response = requestDataWithBudget(method, endpoint, params, signed, suppliedToken, suppliedSecret, file, filename, RequestBudget())
+
+    private fun requestDataWithBudget(
+        method: String, endpoint: String, params: Map<String, String>, signed: Boolean,
+        suppliedToken: String, suppliedSecret: String, file: ByteArray?, filename: String?, budget: RequestBudget
     ): Response {
         if (method != "GET" && method != "POST") {
             throw IllegalArgumentException("Obsługiwane są żądania GET i POST.")
@@ -127,7 +134,6 @@ class UsosClient @JvmOverloads constructor(
             throw IllegalArgumentException("Plik wymaga POST i nie może przekraczać 8 MB.")
         }
         val url = path(endpoint)
-        val budget = RequestBudget()
         var values: MutableMap<String, String> = TreeMap(params)
         if (signed) {
             if (key.isEmpty() || secret.isEmpty()) {
@@ -166,6 +172,7 @@ class UsosClient @JvmOverloads constructor(
         connection.setRequestProperty("Accept", "application/json, text/plain, */*")
         if (authorization.isNotEmpty()) connection.setRequestProperty("Authorization", authorization)
         try {
+            connection.connectTimeout = min(15000, budget.readTimeout())
             connection.readTimeout = budget.readTimeout()
             if (post) {
                 connection.doOutput = true
@@ -270,7 +277,7 @@ class UsosClient @JvmOverloads constructor(
         file: ByteArray?,
         filename: String?
     ): Response {
-        val auth = metadata.getJSONObject("auth_options")
+        val auth = metadata.getJSONObject("auth_options"); if (pl.vistula.checker.core.ApiCatalog.lecturerWriteMethod(metadata.optString("name")) && !lecturer) throw IllegalStateException("Ta metoda zapisu jest dostępna wyłącznie dla konta wykładowcy.")
         for (name in params.keys) {
             if (name.startsWith("oauth_")) {
                 throw IllegalArgumentException("Parametry OAuth są zarządzane przez aplikację. Do logowania użyj ekranu Konto.")
@@ -419,34 +426,39 @@ class UsosClient @JvmOverloads constructor(
 
         reportProgress("Pobieranie prac dyplomowych · theses/user")
         try {
-            val thesesRaw = get(
+            val user = JSONObject(get("services/users/user", mapOf("fields" to "id")))
+            val userId = StudentServices.text(user, "id")
+            if (userId.isBlank()) throw JSONException("Missing user ID")
+            val thesesRaw = JSONObject(get(
                 "services/theses/user",
-                mapOf("fields" to "id|title|status|supervisors[first_name|last_name]|reviewers[first_name|last_name]")
-            )
-            parseLanguages(s) { variant -> variant.thesis = UsosParser.thesis(JSONTokener(thesesRaw).nextValue()) }
+                mapOf("user_id" to userId, "fields" to "authored_theses[id|title|titles|supervisors[first_name|last_name]]")
+            ))
+            if (thesesRaw.optJSONArray("authored_theses") == null) throw JSONException("Missing authored theses")
+            parseLanguages(s) { variant -> variant.thesis = UsosParser.thesis(thesesRaw) }
         } catch (e: Exception) {
             optionalFailure(e)
+            parseLanguages(s) { variant -> variant.serviceErrors["theses"] = SharedRepository.message(e) }
         }
 
         if (StudentServices.hasScope(scopes, "crstests")) {
             reportProgress("Pobieranie sprawdzianów cząstkowych · crstests/participant2")
             try {
-                val node = "id|name|type|visible_for_students|task_node_details[points_max|students_points[points|last_changed]]|grade_node_details[students_grade[grade_value[symbol]|last_changed]]"
                 val tests = JSONArray(
                     get(
                         "services/crstests/participant2",
                         mapOf(
                             "active_terms_only" to "false",
-                            "fields" to "course_edition[course[id|name]|term[id]]|root[$node|subnodes_deep[$node]]"
+                            "fields" to "course_edition[course[id|name]|term[id]]|root[id|type|visible_for_students|subnodes_deep[id|parent_id|name|type|visible_for_students]]"
                         )
                     )
                 )
+                enrichCourseTestNodes(tests)
                 parseLanguages(s) { variant ->
                     variant.tests.addAll(UsosParser.courseTestTrees(tests, UsosParser.courseNames(editions)))
                 }
             } catch (e: Exception) {
                 optionalFailure(e)
-                parseLanguages(s) { variant -> variant.serviceErrors["crstests"] = SharedRepository.message(e) }
+                parseLanguages(s) { variant -> variant.serviceErrors["crstests"] = "incomplete" }
             }
         } else {
             parseLanguages(s) { variant -> variant.serviceErrors["crstests"] = "crstests" }
@@ -500,6 +512,91 @@ class UsosClient @JvmOverloads constructor(
             }
         }
         return s
+    }
+
+    /** The nested selector exposes only primary fields; retrieve visible result details separately. */
+    private fun enrichCourseTestNodes(tests: JSONArray) {
+        val budget = RequestBudget(durationMs = 20_000L)
+        val wanted = LinkedHashMap<String, MutableList<JSONObject>>()
+        var totalNodes = 0
+        for (i in 0 until tests.length()) {
+            val root = tests.getJSONObject(i).getJSONObject("root")
+            val rootId = StudentServices.text(root, "id")
+            if (rootId.isBlank()) throw JSONException("Missing course-test root ID")
+            if (root.has("type") && StudentServices.text(root, "type") != "root") throw JSONException("Invalid course-test root type")
+            if (root.opt("visible_for_students") !is Boolean) throw JSONException("Missing course-test visibility")
+            if (!root.optBoolean("visible_for_students", true)) continue
+            root.remove("task_node_details")
+            root.remove("grade_node_details")
+            root.remove("students_points")
+            root.remove("subnodes")
+            val nodes = LinkedHashMap<String, JSONObject>()
+            nodes[rootId] = root
+            val children = root.optJSONArray("subnodes_deep") ?: throw JSONException("Missing course-test tree")
+            totalNodes += children.length()
+            if (totalNodes > 1000) throw JSONException("Too many course-test nodes")
+            for (j in 0 until children.length()) {
+                val node = children.getJSONObject(j)
+                val id = StudentServices.text(node, "id")
+                if (id.isBlank() || nodes.put(id, node) != null) throw JSONException("Invalid course-test node ID")
+                if (node.opt("visible_for_students") !is Boolean) throw JSONException("Missing course-test visibility")
+                node.remove("task_node_details")
+                node.remove("grade_node_details")
+                node.remove("students_points")
+                if ((!node.isNull("subnodes") && node.has("subnodes")) ||
+                    (!node.isNull("subnodes_deep") && node.has("subnodes_deep"))) {
+                    throw JSONException("Unexpected nested course-test tree")
+                }
+                node.remove("subnodes")
+                node.remove("subnodes_deep")
+            }
+            for ((id, node) in nodes) {
+                if (id == rootId) continue
+                val type = node.optString("type")
+                if (type !in setOf("folder", "task", "grade")) throw JSONException("Invalid course-test node type")
+                var current = node
+                val visited = HashSet<String>()
+                var visible = true
+                while (true) {
+                    val currentId = StudentServices.text(current, "id")
+                    if (!visited.add(currentId)) throw JSONException("Invalid course-test ancestry")
+                    if (!current.optBoolean("visible_for_students", true)) visible = false
+                    if (currentId == rootId) break
+                    val parent = StudentServices.text(current, "parent_id")
+                    current = nodes[parent] ?: throw JSONException("Missing course-test ancestor")
+                    if (parent != rootId && current.optString("type") != "folder") throw JSONException("Invalid course-test parent")
+                }
+                if (visible && type in setOf("task", "grade")) wanted.getOrPut(id) { ArrayList() }.add(node)
+            }
+        }
+        if (wanted.size > 50) throw JSONException("Too many course-test nodes to load safely")
+        for ((id, nodes) in wanted) {
+            if (budget.expired()) throw JSONException("Course-test detail time limit exceeded")
+            val detail = try {
+                JSONObject(requestDataWithBudget("GET", "services/crstests/node2", mapOf("node_id" to id,
+                    "fields" to "id|parent_id|type|visible_for_students|task_node_details[points_max|students_points[points|last_changed]]|grade_node_details[students_grade[grade_value[symbol]|last_changed]]"),
+                    true, token, tokenSecret, null, null, budget).text())
+            } catch (e: SocketTimeoutException) {
+                throw JSONException("Course-test details timed out")
+            }
+            if (StudentServices.text(detail, "id") != id) throw JSONException("Course-test node changed")
+            if (detail.opt("visible_for_students") !is Boolean) throw JSONException("Missing course-test visibility")
+            if (!detail.optBoolean("visible_for_students", true)) {
+                nodes.forEach { it.put("visible_for_students", false) }
+                continue
+            }
+            for (node in nodes) {
+                if (StudentServices.text(detail, "parent_id") != StudentServices.text(node, "parent_id") ||
+                    StudentServices.text(detail, "type") != StudentServices.text(node, "type")) throw JSONException("Course-test node changed")
+                val required = if (node.optString("type") == "task") "task_node_details" else "grade_node_details"
+                if (detail.optJSONObject(required) == null) throw JSONException("Missing course-test details")
+            }
+            for (node in nodes) {
+                val field = if (node.optString("type") == "task") "task_node_details" else "grade_node_details"
+                node.put(field, detail.getJSONObject(field))
+            }
+        }
+        if (budget.expired()) throw JSONException("Course-test detail time limit exceeded")
     }
 
     @Throws(Exception::class)

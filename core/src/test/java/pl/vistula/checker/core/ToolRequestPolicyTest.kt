@@ -35,6 +35,17 @@ class ToolRequestPolicyTest {
         }
     }
 
+    @Test fun customBudgetSharesTheSameDeadlineAcrossReads() {
+        var time = 0L
+        val budget = RequestBudget(20_000L) { time }
+        assertEquals(20_000, budget.readTimeout())
+        time = 19_500_000_000L
+        assertEquals(500, budget.readTimeout())
+        time = 20_000_000_000L
+        assertTrue(budget.expired())
+        assertThrows(SocketTimeoutException::class.java) { budget.readTimeout() }
+    }
+
     @Test fun absentServerCooldownUsesASafeFallbackWithoutAutomaticReplay() {
         assertEquals(31_000L, ApiFailure(429, "{}", null, 1000).retryAt)
         assertEquals(6_000L, ApiFailure(503, "{}", null, 1000).retryAt)

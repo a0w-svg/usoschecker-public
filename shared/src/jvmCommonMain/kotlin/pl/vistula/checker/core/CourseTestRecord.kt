@@ -13,13 +13,14 @@ class CourseTestRecord @JvmOverloads constructor(
     @JvmField val grade: String,
     @JvmField val date: String,
     @JvmField val term: String = "",
+    @JvmField val hasPoints: Boolean = grade.isEmpty() || maxPoints > 0 || points != 0.0,
 ) {
-    fun percentage(): Double = if (maxPoints > 0) (points / maxPoints) * 100.0 else Double.NaN
+    fun percentage(): Double = if (hasPoints && maxPoints > 0) (points / maxPoints) * 100.0 else Double.NaN
 
     @Throws(JSONException::class)
     fun json(): JSONObject = JSONObject().put("id", id).put("courseId", courseId).put("courseName", courseName)
         .put("testName", testName).put("points", points).put("maxPoints", maxPoints)
-        .put("grade", grade).put("date", date).put("term", term)
+        .put("grade", grade).put("date", date).put("term", term).put("hasPoints", hasPoints)
 
     companion object {
         @JvmStatic
@@ -30,6 +31,8 @@ class CourseTestRecord @JvmOverloads constructor(
                 o.optString("courseName", ""), o.optString("testName", ""),
                 o.optDouble("points", 0.0), o.optDouble("maxPoints", 0.0),
                 o.optString("grade", ""), o.optString("date", ""), o.optString("term", ""),
+                if (o.has("hasPoints")) o.optBoolean("hasPoints") else
+                    (o.optString("grade", "").isEmpty() || o.optDouble("maxPoints", 0.0) > 0 || o.optDouble("points", 0.0) != 0.0),
             )
         }
     }

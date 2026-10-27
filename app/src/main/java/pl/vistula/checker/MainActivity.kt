@@ -553,8 +553,15 @@ class MainActivity : AppCompatActivity() {
             }
             val section = when (target) { 11 -> "news"; 13 -> "cards"; 14 -> "documents"; 8 -> "payments"; 15 -> "teaching"; else -> null }
             if (target == 11 && !connected() && CampusAffiliation.selected(state).isEmpty()) return
+            val services = studentServices()
+            val mobile = services.optJSONObject("mcard")
+            // An upgraded installation may have a recent mobile-card cache but no physical-card entry yet.
+            val physicalCardsMissing = section == "cards" && services.optJSONObject("physicalCards") == null &&
+                mobile != null && mobile.optLong("fetchedAt") > 0 && mobile.optString("error").isEmpty() &&
+                StudentServices.hasScope(state.optString("scopes"), "cards") && state.optLong("retryAt") <= System.currentTimeMillis()
             if (section != null && (section == "news" || connected()) &&
-                System.currentTimeMillis() - (studentServices().optJSONObject(if (section == "cards") "mcard" else section)?.optLong("attemptAt") ?: 0L) > 15 * 60_000L) refreshStudentServices(section)
+                (physicalCardsMissing || System.currentTimeMillis() -
+                    (services.optJSONObject(if (section == "cards") "mcard" else section)?.optLong("attemptAt") ?: 0L) > 15 * 60_000L)) refreshStudentServices(section)
         }
     }
 
@@ -588,7 +595,7 @@ class MainActivity : AppCompatActivity() {
                 2 -> R.id.nav_item_grades
                 5 -> R.id.nav_item_plan
                 1 -> R.id.nav_item_history
-                6, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15 -> R.id.nav_item_more
+                6, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 -> R.id.nav_item_more
                 else -> R.id.nav_item_home
             }
             nav.menu.findItem(navMenuId).isChecked = true
@@ -611,7 +618,9 @@ class MainActivity : AppCompatActivity() {
             })
 
             when (tab) {
-                15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, state)
+                15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, state, studentServices())
+                16 -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
+                17 -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
                 13 -> StudentCardsController.render(
                     this,
                     content,
@@ -1088,8 +1097,9 @@ class MainActivity : AppCompatActivity() {
                 error(getString(R.string.services_retry_at, UiHelper.timestamp(state.optLong("retryAt"))))
                 return
             }
-            val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; else -> section }
-            if (section !in setOf("news", "usosNews", "affiliation", "teaching") && !StudentServices.hasScope(state.optString("scopes"), scope)) {
+            // Mapped scope for optional student and lecturer services
+            val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; "lecturerTests" -> "crstests"; "registrations", "exams" -> "studies"; else -> section }
+            if (section !in setOf("news", "usosNews", "affiliation", "teaching", "lecturerGroups", "lecturerMeetings", "staffDirectory", "academicCalendar") && !StudentServices.hasScope(state.optString("scopes"), scope)) {
                 error(getString(R.string.services_scope_required, scope))
                 return
             }
@@ -1240,6 +1250,43 @@ class MainActivity : AppCompatActivity() {
         return credentials
     }
 
+    fun performLecturerWrite(isPoints: Boolean, nodeId: String, studentId: String, value: String, comment: String) {
+        if (!liveService("crstests")) return
+        val prefs = getSharedPreferences("student_tools", MODE_PRIVATE)
+        val kvStore = object : KeyValueStore {
+            override fun getString(key: String, defaultValue: String): String = prefs.getString(key, defaultValue) ?: defaultValue
+            override fun putString(key: String, value: String) { prefs.edit { putString(key, value) } }
+            override fun getBoolean(key: String, defaultValue: Boolean): Boolean = prefs.getBoolean(key, defaultValue)
+            override fun putBoolean(key: String, value: Boolean) { prefs.edit { putBoolean(key, value) } }
+            override fun getLong(key: String, defaultValue: Long): Long = prefs.getLong(key, defaultValue)
+            override fun putLong(key: String, value: Long) { prefs.edit { putLong(key, value) } }
+            override fun clear() { prefs.edit { clear() } }
+        }
+        task(
+            {
+                val credentials = serviceCredentials("crstests")
+                val client = UsosClient(credentials)
+                val sameAccount = {
+                    check(SharedRepository.sameAccount(credentials, repository.read())) {
+                        getString(R.string.service_action_unavailable)
+                    }
+                }
+                if (isPoints) {
+                    LecturerWriteActions.updatePoints(client, credentials, nodeId, studentId, value.replace(',', '.').toDoubleOrNull() ?: throw IllegalArgumentException("Invalid points"), comment, null, kvStore, sameAccount)
+                } else {
+                    LecturerWriteActions.updateGrade(client, credentials, nodeId, studentId, value.toIntOrNull() ?: throw IllegalArgumentException("Invalid grade order"), comment, "", null, kvStore, sameAccount)
+                }
+                StudentServiceLoader.refresh(repository, "lecturerTests")
+                repository.read()
+            },
+            { result ->
+                state = result
+                render()
+                Toast.makeText(this, R.string.lecturer_write_success, Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+
     fun mobileCardAction(order: Boolean, id: String) {
         if (!liveService("cards")) return
         MaterialAlertDialogBuilder(this)
@@ -1256,8 +1303,12 @@ class MainActivity : AppCompatActivity() {
                                 getString(R.string.service_action_unavailable)
                             }
                         }
-                        StudentServiceLoader.refresh(repository, "cards")
-                        repository.read()
+                        try {
+                            StudentServiceLoader.refresh(repository, "cards")
+                            repository.read()
+                        } catch (e: Exception) {
+                            throw MobileCardActions.ConfirmedRefreshFailed(e)
+                        }
                     },
                     { result ->
                         state = result

@@ -32,9 +32,10 @@ def forbidden(path):
     if name == "local.properties.example" or name == ".env.example":
         return False
     return (name == "local.properties" or name == ".env" or name.startswith(".env.")
+            or name == "mapping.txt" or name.endswith("-mapping.txt")
             or name.endswith(("secrets.properties", "signing.properties", "key.properties"))
             or p.suffix in {".jks", ".keystore", ".pem", ".key", ".p12", ".pfx", ".apk", ".aab", ".apks", ".class", ".zip", ".hprof"}
-            or any(part in {".idea", ".gradle", "build", "bin", "private", "captures", "security-reports"} for part in p.parts))
+            or any(part in {".idea", ".gradle", "build", "bin", "dist", "private", "captures", "security-reports"} for part in p.parts))
 
 
 def local_secrets():

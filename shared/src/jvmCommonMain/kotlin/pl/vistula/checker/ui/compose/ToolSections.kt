@@ -122,7 +122,7 @@ fun AccountSection(
                             Text(if (showSecret) t("Ukryj", "Hide", "Приховати") else t("Pokaż", "Show", "Показати"))
                         } })
                     OutlinedTextField(value = scopesInput, onValueChange = { scopesInput = it },
-                        label = { Text(t("Zakresy zgody", "Permission scopes", "Дозволи доступу")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        label = { Text(t("Zakresy zgody", "Permission scopes", "Дозволи доступу")) }, modifier = Modifier.fillMaxWidth(), singleLine = true); ScopePresetRow(scopesInput, language) { scopesInput = it }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(enabled = keyInput.isNotBlank() && secretInput.isNotBlank(), onClick = {
                             val key = keyInput.trim(); val secret = secretInput.trim(); val scopes = scopesInput.trim()
@@ -158,7 +158,7 @@ fun AccountSection(
             TextButton(onClick = { onOpenUrl("https://github.com/Kaydjen") }) {
                 Text(t("Współautor designu: Kaydjen", "Design co-author: Kaydjen", "Співавтор дизайну: Kaydjen"))
             }
-            Text(t("Motyw", "Theme", "Тема"), style = MaterialTheme.typography.titleMedium)
+            ExperimentalLecturerWritesSettingRow(state, preferences, language, onReloadState); Text(t("Motyw", "Theme", "Тема"), style = MaterialTheme.typography.titleMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("system" to t("Systemowy", "System", "Системна"), "light" to t("Jasny", "Light", "Світла"),
                     "dark" to t("Ciemny", "Dark", "Темна"), "oled" to "OLED").forEach { (mode, label) ->
@@ -477,6 +477,7 @@ fun PaymentsAndServicesSection(
                         fontWeight = FontWeight.Medium
                     )
                 }
+                if (payments.hasUnknownSettlement()) Text(t("Nie można ustalić rozliczenia wszystkich pozycji. Sprawdź saldo w USOSweb.", "Settlement is not known for every item. Check your balance in USOSweb.", "Статус оплати деяких позицій невідомий. Перевірте баланс у USOSweb."))
                 payments.installments.forEach { inst ->
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
@@ -484,7 +485,8 @@ fun PaymentsAndServicesSection(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(inst.name, style = MaterialTheme.typography.titleMedium)
-                            Text("${inst.deadline.ifEmpty { "—" }} · ${inst.status}", style = MaterialTheme.typography.bodyMedium)
+                            val status = if (inst.isSettlementUnknown()) t("Rozliczenie nieznane", "Settlement unknown", "Статус оплати невідомий") else inst.status
+                            Text("${inst.deadline.ifEmpty { "—" }} · $status", style = MaterialTheme.typography.bodyMedium)
                         }
                         Text(pl.vistula.checker.core.PaymentAmounts.format(inst.amount, inst.currency, language), fontWeight = FontWeight.Bold)
                     }
@@ -517,7 +519,7 @@ fun PaymentsAndServicesSection(
                                     }
                                     onReloadState()
                                     val entries = repository.read().optJSONObject("studentServices")
-                                    val failure = listOf("mcard", "documents").mapNotNull { entries?.optJSONObject(it) }.firstOrNull { it.optString("error").isNotEmpty() }
+                                    val failure = listOf("mcard", "physicalCards", "documents").mapNotNull { entries?.optJSONObject(it) }.firstOrNull { it.optString("error").isNotEmpty() }
                                     onStatusMessage(if (failure != null) pl.vistula.checker.core.SyncProgress.cachedError(failure, language) else t("Odświeżono legitymacje i dokumenty.", "Student cards and documents refreshed.", "Посвідчення та документи оновлено."))
                                 } catch (e: Exception) {
                                     onStatusMessage(pl.vistula.checker.core.SyncProgress.error(e, language))
@@ -529,11 +531,33 @@ fun PaymentsAndServicesSection(
                     }
                 }
             }
-            for (key in listOf("mcard", "documents")) {
+            for (key in listOf("mcard", "physicalCards", "documents")) {
                 val entry = services?.optJSONObject(key)
                 if (!entry?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(entry, language), color = MaterialTheme.colorScheme.error)
             }
-            if (section != "documents") MobileCardControls(state, repository, language, onReloadState, onStatusMessage, runAsync)
+            if (section != "documents") {
+                Text(t("Karty fizyczne", "Physical cards", "Фізичні картки"), style = MaterialTheme.typography.titleMedium)
+                val cards = services?.optJSONObject("physicalCards")?.optJSONArray("data")
+                val cardEntry = services?.optJSONObject("physicalCards")
+                val fetchedAt = cardEntry?.optLong("fetchedAt") ?: 0L
+                if (fetchedAt > 0) {
+                    val timestamp = java.time.Instant.ofEpochMilli(fetchedAt).atZone(java.time.ZoneId.systemDefault()).toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                    Text(t("Pobrano: ", "Fetched: ", "Завантажено: ") + timestamp, style = MaterialTheme.typography.bodySmall)
+                }
+                if (cards != null && !cardEntry?.optString("error").isNullOrEmpty()) Text(t("Pokazano zapisane dane.", "Showing cached data.", "Показано збережені дані."))
+                if (cards == null) {
+                    Text(t("Dane kart nie zostały jeszcze pobrane.", "Card data has not been loaded yet.", "Дані карток ще не завантажено."))
+                } else if (cards.length() == 0) {
+                    Text(t("USOS nie zwrócił kart fizycznych.", "USOS returned no physical cards.", "USOS не повернув фізичних карток."))
+                } else for (i in 0 until cards.length()) {
+                    val card = StudentServices.Card(cards.optJSONObject(i))
+                    if (card.type.isNotEmpty()) Text(t("Typ karty: ", "Card type: ", "Тип картки: ") + card.type)
+                    if (card.studentNumber.isNotEmpty()) Text(t("Numer albumu: ", "Student number: ", "Номер студента: ") + card.studentNumber)
+                    if (card.issued.isNotEmpty()) Text(t("Data wydania: ", "Issued: ", "Дата видачі: ") + card.issued)
+                    if (card.expires.isNotEmpty()) Text(t("Data ważności: ", "Expires: ", "Дійсне до: ") + card.expires)
+                }
+                MobileCardControls(state, repository, language, onReloadState, onStatusMessage, runAsync)
+            }
             val docsArr = services?.optJSONObject("documents")?.optJSONArray("data")
             if (section != "cards" && docsArr != null && docsArr.length() > 0) {
                 for (i in 0 until docsArr.length()) {
@@ -551,6 +575,9 @@ fun PaymentsAndServicesSection(
     }
 
     val thesis = snapshot?.thesis
+    if (section == "services" && snapshot?.serviceErrors?.containsKey("theses") == true) {
+        Text(t("Nie udało się pobrać danych pracy dyplomowej. Spróbuj ponownie po synchronizacji.", "Thesis information could not be loaded. Try syncing again.", "Не вдалося завантажити дані дипломної роботи. Спробуйте синхронізувати ще раз."))
+    }
     if (section == "services" && thesis != null && thesis.hasThesis()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -560,11 +587,15 @@ fun PaymentsAndServicesSection(
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(t("Praca dyplomowa", "Thesis", "Дипломна робота"), style = MaterialTheme.typography.titleLarge)
                 Text(thesis.title, style = MaterialTheme.typography.titleMedium)
-                Text("${thesis.status} · ${thesis.supervisors}", style = MaterialTheme.typography.bodyMedium)
+                val details = listOf(thesis.status, thesis.supervisors).filter { it.isNotEmpty() }.joinToString(" · ")
+                if (details.isNotEmpty()) Text(details, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }
 
+    if (section == "services") {
+        AcademicExtrasSection(state, repository, language, "services", onReloadState, onStatusMessage, runAsync)
+    }
     if (section == "services") Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -599,6 +630,25 @@ private fun MobileCardControls(
     var pending by remember(state.optString("accountSession"), id) { mutableStateOf<Boolean?>(null) }
     var activation by remember(state.optString("accountSession"), id) { mutableStateOf<JSONObject?>(null) }
     Text(label("mLegitymacja", "Mobile student card", "Мобільне студентське посвідчення"), style = MaterialTheme.typography.titleMedium)
+    if (latest != null) {
+        val rawStatus = StudentServices.text(latest, "status")
+        val status = when (rawStatus) {
+            "pending" -> label("Oczekuje na wysłanie", "Pending", "Очікує надсилання")
+            "in_progress" -> label("W trakcie przetwarzania", "Processing", "Обробляється")
+            "ready", "ready_to_receive" -> label("Gotowa do aktywacji", "Ready to activate", "Готове до активації")
+            "received" -> label("Zainstalowana", "Installed", "Встановлено")
+            "error" -> label("Błąd zamówienia", "Order error", "Помилка замовлення")
+            "revoked", "revoked_by_me" -> label("Unieważniona", "Revoked", "Анулювано")
+            else -> rawStatus.ifEmpty { label("Status nieznany", "Status unknown", "Статус невідомий") }
+        }
+        Text(status)
+        val ordered = StudentServices.text(latest, "order_date")
+        val expiry = StudentServices.text(latest, "expiration_date")
+        if (ordered.isNotEmpty()) Text(label("Data zamówienia: ", "Ordered: ", "Дата замовлення: ") + ordered)
+        if (expiry.isNotEmpty()) Text(label("Ważna do: ", "Expires: ", "Дійсне до: ") + expiry)
+    } else if (data != null) Text(label("Brak bieżącego zamówienia", "No current order", "Немає поточного замовлення"))
+    val expectedExpiry = StudentServices.text(data, "expected_expiration_date")
+    if (expectedExpiry.isNotEmpty()) Text(label("Przewidywana ważność: ", "Expected expiry: ", "Очікувана дата закінчення: ") + expectedExpiry)
     for (order in listOf(true, false)) {
         val field = if (order) "why_cannot_order" else "why_cannot_revoke"
         val reason = StudentServices.localized(data?.opt(field), language)
@@ -657,8 +707,15 @@ private fun MobileCardControls(
                             pl.vistula.checker.MobileCardActions.perform(UsosClient(credentials), credentials, order, id) {
                                 check(SharedRepository.sameAccount(credentials, repository.read()))
                             }
-                            StudentServiceLoader.refresh(repository, "cards")
-                            onReloadState()
+                            try {
+                                StudentServiceLoader.refresh(repository, "cards")
+                                onReloadState()
+                            } catch (e: Exception) {
+                                throw pl.vistula.checker.MobileCardActions.ConfirmedRefreshFailed(e)
+                            }
+                        } catch (_: pl.vistula.checker.MobileCardActions.ConfirmedRefreshFailed) {
+                            onStatusMessage(label("Operacja potwierdzona. Nie udało się odświeżyć statusu; odśwież go przed ponowieniem.",
+                                "Action confirmed. Status could not be refreshed; refresh it before trying again.", "Операцію підтверджено. Не вдалося оновити статус; оновіть його перед повтором."))
                         } catch (_: pl.vistula.checker.MobileCardActions.Uncertain) {
                             onStatusMessage(label("Wynik nieznany. Odśwież status przed ponowieniem.",
                                 "Result unknown. Refresh the status before trying again.", "Результат невідомий. Оновіть статус перед повтором."))
@@ -678,7 +735,7 @@ fun LecturerSection(
     state: JSONObject, repository: SharedRepository, language: String, onOpenUrl: (String) -> Unit,
     onReloadState: () -> Unit, onStatusMessage: (String) -> Unit, runAsync: (() -> Unit) -> Unit
 ) {
-    if (!pl.vistula.checker.core.AccountRole.lecturer(state)) return
+    if (!pl.vistula.checker.core.AccountRole.lecturer(state)) return; LecturerWorkspaceSection(state, repository, null, language, "teaching", onOpenUrl, onReloadState, onStatusMessage, runAsync); if (true) return
     fun label(polish: String, english: String, ukrainian: String) = when (pl.vistula.checker.core.ApiLanguage.normalize(language)) {
         "en" -> english; "uk" -> ukrainian; else -> polish
     }

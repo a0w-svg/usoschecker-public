@@ -1,4 +1,8 @@
-• Czytelniejsze oceny: większe wartości, pełne nazwy form zajęć i więcej miejsca na nazwę przedmiotu.
-• Na telefonie oceny są ułożone pod przedmiotem, z etykietami przy każdej wartości. Układ dostosowuje się do dużej czcionki.
-• W planie godziny, nazwa przedmiotu i sala mają osobne miejsca. Forma zajęć jest widoczna na liście.
-• Większe odstępy i mocniejsza hierarchia tekstu na Androidzie i desktopie.
+• Obsługa kont wykładowców z automatycznym wykrywaniem roli (Student / Wykładowca / Oba) i wspólnym wyglądem aplikacji.
+• Prowadzone przedmioty, grupy zajęciowe z listą uczestników, koordynowane przedmioty oraz harmonogram konsultacji i spotkań.
+• Drzewo sprawdzianów oraz eksperymentalny zapis punktów, ocen i widoczności węzłów dla kont wykładowcy.
+• Katalog pracowników z wyszukiwarką prowadzących, pokojami, godzinami konsultacji i podglądem planu zajęć.
+• Widok tur rejestracji i koszyków, egzaminów, kalendarza akademickiego oraz etapów studiów.
+• Dane kierunku, etapu i daty przyjęcia pochodzą z tego samego programu studiów, a punkty ECTS są przypisywane do właściwego semestru.
+• Anulowane płatności nie zwiększają kwoty do zapłaty, a plan rat nie zgaduje rozliczenia pozycji bez potwierdzenia w USOS.
+• Wzmocniona ochrona schowka, wymuszenie HTTPS dla linków zewnętrznych oraz ochrona klucza sejfu Windows przez DPAPI.

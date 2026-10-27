@@ -236,7 +236,7 @@ class CoreTest {
             """.trimIndent()
         )
         val s = Snapshot("2026-10-13", "2026-11-10")
-        UsosParser.grades(s, gradeJson, mapOf("INF" to "Informatyka"), mapOf("INF" to 6.0))
+        UsosParser.grades(s, gradeJson, mapOf("INF" to "Informatyka"), mapOf("2026Z\u0000INF" to 6.0))
         val gradeRecord = s.records["grade:501:1"]
         assertNotNull(gradeRecord)
         assertEquals(true, gradeRecord!!.metadata.optBoolean("passes"))
@@ -531,7 +531,7 @@ class CoreTest {
         assertEquals("PL1111", p.accounts[0].bankAccountNumber)
         assertEquals("PL2222", p.accounts[1].bankAccountNumber)
         assertEquals(1, p.installments.size)
-        assertEquals(800.0, p.totalUnpaidAmount(), 0.001)
+        assertTrue(p.hasUnknownSettlement())
     }
 
     @Test

@@ -1,6 +1,5 @@
 package pl.vistula.checker.ui
 
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -219,7 +218,7 @@ class NewsScreenController private constructor() {
                         val text = article.title + "\n\n" + meta + "\n\n" +
                             (if (article.content.isEmpty()) article.headline else UiHelper.plain(article.content)) +
                             if (article.url.isEmpty()) "" else "\n\n${article.url}"
-                        cb.setPrimaryClip(ClipData.newPlainText(activity.getString(R.string.tool_news_title), text))
+                        cb.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.tool_news_title), text))
                         Toast.makeText(activity, activity.getString(R.string.news_copied_toast), Toast.LENGTH_SHORT).show()
                     }
                 }

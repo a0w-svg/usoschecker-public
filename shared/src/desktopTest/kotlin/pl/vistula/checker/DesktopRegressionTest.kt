@@ -12,6 +12,10 @@ import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.ui.compose.ToolReadModels
 
 class DesktopRegressionTest {
+    @Test fun demoProvidesPhysicalCardsInTheDisplayedServiceEntry() {
+        val cards = DemoStudentServices.data().getJSONObject("physicalCards").getJSONArray("data")
+        assertEquals("student", cards.getJSONObject(0).getString("type"))
+    }
     @Test fun aSecondDesktopInstanceCannotOpenTheSameAccountDirectory() {
         val directory = Files.createTempDirectory("desktop-instance-regression").toFile()
         try {

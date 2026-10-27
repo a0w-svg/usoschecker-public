@@ -39,6 +39,7 @@ implementations without adding them to the app.
 
 | Build component | Before → after | OSV / GitHub advisory |
 | --- | --- | --- |
+| Guava (JRE) | 33.4.0-jre → 33.7.2-jre | [GHSA-xxph-c9ww-hj94](https://osv.dev/vulnerability/GHSA-xxph-c9ww-hj94) |
 | Commons Lang | 3.16.0 → 3.21.0 | [GHSA-j288-q9x7-2f5v](https://osv.dev/vulnerability/GHSA-j288-q9x7-2f5v) |
 | jose4j | 0.9.5 → 0.9.7 | [GHSA-3677-xxcr-wjqv](https://osv.dev/vulnerability/GHSA-3677-xxcr-wjqv) |
 | Bouncy Castle provider | 1.80.2 → 1.86 | [GHSA-9pwp-9qqc-pr26](https://osv.dev/vulnerability/GHSA-9pwp-9qqc-pr26), [GHSA-c3fc-8qff-9hwx](https://osv.dev/vulnerability/GHSA-c3fc-8qff-9hwx), [GHSA-qp49-qgx5-5m26](https://osv.dev/vulnerability/GHSA-qp49-qgx5-5m26) |

@@ -184,7 +184,7 @@ class ApiExplorerController private constructor() {
                     val entry = catalog.getJSONObject(i)
                     val name = entry.getString("name")
                     val brief = entry.optString("brief_description").trim()
-                    if ((!favoritesOnly || favorites.contains(name)) && ApiCatalog.matches(entry, activity.getApiModule(), search)) {
+                    if (ApiCatalog.visibleForAccount(name, activity.serviceAccountState()) && (!favoritesOnly || favorites.contains(name)) && ApiCatalog.matches(entry, activity.getApiModule(), search)) {
                         ++count
                         if (shown++ < apiLimit) {
                             val b = UiHelper.button(
@@ -250,7 +250,7 @@ class ApiExplorerController private constructor() {
             onBack: Runnable,
             callback: ApiCallback
         ) {
-            val methodName = metadata.getString("name")
+            val methodName = metadata.getString("name"); if (!ApiCatalog.visibleForAccount(methodName, activity.serviceAccountState())) { onBack.run(); return }
             content.removeAllViews()
             scroll.smoothScrollTo(0, 0)
 

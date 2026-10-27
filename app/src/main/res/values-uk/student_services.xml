@@ -1,5 +1,11 @@
 <resources>
     <string name="cards_title">Студентські квитки</string>
+    <string name="cards_confirmed_refresh_failed">USOS підтвердив операцію, але не вдалося оновити статус. Оновіть його перед повтором.</string>
+    <string name="cards_physical_title">Фізичні картки</string>
+    <string name="cards_type">Тип картки: %1$s</string>
+    <string name="cards_physical_empty">USOS не повернув фізичних посвідчень.</string>
+    <string name="cards_issue_date">Дата видачі: %1$s</string>
+    <string name="cards_usage_guide">Оновіть дані посвідчення. Якщо університет дозволяє замовлення, виберіть його та підтвердьте. Коли посвідчення буде готове, відкрийте дані активації та використайте їх у mObywatel. Не передавайте коди іншим. Для анулювання потрібне окреме підтвердження.</string>
     <string name="cards_description">Видача, активація в mObywatel та анулювання мобільного студентського посвідчення</string>
 <string name="cards_refresh">Отримати дані студентського</string>
 <string name="cards_mobile_title">mLegitymacja</string>

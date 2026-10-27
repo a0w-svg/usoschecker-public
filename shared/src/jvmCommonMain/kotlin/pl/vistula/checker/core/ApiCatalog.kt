@@ -58,6 +58,24 @@ object ApiCatalog {
         "services/cards/mcard_order2"
     )
 
+    private val LECTURER_WRITE_METHODS = setOf(
+        "services/crstests/update_grades",
+        "services/crstests/update_points",
+        "services/crstests/change_grade_node_properties",
+        "services/crstests/change_task_node_properties",
+        "services/crstests/create_grade_node",
+        "services/grades/update_grade"
+    )
+
+    @JvmStatic
+    fun lecturerWriteMethod(method: String): Boolean = LECTURER_WRITE_METHODS.contains(method)
+
+    @JvmStatic
+    fun visibleForAccount(method: String, state: JSONObject?): Boolean {
+        if (!lecturerWriteMethod(method)) return true
+        return state != null && AccountRole.lecturer(state)
+    }
+
     @JvmStatic
     fun module(method: String): String {
         val parts = method.split("/")
@@ -107,7 +125,7 @@ object ApiCatalog {
         val lower = key.lowercase(Locale.ROOT)
         return lower.contains("secret") || lower.contains("token") || lower.contains("password") ||
             lower.contains("pass") || lower == "code" || lower == "pin" ||
-            lower.endsWith("_key") || lower == "certificate" || lower == "structure"
+            lower == "key" || lower.endsWith("_key") || lower == "certificate" || lower == "structure"
     }
 
     @JvmStatic
@@ -135,4 +153,3 @@ object ApiCatalog {
         return safe
     }
 }
-

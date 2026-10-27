@@ -194,6 +194,8 @@ class AccountScreenController private constructor() {
                     if (thesis.reviewers.isNotEmpty()) {
                         UiHelper.add(activity, profile, activity.getString(R.string.account_thesis_reviewer, thesis.reviewers), 13, UiHelper.MUTED, false)
                     }
+                } else if (snapshot?.serviceErrors?.containsKey("theses") == true) {
+                    UiHelper.note(activity, profile, activity.getString(R.string.account_thesis_unavailable), UiHelper.MUTED)
                 }
             }
 
@@ -228,6 +230,34 @@ class AccountScreenController private constructor() {
                 }
                 val accountControls = pages.page("settings.account", R.string.settings_account_access)
                 val authorizedScopes = state.optString("scopes")
+                if (pl.vistula.checker.core.AccountRole.lecturer(state)) {
+                    val prefs = activity.getSharedPreferences("student_tools", Context.MODE_PRIVATE)
+                    val expSwitch = MaterialSwitch(activity).apply {
+                        setText(R.string.lecturer_experimental_setting)
+                        setTextColor(UiHelper.foreground(activity, UiHelper.INK))
+                        isChecked = prefs.getBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES, true)
+                    }
+                    accountControls.addView(expSwitch)
+                    expSwitch.setOnCheckedChangeListener { _, checked ->
+                        if (checked && !prefs.getBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES_ACK, false)) {
+                            expSwitch.isChecked = false
+                            MaterialAlertDialogBuilder(activity)
+                                .setTitle(R.string.lecturer_experimental_notice_title)
+                                .setMessage(R.string.lecturer_experimental_notice_body)
+                                .setNegativeButton(R.string.btn_cancel, null)
+                                .setPositiveButton(R.string.lecturer_experimental_ack) { _, _ ->
+                                    prefs.edit {
+                                        putBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES_ACK, true)
+                                        putBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES, true)
+                                    }
+                                    expSwitch.isChecked = true
+                                }
+                                .show()
+                        } else {
+                            prefs.edit { putBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES, checked) }
+                        }
+                    }
+                }
                 val access = UiHelper.disclosure(activity, accountControls, "settings.granted", R.string.settings_access)
                 UiHelper.add(activity, access, activity.getString(R.string.account_oauth_consent, authorizedScopes), 14, UiHelper.MUTED, false)
                 if (!StudentServices.hasScope(authorizedScopes, "payments")) {
@@ -370,7 +400,8 @@ class AccountScreenController private constructor() {
                     "cards" to R.string.cards_title,
                     "documents" to R.string.documents_title,
                     "tests" to R.string.settings_tests_access,
-                    "profile" to R.string.settings_profile_access
+                    "profile" to R.string.settings_profile_access,
+                    "lecturer" to R.string.lecturer_title
                 )
                 var updatingChoices = false
                 val choices = linkedMapOf<String, MaterialSwitch>()

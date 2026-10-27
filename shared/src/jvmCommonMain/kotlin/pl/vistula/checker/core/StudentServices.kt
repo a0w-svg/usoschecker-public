@@ -99,8 +99,8 @@ object StudentServices {
         val result = JSONObject()
             .put("why_cannot_order", ApiLanguage.safe(source.opt("why_cannot_order")))
             .put("why_cannot_revoke", ApiLanguage.safe(source.opt("why_cannot_revoke")))
-            .put("orderEligibilityKnown", source.has("why_cannot_order"))
-            .put("revokeEligibilityKnown", source.has("why_cannot_revoke"))
+            .put("orderEligibilityKnown", validEligibility(source, "why_cannot_order"))
+            .put("revokeEligibilityKnown", validEligibility(source, "why_cannot_revoke"))
             .put("expected_expiration_date", text(source, "expected_expiration_date"))
         val latest = source.optJSONObject("latest_order")
         if (latest != null) result.put("latest_order", safeOrder(latest))
@@ -111,6 +111,16 @@ object StudentServices {
         }
         result.put("orders", safe)
         return result
+    }
+
+    @JvmStatic
+    fun validEligibility(source: JSONObject, field: String): Boolean {
+        if (!source.has(field)) return false
+        val value = source.opt(field)
+        return value === JSONObject.NULL || value is String ||
+            (value is JSONObject && value.keys().asSequence().all {
+                it.matches(Regex("[a-z]{2}(?:-[A-Za-z]{2})?")) && (value.opt(it) is String || value.isNull(it))
+            })
     }
 
     @Throws(JSONException::class)

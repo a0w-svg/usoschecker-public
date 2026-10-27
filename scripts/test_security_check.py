@@ -52,6 +52,16 @@ class SecurityCheckTest(unittest.TestCase):
         self.write('signing.properties', 'placeholder')
         self.assertFalse(self.run_check()[0])
 
+    def test_dist_and_debug_artifacts_blocked(self):
+        (self.root / 'dist').mkdir()
+        self.write('dist/release-notes.txt', 'internal')
+        self.write('app-debug.apk', 'binary')
+        self.write('mapping.txt', 'obfuscation map')
+        self.assertFalse(self.run_check()[0])
+        self.assertTrue(guard.forbidden('dist/publication/VistulaChecker.zip'))
+        self.assertTrue(guard.forbidden('app-debug.apk'))
+        self.assertTrue(guard.forbidden('mapping.txt'))
+
     def test_staged_version_is_scanned_even_after_worktree_is_cleaned(self):
         secret = 'ghp_' + 'Q' * 36
         self.write('sample.txt', secret)

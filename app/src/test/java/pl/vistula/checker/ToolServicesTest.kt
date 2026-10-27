@@ -86,19 +86,25 @@ class ToolServicesTest {
         }
     }
 
-    @Test fun simplifiedCardsRefreshOnlyMobileStatusAndNotActivationSecrets() {
+    @Test fun cardsRefreshKeepsMobileAndPhysicalDataWithoutActivationSecrets() {
         val store = Store(credentials().put("scopes", "cards"))
         var calls = 0
         StudentServiceLoader.refresh(store, "cards", SharedRepository.ClientFactory { state ->
             UsosClient(state, {}) { address ->
                 calls++
-                assertTrue(address.contains("services/cards/mcard2?"))
                 assertFalse(address.contains("distribution_pass"))
-                Connection("""{"why_cannot_order":null,"why_cannot_revoke":null,"latest_order":null}""")
+                if (address.contains("services/cards/mcard2?")) Connection("""{"why_cannot_order":null,"why_cannot_revoke":null,"latest_order":null}""")
+                else {
+                    assertTrue(address.contains("services/cards/user?"))
+                    Connection("""[{"id":"1","student_number":"42","expiration_date":"2027-03-31","card_key":"fixture-private"}]""")
+                }
             }
         })
-        assertEquals(1, calls)
+        assertEquals(2, calls)
         assertTrue(store.state.getJSONObject("studentServices").getJSONObject("mcard").has("data"))
+        val physical = store.state.getJSONObject("studentServices").getJSONObject("physicalCards").getJSONArray("data")
+        assertEquals("42", physical.getJSONObject(0).getString("student_number"))
+        assertFalse(physical.toString().contains("fixture-private"))
     }
 
     @Test fun revokingAnOldOrderNeverSendsAPost() {
@@ -291,5 +297,28 @@ class ToolServicesTest {
         val shown = JSONObject("""{"id":"2","currency":"PLN","installments":[{"amount":100,"payment_date":"2026-11-01"}]}""")
         StudentServiceActions.choosePlan(client, state, "1", "payment", "2", shown)
         assertEquals(1, writes)
+    }
+
+    @Test fun changedFallbackCurrencyPreventsChoosingPlan() {
+        var writes = 0
+        val client = UsosClient(credentials(), {}) { address ->
+            if (address.contains("/payment?")) Connection("""{"id":"1","currency":"EUR","available_installment_plans":[{"id":"2","installments":[{"amount":100,"payment_date":"2026-11-01"}]}]}""")
+            else { writes++; Connection("{}") }
+        }
+        val shown = JSONObject("""{"id":"2","installments":[{"amount":100,"payment_date":"2026-11-01"}]}""")
+        assertThrows(IllegalStateException::class.java) { StudentServiceActions.choosePlan(client, credentials(), "1", "payment", "2", shown, "PLN") }
+        assertEquals(0, writes)
+    }
+
+    @Test fun ambiguousCardWriteResponsesRequireStatusRefresh() {
+        for ((body, status) in listOf("{}" to 200, "{}" to 503, "{}" to 408)) {
+            var writes = 0
+            val client = UsosClient(credentials(), {}) { address ->
+                if (address.contains("/mcard2?")) Connection("""{"why_cannot_order":null}""")
+                else { writes++; Connection(body, status) }
+            }
+            assertThrows(MobileCardActions.Uncertain::class.java) { MobileCardActions.perform(client, credentials(), true, "") }
+            assertEquals(1, writes)
+        }
     }
 }

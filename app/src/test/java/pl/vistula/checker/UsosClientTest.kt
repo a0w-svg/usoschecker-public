@@ -86,6 +86,24 @@ class UsosClientTest {
         assertEquals("Analiza", snapshot.courses[0].title)
     }
 
+    @Test fun thesisUsesAuthenticatedUserAndDocumentedResponseShape() {
+        val client = UsosClient(credentials().put("scopes", "grades|studies"), {}) { address ->
+            when {
+                address.contains("services/users/user?") -> Connection().apply { body = """{"id":"42"}""" }
+                address.contains("services/theses/user?") -> Connection().apply {
+                    assertTrue(address.contains("user_id=42"))
+                    assertTrue(address.contains("authored_theses"))
+                    body = """{"authored_theses":[{"title":"Tytuł główny","titles":{"pl":"Praca","en":"Thesis"},"supervisors":[{"first_name":"Anna","last_name":"Nowak"}]}]}"""
+                }
+                else -> snapshotConnection(address)
+            }
+        }
+        val snapshot = client.snapshot()
+        assertEquals("Praca", snapshot.thesis!!.title)
+        assertEquals("Anna Nowak", snapshot.thesis!!.supervisors)
+        assertEquals("Thesis", snapshot.forLanguage("en").thesis!!.title)
+    }
+
     @Test
     fun missingCoreConsentAbortsBeforeNetworkRequests() {
         for (scopes in listOf("", "studies|payments", "grades|payments")) {
@@ -130,6 +148,122 @@ class UsosClientTest {
         val unknown = UsosClient.profileFields(JSONObject())
         assertFalse(unknown.contains("student_programmes"))
         assertFalse(unknown.contains("email"))
+    }
+
+    @Test fun courseTestsFetchOnlyVisibleNodesWithDocumentedSelectors() {
+        val details = ArrayList<String>()
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply {
+                    val decoded = java.net.URLDecoder.decode(address, "UTF-8")
+                    assertFalse(decoded.contains("subnodes_deep[id|parent_id|name|type|visible_for_students|task_node_details"))
+                    body = """[{"course_edition":{"course":{"id":"C"},"term":{"id":"T"}},"root":{"id":"r","type":"root","visible_for_students":true,"subnodes":[{"id":"injected","task_node_details":{"students_points":{"points":99}}}],"subnodes_deep":[{"id":"f","parent_id":"r","type":"folder","visible_for_students":false},{"id":"hidden","parent_id":"f","type":"task","visible_for_students":true},{"id":"shown","parent_id":"r","type":"task","visible_for_students":true,"name":{"en":"Quiz"}}]}}]"""
+                }
+                address.contains("crstests/node2") -> Connection().apply {
+                    details.add(address)
+                    assertTrue(address.contains("node_id=shown"))
+                    body = """{"id":"shown","parent_id":"r","type":"task","visible_for_students":true,"task_node_details":{"points_max":10,"students_points":{"points":7}},"grade_node_details":{"students_grade":{"grade_value":{"symbol":"5"}}}}"""
+                }
+                else -> snapshotConnection(address)
+            }
+        }
+        val snapshot = client.snapshot()
+        assertEquals(1, details.size)
+        assertEquals(7.0, snapshot.tests.single().points, 0.0)
+        assertEquals("", snapshot.tests.single().grade)
+        assertEquals("Quiz", snapshot.forLanguage("en").tests.single().testName)
+    }
+
+    @Test fun incompleteCourseTestAncestryIsReportedWithoutFetchingDetails() {
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply {
+                    body = """[{"root":{"id":"r","visible_for_students":true,"subnodes_deep":[{"id":"x","parent_id":"missing","type":"task","visible_for_students":true}]}}]"""
+                }
+                address.contains("crstests/node2") -> throw AssertionError("Untrusted ancestry must not be fetched")
+                else -> snapshotConnection(address)
+            }
+        }
+        val snapshot = client.snapshot()
+        assertTrue(snapshot.tests.isEmpty())
+        assertTrue(snapshot.serviceErrors.containsKey("crstests"))
+    }
+
+    @Test fun malformedCourseTestDetailsAreNotPresentedAsAnEmptySuccess() {
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply {
+                    body = """[{"root":{"id":"r","visible_for_students":true,"subnodes_deep":[{"id":"x","parent_id":"r","type":"task","visible_for_students":true}]}}]"""
+                }
+                address.contains("crstests/node2") -> Connection().apply {
+                    body = """{"id":"x","parent_id":"r","type":"task","visible_for_students":true,"task_node_details":null}"""
+                }
+                else -> snapshotConnection(address)
+            }
+        }
+        val snapshot = client.snapshot()
+        assertTrue(snapshot.tests.isEmpty())
+        assertTrue(snapshot.serviceErrors.containsKey("crstests"))
+    }
+
+    @Test fun courseTestDetailRequestsAreCapped() {
+        val children = org.json.JSONArray()
+        repeat(51) { children.put(JSONObject().put("id", "n$it").put("parent_id", "r").put("type", "task").put("visible_for_students", true)) }
+        val data = org.json.JSONArray().put(JSONObject().put("root", JSONObject().put("id", "r").put("visible_for_students", true).put("subnodes_deep", children)))
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply { body = data.toString() }
+                address.contains("crstests/node2") -> throw AssertionError("Limit must be checked before detail requests")
+                else -> snapshotConnection(address)
+            }
+        }
+        assertTrue(client.snapshot().serviceErrors.containsKey("crstests"))
+    }
+
+    @Test fun courseTestDetailTimeoutDoesNotDiscardCoreSnapshot() {
+        var gradesLoaded = false
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply {
+                    body = """[{"root":{"id":"r","visible_for_students":true,"subnodes_deep":[{"id":"x","parent_id":"r","type":"task","visible_for_students":true}]}}]"""
+                }
+                address.contains("crstests/node2") -> throw SocketTimeoutException("fixture timeout")
+                else -> {
+                    if (address.contains("grades/terms2")) gradesLoaded = true
+                    snapshotConnection(address)
+                }
+            }
+        }
+        val snapshot = client.snapshot()
+        assertTrue(snapshot.serviceErrors.containsKey("crstests"))
+        assertTrue(snapshot.tests.isEmpty())
+        assertTrue(gradesLoaded)
+    }
+
+    @Test fun courseTestTaskCannotBeAnAncestorOfAnotherTask() {
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply {
+                    body = """[{"root":{"id":"r","type":"root","visible_for_students":true,"subnodes_deep":[{"id":"a","parent_id":"r","type":"task","visible_for_students":true},{"id":"b","parent_id":"a","type":"task","visible_for_students":true}]}}]"""
+                }
+                address.contains("crstests/node2") -> throw AssertionError("Invalid hierarchy must be rejected before details")
+                else -> snapshotConnection(address)
+            }
+        }
+        assertTrue(client.snapshot().serviceErrors.containsKey("crstests"))
+    }
+
+    @Test fun unexpectedNestedCourseTestTreeIsReportedAsIncomplete() {
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply {
+                    body = """[{"root":{"id":"r","visible_for_students":true,"subnodes_deep":[{"id":"folder","parent_id":"r","type":"folder","visible_for_students":true,"subnodes":[{"id":"lost"}]}]}}]"""
+                }
+                address.contains("crstests/node2") -> throw AssertionError("Unexpected tree must not be fetched")
+                else -> snapshotConnection(address)
+            }
+        }
+        assertTrue(client.snapshot().serviceErrors.containsKey("crstests"))
     }
 
     private class Connection : HttpURLConnection(URL(UsosClient.BASE)) {
@@ -284,7 +418,7 @@ class UsosClientTest {
     @Test
     fun completeSnapshotAcceptsEmptyGradeCollectionsAndLoadsEveryWeek() {
         val pages = AtomicInteger()
-        val client = UsosClient(credentials(), {}) { address ->
+        val client = UsosClient(credentials().put("scopes", "grades|studies|payments"), {}) { address ->
             val connection = Connection()
             when {
                 address.contains("courses/user_ects_points") -> connection.body = "{}"
@@ -294,7 +428,9 @@ class UsosClientTest {
                     connection.body = "[]"
                     pages.incrementAndGet()
                 }
-                address.contains("terms/terms") || address.contains("payments/") || address.contains("theses/user") || address.contains("news/search") -> connection.body = "[]"
+                address.contains("services/users/user?") -> connection.body = "{\"id\":\"42\"}"
+                address.contains("theses/user") -> connection.body = "{\"authored_theses\":[]}"
+                address.contains("terms/terms") || address.contains("payments/") || address.contains("news/search") -> connection.body = "[]"
                 address.contains("crstests/participant2") -> connection.body = "[{\"course_edition\": {\"course\": {\"id\": \"FIN\", \"name\": {\"pl\": \"Finanse\"}}, \"term\": {\"id\": \"2026Z\"}}, \"root\": {\"id\": \"root\", \"type\": \"root\", \"subnodes_deep\": [{\"id\": \"t1\", \"name\": {\"pl\": \"Kolokwium 1\"}, \"type\": \"task\", \"task_node_details\": {\"points_max\": 20, \"students_points\": {\"points\": 18, \"last_changed\": \"2026-10-10\"}}}]}}]"
                 else -> throw AssertionError("Unexpected request: $address")
             }
@@ -310,14 +446,16 @@ class UsosClientTest {
 
     @Test
     fun completeSnapshotParsesEctsAndAttachesToGradeRecord() {
-        val client = UsosClient(credentials(), {}) { address ->
+        val client = UsosClient(credentials().put("scopes", "grades|studies|payments"), {}) { address ->
             val connection = Connection()
             when {
                 address.contains("courses/user_ects_points") -> connection.body = "{\"2026Z\":{\"FIN\":\"5.0\"}}"
                 address.contains("courses/user") -> connection.body = "{\"course_editions\":{\"2026Z\":[{\"course_id\":\"FIN\",\"course_name\":{\"pl\":\"Finanse\"}}]}}"
                 address.contains("grades/terms2") -> connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[{\"1\":{\"exam_id\":10,\"exam_session_number\":1,\"value_symbol\":\"4.5\",\"date_modified\":\"2026-10-14 12:00:00\",\"comment\":null}}],\"course_units_grades\":{}}}}"
                 address.contains("tt/student") -> connection.body = "[]"
-                address.contains("terms/terms") || address.contains("payments/") || address.contains("theses/user") || address.contains("news/search") -> connection.body = "[]"
+                address.contains("services/users/user?") -> connection.body = "{\"id\":\"42\"}"
+                address.contains("theses/user") -> connection.body = "{\"authored_theses\":[]}"
+                address.contains("terms/terms") || address.contains("payments/") || address.contains("news/search") -> connection.body = "[]"
                 address.contains("crstests/participant2") -> connection.body = "[{\"course_edition\": {\"course\": {\"id\": \"FIN\", \"name\": {\"pl\": \"Finanse\"}}, \"term\": {\"id\": \"2026Z\"}}, \"root\": {\"id\": \"root\", \"type\": \"root\", \"subnodes_deep\": [{\"id\": \"t1\", \"name\": {\"pl\": \"Kolokwium 1\"}, \"type\": \"task\", \"task_node_details\": {\"points_max\": 20, \"students_points\": {\"points\": 18, \"last_changed\": \"2026-10-10\"}}}]}}]"
                 else -> throw AssertionError("Unexpected request: $address")
             }
@@ -340,8 +478,10 @@ class UsosClientTest {
                 address.contains("terms/terms") -> connection.body = "{\"2026Z\":{\"name\":{\"pl\":\"Semestr zimowy\"},\"start_date\":\"2026-10-01\",\"end_date\":\"2027-02-15\"}}"
                 address.contains("payments/user_accounts") -> connection.body = "[{\"account_number\":\"PL999\",\"name\":\"Subkonto czesnego\",\"currency\":\"PLN\"}]"
                 address.contains("payments/user_payments") -> connection.body = "[{\"id\":\"p1\",\"total_amount\":850.0,\"currency\":\"PLN\",\"description\":{\"pl\":\"Czesne\"},\"state\":\"unsettled\",\"payment_deadline\":\"2026-10-31\"}]"
-                address.contains("theses/user") -> connection.body = "[{\"title\":{\"pl\":\"System wykrywania anomalii\"},\"status\":{\"pl\":\"W toku\"}}]"
-                address.contains("crstests/participant2") -> connection.body = "[{\"course_edition\": {\"course\": {\"id\": \"FIN\", \"name\": {\"pl\": \"Finanse\"}}, \"term\": {\"id\": \"2026Z\"}}, \"root\": {\"id\": \"root\", \"type\": \"root\", \"subnodes_deep\": [{\"id\": \"t1\", \"name\": {\"pl\": \"Kolokwium 1\"}, \"type\": \"task\", \"task_node_details\": {\"points_max\": 20, \"students_points\": {\"points\": 18, \"last_changed\": \"2026-10-10\"}}}]}}]"
+                address.contains("services/users/user?") -> connection.body = "{\"id\":\"42\"}"
+                address.contains("theses/user") -> connection.body = "{\"authored_theses\":[{\"title\":\"System wykrywania anomalii\"}]}"
+                address.contains("crstests/participant2") -> connection.body = "[{\"course_edition\":{\"course\":{\"id\":\"FIN\",\"name\":{\"pl\":\"Finanse\"}},\"term\":{\"id\":\"2026Z\"}},\"root\":{\"id\":\"root\",\"type\":\"root\",\"visible_for_students\":true,\"subnodes_deep\":[{\"id\":\"t1\",\"parent_id\":\"root\",\"name\":{\"pl\":\"Kolokwium 1\"},\"type\":\"task\",\"visible_for_students\":true}]}}]"
+                address.contains("crstests/node2") -> connection.body = "{\"id\":\"t1\",\"parent_id\":\"root\",\"type\":\"task\",\"visible_for_students\":true,\"task_node_details\":{\"points_max\":20,\"students_points\":{\"points\":18,\"last_changed\":\"2026-10-10\"}}}"
                 address.contains("news/search") -> connection.body = "{\"items\":[{\"article\":{\"id\":\"n1\",\"title\":{\"pl\":\"Inauguracja roku\"},\"publication_date\":\"2026-10-01\"}}]}"
                 address.contains("grades/terms2") -> connection.body = "{\"2026Z\":{\"FIN\":{\"course_grades\":[],\"course_units_grades\":{}}}}"
                 address.contains("tt/student") -> connection.body = "[]"
@@ -404,7 +544,7 @@ class UsosClientTest {
 
     @Test
     fun paymentScopeMissingIsCapturedGracefullyInSnapshot() {
-        val client = UsosClient(credentials(), {}) { address ->
+        val client = UsosClient(credentials().put("scopes", "grades|studies|payments"), {}) { address ->
             val connection = Connection()
             when {
                 address.contains("courses/user_ects_points") -> connection.body = "{}"
@@ -549,6 +689,8 @@ class UsosClientTest {
     private fun snapshotConnection(address: String): Connection {
         val connection = Connection()
         connection.body = when {
+            address.contains("services/users/user?") -> "{\"id\":\"42\"}"
+            address.contains("services/theses/user?") -> "{\"authored_theses\":[]}"
             address.contains("courses/user_ects_points") -> "{}"
             address.contains("courses/user") -> "{\"course_editions\":{\"2026Z\":[]}}"
             address.contains("grades/terms2") -> "{\"2026Z\":{}}"

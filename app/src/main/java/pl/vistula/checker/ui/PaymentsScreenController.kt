@@ -40,6 +40,7 @@ class PaymentsScreenController private constructor() {
                 ToolScreenUi.action(menu, R.string.payments_history_refresh) { activity.refreshStudentServices("remittances") }
                 ToolScreenUi.action(menu, R.string.tool_api_methods) { activity.openApiModule("payments") }
             }
+            UiHelper.note(activity, content, activity.getString(R.string.payments_usage_guide), UiHelper.MUTED)
             val entry = if (activity.isDemo()) JSONObject() else state.optJSONObject("studentServices")?.optJSONObject("payments") ?: JSONObject()
             val language = pl.vistula.checker.core.ApiLanguage.normalize(Language.currentLocale(activity).language)
             val cached = entry.optJSONObject("data")?.optJSONObject(language)
@@ -148,7 +149,7 @@ class PaymentsScreenController private constructor() {
 
             if (payments.installments.isNotEmpty()) {
                 UiHelper.heading(activity, content, activity.getString(R.string.payments_schedule_heading))
-                val amounts = payments.installments.filter { !it.isPaid() }.groupBy { it.currency }
+                val amounts = payments.installments.filter { it.isUnpaid() && it.amount > 0 }.groupBy { it.currency }
                     .mapValues { (_, entries) -> entries.sumOf { it.amount } }
                 val summaryBox = UiHelper.section(
                     activity,
@@ -156,15 +157,18 @@ class PaymentsScreenController private constructor() {
                     if (payments.hasOverdue()) Color.rgb(255, 240, 240) else Color.rgb(238, 245, 242)
                 )
                 UiHelper.note(activity, summaryBox, activity.getString(R.string.payments_installment_total_label), UiHelper.MUTED)
-                for ((currency, amount) in amounts) {
+                if (payments.hasUnknownSettlement() && payments.hasOverdue()) UiHelper.note(activity, summaryBox,
+                    activity.getString(R.string.payments_status_overdue_warn), Color.rgb(160, 48, 40))
+                if (!payments.hasUnknownSettlement()) for ((currency, amount) in amounts) {
                     UiHelper.add(activity, summaryBox, activity.getString(R.string.payments_currency_amount, amount, currency), 22, UiHelper.INK, true)
                 }
                 UiHelper.note(
                     activity,
                     summaryBox,
                     when {
+                        payments.hasUnknownSettlement() -> activity.getString(R.string.payments_settlement_unknown)
                         payments.hasOverdue() -> activity.getString(R.string.payments_status_overdue_warn)
-                        amounts.values.all { it == 0.0 } -> activity.getString(R.string.payments_status_all_paid)
+                        amounts.isEmpty() -> activity.getString(R.string.payments_status_none_due)
                         else -> activity.getString(R.string.payments_status_pending)
                     },
                     if (payments.hasOverdue()) Color.rgb(160, 48, 40) else UiHelper.MUTED
@@ -187,7 +191,8 @@ class PaymentsScreenController private constructor() {
                     val statusLabel = when {
                         paid -> activity.getString(R.string.payment_status_paid)
                         overdue -> activity.getString(R.string.payment_status_overdue)
-                        inst.status.lowercase(java.util.Locale.ROOT) in setOf("scheduled", "zaplanowana", "заплановано") -> activity.getString(R.string.payment_status_scheduled)
+                        inst.status == "settlement_unknown" -> activity.getString(R.string.payment_status_unknown)
+                        inst.isSettlementUnknown() || inst.status.lowercase(java.util.Locale.ROOT) in setOf("scheduled", "zaplanowana", "заплановано") -> activity.getString(R.string.payment_status_scheduled)
                         inst.status.lowercase(java.util.Locale.ROOT) in setOf("cancelled", "anulowana", "скасовано") -> activity.getString(R.string.payment_status_cancelled)
                         inst.status.lowercase(java.util.Locale.ROOT) in setOf("underpaid", "niedopłata", "недоплата") -> activity.getString(R.string.payment_status_underpaid)
                         inst.status.isEmpty() || inst.status.lowercase(java.util.Locale.ROOT) in setOf("do zapłaty", "due", "unsettled", "pending", "до сплати") -> activity.getString(R.string.payment_status_to_pay)

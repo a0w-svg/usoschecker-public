@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="lecturer_title">Панель викладача</string>
-    <string name="lecturer_description">Предмети та розклад занять вашого облікового запису викладача.</string>
+    <string name="lecturer_description">Предмети, групи, перевірки та консультації вашого облікового запису викладача.</string>
     <string name="lecturer_schedule">Розклад викладання</string>
     <string name="lecturer_empty">USOS не повернув активних предметів викладання.</string>
     <string name="lecturer_usosweb">Функції викладача в USOSweb</string>
+    <string name="section_lecturer">Викладач</string>
+    <string name="lecturer_groups_title">Групи та координовані предмети</string>
+    <string name="lecturer_groups_empty">Немає груп викладання у поточному семестрі.</string>
+    <string name="lecturer_tests_title">Перевірки та оцінювання</string>
+    <string name="lecturer_tests_empty">Немає дерев перевірок для предметів викладання.</string>
+    <string name="lecturer_meetings_title">Консультації та зустрічі</string>
+    <string name="lecturer_meetings_empty">Немає збережених консультацій і зустрічей.</string>
+    <string name="lecturer_experimental_badge">Експериментально</string>
+    <string name="lecturer_experimental_setting">Запис оцінок і тестів (Експериментально)</string>
+    <string name="lecturer_experimental_notice_title">Експериментальна функція</string>
+    <string name="lecturer_experimental_notice_body">Запис оцінок, балів і видимості вузлів в USOS реалізовано виключно за документацією API. Перед підтвердженням завжди перевіряйте ідентифікатор студента, вузол і значення.</string>
+    <string name="lecturer_experimental_ack">Розумію та вмикаю</string>
+    <string name="lecturer_write_points">Зберегти бали</string>
+    <string name="lecturer_write_grade">Зберегти оцінку</string>
+    <string name="lecturer_write_confirm_title">Підтвердити запис в USOS (Експериментально)</string>
+    <string name="lecturer_write_confirm_body">Вузол #%1$s · Студент #%2$s · Нове значення: %3$s</string>
+    <string name="lecturer_write_success">Збережено та перевірено в USOS.</string>
+    <string name="staff_directory_title">Каталог працівників</string>
+    <string name="staff_directory_desc">Пошук викладачів, кабінетів і консультацій</string>
+    <string name="academic_extras_title">Реєстрації, іспити та календар</string>
+    <string name="academic_extras_desc">Тури реєстрації, іспити та академічні події</string>
 </resources>

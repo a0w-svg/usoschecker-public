@@ -1,5 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pl">
     <string name="cards_title">Legitymacje</string>
+    <string name="cards_physical_title">Karty fizyczne</string>
+    <string name="cards_type">Typ karty: %1$s</string>
+    <string name="cards_physical_empty">USOS nie zwrócił legitymacji fizycznych.</string>
+    <string name="cards_issue_date">Data wydania: %1$s</string>
+    <string name="cards_usage_guide">Odśwież dane legitymacji. Jeśli uczelnia pozwala ją zamówić, wybierz zamówienie i potwierdź. Gdy status będzie gotowy, otwórz dane aktywacji i użyj ich w aplikacji mObywatel. Nie udostępniaj kodów innym osobom. Unieważnienie wymaga osobnego potwierdzenia.</string>
     <string name="cards_description">Wydanie, aktywacja w mObywatelu i unieważnienie mLegitymacji</string>
 <string name="cards_refresh">Pobierz dane legitymacji</string>
 <string name="cards_mobile_title">mLegitymacja</string>
@@ -15,6 +20,7 @@
     <string name="cards_order_confirm">Wysłać zamówienie mLegitymacji do USOS? Uczelnia zweryfikuje możliwość wydania dokumentu.</string>
     <string name="cards_revoke_confirm">Unieważnić zamówienie lub mLegitymację %1$s? Tej operacji nie można cofnąć w aplikacji.</string>
     <string name="cards_action_success">USOS potwierdził operację. Odświeżamy status.</string>
+    <string name="cards_confirmed_refresh_failed">USOS potwierdził operację, ale nie udało się odświeżyć statusu. Odśwież go przed ponowieniem.</string>
 <string name="cards_activation_title">Aktywacja w mObywatelu</string>
     <string name="cards_activation_data">Kod/token aktywacji:\n%1$s\n\nHasło aktywacyjne:\n%2$s</string>
 <string name="mcard_pending">Oczekuje na wysłanie</string>

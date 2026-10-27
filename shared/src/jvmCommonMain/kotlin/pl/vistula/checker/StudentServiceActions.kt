@@ -3,6 +3,7 @@ package pl.vistula.checker
 import org.json.JSONArray
 import org.json.JSONObject
 import pl.vistula.checker.core.StudentServices
+import pl.vistula.checker.core.PaymentAmounts
 
 /** Foreground actions: recheck eligibility, send once, never retry an uncertain write. */
 object StudentServiceActions {
@@ -38,10 +39,10 @@ object StudentServiceActions {
         }
     }
 
-    fun choosePlan(client: UsosClient, state: JSONObject, paymentId: String, type: String, planId: String, expected: JSONObject) {
+    fun choosePlan(client: UsosClient, state: JSONObject, paymentId: String, type: String, planId: String, expected: JSONObject, expectedCurrency: String = StudentServices.text(expected, "currency")) {
         require(paymentId.isNotBlank() && planId.isNotBlank() && type.isNotBlank())
         val payment = JSONObject(client.get("services/payments/payment", mapOf("id" to paymentId, "type" to type,
-            "fields" to "id|available_installment_plans[id|currency|installments[amount|payment_date|description|number]]")))
+            "fields" to "id|currency|available_installment_plans[id|currency|installments[amount|payment_date|description|number]]")))
         check(StudentServices.text(payment, "id") == paymentId)
         val plans = payment.optJSONArray("available_installment_plans") ?: JSONArray()
         check((0 until plans.length()).any { StudentServices.text(plans.optJSONObject(it), "id") == planId }) {
@@ -50,7 +51,7 @@ object StudentServiceActions {
         val current = (0 until plans.length()).map { plans.getJSONObject(it) }.first { StudentServices.text(it, "id") == planId }
         val rows = current.getJSONArray("installments")
         val shown = expected.getJSONArray("installments")
-        check(StudentServices.text(current, "currency") == StudentServices.text(expected, "currency") && rows.length() == shown.length())
+        check(PaymentAmounts.currency(current, payment) == expectedCurrency && rows.length() == shown.length())
         for (i in 0 until rows.length()) {
             val row = rows.getJSONObject(i)
             val previous = shown.getJSONObject(i)

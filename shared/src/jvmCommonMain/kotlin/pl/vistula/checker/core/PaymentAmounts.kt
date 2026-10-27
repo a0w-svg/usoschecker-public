@@ -27,7 +27,7 @@ object PaymentAmounts {
 
     @JvmStatic
     fun unpaid(info: PaymentInfo, language: String): String {
-        val sums = info.installments.filter { !it.isPaid() && it.amount > 0 }.groupBy { it.currency }
+        val sums = info.installments.filter { it.isUnpaid() && it.amount > 0 }.groupBy { it.currency }
             .mapValues { (_, items) -> items.fold(BigDecimal.ZERO) { sum, item -> sum + BigDecimal.valueOf(item.amount) } }
         return if (sums.isEmpty()) format(0, info.installments.firstOrNull()?.currency ?: info.accounts.firstOrNull()?.currency ?: "", language)
             else sums.entries.joinToString(" · ") { (unit, amount) -> format(amount, unit, language) }

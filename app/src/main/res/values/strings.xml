@@ -248,7 +248,14 @@
     <string name="payments_iban_copied">Numer subkonta skopiowany do schowka</string>
     <string name="payments_schedule_heading">Harmonogram należności</string>
 <string name="payments_status_overdue_warn">Uwaga: Część rat jest po terminie płatności!</string>
-    <string name="payments_status_all_paid">Wszystkie należności są opłacone na bieżąco.</string>
+    <string name="payments_status_all_paid" tools:ignore="UnusedResources">Wszystkie należności są opłacone na bieżąco.</string>
+    <string name="payments_status_none_due">Brak kwot do zapłaty w pobranych ratach.</string>
+    <string name="payments_settlement_unknown">Nie można ustalić rozliczenia wszystkich pozycji. Sprawdź aktualne saldo w USOSweb.</string>
+    <string name="payment_status_unknown">Rozliczenie nieznane</string>
+    <string name="grades_points_without_max">Punkty: %1$.2f</string>
+    <string name="grades_tests_unavailable">Nie udało się w całości pobrać wyników sprawdzianów. Dane mogą być niedostępne lub przekraczać limit pobierania.</string>
+    <string name="account_thesis_unavailable">Nie udało się pobrać danych pracy dyplomowej. Spróbuj ponownie po synchronizacji.</string>
+    <string name="payments_usage_guide">Odśwież płatności, aby zobaczyć dane z USOS. Sprawdź termin, walutę i numer konta przed przelewem. Historia wpłat jest pobierana osobno. Jeśli brakuje danych, sprawdź zgodę payments w ustawieniach konta.</string>
     <string name="payments_status_pending">Pamiętaj o terminowym regulowaniu rat.</string>
     <string name="payments_amount">Kwota: %1$.2f %2$s</string>
     <string name="payments_deadline">Termin płatności: %1$s</string>
@@ -556,9 +563,10 @@
     <string name="widget_grade_sub_simple">Średnia prosta</string>
     <string name="widget_grade_sub_none">Brak ocen</string>
     <string name="widget_payment_overdue">Zaległość po terminie!</string>
-    <string name="widget_payment_all_paid">Wszystko opłacone</string>
+    <string name="widget_payment_all_paid" tools:ignore="UnusedResources">Wszystko opłacone</string>
     <string name="widget_payment_to_pay">Do zapłaty</string>
     <string name="widget_payment_none">Brak należności</string>
+    <string name="widget_payment_unavailable">Dane niedostępne</string>
     <string name="btn_understand">Rozumiem</string>
     <string name="account_album_number">Nr albumu: %1$s</string>
     <string name="grades_share_term">Semestr: %1$s</string>

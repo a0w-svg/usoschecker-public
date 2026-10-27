@@ -14,14 +14,14 @@ class WebLinksTest {
     @Test
     fun acceptsOrdinaryWebLinks() {
         assertTrue(WebLinks.isWebUrl("https://vistula.edu.pl/news?id=12#details"))
-        assertTrue(WebLinks.isWebUrl("http://example.org/"))
+        assertFalse(WebLinks.isWebUrl("http://example.org/"))
         assertTrue(WebLinks.isWebUrl("HTTPS://example.org/"))
     }
 
     @Test
     fun rejectsNonWebSchemesAndMalformedAddresses() {
         for (address in arrayOf(
-            null, "", "javascript:alert(1)", "file:///data/data/private",
+            null, "", "http://example.org/", "javascript:alert(1)", "file:///data/data/private",
             "content://pl.vistula.checker/state", "intent://example/#Intent;scheme=file;end",
             "tel:123", "//example.org/path", "https:example.org", "https:///path",
             "https://trusted.org@evil.org/", "https://example.org\\@evil.org/",

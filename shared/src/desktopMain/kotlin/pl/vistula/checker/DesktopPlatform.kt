@@ -130,13 +130,57 @@ class DesktopInstanceLock @Throws(IOException::class) constructor(directory: Fil
     }
 }
 
+/** Wraps the vault key with an OS-bound secret so a copied data directory is not enough to read it. */
+interface KeyProtector {
+    @Throws(IOException::class) fun protect(raw: ByteArray): ByteArray
+    @Throws(IOException::class) fun unprotect(blob: ByteArray): ByteArray
+
+    companion object {
+        /** Windows DPAPI (current user) is available without extra dependencies; other systems return null. */
+        @JvmStatic
+        fun platformDefault(): KeyProtector? =
+            if (System.getProperty("os.name", "").lowercase(Locale.ROOT).contains("win")) WindowsDpapiProtector else null
+    }
+}
+
+/** DPAPI CurrentUser scope through Windows PowerShell; key bytes travel over stdin/stdout, never arguments. */
+internal object WindowsDpapiProtector : KeyProtector {
+    private const val PRELUDE = "Add-Type -AssemblyName System.Security; \$i=[Console]::In.ReadLine(); \$b=[Convert]::FromBase64String(\$i); "
+    private const val PROTECT = PRELUDE + "[Convert]::ToBase64String([Security.Cryptography.ProtectedData]::Protect(\$b,\$null,'CurrentUser'))"
+    private const val UNPROTECT = PRELUDE + "[Convert]::ToBase64String([Security.Cryptography.ProtectedData]::Unprotect(\$b,\$null,'CurrentUser'))"
+
+    override fun protect(raw: ByteArray): ByteArray = run(PROTECT, raw)
+    override fun unprotect(blob: ByteArray): ByteArray = run(UNPROTECT, blob)
+
+    private fun run(script: String, input: ByteArray): ByteArray {
+        val root = System.getenv("SystemRoot") ?: "C:\\Windows"
+        val exe = File(root, "System32\\WindowsPowerShell\\v1.0\\powershell.exe")
+        if (!exe.isFile) throw IOException("DPAPI helper is unavailable")
+        val process = ProcessBuilder(exe.path, "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script).start()
+        try {
+            process.outputStream.use { it.write(java.util.Base64.getEncoder().encode(input)); it.write('\n'.code) }
+            if (!process.waitFor(30, TimeUnit.SECONDS)) throw IOException("DPAPI helper timed out")
+            if (process.exitValue() != 0) throw IOException("DPAPI helper failed")
+            val out = process.inputStream.readNBytes(8192).toString(StandardCharsets.US_ASCII).trim()
+            return java.util.Base64.getDecoder().decode(out)
+        } catch (e: IllegalArgumentException) {
+            throw IOException("DPAPI helper returned invalid data")
+        } finally {
+            process.destroyForcibly()
+        }
+    }
+}
+
 /**
  * AES-256-GCM encrypted state store for Desktop with the same framing (`[1, iv(12), ciphertext]`)
- * as Android's Keystore Vault.
+ * as Android's Keystore Vault. When a [KeyProtector] is available the key file holds only the
+ * wrapped key (`VKW1` + blob); legacy 32-byte plaintext keys are migrated in place.
  */
 class DesktopVault @JvmOverloads constructor(
-    private val directory: File = DesktopPlatform.defaultDataDir()
+    private val directory: File = DesktopPlatform.defaultDataDir(),
+    private val protector: KeyProtector? = KeyProtector.platformDefault()
 ) : VaultStore {
+    @Volatile private var cachedKey: SecretKey? = null
     private val stateFile = File(directory, "state.bin")
     private val keyFile = File(directory, "vault.key")
     override val storePath: String = directory.toPath().toAbsolutePath().normalize().toString()
@@ -156,16 +200,39 @@ class DesktopVault @JvmOverloads constructor(
         }
     }
 
+    private fun wrapped(raw: ByteArray): ByteArray? {
+        val p = protector ?: return null
+        return try { WRAP_MAGIC + p.protect(raw) } catch (_: IOException) { null }
+    }
+
     private fun key(): SecretKey {
+        cachedKey?.let { return it }
+        val key = loadKey()
+        cachedKey = key
+        return key
+    }
+
+    private fun loadKey(): SecretKey {
         if (Files.exists(keyFile.toPath(), LinkOption.NOFOLLOW_LINKS)) {
-            val raw = DesktopPlatform.readPrivate(keyFile, 32)
-            if (raw.size != 32) throw IOException("Invalid vault key; existing data was preserved")
-            return SecretKeySpec(raw, "AES")
+            val stored = DesktopPlatform.readPrivate(keyFile, MAX_KEY_FILE_BYTES)
+            if (stored.size > 32 && stored.copyOf(WRAP_MAGIC.size).contentEquals(WRAP_MAGIC)) {
+                val p = protector ?: throw IOException("Vault key is bound to the OS account; existing data was preserved")
+                val raw = p.unprotect(stored.copyOfRange(WRAP_MAGIC.size, stored.size))
+                if (raw.size != 32) throw IOException("Invalid vault key; existing data was preserved")
+                return SecretKeySpec(raw, "AES")
+            }
+            if (stored.size != 32) throw IOException("Invalid vault key; existing data was preserved")
+            // Legacy plaintext key: migrate only when the wrapped copy decrypts back to the same key.
+            val blob = wrapped(stored)
+            if (blob != null && runCatching { protector?.unprotect(blob.copyOfRange(WRAP_MAGIC.size, blob.size)) }.getOrNull()?.contentEquals(stored) == true) {
+                DesktopPlatform.atomicWrite(keyFile, blob)
+            }
+            return SecretKeySpec(stored, "AES")
         }
         if (Files.exists(stateFile.toPath(), LinkOption.NOFOLLOW_LINKS)) throw IOException("Missing vault key; existing data was preserved")
         val raw = ByteArray(32)
         SecureRandom().nextBytes(raw)
-        DesktopPlatform.atomicWrite(keyFile, raw)
+        DesktopPlatform.atomicWrite(keyFile, wrapped(raw) ?: raw)
         return SecretKeySpec(raw, "AES")
     }
 
@@ -196,9 +263,12 @@ class DesktopVault @JvmOverloads constructor(
     override fun clear(): Unit = locked {
         Files.deleteIfExists(stateFile.toPath())
         Files.deleteIfExists(keyFile.toPath())
+        cachedKey = null
     }
 
     companion object {
+        private val WRAP_MAGIC = "VKW1".toByteArray(StandardCharsets.US_ASCII)
+        private const val MAX_KEY_FILE_BYTES = 4096
         private const val MAX_STATE_BYTES = 32 * 1024 * 1024
         private val locks = java.util.concurrent.ConcurrentHashMap<String, Any>()
     }

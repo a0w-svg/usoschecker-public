@@ -18,6 +18,7 @@ object ApiErrorUi {
         if (cause.message in explicit) return cause.message!!
         val label = when (cause) {
             is pl.vistula.checker.MobileCardActions.Uncertain -> R.string.service_action_uncertain
+            is pl.vistula.checker.MobileCardActions.ConfirmedRefreshFailed -> R.string.cards_confirmed_refresh_failed
             is UsosClient.ApiException -> http(cause.status, cause.authorization)
             is SocketTimeoutException -> R.string.error_timeout
             is JSONException -> R.string.error_format

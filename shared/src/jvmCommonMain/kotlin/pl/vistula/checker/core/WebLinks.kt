@@ -20,7 +20,7 @@ object WebLinks {
         if (address == null) return false
         return try {
             val uri = URI(address)
-            ("https".equals(uri.scheme, ignoreCase = true) || "http".equals(uri.scheme, ignoreCase = true)) &&
+            "https".equals(uri.scheme, ignoreCase = true) && // HTTPS only: links must not be tamperable on the network.
                 uri.host != null && uri.host.isNotEmpty() && uri.rawUserInfo == null
         } catch (e: URISyntaxException) {
             false

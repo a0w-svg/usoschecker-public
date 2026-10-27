@@ -169,8 +169,8 @@ class StudentToolsTest {
         val ects = UsosParser.ectsPoints(ectsJson)
         assertEquals(5.0, ects["2026Z\u0000CS101"]!!, 0.0001)
         assertEquals(6.5, ects["2026Z\u0000MATH"]!!, 0.0001)
-        assertEquals(2.0, ects["ENG"]!!, 0.0001)
-        assertNull(ects["NULL_CRS"])
+        assertEquals(2.0, ects["2025L\u0000ENG"]!!, 0.0001)
+        assertNull(ects["2026Z\u0000NULL_CRS"])
 
         val userJson = JSONObject(
             """
@@ -201,5 +201,33 @@ class StudentToolsTest {
         assertEquals("Semestr 3", profile.stage)
         assertEquals("2024-10-01", profile.admissionDate)
         assertEquals("https://usosapps.vistula.edu.pl/photo.jpg", profile.photoUrl)
+    }
+
+    @Test fun profileFieldsComeFromTheSelectedProgramme() {
+        val user = JSONObject("""{"student_programmes":[
+            {"status":"inactive","programme":{"name":{"pl":"Old"}},"admission_date":"2020-10-01","stages":[{"stage_id":"old"}]},
+            {"status":"active","programme":{"name":{"pl":"Current"}},"admission_date":"2024-10-01","stages":[]}
+        ]}""")
+        val profile = UsosParser.userProfile(user)
+        assertEquals("Current", profile.programme)
+        assertEquals("2024-10-01", profile.admissionDate)
+        assertEquals("", profile.stage)
+        val unnamed = JSONObject("""{"student_programmes":[
+            {"status":"inactive","programme":{"name":{"pl":"Old"}}},
+            {"status":"active","admission_date":"2025-10-01"}
+        ]}""")
+        val active = UsosParser.userProfile(unnamed)
+        assertEquals("", active.programme)
+        assertEquals("2025-10-01", active.admissionDate)
+    }
+
+    @Test fun gradesNeverBorrowEctsFromAnotherTerm() {
+        val ects = UsosParser.ectsPoints(JSONObject("""{"old":{"C":6},"current":{"OTHER":3}}"""))
+        val grades = JSONObject("""{"current":{"C":{"course_grades":[{"1":{"exam_id":1,"exam_session_number":1,"value_symbol":"5"}}],"course_units_grades":null}}}""")
+        val snapshot = Snapshot("2026-01-01", "2026-12-31")
+        UsosParser.grades(snapshot, grades, emptyMap(), ects)
+        val grade = snapshot.records["grade:1:1"]!!
+        assertTrue(grade.ects.isNaN())
+        assertFalse(grade.metadata.has("ects"))
     }
 }

@@ -9,16 +9,16 @@ import pl.vistula.checker.core.LecturerServices
 import pl.vistula.checker.core.StudentServices
 
 /**
- * Experimental lecturer write actions for USOS course tests and gradebooks.
+ * Experimental lecturer write actions for USOS course tests, gradebooks, and attendance lists.
  *
  * Safeguards:
  * 1. Strictly gated on verified lecturer role (`AccountRole.lecturer(state)`).
  * 2. Requires experimental feature toggle (`PREF_EXPERIMENTAL_WRITES`, default true) AND
  *    explicit one-time user acknowledgment (`PREF_EXPERIMENTAL_WRITES_ACK`).
- * 3. Pre-checks node type and permissions via `services/crstests/node2` before mutating.
+ * 3. Pre-checks target entity via `services/crstests/node2` or `services/attendance/attendance_list` before mutating.
  * 4. Sends a single POST (never GET), never retries on uncertain network/5xx/timeout errors,
  *    and re-verifies account identity before and after.
- * 5. Performs an authoritative re-read of `services/crstests/node2` after each write.
+ * 5. Performs an authoritative re-read after each write.
  * 6. Keeps a minimal audit log of node/target IDs only (never student names or grade values).
  */
 object LecturerWriteActions {
@@ -27,6 +27,8 @@ object LecturerWriteActions {
     const val PREF_AUDIT_LOG = "lecturer_write_audit"
     private val ID_PATTERN = Regex("[A-Za-z0-9_-]{1,64}")
     private val STUDENT_ID_PATTERN = Regex("[0-9]{1,20}")
+    val ATTENDANCE_MODES = setOf("intramural", "remote", "justified_absence", "absence")
+    val LIST_MODES = setOf("intramural", "remote", "hybrid")
 
     class Uncertain(cause: Exception) : IOException("Lecturer write result unknown", cause)
     class ConfirmedRefreshFailed(cause: Exception) : IOException("Lecturer write confirmed but authoritative re-read failed", cause)
@@ -49,7 +51,7 @@ object LecturerWriteActions {
         preferences.putBoolean(PREF_EXPERIMENTAL_WRITES_ACK, true)
     }
 
-    private fun checkPrerequisites(state: JSONObject, preferences: KeyValueStore?) {
+    private fun checkPrerequisites(state: JSONObject, preferences: KeyValueStore?, requireCrstestsScope: Boolean = true) {
         check(AccountRole.lecturer(state)) { "Lecturer role required for write actions" }
         if (preferences != null) {
             check(isEnabled(preferences)) { "Experimental lecturer writes are disabled in settings" }
@@ -59,8 +61,13 @@ object LecturerWriteActions {
         check(token.isNotBlank() && token != "demo" && !state.optBoolean("authorizationError") &&
             state.optLong("retryAt") <= System.currentTimeMillis()) { "Lecturer authorization unavailable" }
         val scopes = state.optString("scopes")
-        check(StudentServices.hasScope(scopes, "staff_perspective") && StudentServices.hasScope(scopes, "crstests")) {
-            "Missing required scopes: staff_perspective|crstests"
+        check(StudentServices.hasScope(scopes, "staff_perspective")) {
+            "Missing required scope: staff_perspective"
+        }
+        if (requireCrstestsScope) {
+            check(StudentServices.hasScope(scopes, "crstests")) {
+                "Missing required scopes: staff_perspective|crstests"
+            }
         }
     }
 
@@ -80,6 +87,16 @@ object LecturerWriteActions {
         return current
     }
 
+    private fun precheckAttendanceList(client: UsosClient, listId: String): JSONObject {
+        require(ID_PATTERN.matches(listId)) { "Invalid list_id" }
+        val current = JSONObject(client.get("services/attendance/attendance_list", mapOf(
+            "id" to listId,
+            "fields" to "id|course_unit|group_number|date|mode"
+        )))
+        check(StudentServices.text(current, "id") == listId) { "Attendance list verification failed" }
+        return current
+    }
+
     private fun authoritativeReread(client: UsosClient, nodeId: String): JSONObject {
         try {
             val updated = JSONObject(client.get("services/crstests/node2", mapOf(
@@ -93,12 +110,30 @@ object LecturerWriteActions {
         }
     }
 
+    private fun authoritativeAttendanceReread(client: UsosClient, listId: String): JSONObject {
+        try {
+            val meta = JSONObject(client.get("services/attendance/attendance_list", mapOf(
+                "id" to listId,
+                "fields" to "id|course_unit|group_number|date|mode"
+            )))
+            check(StudentServices.text(meta, "id") == listId) { "Authoritative attendance list id mismatch" }
+            val entriesRaw = JSONArray(client.get("services/attendance/attendance", mapOf(
+                "list_id" to listId,
+                "fields" to "student|attendance_mode|comment"
+            )))
+            return LecturerServices.safeAttendanceEntries(meta, entriesRaw)
+        } catch (e: Exception) {
+            throw ConfirmedRefreshFailed(e)
+        }
+    }
+
     private fun executeSinglePost(
         client: UsosClient,
         state: JSONObject,
         endpoint: String,
         params: Map<String, String>,
-        checkAccount: () -> Unit
+        checkAccount: () -> Unit,
+        allowEmptySuccessObject: Boolean = false
     ) {
         checkAccount()
         val response = try {
@@ -108,9 +143,10 @@ object LecturerWriteActions {
         } catch (e: Exception) {
             throw Uncertain(e)
         }
-        when (response.opt("success")) {
-            true -> Unit
-            false -> error("USOS rejected lecturer write action")
+        when {
+            response.opt("success") == true -> Unit
+            response.opt("success") == false -> error("USOS rejected lecturer write action")
+            allowEmptySuccessObject && response.length() == 0 -> Unit
             else -> throw Uncertain(IllegalStateException("Unexpected lecturer write response"))
         }
         checkAccount()
@@ -276,6 +312,74 @@ object LecturerWriteActions {
         return authoritativeReread(client, nodeId)
     }
 
+    @JvmStatic
+    @JvmOverloads
+    fun updateAttendance(
+        client: UsosClient,
+        state: JSONObject,
+        listId: String,
+        studentId: String,
+        attendanceMode: String,
+        comment: String = "",
+        preferences: KeyValueStore? = null,
+        checkAccount: () -> Unit = {}
+    ): JSONObject {
+        checkPrerequisites(state, preferences, requireCrstestsScope = false)
+        require(STUDENT_ID_PATTERN.matches(studentId)) { "Invalid student_id" }
+        val normalizedMode = attendanceMode.trim()
+        require(normalizedMode in ATTENDANCE_MODES) { "Invalid attendance_mode: $normalizedMode" }
+        require(comment.length <= 200) { "Comment exceeds 200 characters" }
+
+        precheckAttendanceList(client, listId)
+
+        executeSinglePost(
+            client = client,
+            state = state,
+            endpoint = "services/attendance/update_attendance",
+            params = mapOf(
+                "list_id" to listId,
+                "student_id" to studentId,
+                "attendance_mode" to normalizedMode,
+                "comment" to comment.trim()
+            ),
+            checkAccount = checkAccount,
+            allowEmptySuccessObject = true
+        )
+        recordAudit(preferences, "update_attendance", listId, studentId)
+        return authoritativeAttendanceReread(client, listId)
+    }
+
+    @JvmStatic
+    @JvmOverloads
+    fun changeAttendanceListMode(
+        client: UsosClient,
+        state: JSONObject,
+        listId: String,
+        mode: String,
+        preferences: KeyValueStore? = null,
+        checkAccount: () -> Unit = {}
+    ): JSONObject {
+        checkPrerequisites(state, preferences, requireCrstestsScope = false)
+        val normalizedMode = mode.trim()
+        require(normalizedMode in LIST_MODES) { "Invalid attendance list mode: $normalizedMode" }
+
+        precheckAttendanceList(client, listId)
+
+        executeSinglePost(
+            client = client,
+            state = state,
+            endpoint = "services/attendance/change_list_mode",
+            params = mapOf(
+                "list_id" to listId,
+                "mode" to normalizedMode
+            ),
+            checkAccount = checkAccount,
+            allowEmptySuccessObject = true
+        )
+        recordAudit(preferences, "change_list_mode", listId, "")
+        return authoritativeAttendanceReread(client, listId)
+    }
+
     private fun recordAudit(preferences: KeyValueStore?, action: String, nodeId: String, targetId: String) {
         if (preferences == null) return
         val existing = try { JSONArray(preferences.getString(PREF_AUDIT_LOG, "[]")) } catch (_: Exception) { JSONArray() }
@@ -293,4 +397,3 @@ object LecturerWriteActions {
         preferences.putString(PREF_AUDIT_LOG, next.toString())
     }
 }
-

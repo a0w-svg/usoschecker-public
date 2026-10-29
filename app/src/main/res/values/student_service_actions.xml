@@ -34,5 +34,4 @@
     <string name="payment_status_cancelled">Anulowana</string>
     <string name="payment_status_underpaid">Niedopłata</string>
     <string name="payments_installment_total_label">Suma nieopłaconych rat</string>
-    <string name="payments_currency_amount">%1$.2f %2$s</string>
 </resources>

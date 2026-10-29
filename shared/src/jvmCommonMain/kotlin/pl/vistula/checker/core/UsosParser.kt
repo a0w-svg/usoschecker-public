@@ -15,7 +15,7 @@ object UsosParser {
     @JvmField val TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     private fun optionalText(o: JSONObject, field: String): String =
-        if (o.isNull(field)) "" else o.optString(field, "")
+        if (o.isNull(field)) "" else o.opt(field).let { if (it is String || it is Number || it is Boolean) it.toString() else "" }
 
     private fun finiteAmount(o: JSONObject, field: String, fallback: Double = 0.0): Double {
         if (!o.has(field) || o.isNull(field)) return fallback
@@ -463,7 +463,7 @@ object UsosParser {
             var name = if (nameObj != null) language(nameObj) else optionalText(a, "name")
             if (name.isEmpty()) name = "Subkonto studenckie"
 
-            var currency = optionalText(a, "currency")
+            var currency = PaymentAmounts.currencyCode(a.opt("currency"))
             if (currency.isEmpty()) currency = "PLN"
 
             val balance = finiteAmount(a, "balance")
@@ -506,7 +506,7 @@ object UsosParser {
                 var name = if (nameObj != null) language(nameObj) else optionalText(item, "name")
                 if (name.isEmpty()) name = ApiLanguage.label("Należność", "Payment", "Платіж")
                 val amount = finiteAmount(item, "amount")
-                var currency = optionalText(item, "currency")
+                var currency = PaymentAmounts.currencyCode(item.opt("currency"))
                 if (currency.isEmpty()) currency = "PLN"
                 val deadline = optionalText(item, "deadline")
                 val status = optionalText(item, "status")
@@ -524,9 +524,20 @@ object UsosParser {
             val payAcc = optionalText(item, "account_number")
             var payDeadline = optionalText(item, "payment_deadline")
             if (payDeadline.isEmpty()) payDeadline = optionalText(item, "deadline")
-            var payCurrency = optionalText(item, "currency")
+            var payCurrency = PaymentAmounts.currencyCode(item.opt("currency"))
             if (payCurrency.isEmpty()) payCurrency = "PLN"
-            val totalAmount = if (item.has("total_amount") && !item.isNull("total_amount")) finiteAmount(item, "total_amount") else finiteAmount(item, "amount")
+            val totalAmount = when {
+                item.has("total_amount") && !item.isNull("total_amount") -> {
+                    val t = finiteAmount(item, "total_amount")
+                    if (t != 0.0) t
+                    else if (item.has("amount") && !item.isNull("amount")) finiteAmount(item, "amount")
+                    else if (item.has("saldo_amount") && !item.isNull("saldo_amount")) kotlin.math.abs(finiteAmount(item, "saldo_amount"))
+                    else 0.0
+                }
+                item.has("amount") && !item.isNull("amount") -> finiteAmount(item, "amount")
+                item.has("saldo_amount") && !item.isNull("saldo_amount") -> kotlin.math.abs(finiteAmount(item, "saldo_amount"))
+                else -> 0.0
+            }
 
             val plan = item.optJSONObject("chosen_installment_plan")
             val planInsts = plan?.optJSONArray("installments")
@@ -544,8 +555,8 @@ object UsosParser {
                         if (payDesc.isNotEmpty()) "$payDesc (${ApiLanguage.label("rata", "installment", "внесок")} $num)" else "${ApiLanguage.label("Rata", "Installment", "Внесок")} $num"
                     }
                     val instAmount = finiteAmount(pi, "amount")
-                    var instCurrency = optionalText(pi, "currency")
-                    if (instCurrency.isEmpty()) instCurrency = plan.optString("currency", payCurrency)
+                    var instCurrency = PaymentAmounts.currencyCode(pi.opt("currency"))
+                    if (instCurrency.isEmpty()) instCurrency = PaymentAmounts.currencyCode(plan.opt("currency"))
                     if (instCurrency.isEmpty()) instCurrency = payCurrency
                     var deadline = optionalText(pi, "payment_date")
                     if (deadline.isEmpty()) deadline = payDeadline

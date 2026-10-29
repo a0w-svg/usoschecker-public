@@ -8,7 +8,8 @@ object FeatureAccess {
         "documents" to setOf("adm_documents"),
         "tests" to setOf("crstests"),
         "lecturer" to setOf("staff_perspective", "crstests"),
-        "profile" to setOf("photo", "email")
+        "profile" to setOf("photo", "email"),
+        "extras" to setOf("events", "mailclient", "placement_tests", "slips", "surveys_reports", "surveys_filling")
     )
 
     fun selected(scopes: String, feature: String): Boolean =

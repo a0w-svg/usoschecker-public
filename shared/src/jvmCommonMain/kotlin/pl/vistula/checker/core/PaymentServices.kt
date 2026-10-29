@@ -11,11 +11,13 @@ object PaymentServices {
         for (i in 0 until source.length()) {
             val item = source.getJSONObject(i)
             val safe = JSONObject()
-            for (key in listOf("id", "type", "state", "total_amount", "saldo_amount", "currency", "interest",
+            for (key in listOf("id", "type", "state", "total_amount", "saldo_amount", "interest",
                 "bonus_amount", "bonus_deadline", "has_bonus", "default_choice_date", "payment_deadline")) {
                 val value = item.opt(key)
                 if (value is String || value is Number || value is Boolean) safe.put(key, value)
             }
+            val currency = PaymentAmounts.currencyCode(item.opt("currency"))
+            if (currency.isNotEmpty()) safe.put("currency", currency)
             safe.put("description", ApiLanguage.safe(item.opt("description")))
             safe.put("plans", plans(item.optJSONArray("available_installment_plans") ?: JSONArray()))
             safe.put("chosenPlan", StudentServices.text(item.optJSONObject("chosen_installment_plan"), "id"))
@@ -27,7 +29,7 @@ object PaymentServices {
         for (i in 0 until source.length()) {
             val item = source.getJSONObject(i)
             val safe = JSONObject().put("id", StudentServices.text(item, "id"))
-                .put("currency", StudentServices.text(item, "currency"))
+                .put("currency", PaymentAmounts.currencyCode(item.opt("currency")))
                 .put("is_default", item.optBoolean("is_default"))
             val installments = JSONArray()
             val rows = item.optJSONArray("installments") ?: throw JSONException("Missing installments")
@@ -46,11 +48,27 @@ object PaymentServices {
         for (i in 0 until source.length()) {
             val item = source.getJSONObject(i)
             val safe = JSONObject()
-            for (key in listOf("id", "amount", "remaining", "date", "currency", "status", "is_settled")) {
+            for (key in listOf("id", "amount", "remaining", "date", "status", "is_settled")) {
                 val value = item.opt(key)
                 if (value is String || value is Number || value is Boolean) safe.put(key, value)
             }
+            val currency = PaymentAmounts.currencyCode(item.opt("currency"))
+            if (currency.isNotEmpty()) safe.put("currency", currency)
             put(safe.put("description", ApiLanguage.safe(item.opt("description"))))
         }
+    }
+
+    const val REMITTANCE_DETAIL_FIELDS = "id|amount|remaining|description|status|is_settled|date|currency|faculty[id|name]"
+
+    fun remittanceDetail(item: JSONObject): JSONObject {
+        val safe = JSONObject()
+        for (key in listOf("id", "amount", "remaining", "date", "status", "is_settled")) {
+            val value = item.opt(key)
+            if (value is String || value is Number || value is Boolean) safe.put(key, value)
+        }
+        val currency = PaymentAmounts.currencyCode(item.opt("currency"))
+        if (currency.isNotEmpty()) safe.put("currency", currency)
+        return safe.put("description", ApiLanguage.safe(item.opt("description")))
+            .put("faculty_name", ApiLanguage.safe(item.optJSONObject("faculty")?.opt("name")))
     }
 }

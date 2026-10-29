@@ -1,6 +1,7 @@
 package pl.vistula.checker.ui.compose
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,7 +42,9 @@ import java.time.LocalDate
 import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONObject
+import pl.vistula.checker.DemoStudentServices
 import pl.vistula.checker.KeyValueStore
+import pl.vistula.checker.ToolServiceData
 import pl.vistula.checker.SharedRepository
 import pl.vistula.checker.StudentServiceLoader
 import pl.vistula.checker.UsosClient
@@ -452,6 +456,89 @@ fun PaymentsAndServicesSection(
     fun t(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
     val live = state.optString("token").isNotEmpty() && state.optString("token") != "demo" && !state.optBoolean("authorizationError")
     val payments = ToolReadModels.payments(state, snapshot, language)
+    var remittanceDetail by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
+    var documentDetail by remember(state.optString("accountSession")) { mutableStateOf<StudentServices.Document?>(null) }
+    fun loadRemittance(id: String) {
+        if (state.optString("token") == "demo") remittanceDetail = DemoStudentServices.demoRemittanceDetail(id)
+        else runAsync {
+            val creds = repository.read()
+            check(SharedRepository.sameAccount(state, creds))
+            val detail = ToolServiceData.fetchRemittanceDetail(UsosClient(creds), id)
+            check(SharedRepository.sameAccount(creds, repository.read()))
+            remittanceDetail = detail
+        }
+    }
+    LaunchedEffect(section, state.optString("accountSession"), live) {
+        if (!live) return@LaunchedEffect
+        val svc = state.optJSONObject("studentServices")
+        val scopes = state.optString("scopes")
+        val toFetch = mutableListOf<String>()
+        if ((section == "services" || section == "payments") && StudentServices.hasScope(scopes, "payments") &&
+            (svc?.optJSONObject("payments")?.optLong("attemptAt") ?: 0L) == 0L && snapshot?.payments == null) {
+            toFetch.add("payments")
+        }
+        if ((section == "services" || section == "payments") && StudentServices.hasScope(scopes, "payments") &&
+            (svc?.optJSONObject("remittances")?.optLong("attemptAt") ?: 0L) == 0L) {
+            toFetch.add("remittances")
+        }
+        if ((section == "services" || section == "cards") && StudentServices.hasScope(scopes, "cards") &&
+            (svc?.optJSONObject("mcard")?.optLong("attemptAt") ?: 0L) == 0L) {
+            toFetch.add("cards")
+        }
+        if ((section == "services" || section == "documents") && StudentServices.hasScope(scopes, "adm_documents") &&
+            (svc?.optJSONObject("documents")?.optLong("attemptAt") ?: 0L) == 0L) {
+            toFetch.add("documents")
+        }
+        if (toFetch.isNotEmpty()) {
+            runAsync {
+                for (sec in toFetch) runCatching { StudentServiceLoader.refresh(repository, sec) }
+                onReloadState()
+            }
+        }
+    }
+
+    remittanceDetail?.let { rem ->
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(StudentServices.localized(rem.opt("description"), language).ifEmpty { t("Szczegóły wpłaty / zwrotu", "Remittance details", "Деталі платежу / повернення") }, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    OutlinedButton(onClick = { remittanceDetail = null }) { Text(t("Zamknij", "Close", "Закрити")) }
+                }
+                val cur = pl.vistula.checker.core.PaymentAmounts.currencyCode(rem.opt("currency"))
+                Text(pl.vistula.checker.core.PaymentAmounts.format(rem.opt("amount"), cur, language), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                val lines = mutableListOf<String>()
+                val d = StudentServices.text(rem, "date")
+                if (d.isNotEmpty()) lines.add(t("Data: ", "Date: ", "Дата: ") + d)
+                if (rem.has("is_settled")) {
+                    lines.add(if (rem.optBoolean("is_settled")) t("Rozliczona", "Settled", "Розраховано") else t("Nierozliczona", "Not settled", "Не розраховано"))
+                }
+                if (rem.has("remaining") && !rem.isNull("remaining")) {
+                    lines.add(t("Pozostało: ", "Remaining: ", "Залишилось: ") + pl.vistula.checker.core.PaymentAmounts.format(rem.opt("remaining"), cur, language))
+                }
+                val st = StudentServices.text(rem, "status")
+                if (st.isNotEmpty()) lines.add(t("Status: ", "Status: ", "Статус: ") + st)
+                val fac = StudentServices.localized(rem.opt("faculty_name"), language)
+                if (fac.isNotEmpty()) lines.add(t("Wydział: ", "Faculty: ", "Факультет: ") + fac)
+                lines.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
+            }
+        }
+    }
+
+    documentDetail?.let { doc ->
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(doc.name.ifEmpty { t("Dokument", "Document", "Документ") }, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    OutlinedButton(onClick = { documentDetail = null }) { Text(t("Zamknij", "Close", "Закрити")) }
+                }
+                if (doc.typeName.isNotEmpty()) Text(t("Typ: ", "Type: ", "Тип: ") + doc.typeName, style = MaterialTheme.typography.bodyMedium)
+                if (doc.status.isNotEmpty()) Text(t("Status: ", "Status: ", "Статус: ") + doc.status, style = MaterialTheme.typography.bodyMedium)
+                if (doc.published.isNotEmpty()) Text(t("Data wystawienia: ", "Published: ", "Дата видачі: ") + doc.published, style = MaterialTheme.typography.bodySmall)
+                if (doc.delivered.isNotEmpty()) Text(t("Data doręczenia: ", "Delivered: ", "Дата вручення: ") + doc.delivered, style = MaterialTheme.typography.bodySmall)
+            }
+        }
+    }
+
     if (section == "services" || section == "payments") Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -459,9 +546,14 @@ fun PaymentsAndServicesSection(
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(t("Płatności i subkonta USOS", "USOS payments and accounts", "Платежі та рахунки USOS"), style = MaterialTheme.typography.titleLarge)
-            OutlinedButton(enabled = live && StudentServices.hasScope(state.optString("scopes"), "payments"), onClick = {
-                runAsync { StudentServiceLoader.refresh(repository, "payments"); onReloadState() }
-            }) { Text(t("Odśwież płatności", "Refresh payments", "Оновити платежі")) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(enabled = live && StudentServices.hasScope(state.optString("scopes"), "payments"), onClick = {
+                    runAsync { StudentServiceLoader.refresh(repository, "payments"); onReloadState() }
+                }) { Text(t("Odśwież płatności", "Refresh payments", "Оновити платежі")) }
+                OutlinedButton(enabled = live && StudentServices.hasScope(state.optString("scopes"), "payments"), onClick = {
+                    runAsync { StudentServiceLoader.refresh(repository, "remittances"); onReloadState() }
+                }) { Text(t("Odśwież historię wpłat", "Refresh history", "Оновити історію")) }
+            }
             val paymentError = state.optJSONObject("studentServices")?.optJSONObject("payments")
             if (!paymentError?.optString("error").isNullOrEmpty()) Text(pl.vistula.checker.core.SyncProgress.cachedError(paymentError, language), color = MaterialTheme.colorScheme.error)
             if (payments == null) {
@@ -489,6 +581,34 @@ fun PaymentsAndServicesSection(
                             Text("${inst.deadline.ifEmpty { "—" }} · $status", style = MaterialTheme.typography.bodyMedium)
                         }
                         Text(pl.vistula.checker.core.PaymentAmounts.format(inst.amount, inst.currency, language), fontWeight = FontWeight.Bold)
+                    }
+                }
+                val remittancesEntry = state.optJSONObject("studentServices")?.optJSONObject("remittances")
+                val remittances = remittancesEntry?.optJSONObject("data")?.optJSONArray("items")
+                if (remittances != null && remittances.length() > 0) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(t("Historia wpłat i zwrotów", "Payment history and remittances", "Історія платежів та повернень"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    for (i in 0 until remittances.length()) {
+                        val rem = remittances.optJSONObject(i) ?: continue
+                        val remId = StudentServices.text(rem, "id")
+                        val cur = pl.vistula.checker.core.PaymentAmounts.currencyCode(rem.opt("currency"))
+                        val desc = StudentServices.localized(rem.opt("description"), language).ifEmpty { remId }
+                        val isSettled = rem.optBoolean("is_settled")
+                        val sub = listOf(
+                            StudentServices.text(rem, "date"),
+                            if (isSettled) t("Rozliczona", "Settled", "Розраховано") else t("Nierozliczona", "Not settled", "Не розраховано")
+                        ).filter { it.isNotBlank() }.joinToString(" · ")
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable(enabled = remId.isNotEmpty()) { loadRemittance(remId) }.padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(desc, style = MaterialTheme.typography.bodyLarge)
+                                Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Text(pl.vistula.checker.core.PaymentAmounts.format(rem.opt("amount"), cur, language), fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
@@ -562,10 +682,16 @@ fun PaymentsAndServicesSection(
             if (section != "cards" && docsArr != null && docsArr.length() > 0) {
                 for (i in 0 until docsArr.length()) {
                     val doc = StudentServices.Document(docsArr.getJSONObject(i), language)
-                    Text(
-                        "${doc.name} (${doc.typeName}) · ${doc.status}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().clickable { documentDetail = doc }.padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(doc.name.ifEmpty { doc.id }, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                            Text("${doc.typeName} · ${doc.status}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
                 }
             }
             if (section != "cards" && (docsArr == null || docsArr.length() == 0)) {

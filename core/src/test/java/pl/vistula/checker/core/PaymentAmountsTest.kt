@@ -85,5 +85,12 @@ class PaymentAmountsTest {
         val restored = PaymentInfo.from(old)
         assertTrue(restored.hasUnknownSettlement())
         assertTrue(restored.installments.single().amount.isFinite())
+        val accounts = org.json.JSONArray("""[{"id":"a1","account_number":"PL123","currency":{"id":"EUR","name":{"pl":"Euro"}}}]""")
+        val payments = org.json.JSONArray("""[{"id":"p1","type":"tuition_fee","state":"unsettled","total_amount":0,"saldo_amount":1300,"currency":{"id":"EUR","name":{"pl":"Euro"}}}]""")
+        val info = UsosParser.payments(accounts, payments)
+        assertEquals("EUR", info.accounts.first().currency)
+        assertEquals("EUR", info.installments.single().currency)
+        assertEquals(1300.0, info.installments.single().amount, 0.0)
+        assertEquals("EUR", PaymentServices.details(payments).getJSONObject(0).getString("currency"))
     }
 }

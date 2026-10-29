@@ -8,8 +8,17 @@ import org.json.JSONObject
 /** Display units explicitly; never infer PLN or combine different currencies. */
 object PaymentAmounts {
     @JvmStatic
+    fun currencyCode(value: Any?): String = when (value) {
+        is String -> value.trim()
+        is JSONObject -> StudentServices.text(value, "id").trim()
+            .ifEmpty { StudentServices.text(value, "code").trim() }
+            .ifEmpty { ApiLanguage.text(value.opt("name")).trim() }
+        else -> ""
+    }
+
+    @JvmStatic
     fun currency(plan: JSONObject?, payment: JSONObject?): String =
-        StudentServices.text(plan, "currency").trim().ifEmpty { StudentServices.text(payment, "currency").trim() }
+        currencyCode(plan?.opt("currency")).ifEmpty { currencyCode(payment?.opt("currency")) }
 
     @JvmStatic
     fun format(amount: Any?, currency: String, language: String): String {

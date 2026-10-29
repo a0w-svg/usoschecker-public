@@ -551,7 +551,7 @@ class MainActivity : AppCompatActivity() {
                 refreshStudentServices("affiliation")
                 return
             }
-            val section = when (target) { 11 -> "news"; 13 -> "cards"; 14 -> "documents"; 8 -> "payments"; 15 -> "teaching"; else -> null }
+            val targetSections = when (target) { 8 -> listOf("payments"); 11 -> listOf("news"); 13 -> listOf("cards"); 14 -> listOf("documents"); 15 -> listOf("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports"); 16 -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications"); 17 -> listOf("staffDirectory"); else -> emptyList() }; val section = targetSections.firstOrNull()
             if (target == 11 && !connected() && CampusAffiliation.selected(state).isEmpty()) return
             val services = studentServices()
             val mobile = services.optJSONObject("mcard")
@@ -559,9 +559,17 @@ class MainActivity : AppCompatActivity() {
             val physicalCardsMissing = section == "cards" && services.optJSONObject("physicalCards") == null &&
                 mobile != null && mobile.optLong("fetchedAt") > 0 && mobile.optString("error").isEmpty() &&
                 StudentServices.hasScope(state.optString("scopes"), "cards") && state.optLong("retryAt") <= System.currentTimeMillis()
-            if (section != null && (section == "news" || connected()) &&
-                (physicalCardsMissing || System.currentTimeMillis() -
-                    (services.optJSONObject(if (section == "cards") "mcard" else section)?.optLong("attemptAt") ?: 0L) > 15 * 60_000L)) refreshStudentServices(section)
+            val optionalScopes = setOf("news", "teaching", "lecturerGroups", "lecturerMeetings", "lecturerAttendance", "lecturerReports", "staffDirectory", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+            val staleSections = targetSections.filter { candidate ->
+                val allowed = candidate in optionalScopes ||
+                    StudentServices.hasScope(state.optString("scopes"), StudentServiceLoader.requiredScope(candidate))
+                val cacheKey = if (candidate == "cards") "mcard" else candidate
+                allowed && (physicalCardsMissing && candidate == "cards" ||
+                    System.currentTimeMillis() - (services.optJSONObject(cacheKey)?.optLong("attemptAt") ?: 0L) > 15 * 60_000L)
+            }
+            if (section != null && (section == "news" || connected()) && staleSections.isNotEmpty()) {
+                refreshStudentServices(*staleSections.toTypedArray())
+            }
         }
     }
 
@@ -618,7 +626,7 @@ class MainActivity : AppCompatActivity() {
             })
 
             when (tab) {
-                15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, state, studentServices())
+                15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
                 16 -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
                 17 -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
                 13 -> StudentCardsController.render(
@@ -1074,7 +1082,9 @@ class MainActivity : AppCompatActivity() {
         documentQuery = query
     }
 
-    fun serviceAccountState(): JSONObject = if (demo) JSONObject().put("campusOverride", demoCampus) else state
+    fun serviceAccountState(): JSONObject = if (demo) JSONObject().put("campusOverride", demoCampus).put("staffStatus", 2).put("studentStatusCode", 2) else state
+
+    fun currentServiceCampus(): String = CampusAffiliation.selected(repository.read())
 
     @Throws(Exception::class)
     private fun studentServices(): JSONObject {
@@ -1082,7 +1092,9 @@ class MainActivity : AppCompatActivity() {
         return state.optJSONObject("studentServices") ?: JSONObject()
     }
 
-    fun refreshStudentServices(section: String) {
+    fun refreshStudentServices(vararg sections: String) {
+        if (sections.isEmpty()) return
+        val section = sections.first()
         if (demo) {
             render()
             return
@@ -1098,8 +1110,9 @@ class MainActivity : AppCompatActivity() {
                 return
             }
             // Mapped scope for optional student and lecturer services
-            val scope = when (section) { "documents" -> "adm_documents"; "remittances" -> "payments"; "lecturerTests" -> "crstests"; "registrations", "exams" -> "studies"; else -> section }
-            if (section !in setOf("news", "usosNews", "affiliation", "teaching", "lecturerGroups", "lecturerMeetings", "staffDirectory", "academicCalendar") && !StudentServices.hasScope(state.optString("scopes"), scope)) {
+            val scope = StudentServiceLoader.requiredScope(section)
+            val scopeOptional = setOf("news", "usosNews", "affiliation", "teaching", "lecturerGroups", "lecturerMeetings", "lecturerAttendance", "lecturerReports", "staffDirectory", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+            if (sections.size == 1 && section !in scopeOptional && !StudentServices.hasScope(state.optString("scopes"), scope)) {
                 error(getString(R.string.services_scope_required, scope))
                 return
             }
@@ -1110,7 +1123,13 @@ class MainActivity : AppCompatActivity() {
                     repository.read().optJSONObject("studentServices")?.optJSONObject("affiliation") == null) {
                     StudentServiceLoader.refresh(repository, "affiliation")
                 }
-                StudentServiceLoader.refresh(repository, section)
+                val scopeOptional = setOf("news", "usosNews", "affiliation", "teaching", "lecturerGroups", "lecturerMeetings", "lecturerAttendance", "lecturerReports", "staffDirectory", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+                for (sec in sections) {
+                    val secScope = StudentServiceLoader.requiredScope(sec)
+                    if (sec in scopeOptional || StudentServices.hasScope(state.optString("scopes"), secScope)) {
+                        StudentServiceLoader.refresh(repository, sec)
+                    }
+                }
                 repository.read()
             },
             { result ->
@@ -1184,6 +1203,26 @@ class MainActivity : AppCompatActivity() {
             },
             { done(it) }
         )
+    }
+
+    fun <T> universityRead(operation: (UsosClient) -> T, done: (T) -> Unit) {
+        if (demo || !connected()) {
+            Toast.makeText(this, if (demo) R.string.services_demo_action else R.string.services_connect_first, Toast.LENGTH_LONG).show()
+            return
+        }
+        val originTab = tab
+        task({
+            val credentials = repository.read()
+            check(SharedRepository.sameAccount(state, credentials) && !credentials.optBoolean("authorizationError"))
+            check(credentials.optLong("retryAt") <= System.currentTimeMillis()) { getString(R.string.error_rate_limit) }
+            val client = UsosClient(credentials, {}, { address ->
+                check(SharedRepository.sameAccount(credentials, repository.read()))
+                java.net.URI(address).toURL().openConnection() as java.net.HttpURLConnection
+            })
+            val result = operation(client)
+            check(SharedRepository.sameAccount(credentials, repository.read()))
+            result
+        }, { result -> if (tab == originTab) done(result) })
     }
 
     fun openApiModule(module: String) {

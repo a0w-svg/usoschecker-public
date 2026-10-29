@@ -34,5 +34,4 @@
     <string name="payment_status_cancelled">Cancelled</string>
     <string name="payment_status_underpaid">Underpaid</string>
     <string name="payments_installment_total_label">Unpaid installments</string>
-    <string name="payments_currency_amount">%1$.2f %2$s</string>
 </resources>

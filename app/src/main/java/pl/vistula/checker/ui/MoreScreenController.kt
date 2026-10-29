@@ -50,11 +50,12 @@ class MoreScreenController private constructor() {
                     }
                 })
             }
-            group(R.string.section_university, listOf(
-                Triple(R.string.tool_news_title, R.string.tool_news_desc, 11),
-                Triple(R.string.tool_campus_title, R.string.tool_campus_desc, 10),
-                Triple(R.string.staff_directory_title, R.string.staff_directory_desc, 17)
-            ))
+            group(R.string.section_university, buildList {
+                add(Triple(R.string.tool_news_title, R.string.tool_news_desc, 11))
+                add(Triple(R.string.tool_campus_title, R.string.tool_campus_desc, 10))
+                add(Triple(R.string.staff_directory_title, R.string.staff_directory_desc, 17))
+                if (mode == AccountRole.Mode.LECTURER) add(Triple(R.string.academic_extras_title, R.string.academic_extras_desc, 16))
+            })
             group(R.string.section_app, buildList {
                 add(Triple(R.string.tool_account_title, R.string.tool_account_desc, 4))
                 if (mode != AccountRole.Mode.LECTURER) add(Triple(R.string.tool_gpa_title, R.string.tool_gpa_desc, 9))

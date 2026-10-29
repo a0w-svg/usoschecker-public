@@ -1,8 +1,5 @@
-• Obsługa kont wykładowców z automatycznym wykrywaniem roli (Student / Wykładowca / Oba) i wspólnym wyglądem aplikacji.
-• Prowadzone przedmioty, grupy zajęciowe z listą uczestników, koordynowane przedmioty oraz harmonogram konsultacji i spotkań.
-• Drzewo sprawdzianów oraz eksperymentalny zapis punktów, ocen i widoczności węzłów dla kont wykładowcy.
-• Katalog pracowników z wyszukiwarką prowadzących, pokojami, godzinami konsultacji i podglądem planu zajęć.
-• Widok tur rejestracji i koszyków, egzaminów, kalendarza akademickiego oraz etapów studiów.
-• Dane kierunku, etapu i daty przyjęcia pochodzą z tego samego programu studiów, a punkty ECTS są przypisywane do właściwego semestru.
-• Anulowane płatności nie zwiększają kwoty do zapłaty, a plan rat nie zgaduje rozliczenia pozycji bez potwierdzenia w USOS.
-• Wzmocniona ochrona schowka, wymuszenie HTTPS dla linków zewnętrznych oraz ochrona klucza sejfu Windows przez DPAPI.
+• Rozbudowane Płatności: szczegółowy podgląd historii wpłat i rozliczeń (remittance details, kwoty, waluty, statusy) na Androidzie i Desktopie.
+• Moduł USOSmail: lista wiadomości, podgląd pełnej treści i bezpieczne otwieranie załączników.
+• Ankiety studenckie: lista ankiet do wypełnienia, podgląd pytań oraz bezpieczne przejście do USOSweb.
+• Rozszerzona obsługa API: dedykowany interfejs dla 130 metod USOS API w aplikacji Android oraz Desktop.
+• Poprawki stabilności, bezpieczeństwa danych i oczyszczania znaczników HTML w komunikatach.

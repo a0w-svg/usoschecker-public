@@ -64,7 +64,10 @@ object ApiCatalog {
         "services/crstests/change_grade_node_properties",
         "services/crstests/change_task_node_properties",
         "services/crstests/create_grade_node",
-        "services/grades/update_grade"
+        "services/grades/update_grade",
+        "services/attendance/update_attendance",
+        "services/attendance/change_list_mode",
+        "services/theses/sign_report"
     )
 
     @JvmStatic

@@ -13,12 +13,16 @@ object StudentServiceLoader {
     val SUPPORTED_SECTIONS = setOf(
         "cards", "documents", "payments", "news", "usosNews", "remittances",
         "affiliation", "teaching", "lecturerGroups", "lecturerTests",
-        "lecturerMeetings", "staffDirectory", "registrations", "exams", "academicCalendar"
+        "lecturerMeetings", "lecturerAttendance", "lecturerReports",
+        "staffDirectory", "registrations", "tokenRegistrations", "exams", "academicCalendar",
+        "mobility", "placementAndSlips", "campusGuide", "communications"
     )
 
     private val SCOPE_OPTIONAL_SECTIONS = setOf(
         "news", "usosNews", "affiliation", "teaching", "lecturerGroups",
-        "lecturerMeetings", "staffDirectory", "academicCalendar"
+        "lecturerMeetings", "lecturerAttendance", "lecturerReports",
+        "staffDirectory", "academicCalendar", "mobility",
+        "placementAndSlips", "campusGuide", "communications"
     )
 
     @JvmStatic
@@ -26,7 +30,7 @@ object StudentServiceLoader {
         "documents" -> "adm_documents"
         "remittances" -> "payments"
         "lecturerTests" -> "crstests"
-        "registrations", "exams" -> "studies"
+        "registrations", "tokenRegistrations", "exams" -> "studies"
         else -> section
     }
 

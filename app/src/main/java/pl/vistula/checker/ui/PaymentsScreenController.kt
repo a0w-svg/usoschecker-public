@@ -15,6 +15,10 @@ import org.json.JSONException
 import org.json.JSONObject
 import pl.vistula.checker.MainActivity
 import pl.vistula.checker.R
+import pl.vistula.checker.DemoStudentServices
+import pl.vistula.checker.ToolServiceData
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import pl.vistula.checker.core.PaymentAmounts
 import pl.vistula.checker.core.PaymentInfo
 import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.core.StudentServices
@@ -151,6 +155,9 @@ class PaymentsScreenController private constructor() {
                 UiHelper.heading(activity, content, activity.getString(R.string.payments_schedule_heading))
                 val amounts = payments.installments.filter { it.isUnpaid() && it.amount > 0 }.groupBy { it.currency }
                     .mapValues { (_, entries) -> entries.sumOf { it.amount } }
+                val openAmounts = payments.installments.filter { !it.isPaid() && !it.isCancelled() && it.amount > 0 }.groupBy { it.currency }
+                    .mapValues { (_, entries) -> entries.sumOf { it.amount } }
+                val displayAmounts = amounts.ifEmpty { openAmounts }
                 val summaryBox = UiHelper.section(
                     activity,
                     content,
@@ -159,8 +166,15 @@ class PaymentsScreenController private constructor() {
                 UiHelper.note(activity, summaryBox, activity.getString(R.string.payments_installment_total_label), UiHelper.MUTED)
                 if (payments.hasUnknownSettlement() && payments.hasOverdue()) UiHelper.note(activity, summaryBox,
                     activity.getString(R.string.payments_status_overdue_warn), Color.rgb(160, 48, 40))
-                if (!payments.hasUnknownSettlement()) for ((currency, amount) in amounts) {
-                    UiHelper.add(activity, summaryBox, activity.getString(R.string.payments_currency_amount, amount, currency), 22, UiHelper.INK, true)
+                if (displayAmounts.isNotEmpty()) {
+                    for ((currency, amount) in displayAmounts) {
+                        UiHelper.add(activity, summaryBox, PaymentAmounts.format(amount, currency, language), 22, UiHelper.INK, true)
+                    }
+                } else {
+                    val defaultCurrency = payments.installments.firstOrNull()?.currency
+                        ?: payments.accounts.firstOrNull()?.currency
+                        ?: "PLN"
+                    UiHelper.add(activity, summaryBox, PaymentAmounts.format(0, defaultCurrency, language), 22, UiHelper.INK, true)
                 }
                 UiHelper.note(
                     activity,
@@ -267,18 +281,21 @@ class PaymentsScreenController private constructor() {
             val body = UiHelper.disclosure(activity, content, "payments.details", R.string.payments_details)
             for (i in 0 until items.length()) {
                 val item = items.getJSONObject(i)
-                val currency = StudentServices.text(item, "currency")
+                val currency = PaymentAmounts.currencyCode(item.opt("currency"))
                 val box = UiHelper.section(activity, body, Color.WHITE)
-                UiHelper.heading(activity, box, StudentServices.localized(item.opt("description"), Language.currentLocale(activity).language))
+                UiHelper.heading(activity, box, StudentServices.localized(item.opt("description"), language))
                 for ((key, label) in listOf("total_amount" to R.string.payments_api_amount, "saldo_amount" to R.string.payments_balance_value,
                     "interest" to R.string.payments_interest_value)) {
-                    if (!item.isNull(key) && item.has(key)) UiHelper.note(activity, box,
-                        activity.getString(label, StudentServices.text(item, key), currency), UiHelper.MUTED)
+                    if (!item.isNull(key) && item.has(key)) {
+                        val formatted = PaymentAmounts.format(item.opt(key), currency, language)
+                        UiHelper.note(activity, box, activity.getString(label, formatted, "").trim(), UiHelper.MUTED)
+                    }
                 }
                 if (item.optBoolean("has_bonus")) {
+                    val formattedBonus = PaymentAmounts.format(item.opt("bonus_amount"), currency, language)
                     UiHelper.note(activity, box, activity.getString(R.string.payments_bonus_value,
-                        StudentServices.text(item, "bonus_amount"), currency,
-                        HistoryScreenController.formatFullDate(StudentServices.text(item, "bonus_deadline"))), UiHelper.MUTED)
+                        formattedBonus, "",
+                        HistoryScreenController.formatFullDate(StudentServices.text(item, "bonus_deadline"))).replace("  ,", ","), UiHelper.MUTED)
                 }
                 if (StudentServices.text(item, "default_choice_date").isNotEmpty()) {
                     UiHelper.note(activity, box, activity.getString(R.string.payments_default_choice,
@@ -292,8 +309,8 @@ class PaymentsScreenController private constructor() {
                         val row = rows.getJSONObject(n)
                         activity.getString(R.string.payments_plan_line,
                             HistoryScreenController.formatFullDate(StudentServices.text(row, "payment_date")),
-                            pl.vistula.checker.core.PaymentAmounts.format(row.opt("amount"),
-                                pl.vistula.checker.core.PaymentAmounts.currency(plan, item), language))
+                            PaymentAmounts.format(row.opt("amount"),
+                                PaymentAmounts.currency(plan, item), language))
                     }
                     UiHelper.add(activity, box, activity.getString(R.string.payments_plan_label, plan.optString("id")), 16, UiHelper.INK, true)
                     UiHelper.note(activity, box, description, UiHelper.MUTED)
@@ -311,6 +328,7 @@ class PaymentsScreenController private constructor() {
         }
 
         private fun renderRemittances(activity: MainActivity, content: LinearLayout, entry: JSONObject) {
+            val language = Language.currentLocale(activity).language
             val body = UiHelper.disclosure(activity, content, "payments.remittances", R.string.payments_history)
             StudentCardsController.status(activity, body, entry)
             body.addView(UiHelper.button(activity, activity.getString(R.string.payments_history_refresh), {
@@ -323,17 +341,52 @@ class PaymentsScreenController private constructor() {
             }
             for (i in 0 until items.length()) {
                 val item = items.getJSONObject(i)
+                val currency = PaymentAmounts.currencyCode(item.opt("currency"))
                 val box = UiHelper.section(activity, body, Color.WHITE)
-                UiHelper.add(activity, box, StudentServices.localized(item.opt("description"), Language.currentLocale(activity).language), 16, UiHelper.INK, true)
+                val remittanceId = StudentServices.text(item, "id")
+                if (remittanceId.isNotEmpty()) {
+                    box.isClickable = true
+                    box.isFocusable = true
+                    box.setOnClickListener {
+                        if (activity.isDemo()) showRemittanceDetails(activity, DemoStudentServices.demoRemittanceDetail(remittanceId), language)
+                        else activity.universityRead({ client -> ToolServiceData.fetchRemittanceDetail(client, remittanceId) }) { detail ->
+                            showRemittanceDetails(activity, detail, language)
+                        }
+                    }
+                }
+                UiHelper.add(activity, box, StudentServices.localized(item.opt("description"), language), 16, UiHelper.INK, true)
                 UiHelper.note(activity, box, HistoryScreenController.formatFullDate(StudentServices.text(item, "date")), UiHelper.MUTED)
-                UiHelper.add(activity, box, StudentServices.text(item, "amount") + " " + StudentServices.text(item, "currency"), 18, UiHelper.INK, true)
+                UiHelper.add(activity, box, PaymentAmounts.format(item.opt("amount"), currency, language), 18, UiHelper.INK, true)
                 if (item.has("is_settled") && !item.isNull("is_settled")) {
                     UiHelper.note(activity, box, activity.getString(if (item.optBoolean("is_settled"))
                         R.string.payments_settled else R.string.payments_not_settled), UiHelper.MUTED)
                 }
-                if (!item.isNull("remaining") && item.has("remaining")) UiHelper.note(activity, box,
-                    activity.getString(R.string.payments_remittance_remaining, StudentServices.text(item, "remaining"), StudentServices.text(item, "currency")), UiHelper.MUTED)
+                if (!item.isNull("remaining") && item.has("remaining")) {
+                    val formattedRemaining = PaymentAmounts.format(item.opt("remaining"), currency, language)
+                    UiHelper.note(activity, box,
+                        activity.getString(R.string.payments_remittance_remaining, formattedRemaining, "").trim(), UiHelper.MUTED)
+                }
             }
+        }
+
+        private fun showRemittanceDetails(activity: MainActivity, data: JSONObject, language: String) {
+            val currency = PaymentAmounts.currencyCode(data.opt("currency"))
+            val lines = mutableListOf<String>()
+            HistoryScreenController.formatFullDate(StudentServices.text(data, "date")).takeIf { it.isNotEmpty() }?.let { lines.add(it) }
+            lines.add(PaymentAmounts.format(data.opt("amount"), currency, language))
+            if (data.has("remaining") && !data.isNull("remaining")) {
+                lines.add(activity.getString(R.string.payments_remittance_remaining, PaymentAmounts.format(data.opt("remaining"), currency, language), "").trim())
+            }
+            if (data.has("is_settled") && !data.isNull("is_settled")) {
+                lines.add(activity.getString(if (data.optBoolean("is_settled")) R.string.payments_settled else R.string.payments_not_settled))
+            }
+            StudentServices.text(data, "status").takeIf { it.isNotEmpty() }?.let { lines.add(it) }
+            StudentServices.localized(data.opt("faculty_name"), language).takeIf { it.isNotBlank() }
+                ?.let { lines.add(activity.getString(R.string.remittance_faculty, it)) }
+            MaterialAlertDialogBuilder(activity)
+                .setTitle(StudentServices.localized(data.opt("description"), language).ifEmpty { activity.getString(R.string.payments_history) })
+                .setMessage(lines.joinToString("\n\n"))
+                .setPositiveButton(android.R.string.ok, null).show()
         }
 
         @JvmStatic

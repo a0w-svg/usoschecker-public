@@ -33,6 +33,234 @@ class ToolServicesTest {
         override fun update(operation: StateRepository.Update) = operation.apply(state)
     }
 
+    @Test fun teacherSearchUsesDocumentedResponseAndArguments() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/users/search_current_teachers?"))
+            assertFalse(address.contains("fields="))
+            Connection("""{"items":[{"user_id":"42","match":"Jan <b>Kowal</b>ski"}],"next_page":true}""")
+        }
+        val result = ToolServiceData.searchTeachers(client, "Kowal")
+        val user = result.getJSONArray("users").getJSONObject(0)
+        assertEquals("42", user.getString("id"))
+        assertEquals("Jan Kowalski", user.getString("first_name"))
+        assertTrue(result.getBoolean("hasMore"))
+    }
+
+    @Test fun staffProfileRequestsOnlyDirectoryFieldsAndDropsPrivateData() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/users/user?"))
+            assertTrue(address.contains("user_id=42"))
+            Connection("""{"id":"42","first_name":"Jan","last_name":"Kowalski","titles":{"before":"dr"},"office_hours":"Tuesday 12:00","room":"A1","pesel":"private"}""")
+        }
+        val profile = ToolServiceData.fetchStaffProfile(client, "42")
+        assertEquals("A1", profile.getString("room"))
+        assertEquals("Tuesday 12:00", profile.getString("office_hours"))
+        assertEquals("dr", profile.getString("title_before"))
+        assertFalse(profile.toString().contains("private"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchStaffProfile(client, "../bad") }
+    }
+
+    @Test fun registrationRoundsExposeDatesWithoutExtraFields() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/registrations/course_registration_rounds?"))
+            assertTrue(address.contains("registration_id=R1"))
+            Connection("""[{"id":"round1","name":{"en":"First round"},"status":"open","start_date":"2026-11-01","end_date":"2026-11-05","private":"discard"}]""")
+        }
+        val round = ToolServiceData.fetchRegistrationRounds(client, "R1").getJSONObject(0)
+        assertEquals("First round", round.getJSONObject("name").getString("en"))
+        assertEquals("2026-11-05", round.getString("end_date"))
+        assertFalse(round.toString().contains("discard"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchRegistrationRounds(client, "../bad") }
+    }
+
+    @Test fun tokenRegistrationsHaveIndependentCacheAndUseStudiesScope() {
+        val store = Store(credentials().put("scopes", "studies"))
+        StudentServiceLoader.refresh(store, "tokenRegistrations", SharedRepository.ClientFactory { state ->
+            UsosClient(state, {}) { address ->
+                assertTrue(address.contains("services/registrations/user_token_registrations?"))
+                Connection("""[{"id":"T1","description":{"en":"Language registration"},"status":"open","private":"discard"}]""")
+            }
+        })
+        val entry = store.state.getJSONObject("studentServices").getJSONObject("tokenRegistrations")
+        val row = entry.getJSONObject("data").getJSONArray("registrations").getJSONObject(0)
+        assertEquals("Language registration", row.getJSONObject("description").getString("en"))
+        assertFalse(entry.toString().contains("discard"))
+        assertEquals("studies", StudentServiceLoader.requiredScope("tokenRegistrations"))
+    }
+
+    @Test fun tokenRegistrationDetailsPreserveRoundRulesWithoutPrivateFields() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/registrations/token_registration?"))
+            assertTrue(address.contains("id=token%2F1"))
+            Connection("""{"id":"token/1","rounds":[{"id":"R1","name":{"en":"Main"},"start_date":"2026-11-01","end_date":"2026-11-05","selection_limit":2,"is_prioritized":true,"is_only_entitled":null,"private":"discard"}]}""")
+        }
+        val result = ToolServiceData.fetchTokenRegistrationDetails(client, "token/1")
+        val round = result.getJSONArray("rounds").getJSONObject(0)
+        assertTrue(result.getBoolean("rounds_available"))
+        assertEquals(2, round.getInt("selection_limit"))
+        assertTrue(round.getBoolean("is_prioritized"))
+        assertFalse(round.has("is_only_entitled"))
+        assertFalse(result.toString().contains("discard"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchTokenRegistrationDetails(client, "bad\nvalue") }
+    }
+
+    @Test fun tokenRegistrationMissingRoundsIsNotReportedAsEmpty() {
+        val client = UsosClient(credentials(), {}) { Connection("""{"id":"T1","rounds":null}""") }
+        val result = ToolServiceData.fetchTokenRegistrationDetails(client, "T1")
+        assertFalse(result.getBoolean("rounds_available"))
+        assertEquals(0, result.getJSONArray("rounds").length())
+    }
+
+    @Test fun courseSearchUsesDocumentedFieldsAndKeepsApproximateCredits() {
+        var calls = 0
+        val client = UsosClient(credentials(), {}) { address ->
+            calls++
+            assertTrue(address.contains("services/courses/search?"))
+            assertTrue(address.contains("ects_credits_simplified"))
+            assertFalse(address.contains("items%5B"))
+            Connection("""{"items":[{"id":"INF-1","name":{"en":"Programming"},"ects_credits_simplified":6.0,"match":"<b>Prog</b>ramming"}],"next_page":true}""")
+        }
+        val result = ToolServiceData.searchCourses(client, "Prog")
+        val course = result.getJSONArray("courses").getJSONObject(0)
+        assertEquals("INF-1", course.getString("id"))
+        assertEquals("6.0", course.getString("ects"))
+        assertEquals("Programming", course.getString("match"))
+        assertTrue(result.getBoolean("hasMore"))
+        assertEquals(1, calls)
+    }
+
+    @Test fun courseDetailsReadDescriptionsWithoutUnrequestedFields() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/courses/course?"))
+            assertTrue(address.contains("course_id=INF%2F1"))
+            assertTrue(address.contains("learning_outcomes"))
+            Connection("""{"id":"INF/1","name":{"en":"Programming"},"ects_credits_simplified":5.0,"description":{"en":"<p>Learn &amp; practice.</p>"},"learning_outcomes":{"en":"Build programs"},"private":"discard"}""")
+        }
+        val detail = ToolServiceData.fetchCourseDetails(client, "INF/1")
+        assertEquals("5.0", detail.getString("ects"))
+        assertEquals("Learn & practice.", ToolServiceData.courseText(detail.opt("description"), "en"))
+        assertEquals("Build programs", ToolServiceData.courseText(detail.opt("learning_outcomes"), "en"))
+        assertEquals("x < 5 > 3", ToolServiceData.courseText("x < 5 > 3", "en"))
+        assertFalse(detail.toString().contains("discard"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchCourseDetails(client, "invalid\nvalue") }
+    }
+
+    @Test fun programmeDetailsPreserveTranslationsAndDiscardUnrequestedData() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/progs/programme?"))
+            assertTrue(address.contains("programme_id=S1%2FINF"))
+            Connection("""{"id":"S1/INF","name":{"en":"Computer Science","pl":"Informatyka"},"faculty":{"id":"F1","name":{"en":"Computing"},"private":"discard"},"mode_of_studies":{"en":"Full-time"},"duration":{"en":"3 years"},"private":"discard"}""")
+        }
+        val data = ToolServiceData.fetchProgrammeDetails(client, "S1/INF")
+        assertEquals("Informatyka", data.getJSONObject("name").getString("pl"))
+        assertEquals("Computing", data.getJSONObject("faculty_name").getString("en"))
+        assertEquals("3 years", data.getJSONObject("duration").getString("en"))
+        assertFalse(data.toString().contains("discard"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchProgrammeDetails(client, "bad\nvalue") }
+    }
+
+    @Test fun programmeStagesPreserveIdsAndExposeUnsupportedRows() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/progs/student_programme?"))
+            assertTrue(address.contains("student_programme_id=SP%2F1"))
+            assertFalse(address.contains("user%5B"))
+            Connection("""{"id":"SP/1","stages":[{"stage_id":"1Z","private":"discard"},"2L",{"unexpected":"x"}],"private":"discard"}""")
+        }
+        val data = ToolServiceData.fetchStudentProgrammeStages(client, "SP/1")
+        assertTrue(data.getBoolean("stages_available"))
+        assertTrue(data.getBoolean("stages_unrecognized"))
+        assertEquals("1Z", data.getJSONArray("stages").getJSONObject(0).getString("id"))
+        assertEquals("2L", data.getJSONArray("stages").getJSONObject(1).getString("id"))
+        assertFalse(data.toString().contains("discard"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchStudentProgrammeStages(client, "bad\nvalue") }
+    }
+
+    @Test fun absentStudyStagesAreDifferentFromAnEmptyList() {
+        val missing = UsosClient(credentials(), {}) { Connection("""{"id":"P1","stages":null}""") }
+        val empty = UsosClient(credentials(), {}) { Connection("""{"id":"P1","stages":[]}""") }
+        assertFalse(ToolServiceData.fetchStudentProgrammeStages(missing, "P1").getBoolean("stages_available"))
+        assertTrue(ToolServiceData.fetchStudentProgrammeStages(empty, "P1").getBoolean("stages_available"))
+    }
+
+    @Test fun studyStageReturnsLocalizedNameOnly() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/progs/stage?"))
+            assertTrue(address.contains("id=1Z"))
+            Connection("""{"id":"1Z","name":{"en":"First semester"},"private":"discard"}""")
+        }
+        val stage = ToolServiceData.fetchStudyStage(client, "1Z")
+        assertEquals("First semester", stage.getJSONObject("name").getString("en"))
+        assertFalse(stage.toString().contains("discard"))
+    }
+
+    @Test fun calendarSearchChecksOneMonthBoundaryAndKeepsEvents() {
+        var calls = 0
+        val client = UsosClient(credentials(), {}) { address ->
+            calls++
+            assertTrue(address.contains("services/calendar/search?"))
+            assertTrue(address.contains("faculty_id=0000"))
+            assertTrue(address.contains("start_date=2026-01-31"))
+            assertTrue(address.contains("end_date=2026-02-28"))
+            Connection("""[{"id":"E1","name":{"en":"Exam session"},"start_date":"2026-02-01","end_date":"2026-02-02","private":"discard"}]""")
+        }
+        val data = ToolServiceData.searchCalendar(client, "0000", "2026-01-31", "2026-02-28")
+        assertEquals("Exam session", data.getJSONArray("events").getJSONObject(0).getJSONObject("name").getString("en"))
+        assertFalse(data.toString().contains("discard"))
+        assertFalse(ToolServiceData.validCalendarRange("2026-01-31", "2026-03-01"))
+        assertFalse(ToolServiceData.validCalendarRange("2026-01-31", "2026-01-31"))
+        assertFalse(ToolServiceData.validCalendarRange("bad", "2026-02-28"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.searchCalendar(client, "0000", "2026-01-31", "2026-03-01") }
+        assertEquals(1, calls)
+    }
+
+    @Test fun calendarEventKeepsFacultyAndDoesNotGuessUnknownDayOff() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/calendar/calendar_event?"))
+            assertTrue(address.contains("id=E%2F1"))
+            Connection("""{"id":"E/1","name":{"en":"Event"},"faculty":{"name":{"en":"Faculty"},"private":"discard"},"is_day_off":null,"private":"discard"}""")
+        }
+        val event = ToolServiceData.fetchCalendarEvent(client, "E/1")
+        assertEquals("Faculty", event.getJSONObject("faculty_name").getString("en"))
+        assertFalse(event.has("is_day_off"))
+        assertFalse(event.toString().contains("discard"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchCalendarEvent(client, "bad\nvalue") }
+    }
+
+    @Test fun buildingRoomsRetainOnlyDirectoryFields() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/geo/building2?"))
+            assertTrue(address.contains("building_id=B1"))
+            Connection("""{"id":"B1","rooms":[{"id":"R1","number":"101","capacity":30,"private":"discard"}]}""")
+        }
+        val rooms = ToolServiceData.fetchBuildingRooms(client, "B1")
+        assertEquals("101", rooms.getJSONObject(0).getString("number"))
+        assertFalse(rooms.toString().contains("discard"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchBuildingRooms(client, "../bad") }
+    }
+
+    @Test fun examDetailsKeepGroupTimesAndExcludeAttendees() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/exams/exam?"))
+            assertTrue(address.contains("id=exam-1"))
+            assertFalse(address.contains("attendees"))
+            Connection("""{"id":"exam-1","name":{"en":"Final exam"},"registration_start":"2026-12-01","groups":[{"number":1,"exam_start":"2027-01-10 09:00:00","exam_end":"2027-01-10 10:30:00","room":{"id":"R1","number":"101"},"attendees":[{"first_name":"private"}]}]}""")
+        }
+        val detail = ToolServiceData.fetchExamDetails(client, "exam-1")
+        val group = detail.getJSONArray("groups").getJSONObject(0)
+        assertEquals("2027-01-10 09:00:00", group.getString("exam_start"))
+        assertEquals("101", group.getString("room_number"))
+        assertFalse(detail.toString().contains("private"))
+        assertThrows(IllegalArgumentException::class.java) { ToolServiceData.fetchExamDetails(client, "../bad") }
+    }
+
+    @Test fun registrationCartFailureIsNotReportedAsAnEmptyCart() {
+        val client = UsosClient(credentials(), {}) { address ->
+            if (address.contains("user_registrations")) Connection("[]")
+            else Connection("{}", 500)
+        }
+        assertThrows(Exception::class.java) { ToolServiceData.fetch(client, "registrations", "", credentials()) }
+    }
+
     @Test fun lecturerCampusUsesEmploymentRatherThanStudentProgrammes() {
         val state = credentials().put("staffStatus", 2).put("studentStatusCode", 0)
         val client = UsosClient(state, {}) { address ->

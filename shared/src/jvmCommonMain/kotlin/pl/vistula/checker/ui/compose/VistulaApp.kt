@@ -1430,6 +1430,8 @@ fun MoreScreen(
                 add(Triple("lecturerGroups", tr("Grupy i uczestnicy", "Class groups & rosters", "Групи та учасники"), tr("Prowadzone grupy i koordynowane przedmioty", "Taught groups and coordinated courses", "Групи викладання та координовані предмети")))
                 add(Triple("lecturerTests", tr("Sprawdziany i oceny", "Course tests & grading", "Перевірки та оцінювання"), tr("Drzewo sprawdzianów i wpisywanie ocen (Eksperymentalne)", "Test trees and experimental grading", "Дерево перевірок і виставлення оцінок (Експериментально)")))
                 add(Triple("lecturerMeetings", tr("Konsultacje i spotkania", "Consultations & meetings", "Консультації та зустрічі"), tr("Harmonogram dyżurów i spotkań", "Office hours and meetings", "Розклад консультацій і зустрічей")))
+                add(Triple("lecturerAttendance", tr("Listy obecności USOS", "USOS attendance lists", "Списки присутності USOS"), tr("Listy obecności i wpisywanie obecności (Eksperymentalne)", "Attendance lists and experimental updates", "Списки присутності та експериментальний запис")))
+                add(Triple("lecturerReports", tr("Ankiety i prace dyplomowe", "Surveys & thesis reports", "Анкети та дипломні роботи"), tr("Ankiety dydaktyczne i protokoły prac", "Course surveys and thesis reports", "Анкети викладання та протоколи робіт")))
                 if (mode == pl.vistula.checker.core.AccountRole.Mode.LECTURER) {
                     add(Triple("tasks", strings.sectionTasks, tr("Własne zadania i terminy", "Your own tasks and deadlines", "Власні завдання й терміни")))
                 }
@@ -1440,7 +1442,11 @@ fun MoreScreen(
             Triple("news", tr("Aktualności", "News", "Новини"), tr("Ogłoszenia uczelni", "University announcements", "Оголошення університету")),
             Triple("campus", tr("Kampus i kontakty", "Campus & contacts", "Кампус і контакти"), tr("Adresy i dane kontaktowe", "Addresses and contact details", "Адреси та контакти")),
             Triple("academicCalendar", tr("Kalendarz akademicki", "Academic calendar", "Академічний календар"), tr("Wydarzenia i terminy roku akademickiego", "Academic year events and dates", "Події та дати навчального року")),
-            Triple("staffDirectory", tr("Katalog pracowników", "Staff directory", "Каталог працівників"), tr("Wyszukiwarka prowadzących i konsultacji", "Search lecturers and office hours", "Пошук викладачів і консультацій"))
+            Triple("staffDirectory", tr("Katalog pracowników", "Staff directory", "Каталог працівників"), tr("Wyszukiwarka prowadzących i konsultacji", "Search lecturers and office hours", "Пошук викладачів і консультацій")),
+            Triple("campusGuide", tr("Informator, akademiki i sale", "Campus guide, dorms & rooms", "Довідник, гуртожитки та аудиторії"), tr("Przewodnik, akademiki, wyszukiwarka przedmiotów i sal", "Guide, dormitories, course catalog & room schedules", "Довідник, гуртожитки, пошук предметів та аудиторій")),
+            Triple("mobility", tr("Wymiany i Erasmus+", "Mobility & Erasmus+", "Обміни та Erasmus+"), tr("Wyjazdy studenckie i koordynacja umów", "Student exchanges and mobility coordination", "Студентські обміни та координація угод")),
+            Triple("placementAndSlips", tr("Testy poziomujące i obiegówki", "Placement tests & slips", "Тести рівня та обхідні листи"), tr("Wyniki testów językowych i pytania obiegówek", "Placement test results and clearance slips", "Результати мовних тестів та обхідні листи")),
+            Triple("communications", tr("Oświadczenia i USOSmail", "Statements & USOSmail", "Заяви та USOSmail"), tr("Oświadczenia, powiadomienia i wiadomości USOSmail", "Statements, notifications & USOSmail messages", "Заяви, сповіщення та повідомлення USOSmail"))
         ),
         tr("Aplikacja i narzędzia", "App & tools", "Застосунок і інструменти") to buildList {
             add(Triple("account", strings.sectionAccount, tr("Połączenie, wygląd i synchronizacja", "Connection, appearance and sync", "Підключення, вигляд і синхронізація")))
@@ -1483,9 +1489,9 @@ fun MoreScreen(
         when (activeSection) {
             "" -> Unit
             "campus" -> CampusSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
-            "teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings" -> LecturerWorkspaceSection(state, repository, preferences, language, activeSection, onOpenUrl, onReloadState, onStatusMessage, runAsync)
+            "teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports" -> LecturerWorkspaceSection(state, repository, preferences, language, activeSection, onOpenUrl, onReloadState, onStatusMessage, runAsync)
             "staffDirectory" -> StaffDirectorySection(state, repository, language, onReloadState, onStatusMessage, runAsync)
-            "registrations", "exams", "academicCalendar" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
+            "registrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
             "account" -> AccountSection(
                 state = state,
                 repository = repository,

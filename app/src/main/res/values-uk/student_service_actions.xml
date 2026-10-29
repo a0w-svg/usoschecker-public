@@ -34,5 +34,4 @@
     <string name="payment_status_cancelled">Скасовано</string>
     <string name="payment_status_underpaid">Недоплата</string>
     <string name="payments_installment_total_label">Сума несплачених внесків</string>
-    <string name="payments_currency_amount">%1$.2f %2$s</string>
 </resources>

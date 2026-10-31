@@ -1,14 +1,19 @@
 package pl.vistula.checker.ui
 
-import androidx.core.content.edit
 import android.content.DialogInterface
-import android.graphics.Color
+import android.content.SharedPreferences
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.edit
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.time.LocalDate
 import java.util.function.Consumer
 import kotlin.math.max
@@ -24,10 +29,97 @@ import pl.vistula.checker.core.Snapshot
 
 /**
  * Controller for tracking course attendance and absence limits.
+ * Layouts: `screen_attendance`, `item_attendance_course`, `dialog_attendance_course`.
  */
 class AttendanceScreenController private constructor() {
 
     companion object {
+        /** Everything the screen needs, derived from the saved tracker data and the current snapshot. */
+        private class Overview(
+            val saved: JSONObject,
+            val terms: List<String>,
+            val termLabels: List<String>,
+            val activeTerm: String,
+            val typeValues: List<String>,
+            val typeLabels: List<String>,
+            val activeType: String,
+            val courses: Int,
+            val warnings: Int,
+            val exceeded: Int,
+            val absences: Int
+        )
+
+        private fun readSaved(prefs: SharedPreferences): JSONObject = try {
+            JSONObject(prefs.getString("data", "{}") ?: "{}")
+        } catch (_: Exception) {
+            JSONObject()
+        }
+
+        private fun overview(activity: MainActivity, d: JSONObject, prefs: SharedPreferences): Overview {
+            val snapshot = d.optJSONObject("snapshot")?.let {
+                try {
+                    Snapshot.from(it)
+                } catch (_: JSONException) {
+                    null
+                }
+            }
+            val saved = try {
+                AttendanceTracker.reconcile(readSaved(prefs), snapshot)
+            } catch (e: JSONException) {
+                throw IllegalStateException(e)
+            }
+            prefs.edit { putString("data", saved.toString()) }
+
+            val terms = ArrayList<String>()
+            if (snapshot != null) terms.addAll(GradeSemesters.ordered(snapshot, LocalDate.now(UsosClient.ZONE)))
+            for (key in saved.keys()) {
+                val term = saved.optJSONObject(key)?.optString("term") ?: continue
+                if (!terms.contains(term)) terms.add(term)
+            }
+            if (terms.isEmpty()) terms.add("")
+            var activeTerm = prefs.getString("term", terms[0]) ?: terms[0]
+            if (!terms.contains(activeTerm)) activeTerm = terms[0]
+            prefs.edit { putString("term", activeTerm) }
+            val termLabels = terms.map { id ->
+                when {
+                    id.isEmpty() -> activity.getString(R.string.attendance_unassigned)
+                    snapshot != null && snapshot.terms.containsKey(id) -> "${snapshot.terms[id]!!.name} · $id"
+                    else -> id
+                }
+            }
+
+            val types = LinkedHashSet<String>()
+            types.add(AttendanceFilter.TYPE_ALL)
+            for (key in saved.keys()) {
+                val entry = saved.optJSONObject(key) ?: continue
+                if (activeTerm == entry.optString("term")) types.add(entry.optString("classType"))
+            }
+            var activeType = prefs.getString("classType", AttendanceFilter.TYPE_ALL) ?: AttendanceFilter.TYPE_ALL
+            if (!types.contains(activeType)) activeType = AttendanceFilter.TYPE_ALL
+            val typeValues = types.toList()
+            val typeLabels = typeValues.map { t ->
+                when {
+                    t == AttendanceFilter.TYPE_ALL -> activity.getString(R.string.attendance_all_types)
+                    t.isEmpty() -> activity.getString(R.string.attendance_unknown_type)
+                    else -> classType(activity, t)
+                }
+            }
+
+            var courses = 0
+            var warnings = 0
+            var exceeded = 0
+            var absences = 0
+            for (key in saved.keys()) {
+                val item = saved.optJSONObject(key) ?: continue
+                if (!matches(item, activeTerm, activeType)) continue
+                courses++
+                val count = item.optInt("absences", 0)
+                absences += count
+                if (AttendanceTracker.exceeded(count)) exceeded++ else if (AttendanceTracker.warning(count)) warnings++
+            }
+            return Overview(saved, terms, termLabels, activeTerm, typeValues, typeLabels, activeType, courses, warnings, exceeded, absences)
+        }
+
         @JvmStatic
         fun render(
             activity: MainActivity,
@@ -37,286 +129,156 @@ class AttendanceScreenController private constructor() {
             onFilterChanged: Consumer<String>,
             requestRender: Runnable
         ) {
-            val headerIndex = content.childCount
             val prefs = activity.attendancePreferences()
-            var saved = try {
-                JSONObject(prefs.getString("data", "{}") ?: "{}")
-            } catch (_: Exception) {
-                JSONObject()
+            val data = overview(activity, d, prefs)
+            ToolScreenUi.header(activity, content, R.string.tool_attendance_title) { menu ->
+                buildMenu(activity, menu, prefs, data, filter, onFilterChanged, requestRender)
+            }
+            val screen = LayoutInflater.from(activity).inflate(R.layout.screen_attendance, content, false)
+            content.addView(screen)
+
+            screen.findViewById<TextView>(R.id.attendance_term).text = data.termLabels[data.terms.indexOf(data.activeTerm)]
+            screen.findViewById<TextView>(R.id.attendance_stats).text =
+                activity.getString(R.string.attendance_stats_summary, data.courses, data.absences)
+            screen.findViewById<TextView>(R.id.attendance_alert).apply {
+                when {
+                    data.exceeded > 0 -> {
+                        text = activity.getString(R.string.attendance_note_exceeded, data.exceeded)
+                        setTextColor(activity.getColor(R.color.app_error))
+                        visibility = View.VISIBLE
+                    }
+                    data.warnings > 0 -> {
+                        text = activity.getString(R.string.attendance_note_warning, data.warnings)
+                        setTextColor(activity.getColor(R.color.app_muted))
+                        visibility = View.VISIBLE
+                    }
+                }
             }
 
-            val raw = d.optJSONObject("snapshot")
-            var snapshot: Snapshot? = null
-            if (raw != null) {
+            val list = screen.findViewById<LinearLayout>(R.id.attendance_list)
+            val codes = data.saved.keys().asSequence().toList().sortedWith { a, b ->
+                val nameA = data.saved.optJSONObject(a)?.optString("name", a) ?: a
+                val nameB = data.saved.optJSONObject(b)?.optString("name", b) ?: b
+                nameA.compareTo(nameB, ignoreCase = true)
+            }
+            var shown = 0
+            for (code in codes) {
+                val item = data.saved.optJSONObject(code) ?: continue
+                if (!matches(item, data.activeTerm, data.activeType)) continue
+                val count = item.optInt("absences", 0)
+                if (AttendanceFilter.WARNING == filter && !AttendanceTracker.warning(count)) continue
+                if (AttendanceFilter.EXCEEDED == filter && !AttendanceTracker.exceeded(count)) continue
+                shown++
+                list.addView(courseCard(activity, list, code, item, data.saved, prefs, requestRender))
+            }
+            if (shown == 0) {
+                val empty = LayoutInflater.from(activity).inflate(R.layout.view_empty_state, list, false) as LinearLayout
+                empty.findViewById<TextView>(R.id.empty_title).setText(R.string.attendance_empty_filter)
+                empty.findViewById<TextView>(R.id.empty_description).setText(R.string.attendance_empty_desc)
+                list.addView(empty)
+                if (AttendanceFilter.ALL != filter) {
+                    list.addView(UiHelper.button(activity, activity.getString(R.string.attendance_filter_all, data.courses), {
+                        onFilterChanged.accept(AttendanceFilter.ALL)
+                    }, false))
+                }
+            }
+        }
+
+        private fun buildMenu(
+            activity: MainActivity, menu: android.view.Menu, prefs: SharedPreferences, data: Overview, filter: String,
+            onFilterChanged: Consumer<String>, requestRender: Runnable
+        ) {
+            ToolScreenUi.action(menu, R.string.attendance_btn_add_course) { showEditCourseDialog(activity, null, requestRender) }
+            val semesters = menu.addSubMenu(R.string.attendance_semester)
+            data.terms.forEachIndexed { i, term ->
+                semesters.add(data.termLabels[i]).setCheckable(true).setChecked(term == data.activeTerm)
+                    .setOnMenuItemClickListener {
+                        prefs.edit { putString("term", term) }
+                        requestRender.run()
+                        true
+                    }
+            }
+            val classTypes = menu.addSubMenu(R.string.attendance_all_types)
+            data.typeValues.forEachIndexed { i, type ->
+                classTypes.add(data.typeLabels[i]).setCheckable(true).setChecked(type == data.activeType)
+                    .setOnMenuItemClickListener {
+                        prefs.edit { putString("classType", type) }
+                        requestRender.run()
+                        true
+                    }
+            }
+            val statuses = menu.addSubMenu(R.string.grades_filter_type)
+            val labels = arrayOf(
+                activity.getString(R.string.attendance_filter_all, data.courses),
+                activity.getString(R.string.attendance_filter_warning, data.warnings),
+                activity.getString(R.string.attendance_filter_exceeded, data.exceeded)
+            )
+            AttendanceFilter.STATUSES.forEachIndexed { i, key ->
+                statuses.add(labels[i]).setCheckable(true).setChecked(key == filter)
+                    .setOnMenuItemClickListener {
+                        onFilterChanged.accept(key)
+                        true
+                    }
+            }
+            ToolScreenUi.action(menu, R.string.tool_api_methods) { activity.openApiModule("attendance") }
+            ToolScreenUi.action(menu, R.string.attendance_rule_footer) {
+                MaterialAlertDialogBuilder(activity)
+                    .setMessage(R.string.attendance_rule_footer)
+                    .setPositiveButton(R.string.btn_close, null)
+                    .show()
+            }
+        }
+
+        private fun courseCard(
+            activity: MainActivity, list: LinearLayout, code: String, item: JSONObject, saved: JSONObject,
+            prefs: SharedPreferences, requestRender: Runnable
+        ): View {
+            val count = item.optInt("absences", 0)
+            val limit = AttendanceTracker.LIMIT
+            val card = LayoutInflater.from(activity).inflate(R.layout.item_attendance_course, list, false)
+            card.setOnClickListener { showEditCourseDialog(activity, code, requestRender) }
+            card.findViewById<TextView>(R.id.attendance_course_name).text = item.optString("name", code)
+            card.findViewById<TextView>(R.id.attendance_course_type).text =
+                if (item.optString("classType").isEmpty()) activity.getString(R.string.attendance_unknown_type)
+                else classType(activity, item.optString("classType"))
+
+            val (badgeText, badgeColor) = when {
+                count > limit -> activity.getString(R.string.attendance_badge_exceeded, count, limit, count - limit) to R.color.app_error
+                count == limit -> activity.getString(R.string.attendance_badge_limit_reached, count, limit) to R.color.app_warning
+                count == limit - 1 && limit > 1 -> activity.getString(R.string.attendance_badge_last_one, count, limit) to R.color.app_warning
+                else -> activity.getString(R.string.attendance_badge_safe, count, limit, limit - count) to R.color.app_ink
+            }
+            card.findViewById<TextView>(R.id.attendance_course_badge).apply {
+                text = badgeText
+                setTextColor(activity.getColor(badgeColor))
+            }
+
+            fun store(update: () -> Unit) {
                 try {
-                    snapshot = Snapshot.from(raw)
+                    update()
+                    saved.put(code, item)
+                    prefs.edit { putString("data", saved.toString()) }
+                    requestRender.run()
                 } catch (_: JSONException) {
                 }
             }
-            saved = try {
-                AttendanceTracker.reconcile(saved, snapshot)
-            } catch (e: JSONException) {
-                throw IllegalStateException(e)
-            }
-            prefs.edit { putString("data", saved.toString()) }
-            val terms = ArrayList<String>()
-            if (snapshot != null) {
-                terms.addAll(GradeSemesters.ordered(snapshot, LocalDate.now(UsosClient.ZONE)))
-            }
-            var savedKeys = saved.keys()
-            while (savedKeys.hasNext()) {
-                val entry = saved.optJSONObject(savedKeys.next())
-                if (entry != null && !terms.contains(entry.optString("term"))) {
-                    terms.add(entry.optString("term"))
-                }
-            }
-            if (terms.isEmpty()) terms.add("")
-            var selectedTerm = prefs.getString("term", terms[0]) ?: terms[0]
-            if (!terms.contains(selectedTerm)) selectedTerm = terms[0]
-            val activeTerm = selectedTerm
-            val termLabels = Array(terms.size) { i ->
-                val id = terms[i]
-                when {
-                    id.isEmpty() -> activity.getString(R.string.attendance_unassigned)
-                    snapshot != null && snapshot.terms.containsKey(id) -> "${snapshot.terms[id]!!.name} · $id"
-                    else -> id
-                }
-            }
-            prefs.edit { putString("term", activeTerm) }
-            var activeType = prefs.getString("classType", AttendanceFilter.TYPE_ALL) ?: AttendanceFilter.TYPE_ALL
-            val types = LinkedHashSet<String>()
-            types.add(AttendanceFilter.TYPE_ALL)
-            savedKeys = saved.keys()
-            while (savedKeys.hasNext()) {
-                val entry = saved.optJSONObject(savedKeys.next())
-                if (entry != null && activeTerm == entry.optString("term")) {
-                    types.add(entry.optString("classType"))
-                }
-            }
-            if (!types.contains(activeType)) activeType = AttendanceFilter.TYPE_ALL
-            val selectedType = activeType
-            val typeValues = types.toTypedArray()
-            val typeLabels = Array(typeValues.size) { i ->
-                val t = typeValues[i]
-                when {
-                    t == AttendanceFilter.TYPE_ALL -> activity.getString(R.string.attendance_all_types)
-                    t.isEmpty() -> activity.getString(R.string.attendance_unknown_type)
-                    else -> classType(activity, t)
-                }
-            }
-            var totalCourses = 0
-            var warningCount = 0
-            var exceededCount = 0
-            var totalAbsences = 0
-            var keys = saved.keys()
-            while (keys.hasNext()) {
-                val key = keys.next()
-                val item = saved.optJSONObject(key) ?: continue
-                if (!matches(item, activeTerm, selectedType)) continue
-                totalCourses++
-                val count = item.optInt("absences", 0)
-                totalAbsences += count
-                if (AttendanceTracker.exceeded(count)) exceededCount++
-                else if (AttendanceTracker.warning(count)) warningCount++
-            }
-
-            val courses = totalCourses
-            val warnings = warningCount
-            val exceeded = exceededCount
-            ToolScreenUi.header(activity, content, R.string.tool_attendance_title) { menu ->
-                ToolScreenUi.action(menu, R.string.attendance_btn_add_course) {
-                    showEditCourseDialog(activity, null, requestRender)
-                }
-                val semesters = menu.addSubMenu(R.string.attendance_semester)
-                for (i in terms.indices) {
-                    val next = terms[i]
-                    semesters.add(termLabels[i]).setCheckable(true).setChecked(next == activeTerm)
-                        .setOnMenuItemClickListener {
-                            prefs.edit { putString("term", next) }
-                            requestRender.run()
-                            true
-                        }
-                }
-                val classTypes = menu.addSubMenu(R.string.attendance_all_types)
-                for (i in typeValues.indices) {
-                    val next = typeValues[i]
-                    classTypes.add(typeLabels[i]).setCheckable(true).setChecked(next == selectedType)
-                        .setOnMenuItemClickListener {
-                            prefs.edit { putString("classType", next) }
-                            requestRender.run()
-                            true
-                        }
-                }
-                val statuses = menu.addSubMenu(R.string.grades_filter_type)
-                val statusKeys = AttendanceFilter.STATUSES
-                val labels = arrayOf(
-                    activity.getString(R.string.attendance_filter_all, courses),
-                    activity.getString(R.string.attendance_filter_warning, warnings),
-                    activity.getString(R.string.attendance_filter_exceeded, exceeded)
-                )
-                for (i in statusKeys.indices) {
-                    val key = statusKeys[i]
-                    statuses.add(labels[i]).setCheckable(true).setChecked(key == filter)
-                        .setOnMenuItemClickListener {
-                            onFilterChanged.accept(key)
-                            true
-                        }
-                }
-                ToolScreenUi.action(menu, R.string.tool_api_methods) { activity.openApiModule("attendance") }
-                ToolScreenUi.action(menu, R.string.attendance_rule_footer) {
-                    MaterialAlertDialogBuilder(activity)
-                        .setMessage(R.string.attendance_rule_footer)
-                        .setPositiveButton(R.string.btn_close, null)
-                        .show()
-                }
-            }
-            val heading = content.getChildAt(content.childCount - 1)
-            content.removeView(heading)
-            content.addView(heading, headerIndex)
-            UiHelper.note(activity, content, termLabels[terms.indexOf(activeTerm)], UiHelper.MUTED)
-            UiHelper.note(activity, content, activity.getString(R.string.attendance_stats_summary, totalCourses, totalAbsences), UiHelper.MUTED)
-            if (exceededCount > 0) {
-                UiHelper.note(activity, content, activity.getString(R.string.attendance_note_exceeded, exceededCount), activity.getColor(R.color.app_error))
-            } else if (warningCount > 0) {
-                UiHelper.note(activity, content, activity.getString(R.string.attendance_note_warning, warningCount), UiHelper.MUTED)
-            }
-
-            UiHelper.note(activity, content, activity.getString(R.string.local_data_note), UiHelper.MUTED)
-            val list = LinearLayout(activity)
-            list.orientation = LinearLayout.VERTICAL
-            content.addView(list)
-
-            val sortedKeys = ArrayList<String>()
-            keys = saved.keys()
-            while (keys.hasNext()) sortedKeys.add(keys.next())
-            val finalSavedRef = saved
-            sortedKeys.sortWith { a, b ->
-                val objA = finalSavedRef.optJSONObject(a)
-                val objB = finalSavedRef.optJSONObject(b)
-                val nameA = objA?.optString("name", a) ?: a
-                val nameB = objB?.optString("name", b) ?: b
-                nameA.compareTo(nameB, ignoreCase = true)
-            }
-
-            var shown = 0
-            for (code in sortedKeys) {
-                val item = saved.optJSONObject(code)
-                if (item == null || !matches(item, activeTerm, selectedType)) continue
-                val count = item.optInt("absences", 0)
-                val limit = AttendanceTracker.LIMIT
-                val name = item.optString("name", code.orEmpty())
-
-                if (AttendanceFilter.WARNING == filter && !AttendanceTracker.warning(count)) continue
-                if (AttendanceFilter.EXCEEDED == filter && !AttendanceTracker.exceeded(count)) continue
-
-                shown++
-                val itemCard = UiHelper.section(activity, list, Color.WHITE)
-                itemCard.isClickable = true
-                itemCard.isFocusable = true
-                itemCard.setOnClickListener { showEditCourseDialog(activity, code, requestRender) }
-                UiHelper.add(activity, itemCard, name, 17, UiHelper.INK, true)
-                UiHelper.note(
-                    activity,
-                    itemCard,
-                    if (item.optString("classType").isEmpty()) {
-                        activity.getString(R.string.attendance_unknown_type)
-                    } else {
-                        classType(activity, item.optString("classType"))
-                    },
-                    UiHelper.MUTED
-                )
-
-                val badgeText: String
-                val badgeColor: Int
-                when {
-                    count > limit -> {
-                        badgeText = activity.getString(R.string.attendance_badge_exceeded, count, limit, count - limit)
-                        badgeColor = Color.rgb(160, 48, 40)
-                    }
-                    count == limit -> {
-                        badgeText = activity.getString(R.string.attendance_badge_limit_reached, count, limit)
-                        badgeColor = Color.rgb(180, 83, 9)
-                    }
-                    count == limit - 1 && limit > 1 -> {
-                        badgeText = activity.getString(R.string.attendance_badge_last_one, count, limit)
-                        badgeColor = Color.rgb(217, 119, 6)
-                    }
-                    else -> {
-                        badgeText = activity.getString(R.string.attendance_badge_safe, count, limit, limit - count)
-                        badgeColor = UiHelper.GREEN
+            card.findViewById<MaterialButton>(R.id.attendance_minus).apply {
+                isEnabled = count > 0
+                setOnClickListener {
+                    store {
+                        item.put("absences", max(0, count - 1))
+                        val lessons = item.optJSONArray("lessons")
+                        if (lessons != null && lessons.length() > 0) lessons.remove(lessons.length() - 1)
                     }
                 }
-                UiHelper.add(activity, itemCard, badgeText, 14, badgeColor, true)
-
-                val actions = LinearLayout(activity)
-                actions.orientation = LinearLayout.HORIZONTAL
-
-                val minusBtn = UiHelper.button(
-                    activity,
-                    activity.getString(R.string.attendance_btn_minus),
-                    {
-                        val newCount = max(0, count - 1)
-                        try {
-                            item.put("absences", newCount)
-                            val lessons = item.optJSONArray("lessons")
-                            if (lessons != null && lessons.length() > 0) {
-                                lessons.remove(lessons.length() - 1)
-                            }
-                            finalSavedRef.put(code, item)
-                            prefs.edit { putString("data", finalSavedRef.toString()) }
-                            requestRender.run()
-                        } catch (_: JSONException) {
-                        }
-                    },
-                    false
-                )
-                minusBtn.isEnabled = count > 0
-
-                val plusBtn = UiHelper.button(
-                    activity,
-                    activity.getString(R.string.attendance_btn_plus),
-                    {
-                        try {
-                            item.put("absences", count + 1)
-                            var lessons = item.optJSONArray("lessons")
-                            if (lessons == null) lessons = JSONArray()
-                            item.put("lessons", lessons.put(""))
-                            finalSavedRef.put(code, item)
-                            prefs.edit { putString("data", finalSavedRef.toString()) }
-                            requestRender.run()
-                        } catch (_: JSONException) {
-                        }
-                    },
-                    true
-                )
-
-                val b1 = LinearLayout.LayoutParams(0, -2, 1f)
-                b1.marginEnd = UiHelper.dp(activity, 4)
-                val b2 = LinearLayout.LayoutParams(0, -2, 2.2f)
-                b2.marginEnd = UiHelper.dp(activity, 4)
-                actions.addView(minusBtn, b1)
-                actions.addView(plusBtn, b2)
-                itemCard.addView(actions)
             }
-
-            if (shown == 0) {
-                UiHelper.empty(
-                    activity,
-                    list,
-                    activity.getString(R.string.attendance_empty_filter),
-                    activity.getString(R.string.attendance_empty_desc)
-                )
-                if (AttendanceFilter.ALL != filter) {
-                    list.addView(
-                        UiHelper.button(
-                            activity,
-                            activity.getString(R.string.attendance_filter_all, totalCourses),
-                            { onFilterChanged.accept(AttendanceFilter.ALL) },
-                            false
-                        )
-                    )
+            card.findViewById<MaterialButton>(R.id.attendance_plus).setOnClickListener {
+                store {
+                    item.put("absences", count + 1)
+                    item.put("lessons", (item.optJSONArray("lessons") ?: JSONArray()).put(""))
                 }
             }
+            return card
         }
 
         private fun classType(activity: MainActivity, value: String): String {
@@ -331,84 +293,41 @@ class AttendanceScreenController private constructor() {
             return term == item.optString("term") && (type == AttendanceFilter.TYPE_ALL || type == item.optString("classType"))
         }
 
+        private val CLASS_TYPES = listOf("Wykład", "Ćwiczenia", "Laboratorium", "Projekt", "Seminarium", "Lektorat", "Konwersatorium", "Inne")
+
         @JvmStatic
         fun showEditCourseDialog(activity: MainActivity, code: String?, onComplete: Runnable) {
             val prefs = activity.attendancePreferences()
-            val saved = try {
-                JSONObject(prefs.getString("data", "{}") ?: "{}")
-            } catch (_: Exception) {
-                JSONObject()
-            }
+            val saved = readSaved(prefs)
             val existing = if (code != null) saved.optJSONObject(code) else null
 
-            val form = LinearLayout(activity)
-            form.orientation = LinearLayout.VERTICAL
-            form.setPadding(UiHelper.dp(activity, 24), UiHelper.dp(activity, 8), UiHelper.dp(activity, 24), 0)
+            val form = LayoutInflater.from(activity).inflate(R.layout.dialog_attendance_course, null)
+            val nameLayout = form.findViewById<TextInputLayout>(R.id.attendance_name_layout)
+            val termLayout = form.findViewById<TextInputLayout>(R.id.attendance_term_layout)
+            val nameField = form.findViewById<TextInputEditText>(R.id.attendance_input_name)
+            val termField = form.findViewById<TextInputEditText>(R.id.attendance_input_term)
+            val notesField = form.findViewById<TextInputEditText>(R.id.attendance_input_notes)
+            val typeField = form.findViewById<Spinner>(R.id.attendance_input_type)
 
-            val nameField = UiHelper.field(
-                activity,
-                form,
-                activity.getString(R.string.attendance_dialog_name_hint),
-                if (existing != null) existing.optString("name", code.orEmpty()) else "",
-                false
-            )
-            val termField = UiHelper.field(
-                activity,
-                form,
-                activity.getString(R.string.attendance_semester_hint),
-                if (existing != null) existing.optString("term") else prefs.getString("term", ""),
-                false
-            )
-            UiHelper.add(activity, form, activity.getString(R.string.attendance_class_type), 14, UiHelper.MUTED, true)
-            val typeOptions = ArrayList(
-                listOf(
-                    "Wykład",
-                    "Ćwiczenia",
-                    "Laboratorium",
-                    "Projekt",
-                    "Seminarium",
-                    "Lektorat",
-                    "Konwersatorium",
-                    "Inne"
-                )
-            )
+            nameField.setText(if (existing != null) existing.optString("name", code.orEmpty()) else "")
+            termField.setText(if (existing != null) existing.optString("term") else prefs.getString("term", ""))
+            notesField.setText(if (existing != null) existing.optString("notes", "") else "")
+
+            val typeOptions = ArrayList(CLASS_TYPES)
             val oldType = if (existing == null) "Wykład" else existing.optString("classType")
             if (!typeOptions.contains(oldType)) typeOptions.add(oldType)
-            val typeField = Spinner(activity)
-            val typeLabels = Array(typeOptions.size) { i ->
-                val t = typeOptions[i]
-                if (t.isEmpty()) activity.getString(R.string.attendance_unknown_type) else classType(activity, t)
-            }
+            val typeLabels = typeOptions.map { t -> if (t.isEmpty()) activity.getString(R.string.attendance_unknown_type) else classType(activity, t) }
             typeField.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, typeLabels)
             typeField.setSelection(max(0, typeOptions.indexOf(oldType)))
-            form.addView(typeField)
-            UiHelper.note(activity, form, activity.getString(R.string.attendance_fixed_limit), UiHelper.MUTED)
-
-            val notesField = UiHelper.field(
-                activity,
-                form,
-                activity.getString(R.string.attendance_dialog_notes_hint),
-                if (existing != null) existing.optString("notes", "") else "",
-                false
-            )
-            notesField.isSingleLine = false
-            notesField.minLines = 2
-
-            val formScroll = ScrollView(activity)
-            formScroll.addView(form)
 
             val builder = MaterialAlertDialogBuilder(activity)
                 .setTitle(
-                    if (existing == null) {
-                        activity.getString(R.string.attendance_dialog_add)
-                    } else {
-                        activity.getString(R.string.attendance_dialog_edit, existing.optString("name", code.orEmpty()))
-                    }
+                    if (existing == null) activity.getString(R.string.attendance_dialog_add)
+                    else activity.getString(R.string.attendance_dialog_edit, existing.optString("name", code.orEmpty()))
                 )
-                .setView(formScroll)
+                .setView(form)
                 .setNegativeButton(activity.getString(R.string.btn_cancel), null)
                 .setPositiveButton(activity.getString(R.string.btn_save), null)
-
             if (existing != null) {
                 builder.setNeutralButton(activity.getString(R.string.attendance_dialog_delete)) { _, _ ->
                     saved.remove(code)
@@ -422,12 +341,12 @@ class AttendanceScreenController private constructor() {
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
                     val name = nameField.text?.toString()?.trim() ?: ""
                     if (name.isEmpty()) {
-                        nameField.error = activity.getString(R.string.attendance_dialog_error_name)
+                        nameLayout.error = activity.getString(R.string.attendance_dialog_error_name)
                         return@setOnClickListener
                     }
-                    val term = termField.text.toString().trim()
+                    val term = termField.text?.toString()?.trim() ?: ""
                     if (term.isEmpty()) {
-                        termField.error = activity.getString(R.string.attendance_semester_required)
+                        termLayout.error = activity.getString(R.string.attendance_semester_required)
                         return@setOnClickListener
                     }
                     val type = typeOptions[typeField.selectedItemPosition]
@@ -440,7 +359,7 @@ class AttendanceScreenController private constructor() {
                         val c = AttendanceTracker.key(term, course, type)
                         val target = saved.optJSONObject(c)
                         if (c != code && target != null && (target.optInt("absences") > 0 || target.optString("notes").isNotEmpty())) {
-                            nameField.error = activity.getString(R.string.attendance_duplicate)
+                            nameLayout.error = activity.getString(R.string.attendance_duplicate)
                             return@setOnClickListener
                         }
                         val item = existing ?: JSONObject()
@@ -464,4 +383,3 @@ class AttendanceScreenController private constructor() {
         }
     }
 }
-

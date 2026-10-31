@@ -1,11 +1,11 @@
 package pl.vistula.checker.ui
 
-import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.PopupMenu
-import androidx.core.view.ViewCompat
+import android.widget.TextView
 import java.util.function.Consumer
 import pl.vistula.checker.MainActivity
 import pl.vistula.checker.R
@@ -15,18 +15,13 @@ class ToolScreenUi private constructor() {
     companion object {
         @JvmStatic
         fun header(activity: MainActivity, content: LinearLayout, title: Int, actions: Consumer<Menu>?) {
-            val row = LinearLayout(activity)
-            row.gravity = Gravity.CENTER_VERTICAL
-            val label = UiHelper.text(activity, activity.getString(title), 20, UiHelper.INK, true)
-            label.setPadding(UiHelper.dp(activity, 8), 0, 0, 0)
-            ViewCompat.setAccessibilityHeading(label, true)
-            row.addView(label, LinearLayout.LayoutParams(0, -2, 1f))
-            row.minimumHeight = UiHelper.dp(activity, 64)
-            if (actions != null) {
-                val more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more) {}
-                more.id = R.id.tool_screen_more
+            val row = LayoutInflater.from(activity).inflate(R.layout.view_tool_header, content, false)
+            row.findViewById<TextView>(R.id.tool_header_title).setText(title)
+            val more = row.findViewById<View>(R.id.tool_screen_more)
+            if (actions == null) {
+                more.visibility = View.GONE
+            } else {
                 more.contentDescription = activity.getString(R.string.tool_options, activity.getString(title))
-                row.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
                 more.setOnClickListener {
                     val popup = PopupMenu(activity, more)
                     actions.accept(popup.menu)

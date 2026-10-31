@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/grades_semester"
+            style="@style/Widget.Vistula.HeaderButton.Label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start|center_vertical" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/grades_search_action"
+            style="@style/Widget.Vistula.HeaderButton"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/grades_search_action"
+            android:gravity="center"
+            app:icon="@drawable/ic_schedule_search"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/app_ink" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/grades_more"
+            style="@style/Widget.Vistula.HeaderButton"
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/grades_options"
+            android:gravity="center"
+            app:icon="@drawable/ic_schedule_more"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="20dp"
+            app:iconTint="@color/app_ink" />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/grades_tests_note"
+        style="@style/Vistula.Text.Note.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/grades_active_filters"
+        style="@style/Widget.Vistula.FilterChip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
+    <include
+        android:id="@+id/grades_search"
+        layout="@layout/view_search_field"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/grades_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+</LinearLayout>

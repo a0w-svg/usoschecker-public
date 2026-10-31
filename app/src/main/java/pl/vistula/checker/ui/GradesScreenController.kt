@@ -12,6 +12,10 @@ import android.text.InputType
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.LayoutInflater
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.button.MaterialButton
+import android.view.inputmethod.EditorInfo
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import pl.vistula.checker.ui.compose.GradeTable
@@ -114,49 +118,27 @@ class GradesScreenController private constructor() {
                 R.string.grades_sort_recent,
                 R.string.grades_sort_value
             )
-            val header = LinearLayout(activity)
-            header.gravity = Gravity.CENTER_VERTICAL
+            val screen = UiHelper.inflate(activity, R.layout.screen_grades, content)
+            content.addView(screen)
             val semesterLabel = when {
                 semester.isEmpty() -> activity.getString(R.string.grades_all_terms)
                 snapshot.terms.containsKey(semester) && snapshot.terms[semester]!!.name.isNotEmpty() -> snapshot.terms[semester]!!.name
                 else -> semester
             }
-            val termPicker = ScheduleScreenController.headerButton(activity, "$semesterLabel ▾") {
-                showSemesterPicker(activity, snapshot, semester, onSemesterChanged)
+            screen.findViewById<MaterialButton>(R.id.grades_semester).apply {
+                text = activity.getString(R.string.grades_semester_picker, semesterLabel)
+                contentDescription = "${activity.getString(R.string.grade_picker_semester)}: $semesterLabel"
+                setOnClickListener { showSemesterPicker(activity, snapshot, semester, onSemesterChanged) }
             }
-            termPicker.id = R.id.grades_semester
-            termPicker.textSize = 13f
-            termPicker.setTextColor(activity.getColor(R.color.app_ink))
-            termPicker.setTypeface(null, Typeface.NORMAL)
-            termPicker.gravity = Gravity.START or Gravity.CENTER_VERTICAL
-            termPicker.setPadding(
-                UiHelper.dp(activity, 8),
-                UiHelper.dp(activity, 4),
-                UiHelper.dp(activity, 8),
-                UiHelper.dp(activity, 4)
-            )
-            termPicker.contentDescription = "${activity.getString(R.string.grade_picker_semester)}: $semesterLabel"
-            header.addView(termPicker, LinearLayout.LayoutParams(0, -2, 1f))
-            val searchAction = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_search) {}
-            searchAction.contentDescription = activity.getString(R.string.grades_search_action)
-            header.addView(searchAction, LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2))
-            val more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more) {}
-            more.id = R.id.grades_more
-            more.contentDescription = activity.getString(R.string.grades_options)
-            header.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
-            content.addView(header)
+            val searchAction = screen.findViewById<View>(R.id.grades_search_action)
+            val more = screen.findViewById<View>(R.id.grades_more)
             if (snapshot.serviceErrors.containsKey("crstests")) {
                 val reason = snapshot.serviceErrors["crstests"]
-                UiHelper.note(
-                    activity,
-                    content,
-                    if ("crstests" == reason) {
-                        activity.getString(R.string.services_scope_required, "crstests")
-                    } else {
-                        activity.getString(R.string.grades_tests_unavailable)
-                    },
-                    Tone.MUTED
-                )
+                screen.findViewById<TextView>(R.id.grades_tests_note).apply {
+                    text = if ("crstests" == reason) activity.getString(R.string.services_scope_required, "crstests")
+                        else activity.getString(R.string.grades_tests_unavailable)
+                    visibility = View.VISIBLE
+                }
             }
             if (gradeType != GradesUiState.TYPE_ALL || gradeOrder != GradesUiState.ORDER_NAME) {
                 val active = ArrayList<String>()
@@ -166,37 +148,37 @@ class GradesScreenController private constructor() {
                 for (i in orders.indices) {
                     if (gradeOrder != GradesUiState.ORDER_NAME && orders[i] == gradeOrder) active.add(activity.getString(orderLabels[i]))
                 }
-                val clear = ScheduleScreenController.headerButton(activity, "${active.joinToString(" · ")} ×", onResetFilters)
-                clear.id = R.id.grades_active_filters
-                clear.textSize = 14f
-                clear.isSelected = true
-                clear.contentDescription = "${active.joinToString(" · ")}. ${activity.getString(R.string.grades_filter_reset)}"
-                content.addView(clear)
-            }
-            val searchContainer = arrayOfNulls<View>(1)
-            val search = UiHelper.searchField(
-                activity,
-                content,
-                activity.getString(R.string.grades_search_hint),
-                gradeQuery,
-                null
-            ) {
-                onQueryChanged.accept("")
-                val container = searchContainer[0]
-                if (container != null) {
-                    (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                        .hideSoftInputFromWindow(container.windowToken, 0)
-                    container.clearFocus()
-                    container.visibility = View.GONE
+                val summary = active.joinToString(" · ")
+                screen.findViewById<MaterialButton>(R.id.grades_active_filters).apply {
+                    text = activity.getString(R.string.tasks_filter_active, summary)
+                    contentDescription = "$summary. ${activity.getString(R.string.grades_filter_reset)}"
+                    isSelected = true
+                    visibility = View.VISIBLE
+                    setOnClickListener { onResetFilters.run() }
                 }
             }
-            val searchBox = content.getChildAt(content.childCount - 1)
-            searchContainer[0] = searchBox
+            val searchBox = screen.findViewById<TextInputLayout>(R.id.grades_search)
+            searchBox.hint = activity.getString(R.string.grades_search_hint)
+            val search = searchBox.findViewById<TextInputEditText>(R.id.field_input)
+            search.setText(gradeQuery)
             searchBox.visibility = if (gradeQuery.isEmpty()) View.GONE else View.VISIBLE
+            searchBox.setEndIconOnClickListener {
+                search.setText("")
+                onQueryChanged.accept("")
+                activity.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(searchBox.windowToken, 0)
+                searchBox.clearFocus()
+                searchBox.visibility = View.GONE
+            }
+            search.setOnEditorActionListener { _, action, _ ->
+                if (action != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener false
+                activity.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(search.windowToken, 0)
+                search.clearFocus()
+                true
+            }
             searchAction.setOnClickListener {
                 searchBox.visibility = View.VISIBLE
                 search.requestFocus()
-                search.post { (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(search, 0) }
+                search.post { activity.getSystemService(InputMethodManager::class.java)?.showSoftInput(search, 0) }
             }
             more.setOnClickListener {
                 val menu = PopupMenu(activity, more)
@@ -271,9 +253,7 @@ class GradesScreenController private constructor() {
                 menu.show()
             }
 
-            val list = LinearLayout(activity)
-            list.orientation = LinearLayout.VERTICAL
-            content.addView(list)
+            val list = screen.findViewById<LinearLayout>(R.id.grades_list)
 
             val populate = Runnable {
                 list.removeAllViews()
@@ -418,20 +398,11 @@ class GradesScreenController private constructor() {
                 }
 
                 if (visible.isEmpty() && pendingCount == 0 && extraTestCount == 0 && (terms.isEmpty() || currentQuery.trim().isNotEmpty())) {
-                    val box = UiHelper.card(activity, list)
-                    UiHelper.add(
-                        activity,
-                        box,
-                        if (currentQuery.trim().isEmpty()) {
-                            activity.getString(R.string.grades_empty_title)
-                        } else {
-                            activity.getString(R.string.grades_no_match)
-                        },
-                        17,
-                        Tone.INK,
-                        true
+                    UiHelper.empty(
+                        activity, list,
+                        activity.getString(if (currentQuery.trim().isEmpty()) R.string.grades_empty_title else R.string.grades_no_match),
+                        activity.getString(R.string.grades_no_match_hint)
                     )
-                    UiHelper.note(activity, box, activity.getString(R.string.grades_no_match_hint), Tone.MUTED)
                 }
             }
 
@@ -514,7 +485,7 @@ class GradesScreenController private constructor() {
                 },
                 false
             )
-            header[0]!!.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+            header[0]!!.backgroundTintList = activity.getColorStateList(android.R.color.transparent)
             header[0]!!.gravity = Gravity.START or Gravity.CENTER_VERTICAL
             header[0]!!.textSize = 13f
             header[0]!!.setTone(Tone.MUTED)
@@ -775,133 +746,43 @@ class GradesScreenController private constructor() {
         ) {
             if (rows.isEmpty()) return
             val summary = GradeSummary.of(rows)
-            val box = UiHelper.card(activity, parent, Surface.SUCCESS)
+            val box = UiHelper.inflate(activity, R.layout.view_grades_summary, parent)
+            box.backgroundTintList = ColorStateList.valueOf(activity.getColor(Surface.SUCCESS.color))
+            val locale = Language.currentLocale(activity)
 
-            val header = LinearLayout(activity)
-            header.gravity = Gravity.CENTER_VERTICAL
-            header.addView(
-                UiHelper.text(activity, activity.getString(R.string.grades_summary_title), 16, Tone.INK, true),
-                LinearLayout.LayoutParams(0, -2, 1f)
-            )
-
-            val help = UiHelper.button(
-                activity,
-                "?",
-                {
-                    var statistics = if (summary.numeric == 0) {
-                        activity.getString(R.string.grades_no_numeric_stats)
-                    } else {
-                        String.format(
-                            Language.currentLocale(activity),
-                            activity.getString(R.string.grades_stats_simple),
-                            summary.average,
-                            summary.min,
-                            summary.max
-                        )
-                    }
-                    if (!summary.ectsAverage.isNaN()) {
-                        statistics += String.format(
-                            Language.currentLocale(activity),
-                            activity.getString(R.string.grades_stats_weighted),
-                            summary.ectsAverage,
-                            summary.totalEcts
-                        )
-                    }
-                    MaterialAlertDialogBuilder(activity)
-                        .setTitle(activity.getString(R.string.grades_summary_title))
-                        .setMessage(statistics + activity.getString(R.string.grades_stats_disclaimer))
-                        .setPositiveButton(activity.getString(R.string.btn_understand), null)
-                        .show()
-                },
-                false
-            )
-            help.minWidth = 0
-            help.setPadding(0, 0, 0, 0)
-            header.addView(help, LinearLayout.LayoutParams(UiHelper.dp(activity, 48), UiHelper.dp(activity, 48)))
-            box.addView(header)
-
-            val values = LinearLayout(activity)
-            values.gravity = Gravity.CENTER_VERTICAL
-            values.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8))
-
-            val average = UiHelper.text(
-                activity,
-                if (summary.numeric == 0) "—" else String.format(Language.currentLocale(activity), "%.2f", summary.average),
-                32,
-                Tone.INK,
-                true
-            )
-            average.setPadding(0, 0, UiHelper.dp(activity, 16), 0)
-            values.addView(average, LinearLayout.LayoutParams(-2, -2))
-
-            val counts = LinearLayout(activity)
-            counts.orientation = LinearLayout.VERTICAL
-            counts.addView(
-                UiHelper.text(
-                    activity,
-                    if (summary.numeric == 0) {
-                        activity.getString(R.string.grades_card_no_numeric)
-                    } else {
-                        activity.getString(R.string.grades_card_simple_avg)
-                    },
-                    12,
-                    Tone.INK,
-                    false
-                )
+            box.findViewById<View>(R.id.grades_summary_help).setOnClickListener {
+                var statistics = if (summary.numeric == 0) {
+                    activity.getString(R.string.grades_no_numeric_stats)
+                } else {
+                    String.format(locale, activity.getString(R.string.grades_stats_simple), summary.average, summary.min, summary.max)
+                }
+                if (!summary.ectsAverage.isNaN()) {
+                    statistics += String.format(locale, activity.getString(R.string.grades_stats_weighted), summary.ectsAverage, summary.totalEcts)
+                }
+                MaterialAlertDialogBuilder(activity)
+                    .setTitle(activity.getString(R.string.grades_summary_title))
+                    .setMessage(statistics + activity.getString(R.string.grades_stats_disclaimer))
+                    .setPositiveButton(activity.getString(R.string.btn_understand), null)
+                    .show()
+            }
+            box.findViewById<TextView>(R.id.grades_summary_average).text =
+                if (summary.numeric == 0) "—" else String.format(locale, "%.2f", summary.average)
+            box.findViewById<TextView>(R.id.grades_summary_kind).setText(
+                if (summary.numeric == 0) R.string.grades_card_no_numeric else R.string.grades_card_simple_avg
             )
             if (!summary.ectsAverage.isNaN()) {
-                counts.addView(
-                    UiHelper.text(
-                        activity,
-                        String.format(
-                            Language.currentLocale(activity),
-                            activity.getString(R.string.grades_card_weighted_avg),
-                            summary.ectsAverage,
-                            summary.totalEcts
-                        ),
-                        13,
-                        Tone.INK,
-                        true
-                    )
-                )
+                box.findViewById<TextView>(R.id.grades_summary_weighted).apply {
+                    text = String.format(locale, activity.getString(R.string.grades_card_weighted_avg), summary.ectsAverage, summary.totalEcts)
+                    visibility = View.VISIBLE
+                }
             }
-            counts.addView(
-                UiHelper.text(
-                    activity,
-                    activity.getString(R.string.grades_card_counts, summary.numeric, summary.other),
-                    13,
-                    Tone.MUTED,
-                    false
-                )
-            )
-            values.addView(counts, LinearLayout.LayoutParams(0, -2, 1f))
-            box.addView(values)
-
-            val summaryButtons = LinearLayout(activity)
-            summaryButtons.orientation = LinearLayout.HORIZONTAL
-            val calcBtn = UiHelper.button(
-                activity,
-                activity.getString(R.string.grades_calc_goals),
-                { showGradeSimulatorDialog(activity, summary) },
-                false
-            )
-            val shareBtn = UiHelper.button(
-                activity,
-                activity.getString(R.string.grades_share_report),
-                { shareGradesReport(activity, rows, summary, state, currentSemester) },
-                false
-            )
-            calcBtn.minHeight = UiHelper.dp(activity, 48)
-            calcBtn.textSize = 12f
-            shareBtn.minHeight = UiHelper.dp(activity, 48)
-            shareBtn.textSize = 12f
-            val bp1 = LinearLayout.LayoutParams(0, -2, 1f)
-            bp1.marginEnd = UiHelper.dp(activity, 6)
-            summaryButtons.addView(calcBtn, bp1)
-            summaryButtons.addView(shareBtn, LinearLayout.LayoutParams(0, -2, 1f))
-            box.addView(summaryButtons)
-
-            UiHelper.note(activity, box, activity.getString(R.string.grades_card_note), Tone.MUTED)
+            box.findViewById<TextView>(R.id.grades_summary_counts).text =
+                activity.getString(R.string.grades_card_counts, summary.numeric, summary.other)
+            box.findViewById<View>(R.id.grades_summary_calc).setOnClickListener { showGradeSimulatorDialog(activity, summary) }
+            box.findViewById<View>(R.id.grades_summary_share).setOnClickListener {
+                shareGradesReport(activity, rows, summary, state, currentSemester)
+            }
+            parent.addView(box)
         }
 
         private fun shareGradesReport(
@@ -965,14 +846,7 @@ class GradesScreenController private constructor() {
         }
 
         private fun showGradeSimulatorDialog(activity: MainActivity, summary: GradeSummary) {
-            val dialogLayout = LinearLayout(activity)
-            dialogLayout.orientation = LinearLayout.VERTICAL
-            dialogLayout.setPadding(
-                UiHelper.dp(activity, 24),
-                UiHelper.dp(activity, 16),
-                UiHelper.dp(activity, 24),
-                UiHelper.dp(activity, 8)
-            )
+            val dialogLayout = UiHelper.inflate(activity, R.layout.dialog_grade_simulator, LinearLayout(activity)) as LinearLayout
 
             val currentAvg = if (summary.ectsAverage.isNaN()) summary.average else summary.ectsAverage
             val currentAvgStr = if (currentAvg.isNaN()) {
@@ -980,20 +854,17 @@ class GradesScreenController private constructor() {
             } else {
                 String.format(Language.currentLocale(activity), "%.2f", currentAvg)
             }
+            dialogLayout.findViewById<TextView>(R.id.sim_current).text = activity.getString(R.string.grades_sim_current, currentAvgStr)
 
-            val currentLabel = UiHelper.text(activity, activity.getString(R.string.grades_sim_current, currentAvgStr), 14, Tone.INK, true)
-            dialogLayout.addView(currentLabel)
-
-            val targetField = UiHelper.field(activity, dialogLayout, activity.getString(R.string.grades_sim_target_hint), "4.50", false)
-            val countField = UiHelper.field(activity, dialogLayout, activity.getString(R.string.grades_sim_count_hint), "2", false)
+            val fields = dialogLayout.findViewById<LinearLayout>(R.id.sim_fields)
+            val targetField = UiHelper.field(activity, fields, activity.getString(R.string.grades_sim_target_hint), "4.50", false)
+            val countField = UiHelper.field(activity, fields, activity.getString(R.string.grades_sim_count_hint), "2", false)
             countField.inputType = InputType.TYPE_CLASS_NUMBER
-
-            val ectsField = UiHelper.field(activity, dialogLayout, activity.getString(R.string.grades_sim_ects_hint), "6", false)
+            val ectsField = UiHelper.field(activity, fields, activity.getString(R.string.grades_sim_ects_hint), "6", false)
             ectsField.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
 
-            val resultView = UiHelper.text(activity, activity.getString(R.string.grades_sim_intro), 13, Tone.INK, true)
-            resultView.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 16))
-            dialogLayout.addView(resultView)
+            val resultView = dialogLayout.findViewById<TextView>(R.id.sim_result)
+            resultView.setText(R.string.grades_sim_intro)
 
             val compute = Runnable {
                 try {

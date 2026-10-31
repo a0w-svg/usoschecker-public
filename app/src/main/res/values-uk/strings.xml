@@ -451,6 +451,8 @@
     <string name="gpa_chip_ects_45">45 ECTS</string>
     <string name="gpa_chip_ects_60">60 ECTS (весь рік)</string>
 <string name="share_generated_by">Згенеровано додатком Vistula Checker</string>
+    <string name="grades_summary_help">Про цю статистику</string>
+    <string name="grades_semester_picker">%1$s ▾</string>
     <string name="grades_all_terms">Усі семестри</string>
     <string name="grades_empty_title">Немає даних у цьому діапазоні</string>
     <string name="grades_share_subject">Виписка оцінок — Vistula USOS</string>

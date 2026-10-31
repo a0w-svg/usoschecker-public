@@ -455,6 +455,8 @@
     <string name="gpa_chip_ects_45">45 ECTS</string>
     <string name="gpa_chip_ects_60">60 ECTS (cały rok)</string>
 <string name="share_generated_by">Wygenerowano z aplikacji Vistula Checker</string>
+    <string name="grades_summary_help">Pomoc: statystyki ocen</string>
+    <string name="grades_semester_picker">%1$s ▾</string>
     <string name="grades_all_terms">Wszystkie semestry</string>
     <string name="grades_empty_title">Brak danych w tym zakresie</string>
     <string name="grades_share_subject">Wykaz ocen — Vistula USOS</string>
@@ -668,6 +670,7 @@
     <string name="history_search_action">Szukaj zmian</string>
     <string name="history_clear_filter">Wyczyść filtr</string>
     <string name="grades_options">Opcje ocen</string>
+    <string name="grades_help_symbol" translatable="false">?</string>
     <string name="grades_search_action">Szukaj ocen</string>
     <string name="grades_data_status">Aktualność danych</string>
     <string name="grades_filter_type">Typ ocen</string>

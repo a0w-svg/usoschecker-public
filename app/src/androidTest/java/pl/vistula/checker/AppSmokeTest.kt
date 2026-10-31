@@ -314,15 +314,30 @@ class AppSmokeTest {
         }
     }
 
+    /** Methods the current account may see; role-specific methods are hidden from other accounts. */
+    private fun visibleCatalogSize(): Int {
+        val index = JSONArray(read(InstrumentationRegistry.getInstrumentation().targetContext, "api/index.json"))
+        var visible = 0
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val account = (activity() as pl.vistula.checker.MainActivity).serviceAccountState()
+            for (i in 0 until index.length()) {
+                if (pl.vistula.checker.core.ApiCatalog.visibleForAccount(index.getJSONObject(i).getString("name"), account)) visible++
+            }
+        }
+        return visible
+    }
+
     @Test
     fun catalogCanShowMoreThanFirstPage() {
         click("Więcej")
         click(activity().getString(R.string.tool_api_title))
-        has("Wyświetlono 60 z 571 pasujących metod.")
+        val total = visibleCatalogSize()
+        assertTrue("catalog should need several pages", total > 120)
+        has("Wyświetlono 60 z $total pasujących metod.")
         click("Pokaż kolejne metody")
-        has("Wyświetlono 120 z 571 pasujących metod.")
-        for (i in 0 until 8) click("Pokaż kolejne metody")
-        has("Wyświetlono 571 z 571 pasujących metod.")
+        has("Wyświetlono 120 z $total pasujących metod.")
+        repeat((total - 1) / 60 - 1) { click("Pokaż kolejne metody") }
+        has("Wyświetlono $total z $total pasujących metod.")
         InstrumentationRegistry.getInstrumentation().runOnMainSync {
             assertNull(find(activity().window.decorView, "Pokaż kolejne metody", true))
         }

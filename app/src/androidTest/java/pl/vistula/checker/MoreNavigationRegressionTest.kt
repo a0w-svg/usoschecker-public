@@ -180,7 +180,10 @@ class MoreNavigationRegressionTest {
                 if (view is ViewGroup) repeat(view.childCount) { verifyRows(view.getChildAt(it)) }
             }
             verifyRows(content)
-            assertEquals(11, count)
+            val expected = pl.vistula.checker.ui.MoreScreenController
+                .layout(pl.vistula.checker.core.AccountRole.mode(rule.activity.serviceAccountState()))
+                .sumOf { it.entries.size }
+            assertEquals(expected, count)
         }
         screenshot("more")
         val tabs = intArrayOf(7, 8, 9, 10, 11, 12, 13, 14, 3, 4)

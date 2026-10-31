@@ -135,3 +135,13 @@ class GradesKeysTest {
         assertEquals(GradesUiState.ORDERS.size, GradesUiState.ORDERS.toSet().size)
     }
 }
+
+class AttendanceFilterTest {
+    @Test
+    fun unknownOrMissingStatusFallsBackToAll() {
+        assertEquals(pl.vistula.checker.ui.AttendanceFilter.ALL, pl.vistula.checker.ui.AttendanceFilter.statusOrAll(null))
+        assertEquals(pl.vistula.checker.ui.AttendanceFilter.ALL, pl.vistula.checker.ui.AttendanceFilter.statusOrAll("nonsense"))
+        assertEquals("warning", pl.vistula.checker.ui.AttendanceFilter.statusOrAll("warning"))
+        assertEquals("exceeded", pl.vistula.checker.ui.AttendanceFilter.statusOrAll("exceeded"))
+    }
+}

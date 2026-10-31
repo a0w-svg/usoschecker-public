@@ -83,9 +83,9 @@ class AttendanceScreenController private constructor() {
                 }
             }
             prefs.edit { putString("term", activeTerm) }
-            var activeType = prefs.getString("classType", "all") ?: "all"
+            var activeType = prefs.getString("classType", AttendanceFilter.TYPE_ALL) ?: AttendanceFilter.TYPE_ALL
             val types = LinkedHashSet<String>()
-            types.add("all")
+            types.add(AttendanceFilter.TYPE_ALL)
             savedKeys = saved.keys()
             while (savedKeys.hasNext()) {
                 val entry = saved.optJSONObject(savedKeys.next())
@@ -93,13 +93,13 @@ class AttendanceScreenController private constructor() {
                     types.add(entry.optString("classType"))
                 }
             }
-            if (!types.contains(activeType)) activeType = "all"
+            if (!types.contains(activeType)) activeType = AttendanceFilter.TYPE_ALL
             val selectedType = activeType
             val typeValues = types.toTypedArray()
             val typeLabels = Array(typeValues.size) { i ->
                 val t = typeValues[i]
                 when {
-                    t == "all" -> activity.getString(R.string.attendance_all_types)
+                    t == AttendanceFilter.TYPE_ALL -> activity.getString(R.string.attendance_all_types)
                     t.isEmpty() -> activity.getString(R.string.attendance_unknown_type)
                     else -> classType(activity, t)
                 }
@@ -148,7 +148,7 @@ class AttendanceScreenController private constructor() {
                         }
                 }
                 val statuses = menu.addSubMenu(R.string.grades_filter_type)
-                val statusKeys = arrayOf("all", "warning", "exceeded")
+                val statusKeys = AttendanceFilter.STATUSES
                 val labels = arrayOf(
                     activity.getString(R.string.attendance_filter_all, courses),
                     activity.getString(R.string.attendance_filter_warning, warnings),
@@ -206,8 +206,8 @@ class AttendanceScreenController private constructor() {
                 val limit = AttendanceTracker.LIMIT
                 val name = item.optString("name", code.orEmpty())
 
-                if ("warning" == filter && !AttendanceTracker.warning(count)) continue
-                if ("exceeded" == filter && !AttendanceTracker.exceeded(count)) continue
+                if (AttendanceFilter.WARNING == filter && !AttendanceTracker.warning(count)) continue
+                if (AttendanceFilter.EXCEEDED == filter && !AttendanceTracker.exceeded(count)) continue
 
                 shown++
                 val itemCard = UiHelper.section(activity, list, Color.WHITE)
@@ -306,12 +306,12 @@ class AttendanceScreenController private constructor() {
                     activity.getString(R.string.attendance_empty_filter),
                     activity.getString(R.string.attendance_empty_desc)
                 )
-                if ("all" != filter) {
+                if (AttendanceFilter.ALL != filter) {
                     list.addView(
                         UiHelper.button(
                             activity,
                             activity.getString(R.string.attendance_filter_all, totalCourses),
-                            { onFilterChanged.accept("all") },
+                            { onFilterChanged.accept(AttendanceFilter.ALL) },
                             false
                         )
                     )
@@ -328,7 +328,7 @@ class AttendanceScreenController private constructor() {
         }
 
         private fun matches(item: JSONObject, term: String, type: String): Boolean {
-            return term == item.optString("term") && (type == "all" || type == item.optString("classType"))
+            return term == item.optString("term") && (type == AttendanceFilter.TYPE_ALL || type == item.optString("classType"))
         }
 
         @JvmStatic

@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
     private var pendingCalendar: String? = null
     private val schedule = pl.vistula.checker.ui.ScheduleUiState()
     private var newsQuery: String = ""
-    private var attendanceFilter: String = "all"
+    private var attendanceFilter: String = pl.vistula.checker.ui.AttendanceFilter.ALL
     private var documentQuery: String = ""
     private var demoPlanDays: Int = 56
     private var renderedMinute: Long = 0
@@ -218,7 +218,7 @@ class MainActivity : AppCompatActivity() {
             tasks.restore(bundle)
             pendingCalendar = bundle.getString("pendingCalendar")
             newsQuery = bundle.getString("newsQuery", "")
-            attendanceFilter = bundle.getString("attendanceFilter", "all")
+            attendanceFilter = pl.vistula.checker.ui.AttendanceFilter.statusOrAll(bundle.getString("attendanceFilter"))
             documentQuery = bundle.getString("documentQuery", "")
             api.restore(bundle)
             try {

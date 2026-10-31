@@ -405,16 +405,20 @@ class UiHelper private constructor() {
             return scroll
         }
 
+        /** Adds a Material text field and returns its layout, for callers that show errors on it. */
         @JvmStatic
-        fun field(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): EditText {
+        fun fieldLayout(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): TextInputLayout {
             val layout = LayoutInflater.from(context)
                 .inflate(if (password) R.layout.view_text_field_password else R.layout.view_text_field, parent, false) as TextInputLayout
             layout.hint = hint
-            val input = layout.findViewById<TextInputEditText>(R.id.field_input)
-            input.setText(value)
+            layout.findViewById<TextInputEditText>(R.id.field_input).setText(value)
             parent.addView(layout)
-            return input
+            return layout
         }
+
+        @JvmStatic
+        fun field(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): EditText =
+            fieldLayout(context, parent, hint, value, password).findViewById<TextInputEditText>(R.id.field_input)
 
         @JvmStatic
         fun copyToClipboard(context: Context, label: String?, text: String?) {

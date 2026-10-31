@@ -55,4 +55,34 @@ class AccountProfileScreenTest {
         InstrumentationRegistry.getInstrumentation().uiAutomation
             .executeShellCommand("cp " + file.absolutePath + " /data/local/tmp/usos-account-profile.png").use { }
     }
+
+    @Test
+    fun signInSetupShowsCredentialFieldsScopesAndValidatesBeforeLogin() {
+        main {
+            rule.activity.setDemo(false)
+            rule.activity.navigate(Tabs.ACCOUNT)
+            rule.activity.openAccountPage("settings.connection")
+        }
+        main {
+            val keyHost = content().findViewById<LinearLayout>(R.id.connection_key_host)
+            val secretHost = content().findViewById<LinearLayout>(R.id.connection_secret_host)
+            assertEquals(1, keyHost.childCount)
+            assertEquals(1, secretHost.childCount)
+            assertTrue(content().findViewById<LinearLayout>(R.id.connection_choices).childCount >= 6)
+            assertEquals(View.GONE, content().findViewById<View>(R.id.connection_pin_section).visibility)
+            if (BuildConfig.USOS_KEY.isBlank()) {
+                content().findViewById<View>(R.id.connection_login).performClick()
+                val keyLayout = keyHost.getChildAt(0) as com.google.android.material.textfield.TextInputLayout
+                assertNotNull(keyLayout.error)
+            }
+        }
+        SystemClock.sleep(400)
+        val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+        assertNotNull(bitmap)
+        val file = File(rule.activity.getExternalFilesDir(null), "account-connection.png")
+        FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        bitmap.recycle()
+        InstrumentationRegistry.getInstrumentation().uiAutomation
+            .executeShellCommand("cp " + file.absolutePath + " /data/local/tmp/usos-account-connection.png").use { }
+    }
 }

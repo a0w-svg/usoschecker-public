@@ -21,6 +21,8 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textfield.TextInputEditText
 import java.time.LocalDate
 import org.json.JSONException
 import org.json.JSONObject
@@ -218,205 +220,7 @@ class AccountScreenController private constructor() {
                 )
             } else if (!demo) {
                 val box = pages.page("settings.connection", R.string.connect_usos_title, true)
-                UiHelper.add(activity, box, activity.getString(R.string.connect_usos_desc), 14, UiHelper.MUTED, false)
-                box.addView(UiHelper.actionRow(activity, activity.getString(R.string.welcome_reopen), { activity.showWelcome(1) }, false))
-
-                val buildKey = BuildConfig.USOS_KEY.trim()
-                val buildSecret = BuildConfig.USOS_SECRET.trim()
-                var defaultKey = state.optString("key", buildKey)
-                if (defaultKey.isEmpty()) defaultKey = buildKey
-                var defaultSecret = state.optString("secret", buildSecret)
-                if (defaultSecret.isEmpty()) defaultSecret = buildSecret
-
-                val pending = state.optString("requestToken").isNotEmpty()
-                val credentialsReady = defaultKey.isNotEmpty() && defaultSecret.isNotEmpty()
-                UiHelper.note(
-                    activity,
-                    box,
-                    activity.getString(
-                        when {
-                            pending -> R.string.login_step_pin
-                            credentialsReady -> R.string.login_ready
-                            else -> R.string.login_setup
-                        }
-                    ),
-                    UiHelper.MUTED
-                )
-                val setup = LinearLayout(activity)
-                setup.orientation = LinearLayout.VERTICAL
-                box.addView(setup)
-                setup.visibility = if (pending) View.GONE else View.VISIBLE
-                val advanced = LinearLayout(activity)
-                advanced.orientation = LinearLayout.VERTICAL
-                setup.addView(advanced)
-                advanced.visibility = if (credentialsReady) View.GONE else View.VISIBLE
-                box.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.login_settings),
-                        {
-                            if (setup.isGone) {
-                                setup.visibility = View.VISIBLE
-                                advanced.visibility = View.VISIBLE
-                            } else {
-                                advanced.visibility = if (advanced.isVisible) View.GONE else View.VISIBLE
-                            }
-                        },
-                        false
-                    )
-                )
-                advanced.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.btn_how_to_register),
-                        { showApiKeyHelpDialog(activity) },
-                        false
-                    )
-                )
-                val key = UiHelper.field(activity, advanced, "Consumer Key", defaultKey, false)
-                val secret = UiHelper.field(activity, advanced, "Consumer Secret", defaultSecret, true)
-                if (buildKey.isNotEmpty()) {
-                    UiHelper.note(
-                        activity,
-                        advanced,
-                        activity.getString(R.string.settings_debug_credentials),
-                        UiHelper.GREEN
-                    )
-                }
-                val rawScopes = UiHelper.disclosure(activity, advanced, "settings.rawScopes", R.string.settings_scope_advanced)
-                val scopes = UiHelper.field(
-                    activity, rawScopes, activity.getString(R.string.settings_scope_advanced),
-                    state.optString("scopes", "grades|studies|payments|cards|adm_documents|crstests|offline_access"), false
-                )
-                val access = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
-                setup.addView(access)
-                UiHelper.heading(activity, access, activity.getString(R.string.settings_access))
-                UiHelper.note(activity, access, activity.getString(R.string.settings_access_hint), UiHelper.MUTED)
-                val features = linkedMapOf(
-                    "payments" to R.string.tool_payments_title,
-                    "cards" to R.string.cards_title,
-                    "documents" to R.string.documents_title,
-                    "tests" to R.string.settings_tests_access,
-                    "profile" to R.string.settings_profile_access,
-                    "lecturer" to R.string.lecturer_title
-                )
-                var updatingChoices = false
-                val choices = linkedMapOf<String, MaterialSwitch>()
-                for ((feature, title) in features) {
-                    val choice = UiHelper.switchRow(activity, access, activity.getString(title), FeatureAccess.selected(scopes.text.toString(), feature))
-                    choices[feature] = choice
-                    choice.setOnCheckedChangeListener { _, enabled ->
-                        if (!updatingChoices) {
-                            val next = FeatureAccess.change(scopes.text.toString(), feature, enabled)
-                            if (next != scopes.text.toString()) scopes.setText(next)
-                        }
-                    }
-                }
-                UiHelper.watchSearch(scopes) { value ->
-                    updatingChoices = true
-                    for ((feature, choice) in choices) {
-                        val selected = FeatureAccess.selected(value, feature)
-                        if (choice.isChecked != selected) choice.isChecked = selected
-                    }
-                    updatingChoices = false
-                }
-
-                setup.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.btn_login_browser),
-                        {
-                            var k = key.text.toString().trim()
-                            if (k.isEmpty()) k = buildKey
-                            var sec = secret.text.toString().trim()
-                            if (sec.isEmpty()) sec = buildSecret
-                            val sc = scopes.text.toString().trim()
-                            if (k.isNotEmpty() && sec.isNotEmpty()) {
-                                val cleanScopes = ArrayList<String>()
-                                for (part in sc.split("|")) {
-                                    val trimmed = part.trim()
-                                    if (trimmed.isNotEmpty() && !cleanScopes.contains(trimmed)) {
-                                        cleanScopes.add(trimmed)
-                                    }
-                                }
-                                if (!cleanScopes.contains("grades")) cleanScopes.add("grades")
-                                if (!cleanScopes.contains("studies")) cleanScopes.add("studies")
-                                if (!cleanScopes.contains("offline_access")) cleanScopes.add("offline_access")
-                                listener.onBeginOAuth(k, sec, cleanScopes.joinToString("|"))
-                            } else {
-                                advanced.visibility = View.VISIBLE
-                                if (k.isEmpty()) key.error = activity.getString(R.string.login_key_required)
-                                if (sec.isEmpty()) secret.error = activity.getString(R.string.login_secret_required)
-                            }
-                        },
-                        true
-                    )
-                )
-
-                if (state.optString("requestToken").isNotEmpty()) {
-                    UiHelper.add(activity, box, activity.getString(R.string.pin_hint), 14, UiHelper.MUTED, false)
-                    val initialPin = detectedPin ?: ""
-                    val pin = UiHelper.field(activity, box, activity.getString(R.string.account_pin_field_hint), initialPin, true)
-                    if (initialPin.isNotEmpty()) {
-                        UiHelper.note(activity, box, activity.getString(R.string.pin_detected_clipboard), UiHelper.GREEN)
-                    }
-                    box.addView(
-                        UiHelper.button(
-                            activity,
-                            activity.getString(R.string.btn_paste_pin),
-                            {
-                                try {
-                                    val cb = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                                    val primaryClip = cb?.primaryClip
-                                    if (cb != null && cb.hasPrimaryClip() && primaryClip != null && primaryClip.itemCount > 0) {
-                                        val item = primaryClip.getItemAt(0)
-                                        if (item != null && item.text != null) {
-                                            val clip = item.text.toString().trim().replace(Regex("\\s+"), "")
-                                            pin.setText(clip)
-                                            Toast.makeText(activity, R.string.account_toast_pin_pasted, Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    pl.vistula.checker.Diagnostics.swallowed("AccountScreenController", e)
-                                }
-                            },
-                            false
-                        )
-                    )
-                    val confirmPin = Runnable {
-                        val value = pin.text.toString().trim().replace(Regex("\\s+"), "")
-                        if (value.isEmpty()) {
-                            pin.error = activity.getString(R.string.account_toast_enter_pin)
-                        } else {
-                            listener.onConfirmPin(value)
-                        }
-                    }
-                    pin.isSingleLine = true
-                    // setSingleLine replaces the password transformation on Android.
-                    pin.transformationMethod = PasswordTransformationMethod.getInstance()
-                    pin.imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-                    pin.setOnEditorActionListener { _, action, _ ->
-                        if (action != EditorInfo.IME_ACTION_DONE) return@setOnEditorActionListener false
-                        confirmPin.run()
-                        true
-                    }
-                    box.addView(UiHelper.button(activity, activity.getString(R.string.btn_confirm_pin), confirmPin, true))
-                    box.addView(
-                        UiHelper.button(
-                            activity,
-                            activity.getString(R.string.btn_return_to_browser),
-                            {
-                                UiHelper.browser(
-                                    activity,
-                                    "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" +
-                                        OAuth.encode(state.optString("requestToken"))
-                                )
-                            },
-                            false
-                        )
-                    )
-                }
-
+                renderConnection(activity, box, state, detectedPin, listener)
                 content.addView(UiHelper.button(activity, activity.getString(R.string.btn_start_demo), { listener.onStartDemo() }, false))
             }
 
@@ -528,6 +332,141 @@ class AccountScreenController private constructor() {
             )
             AppInfo.render(activity, about)
             pages.finish(if (!connected && state.optString("requestToken").isNotEmpty()) "settings.connection" else null)
+        }
+
+        /** Sign-in setup (`view_account_connection`): credentials, access scopes, browser login and PIN confirmation. */
+        private fun renderConnection(activity: MainActivity, box: LinearLayout, state: JSONObject, detectedPin: String?, listener: AccountListener) {
+            val view = LayoutInflater.from(activity).inflate(R.layout.view_account_connection, box, false)
+            val buildKey = BuildConfig.USOS_KEY.trim()
+            val buildSecret = BuildConfig.USOS_SECRET.trim()
+            val defaultKey = state.optString("key", buildKey).ifEmpty { buildKey }
+            val defaultSecret = state.optString("secret", buildSecret).ifEmpty { buildSecret }
+            val pending = state.optString("requestToken").isNotEmpty()
+            val credentialsReady = defaultKey.isNotEmpty() && defaultSecret.isNotEmpty()
+
+            view.findViewById<View>(R.id.connection_reopen).setOnClickListener { activity.showWelcome(1) }
+            view.findViewById<TextView>(R.id.connection_desc).setText(R.string.connect_usos_desc)
+            view.findViewById<TextView>(R.id.connection_status).setText(
+                when {
+                    pending -> R.string.login_step_pin
+                    credentialsReady -> R.string.login_ready
+                    else -> R.string.login_setup
+                }
+            )
+            val setup = view.findViewById<View>(R.id.connection_setup)
+            val advanced = view.findViewById<View>(R.id.connection_advanced)
+            setup.visibility = if (pending) View.GONE else View.VISIBLE
+            advanced.visibility = if (credentialsReady) View.GONE else View.VISIBLE
+            view.findViewById<View>(R.id.connection_toggle).setOnClickListener {
+                if (setup.isGone) {
+                    setup.visibility = View.VISIBLE
+                    advanced.visibility = View.VISIBLE
+                } else {
+                    advanced.visibility = if (advanced.isVisible) View.GONE else View.VISIBLE
+                }
+            }
+            view.findViewById<View>(R.id.connection_help).setOnClickListener { showApiKeyHelpDialog(activity) }
+
+            val keyLayout = UiHelper.fieldLayout(activity, view.findViewById(R.id.connection_key_host), activity.getString(R.string.login_consumer_key), defaultKey, false)
+            val secretLayout = UiHelper.fieldLayout(activity, view.findViewById(R.id.connection_secret_host), activity.getString(R.string.login_consumer_secret), defaultSecret, true)
+            val key = keyLayout.findViewById<TextInputEditText>(R.id.field_input)
+            val secret = secretLayout.findViewById<TextInputEditText>(R.id.field_input)
+            if (buildKey.isNotEmpty()) view.findViewById<View>(R.id.connection_debug).visibility = View.VISIBLE
+
+            val rawScopes = UiHelper.disclosure(activity, view.findViewById(R.id.connection_raw_scopes), "settings.rawScopes", R.string.settings_scope_advanced)
+            val scopes = UiHelper.field(
+                activity, rawScopes, activity.getString(R.string.settings_scope_advanced),
+                state.optString("scopes", "grades|studies|payments|cards|adm_documents|crstests|offline_access"), false
+            )
+            val features = linkedMapOf(
+                "payments" to R.string.tool_payments_title,
+                "cards" to R.string.cards_title,
+                "documents" to R.string.documents_title,
+                "tests" to R.string.settings_tests_access,
+                "profile" to R.string.settings_profile_access,
+                "lecturer" to R.string.lecturer_title
+            )
+            val choicesHost = view.findViewById<LinearLayout>(R.id.connection_choices)
+            var updatingChoices = false
+            val choices = linkedMapOf<String, MaterialSwitch>()
+            for ((feature, title) in features) {
+                val choice = UiHelper.switchRow(activity, choicesHost, activity.getString(title), FeatureAccess.selected(scopes.text.toString(), feature))
+                choices[feature] = choice
+                choice.setOnCheckedChangeListener { _, enabled ->
+                    if (!updatingChoices) {
+                        val next = FeatureAccess.change(scopes.text.toString(), feature, enabled)
+                        if (next != scopes.text.toString()) scopes.setText(next)
+                    }
+                }
+            }
+            UiHelper.watchSearch(scopes) { value ->
+                updatingChoices = true
+                for ((feature, choice) in choices) {
+                    val selected = FeatureAccess.selected(value, feature)
+                    if (choice.isChecked != selected) choice.isChecked = selected
+                }
+                updatingChoices = false
+            }
+
+            view.findViewById<View>(R.id.connection_login).setOnClickListener {
+                val k = key.text.toString().trim().ifEmpty { buildKey }
+                val sec = secret.text.toString().trim().ifEmpty { buildSecret }
+                if (k.isNotEmpty() && sec.isNotEmpty()) {
+                    val clean = LinkedHashSet<String>()
+                    for (part in scopes.text.toString().trim().split("|")) {
+                        val trimmed = part.trim()
+                        if (trimmed.isNotEmpty()) clean.add(trimmed)
+                    }
+                    clean.addAll(listOf("grades", "studies", "offline_access"))
+                    listener.onBeginOAuth(k, sec, clean.joinToString("|"))
+                } else {
+                    advanced.visibility = View.VISIBLE
+                    if (k.isEmpty()) keyLayout.error = activity.getString(R.string.login_key_required)
+                    if (sec.isEmpty()) secretLayout.error = activity.getString(R.string.login_secret_required)
+                }
+            }
+            if (pending) bindPinSection(activity, view, state, detectedPin, listener)
+            box.addView(view)
+        }
+
+        private fun bindPinSection(activity: MainActivity, view: View, state: JSONObject, detectedPin: String?, listener: AccountListener) {
+            view.findViewById<View>(R.id.connection_pin_section).visibility = View.VISIBLE
+            val initialPin = detectedPin ?: ""
+            val pinLayout = UiHelper.fieldLayout(activity, view.findViewById(R.id.connection_pin_host), activity.getString(R.string.account_pin_field_hint), initialPin, true)
+            val pin = pinLayout.findViewById<TextInputEditText>(R.id.field_input)
+            if (initialPin.isNotEmpty()) view.findViewById<View>(R.id.connection_pin_detected).visibility = View.VISIBLE
+            val confirmPin = Runnable {
+                val value = pin.text.toString().trim().replace(Regex("\\s+"), "")
+                if (value.isEmpty()) pinLayout.error = activity.getString(R.string.account_toast_enter_pin) else listener.onConfirmPin(value)
+            }
+            pin.isSingleLine = true
+            // setSingleLine replaces the password transformation on Android.
+            pin.transformationMethod = PasswordTransformationMethod.getInstance()
+            pin.imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+            pin.setOnEditorActionListener { _, action, _ ->
+                if (action != EditorInfo.IME_ACTION_DONE) return@setOnEditorActionListener false
+                confirmPin.run()
+                true
+            }
+            view.findViewById<View>(R.id.connection_paste).setOnClickListener {
+                try {
+                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                    val text = clipboard?.primaryClip?.takeIf { clipboard.hasPrimaryClip() && it.itemCount > 0 }?.getItemAt(0)?.text
+                    if (text != null) {
+                        pin.setText(text.toString().trim().replace(Regex("\\s+"), ""))
+                        Toast.makeText(activity, R.string.account_toast_pin_pasted, Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("AccountScreenController", e)
+                }
+            }
+            view.findViewById<View>(R.id.connection_confirm).setOnClickListener { confirmPin.run() }
+            view.findViewById<View>(R.id.connection_return).setOnClickListener {
+                UiHelper.browser(
+                    activity,
+                    "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" + OAuth.encode(state.optString("requestToken"))
+                )
+            }
         }
 
         /** Fills `view_account_profile`; empty values hide their line. */

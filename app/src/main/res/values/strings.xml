@@ -628,6 +628,8 @@
     <string name="login_step_pin">Krok 2 z 2: wklej PIN ze strony USOS i połącz konto.</string>
     <string name="login_ready">Klucz jest gotowy. Krok 1 z 2: otwórz logowanie USOS.</string>
     <string name="login_setup">Jednorazowo dodaj klucz aplikacji poniżej. Następnie otwórz logowanie USOS.</string>
+    <string name="login_consumer_key" translatable="false">Consumer Key</string>
+    <string name="login_consumer_secret" translatable="false">Consumer Secret</string>
     <string name="login_key_required">Wpisz Consumer Key</string>
     <string name="login_secret_required">Wpisz Consumer Secret</string>
     <string name="attendance_type_required">Wybierz rodzaj zajęć</string>

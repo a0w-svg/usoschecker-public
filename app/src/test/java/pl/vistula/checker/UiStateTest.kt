@@ -105,3 +105,18 @@ class UiStateTest {
         assertEquals(Tabs.STAFF_DIRECTORY, Tabs.fromExternal(17))
     }
 }
+
+class TasksKeysTest {
+    @Test
+    fun defaultsAreAmongTheAllowedKeys() {
+        val tasks = TasksUiState()
+        assertTrue(tasks.filter in TasksUiState.FILTERS)
+        assertTrue(tasks.order in TasksUiState.ORDERS)
+    }
+
+    @Test
+    fun keysAreUniqueSoSavedStateStaysUnambiguous() {
+        assertEquals(TasksUiState.FILTERS.size, TasksUiState.FILTERS.toSet().size)
+        assertEquals(TasksUiState.ORDERS.size, TasksUiState.ORDERS.toSet().size)
+    }
+}

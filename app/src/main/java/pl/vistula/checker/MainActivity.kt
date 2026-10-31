@@ -195,7 +195,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-        tasks.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due") ?: "due"
+        tasks.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", null)
+            ?.takeIf { it in pl.vistula.checker.ui.TasksUiState.ORDERS } ?: pl.vistula.checker.ui.TasksUiState.ORDER_DUE
         grades.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name") ?: "name"
         schedule.mode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
         api.favorites = HashSet(

@@ -62,6 +62,7 @@ import pl.vistula.checker.core.TaskTools
 import pl.vistula.checker.ui.AccountScreenController
 import pl.vistula.checker.ui.ApiErrorUi
 import pl.vistula.checker.ui.ApiExplorerController
+import pl.vistula.checker.ui.TabSections
 import pl.vistula.checker.ui.Tabs
 import pl.vistula.checker.ui.Appearance
 import pl.vistula.checker.ui.AttendanceScreenController
@@ -476,7 +477,8 @@ class MainActivity : AppCompatActivity() {
                 refreshStudentServices("affiliation")
                 return
             }
-            val targetSections = when (target) { Tabs.PAYMENTS -> listOf("payments", "remittances"); Tabs.NEWS -> listOf("news"); Tabs.CARDS -> listOf("cards"); Tabs.DOCUMENTS -> listOf("documents"); Tabs.LECTURER -> if (AccountRole.lecturer(serviceAccountState())) listOf("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports") else emptyList(); Tabs.ACADEMIC_EXTRAS -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses"); Tabs.STAFF_DIRECTORY -> listOf("staffDirectory"); else -> emptyList() }; val section = targetSections.firstOrNull()
+            val targetSections = TabSections.forTab(target, AccountRole.lecturer(serviceAccountState()))
+            val section = targetSections.firstOrNull()
             if (target == Tabs.NEWS && !connected() && CampusAffiliation.selected(state).isEmpty()) return
             val services = studentServices()
             val mobile = services.optJSONObject("mcard")

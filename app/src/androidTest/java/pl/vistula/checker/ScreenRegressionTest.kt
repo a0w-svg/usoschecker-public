@@ -298,11 +298,11 @@ class ScreenRegressionTest {
     @Test
     fun apiModuleShortcutsAndPolishSearchReachEveryModule() {
         main { rule.activity.openApiModule("cards") }
-        has("cards/mcard2\nGet information about student card and related mcard (mLegitymacje)")
+        ApiCatalogTestHelper.has(rule.activity, "cards/mcard2")
         main { rule.activity.openApiModule("") }
         search("legitymacje")
-        has("cards/mcard2\nGet information about student card and related mcard (mLegitymacje)")
-        absent("adm_documents/document\nGet information on administration document by id.")
+        ApiCatalogTestHelper.has(rule.activity, "cards/mcard2")
+        ApiCatalogTestHelper.absent(rule.activity, "adm_documents/document")
         main { assertEquals("legitymacje", input(decor())!!.text.toString()) }
         capture("api-modules")
         main { rule.activity.openApiMethod("services/cards/mcard_order2", mapOf("order_id" to "42")) }

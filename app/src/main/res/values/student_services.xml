@@ -55,6 +55,7 @@
     <string name="services_demo_action">Wersja demonstracyjna nie wysyła zamówień ani nie pobiera plików konta.</string>
     <string name="services_connect_first">Połącz konto USOS, aby wykonać tę operację.</string>
 <string name="api_modules_count">Moduły: %1$d · metody w katalogu: %2$d</string>
+    <string name="api_module_label" translatable="false">%1$s · %2$s (%3$d)</string>
     <string name="api_modules_all">Wszystkie moduły</string>
 <string name="api_export_response">Zapisz odpowiedź / plik</string>
     <string name="api_result_fields">Pola odpowiedzi</string>

@@ -7,6 +7,10 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.view.Gravity
 import android.view.View
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textfield.TextInputEditText
+import android.widget.TextView
+import android.view.LayoutInflater
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -110,30 +114,24 @@ class ApiExplorerController private constructor() {
                         .show()
                 }
             }
-            if (favoritesOnly) {
-                UiHelper.note(activity, content, activity.getString(R.string.api_fav_filter), Tone.MUTED)
-            }
-            UiHelper.note(activity, content, activity.getString(R.string.api_catalog_scope_note), Tone.MUTED)
+            val screen = LayoutInflater.from(activity).inflate(R.layout.screen_api_catalog, content, false)
+            content.addView(screen)
+            if (favoritesOnly) screen.findViewById<View>(R.id.api_filter_note).visibility = View.VISIBLE
             val modules = ApiCatalog.modules(catalog)
-            UiHelper.note(
-                activity,
-                content,
-                activity.getString(R.string.api_modules_count, modules.size, catalog.length()),
-                Tone.MUTED
-            )
+            screen.findViewById<TextView>(R.id.api_modules_note).text =
+                activity.getString(R.string.api_modules_count, modules.size, catalog.length())
+
             val moduleValues = ArrayList<String>()
             val moduleLabels = ArrayList<String>()
             moduleValues.add("")
             moduleLabels.add(activity.getString(R.string.api_modules_all))
             for ((key, value) in modules) {
                 moduleValues.add(key)
-                moduleLabels.add("${ApiCatalog.label(key)} · $key ($value)")
+                moduleLabels.add(activity.getString(R.string.api_module_label, ApiCatalog.label(key), key, value))
             }
-            val modulePicker = Spinner(activity)
-            modulePicker.contentDescription = activity.getString(R.string.api_module_choose)
+            val modulePicker = screen.findViewById<Spinner>(R.id.api_module_picker)
             modulePicker.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, moduleLabels)
             modulePicker.setSelection(max(0, moduleValues.indexOf(activity.getApiModule())))
-            content.addView(modulePicker, LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 56)))
             modulePicker.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     if (modulePicker.isAttachedToWindow && moduleValues[position] != activity.getApiModule()) {
@@ -144,17 +142,16 @@ class ApiExplorerController private constructor() {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
 
-            val search = UiHelper.searchField(activity, content, activity.getString(R.string.api_search_hint), apiQuery, null, null)
-            val list = LinearLayout(activity)
-            list.orientation = LinearLayout.VERTICAL
-            content.addView(list)
-
+            val searchLayout = screen.findViewById<TextInputLayout>(R.id.api_search)
+            searchLayout.hint = activity.getString(R.string.api_search_hint)
+            val search = searchLayout.findViewById<TextInputEditText>(R.id.field_input)
+            search.setText(apiQuery)
+            val list = screen.findViewById<LinearLayout>(R.id.api_list)
             populateMethods(activity, list, catalog, apiQuery, apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
-
             UiHelper.watchSearch(search) { value ->
-                    onQueryChanged.accept(value)
-                    populateMethods(activity, list, catalog, value, apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
-}
+                onQueryChanged.accept(value)
+                populateMethods(activity, list, catalog, value, apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
+            }
         }
 
         private fun populateMethods(
@@ -171,36 +168,24 @@ class ApiExplorerController private constructor() {
             list.removeAllViews()
             var count = 0
             var shown = 0
-
+            val account = activity.serviceAccountState()
+            val module = activity.getApiModule()
+            val inflater = LayoutInflater.from(activity)
             try {
                 for (i in 0 until catalog.length()) {
                     val entry = catalog.getJSONObject(i)
                     val name = entry.getString("name")
-                    val brief = entry.optString("brief_description").trim()
-                    if (ApiCatalog.visibleForAccount(name, activity.serviceAccountState()) && (!favoritesOnly || favorites.contains(name)) && ApiCatalog.matches(entry, activity.getApiModule(), search)) {
-                        ++count
-                        if (shown++ < apiLimit) {
-                            val b = UiHelper.button(
-                                activity,
-                                name.substring("services/".length) + "\n" + brief,
-                                { onShowMethod.accept(name) },
-                                false
-                            )
-                            b.gravity = Gravity.START or Gravity.CENTER_VERTICAL
-                            b.textSize = 13.0f
-                            b.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-                            b.setPadding(
-                                UiHelper.dp(activity, 8),
-                                UiHelper.dp(activity, 12),
-                                UiHelper.dp(activity, 8),
-                                UiHelper.dp(activity, 12)
-                            )
-                            list.addView(b, LinearLayout.LayoutParams(-1, -2))
-                            val divider = View(activity)
-                            divider.setBackgroundColor(activity.getColor(R.color.app_outline_soft))
-                            list.addView(divider, LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 1)))
-                        }
+                    if (!ApiCatalog.visibleForAccount(name, account) || (favoritesOnly && !favorites.contains(name)) ||
+                        !ApiCatalog.matches(entry, module, search)) continue
+                    count++
+                    if (shown++ >= apiLimit) continue
+                    val row = inflater.inflate(R.layout.item_api_method, list, false)
+                    row.findViewById<TextView>(R.id.api_method_name).text = name.substring("services/".length)
+                    row.findViewById<TextView>(R.id.api_method_brief).apply {
+                        showIfNotEmpty(entry.optString("brief_description").trim())
                     }
+                    row.findViewById<View>(R.id.api_method_row).setOnClickListener { onShowMethod.accept(name) }
+                    list.addView(row)
                 }
             } catch (_: JSONException) {
             }

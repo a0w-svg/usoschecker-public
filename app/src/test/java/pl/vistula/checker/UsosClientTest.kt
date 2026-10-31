@@ -714,3 +714,73 @@ class UsosClientTest {
         assertTrue(captured[0].contains("oauth_verifier=12345678"))
     }
 }
+
+class UsosClientRetryTest {
+    private fun state() = JSONObject().put("key", "k").put("secret", "s").put("token", "t").put("tokenSecret", "ts").put("scopes", "grades|studies|offline_access")
+
+    private class OkConnection : HttpURLConnection(URL("https://usosapps.vistula.edu.pl/")) {
+        override fun connect() {}
+        override fun disconnect() {}
+        override fun usingProxy() = false
+        override fun getResponseCode() = 200
+        override fun getInputStream(): InputStream = ByteArrayInputStream("{\"ok\":true}".toByteArray(StandardCharsets.UTF_8))
+        override fun getOutputStream(): OutputStream = ByteArrayOutputStream()
+        override fun getContentType() = "application/json"
+    }
+
+    private class TimeoutConnection : HttpURLConnection(URL("https://usosapps.vistula.edu.pl/")) {
+        override fun connect() {}
+        override fun disconnect() {}
+        override fun usingProxy() = false
+        override fun getResponseCode(): Int = throw SocketTimeoutException("read timed out")
+        override fun getOutputStream(): OutputStream = ByteArrayOutputStream()
+    }
+
+    @Test
+    fun aTimedOutGetIsRepeatedWithFreshSignatureAndSucceeds() {
+        val urls = mutableListOf<String>()
+        val pauses = mutableListOf<Long>()
+        val client = UsosClient(state(), {}) { address ->
+            urls.add(address)
+            if (urls.size < 3) TimeoutConnection() else OkConnection()
+        }.withRetryPause { pauses.add(it) }
+        val text = client.request("GET", "services/users/user", mapOf("fields" to "id"), true, "t", "ts")
+        assertEquals("{\"ok\":true}", text)
+        assertEquals(3, urls.size)
+        assertEquals(2, pauses.size)
+        assertTrue(pauses[0] in 400..550 && pauses[1] in 1200..1350)
+        // oauth_nonce differs between attempts, so a retry is never rejected as a replay
+        val nonces = urls.map { Regex("oauth_nonce=([^&]+)").find(it)!!.groupValues[1] }
+        assertEquals(3, nonces.toSet().size)
+    }
+
+    @Test
+    fun aGetThatKeepsTimingOutStopsAfterTwoRetries() {
+        val attempts = AtomicInteger()
+        val client = UsosClient(state(), {}) { _ ->
+            attempts.incrementAndGet()
+            TimeoutConnection()
+        }.withRetryPause { }
+        try {
+            client.request("GET", "services/users/user", emptyMap(), true, "t", "ts")
+            fail("must fail after the retries are used up")
+        } catch (e: SocketTimeoutException) {
+            assertEquals(3, attempts.get())
+        }
+    }
+
+    @Test
+    fun postRequestsAreNeverRepeated() {
+        val attempts = AtomicInteger()
+        val client = UsosClient(state(), {}) { _ ->
+            attempts.incrementAndGet()
+            TimeoutConnection()
+        }.withRetryPause { }
+        try {
+            client.request("POST", "services/users/user", emptyMap(), true, "t", "ts")
+            fail("a POST must not be retried")
+        } catch (e: SocketTimeoutException) {
+            assertEquals(1, attempts.get())
+        }
+    }
+}

@@ -120,3 +120,18 @@ class TasksKeysTest {
         assertEquals(TasksUiState.ORDERS.size, TasksUiState.ORDERS.toSet().size)
     }
 }
+
+class GradesKeysTest {
+    @Test
+    fun defaultsAreAmongTheAllowedKeys() {
+        val grades = GradesUiState()
+        assertTrue(grades.type in GradesUiState.TYPES)
+        assertTrue(grades.order in GradesUiState.ORDERS)
+    }
+
+    @Test
+    fun keysAreUnique() {
+        assertEquals(GradesUiState.TYPES.size, GradesUiState.TYPES.toSet().size)
+        assertEquals(GradesUiState.ORDERS.size, GradesUiState.ORDERS.toSet().size)
+    }
+}

@@ -5,8 +5,8 @@ import android.os.Bundle
 /** Filter, sort and expansion state of the Grades screen; survives recreation through [save] / [restore]. */
 class GradesUiState {
     var query: String = ""
-    var type: String = "all"
-    var order: String = "name"
+    var type: String = TYPE_ALL
+    var order: String = ORDER_NAME
     var filtersExpanded: Boolean = false
     var semester: String = ""
     var semesterInitialized: Boolean = false
@@ -20,9 +20,9 @@ class GradesUiState {
 
     fun resetFilters() {
         clearSemester()
-        type = "all"
+        type = TYPE_ALL
         query = ""
-        order = "name"
+        order = ORDER_NAME
     }
 
     fun select(term: String) {
@@ -44,13 +44,20 @@ class GradesUiState {
 
     fun restore(bundle: Bundle) {
         query = bundle.getString("gradeQuery", "")
-        type = bundle.getString("gradeType", "all")
-        order = bundle.getString("gradeOrder", order)
+        type = bundle.getString("gradeType", TYPE_ALL)?.takeIf { it in TYPES } ?: TYPE_ALL
+        order = bundle.getString("gradeOrder", order)?.takeIf { it in ORDERS } ?: ORDER_NAME
         filtersExpanded = bundle.getBoolean("gradeFiltersExpanded")
         bundle.getBundle("gradeSemesterExpansion")?.let { expanded ->
             for (term in expanded.keySet()) semesterExpansion[term] = expanded.getBoolean(term)
         }
         semester = bundle.getString("semester", "")
         semesterInitialized = bundle.getBoolean("semesterInitialized", bundle.containsKey("semester"))
+    }
+
+    companion object {
+        const val TYPE_ALL = "all"
+        const val ORDER_NAME = "name"
+        val TYPES = arrayOf(TYPE_ALL, "labs", "exercises", "numeric", "other", "retakes")
+        val ORDERS = arrayOf(ORDER_NAME, "recent", "value")
     }
 }

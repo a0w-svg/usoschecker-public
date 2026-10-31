@@ -106,7 +106,7 @@ class GradesScreenController private constructor() {
             val snapshot = Snapshot.from(raw)
             val today = LocalDate.now(UsosClient.ZONE)
             val terms = GradeSemesters.ordered(snapshot, today)
-            val types = arrayOf("all", "labs", "exercises", "numeric", "other", "retakes")
+            val types = GradesUiState.TYPES
             val typeLabels = intArrayOf(
                 R.string.grades_chip_all,
                 R.string.grades_type_labs_label,
@@ -115,7 +115,7 @@ class GradesScreenController private constructor() {
                 R.string.grades_chip_other,
                 R.string.grades_chip_retakes
             )
-            val orders = arrayOf("name", "recent", "value")
+            val orders = GradesUiState.ORDERS
             val orderLabels = intArrayOf(
                 R.string.grades_sort_subject,
                 R.string.grades_sort_recent,
@@ -165,13 +165,13 @@ class GradesScreenController private constructor() {
                     UiHelper.MUTED
                 )
             }
-            if (gradeType != "all" || gradeOrder != "name") {
+            if (gradeType != GradesUiState.TYPE_ALL || gradeOrder != GradesUiState.ORDER_NAME) {
                 val active = ArrayList<String>()
                 for (i in types.indices) {
-                    if (gradeType != "all" && types[i] == gradeType) active.add(activity.getString(typeLabels[i]))
+                    if (gradeType != GradesUiState.TYPE_ALL && types[i] == gradeType) active.add(activity.getString(typeLabels[i]))
                 }
                 for (i in orders.indices) {
-                    if (gradeOrder != "name" && orders[i] == gradeOrder) active.add(activity.getString(orderLabels[i]))
+                    if (gradeOrder != GradesUiState.ORDER_NAME && orders[i] == gradeOrder) active.add(activity.getString(orderLabels[i]))
                 }
                 val clear = ScheduleScreenController.headerButton(activity, "${active.joinToString(" · ")} ×", onResetFilters)
                 clear.id = R.id.grades_active_filters
@@ -224,7 +224,7 @@ class GradesScreenController private constructor() {
                 menu.menu.add(0, 3, 4, R.string.grades_calc_button)
                 menu.menu.add(0, 4, 5, R.string.grades_refresh)
                 menu.menu.add(0, 5, 6, R.string.grades_filter_reset).isEnabled = semester.isNotEmpty() ||
-                    gradeType != "all" || gradeOrder != "name" || search.text.toString().trim().isNotEmpty()
+                    gradeType != GradesUiState.TYPE_ALL || gradeOrder != GradesUiState.ORDER_NAME || search.text.toString().trim().isNotEmpty()
                 menu.menu.add(0, 6, 7, R.string.grades_data_status)
                 menu.setOnMenuItemClickListener { item ->
                     val id = item.itemId
@@ -294,7 +294,7 @@ class GradesScreenController private constructor() {
                     val termRows = GradeSemesters.inTerm(visible, term)
                     val pendingCourses = GradeBrowser.ungraded(snapshot, term, gradeType, currentQuery)
                     pendingCount += pendingCourses.size
-                    if (termRows.isEmpty() && pendingCourses.isEmpty() && (currentQuery.trim().isNotEmpty() || gradeType != "all")) continue
+                    if (termRows.isEmpty() && pendingCourses.isEmpty() && (currentQuery.trim().isNotEmpty() || gradeType != GradesUiState.TYPE_ALL)) continue
                     val label = when {
                         term.isEmpty() -> activity.getString(R.string.grades_semester_unknown)
                         snapshot.terms.containsKey(term) && snapshot.terms[term]!!.name.isNotEmpty() -> snapshot.terms[term]!!.name
@@ -360,7 +360,7 @@ class GradesScreenController private constructor() {
                         val matchesTest = StudentSearch.matches(currentQuery, ctr.courseName, ctr.testName, ctr.grade, ctr.date)
                         if (!renderedTestIds.contains(ctr.id) &&
                             (semester.isEmpty() || semester == GradeSemesters.testTerm(snapshot, ctr)) &&
-                            (courseVisible || (gradeType == "all" && matchesTest))
+                            (courseVisible || (gradeType == GradesUiState.TYPE_ALL && matchesTest))
                         ) {
                             unassigned.add(ctr)
                             extraTestCount++

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Text roles: sp sizes live here, not in Kotlin. UiHelper maps a requested size to the exact role. -->
+    <style name="Vistula.Text" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/app_ink</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+    </style>
+    <style name="Vistula.Text.Title">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Vistula.Text.Heading">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Vistula.Text.Heading18">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Vistula.Text.Subheading">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Vistula.Text.Strong16">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Vistula.Text.Strong">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Vistula.Text.Strong14">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="Vistula.Text.Note">
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="Vistula.Text.Body">
+        <item name="android:textSize">15sp</item>
+    </style>
+    <style name="Vistula.Text.BodySmall">
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="Vistula.Text.Caption">
+        <item name="android:textSize">13sp</item>
+    </style>
+    <style name="Vistula.Text.Micro">
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="Vistula.Text.Overline">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.12</item>
+    </style>
+
+    <style name="Widget.Vistula.Button" parent="Widget.Material3.Button">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:maxLines">4</item>
+        <item name="android:textColor">@color/vistula_button_text</item>
+        <item name="backgroundTint">@color/vistula_button_tint</item>
+        <item name="cornerRadius">14dp</item>
+    </style>
+    <style name="Widget.Vistula.Button.Primary">
+        <item name="android:textColor">@color/vistula_button_text_primary</item>
+        <item name="backgroundTint">@color/vistula_button_tint_primary</item>
+    </style>
+</resources>

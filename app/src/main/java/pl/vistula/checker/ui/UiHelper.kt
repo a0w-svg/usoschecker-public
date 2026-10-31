@@ -127,71 +127,87 @@ class UiHelper private constructor() {
             return (value * context.resources.displayMetrics.density).roundToInt()
         }
 
-        @JvmStatic
-        fun text(context: Context, value: String?, size: Int, color: Int, bold: Boolean): TextView {
-            val t = TextView(context)
+        /** Text role from `res/values/vistula_components.xml` for an exact size and weight, or null if none matches. */
+        private fun textStyle(size: Int, bold: Boolean): Int? = if (bold) {
+            when (size) {
+                28 -> R.style.Vistula_Text_Title
+                20 -> R.style.Vistula_Text_Heading
+                18 -> R.style.Vistula_Text_Heading18
+                17 -> R.style.Vistula_Text_Subheading
+                16 -> R.style.Vistula_Text_Strong16
+                15 -> R.style.Vistula_Text_Strong
+                14 -> R.style.Vistula_Text_Strong14
+                else -> null
+            }
+        } else {
+            when (size) {
+                16 -> R.style.Vistula_Text_Note
+                15 -> R.style.Vistula_Text_Body
+                14 -> R.style.Vistula_Text_BodySmall
+                13 -> R.style.Vistula_Text_Caption
+                12 -> R.style.Vistula_Text_Micro
+                else -> null
+            }
+        }
+
+        private fun styleText(t: TextView, value: String?, size: Int, color: Int, bold: Boolean): TextView {
             t.text = value
-            t.textSize = size.toFloat()
-            t.setTextColor(foreground(context, color))
-            t.setLineSpacing(dp(context, 3).toFloat(), 1f)
-            if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
+            val style = textStyle(size, bold)
+            if (style != null) {
+                t.setTextAppearance(style)
+            } else {
+                t.textSize = size.toFloat()
+                if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
+            }
+            // INK and GREEN are the layout's own text colour; anything else is resolved for the current theme.
+            if (color != INK && color != GREEN) t.setTextColor(foreground(t.context, color))
             return t
         }
 
         @JvmStatic
+        fun text(context: Context, value: String?, size: Int, color: Int, bold: Boolean): TextView {
+            val t = LayoutInflater.from(context).inflate(R.layout.view_text, inflateHost(context), false) as TextView
+            return styleText(t, value, size, color, bold)
+        }
+
+        @JvmStatic
         fun add(context: Context, target: LinearLayout, value: String?, size: Int, color: Int, bold: Boolean) {
-            val t = text(context, value, max(15, size), color, bold)
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 12)
-            target.addView(t, p)
+            val t = LayoutInflater.from(context).inflate(R.layout.view_text_block, target, false) as TextView
+            target.addView(styleText(t, value, max(15, size), color, bold))
         }
 
         @JvmStatic
         fun card(context: Context, parent: LinearLayout, color: Int): LinearLayout {
-            val box = LinearLayout(context)
-            box.orientation = LinearLayout.VERTICAL
-            box.setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 8))
-            val shape = GradientDrawable()
-            shape.setColor(background(context, color))
-            shape.cornerRadius = dp(context, 14).toFloat()
-            box.background = shape
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 14)
-            parent.addView(box, p)
+            val box = LayoutInflater.from(context).inflate(R.layout.view_card, parent, false) as LinearLayout
+            if (color != Color.WHITE) box.backgroundTintList = ColorStateList.valueOf(background(context, color))
+            parent.addView(box)
             return box
         }
 
         @JvmStatic
-        fun tray(context: Context, parent: LinearLayout): LinearLayout = card(context, parent, Color.WHITE).apply {
-            setPadding(0, 0, 0, 0)
-            clipToOutline = true
+        fun tray(context: Context, parent: LinearLayout): LinearLayout {
+            val box = LayoutInflater.from(context).inflate(R.layout.view_tray, parent, false) as LinearLayout
+            parent.addView(box)
+            return box
         }
 
         @JvmStatic
         fun trayDivider(context: Context, parent: LinearLayout) {
-            parent.addView(View(context).apply { setBackgroundColor(context.getColor(R.color.app_outline_inner)) },
-                LinearLayout.LayoutParams(-1, dp(context, 1)).apply { marginStart = dp(context, 16); marginEnd = dp(context, 16) })
+            parent.addView(LayoutInflater.from(context).inflate(R.layout.view_tray_divider, parent, false))
         }
 
         @JvmStatic
         fun sectionLabel(context: Context, parent: LinearLayout, title: String) {
-            parent.addView(text(context, title, 11, MUTED, false).apply {
-                isAllCaps = true
-                letterSpacing = .12f
-                setPadding(dp(context, 4), dp(context, 24), dp(context, 4), dp(context, 14))
-                ViewCompat.setAccessibilityHeading(this, true)
-            })
+            val label = LayoutInflater.from(context).inflate(R.layout.view_section_label, parent, false) as TextView
+            label.text = title
+            ViewCompat.setAccessibilityHeading(label, true)
+            parent.addView(label)
         }
 
         @JvmStatic
         fun section(context: Context, parent: LinearLayout, ignoredColor: Int): LinearLayout {
-            val box = LinearLayout(context)
-            box.orientation = LinearLayout.VERTICAL
-            box.setPadding(dp(context, 8), dp(context, 16), dp(context, 8), dp(context, 12))
-            box.setBackgroundResource(R.drawable.bg_section_divider)
-            val params = LinearLayout.LayoutParams(-1, -2)
-            params.bottomMargin = dp(context, 8)
-            parent.addView(box, params)
+            val box = LayoutInflater.from(context).inflate(R.layout.view_section, parent, false) as LinearLayout
+            parent.addView(box)
             return box
         }
 
@@ -227,48 +243,26 @@ class UiHelper private constructor() {
             return body
         }
 
+        /** Detached widgets are inflated against a LinearLayout parent so their XML width and margins are kept for callers that add them to one. */
+        private fun inflateHost(context: Context): LinearLayout = LinearLayout(context)
+
         @JvmStatic
         fun button(context: Context, label: String?, action: Runnable, primary: Boolean): Button {
-            val b = MaterialButton(context)
-            b.maxLines = 4
-            b.isSingleLine = false
+            val host = inflateHost(context)
+            val layout = if (primary) R.layout.view_button_primary else R.layout.view_button
+            val b = LayoutInflater.from(context).inflate(layout, host, false) as MaterialButton
             b.text = label
-            b.isAllCaps = false
-            b.textSize = 15f
-            val states = arrayOf(intArrayOf(-android.R.attr.state_enabled), intArrayOf())
-            b.setTextColor(
-                ColorStateList(
-                    states,
-                    intArrayOf(
-                        context.getColor(R.color.app_disabled_content),
-                        context.getColor(if (primary) R.color.app_on_accent else R.color.app_ink)
-                    )
-                )
-            )
-            b.cornerRadius = dp(context, 14)
-            b.backgroundTintList = ColorStateList(
-                states,
-                intArrayOf(
-                    context.getColor(R.color.app_disabled_surface),
-                    context.getColor(if (primary) R.color.app_accent else R.color.app_inner_surface)
-                )
-            )
-            b.setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10))
-            b.minHeight = dp(context, 48)
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 8)
-            b.layoutParams = p
             b.setOnClickListener { action.run() }
             return b
         }
 
         @JvmStatic
         fun actionRow(context: Context, label: String?, action: Runnable, ignoredPrimary: Boolean): Button {
-            val button = button(context, label, action, false)
-            button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-            button.gravity = Gravity.START or Gravity.CENTER_VERTICAL
-            button.setPadding(dp(context, 8), dp(context, 10), dp(context, 8), dp(context, 10))
-            return button
+            val host = inflateHost(context)
+            val b = LayoutInflater.from(context).inflate(R.layout.view_action_row, host, false) as MaterialButton
+            b.text = label
+            b.setOnClickListener { action.run() }
+            return b
         }
 
         @JvmStatic

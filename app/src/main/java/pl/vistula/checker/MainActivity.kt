@@ -52,6 +52,7 @@ import kotlin.math.max
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import pl.vistula.checker.core.AccountRole
 import pl.vistula.checker.core.ApiCatalog
 import pl.vistula.checker.core.CampusAffiliation
 import pl.vistula.checker.core.LessonTime
@@ -551,7 +552,7 @@ class MainActivity : AppCompatActivity() {
                 refreshStudentServices("affiliation")
                 return
             }
-            val targetSections = when (target) { 8 -> listOf("payments"); 11 -> listOf("news"); 13 -> listOf("cards"); 14 -> listOf("documents"); 15 -> listOf("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports"); 16 -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications"); 17 -> listOf("staffDirectory"); else -> emptyList() }; val section = targetSections.firstOrNull()
+            val targetSections = when (target) { 8 -> listOf("payments", "remittances"); 11 -> listOf("news"); 13 -> listOf("cards"); 14 -> listOf("documents"); 15 -> if (AccountRole.lecturer(serviceAccountState())) listOf("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports") else emptyList(); 16 -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses"); 17 -> listOf("staffDirectory"); else -> emptyList() }; val section = targetSections.firstOrNull()
             if (target == 11 && !connected() && CampusAffiliation.selected(state).isEmpty()) return
             val services = studentServices()
             val mobile = services.optJSONObject("mcard")
@@ -559,7 +560,7 @@ class MainActivity : AppCompatActivity() {
             val physicalCardsMissing = section == "cards" && services.optJSONObject("physicalCards") == null &&
                 mobile != null && mobile.optLong("fetchedAt") > 0 && mobile.optString("error").isEmpty() &&
                 StudentServices.hasScope(state.optString("scopes"), "cards") && state.optLong("retryAt") <= System.currentTimeMillis()
-            val optionalScopes = setOf("news", "teaching", "lecturerGroups", "lecturerMeetings", "lecturerAttendance", "lecturerReports", "staffDirectory", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+            val optionalScopes = setOf("news", "teaching", "lecturerGroups", "lecturerMeetings", "lecturerAttendance", "lecturerReports", "staffDirectory", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
             val staleSections = targetSections.filter { candidate ->
                 val allowed = candidate in optionalScopes ||
                     StudentServices.hasScope(state.optString("scopes"), StudentServiceLoader.requiredScope(candidate))
@@ -962,7 +963,7 @@ class MainActivity : AppCompatActivity() {
                     { tq -> taskQuery = tq },
                     taskCallback()
                 )
-                8 -> PaymentsScreenController.render(this, content, display(), state, connected()) { refreshStudentServices("payments") }
+                8 -> PaymentsScreenController.render(this, content, display(), state, connected(), studentServices()) { refreshStudentServices("payments", "remittances") }
                 9 -> GpaSimulatorController.render(
                     this,
                     content,
@@ -1127,7 +1128,11 @@ class MainActivity : AppCompatActivity() {
                 for (sec in sections) {
                     val secScope = StudentServiceLoader.requiredScope(sec)
                     if (sec in scopeOptional || StudentServices.hasScope(state.optString("scopes"), secScope)) {
-                        StudentServiceLoader.refresh(repository, sec)
+                        try {
+                            StudentServiceLoader.refresh(repository, sec)
+                        } catch (_: Exception) {
+                            // Ensure remaining sections in batch are loaded so all tables receive data
+                        }
                     }
                 }
                 repository.read()
@@ -1754,7 +1759,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun <T> task(job: Job<T>, done: Done<T>, failed: Consumer<String>) {
-        if (busy || isDestroyed) return
+        if (isDestroyed) return
+        if (busy) {
+            Toast.makeText(this, R.string.loading, Toast.LENGTH_SHORT).show()
+            return
+        }
         busy = true
         updateBusy(true)
         io.execute {

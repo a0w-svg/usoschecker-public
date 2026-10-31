@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
@@ -57,7 +59,7 @@ internal fun ScopePresetRow(
     language: String,
     onScopesChanged: (String) -> Unit
 ) {
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     val options = listOf(
         "payments" to tr("Płatności", "Payments", "Платежі"),
         "cards" to tr("Legitymacja", "Student ID", "Посвідчення"),
@@ -98,7 +100,7 @@ internal fun ExperimentalLecturerWritesSettingRow(
     onReloadState: () -> Unit
 ) {
     if (!AccountRole.lecturer(state)) return
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     var enabled by remember(preferences) { mutableStateOf(LecturerWriteActions.isEnabled(preferences)) }
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -164,7 +166,7 @@ internal fun LecturerWorkspaceSection(
 ) {
     if (!AccountRole.lecturer(state)) return
     val t = VistulaDesign.tokens
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     var subTab by remember(initialTab) {
         mutableStateOf(
             when (initialTab) {
@@ -296,7 +298,11 @@ internal fun LecturerWorkspaceSection(
                                             runAsync {
                                                 val creds = repository.read()
                                                 check(SharedRepository.sameAccount(state, creds))
-                                                selectedGroupDetail = ToolServiceData.fetchGroupDetail(UsosClient(creds), creds, unitId, groupNr)
+                                                selectedGroupDetail = if (creds.optString("token") == "demo") {
+                                                    DemoStudentServices.demoGroupDetail(unitId, groupNr)
+                                                } else {
+                                                    ToolServiceData.fetchGroupDetail(UsosClient(creds), creds, unitId, groupNr)
+                                                }
                                             }
                                         }
                                     } else null
@@ -406,7 +412,11 @@ internal fun LecturerWorkspaceSection(
                                             runAsync {
                                                 val creds = repository.read()
                                                 check(SharedRepository.sameAccount(state, creds))
-                                                selectedNodeDetail = ToolServiceData.fetchNodeDetail(UsosClient(creds), creds, nodeId)
+                                                selectedNodeDetail = if (creds.optString("token") == "demo") {
+                                                    DemoStudentServices.demoNodeDetail(nodeId)
+                                                } else {
+                                                    ToolServiceData.fetchNodeDetail(UsosClient(creds), creds, nodeId)
+                                                }
                                             }
                                         }
                                     )
@@ -650,7 +660,7 @@ private fun ExperimentalAttendanceWriteCard(
     runAsync: (() -> Unit) -> Unit
 ) {
     if (!AccountRole.lecturer(state)) return
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     val enabled = preferences == null || LecturerWriteActions.isEnabled(preferences)
     val acknowledged = preferences == null || LecturerWriteActions.isAcknowledged(preferences)
     if (!enabled || !acknowledged) return
@@ -791,7 +801,7 @@ private fun ExperimentalLecturerWriteCard(
     runAsync: (() -> Unit) -> Unit
 ) {
     if (!AccountRole.lecturer(state)) return
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     val enabled = preferences == null || LecturerWriteActions.isEnabled(preferences)
     var acknowledged by remember(preferences) { mutableStateOf(preferences == null || LecturerWriteActions.isAcknowledged(preferences)) }
     var writeMode by remember { mutableStateOf("points") } // points | grade | taskProps | gradeProps
@@ -894,7 +904,14 @@ private fun ExperimentalLecturerWriteCard(
                             onValueChange = { pointsInput = it.trim() },
                             label = { Text(tr("Liczba punktów", "Points", "Кількість балів")) },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            isError = pointsInput.isNotEmpty() && pointsInput.toPointsOrNull() == null,
+                            supportingText = {
+                                if (pointsInput.isNotEmpty() && pointsInput.toPointsOrNull() == null) {
+                                    Text(tr("Podaj liczbę, np. 4,5", "Enter a number, e.g. 4.5", "Введіть число, напр. 4,5"))
+                                }
+                            }
                         )
                     } else {
                         OutlinedTextField(
@@ -902,7 +919,14 @@ private fun ExperimentalLecturerWriteCard(
                             onValueChange = { gradeOrderInput = it.trim() },
                             label = { Text(tr("Kolejność wartości oceny (order)", "Grade value order (order)", "Порядковий номер оцінки (order)")) },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            isError = gradeOrderInput.isNotEmpty() && gradeOrderInput.toIntOrNull() == null,
+                            supportingText = {
+                                if (gradeOrderInput.isNotEmpty() && gradeOrderInput.toIntOrNull() == null) {
+                                    Text(tr("Podaj liczbę całkowitą", "Enter a whole number", "Введіть ціле число"))
+                                }
+                            }
                         )
                     }
                     OutlinedTextField(
@@ -944,21 +968,21 @@ private fun ExperimentalLecturerWriteCard(
                             OutlinedTextField(
                                 value = pointsMinInput,
                                 onValueChange = { pointsMinInput = it.trim() },
-                                label = { Text("points_min (<=0)") },
+                                label = { Text(tr("Min. punktów (≤ 0)", "Min points (≤ 0)", "Мін. балів (≤ 0)")) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
                             )
                             OutlinedTextField(
                                 value = pointsMaxInput,
                                 onValueChange = { pointsMaxInput = it.trim() },
-                                label = { Text("points_max (>0)") },
+                                label = { Text(tr("Maks. punktów (> 0)", "Max points (> 0)", "Макс. балів (> 0)")) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
                             )
                             OutlinedTextField(
                                 value = pointsPrecisionInput,
                                 onValueChange = { pointsPrecisionInput = it.trim() },
-                                label = { Text("precision (0..3)") },
+                                label = { Text(tr("Dokładność (0–3)", "Precision (0–3)", "Точність (0–3)")) },
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
                             )
@@ -969,7 +993,7 @@ private fun ExperimentalLecturerWriteCard(
 
             Button(
                 enabled = nodeId.isNotBlank() && when (writeMode) {
-                    "points" -> studentId.isNotBlank() && pointsInput.toDoubleOrNull() != null
+                    "points" -> studentId.isNotBlank() && pointsInput.toPointsOrNull() != null
                     "grade" -> studentId.isNotBlank() && gradeOrderInput.toIntOrNull() != null
                     else -> namePlInput.isNotBlank() && nameEnInput.isNotBlank()
                 },
@@ -1017,7 +1041,7 @@ private fun ExperimentalLecturerWriteCard(
                                     state = creds,
                                     nodeId = nodeId,
                                     studentId = studentId,
-                                    points = pointsInput.toDouble(),
+                                    points = checkNotNull(pointsInput.toPointsOrNull()),
                                     publicComment = commentInput,
                                     lastChanged = lastChangedInput.ifBlank { null },
                                     preferences = preferences,
@@ -1086,7 +1110,7 @@ internal fun StaffDirectorySection(
     onStatusMessage: (String) -> Unit,
     runAsync: (() -> Unit) -> Unit
 ) {
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     var query by remember { mutableStateOf("") }
     var searchResults by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
     var staffSchedule by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONArray>?>(null) }
@@ -1126,13 +1150,18 @@ internal fun StaffDirectorySection(
                 singleLine = true
             )
             Button(
-                enabled = query.trim().length >= 2 && state.optString("token").isNotEmpty() && state.optString("token") != "demo",
+                enabled = query.trim().length >= 2 && state.optString("token").isNotEmpty(),
                 onClick = {
                     val q = query.trim()
                     runAsync {
-                        val creds = repository.read()
-                        check(SharedRepository.sameAccount(state, creds))
-                        searchResults = ToolServiceData.searchTeachers(UsosClient(creds), q)
+                        if (state.optString("token") == "demo") {
+                            val demoArr = JSONArray().put(JSONObject().put("id", "9901").put("first_name", "Jan").put("last_name", "Kowalski").put("room", "101"))
+                            searchResults = JSONObject().put("users", demoArr)
+                        } else {
+                            val creds = repository.read()
+                            check(SharedRepository.sameAccount(state, creds))
+                            searchResults = ToolServiceData.searchTeachers(UsosClient(creds), q)
+                        }
                     }
                 }
             ) {
@@ -1156,18 +1185,23 @@ internal fun StaffDirectorySection(
                     ItemRow(
                         title = fullName.ifEmpty { "ID: $uid" },
                         sub = sub,
-                        onClick = if (uid.isNotEmpty() && state.optString("token").isNotEmpty() && state.optString("token") != "demo") {
+                        onClick = if (uid.isNotEmpty() && state.optString("token").isNotEmpty()) {
                             {
                                 runAsync {
-                                    val creds = repository.read()
-                                    check(SharedRepository.sameAccount(state, creds))
-                                    val today = LocalDate.now(UsosClient.ZONE).toString()
-                                    val client = UsosClient(creds)
-                                    val profile = ToolServiceData.fetchStaffProfile(client, uid)
-                                    val lessons = ToolServiceData.fetchStaffSchedule(client, uid, today)
-                                    check(SharedRepository.sameAccount(creds, repository.read()))
-                                    staffProfile = profile
-                                    staffSchedule = fullName.ifEmpty { uid } to lessons
+                                    if (state.optString("token") == "demo") {
+                                        staffProfile = DemoStudentServices.demoStaffProfile(uid)
+                                        staffSchedule = (fullName.ifEmpty { uid }) to DemoStudentServices.demoStaffSchedule(uid)
+                                    } else {
+                                        val creds = repository.read()
+                                        check(SharedRepository.sameAccount(state, creds))
+                                        val today = LocalDate.now(UsosClient.ZONE).toString()
+                                        val client = UsosClient(creds)
+                                        val profile = ToolServiceData.fetchStaffProfile(client, uid)
+                                        val lessons = ToolServiceData.fetchStaffSchedule(client, uid, today)
+                                        check(SharedRepository.sameAccount(creds, repository.read()))
+                                        staffProfile = profile
+                                        staffSchedule = fullName.ifEmpty { uid } to lessons
+                                    }
                                 }
                             }
                         } else null
@@ -1220,7 +1254,7 @@ internal fun AcademicExtrasSection(
     onStatusMessage: (String) -> Unit,
     runAsync: (() -> Unit) -> Unit
 ) {
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     val services = state.optJSONObject("studentServices")
     var courseQuery by remember { mutableStateOf("") }
     var courseSearchResults by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
@@ -1236,6 +1270,10 @@ internal fun AcademicExtrasSection(
     var programmeStages by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
     var surveyDetail by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
     var mailDetail by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
+    var selectedThesis by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var selectedDormitory by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var selectedAllocationPeriod by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var selectedGuidePage by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
     fun loadSurvey(id: String) {
         if (state.optString("token") == "demo") surveyDetail = DemoStudentServices.demoSurveyDetail(id)
         else runAsync {
@@ -1278,7 +1316,7 @@ internal fun AcademicExtrasSection(
     LaunchedEffect(section, state.optString("accountSession"), live) {
         if (!live) return@LaunchedEffect
         val wanted = when (section) {
-            "services" -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+            "services" -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
             "registrations" -> listOf("registrations", "tokenRegistrations")
             "academicCalendar", "exams" -> listOf("exams", "academicCalendar")
             else -> listOf(section)
@@ -1664,6 +1702,69 @@ internal fun AcademicExtrasSection(
             }
         }
 
+        if (section == "theses" || section == "services") {
+            SectionHead(
+                title = tr("Prace dyplomowe", "Theses", "Дипломні роботи"),
+                onClick = {
+                    runAsync {
+                        StudentServiceLoader.refresh(repository, "theses")
+                        onReloadState()
+                    }
+                },
+                modifier = Modifier
+            )
+            val thesisEntry = services?.optJSONObject("theses")
+            ServiceStatusBanner(thesisEntry, language)
+            val theses = thesisEntry?.optJSONObject("data")?.optJSONArray("theses") ?: JSONArray()
+            if (theses.length() == 0) {
+                QuietLine(tr("Brak zarejestrowanych prac dyplomowych.", "No registered theses found.", "Немає зареєстрованих дипломних робіт."))
+            } else {
+                Tray {
+                    for (i in 0 until theses.length()) {
+                        if (i > 0) TrayDivider()
+                        val th = theses.getJSONObject(i)
+                        val thId = th.optString("id")
+                        val title = StudentServices.localized(th.opt("title") ?: th.opt("titles"), language).ifEmpty { thId }
+                        val sub = listOf(th.optString("type"), th.optString("status"), tr("Szczegóły pracy", "Thesis details", "Деталі роботи")).filter { it.isNotBlank() }.joinToString(" · ")
+                        ItemRow(
+                            title = title,
+                            sub = sub,
+                            onClick = if (thId.isNotEmpty()) ({
+                                if (state.optString("token") == "demo") {
+                                    selectedThesis = title to DemoStudentServices.demoThesisDetail(thId)
+                                } else runAsync {
+                                    val creds = repository.read()
+                                    check(SharedRepository.sameAccount(state, creds))
+                                    val detail = ToolServiceData.fetchThesisDetail(UsosClient(creds), thId)
+                                    check(SharedRepository.sameAccount(creds, repository.read()))
+                                    selectedThesis = title to detail
+                                }
+                            }) else null
+                        )
+                    }
+                }
+            }
+            selectedThesis?.let { (fallback, detail) ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(StudentServices.localized(detail.opt("title") ?: detail.opt("titles"), language).ifEmpty { fallback }, style = MaterialTheme.typography.titleMedium)
+                        val sup = detail.optJSONArray("supervisors") ?: JSONArray()
+                        if (sup.length() > 0) {
+                            val names = (0 until sup.length()).map { sup.optString(it) }.filter { it.isNotBlank() }.joinToString(", ")
+                            Text(tr("Promotorzy: ", "Supervisors: ", "Керівники: ") + names)
+                        }
+                        val aut = detail.optJSONArray("authors") ?: JSONArray()
+                        if (aut.length() > 0) {
+                            val names = (0 until aut.length()).map { aut.optString(it) }.filter { it.isNotBlank() }.joinToString(", ")
+                            Text(tr("Autorzy: ", "Authors: ", "Автори: ") + names)
+                        }
+                        StudentServices.localized(detail.opt("faculty_name"), language).takeIf { it.isNotBlank() }?.let { Text(tr("Wydział: ", "Faculty: ", "Факультет: ") + it) }
+                        OutlinedButton(onClick = { selectedThesis = null }) { Text(tr("Zamknij", "Close", "Закрити")) }
+                    }
+                }
+            }
+        }
+
         if (section == "mobility" || section == "academicCalendar" || section == "services") {
             SectionHead(
                 title = tr("Mobilność studencka i wymiany (Erasmus+)", "Academic mobility & exchanges (Erasmus+)", "Академічна мобільність та обміни (Erasmus+)"),
@@ -1782,25 +1883,53 @@ internal fun AcademicExtrasSection(
                 Tray {
                     var anyRow = false
                     for (i in 0 until chapters.length()) {
-                        if (anyRow) TrayDivider()
-                        anyRow = true
                         val ch = chapters.getJSONObject(i)
+                        val chTitle = StudentServices.localized(ch.opt("title"), language).ifEmpty { ch.optString("id") }
                         val pages = ch.optJSONArray("pages") ?: JSONArray()
-                        val pageTitles = (0 until pages.length()).mapNotNull {
-                            StudentServices.localized(pages.optJSONObject(it)?.opt("title"), language).takeIf { s -> s.isNotBlank() }
-                        }.joinToString(" · ")
-                        ItemRow(
-                            title = StudentServices.localized(ch.opt("title"), language).ifEmpty { ch.optString("id") },
-                            sub = pageTitles
-                        )
+                        for (j in 0 until pages.length()) {
+                            if (anyRow) TrayDivider()
+                            anyRow = true
+                            val pg = pages.getJSONObject(j)
+                            val pgId = pg.optString("id")
+                            val pgTitle = StudentServices.localized(pg.opt("title"), language).ifEmpty { pgId }
+                            ItemRow(
+                                title = pgTitle,
+                                sub = listOf(tr("Rozdział: ", "Chapter: ", "Розділ: ") + chTitle, tr("Przeczytaj stronę", "Read page", "Читати сторінку")).joinToString(" · "),
+                                onClick = if (pgId.isNotEmpty()) ({
+                                    if (state.optString("token") == "demo") {
+                                        selectedGuidePage = pgTitle to DemoStudentServices.demoGuidePage(pgId)
+                                    } else runAsync {
+                                        val creds = repository.read()
+                                        check(SharedRepository.sameAccount(state, creds))
+                                        val detail = ToolServiceData.fetchGuidePage(UsosClient(creds), pgId)
+                                        check(SharedRepository.sameAccount(creds, repository.read()))
+                                        selectedGuidePage = pgTitle to detail
+                                    }
+                                }) else null
+                            )
+                        }
                     }
                     for (i in 0 until dorms.length()) {
                         if (anyRow) TrayDivider()
                         anyRow = true
                         val d = dorms.getJSONObject(i)
+                        val dormId = d.optString("id")
+                        val dormTitle = StudentServices.localized(d.opt("name"), language).ifEmpty { dormId }
                         ItemRow(
-                            title = StudentServices.localized(d.opt("name"), language).ifEmpty { d.optString("id") },
-                            sub = listOf(d.optString("address"), StudentServices.localized(d.opt("description"), language)).filter { it.isNotBlank() }.joinToString(" · ")
+                            title = dormTitle,
+                            sub = listOf(d.optString("address"), StudentServices.localized(d.opt("description"), language),
+                                if (dormId.isNotEmpty()) tr("Zobacz szczegóły", "View details", "Переглянути деталі") else "").filter { it.isNotBlank() }.joinToString(" · "),
+                            onClick = if (dormId.isNotEmpty()) ({
+                                if (state.optString("token") == "demo") {
+                                    selectedDormitory = dormTitle to DemoStudentServices.demoDormitoryDetail(dormId)
+                                } else runAsync {
+                                    val creds = repository.read()
+                                    check(SharedRepository.sameAccount(state, creds))
+                                    val detail = ToolServiceData.fetchDormitoryDetail(UsosClient(creds), dormId)
+                                    check(SharedRepository.sameAccount(creds, repository.read()))
+                                    selectedDormitory = dormTitle to detail
+                                }
+                            }) else null
                         )
                     }
                     for (i in 0 until buildings.length()) {
@@ -1823,6 +1952,74 @@ internal fun AcademicExtrasSection(
                                 }
                             }) else null
                         )
+                    }
+                }
+            }
+            val periods = guideData?.optJSONArray("allocationPeriods") ?: JSONArray()
+            if (periods.length() > 0) {
+                Text(tr("Tury przydziału miejsc w akademikach", "Dormitory allocation periods", "Періоди розподілу гуртожитків"), style = MaterialTheme.typography.titleMedium)
+                Tray {
+                    for (i in 0 until periods.length()) {
+                        if (i > 0) TrayDivider()
+                        val p = periods.getJSONObject(i)
+                        val pid = p.optString("id")
+                        val pTitle = StudentServices.localized(p.opt("name") ?: p.opt("status_name"), language).ifEmpty { pid }
+                        val pDesc = StudentServices.localized(p.opt("description") ?: p.opt("status_desc"), language)
+                        ItemRow(
+                            title = pTitle,
+                            sub = listOf(pDesc, tr("Zobacz terminy", "View dates", "Переглянути дати")).filter { it.isNotBlank() }.joinToString(" · "),
+                            onClick = if (pid.isNotEmpty()) ({
+                                if (state.optString("token") == "demo") {
+                                    selectedAllocationPeriod = pTitle to DemoStudentServices.demoAllocationPeriodDetail(pid)
+                                } else runAsync {
+                                    val creds = repository.read()
+                                    check(SharedRepository.sameAccount(state, creds))
+                                    val detail = ToolServiceData.fetchAllocationPeriodDetail(UsosClient(creds), pid)
+                                    check(SharedRepository.sameAccount(creds, repository.read()))
+                                    selectedAllocationPeriod = pTitle to detail
+                                }
+                            }) else null
+                        )
+                    }
+                }
+            }
+            selectedAllocationPeriod?.let { (fallback, detail) ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(StudentServices.localized(detail.opt("status_name"), language).ifEmpty { fallback }, style = MaterialTheme.typography.titleMedium)
+                        val desc = StudentServices.localized(detail.opt("status_desc"), language)
+                        if (desc.isNotBlank()) Text(desc)
+                        val dates = listOf(detail.optString("start_date"), detail.optString("end_date")).filter { it.isNotBlank() }
+                        if (dates.isNotEmpty()) Text(tr("Termin: ", "Dates: ", "Термін: ") + dates.joinToString(" – "))
+                        OutlinedButton(onClick = { selectedAllocationPeriod = null }) { Text(tr("Zamknij", "Close", "Закрити")) }
+                    }
+                }
+            }
+            selectedDormitory?.let { (fallback, detail) ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(StudentServices.localized(detail.opt("name"), language).ifEmpty { fallback }, style = MaterialTheme.typography.titleMedium)
+                        val addr = detail.optString("address")
+                        if (addr.isNotBlank()) Text(tr("Adres: ", "Address: ", "Адреса: ") + addr)
+                        val desc = StudentServices.localized(detail.opt("description"), language)
+                        if (desc.isNotBlank()) Text(desc)
+                        OutlinedButton(onClick = { selectedDormitory = null }) { Text(tr("Zamknij", "Close", "Закрити")) }
+                    }
+                }
+            }
+            selectedGuidePage?.let { (fallback, detail) ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(StudentServices.localized(detail.opt("title"), language).ifEmpty { fallback }, style = MaterialTheme.typography.titleMedium)
+                        val entries = detail.optJSONArray("entries") ?: JSONArray()
+                        for (i in 0 until entries.length()) {
+                            val e = entries.optJSONObject(i) ?: continue
+                            val et = StudentServices.localized(e.opt("title"), language)
+                            val ec = e.optString("content")
+                            if (et.isNotBlank()) Text(et, style = MaterialTheme.typography.titleSmall)
+                            if (ec.isNotBlank()) Text(ec)
+                        }
+                        OutlinedButton(onClick = { selectedGuidePage = null }) { Text(tr("Zamknij", "Close", "Закрити")) }
                     }
                 }
             }
@@ -2059,7 +2256,7 @@ internal fun AcademicExtrasSection(
 
 @Composable
 private fun MailDetailCard(message: JSONObject, language: String, onClose: () -> Unit) {
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -2084,7 +2281,7 @@ private fun MailDetailCard(message: JSONObject, language: String, onClose: () ->
 
 @Composable
 private fun SurveyDetailCard(survey: JSONObject, language: String, onClose: () -> Unit) {
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -2130,3 +2327,6 @@ private fun ServiceStatusBanner(entry: JSONObject?, language: String) {
         )
     }
 }
+
+/** Accepts both "4.5" and the Polish "4,5" decimal separator. */
+private fun String.toPointsOrNull(): Double? = replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() }

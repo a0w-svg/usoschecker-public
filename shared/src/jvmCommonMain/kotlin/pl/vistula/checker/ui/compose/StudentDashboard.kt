@@ -59,7 +59,7 @@ internal fun StudentDashboard(
     val t = VistulaDesign.tokens
     val language = strings.languageCode
     val locale = Locale.forLanguageTag(language)
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) { while (true) { delay(60_000); now = Instant.now() } }
     val today = now.atZone(UsosClient.ZONE).toLocalDate()
@@ -221,7 +221,7 @@ internal fun StudentDashboard(
 @Composable
 internal fun ChangeRow(change: Change, language: String, onClick: (() -> Unit)? = null) {
     val t = VistulaDesign.tokens
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     val diff = listOf("diffRoom", "diffTime", "diffGrade", "diffLecturers", "diffDate").map { it to change.optMeta(it) }
         .firstOrNull { it.second.isNotEmpty() }
     val kind = when (diff?.first) {

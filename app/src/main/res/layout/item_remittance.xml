@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/remittance_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_section_divider"
+    android:orientation="vertical"
+    android:paddingStart="8dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="12dp">
+    <TextView
+        android:id="@+id/remittance_title"
+        style="@style/Vistula.Text.Strong16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp" />
+    <TextView
+        android:id="@+id/remittance_date"
+        style="@style/Vistula.Text.Note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/app_muted" />
+    <TextView
+        android:id="@+id/remittance_amount"
+        style="@style/Vistula.Text.Heading18"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp" />
+    <TextView
+        android:id="@+id/remittance_settled"
+        style="@style/Vistula.Text.Note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/app_muted"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/remittance_remaining"
+        style="@style/Vistula.Text.Note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/app_muted"
+        android:visibility="gone" />
+</LinearLayout>

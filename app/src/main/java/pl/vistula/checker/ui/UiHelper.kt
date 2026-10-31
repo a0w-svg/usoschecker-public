@@ -215,13 +215,11 @@ class UiHelper private constructor() {
         @JvmStatic
         fun disclosure(context: Context, parent: LinearLayout, key: String, title: Int): LinearLayout {
             val prefs = context.getSharedPreferences("tool_layout", Context.MODE_PRIVATE)
-            val group = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
-            val body = LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(dp(context, 8), dp(context, 8), dp(context, 8), dp(context, 8))
-            }
+            val group = LayoutInflater.from(context).inflate(R.layout.view_disclosure, parent, false) as LinearLayout
+            val toggle = group.findViewById<MaterialButton>(R.id.disclosure_toggle)
+            val body = group.findViewById<LinearLayout>(R.id.disclosure_body)
+            toggle.text = context.getString(title)
             var expanded = prefs.getBoolean(key, false)
-            val toggle = actionRow(context, context.getString(title), {}, false)
             fun update() {
                 body.visibility = if (expanded) View.VISIBLE else View.GONE
                 toggle.setCompoundDrawablesWithIntrinsicBounds(0, 0,
@@ -235,10 +233,7 @@ class UiHelper private constructor() {
                 prefs.edit { putBoolean(key, expanded) }
                 update()
             }
-            group.addView(toggle)
-            group.addView(body)
-            group.setBackgroundResource(R.drawable.bg_section_divider)
-            parent.addView(group, LinearLayout.LayoutParams(-1, -2))
+            parent.addView(group)
             update()
             return body
         }
@@ -359,9 +354,10 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun empty(context: Context, parent: LinearLayout, title: String?, description: String?) {
-            val box = card(context, parent, Color.WHITE)
-            add(context, box, title, 17, INK, true)
-            add(context, box, description, 14, MUTED, false)
+            val box = LayoutInflater.from(context).inflate(R.layout.view_empty_state, parent, false)
+            box.findViewById<TextView>(R.id.empty_title).text = title
+            box.findViewById<TextView>(R.id.empty_description).text = description
+            parent.addView(box)
         }
 
         @JvmStatic

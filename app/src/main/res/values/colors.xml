@@ -18,4 +18,7 @@
     <color name="app_warning">#875000</color>
     <color name="app_disabled_content">#555F65</color>
     <color name="app_disabled_surface">#E4E8E9</color>
+    <color name="app_badge_success_bg">#E8F3EC</color>
+    <color name="app_badge_warning_bg">#FFF8E6</color>
+    <color name="app_badge_error_bg">#FFEBEB</color>
 </resources>

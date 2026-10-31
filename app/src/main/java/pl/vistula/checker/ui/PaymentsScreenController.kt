@@ -2,29 +2,28 @@ package pl.vistula.checker.ui
 
 import android.content.ClipboardManager
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlin.math.min
 import org.json.JSONException
 import org.json.JSONObject
+import pl.vistula.checker.DemoStudentServices
 import pl.vistula.checker.MainActivity
 import pl.vistula.checker.R
-import pl.vistula.checker.DemoStudentServices
 import pl.vistula.checker.ToolServiceData
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import pl.vistula.checker.core.PaymentAmounts
 import pl.vistula.checker.core.PaymentInfo
 import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.core.StudentServices
 
 /**
- * Controller for rendering the Payments, Subaccount and Installments screen.
+ * Controller for the Payments screen. Every block is inflated from XML (`view_payments_*`, `item_payment_*`,
+ * `item_remittance`); this class only chooses what to show and binds the data.
  */
 class PaymentsScreenController private constructor() {
 
@@ -60,13 +59,14 @@ class PaymentsScreenController private constructor() {
                 UiHelper.note(activity, content, activity.getString(R.string.payments_data_freshness,
                     UiHelper.timestamp(d.optLong("successAt"))), UiHelper.MUTED)
             }
+            val remittances = services.optJSONObject("remittances") ?: JSONObject()
             if (payments == null) {
-                renderRemittances(activity, content, services.optJSONObject("remittances") ?: JSONObject())
+                renderRemittances(activity, content, remittances)
                 UiHelper.empty(activity, content, activity.getString(R.string.payments_no_data_title),
                     activity.getString(R.string.services_not_loaded))
                 content.addView(UiHelper.button(activity,
                     activity.getString(if (connected) R.string.btn_refresh else R.string.btn_connect),
-                    { if (connected) onRefresh.run() else activity.navigate(4) }, true))
+                    { if (connected) onRefresh.run() else activity.navigate(Tabs.ACCOUNT) }, true))
                 return
             }
 
@@ -74,206 +74,176 @@ class PaymentsScreenController private constructor() {
             val hasPaymentsScope = StudentServices.hasScope(authorizedScopes, "payments")
             val scopeMissing = payments.scopeMissing ||
                 (connected && authorizedScopes.isNotEmpty() && !hasPaymentsScope)
-
-            if (scopeMissing) {
-                val warnBox = UiHelper.section(activity, content, Color.rgb(255, 248, 230))
-                UiHelper.add(activity, warnBox, activity.getString(R.string.payments_missing_scope_badge), 11, Color.rgb(180, 110, 0), true)
-                UiHelper.add(activity, warnBox, activity.getString(R.string.payments_missing_scope_title), 17, UiHelper.INK, true)
-                UiHelper.note(
-                    activity,
-                    warnBox,
-                    activity.getString(R.string.payments_missing_scope_desc, if (authorizedScopes.isEmpty()) "brak" else authorizedScopes),
-                    UiHelper.INK
-                )
-                UiHelper.note(activity, warnBox, activity.getString(R.string.payments_missing_scope_action_note), UiHelper.MUTED)
-                warnBox.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.payments_missing_scope_btn),
-                        { activity.navigate(4) },
-                        true
-                    )
-                )
-            }
+            if (scopeMissing) renderScopeWarning(activity, content, authorizedScopes)
 
             renderDetails(activity, content, entry.optJSONObject("data"))
-            renderRemittances(activity, content, services.optJSONObject("remittances") ?: JSONObject())
+            renderRemittances(activity, content, remittances)
             if (payments.accounts.isEmpty() && payments.installments.isEmpty()) {
                 if (!scopeMissing) {
-                    UiHelper.empty(
-                        activity,
-                        content,
-                        activity.getString(R.string.payments_empty_title),
-                        activity.getString(R.string.payments_empty_desc)
-                    )
+                    UiHelper.empty(activity, content, activity.getString(R.string.payments_empty_title),
+                        activity.getString(R.string.payments_empty_desc))
                 }
                 return
             }
-
-            if (payments.accounts.isNotEmpty()) {
-                val accounts = UiHelper.disclosure(activity, content, "payments.accounts", R.string.payments_accounts_heading)
-                UiHelper.note(activity, accounts, activity.getString(R.string.payments_accounts_information), UiHelper.MUTED)
-                for (acc in payments.accounts) {
-                    val box = UiHelper.section(activity, accounts, Color.WHITE)
-                    UiHelper.add(
-                        activity,
-                        box,
-                        if (acc.name.isEmpty()) activity.getString(R.string.payments_account_default_name) else acc.name,
-                        18,
-                        UiHelper.INK,
-                        true
-                    )
-                    if (acc.faculty.isNotEmpty()) {
-                        UiHelper.add(activity, box, activity.getString(R.string.payments_faculty, acc.faculty), 13, UiHelper.MUTED, false)
-                    }
-                    if (acc.accountOwner.isNotEmpty()) {
-                        UiHelper.add(activity, box, activity.getString(R.string.payments_owner, acc.accountOwner), 13, UiHelper.MUTED, false)
-                    }
-                    UiHelper.add(activity, box, formatIban(acc.bankAccountNumber), 16, UiHelper.GREEN, true)
-                    if (acc.swift.isNotEmpty()) {
-                        UiHelper.add(activity, box, activity.getString(R.string.payments_swift, acc.swift), 12, UiHelper.MUTED, false)
-                    }
-                    if (acc.balance != 0.0) {
-                        UiHelper.add(activity, box, activity.getString(R.string.payments_balance, acc.balance, acc.currency), 13, UiHelper.MUTED, false)
-                    }
-                    box.addView(
-                        UiHelper.button(
-                            activity,
-                            activity.getString(R.string.payments_copy_iban),
-                            {
-                                val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                                if (clipboard != null) {
-                                    clipboard.setPrimaryClip(UiHelper.privateClip("Subkonto USOS", acc.bankAccountNumber.replace(Regex("\\s+"), "")))
-                                    Toast.makeText(activity, activity.getString(R.string.payments_iban_copied), Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                            false
-                        )
-                    )
-                }
-            }
-
+            if (payments.accounts.isNotEmpty()) renderAccounts(activity, content, payments)
             if (payments.installments.isNotEmpty()) {
                 UiHelper.heading(activity, content, activity.getString(R.string.payments_schedule_heading))
-                val amounts = payments.installments.filter { it.isUnpaid() && it.amount > 0 }.groupBy { it.currency }
-                    .mapValues { (_, entries) -> entries.sumOf { it.amount } }
-                val openAmounts = payments.installments.filter { !it.isPaid() && !it.isCancelled() && it.amount > 0 }.groupBy { it.currency }
-                    .mapValues { (_, entries) -> entries.sumOf { it.amount } }
-                val displayAmounts = amounts.ifEmpty { openAmounts }
-                val summaryBox = UiHelper.section(
-                    activity,
-                    content,
-                    if (payments.hasOverdue()) Color.rgb(255, 240, 240) else Color.rgb(238, 245, 242)
+                renderSummary(activity, content, payments, language)
+                for (installment in payments.installments) renderInstallment(activity, content, installment)
+            }
+        }
+
+        private fun inflate(activity: MainActivity, layout: Int, parent: LinearLayout): View =
+            LayoutInflater.from(activity).inflate(layout, parent, false)
+
+        private fun copySensitive(activity: MainActivity, label: String, number: String, confirmation: Int) {
+            val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager? ?: return
+            clipboard.setPrimaryClip(UiHelper.privateClip(label, number.replace(Regex("\\s+"), "")))
+            Toast.makeText(activity, activity.getString(confirmation), Toast.LENGTH_SHORT).show()
+        }
+
+        private fun TextView.showIfNotEmpty(value: String) {
+            text = value
+            visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+        }
+
+        private fun renderScopeWarning(activity: MainActivity, content: LinearLayout, authorizedScopes: String) {
+            val box = inflate(activity, R.layout.view_payments_scope_warning, content)
+            box.findViewById<TextView>(R.id.payments_scope_badge).setText(R.string.payments_missing_scope_badge)
+            box.findViewById<TextView>(R.id.payments_scope_title).setText(R.string.payments_missing_scope_title)
+            box.findViewById<TextView>(R.id.payments_scope_desc).text = activity.getString(
+                R.string.payments_missing_scope_desc, if (authorizedScopes.isEmpty()) "brak" else authorizedScopes
+            )
+            box.findViewById<TextView>(R.id.payments_scope_note).setText(R.string.payments_missing_scope_action_note)
+            box.findViewById<MaterialButton>(R.id.payments_scope_button).apply {
+                setText(R.string.payments_missing_scope_btn)
+                setOnClickListener { activity.navigate(Tabs.ACCOUNT) }
+            }
+            content.addView(box)
+        }
+
+        private fun renderAccounts(activity: MainActivity, content: LinearLayout, payments: PaymentInfo) {
+            val accounts = UiHelper.disclosure(activity, content, "payments.accounts", R.string.payments_accounts_heading)
+            UiHelper.note(activity, accounts, activity.getString(R.string.payments_accounts_information), UiHelper.MUTED)
+            for (acc in payments.accounts) {
+                val box = inflate(activity, R.layout.item_payment_account, accounts)
+                box.findViewById<TextView>(R.id.payments_account_name).text =
+                    acc.name.ifEmpty { activity.getString(R.string.payments_account_default_name) }
+                box.findViewById<TextView>(R.id.payments_account_faculty)
+                    .showIfNotEmpty(if (acc.faculty.isEmpty()) "" else activity.getString(R.string.payments_faculty, acc.faculty))
+                box.findViewById<TextView>(R.id.payments_account_owner)
+                    .showIfNotEmpty(if (acc.accountOwner.isEmpty()) "" else activity.getString(R.string.payments_owner, acc.accountOwner))
+                box.findViewById<TextView>(R.id.payments_account_iban).text = formatIban(acc.bankAccountNumber)
+                box.findViewById<TextView>(R.id.payments_account_swift)
+                    .showIfNotEmpty(if (acc.swift.isEmpty()) "" else activity.getString(R.string.payments_swift, acc.swift))
+                box.findViewById<TextView>(R.id.payments_account_balance).showIfNotEmpty(
+                    if (acc.balance == 0.0) "" else activity.getString(R.string.payments_balance, acc.balance, acc.currency)
                 )
-                UiHelper.note(activity, summaryBox, activity.getString(R.string.payments_installment_total_label), UiHelper.MUTED)
-                if (payments.hasUnknownSettlement() && payments.hasOverdue()) UiHelper.note(activity, summaryBox,
-                    activity.getString(R.string.payments_status_overdue_warn), Color.rgb(160, 48, 40))
-                if (displayAmounts.isNotEmpty()) {
-                    for ((currency, amount) in displayAmounts) {
-                        UiHelper.add(activity, summaryBox, PaymentAmounts.format(amount, currency, language), 22, UiHelper.INK, true)
-                    }
-                } else {
-                    val defaultCurrency = payments.installments.firstOrNull()?.currency
-                        ?: payments.accounts.firstOrNull()?.currency
-                        ?: "PLN"
-                    UiHelper.add(activity, summaryBox, PaymentAmounts.format(0, defaultCurrency, language), 22, UiHelper.INK, true)
+                box.findViewById<MaterialButton>(R.id.payments_account_copy).setOnClickListener {
+                    copySensitive(activity, "Subkonto USOS", acc.bankAccountNumber, R.string.payments_iban_copied)
                 }
-                UiHelper.note(
-                    activity,
-                    summaryBox,
-                    when {
-                        payments.hasUnknownSettlement() -> activity.getString(R.string.payments_settlement_unknown)
-                        payments.hasOverdue() -> activity.getString(R.string.payments_status_overdue_warn)
-                        amounts.isEmpty() -> activity.getString(R.string.payments_status_none_due)
-                        else -> activity.getString(R.string.payments_status_pending)
-                    },
-                    if (payments.hasOverdue()) Color.rgb(160, 48, 40) else UiHelper.MUTED
-                )
+                accounts.addView(box)
+            }
+        }
 
-                val inflater = LayoutInflater.from(activity)
-                for (inst in payments.installments) {
-                    val instCard = inflater.inflate(R.layout.item_payment_card, content, false)
-                    val title = instCard.findViewById<TextView>(R.id.payment_item_title)
-                    val status = instCard.findViewById<TextView>(R.id.payment_item_status)
-                    val amount = instCard.findViewById<TextView>(R.id.payment_item_amount)
-                    val deadline = instCard.findViewById<TextView>(R.id.payment_item_deadline)
-                    val paidDate = instCard.findViewById<TextView>(R.id.payment_item_paid_date)
-                    val account = instCard.findViewById<TextView>(R.id.payment_item_account)
-                    val btnCopy = instCard.findViewById<MaterialButton>(R.id.payment_item_btn_copy)
+        private fun renderSummary(activity: MainActivity, content: LinearLayout, payments: PaymentInfo, language: String) {
+            val unpaid = payments.installments.filter { it.isUnpaid() && it.amount > 0 }.groupBy { it.currency }
+                .mapValues { (_, entries) -> entries.sumOf { it.amount } }
+            val open = payments.installments.filter { !it.isPaid() && !it.isCancelled() && it.amount > 0 }.groupBy { it.currency }
+                .mapValues { (_, entries) -> entries.sumOf { it.amount } }
+            val totals = unpaid.ifEmpty { open }
+            val overdue = payments.hasOverdue()
 
-                    title.text = inst.name
-                    val paid = inst.isPaid()
-                    val overdue = inst.isOverdue()
-                    val statusLabel = when {
-                        paid -> activity.getString(R.string.payment_status_paid)
-                        overdue -> activity.getString(R.string.payment_status_overdue)
-                        inst.status == "settlement_unknown" -> activity.getString(R.string.payment_status_unknown)
-                        inst.isSettlementUnknown() || inst.status.lowercase(java.util.Locale.ROOT) in setOf("scheduled", "zaplanowana", "заплановано") -> activity.getString(R.string.payment_status_scheduled)
-                        inst.status.lowercase(java.util.Locale.ROOT) in setOf("cancelled", "anulowana", "скасовано") -> activity.getString(R.string.payment_status_cancelled)
-                        inst.status.lowercase(java.util.Locale.ROOT) in setOf("underpaid", "niedopłata", "недоплата") -> activity.getString(R.string.payment_status_underpaid)
-                        inst.status.isEmpty() || inst.status.lowercase(java.util.Locale.ROOT) in setOf("do zapłaty", "due", "unsettled", "pending", "до сплати") -> activity.getString(R.string.payment_status_to_pay)
-                        else -> inst.status
-                    }
-                    val statusColor = when {
-                        paid -> UiHelper.GREEN
-                        overdue -> Color.rgb(160, 48, 40)
-                        else -> Color.rgb(180, 110, 0)
-                    }
-
-                    status.text = statusLabel
-                    status.setTextColor(UiHelper.foreground(activity, statusColor))
-                    val badgeBg = GradientDrawable()
-                    badgeBg.setColor(
-                        UiHelper.background(
-                            activity,
-                            when {
-                                paid -> Color.rgb(232, 243, 236)
-                                overdue -> Color.rgb(255, 235, 235)
-                                else -> Color.rgb(255, 248, 230)
-                            }
-                        )
-                    )
-                    badgeBg.cornerRadius = UiHelper.dp(activity, 8).toFloat()
-                    status.background = badgeBg
-
-                    amount.text = activity.getString(R.string.payments_amount, inst.amount, inst.currency)
-
-                    if (inst.deadline.isNotEmpty()) {
-                        deadline.visibility = View.VISIBLE
-                        deadline.text = activity.getString(R.string.payments_deadline, HistoryScreenController.formatFullDate(inst.deadline))
-                        if (overdue) deadline.setTextColor(UiHelper.foreground(activity, Color.rgb(160, 48, 40)))
-                    }
-
-                    if (inst.paymentDate.isNotEmpty()) {
-                        paidDate.visibility = View.VISIBLE
-                        paidDate.text = activity.getString(R.string.payments_date_paid, HistoryScreenController.formatFullDate(inst.paymentDate))
-                    }
-
-                    if (inst.bankAccountNumber.isNotEmpty()) {
-                        account.visibility = View.VISIBLE
-                        account.text = activity.getString(R.string.payments_account_for_installment, formatIban(inst.bankAccountNumber))
-                        btnCopy.visibility = View.VISIBLE
-                        val copyAction = Runnable {
-                            val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                            if (clipboard != null) {
-                                clipboard.setPrimaryClip(
-                                    UiHelper.privateClip(
-                                        activity.getString(R.string.payment_clipboard_label),
-                                        inst.bankAccountNumber.replace(Regex("\\s+"), "")
-                                    )
-                                )
-                                Toast.makeText(activity, activity.getString(R.string.payments_account_copied), Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                        btnCopy.setOnClickListener { copyAction.run() }
-                        instCard.isClickable = true
-                        instCard.isFocusable = true
-                        instCard.setOnClickListener { copyAction.run() }
-                    }
-
-                    content.addView(instCard)
+            val box = inflate(activity, R.layout.view_payments_summary, content)
+            box.findViewById<TextView>(R.id.payments_summary_label).setText(R.string.payments_installment_total_label)
+            box.findViewById<TextView>(R.id.payments_summary_warning).apply {
+                setText(R.string.payments_status_overdue_warn)
+                visibility = if (payments.hasUnknownSettlement() && overdue) View.VISIBLE else View.GONE
+            }
+            val amounts = box.findViewById<LinearLayout>(R.id.payments_summary_amounts)
+            val lines = if (totals.isNotEmpty()) {
+                totals.map { (currency, amount) -> PaymentAmounts.format(amount, currency, language) }
+            } else {
+                val currency = payments.installments.firstOrNull()?.currency
+                    ?: payments.accounts.firstOrNull()?.currency
+                    ?: "PLN"
+                listOf(PaymentAmounts.format(0, currency, language))
+            }
+            for (line in lines) {
+                (inflate(activity, R.layout.item_payment_amount, amounts) as TextView).also {
+                    it.text = line
+                    amounts.addView(it)
                 }
             }
+            box.findViewById<TextView>(R.id.payments_summary_status).apply {
+                setText(
+                    when {
+                        payments.hasUnknownSettlement() -> R.string.payments_settlement_unknown
+                        overdue -> R.string.payments_status_overdue_warn
+                        unpaid.isEmpty() -> R.string.payments_status_none_due
+                        else -> R.string.payments_status_pending
+                    }
+                )
+                if (overdue) setTextColor(activity.getColor(R.color.app_error))
+            }
+            content.addView(box)
+        }
+
+        private fun installmentStatusLabel(activity: MainActivity, inst: PaymentInfo.Installment): String {
+            val status = inst.status.lowercase(java.util.Locale.ROOT)
+            return when {
+                inst.isPaid() -> activity.getString(R.string.payment_status_paid)
+                inst.isOverdue() -> activity.getString(R.string.payment_status_overdue)
+                inst.status == "settlement_unknown" -> activity.getString(R.string.payment_status_unknown)
+                inst.isSettlementUnknown() || status in setOf("scheduled", "zaplanowana", "заплановано") -> activity.getString(R.string.payment_status_scheduled)
+                status in setOf("cancelled", "anulowana", "скасовано") -> activity.getString(R.string.payment_status_cancelled)
+                status in setOf("underpaid", "niedopłata", "недоплата") -> activity.getString(R.string.payment_status_underpaid)
+                inst.status.isEmpty() || status in setOf("do zapłaty", "due", "unsettled", "pending", "до сплати") -> activity.getString(R.string.payment_status_to_pay)
+                else -> inst.status
+            }
+        }
+
+        private fun renderInstallment(activity: MainActivity, content: LinearLayout, inst: PaymentInfo.Installment) {
+            val card = inflate(activity, R.layout.item_payment_card, content)
+            val paid = inst.isPaid()
+            val overdue = inst.isOverdue()
+
+            card.findViewById<TextView>(R.id.payment_item_title).text = inst.name
+            card.findViewById<TextView>(R.id.payment_item_status).apply {
+                text = installmentStatusLabel(activity, inst)
+                setTextColor(activity.getColor(if (paid) R.color.app_ink else if (overdue) R.color.app_error else R.color.app_warning))
+                setBackgroundResource(if (paid) R.drawable.bg_badge_success else if (overdue) R.drawable.bg_badge_error else R.drawable.bg_badge_warning)
+            }
+            card.findViewById<TextView>(R.id.payment_item_amount).text = activity.getString(R.string.payments_amount, inst.amount, inst.currency)
+            card.findViewById<TextView>(R.id.payment_item_deadline).apply {
+                showIfNotEmpty(if (inst.deadline.isEmpty()) "" else activity.getString(R.string.payments_deadline, HistoryScreenController.formatFullDate(inst.deadline)))
+                if (overdue) setTextColor(activity.getColor(R.color.app_error))
+            }
+            card.findViewById<TextView>(R.id.payment_item_paid_date).showIfNotEmpty(
+                if (inst.paymentDate.isEmpty()) "" else activity.getString(R.string.payments_date_paid, HistoryScreenController.formatFullDate(inst.paymentDate))
+            )
+            if (inst.bankAccountNumber.isNotEmpty()) {
+                card.findViewById<TextView>(R.id.payment_item_account).showIfNotEmpty(
+                    activity.getString(R.string.payments_account_for_installment, formatIban(inst.bankAccountNumber))
+                )
+                val copy = Runnable {
+                    copySensitive(activity, activity.getString(R.string.payment_clipboard_label), inst.bankAccountNumber, R.string.payments_account_copied)
+                }
+                card.findViewById<MaterialButton>(R.id.payment_item_btn_copy).apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener { copy.run() }
+                }
+                card.isClickable = true
+                card.isFocusable = true
+                card.setOnClickListener { copy.run() }
+            }
+            content.addView(card)
+        }
+
+        private fun addLine(activity: MainActivity, parent: LinearLayout, value: String) {
+            val line = inflate(activity, R.layout.item_payment_line, parent) as TextView
+            line.text = value
+            parent.addView(line)
         }
 
         private fun renderDetails(activity: MainActivity, content: LinearLayout, data: JSONObject?) {
@@ -284,49 +254,58 @@ class PaymentsScreenController private constructor() {
             for (i in 0 until items.length()) {
                 val item = items.getJSONObject(i)
                 val currency = PaymentAmounts.currencyCode(item.opt("currency"))
-                val box = UiHelper.section(activity, body, Color.WHITE)
-                UiHelper.heading(activity, box, StudentServices.localized(item.opt("description"), language))
+                val box = inflate(activity, R.layout.item_payment_detail, body)
+                box.findViewById<TextView>(R.id.payments_detail_title).text = StudentServices.localized(item.opt("description"), language)
+                val lines = box.findViewById<LinearLayout>(R.id.payments_detail_lines)
+                val plansView = box.findViewById<LinearLayout>(R.id.payments_detail_plans)
                 for ((key, label) in listOf("total_amount" to R.string.payments_api_amount, "saldo_amount" to R.string.payments_balance_value,
                     "interest" to R.string.payments_interest_value)) {
                     if (!item.isNull(key) && item.has(key)) {
                         val formatted = PaymentAmounts.format(item.opt(key), currency, language)
-                        UiHelper.note(activity, box, activity.getString(label, formatted, "").trim(), UiHelper.MUTED)
+                        addLine(activity, lines, activity.getString(label, formatted, "").trim())
                     }
                 }
                 if (item.optBoolean("has_bonus")) {
                     val formattedBonus = PaymentAmounts.format(item.opt("bonus_amount"), currency, language)
-                    UiHelper.note(activity, box, activity.getString(R.string.payments_bonus_value,
-                        formattedBonus, "",
-                        HistoryScreenController.formatFullDate(StudentServices.text(item, "bonus_deadline"))).replace("  ,", ","), UiHelper.MUTED)
+                    addLine(activity, lines, activity.getString(R.string.payments_bonus_value, formattedBonus, "",
+                        HistoryScreenController.formatFullDate(StudentServices.text(item, "bonus_deadline"))).replace("  ,", ","))
                 }
                 if (StudentServices.text(item, "default_choice_date").isNotEmpty()) {
-                    UiHelper.note(activity, box, activity.getString(R.string.payments_default_choice,
-                        HistoryScreenController.formatFullDate(StudentServices.text(item, "default_choice_date"))), UiHelper.MUTED)
+                    addLine(activity, lines, activity.getString(R.string.payments_default_choice,
+                        HistoryScreenController.formatFullDate(StudentServices.text(item, "default_choice_date"))))
                 }
-                val plans = item.optJSONArray("plans") ?: continue
-                for (j in 0 until plans.length()) {
-                    val plan = plans.getJSONObject(j)
-                    val rows = plan.getJSONArray("installments")
-                    val description = (0 until rows.length()).joinToString("\n") { n ->
-                        val row = rows.getJSONObject(n)
-                        activity.getString(R.string.payments_plan_line,
-                            HistoryScreenController.formatFullDate(StudentServices.text(row, "payment_date")),
-                            PaymentAmounts.format(row.opt("amount"),
-                                PaymentAmounts.currency(plan, item), language))
-                    }
-                    UiHelper.add(activity, box, activity.getString(R.string.payments_plan_label, plan.optString("id")), 16, UiHelper.INK, true)
-                    UiHelper.note(activity, box, description, UiHelper.MUTED)
-                    if (item.optString("chosenPlan") == plan.optString("id")) {
-                        UiHelper.note(activity, box, activity.getString(R.string.payments_selected_plan), UiHelper.MUTED)
-                    }
-                    if (StudentServices.text(item, "id").isNotEmpty() && StudentServices.text(item, "type").isNotEmpty() &&
-                        StudentServices.text(plan, "id").isNotEmpty() && item.optString("chosenPlan") != plan.optString("id")) {
-                        box.addView(UiHelper.button(activity, activity.getString(R.string.payments_plan_choose), {
-                            StudentActionsController.choosePlan(activity, item, plan, description)
-                        }, false))
-                    }
+                val plans = item.optJSONArray("plans")
+                if (plans != null) {
+                    for (j in 0 until plans.length()) renderPlan(activity, plansView, item, plans.getJSONObject(j), language)
+                }
+                body.addView(box)
+            }
+        }
+
+        private fun renderPlan(activity: MainActivity, parent: LinearLayout, item: JSONObject, plan: JSONObject, language: String) {
+            val rows = plan.getJSONArray("installments")
+            val description = (0 until rows.length()).joinToString("\n") { n ->
+                val row = rows.getJSONObject(n)
+                activity.getString(R.string.payments_plan_line,
+                    HistoryScreenController.formatFullDate(StudentServices.text(row, "payment_date")),
+                    PaymentAmounts.format(row.opt("amount"), PaymentAmounts.currency(plan, item), language))
+            }
+            val view = inflate(activity, R.layout.item_payment_plan, parent)
+            view.findViewById<TextView>(R.id.payments_plan_label).text = activity.getString(R.string.payments_plan_label, plan.optString("id"))
+            view.findViewById<TextView>(R.id.payments_plan_rows).text = description
+            val chosen = item.optString("chosenPlan") == plan.optString("id")
+            if (chosen) view.findViewById<TextView>(R.id.payments_plan_selected).apply {
+                setText(R.string.payments_selected_plan)
+                visibility = View.VISIBLE
+            }
+            if (StudentServices.text(item, "id").isNotEmpty() && StudentServices.text(item, "type").isNotEmpty() &&
+                StudentServices.text(plan, "id").isNotEmpty() && !chosen) {
+                view.findViewById<MaterialButton>(R.id.payments_plan_choose).apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener { StudentActionsController.choosePlan(activity, item, plan, description) }
                 }
             }
+            parent.addView(view)
         }
 
         private fun renderRemittances(activity: MainActivity, content: LinearLayout, entry: JSONObject) {
@@ -344,7 +323,7 @@ class PaymentsScreenController private constructor() {
             for (i in 0 until items.length()) {
                 val item = items.getJSONObject(i)
                 val currency = PaymentAmounts.currencyCode(item.opt("currency"))
-                val box = UiHelper.section(activity, body, Color.WHITE)
+                val box = inflate(activity, R.layout.item_remittance, body)
                 val remittanceId = StudentServices.text(item, "id")
                 if (remittanceId.isNotEmpty()) {
                     box.isClickable = true
@@ -356,18 +335,23 @@ class PaymentsScreenController private constructor() {
                         }
                     }
                 }
-                UiHelper.add(activity, box, StudentServices.localized(item.opt("description"), language), 16, UiHelper.INK, true)
-                UiHelper.note(activity, box, HistoryScreenController.formatFullDate(StudentServices.text(item, "date")), UiHelper.MUTED)
-                UiHelper.add(activity, box, PaymentAmounts.format(item.opt("amount"), currency, language), 18, UiHelper.INK, true)
+                box.findViewById<TextView>(R.id.remittance_title).text = StudentServices.localized(item.opt("description"), language)
+                box.findViewById<TextView>(R.id.remittance_date).text = HistoryScreenController.formatFullDate(StudentServices.text(item, "date"))
+                box.findViewById<TextView>(R.id.remittance_amount).text = PaymentAmounts.format(item.opt("amount"), currency, language)
                 if (item.has("is_settled") && !item.isNull("is_settled")) {
-                    UiHelper.note(activity, box, activity.getString(if (item.optBoolean("is_settled"))
-                        R.string.payments_settled else R.string.payments_not_settled), UiHelper.MUTED)
+                    box.findViewById<TextView>(R.id.remittance_settled).apply {
+                        setText(if (item.optBoolean("is_settled")) R.string.payments_settled else R.string.payments_not_settled)
+                        visibility = View.VISIBLE
+                    }
                 }
                 if (!item.isNull("remaining") && item.has("remaining")) {
                     val formattedRemaining = PaymentAmounts.format(item.opt("remaining"), currency, language)
-                    UiHelper.note(activity, box,
-                        activity.getString(R.string.payments_remittance_remaining, formattedRemaining, "").trim(), UiHelper.MUTED)
+                    box.findViewById<TextView>(R.id.remittance_remaining).apply {
+                        text = activity.getString(R.string.payments_remittance_remaining, formattedRemaining, "").trim()
+                        visibility = View.VISIBLE
+                    }
                 }
+                body.addView(box)
             }
         }
 

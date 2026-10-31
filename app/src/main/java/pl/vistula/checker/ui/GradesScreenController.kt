@@ -9,17 +9,11 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Editable
 import android.text.InputType
-import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.TextWatcher
-import android.text.style.ForegroundColorSpan
-import android.text.style.RelativeSizeSpan
-import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.HorizontalScrollView
 import pl.vistula.checker.ui.compose.GradeTable
 import android.widget.Button
 import android.widget.LinearLayout
@@ -31,7 +25,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.time.LocalDate
 import java.util.HashSet
 import java.util.LinkedHashMap
-import java.util.LinkedHashSet
 import java.util.function.Consumer
 import org.json.JSONObject
 import pl.vistula.checker.MainActivity

@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
@@ -153,15 +151,10 @@ class ApiExplorerController private constructor() {
 
             populateMethods(activity, list, catalog, apiQuery, apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
 
-            search.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, st: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence, st: Int, before: Int, count: Int) {
-                    onQueryChanged.accept(s.toString())
-                    populateMethods(activity, list, catalog, s.toString(), apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
-                }
-
-                override fun afterTextChanged(e: Editable) {}
-            })
+            UiHelper.watchSearch(search) { value ->
+                    onQueryChanged.accept(value)
+                    populateMethods(activity, list, catalog, value, apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
+}
         }
 
         private fun populateMethods(

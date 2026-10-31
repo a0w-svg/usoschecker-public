@@ -65,11 +65,10 @@
 
         <TextView
             android:id="@+id/profile_email"
-            style="@style/Vistula.Text.BodySmall"
+            style="@style/Vistula.Text.BodySmall.Muted"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/app_muted" />
+            android:layout_weight="1" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/profile_email_copy"
@@ -89,20 +88,18 @@
         android:visibility="gone" />
     <TextView
         android:id="@+id/profile_stage"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:textColor="@color/app_muted" />
+        android:visibility="gone" />
     <TextView
         android:id="@+id/profile_admission"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:textColor="@color/app_muted" />
+        android:visibility="gone" />
     <TextView
         android:id="@+id/profile_thesis_header"
         style="@style/Vistula.Text.Strong"
@@ -119,34 +116,30 @@
         android:visibility="gone" />
     <TextView
         android:id="@+id/profile_thesis_status"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:textColor="@color/app_muted" />
+        android:visibility="gone" />
     <TextView
         android:id="@+id/profile_thesis_supervisor"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:textColor="@color/app_muted" />
+        android:visibility="gone" />
     <TextView
         android:id="@+id/profile_thesis_reviewer"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:textColor="@color/app_muted" />
+        android:visibility="gone" />
     <TextView
         android:id="@+id/profile_thesis_unavailable"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        android:textColor="@color/app_muted" />
+        android:visibility="gone" />
 </LinearLayout>

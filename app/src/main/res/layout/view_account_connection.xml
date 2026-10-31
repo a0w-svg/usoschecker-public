@@ -5,11 +5,10 @@
     android:orientation="vertical">
     <TextView
         android:id="@+id/connection_desc"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted" />
+        android:layout_marginBottom="12dp" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connection_reopen"
         style="@style/Widget.Vistula.Button"
@@ -22,11 +21,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto" />
     <TextView
         android:id="@+id/connection_status"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted" />
+        android:layout_marginBottom="12dp" />
     <LinearLayout
         android:id="@+id/connection_setup"
         android:layout_width="match_parent"
@@ -75,19 +73,16 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
     <TextView
-        android:id="@+id/connection_access_title"
         style="@style/Vistula.Text.Heading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:text="@string/settings_access" />
     <TextView
-        android:id="@+id/connection_access_hint"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:text="@string/settings_access_hint" />
             <LinearLayout
                 android:id="@+id/connection_choices"
@@ -118,12 +113,10 @@
         android:orientation="vertical"
         android:visibility="gone">
     <TextView
-        android:id="@+id/connection_pin_hint"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:text="@string/pin_hint" />
         <LinearLayout
             android:id="@+id/connection_pin_host"

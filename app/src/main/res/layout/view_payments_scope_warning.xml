@@ -31,11 +31,10 @@
         android:layout_marginBottom="12dp" />
     <TextView
         android:id="@+id/payments_scope_note"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted" />
+        android:layout_marginBottom="12dp" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/payments_scope_button"
         style="@style/Widget.Vistula.Button.Primary"

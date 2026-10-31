@@ -1,11 +1,9 @@
 package pl.vistula.checker.ui
 
-import android.content.ClipboardManager
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.function.Consumer
 import org.json.JSONException
@@ -111,20 +109,12 @@ class NewsScreenController private constructor() {
 
                 if (filtered.isEmpty()) {
                     val demo = activity.isDemo()
-                    val empty = LayoutInflater.from(activity).inflate(R.layout.view_empty_state, list, false) as LinearLayout
-                    empty.findViewById<TextView>(R.id.empty_title).setText(
-                        if (q.isNotEmpty()) R.string.news_no_match_title else if (demo) R.string.news_empty_title else R.string.campus_news_empty
+                    val empty = UiHelper.empty(
+                        activity, list,
+                        activity.getString(if (q.isNotEmpty()) R.string.news_no_match_title else if (demo) R.string.news_empty_title else R.string.campus_news_empty),
+                        activity.getString(if (q.isNotEmpty()) R.string.news_no_match_desc else if (demo) R.string.news_empty_desc else R.string.campus_news_hint)
                     )
-                    empty.findViewById<TextView>(R.id.empty_description).setText(
-                        if (q.isNotEmpty()) R.string.news_no_match_desc else if (demo) R.string.news_empty_desc else R.string.campus_news_hint
-                    )
-                    if (q.isNotEmpty()) {
-                        empty.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), {
-                            search.setText("")
-                            onQueryChanged.accept("")
-                        }, false))
-                    }
-                    list.addView(empty)
+                    if (q.isNotEmpty()) empty.addView(UiHelper.clearSearchButton(activity, search, onQueryChanged))
                 } else {
                     UiHelper.note(activity, list, activity.getString(R.string.news_count, filtered.size), UiHelper.MUTED)
                     val inflater = LayoutInflater.from(activity)
@@ -182,13 +172,9 @@ class NewsScreenController private constructor() {
                 .setView(scroll)
                 .setPositiveButton(activity.getString(R.string.btn_close), null)
                 .setNeutralButton(activity.getString(R.string.news_copy_content)) { _, _ ->
-                    val cb = activity.getSystemService(ClipboardManager::class.java)
-                    if (cb != null) {
-                        val text = article.title + "\n\n" + meta + "\n\n" + body +
-                            if (article.url.isEmpty()) "" else "\n\n${article.url}"
-                        cb.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.tool_news_title), text))
-                        Toast.makeText(activity, activity.getString(R.string.news_copied_toast), Toast.LENGTH_SHORT).show()
-                    }
+                    val text = article.title + "\n\n" + meta + "\n\n" + body +
+                        if (article.url.isEmpty()) "" else "\n\n${article.url}"
+                    UiHelper.copyToClipboard(activity, activity.getString(R.string.tool_news_title), text, R.string.news_copied_toast)
                 }
 
             if (article.url.isNotEmpty()) {

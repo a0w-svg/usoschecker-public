@@ -3,11 +3,9 @@ package pl.vistula.checker.ui
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isGone
 import androidx.core.view.isNotEmpty
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.view.Gravity
 import android.view.View
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textfield.TextInputEditText
@@ -18,7 +16,6 @@ import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -44,6 +41,8 @@ import pl.vistula.checker.core.UsosParser
 class HistoryScreenController private constructor() {
 
     companion object {
+        private val LEADING_SYMBOLS = Regex("^[^\\p{L}]+")
+
         @JvmStatic
         fun render(
             activity: MainActivity,
@@ -231,14 +230,13 @@ class HistoryScreenController private constructor() {
 
                 if (count == 0) {
                     val noQuery = currentQuery.trim().isEmpty()
-                    val box = LayoutInflater.from(activity).inflate(R.layout.view_empty_state, list, false) as LinearLayout
-                    box.findViewById<TextView>(R.id.empty_title).setText(if (noQuery) R.string.history_empty_title else R.string.history_no_match_title)
-                    box.findViewById<TextView>(R.id.empty_description).setText(if (noQuery) R.string.history_empty_desc else R.string.history_no_match_desc)
+                    val box = UiHelper.empty(
+                        activity, list,
+                        activity.getString(if (noQuery) R.string.history_empty_title else R.string.history_no_match_title),
+                        activity.getString(if (noQuery) R.string.history_empty_desc else R.string.history_no_match_desc)
+                    )
                     if (!noQuery) {
-                        box.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), {
-                            search.setText("")
-                            onQueryChanged.accept("")
-                        }, false))
+                        box.addView(UiHelper.clearSearchButton(activity, search, onQueryChanged))
                     } else if (filter != HistoryUiState.ALL) {
                         box.addView(UiHelper.button(activity, activity.getString(R.string.history_show_all), {
                             onFilterChanged.accept(HistoryUiState.ALL)
@@ -246,7 +244,6 @@ class HistoryScreenController private constructor() {
                     } else if (demo && onSimulate != null) {
                         box.addView(UiHelper.button(activity, activity.getString(R.string.history_btn_simulate), onSimulate, true))
                     }
-                    list.addView(box)
                 }
             }
 
@@ -426,7 +423,7 @@ class HistoryScreenController private constructor() {
         @JvmStatic
         fun renderChangeRow(activity: MainActivity, parent: LinearLayout, change: Change) {
             val row = LayoutInflater.from(activity).inflate(R.layout.item_history_row, parent, false)
-            val diffs = getDiffSummaryList(activity, change).map { it.replaceFirst(Regex("^[^\\p{L}]+"), "") }
+            val diffs = getDiffSummaryList(activity, change).map { it.replaceFirst(LEADING_SYMBOLS, "") }
             val firstDiff = diffs.firstOrNull().orEmpty()
             val kind = firstDiff.substringBefore(":").ifEmpty {
                 activity.getString(
@@ -480,7 +477,7 @@ class HistoryScreenController private constructor() {
             val diffs = getDiffSummaryList(activity, c)
             if (c.action == "Zmieniono" && diffs.isNotEmpty()) {
                 for (i in 0 until min(3, diffs.size)) {
-                    UiHelper.add(activity, box, diffs[i].replaceFirst(Regex("^[^\\p{L}]+"), ""), 14, UiHelper.INK, false)
+                    UiHelper.add(activity, box, diffs[i].replaceFirst(LEADING_SYMBOLS, ""), 14, UiHelper.INK, false)
                 }
             } else {
                 val value = when (c.action) {
@@ -566,11 +563,8 @@ class HistoryScreenController private constructor() {
                 .show()
         }
 
-        private fun copyDetails(activity: MainActivity, text: String) {
-            val cb = activity.getSystemService(ClipboardManager::class.java) ?: return
-            cb.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.history_clipboard_label), text))
-            Toast.makeText(activity, R.string.toast_history_details_copied, Toast.LENGTH_SHORT).show()
-        }
+        private fun copyDetails(activity: MainActivity, text: String) =
+            UiHelper.copyToClipboard(activity, activity.getString(R.string.history_clipboard_label), text, R.string.toast_history_details_copied)
 
         private fun buildShareText(
             activity: MainActivity,

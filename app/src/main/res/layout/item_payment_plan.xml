@@ -11,18 +11,16 @@
         android:layout_marginBottom="12dp" />
     <TextView
         android:id="@+id/payments_plan_rows"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted" />
+        android:layout_marginBottom="12dp" />
     <TextView
         android:id="@+id/payments_plan_selected"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:visibility="gone" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/payments_plan_choose"

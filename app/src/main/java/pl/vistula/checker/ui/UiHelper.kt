@@ -14,10 +14,7 @@ import android.net.Uri
 import android.os.PersistableBundle
 import android.text.Editable
 import android.text.Html
-import android.text.InputType
 import android.text.TextWatcher
-import android.text.method.PasswordTransformationMethod
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -362,12 +359,19 @@ class UiHelper private constructor() {
             add(context, parent, description, 14, MUTED, false)
         }
 
+        /** Inflates [layout] against [parent] (so its XML width and margins apply) without attaching it. */
         @JvmStatic
-        fun empty(context: Context, parent: LinearLayout, title: String?, description: String?) {
-            val box = LayoutInflater.from(context).inflate(R.layout.view_empty_state, parent, false)
+        fun inflate(context: Context, @androidx.annotation.LayoutRes layout: Int, parent: android.view.ViewGroup?): View =
+            LayoutInflater.from(context).inflate(layout, parent, false)
+
+        /** Adds the empty-state card and returns it so callers can append an action button. */
+        @JvmStatic
+        fun empty(context: Context, parent: LinearLayout, title: String?, description: String?): LinearLayout {
+            val box = inflate(context, R.layout.view_empty_state, parent) as LinearLayout
             box.findViewById<TextView>(R.id.empty_title).text = title
             box.findViewById<TextView>(R.id.empty_description).text = description
             parent.addView(box)
+            return box
         }
 
         @JvmStatic
@@ -408,10 +412,14 @@ class UiHelper private constructor() {
         /** Adds a Material text field and returns its layout, for callers that show errors on it. */
         @JvmStatic
         fun fieldLayout(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): TextInputLayout {
-            val layout = LayoutInflater.from(context)
-                .inflate(if (password) R.layout.view_text_field_password else R.layout.view_text_field, parent, false) as TextInputLayout
+            val layout = inflate(context, R.layout.view_text_field, parent) as TextInputLayout
             layout.hint = hint
-            layout.findViewById<TextInputEditText>(R.id.field_input).setText(value)
+            val input = layout.findViewById<TextInputEditText>(R.id.field_input)
+            input.setText(value)
+            if (password) {
+                layout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+                input.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }
             parent.addView(layout)
             return layout
         }
@@ -421,11 +429,12 @@ class UiHelper private constructor() {
             fieldLayout(context, parent, hint, value, password).findViewById<TextInputEditText>(R.id.field_input)
 
         @JvmStatic
-        fun copyToClipboard(context: Context, label: String?, text: String?) {
+        @JvmOverloads
+        fun copyToClipboard(context: Context, label: String?, text: String?, @androidx.annotation.StringRes confirmation: Int = R.string.services_copied) {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
             if (clipboard != null) {
                 clipboard.setPrimaryClip(privateClip(label, text))
-                Toast.makeText(context, R.string.services_copied, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, confirmation, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -547,6 +556,14 @@ class UiHelper private constructor() {
             return input
         }
 
+        /** The "clear search" action shown in empty states: empties [search] and reports the cleared query. */
+        @JvmStatic
+        fun clearSearchButton(context: Context, search: EditText, onQueryChanged: Consumer<String>): Button =
+            button(context, context.getString(R.string.btn_clear_search), {
+                search.setText("")
+                onQueryChanged.accept("")
+            }, false)
+
         @JvmStatic
         fun watchSearch(search: EditText, action: Consumer<String>) {
             search.addTextChangedListener(object : TextWatcher {
@@ -590,3 +607,8 @@ class UiHelper private constructor() {
     }
 }
 
+/** Shows [value], or hides the view when it is empty. */
+fun TextView.showIfNotEmpty(value: String) {
+    text = value
+    visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+}

@@ -29,10 +29,9 @@
 
         <TextView
             android:id="@+id/history_row_detail"
-            style="@style/Vistula.Text.Caption"
+            style="@style/Vistula.Text.Caption.Muted"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/app_muted" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <TextView

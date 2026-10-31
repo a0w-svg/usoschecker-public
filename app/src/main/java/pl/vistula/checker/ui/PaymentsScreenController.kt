@@ -1,12 +1,8 @@
 package pl.vistula.checker.ui
 
-import android.content.ClipboardManager
-import android.content.Context
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlin.math.min
@@ -94,18 +90,12 @@ class PaymentsScreenController private constructor() {
         }
 
         private fun inflate(activity: MainActivity, layout: Int, parent: LinearLayout): View =
-            LayoutInflater.from(activity).inflate(layout, parent, false)
+            UiHelper.inflate(activity, layout, parent)
 
-        private fun copySensitive(activity: MainActivity, label: String, number: String, confirmation: Int) {
-            val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager? ?: return
-            clipboard.setPrimaryClip(UiHelper.privateClip(label, number.replace(Regex("\\s+"), "")))
-            Toast.makeText(activity, activity.getString(confirmation), Toast.LENGTH_SHORT).show()
-        }
+        private val WHITESPACE = Regex("\\s+")
 
-        private fun TextView.showIfNotEmpty(value: String) {
-            text = value
-            visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
-        }
+        private fun copySensitive(activity: MainActivity, label: String, number: String, confirmation: Int) =
+            UiHelper.copyToClipboard(activity, label, number.replace(WHITESPACE, ""), confirmation)
 
         private fun renderScopeWarning(activity: MainActivity, content: LinearLayout, authorizedScopes: String) {
             val box = inflate(activity, R.layout.view_payments_scope_warning, content)
@@ -378,7 +368,7 @@ class PaymentsScreenController private constructor() {
         @JvmStatic
         fun formatIban(raw: String?): String {
             if (raw == null) return ""
-            val clean = raw.replace(Regex("\\s+"), "")
+            val clean = raw.replace(WHITESPACE, "")
             if (clean.length < 10) return raw
             val sb = StringBuilder()
             var offset = 0

@@ -53,7 +53,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import pl.vistula.checker.core.AccountRole
-import pl.vistula.checker.core.ApiCatalog
 import pl.vistula.checker.core.CampusAffiliation
 import pl.vistula.checker.core.LessonTime
 import pl.vistula.checker.core.OAuth

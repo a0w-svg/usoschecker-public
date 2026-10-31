@@ -1,12 +1,8 @@
 package pl.vistula.checker.ui
 
 import android.app.DatePickerDialog
-import android.content.Context
 import android.content.DialogInterface
-import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Typeface
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -72,7 +68,8 @@ class TasksScreenController private constructor() {
             }
 
             val searchLayout = screen.findViewById<TextInputLayout>(R.id.tasks_search_layout)
-            val search = screen.findViewById<TextInputEditText>(R.id.tasks_search_input)
+            searchLayout.hint = activity.getString(R.string.tasks_search_hint)
+            val search = searchLayout.findViewById<TextInputEditText>(R.id.field_input)
             search.setText(taskQuery)
             searchLayout.visibility = if (taskQuery.isEmpty()) View.GONE else View.VISIBLE
             searchLayout.setEndIconOnClickListener {
@@ -106,7 +103,7 @@ class TasksScreenController private constructor() {
                     list.addView(taskCard(activity, list, task, today, rows.length(), callback))
                 }
                 if (shown == 0) {
-                    list.addView(emptyState(activity, list, rows.length(), search, taskFilter, onQueryChanged, onFilterChanged))
+                    emptyState(activity, list, rows.length(), search, taskFilter, onQueryChanged, onFilterChanged)
                 }
             }
             UiHelper.watchSearch(search) { value ->
@@ -304,21 +301,19 @@ class TasksScreenController private constructor() {
         private fun emptyState(
             activity: MainActivity, list: LinearLayout, total: Int, search: TextInputEditText, taskFilter: String,
             onQueryChanged: Consumer<String>, onFilterChanged: Consumer<String>
-        ): View {
-            val box = LayoutInflater.from(activity).inflate(R.layout.view_empty_state, list, false) as LinearLayout
-            box.findViewById<TextView>(R.id.empty_title).setText(if (total == 0) R.string.tasks_empty_title else R.string.tasks_no_match_title)
-            box.findViewById<TextView>(R.id.empty_description).setText(if (total == 0) R.string.tasks_empty_desc else R.string.tasks_no_match_desc)
+        ) {
+            val box = UiHelper.empty(
+                activity, list,
+                activity.getString(if (total == 0) R.string.tasks_empty_title else R.string.tasks_no_match_title),
+                activity.getString(if (total == 0) R.string.tasks_empty_desc else R.string.tasks_no_match_desc)
+            )
             if (search.text.toString().trim().isNotEmpty()) {
-                box.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), {
-                    search.setText("")
-                    onQueryChanged.accept("")
-                }, false))
+                box.addView(UiHelper.clearSearchButton(activity, search, onQueryChanged))
             } else if (TasksUiState.FILTER_ALL != taskFilter) {
                 box.addView(UiHelper.button(activity, "${activity.getString(R.string.tasks_chip_all)} ($total)", {
                     onFilterChanged.accept(TasksUiState.FILTER_ALL)
                 }, false))
             }
-            return box
         }
 
         @JvmStatic

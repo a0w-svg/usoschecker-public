@@ -6,14 +6,10 @@ import androidx.core.view.isVisible
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.text.method.PasswordTransformationMethod
-import android.view.Gravity
 import android.view.View
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
-import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -21,7 +17,6 @@ import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
-import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textfield.TextInputEditText
 import java.time.LocalDate
 import org.json.JSONException

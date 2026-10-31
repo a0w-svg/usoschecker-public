@@ -28,11 +28,10 @@
         android:visibility="gone" />
     <TextView
         android:id="@+id/history_detail_before"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:visibility="gone" />
     <TextView
         android:id="@+id/history_detail_after"
@@ -50,18 +49,16 @@
         android:visibility="gone" />
     <TextView
         android:id="@+id/history_detail_detected"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted" />
+        android:layout_marginBottom="12dp" />
     <TextView
         android:id="@+id/history_detail_server"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:visibility="gone" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/history_detail_share"

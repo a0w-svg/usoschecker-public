@@ -2,7 +2,6 @@ package pl.vistula.checker.ui
 
 import androidx.core.content.withStyledAttributes
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity

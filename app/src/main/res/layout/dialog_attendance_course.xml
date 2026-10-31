@@ -75,15 +75,13 @@
             android:minHeight="48dp" />
 
         <TextView
-            style="@style/Vistula.Text.Note"
+            style="@style/Vistula.Text.Note.Muted"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"
-            android:text="@string/attendance_fixed_limit"
-            android:textColor="@color/app_muted" />
+            android:text="@string/attendance_fixed_limit" />
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/attendance_notes_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"

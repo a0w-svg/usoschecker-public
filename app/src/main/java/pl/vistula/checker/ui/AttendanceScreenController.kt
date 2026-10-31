@@ -172,10 +172,7 @@ class AttendanceScreenController private constructor() {
                 list.addView(courseCard(activity, list, code, item, data.saved, prefs, requestRender))
             }
             if (shown == 0) {
-                val empty = LayoutInflater.from(activity).inflate(R.layout.view_empty_state, list, false) as LinearLayout
-                empty.findViewById<TextView>(R.id.empty_title).setText(R.string.attendance_empty_filter)
-                empty.findViewById<TextView>(R.id.empty_description).setText(R.string.attendance_empty_desc)
-                list.addView(empty)
+                UiHelper.empty(activity, list, activity.getString(R.string.attendance_empty_filter), activity.getString(R.string.attendance_empty_desc))
                 if (AttendanceFilter.ALL != filter) {
                     list.addView(UiHelper.button(activity, activity.getString(R.string.attendance_filter_all, data.courses), {
                         onFilterChanged.accept(AttendanceFilter.ALL)

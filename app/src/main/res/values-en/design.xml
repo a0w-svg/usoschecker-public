@@ -3,6 +3,7 @@
     <string name="design_next_class">Next class</string>
     <string name="design_later_today">Later today</string>
     <string name="design_this_week">This week</string>
+    <string name="home_section_link">%1$s  ›</string>
     <string name="design_shortcuts">Shortcuts</string>
     <string name="design_starts_minutes">Starts in %1$d min</string>
     <string name="design_tentative">Tentative time</string>

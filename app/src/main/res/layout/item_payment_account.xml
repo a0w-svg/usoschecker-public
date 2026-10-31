@@ -17,19 +17,17 @@
         android:layout_marginBottom="12dp" />
     <TextView
         android:id="@+id/payments_account_faculty"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:visibility="gone" />
     <TextView
         android:id="@+id/payments_account_owner"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:visibility="gone" />
     <TextView
         android:id="@+id/payments_account_iban"
@@ -39,19 +37,17 @@
         android:layout_marginBottom="12dp" />
     <TextView
         android:id="@+id/payments_account_swift"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:visibility="gone" />
     <TextView
         android:id="@+id/payments_account_balance"
-        style="@style/Vistula.Text.Body"
+        style="@style/Vistula.Text.Body.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted"
         android:visibility="gone" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/payments_account_copy"

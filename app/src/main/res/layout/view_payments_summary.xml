@@ -11,11 +11,10 @@
     android:paddingBottom="12dp">
     <TextView
         android:id="@+id/payments_summary_label"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted" />
+        android:layout_marginBottom="12dp" />
     <TextView
         android:id="@+id/payments_summary_warning"
         style="@style/Vistula.Text.Note"
@@ -31,9 +30,8 @@
         android:orientation="vertical" />
     <TextView
         android:id="@+id/payments_summary_status"
-        style="@style/Vistula.Text.Note"
+        style="@style/Vistula.Text.Note.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textColor="@color/app_muted" />
+        android:layout_marginBottom="12dp" />
 </LinearLayout>

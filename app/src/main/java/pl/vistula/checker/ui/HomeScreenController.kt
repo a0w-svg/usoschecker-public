@@ -197,7 +197,7 @@ class HomeScreenController private constructor() {
             val rest = lessons.filter { it !== focus && it.intersects(focusDate) && it.end.toInstant().isAfter(now) }
             if (rest.isNotEmpty()) {
                 sectionLink(activity, parent, if (focusDate == today) R.string.design_later_today else R.string.design_later_that_day) { openDay(activity, focusDate) }
-                val box = UiHelper.card(activity, parent, android.graphics.Color.WHITE)
+                val box = UiHelper.card(activity, parent)
                 rest.forEachIndexed { index, lesson ->
                     if (index > 0) UiHelper.trayDivider(activity, box)
                     box.addView(lessonRow(activity, box, lesson, details))
@@ -206,11 +206,11 @@ class HomeScreenController private constructor() {
             val upcoming = lessons.firstOrNull { it.start.toInstant().isAfter(now) }
             if (current.isNotEmpty() && upcoming != null && !upcoming.intersects(today)) {
                 sectionLink(activity, parent, R.string.design_next_class) { openDay(activity, upcoming.start.toLocalDate()) }
-                val nextBox = UiHelper.card(activity, parent, android.graphics.Color.WHITE)
-                nextBox.addView(UiHelper.actionRow(activity, upcoming.record.title, { details.accept(upcoming) }, false))
+                val nextBox = UiHelper.card(activity, parent)
+                nextBox.addView(UiHelper.actionRow(activity, upcoming.record.title, { details.accept(upcoming) }))
                 UiHelper.note(activity, nextBox, UiHelper.shortDate(upcoming.start.toLocalDate()) + " · " +
                     upcoming.start.format(CLOCK) +
-                    if (upcoming.tentative()) " · " + activity.getString(R.string.design_tentative) else "", UiHelper.MUTED)
+                    if (upcoming.tentative()) " · " + activity.getString(R.string.design_tentative) else "", Tone.MUTED)
             }
         }
 
@@ -269,7 +269,7 @@ class HomeScreenController private constructor() {
             if (open.isEmpty()) return
             open.sortWith(compareBy { it.optString("due") })
             UiHelper.heading(activity, content, activity.getString(R.string.deadlines_upcoming))
-            val box = UiHelper.card(activity, content, android.graphics.Color.WHITE)
+            val box = UiHelper.card(activity, content)
             val today = LocalDate.now(UsosClient.ZONE)
             for (i in 0 until min(3, open.size)) {
                 val task = open[i]
@@ -287,7 +287,7 @@ class HomeScreenController private constructor() {
                         }
                         val line = prefix + due.format(DUE_DATE)
                         text = line
-                        if (due.isBefore(today)) setTextColor(activity.getColor(R.color.app_error))
+                        if (due.isBefore(today)) setTone(Tone.ERROR)
                     }
                 }
                 box.addView(item)

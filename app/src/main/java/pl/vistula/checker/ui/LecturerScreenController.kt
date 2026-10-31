@@ -20,9 +20,9 @@ object LecturerScreenController {
     fun render(activity: MainActivity, content: LinearLayout, state: JSONObject, servicesOverride: JSONObject? = null) {
                 if (!AccountRole.lecturer(state)) {
             ToolScreenUi.header(activity, content, R.string.lecturer_title, null)
-            val box = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, box, activity.getString(R.string.lecturer_title), 17, UiHelper.INK, true)
-            UiHelper.note(activity, box, activity.getString(R.string.lecturer_role_required), UiHelper.MUTED)
+            val box = UiHelper.section(activity, content)
+            UiHelper.add(activity, box, activity.getString(R.string.lecturer_title), 17, Tone.INK, true)
+            UiHelper.note(activity, box, activity.getString(R.string.lecturer_role_required), Tone.MUTED)
             box.addView(UiHelper.button(activity, activity.getString(R.string.nav_home), { activity.navigate(0) }, true))
             return
         }
@@ -33,7 +33,7 @@ object LecturerScreenController {
                 activity.refreshStudentServices("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports")
             }
         }
-        UiHelper.note(activity, content, activity.getString(R.string.lecturer_description), UiHelper.MUTED)
+        UiHelper.note(activity, content, activity.getString(R.string.lecturer_description), Tone.MUTED)
         content.addView(UiHelper.button(activity, activity.getString(R.string.lecturer_schedule), { activity.navigate(5) }, true))
 
         // 1. Conducted Courses
@@ -41,7 +41,7 @@ object LecturerScreenController {
         StudentCardsController.status(activity, content, teachingEntry)
         val courses = teachingEntry.optJSONObject("data")?.optJSONArray("courses")
         if (courses == null || courses.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(if (teachingEntry.has("fetchedAt")) R.string.lecturer_empty else R.string.services_load_hint), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(if (teachingEntry.has("fetchedAt")) R.string.lecturer_empty else R.string.services_load_hint), Tone.MUTED)
         } else {
             val tray = UiHelper.tray(activity, content)
             for (i in 0 until courses.length()) {
@@ -51,8 +51,8 @@ object LecturerScreenController {
                     orientation = LinearLayout.VERTICAL
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
-                UiHelper.add(activity, box, StudentServices.localized(course.opt("name"), language), 16, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.localized(course.opt("term"), language), UiHelper.MUTED)
+                UiHelper.add(activity, box, StudentServices.localized(course.opt("name"), language), 16, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.localized(course.opt("term"), language), Tone.MUTED)
                 tray.addView(box)
             }
         }
@@ -66,7 +66,7 @@ object LecturerScreenController {
         val groups = groupsData?.optJSONArray("groups") ?: JSONArray()
         val coordinated = groupsData?.optJSONArray("coordinated") ?: groupsData?.optJSONArray("coordinatedCourses") ?: JSONArray()
         if (groups.length() == 0 && coordinated.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(R.string.lecturer_groups_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.lecturer_groups_empty), Tone.MUTED)
         } else {
             val tray = UiHelper.tray(activity, content)
             var index = 0
@@ -78,19 +78,19 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(g.opt("course_name"), language).ifEmpty { StudentServices.text(g, "course_id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
                 val sub = listOfNotNull(
                     StudentServices.localized(g.opt("class_type"), language).takeIf { it.isNotEmpty() },
                     StudentServices.text(g, "group_number").takeIf { it.isNotEmpty() }?.let { "#$it" },
                     StudentServices.text(g, "term_id").takeIf { it.isNotEmpty() }
                 ).joinToString(" · ")
-                if (sub.isNotEmpty()) UiHelper.note(activity, box, sub, UiHelper.MUTED)
+                if (sub.isNotEmpty()) UiHelper.note(activity, box, sub, Tone.MUTED)
                 val unitId = StudentServices.text(g, "course_unit_id")
                 val groupNr = StudentServices.text(g, "group_number")
                 if (unitId.isNotEmpty() && groupNr.isNotEmpty()) {
                     box.isClickable = true
                     box.isFocusable = true
-                    UiHelper.note(activity, box, activity.getString(R.string.lecturer_group_click_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.lecturer_group_click_hint), Tone.MUTED)
                     box.setOnClickListener {
                         if (activity.isDemo()) {
                             showGroupDetails(activity, title, DemoStudentServices.demoGroupDetail(unitId, groupNr), language)
@@ -113,8 +113,8 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(c.opt("course_name"), language).ifEmpty { StudentServices.text(c, "course_id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(c, "term_id"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(c, "term_id"), Tone.MUTED)
                 tray.addView(box)
             }
         }
@@ -128,7 +128,7 @@ object LecturerScreenController {
         val testCourses = testsData?.optJSONArray("trees") ?: testsData?.optJSONArray("courses") ?: JSONArray()
         var firstNodeId = ""
         if (testCourses.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(R.string.lecturer_tests_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.lecturer_tests_empty), Tone.MUTED)
         } else {
             val tray = UiHelper.tray(activity, content)
             var nodeIndex = 0
@@ -146,17 +146,17 @@ object LecturerScreenController {
                         setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                     }
                     val nodeName = StudentServices.localized(n.opt("name"), language).ifEmpty { nodeId }
-                    UiHelper.add(activity, box, "$nodeName (#$nodeId)", 15, UiHelper.INK, true)
+                    UiHelper.add(activity, box, "$nodeName (#$nodeId)", 15, Tone.INK, true)
                     val sub = listOfNotNull(
                         courseName.takeIf { it.isNotEmpty() },
                         StudentServices.text(n, "type").uppercase(),
                         if (n.optBoolean("visible_for_students", false)) "Visible" else "Hidden"
                     ).joinToString(" · ")
-                    UiHelper.note(activity, box, sub, UiHelper.MUTED)
+                    UiHelper.note(activity, box, sub, Tone.MUTED)
                     if (nodeId.isNotEmpty()) {
                         box.isClickable = true
                         box.isFocusable = true
-                        UiHelper.note(activity, box, activity.getString(R.string.lecturer_node_click_hint), UiHelper.MUTED)
+                        UiHelper.note(activity, box, activity.getString(R.string.lecturer_node_click_hint), Tone.MUTED)
                         box.setOnClickListener {
                             if (activity.isDemo()) {
                                 showNodeDetails(activity, nodeName, DemoStudentServices.demoNodeDetail(nodeId), language)
@@ -177,9 +177,9 @@ object LecturerScreenController {
         val prefs = activity.getSharedPreferences("student_tools", Context.MODE_PRIVATE)
         val expEnabled = prefs.getBoolean(LecturerWriteActions.PREF_EXPERIMENTAL_WRITES, true) &&
             prefs.getBoolean(LecturerWriteActions.PREF_EXPERIMENTAL_WRITES_ACK, false)
-        val writeBox = UiHelper.section(activity, content, Color.WHITE)
-        UiHelper.add(activity, writeBox, activity.getString(R.string.lecturer_experimental_setting), 15, UiHelper.GREEN, true)
-        UiHelper.note(activity, writeBox, activity.getString(R.string.lecturer_experimental_notice_body), UiHelper.MUTED)
+        val writeBox = UiHelper.section(activity, content)
+        UiHelper.add(activity, writeBox, activity.getString(R.string.lecturer_experimental_setting), 15, Tone.INK, true)
+        UiHelper.note(activity, writeBox, activity.getString(R.string.lecturer_experimental_notice_body), Tone.MUTED)
         if (expEnabled) {
             val nodeField = UiHelper.field(activity, writeBox, "Node ID", firstNodeId, false)
             val studentField = UiHelper.field(activity, writeBox, "Student ID", "", false)
@@ -226,7 +226,7 @@ object LecturerScreenController {
         }, false))
         val meetings = services.optJSONObject("lecturerMeetings")?.optJSONObject("data")?.optJSONArray("meetings") ?: JSONArray()
         if (meetings.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(R.string.lecturer_meetings_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.lecturer_meetings_empty), Tone.MUTED)
         } else {
             val tray = UiHelper.tray(activity, content)
             for (i in 0 until meetings.length()) {
@@ -237,9 +237,9 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(m.opt("name"), language).ifEmpty { StudentServices.text(m, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
                 val comment = StudentServices.localized(m.opt("comment"), language)
-                if (comment.isNotEmpty()) UiHelper.note(activity, box, comment, UiHelper.MUTED)
+                if (comment.isNotEmpty()) UiHelper.note(activity, box, comment, Tone.MUTED)
                 val dates = m.optJSONArray("dates") ?: JSONArray()
                 if (dates.length() > 0) {
                     val slots = (0 until dates.length()).mapNotNull { dIdx ->
@@ -248,7 +248,7 @@ object LecturerScreenController {
                         val seats = d.optInt("seats_limit", 0).takeIf { it > 0 }?.let { "Limit: $it" }.orEmpty()
                         listOf(time, seats).filter { it.isNotEmpty() }.joinToString(" · ")
                     }.joinToString("\n")
-                    if (slots.isNotEmpty()) UiHelper.note(activity, box, slots, UiHelper.GREEN)
+                    if (slots.isNotEmpty()) UiHelper.note(activity, box, slots, Tone.INK)
                 }
                 tray.addView(box)
             }
@@ -261,7 +261,7 @@ object LecturerScreenController {
         }, false))
         val attLists = services.optJSONObject("lecturerAttendance")?.optJSONObject("data")?.optJSONArray("lists") ?: JSONArray()
         if (attLists.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(R.string.lecturer_attendance_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.lecturer_attendance_empty), Tone.MUTED)
         } else {
             val tray = UiHelper.tray(activity, content)
             for (i in 0 until attLists.length()) {
@@ -272,18 +272,18 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(l.opt("course_name"), language).ifEmpty { "#${StudentServices.text(l, "id")}" }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
                 val sub = listOfNotNull(
                     StudentServices.text(l, "date").takeIf { it.isNotEmpty() },
                     StudentServices.text(l, "group_number").takeIf { it.isNotEmpty() }?.let { "#$it" },
                     StudentServices.text(l, "mode").takeIf { it.isNotEmpty() }
                 ).joinToString(" · ")
-                if (sub.isNotEmpty()) UiHelper.note(activity, box, sub, UiHelper.MUTED)
+                if (sub.isNotEmpty()) UiHelper.note(activity, box, sub, Tone.MUTED)
                 val listId = StudentServices.text(l, "id")
                 if (listId.isNotEmpty()) {
                     box.isClickable = true
                     box.isFocusable = true
-                    UiHelper.note(activity, box, activity.getString(R.string.lecturer_attendance_click_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.lecturer_attendance_click_hint), Tone.MUTED)
                     box.setOnClickListener {
                         if (activity.isDemo()) {
                             showAttendanceDetails(activity, title, DemoStudentServices.demoAttendanceDetail(listId), language)
@@ -309,7 +309,7 @@ object LecturerScreenController {
         val surveys = repData?.optJSONArray("surveys") ?: JSONArray()
         val theses = repData?.optJSONArray("signableTheses") ?: JSONArray()
         if (surveys.length() == 0 && theses.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(R.string.lecturer_reports_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.lecturer_reports_empty), Tone.MUTED)
         } else {
             val tray = UiHelper.tray(activity, content)
             var idx = 0
@@ -321,8 +321,8 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(s.opt("name"), language).ifEmpty { StudentServices.text(s, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, "${s.optInt("number_of_answers", 0)} · ${StudentServices.text(s, "start_date")}", UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, "${s.optInt("number_of_answers", 0)} · ${StudentServices.text(s, "start_date")}", Tone.MUTED)
                 tray.addView(box)
             }
             for (i in 0 until theses.length()) {
@@ -333,15 +333,15 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(t.opt("title"), language).ifEmpty { StudentServices.text(t, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(t, "type"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(t, "type"), Tone.MUTED)
                 tray.addView(box)
             }
         }
 
         content.addView(UiHelper.actionRow(activity, activity.getString(R.string.lecturer_usosweb), {
             UiHelper.browser(activity, "https://usosweb.vistula.edu.pl/kontroler.php?_action=dla_prac")
-        }, false))
+        }))
     }
 
     fun renderAcademicExtras(activity: MainActivity, content: LinearLayout, services: JSONObject) {
@@ -351,7 +351,7 @@ object LecturerScreenController {
                 activity.refreshStudentServices("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
             }
         }
-        UiHelper.note(activity, content, activity.getString(R.string.academic_extras_desc), UiHelper.MUTED)
+        UiHelper.note(activity, content, activity.getString(R.string.academic_extras_desc), Tone.MUTED)
         val statusEntry = listOf("academicCalendar", "registrations", "exams", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
             .mapNotNull { services.optJSONObject(it) }
             .maxByOrNull { it.optLong("attemptAt", it.optLong("fetchedAt", 0L)) } ?: JSONObject()
@@ -371,8 +371,8 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val desc = StudentServices.localized(r.opt("description"), language).ifEmpty { StudentServices.text(r, "id") }
-                UiHelper.add(activity, box, desc, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(r, "status"), UiHelper.MUTED)
+                UiHelper.add(activity, box, desc, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(r, "status"), Tone.MUTED)
                 val registrationId = StudentServices.text(r, "id")
                 if (registrationId.isNotEmpty()) {
                     box.isClickable = true
@@ -403,8 +403,8 @@ object LecturerScreenController {
                     orientation = LinearLayout.VERTICAL
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
-                UiHelper.add(activity, box, StudentServices.localized(item.opt("course_name"), language).ifEmpty { StudentServices.text(item, "course_id") }, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, listOf(StudentServices.text(item, "term_id"), StudentServices.text(item, "user_registration_status")).filter { it.isNotEmpty() }.joinToString(" · "), UiHelper.MUTED)
+                UiHelper.add(activity, box, StudentServices.localized(item.opt("course_name"), language).ifEmpty { StudentServices.text(item, "course_id") }, 15, Tone.INK, true)
+                UiHelper.note(activity, box, listOf(StudentServices.text(item, "term_id"), StudentServices.text(item, "user_registration_status")).filter { it.isNotEmpty() }.joinToString(" · "), Tone.MUTED)
                 tray.addView(box)
             }
         }
@@ -413,7 +413,7 @@ object LecturerScreenController {
         UiHelper.sectionLabel(activity, content, activity.getString(R.string.token_registrations_title))
         if (tokenEntry != null) StudentCardsController.status(activity, content, tokenEntry)
         if (tokens.length() == 0 && (tokenEntry?.optLong("fetchedAt", 0L) ?: 0L) > 0L) {
-            UiHelper.note(activity, content, activity.getString(R.string.token_registrations_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.token_registrations_empty), Tone.MUTED)
         }
         if (tokens.length() > 0) {
             val tray = UiHelper.tray(activity, content)
@@ -425,11 +425,11 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(item.opt("description"), language).ifEmpty { StudentServices.text(item, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(item, "status"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(item, "status"), Tone.MUTED)
                 val id = StudentServices.text(item, "id")
                 if (id.isNotEmpty()) {
-                    UiHelper.note(activity, box, activity.getString(R.string.token_details_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.token_details_hint), Tone.MUTED)
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener {
@@ -453,11 +453,11 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(e.opt("course_name"), language).ifEmpty { StudentServices.text(e, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(e, "term_id"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(e, "term_id"), Tone.MUTED)
                 val examId = StudentServices.text(e, "id")
                 if (examId.isNotEmpty()) {
-                    UiHelper.note(activity, box, activity.getString(R.string.exam_details_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.exam_details_hint), Tone.MUTED)
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener {
@@ -484,12 +484,12 @@ object LecturerScreenController {
                 }
                 val thId = StudentServices.text(t, "id")
                 val title = StudentServices.localized(t.opt("title") ?: t.opt("titles"), language).ifEmpty { thId }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, listOf(StudentServices.text(t, "type"), StudentServices.text(t, "status")).filter { it.isNotEmpty() }.joinToString(" · "), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, listOf(StudentServices.text(t, "type"), StudentServices.text(t, "status")).filter { it.isNotEmpty() }.joinToString(" · "), Tone.MUTED)
                 if (thId.isNotEmpty()) {
                     box.isClickable = true
                     box.isFocusable = true
-                    UiHelper.note(activity, box, activity.getString(R.string.theses_details_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.theses_details_hint), Tone.MUTED)
                     box.setOnClickListener {
                         if (activity.isDemo()) {
                             showThesisDetails(activity, title, DemoStudentServices.demoThesisDetail(thId), language)
@@ -522,10 +522,10 @@ object LecturerScreenController {
                 }
                 val id = StudentServices.text(programme, "programme_id")
                 val title = StudentServices.localized(programme.opt("programme_name"), language).ifEmpty { id }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, listOf(StudentServices.text(programme, "status"), StudentServices.text(programme, "admission_date")).filter { it.isNotEmpty() }.joinToString(" · "), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, listOf(StudentServices.text(programme, "status"), StudentServices.text(programme, "admission_date")).filter { it.isNotEmpty() }.joinToString(" · "), Tone.MUTED)
                 if (id.isNotEmpty()) {
-                    UiHelper.note(activity, box, activity.getString(R.string.programme_details_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.programme_details_hint), Tone.MUTED)
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener {
@@ -559,7 +559,7 @@ object LecturerScreenController {
                     orientation = LinearLayout.VERTICAL
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
-                UiHelper.add(activity, box, "ECTS: $usedEcts", 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, "ECTS: $usedEcts", 15, Tone.INK, true)
                 tray.addView(box)
             }
             for (i in 0 until events.length()) {
@@ -570,11 +570,11 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(ev.opt("name"), language).ifEmpty { StudentServices.text(ev, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(ev, "start_date"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(ev, "start_date"), Tone.MUTED)
                 val id = StudentServices.text(ev, "id")
                 if (id.isNotEmpty()) {
-                    UiHelper.note(activity, box, activity.getString(R.string.calendar_event_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.calendar_event_hint), Tone.MUTED)
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener { showCalendarEvent(activity, id, title, language) }
@@ -589,8 +589,8 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(g.opt("description"), language).ifEmpty { StudentServices.text(g, "number") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(g, "term_id"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(g, "term_id"), Tone.MUTED)
                 tray.addView(box)
             }
         }
@@ -633,8 +633,8 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(m.opt("institution"), language).ifEmpty { StudentServices.text(m, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.localized(m.opt("programme"), language), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.localized(m.opt("programme"), language), Tone.MUTED)
                 tray.addView(box)
             }
         }
@@ -653,13 +653,13 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(d.opt("name"), language).ifEmpty { StudentServices.text(d, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(d, "address"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(d, "address"), Tone.MUTED)
                 val dormId = StudentServices.text(d, "id")
                 if (dormId.isNotEmpty()) {
                     box.isClickable = true
                     box.isFocusable = true
-                    UiHelper.note(activity, box, activity.getString(R.string.dormitory_details_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.dormitory_details_hint), Tone.MUTED)
                     box.setOnClickListener {
                         if (activity.isDemo()) {
                             showDormitoryDetails(activity, title, DemoStudentServices.demoDormitoryDetail(dormId), language)
@@ -682,13 +682,13 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(b.opt("name"), language).ifEmpty { StudentServices.text(b, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(b, "postal_address"), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(b, "postal_address"), Tone.MUTED)
                 val buildingId = StudentServices.text(b, "id")
                 if (buildingId.isNotEmpty() && !activity.isDemo()) {
                     box.isClickable = true
                     box.isFocusable = true
-                    UiHelper.note(activity, box, activity.getString(R.string.campus_building_rooms_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.campus_building_rooms_hint), Tone.MUTED)
                     box.setOnClickListener {
                         activity.universityRead({ client -> ToolServiceData.fetchBuildingRooms(client, buildingId) }) { rooms ->
                             if (rooms.length() == 0) {
@@ -723,13 +723,13 @@ object LecturerScreenController {
                 }
                 val apId = StudentServices.text(ap, "id")
                 val title = StudentServices.localized(ap.opt("name") ?: ap.opt("status_name"), language).ifEmpty { apId }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
                 val desc = StudentServices.localized(ap.opt("description") ?: ap.opt("status_desc"), language)
-                if (desc.isNotEmpty()) UiHelper.note(activity, box, desc, UiHelper.MUTED)
+                if (desc.isNotEmpty()) UiHelper.note(activity, box, desc, Tone.MUTED)
                 if (apId.isNotEmpty()) {
                     box.isClickable = true
                     box.isFocusable = true
-                    UiHelper.note(activity, box, activity.getString(R.string.allocation_period_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.allocation_period_hint), Tone.MUTED)
                     box.setOnClickListener {
                         if (activity.isDemo()) {
                             showAllocationPeriodDetails(activity, title, DemoStudentServices.demoAllocationPeriodDetail(apId), language)
@@ -762,12 +762,12 @@ object LecturerScreenController {
                     }
                     val pgId = StudentServices.text(pg, "id")
                     val pgTitle = StudentServices.localized(pg.opt("title"), language).ifEmpty { pgId }
-                    UiHelper.add(activity, box, pgTitle, 15, UiHelper.INK, true)
-                    UiHelper.note(activity, box, activity.getString(R.string.guide_chapter_title, chTitle), UiHelper.MUTED)
+                    UiHelper.add(activity, box, pgTitle, 15, Tone.INK, true)
+                    UiHelper.note(activity, box, activity.getString(R.string.guide_chapter_title, chTitle), Tone.MUTED)
                     if (pgId.isNotEmpty()) {
                         box.isClickable = true
                         box.isFocusable = true
-                        UiHelper.note(activity, box, activity.getString(R.string.guide_page_hint), UiHelper.MUTED)
+                        UiHelper.note(activity, box, activity.getString(R.string.guide_page_hint), Tone.MUTED)
                         box.setOnClickListener {
                             if (activity.isDemo()) {
                                 showGuidePageDetails(activity, pgTitle, DemoStudentServices.demoGuidePage(pgId), language)
@@ -818,8 +818,8 @@ object LecturerScreenController {
                     orientation = LinearLayout.VERTICAL
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
-                UiHelper.add(activity, box, StudentServices.text(s, "subject"), 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(s, "content"), UiHelper.MUTED)
+                UiHelper.add(activity, box, StudentServices.text(s, "subject"), 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(s, "content"), Tone.MUTED)
                 tray.addView(box)
             }
             for (i in 0 until surveys.length()) {
@@ -831,16 +831,16 @@ object LecturerScreenController {
                 }
                 val id = StudentServices.text(s, "id")
                 val title = StudentServices.localized(s.opt("name"), language).ifEmpty { id }
-                UiHelper.add(activity, box, activity.getString(R.string.survey_item_title, title), 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, activity.getString(R.string.survey_item_title, title), 15, Tone.INK, true)
                 val status = when {
                     s.optBoolean("did_i_fill_out") -> activity.getString(R.string.survey_completed)
                     s.has("can_i_fill_out") && !s.optBoolean("can_i_fill_out") -> activity.getString(R.string.survey_unavailable)
                     s.has("can_i_fill_out") -> activity.getString(R.string.survey_to_fill)
                     else -> ""
                 }
-                UiHelper.note(activity, box, listOf(status, StudentServices.text(s, "end_date")).filter { it.isNotEmpty() }.joinToString(" · "), UiHelper.MUTED)
+                UiHelper.note(activity, box, listOf(status, StudentServices.text(s, "end_date")).filter { it.isNotEmpty() }.joinToString(" · "), Tone.MUTED)
                 if (id.isNotEmpty()) {
-                    UiHelper.note(activity, box, activity.getString(R.string.survey_details_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.survey_details_hint), Tone.MUTED)
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener {
@@ -861,10 +861,10 @@ object LecturerScreenController {
                 }
                 val id = StudentServices.text(m, "id")
                 val title = StudentServices.text(m, "subject").ifEmpty { id }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, listOf(StudentServices.text(m, "status"), StudentServices.text(m, "date")).filter { it.isNotEmpty() }.joinToString(" · "), UiHelper.MUTED)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
+                UiHelper.note(activity, box, listOf(StudentServices.text(m, "status"), StudentServices.text(m, "date")).filter { it.isNotEmpty() }.joinToString(" · "), Tone.MUTED)
                 if (id.isNotEmpty()) {
-                    UiHelper.note(activity, box, activity.getString(R.string.mail_details_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.mail_details_hint), Tone.MUTED)
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener {
@@ -883,8 +883,8 @@ object LecturerScreenController {
                     orientation = LinearLayout.VERTICAL
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
-                UiHelper.add(activity, box, StudentServices.localized(n.opt("summary"), language).ifEmpty { StudentServices.text(n, "type") }, 15, UiHelper.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(n, "created"), UiHelper.MUTED)
+                UiHelper.add(activity, box, StudentServices.localized(n.opt("summary"), language).ifEmpty { StudentServices.text(n, "type") }, 15, Tone.INK, true)
+                UiHelper.note(activity, box, StudentServices.text(n, "created"), Tone.MUTED)
                 tray.addView(box)
             }
         }
@@ -903,13 +903,13 @@ object LecturerScreenController {
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
                 val title = StudentServices.localized(pt.opt("name"), language).ifEmpty { StudentServices.text(pt, "id") }
-                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, title, 15, Tone.INK, true)
                 val score = listOfNotNull(
                     StudentServices.text(pt, "points").takeIf { it.isNotEmpty() },
                     StudentServices.text(pt, "max_score").takeIf { it.isNotEmpty() }?.let { "/ $it" },
                     StudentServices.localized(pt.opt("level"), language).takeIf { it.isNotEmpty() }
                 ).joinToString(" ")
-                if (score.isNotEmpty()) UiHelper.note(activity, box, score, UiHelper.MUTED)
+                if (score.isNotEmpty()) UiHelper.note(activity, box, score, Tone.MUTED)
                 tray.addView(box)
             }
             for (i in 0 until slips.length()) {
@@ -919,7 +919,7 @@ object LecturerScreenController {
                     orientation = LinearLayout.VERTICAL
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
-                UiHelper.add(activity, box, StudentServices.localized(sl.opt("question"), language).ifEmpty { StudentServices.text(sl, "id") }, 15, UiHelper.INK, true)
+                UiHelper.add(activity, box, StudentServices.localized(sl.opt("question"), language).ifEmpty { StudentServices.text(sl, "id") }, 15, Tone.INK, true)
                 tray.addView(box)
             }
         }
@@ -927,7 +927,7 @@ object LecturerScreenController {
             primaryGroups.length() > 0 || studentMobs.length() > 0 || dorms.length() > 0 || buildings.length() > 0 ||
             statements.length() > 0 || notifications.length() > 0 || surveys.length() > 0 || messages.length() > 0 || plcTests.length() > 0 || slips.length() > 0
         if (!anyRendered) {
-            UiHelper.note(activity, content, activity.getString(if (statusEntry.has("fetchedAt")) R.string.lecturer_empty else R.string.services_load_hint), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(if (statusEntry.has("fetchedAt")) R.string.lecturer_empty else R.string.services_load_hint), Tone.MUTED)
         }
     }
 
@@ -935,7 +935,7 @@ object LecturerScreenController {
         content.removeAllViews()
         val rows = data.optJSONArray("courses") ?: JSONArray()
         if (rows.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(R.string.campus_courses_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.campus_courses_empty), Tone.MUTED)
             return
         }
         val tray = UiHelper.tray(activity, content)
@@ -947,12 +947,12 @@ object LecturerScreenController {
                 setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
             }
             val title = StudentServices.localized(course.opt("name"), language).ifEmpty { StudentServices.text(course, "match") }
-            UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+            UiHelper.add(activity, box, title, 15, Tone.INK, true)
             val ects = StudentServices.text(course, "ects").takeIf { it.isNotEmpty() }?.let { activity.getString(R.string.campus_ects_approx, it) }.orEmpty()
-            UiHelper.note(activity, box, listOf(StudentServices.text(course, "id"), ects).filter { it.isNotEmpty() }.joinToString(" · "), UiHelper.MUTED)
+            UiHelper.note(activity, box, listOf(StudentServices.text(course, "id"), ects).filter { it.isNotEmpty() }.joinToString(" · "), Tone.MUTED)
             val courseId = StudentServices.text(course, "id")
             if (courseId.isNotEmpty()) {
-                UiHelper.note(activity, box, activity.getString(R.string.course_details_hint), UiHelper.MUTED)
+                UiHelper.note(activity, box, activity.getString(R.string.course_details_hint), Tone.MUTED)
                 box.isClickable = true
                 box.isFocusable = true
                 box.setOnClickListener {
@@ -964,7 +964,7 @@ object LecturerScreenController {
             }
             tray.addView(box)
         }
-        if (data.optBoolean("hasMore")) UiHelper.note(activity, content, activity.getString(R.string.staff_search_more), UiHelper.MUTED)
+        if (data.optBoolean("hasMore")) UiHelper.note(activity, content, activity.getString(R.string.staff_search_more), Tone.MUTED)
     }
 
     private fun showCourseDetails(activity: MainActivity, fallback: String, data: JSONObject, language: String) {
@@ -1059,7 +1059,7 @@ object LecturerScreenController {
         content.removeAllViews()
         val events = data.optJSONArray("events") ?: JSONArray()
         if (events.length() == 0) {
-            UiHelper.note(activity, content, activity.getString(R.string.calendar_events_empty), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.calendar_events_empty), Tone.MUTED)
             return
         }
         val tray = UiHelper.tray(activity, content)
@@ -1072,16 +1072,16 @@ object LecturerScreenController {
             }
             val id = StudentServices.text(event, "id")
             val title = StudentServices.localized(event.opt("name"), language).ifEmpty { id }
-            UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
-            UiHelper.note(activity, box, listOf(StudentServices.text(event, "start_date"), StudentServices.text(event, "end_date")).filter { it.isNotEmpty() }.joinToString(" – "), UiHelper.MUTED)
+            UiHelper.add(activity, box, title, 15, Tone.INK, true)
+            UiHelper.note(activity, box, listOf(StudentServices.text(event, "start_date"), StudentServices.text(event, "end_date")).filter { it.isNotEmpty() }.joinToString(" – "), Tone.MUTED)
             if (id.isNotEmpty()) {
-                UiHelper.note(activity, box, activity.getString(R.string.calendar_event_hint), UiHelper.MUTED)
+                UiHelper.note(activity, box, activity.getString(R.string.calendar_event_hint), Tone.MUTED)
                 box.isClickable = true; box.isFocusable = true
                 box.setOnClickListener { showCalendarEvent(activity, id, title, language) }
             }
             tray.addView(box)
         }
-        if (data.optBoolean("truncated")) UiHelper.note(activity, content, activity.getString(R.string.calendar_events_limited), UiHelper.MUTED)
+        if (data.optBoolean("truncated")) UiHelper.note(activity, content, activity.getString(R.string.calendar_events_limited), Tone.MUTED)
     }
 
     private fun showCalendarEvent(activity: MainActivity, id: String, fallback: String, language: String) {

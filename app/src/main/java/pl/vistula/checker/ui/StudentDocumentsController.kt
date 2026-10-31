@@ -39,21 +39,21 @@ class StudentDocumentsController private constructor() {
                         val document = StudentServices.Document(raw, Language.currentLocale(activity).language)
                         if (!document.matches(search.text.toString())) continue
                         shown++
-                        val card = UiHelper.section(activity, list, Color.WHITE)
+                        val card = UiHelper.section(activity, list)
                         UiHelper.add(
                             activity,
                             card,
                             if (document.name.isEmpty()) activity.getString(R.string.documents_unnamed) else document.name,
                             16,
-                            UiHelper.INK,
+                            Tone.INK,
                             true
                         )
                         if (document.status.isNotEmpty()) {
-                            UiHelper.badge(activity, card, document.status, Color.rgb(214, 241, 229), UiHelper.GREEN)
+                            UiHelper.badge(activity, card, document.status, Surface.ACCENT, Tone.INK)
                         }
                         val details = UiHelper.disclosure(activity, card, "documents.details", R.string.simple_details)
                         if (document.typeName.isNotEmpty()) {
-                            UiHelper.note(activity, details, document.typeName, UiHelper.MUTED)
+                            UiHelper.note(activity, details, document.typeName, Tone.MUTED)
                         }
                         StudentCardsController.line(activity, details, R.string.documents_published, HistoryScreenController.formatFullDate(document.published))
                         StudentCardsController.line(activity, details, R.string.documents_delivered, HistoryScreenController.formatFullDate(document.delivered))
@@ -115,7 +115,7 @@ class StudentDocumentsController private constructor() {
                         )
                     }
                 }
-                UiHelper.note(activity, list, activity.getString(R.string.documents_count, shown), UiHelper.MUTED)
+                UiHelper.note(activity, list, activity.getString(R.string.documents_count, shown), Tone.MUTED)
             }
             UiHelper.watchSearch(search) { query ->
                 activity.setDocumentQuery(query)

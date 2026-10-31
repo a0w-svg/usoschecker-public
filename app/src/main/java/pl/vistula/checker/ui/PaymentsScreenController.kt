@@ -42,7 +42,7 @@ class PaymentsScreenController private constructor() {
                 ToolScreenUi.action(menu, R.string.payments_history_refresh) { activity.refreshStudentServices("remittances") }
                 ToolScreenUi.action(menu, R.string.tool_api_methods) { activity.openApiModule("payments") }
             }
-            UiHelper.note(activity, content, activity.getString(R.string.payments_usage_guide), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.payments_usage_guide), Tone.MUTED)
             val entry = services.optJSONObject("payments") ?: JSONObject()
             val language = pl.vistula.checker.core.ApiLanguage.normalize(Language.currentLocale(activity).language)
             val cached = entry.optJSONObject("data")?.optJSONObject(language)
@@ -53,7 +53,7 @@ class PaymentsScreenController private constructor() {
                 StudentCardsController.status(activity, content, entry)
             } else if (raw != null) {
                 UiHelper.note(activity, content, activity.getString(R.string.payments_data_freshness,
-                    UiHelper.timestamp(d.optLong("successAt"))), UiHelper.MUTED)
+                    UiHelper.timestamp(d.optLong("successAt"))), Tone.MUTED)
             }
             val remittances = services.optJSONObject("remittances") ?: JSONObject()
             if (payments == null) {
@@ -114,7 +114,7 @@ class PaymentsScreenController private constructor() {
 
         private fun renderAccounts(activity: MainActivity, content: LinearLayout, payments: PaymentInfo) {
             val accounts = UiHelper.disclosure(activity, content, "payments.accounts", R.string.payments_accounts_heading)
-            UiHelper.note(activity, accounts, activity.getString(R.string.payments_accounts_information), UiHelper.MUTED)
+            UiHelper.note(activity, accounts, activity.getString(R.string.payments_accounts_information), Tone.MUTED)
             for (acc in payments.accounts) {
                 val box = inflate(activity, R.layout.item_payment_account, accounts)
                 box.findViewById<TextView>(R.id.payments_account_name).text =
@@ -174,7 +174,7 @@ class PaymentsScreenController private constructor() {
                         else -> R.string.payments_status_pending
                     }
                 )
-                if (overdue) setTextColor(activity.getColor(R.color.app_error))
+                if (overdue) setTone(Tone.ERROR)
             }
             content.addView(box)
         }
@@ -207,7 +207,7 @@ class PaymentsScreenController private constructor() {
             card.findViewById<TextView>(R.id.payment_item_amount).text = activity.getString(R.string.payments_amount, inst.amount, inst.currency)
             card.findViewById<TextView>(R.id.payment_item_deadline).apply {
                 showIfNotEmpty(if (inst.deadline.isEmpty()) "" else activity.getString(R.string.payments_deadline, HistoryScreenController.formatFullDate(inst.deadline)))
-                if (overdue) setTextColor(activity.getColor(R.color.app_error))
+                if (overdue) setTone(Tone.ERROR)
             }
             card.findViewById<TextView>(R.id.payment_item_paid_date).showIfNotEmpty(
                 if (inst.paymentDate.isEmpty()) "" else activity.getString(R.string.payments_date_paid, HistoryScreenController.formatFullDate(inst.paymentDate))
@@ -307,7 +307,7 @@ class PaymentsScreenController private constructor() {
             }, false))
             val items = entry.optJSONObject("data")?.optJSONArray("items")
             if (items == null || items.length() == 0) {
-                UiHelper.note(activity, body, activity.getString(if (items == null) R.string.services_not_loaded else R.string.payments_empty_title), UiHelper.MUTED)
+                UiHelper.note(activity, body, activity.getString(if (items == null) R.string.services_not_loaded else R.string.payments_empty_title), Tone.MUTED)
                 return
             }
             for (i in 0 until items.length()) {

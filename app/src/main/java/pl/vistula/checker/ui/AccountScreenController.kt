@@ -68,7 +68,7 @@ class AccountScreenController private constructor() {
                 state.optBoolean("authorizationError") -> R.string.account_session_expired
                 state.optString("token").isNotEmpty() -> R.string.settings_connected
                 else -> R.string.settings_disconnected
-            }), UiHelper.MUTED)
+            }), Tone.MUTED)
             val campus = pages.page("settings.campus", R.string.campus_affiliation_title)
             CampusSettingsController.render(activity, campus, if (demo) activity.serviceAccountState() else state)
             val appearance = pages.page("settings.appearance", R.string.settings_personalization)
@@ -82,17 +82,13 @@ class AccountScreenController private constructor() {
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.appearance_title),
-                    { Appearance.choose(activity) },
-                    false
-                )
+                    { Appearance.choose(activity) })
             )
             appearance.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.language_title),
-                    { Language.choose(activity) },
-                    false
-                )
+                    { Language.choose(activity) })
             )
 
             var profileBody: LinearLayout? = null
@@ -125,26 +121,26 @@ class AccountScreenController private constructor() {
 
             if (connected) {
                 if (state.optBoolean("authorizationError")) {
-                    UiHelper.note(activity, content, activity.getString(R.string.account_session_expired), activity.getColor(R.color.app_error))
+                    UiHelper.note(activity, content, activity.getString(R.string.account_session_expired), Tone.ERROR)
                 }
                 val box = pages.page("settings.sync", R.string.sync_settings_title)
-                UiHelper.note(activity, box, activity.getString(R.string.settings_sync_hint), UiHelper.MUTED)
+                UiHelper.note(activity, box, activity.getString(R.string.settings_sync_hint), Tone.MUTED)
                 box.addView(UiHelper.button(activity, activity.getString(R.string.btn_check_now), { activity.sync() }, true))
                 UiHelper.note(
                     activity,
                     box,
                     activity.getString(R.string.monitoring_last_success) + "\n" +
                         UiHelper.timestamp(d?.optLong("successAt") ?: 0L),
-                    UiHelper.MUTED
+                    Tone.MUTED
                 )
                 if (state.optString("error").isNotEmpty()) {
-                    UiHelper.note(activity, box, ApiErrorUi.cached(activity, state), Color.rgb(167, 49, 49))
+                    UiHelper.note(activity, box, ApiErrorUi.cached(activity, state), Tone.ERROR)
                     if (state.optLong("retryAt") > System.currentTimeMillis()) {
                         UiHelper.note(
                             activity,
                             box,
                             activity.getString(R.string.home_next_retry, UiHelper.timestamp(state.optLong("retryAt"))),
-                            UiHelper.MUTED
+                            Tone.MUTED
                         )
                     }
                 }
@@ -177,14 +173,14 @@ class AccountScreenController private constructor() {
                     }
                 }
                 val access = UiHelper.disclosure(activity, accountControls, "settings.granted", R.string.settings_access)
-                UiHelper.add(activity, access, activity.getString(R.string.account_oauth_consent, authorizedScopes), 14, UiHelper.MUTED, false)
+                UiHelper.add(activity, access, activity.getString(R.string.account_oauth_consent, authorizedScopes), 14, Tone.MUTED, false)
                 if (!StudentServices.hasScope(authorizedScopes, "payments")) {
-                    UiHelper.note(activity, accountControls, activity.getString(R.string.account_warn_no_payments_scope), Color.rgb(180, 110, 0))
+                    UiHelper.note(activity, accountControls, activity.getString(R.string.account_warn_no_payments_scope), Tone.WARNING)
                 }
                 val toggle = UiHelper.switchRow(activity, box, activity.getString(R.string.background_check), state.optBoolean("enabled"))
                 if (state.optBoolean("authorizationError")) {
                     toggle.isEnabled = false
-                    UiHelper.note(activity, box, activity.getString(R.string.account_session_expired), Color.rgb(167, 49, 49))
+                    UiHelper.note(activity, box, activity.getString(R.string.account_session_expired), Tone.ERROR)
                 }
                 toggle.setOnCheckedChangeListener { _, checked -> listener.onToggleEnabled(checked) }
 
@@ -230,7 +226,7 @@ class AccountScreenController private constructor() {
                     activity.getString(R.string.account_notif_system_blocked)
                 },
                 14,
-                UiHelper.MUTED,
+                Tone.MUTED,
                 false
             )
             notices.addView(
@@ -277,9 +273,9 @@ class AccountScreenController private constructor() {
 
             if (remindersOn) {
                 if (!ClassReminderReceiver.canNotify(activity)) {
-                    UiHelper.note(activity, reminderRow, activity.getString(R.string.account_reminder_permission_missing), UiHelper.MUTED)
+                    UiHelper.note(activity, reminderRow, activity.getString(R.string.account_reminder_permission_missing), Tone.MUTED)
                 }
-                UiHelper.note(activity, reminderRow, activity.getString(R.string.account_reminder_lead_time_label), UiHelper.MUTED)
+                UiHelper.note(activity, reminderRow, activity.getString(R.string.account_reminder_lead_time_label), Tone.MUTED)
                 UiHelper.chips(
                     activity,
                     reminderRow,
@@ -298,11 +294,11 @@ class AccountScreenController private constructor() {
                 }
             }
             notices.addView(reminderRow)
-            UiHelper.note(activity, notices, activity.getString(R.string.account_channels_note), UiHelper.MUTED)
+            UiHelper.note(activity, notices, activity.getString(R.string.account_channels_note), Tone.MUTED)
 
             // Widgets
             val widgetsCard = pages.page("settings.widgets", R.string.account_widgets_heading)
-            UiHelper.add(activity, widgetsCard, activity.getString(R.string.account_widgets_desc), 13, UiHelper.MUTED, false)
+            UiHelper.add(activity, widgetsCard, activity.getString(R.string.account_widgets_desc), 13, Tone.MUTED, false)
             widgetsCard.addView(
                 UiHelper.button(
                     activity,
@@ -519,16 +515,16 @@ class AccountScreenController private constructor() {
                     currentTerm = snap.terms.values.iterator().next()
                 }
                 if (currentTerm != null) {
-                    val termBox = UiHelper.section(activity, content, Color.rgb(238, 245, 242))
-                    UiHelper.add(activity, termBox, activity.getString(R.string.academic_calendar_title), 11, UiHelper.GREEN, true)
-                    UiHelper.add(activity, termBox, currentTerm.name, 17, UiHelper.INK, true)
+                    val termBox = UiHelper.section(activity, content)
+                    UiHelper.add(activity, termBox, activity.getString(R.string.academic_calendar_title), 11, Tone.INK, true)
+                    UiHelper.add(activity, termBox, currentTerm.name, 17, Tone.INK, true)
                     val days = currentTerm.daysRemaining(today)
                     val termInfo = if (days >= 0) {
                         activity.getString(R.string.home_term_remaining, days, currentTerm.endDate)
                     } else {
                         activity.getString(R.string.home_term_ended, currentTerm.endDate)
                     }
-                    UiHelper.add(activity, termBox, termInfo, 13, UiHelper.MUTED, false)
+                    UiHelper.add(activity, termBox, termInfo, 13, Tone.MUTED, false)
                 }
             } catch (_: JSONException) {
                 // Missing cached academic information must not block account settings.

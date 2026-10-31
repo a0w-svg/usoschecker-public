@@ -144,12 +144,12 @@ class AttendanceScreenController private constructor() {
                 when {
                     data.exceeded > 0 -> {
                         text = activity.getString(R.string.attendance_note_exceeded, data.exceeded)
-                        setTextColor(activity.getColor(R.color.app_error))
+                        setTone(Tone.ERROR)
                         visibility = View.VISIBLE
                     }
                     data.warnings > 0 -> {
                         text = activity.getString(R.string.attendance_note_warning, data.warnings)
-                        setTextColor(activity.getColor(R.color.app_muted))
+                        setTone(Tone.MUTED)
                         visibility = View.VISIBLE
                     }
                 }

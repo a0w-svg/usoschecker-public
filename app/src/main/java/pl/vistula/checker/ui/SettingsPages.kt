@@ -43,7 +43,7 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
         ToolScreenUi.header(activity, content, selected.title, null)
         content.addView(UiHelper.actionRow(activity, activity.getString(R.string.settings_back), {
             activity.openAccountPage(null)
-        }, false))
+        }))
         selected.body.visibility = View.VISIBLE
         content.addView(selected.body)
     }

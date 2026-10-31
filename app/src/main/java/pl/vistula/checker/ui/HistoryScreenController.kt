@@ -451,7 +451,7 @@ class HistoryScreenController private constructor() {
 
         @JvmStatic
         fun renderChangeCard(activity: MainActivity, parent: LinearLayout, c: Change) {
-            val box = UiHelper.card(activity, parent, Color.WHITE)
+            val box = UiHelper.card(activity, parent)
             box.isClickable = true
             box.isFocusable = true
 
@@ -469,15 +469,15 @@ class HistoryScreenController private constructor() {
                 box,
                 "$category · $action" + if (time.isEmpty()) "" else " · $time",
                 12,
-                UiHelper.MUTED,
+                Tone.MUTED,
                 false
             )
-            UiHelper.add(activity, box, c.title, 17, UiHelper.INK, true)
+            UiHelper.add(activity, box, c.title, 17, Tone.INK, true)
 
             val diffs = getDiffSummaryList(activity, c)
             if (c.action == "Zmieniono" && diffs.isNotEmpty()) {
                 for (i in 0 until min(3, diffs.size)) {
-                    UiHelper.add(activity, box, diffs[i].replaceFirst(LEADING_SYMBOLS, ""), 14, UiHelper.INK, false)
+                    UiHelper.add(activity, box, diffs[i].replaceFirst(LEADING_SYMBOLS, ""), 14, Tone.INK, false)
                 }
             } else {
                 val value = when (c.action) {
@@ -486,12 +486,12 @@ class HistoryScreenController private constructor() {
                     else -> if (c.after.isEmpty()) c.before else c.after
                 }
                 if (value.isNotEmpty()) {
-                    UiHelper.add(activity, box, value, 14, UiHelper.INK, false)
+                    UiHelper.add(activity, box, value, 14, Tone.INK, false)
                 }
             }
             val eventDate = eventDateDescription(activity, c)
             if (eventDate.isNotEmpty()) {
-                UiHelper.add(activity, box, eventDate, 12, UiHelper.MUTED, false)
+                UiHelper.add(activity, box, eventDate, 12, Tone.MUTED, false)
             }
             ViewCompat.setScreenReaderFocusable(box, true)
             ViewCompat.replaceAccessibilityAction(

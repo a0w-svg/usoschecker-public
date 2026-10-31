@@ -13,8 +13,8 @@ object CampusSettingsController {
         val selected = CampusAffiliation.selected(state)
         UiHelper.heading(activity, content, CampusAffiliation.campuses[selected] ?: activity.getString(R.string.campus_unknown))
         UiHelper.note(activity, content, activity.getString(if (state.optString("campusOverride").isEmpty())
-            R.string.campus_automatic_hint else R.string.campus_manual_hint), UiHelper.MUTED)
-        UiHelper.note(activity, content, activity.getString(R.string.campus_filter_hint), UiHelper.MUTED)
+            R.string.campus_automatic_hint else R.string.campus_manual_hint), Tone.MUTED)
+        UiHelper.note(activity, content, activity.getString(R.string.campus_filter_hint), Tone.MUTED)
         content.addView(UiHelper.button(activity, activity.getString(R.string.campus_choose), { choose(activity, state) }, true))
         if (activity.connected() && !activity.isDemo()) {
             content.addView(UiHelper.button(activity, activity.getString(R.string.campus_detect), {
@@ -27,8 +27,8 @@ object CampusSettingsController {
         for (i in 0 until units.length()) {
             val unit = units.getJSONObject(i)
             if (unit.optString("campus") != selected || selected.isEmpty()) continue
-            UiHelper.add(activity, content, StudentServices.localized(unit.opt("name"), Language.currentLocale(activity).language), 16, UiHelper.INK, true)
-            UiHelper.note(activity, content, StudentServices.text(unit, "address"), UiHelper.MUTED)
+            UiHelper.add(activity, content, StudentServices.localized(unit.opt("name"), Language.currentLocale(activity).language), 16, Tone.INK, true)
+            UiHelper.note(activity, content, StudentServices.text(unit, "address"), Tone.MUTED)
         }
     }
 
@@ -55,7 +55,7 @@ object CampusSettingsController {
             if (units != null) for (i in 0 until units.length()) {
                 val unit = units.getJSONObject(i)
                 if (unit.optString("campus") != selected) continue
-                val box = UiHelper.section(activity, content, android.graphics.Color.WHITE)
+                val box = UiHelper.section(activity, content)
                 UiHelper.heading(activity, box, StudentServices.localized(unit.opt("name"), Language.currentLocale(activity).language))
                 for (key in listOf("address", "email")) {
                     val value = StudentServices.text(unit, key)
@@ -65,8 +65,8 @@ object CampusSettingsController {
                             box.addView(UiHelper.actionRow(activity, value, {
                                 try { activity.startActivity(android.content.Intent(android.content.Intent.ACTION_SENDTO,
                                     android.net.Uri.fromParts("mailto", value, null))) } catch (_: android.content.ActivityNotFoundException) { }
-                            }, false))
-                        } else UiHelper.add(activity, box, value, 16, UiHelper.INK, false)
+                            }))
+                        } else UiHelper.add(activity, box, value, 16, Tone.INK, false)
                     }
                 }
                 val phones = unit.optJSONArray("phones") ?: org.json.JSONArray()
@@ -77,13 +77,13 @@ object CampusSettingsController {
                     if (number.isNotEmpty()) box.addView(UiHelper.actionRow(activity, phone, {
                         try { activity.startActivity(android.content.Intent(android.content.Intent.ACTION_DIAL,
                             android.net.Uri.fromParts("tel", number, null))) } catch (_: android.content.ActivityNotFoundException) { }
-                    }, false))
+                    }))
                 }
             }
-            if (!hasContacts) UiHelper.note(activity, content, activity.getString(R.string.campus_contacts_unavailable), UiHelper.MUTED)
+            if (!hasContacts) UiHelper.note(activity, content, activity.getString(R.string.campus_contacts_unavailable), Tone.MUTED)
             content.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_student_portal), {
                 UiHelper.browser(activity, "https://usosweb.vistula.edu.pl/")
-            }, false))
+            }))
             CampusAffiliation.website(selected)?.let { website ->
                 content.addView(UiHelper.button(activity, activity.getString(R.string.campus_official_site), { UiHelper.browser(activity, website) }, true))
             }
@@ -93,6 +93,6 @@ object CampusSettingsController {
         content.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_choose), {
             activity.navigate(Tabs.ACCOUNT)
             activity.openAccountPage("settings.campus")
-        }, false))
+        }))
     }
 }

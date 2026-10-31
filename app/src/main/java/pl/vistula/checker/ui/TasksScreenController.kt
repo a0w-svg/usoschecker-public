@@ -233,7 +233,7 @@ class TasksScreenController private constructor() {
 
             title.text = titleText
             if (done) {
-                title.setTextColor(activity.getColor(R.color.app_muted))
+                title.setTone(Tone.MUTED)
                 title.paintFlags = title.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             }
 

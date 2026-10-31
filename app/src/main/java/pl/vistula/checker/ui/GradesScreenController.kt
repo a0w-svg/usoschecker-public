@@ -73,7 +73,7 @@ class GradesScreenController private constructor() {
             listener: GradesListener
         ) {
             if (!demo && state.optString("error").isNotEmpty()) {
-                UiHelper.note(activity, content, ApiErrorUi.cached(activity, state), Color.rgb(160, 48, 40))
+                UiHelper.note(activity, content, ApiErrorUi.cached(activity, state), Tone.ERROR)
             }
 
             val raw = d.optJSONObject("snapshot")
@@ -155,7 +155,7 @@ class GradesScreenController private constructor() {
                     } else {
                         activity.getString(R.string.grades_tests_unavailable)
                     },
-                    UiHelper.MUTED
+                    Tone.MUTED
                 )
             }
             if (gradeType != GradesUiState.TYPE_ALL || gradeOrder != GradesUiState.ORDER_NAME) {
@@ -319,7 +319,7 @@ class GradesScreenController private constructor() {
                         }
                         headings.addView(View(activity), LinearLayout.LayoutParams(0, 1, 1f))
                         columns.forEach { column ->
-                            headings.addView(UiHelper.text(activity, GradeTable.fullLabel(column, Language.currentLocale(activity).language), 13, UiHelper.MUTED, false).apply {
+                            headings.addView(UiHelper.text(activity, GradeTable.fullLabel(column, Language.currentLocale(activity).language), 13, Tone.MUTED, false).apply {
                                 gravity = Gravity.CENTER
                             }, LinearLayout.LayoutParams(widths.getValue(column), -2))
                         }
@@ -338,7 +338,7 @@ class GradesScreenController private constructor() {
                             activity,
                             section,
                             activity.getString(if (hasGrades) R.string.grades_semester_empty else R.string.grades_semester_no_grades),
-                            UiHelper.MUTED
+                            Tone.MUTED
                         )
                     }
                 }
@@ -374,9 +374,9 @@ class GradesScreenController private constructor() {
                             }
                             val testsSection = semesterSection(activity, list, "\u0000tests$term", heading, groupValues.size, term.isNotEmpty())
                             for (ctr in groupValues) {
-                                val testBox = UiHelper.section(activity, testsSection, Color.WHITE)
-                                UiHelper.add(activity, testBox, ctr.testName, 17, UiHelper.INK, true)
-                                UiHelper.add(activity, testBox, ctr.courseName, 13, UiHelper.GREEN, true)
+                                val testBox = UiHelper.section(activity, testsSection)
+                                UiHelper.add(activity, testBox, ctr.testName, 17, Tone.INK, true)
+                                UiHelper.add(activity, testBox, ctr.courseName, 13, Tone.INK, true)
                                 if (ctr.maxPoints > 0) {
                                     UiHelper.add(
                                         activity,
@@ -389,7 +389,7 @@ class GradesScreenController private constructor() {
                                             ctr.percentage()
                                         ),
                                         15,
-                                        UiHelper.INK,
+                                        Tone.INK,
                                         false
                                     )
                                 } else if (!ctr.points.isNaN() && ctr.points > 0) {
@@ -402,15 +402,15 @@ class GradesScreenController private constructor() {
                                             ctr.points
                                         ),
                                         15,
-                                        UiHelper.INK,
+                                        Tone.INK,
                                         false
                                     )
                                 }
                                 if (ctr.grade.isNotEmpty()) {
-                                    UiHelper.add(activity, testBox, activity.getString(R.string.grades_test_grade, ctr.grade), 14, UiHelper.GREEN, true)
+                                    UiHelper.add(activity, testBox, activity.getString(R.string.grades_test_grade, ctr.grade), 14, Tone.INK, true)
                                 }
                                 if (ctr.date.isNotEmpty()) {
-                                    UiHelper.add(activity, testBox, activity.getString(R.string.grades_test_date, ctr.date), 12, UiHelper.MUTED, false)
+                                    UiHelper.add(activity, testBox, activity.getString(R.string.grades_test_date, ctr.date), 12, Tone.MUTED, false)
                                 }
                             }
                         }
@@ -418,7 +418,7 @@ class GradesScreenController private constructor() {
                 }
 
                 if (visible.isEmpty() && pendingCount == 0 && extraTestCount == 0 && (terms.isEmpty() || currentQuery.trim().isNotEmpty())) {
-                    val box = UiHelper.card(activity, list, Color.WHITE)
+                    val box = UiHelper.card(activity, list)
                     UiHelper.add(
                         activity,
                         box,
@@ -428,10 +428,10 @@ class GradesScreenController private constructor() {
                             activity.getString(R.string.grades_no_match)
                         },
                         17,
-                        UiHelper.INK,
+                        Tone.INK,
                         true
                     )
-                    UiHelper.note(activity, box, activity.getString(R.string.grades_no_match_hint), UiHelper.MUTED)
+                    UiHelper.note(activity, box, activity.getString(R.string.grades_no_match_hint), Tone.MUTED)
                 }
             }
 
@@ -447,15 +447,15 @@ class GradesScreenController private constructor() {
             row.findViewById<TextView>(R.id.grade_item_course_name).text = course.title
             val value = row.findViewById<TextView>(R.id.grade_item_value_badge)
             value.text = "—"
-            value.setTextColor(activity.getColor(R.color.app_muted))
+            value.setTone(Tone.MUTED)
             row.findViewById<TextView>(R.id.grade_item_course_meta).setText(R.string.grades_no_grade)
             row.setOnClickListener {
                 val body = LinearLayout(activity)
                 body.orientation = LinearLayout.VERTICAL
                 body.setPadding(UiHelper.dp(activity, 24), 0, UiHelper.dp(activity, 24), UiHelper.dp(activity, 16))
-                UiHelper.add(activity, body, activity.getString(R.string.grades_no_grade), 15, UiHelper.MUTED, false)
+                UiHelper.add(activity, body, activity.getString(R.string.grades_no_grade), 15, Tone.MUTED, false)
                 if (course.optMeta("courseId").isNotEmpty()) {
-                    UiHelper.add(activity, body, course.optMeta("courseId"), 14, UiHelper.INK, false)
+                    UiHelper.add(activity, body, course.optMeta("courseId"), 14, Tone.INK, false)
                 }
                 if (course.ects.isFinite()) {
                     UiHelper.add(
@@ -466,7 +466,7 @@ class GradesScreenController private constructor() {
                             String.format(Language.currentLocale(activity), "%s", course.ects)
                         ),
                         14,
-                        UiHelper.INK,
+                        Tone.INK,
                         false
                     )
                 }
@@ -517,7 +517,7 @@ class GradesScreenController private constructor() {
             header[0]!!.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
             header[0]!!.gravity = Gravity.START or Gravity.CENTER_VERTICAL
             header[0]!!.textSize = 13f
-            header[0]!!.setTextColor(activity.getColor(R.color.app_muted))
+            header[0]!!.setTone(Tone.MUTED)
             header[0]!!.setPadding(UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 8), 0)
             header[0]!!.maxLines = Int.MAX_VALUE
             ViewCompat.setAccessibilityHeading(header[0]!!, true)
@@ -582,7 +582,7 @@ class GradesScreenController private constructor() {
             // The chevron is redundant: the complete course row is the detail action.
             while (horizontal.childCount > valueIndex) horizontal.removeViewAt(valueIndex)
             val firstValueColumn = columns.firstOrNull { GradeTable.values(rows, it, snapshot) != "—" }
-            fun cell(column: String) = UiHelper.text(activity, GradeTable.values(rows, column, snapshot), if (stacked) 20 else 18, UiHelper.INK, true).apply {
+            fun cell(column: String) = UiHelper.text(activity, GradeTable.values(rows, column, snapshot), if (stacked) 20 else 18, Tone.INK, true).apply {
                 if (column == firstValueColumn) id = R.id.grade_item_value_badge
                 gravity = Gravity.CENTER
                 contentDescription = GradeTable.fullLabel(column, Language.currentLocale(activity).language) + ": " + text
@@ -598,7 +598,7 @@ class GradesScreenController private constructor() {
                             orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
                             setPadding(UiHelper.dp(activity, 6), UiHelper.dp(activity, 4), UiHelper.dp(activity, 6), UiHelper.dp(activity, 4))
                         }
-                        assessment.addView(UiHelper.text(activity, GradeTable.fullLabel(column, Language.currentLocale(activity).language), 13, UiHelper.MUTED, false).apply {
+                        assessment.addView(UiHelper.text(activity, GradeTable.fullLabel(column, Language.currentLocale(activity).language), 13, Tone.MUTED, false).apply {
                             gravity = Gravity.CENTER
                             minLines = 2
                             setPadding(0, 0, 0, UiHelper.dp(activity, 4))
@@ -671,7 +671,7 @@ class GradesScreenController private constructor() {
                 try {
                     val raw = row.json().toString(2)
                     copied.append(raw).append("\n\n")
-                    val rawView = UiHelper.text(activity, raw, 12, UiHelper.INK, false)
+                    val rawView = UiHelper.text(activity, raw, 12, Tone.INK, false)
                     rawView.typeface = Typeface.MONOSPACE
                     rawView.setTextIsSelectable(true)
                     rawView.visibility = View.GONE
@@ -710,19 +710,19 @@ class GradesScreenController private constructor() {
                                     test.percentage()
                                 ),
                                 15,
-                                UiHelper.INK,
+                                Tone.INK,
                                 false
                             )
                         } else if (test.hasPoints) {
-                            UiHelper.add(activity, body, activity.getString(R.string.grades_points_without_max, test.points), 15, UiHelper.INK, false)
+                            UiHelper.add(activity, body, activity.getString(R.string.grades_points_without_max, test.points), 15, Tone.INK, false)
                         }
                         if (test.grade.isNotEmpty()) {
-                            UiHelper.add(activity, body, activity.getString(R.string.grades_test_grade, test.grade), 15, UiHelper.INK, true)
+                            UiHelper.add(activity, body, activity.getString(R.string.grades_test_grade, test.grade), 15, Tone.INK, true)
                         }
                         if (test.date.isNotEmpty()) {
-                            UiHelper.note(activity, body, activity.getString(R.string.grades_test_date, test.date), UiHelper.MUTED)
+                            UiHelper.note(activity, body, activity.getString(R.string.grades_test_date, test.date), Tone.MUTED)
                         }
-                        val text = UiHelper.text(activity, test.json().toString(2), 13, UiHelper.INK, false)
+                        val text = UiHelper.text(activity, test.json().toString(2), 13, Tone.INK, false)
                         text.setTextIsSelectable(true)
                         text.visibility = View.GONE
                         body.addView(
@@ -775,12 +775,12 @@ class GradesScreenController private constructor() {
         ) {
             if (rows.isEmpty()) return
             val summary = GradeSummary.of(rows)
-            val box = UiHelper.card(activity, parent, Color.rgb(232, 243, 236))
+            val box = UiHelper.card(activity, parent, Surface.SUCCESS)
 
             val header = LinearLayout(activity)
             header.gravity = Gravity.CENTER_VERTICAL
             header.addView(
-                UiHelper.text(activity, activity.getString(R.string.grades_summary_title), 16, UiHelper.INK, true),
+                UiHelper.text(activity, activity.getString(R.string.grades_summary_title), 16, Tone.INK, true),
                 LinearLayout.LayoutParams(0, -2, 1f)
             )
 
@@ -828,7 +828,7 @@ class GradesScreenController private constructor() {
                 activity,
                 if (summary.numeric == 0) "—" else String.format(Language.currentLocale(activity), "%.2f", summary.average),
                 32,
-                UiHelper.GREEN,
+                Tone.INK,
                 true
             )
             average.setPadding(0, 0, UiHelper.dp(activity, 16), 0)
@@ -845,7 +845,7 @@ class GradesScreenController private constructor() {
                         activity.getString(R.string.grades_card_simple_avg)
                     },
                     12,
-                    UiHelper.INK,
+                    Tone.INK,
                     false
                 )
             )
@@ -860,7 +860,7 @@ class GradesScreenController private constructor() {
                             summary.totalEcts
                         ),
                         13,
-                        UiHelper.GREEN,
+                        Tone.INK,
                         true
                     )
                 )
@@ -870,7 +870,7 @@ class GradesScreenController private constructor() {
                     activity,
                     activity.getString(R.string.grades_card_counts, summary.numeric, summary.other),
                     13,
-                    UiHelper.MUTED,
+                    Tone.MUTED,
                     false
                 )
             )
@@ -901,7 +901,7 @@ class GradesScreenController private constructor() {
             summaryButtons.addView(shareBtn, LinearLayout.LayoutParams(0, -2, 1f))
             box.addView(summaryButtons)
 
-            UiHelper.note(activity, box, activity.getString(R.string.grades_card_note), UiHelper.MUTED)
+            UiHelper.note(activity, box, activity.getString(R.string.grades_card_note), Tone.MUTED)
         }
 
         private fun shareGradesReport(
@@ -981,7 +981,7 @@ class GradesScreenController private constructor() {
                 String.format(Language.currentLocale(activity), "%.2f", currentAvg)
             }
 
-            val currentLabel = UiHelper.text(activity, activity.getString(R.string.grades_sim_current, currentAvgStr), 14, UiHelper.INK, true)
+            val currentLabel = UiHelper.text(activity, activity.getString(R.string.grades_sim_current, currentAvgStr), 14, Tone.INK, true)
             dialogLayout.addView(currentLabel)
 
             val targetField = UiHelper.field(activity, dialogLayout, activity.getString(R.string.grades_sim_target_hint), "4.50", false)
@@ -991,7 +991,7 @@ class GradesScreenController private constructor() {
             val ectsField = UiHelper.field(activity, dialogLayout, activity.getString(R.string.grades_sim_ects_hint), "6", false)
             ectsField.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
 
-            val resultView = UiHelper.text(activity, activity.getString(R.string.grades_sim_intro), 13, UiHelper.GREEN, true)
+            val resultView = UiHelper.text(activity, activity.getString(R.string.grades_sim_intro), 13, Tone.INK, true)
             resultView.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 16))
             dialogLayout.addView(resultView)
 

@@ -50,6 +50,10 @@ import pl.vistula.checker.core.WebLinks
  */
 class UiHelper private constructor() {
     companion object {
+        /**
+         * Raw colours below are legacy: only the custom-drawn [pl.vistula.checker.DayTimelineView] and the theme tests use them.
+         * Screens pass a [Tone] or [Surface] instead, which resolves through colour resources.
+         */
         @JvmField
         val INK: Int = Color.rgb(27, 37, 32)
 
@@ -147,7 +151,7 @@ class UiHelper private constructor() {
             }
         }
 
-        private fun styleText(t: TextView, value: String?, size: Int, color: Int, bold: Boolean): TextView {
+        private fun styleText(t: TextView, value: String?, size: Int, tone: Tone, bold: Boolean): TextView {
             t.text = value
             val style = textStyle(size, bold)
             if (style != null) {
@@ -156,27 +160,29 @@ class UiHelper private constructor() {
                 t.textSize = size.toFloat()
                 if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
             }
-            // INK and GREEN are the layout's own text colour; anything else is resolved for the current theme.
-            if (color != INK && color != GREEN) t.setTextColor(foreground(t.context, color))
+            // INK is the layout's own text colour; other tones come from colour resources (day and night variants).
+            if (tone != Tone.INK) t.setTextColor(t.context.getColor(tone.color))
             return t
         }
 
         @JvmStatic
-        fun text(context: Context, value: String?, size: Int, color: Int, bold: Boolean): TextView {
+        fun text(context: Context, value: String?, size: Int, tone: Tone, bold: Boolean): TextView {
             val t = LayoutInflater.from(context).inflate(R.layout.view_text, inflateHost(context), false) as TextView
-            return styleText(t, value, size, color, bold)
+            return styleText(t, value, size, tone, bold)
         }
 
         @JvmStatic
-        fun add(context: Context, target: LinearLayout, value: String?, size: Int, color: Int, bold: Boolean) {
+        fun add(context: Context, target: LinearLayout, value: String?, size: Int, tone: Tone, bold: Boolean) {
             val t = LayoutInflater.from(context).inflate(R.layout.view_text_block, target, false) as TextView
-            target.addView(styleText(t, value, max(15, size), color, bold))
+            // Body text in blocks is never smaller than 15sp, whatever size the caller asks for.
+            target.addView(styleText(t, value, max(15, size), tone, bold))
         }
 
         @JvmStatic
-        fun card(context: Context, parent: LinearLayout, color: Int): LinearLayout {
+        @JvmOverloads
+        fun card(context: Context, parent: LinearLayout, surface: Surface = Surface.DEFAULT): LinearLayout {
             val box = LayoutInflater.from(context).inflate(R.layout.view_card, parent, false) as LinearLayout
-            if (color != Color.WHITE) box.backgroundTintList = ColorStateList.valueOf(background(context, color))
+            if (surface != Surface.DEFAULT) box.backgroundTintList = ColorStateList.valueOf(context.getColor(surface.color))
             parent.addView(box)
             return box
         }
@@ -202,7 +208,7 @@ class UiHelper private constructor() {
         }
 
         @JvmStatic
-        fun section(context: Context, parent: LinearLayout, ignoredColor: Int): LinearLayout {
+        fun section(context: Context, parent: LinearLayout): LinearLayout {
             val box = LayoutInflater.from(context).inflate(R.layout.view_section, parent, false) as LinearLayout
             parent.addView(box)
             return box
@@ -259,7 +265,7 @@ class UiHelper private constructor() {
         }
 
         @JvmStatic
-        fun actionRow(context: Context, label: String?, action: Runnable, ignoredPrimary: Boolean): Button {
+        fun actionRow(context: Context, label: String?, action: Runnable): Button {
             val host = inflateHost(context)
             val b = LayoutInflater.from(context).inflate(R.layout.view_action_row, host, false) as MaterialButton
             b.text = label
@@ -348,15 +354,15 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun heading(context: Context, parent: LinearLayout, value: String?) {
-            add(context, parent, value, 20, INK, true)
+            add(context, parent, value, 20, Tone.INK, true)
             ViewCompat.setAccessibilityHeading(parent.getChildAt(parent.childCount - 1), true)
         }
 
         @JvmStatic
         fun title(context: Context, parent: LinearLayout, value: String?, description: String?) {
-            add(context, parent, value, 28, INK, true)
+            add(context, parent, value, 28, Tone.INK, true)
             ViewCompat.setAccessibilityHeading(parent.getChildAt(parent.childCount - 1), true)
-            add(context, parent, description, 14, MUTED, false)
+            add(context, parent, description, 14, Tone.MUTED, false)
         }
 
         /** Inflates [layout] against [parent] (so its XML width and margins apply) without attaching it. */
@@ -375,17 +381,17 @@ class UiHelper private constructor() {
         }
 
         @JvmStatic
-        fun note(context: Context, parent: LinearLayout, value: String?, color: Int) {
-            add(context, parent, value, 16, color, false)
+        fun note(context: Context, parent: LinearLayout, value: String?, tone: Tone) {
+            add(context, parent, value, 16, tone, false)
         }
 
         @JvmStatic
         fun detailField(context: Context, parent: LinearLayout, label: String?, value: String?) {
-            val caption = text(context, label, 12, MUTED, false)
+            val caption = text(context, label, 12, Tone.MUTED, false)
             val captionParams = LinearLayout.LayoutParams(-1, -2)
             captionParams.bottomMargin = dp(context, 3)
             parent.addView(caption, captionParams)
-            val textView = text(context, value, 15, INK, false)
+            val textView = text(context, value, 15, Tone.INK, false)
             textView.setTextIsSelectable(true)
             val valueParams = LinearLayout.LayoutParams(-1, -2)
             valueParams.bottomMargin = dp(context, 14)
@@ -472,23 +478,15 @@ class UiHelper private constructor() {
             return date.format(DateTimeFormatter.ofPattern("EEE, d MMM", Language.currentLocale(null)))
         }
 
+        /** A small pill label on a tinted [surface] with [tone] text, inflated from `view_badge`. */
         @JvmStatic
-        fun badge(context: Context, parent: LinearLayout, text: String?, bg: Int, fg: Int): TextView {
-            val t = TextView(context)
-            t.text = text
-            t.textSize = 11f
-            t.setTextColor(foreground(context, fg))
-            t.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
-            t.setPadding(dp(context, 10), dp(context, 4), dp(context, 10), dp(context, 4))
-            val d = GradientDrawable()
-            d.setColor(background(context, bg))
-            d.cornerRadius = dp(context, 8).toFloat()
-            t.background = d
-            val p = LinearLayout.LayoutParams(-2, -2)
-            p.bottomMargin = dp(context, 8)
-            p.rightMargin = dp(context, 6)
-            parent.addView(t, p)
-            return t
+        fun badge(context: Context, parent: LinearLayout, text: String?, surface: Surface, tone: Tone): TextView {
+            val badge = inflate(context, R.layout.view_badge, parent) as TextView
+            badge.text = text
+            badge.backgroundTintList = ColorStateList.valueOf(context.getColor(surface.color))
+            badge.setTone(tone)
+            parent.addView(badge)
+            return badge
         }
 
         @JvmStatic

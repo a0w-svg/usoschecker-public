@@ -16,13 +16,13 @@ class AppInfo private constructor() {
     companion object {
         @JvmStatic
         fun render(context: Context, parent: LinearLayout) {
-            val card = UiHelper.card(context, parent, Color.WHITE)
-            UiHelper.add(context, card, context.getString(R.string.about_title), 18, UiHelper.INK, true)
-            UiHelper.add(context, card, context.getString(R.string.about_author), 14, UiHelper.INK, false)
+            val card = UiHelper.card(context, parent)
+            UiHelper.add(context, card, context.getString(R.string.about_title), 18, Tone.INK, true)
+            UiHelper.add(context, card, context.getString(R.string.about_author), 14, Tone.INK, false)
             card.addView(UiHelper.actionRow(context, context.getString(R.string.design_credit), {
                 UiHelper.browser(context, "https://github.com/Kaydjen")
-            }, false))
-            UiHelper.note(context, card, context.getString(R.string.about_version, BuildConfig.VERSION_NAME), UiHelper.MUTED)
+            }))
+            UiHelper.note(context, card, context.getString(R.string.about_version, BuildConfig.VERSION_NAME), Tone.MUTED)
             if (context is AppCompatActivity) {
                 card.addView(
                     UiHelper.button(
@@ -33,7 +33,7 @@ class AppInfo private constructor() {
                     )
                 )
             }
-            UiHelper.note(context, card, context.getString(R.string.about_license), UiHelper.MUTED)
+            UiHelper.note(context, card, context.getString(R.string.about_license), Tone.MUTED)
             card.addView(
                 UiHelper.button(
                     context,

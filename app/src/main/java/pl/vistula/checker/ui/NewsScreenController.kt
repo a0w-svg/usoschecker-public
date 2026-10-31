@@ -54,11 +54,11 @@ class NewsScreenController private constructor() {
             val entry = if (activity.isDemo() || data != null && CampusAffiliation.newsMatches(data, account)) cachedEntry
                 else JSONObject(cachedEntry.toString()).apply { remove("data"); remove("fetchedAt") }
             if (!activity.isDemo()) {
-                UiHelper.note(activity, content, CampusAffiliation.campuses[campus], UiHelper.MUTED)
+                UiHelper.note(activity, content, CampusAffiliation.campuses[campus], Tone.MUTED)
                 CampusAffiliation.website(campus)?.let { website ->
                     content.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_official_site), {
                         UiHelper.browser(activity, website)
-                    }, false))
+                    }))
                 }
             }
             val raw = if (activity.isDemo()) d.optJSONObject("snapshot") else null
@@ -71,17 +71,17 @@ class NewsScreenController private constructor() {
                 StudentCardsController.status(activity, content, entry)
             } else if (snapshot != null && snapshot.serviceErrors.containsKey("news")) {
                 UiHelper.note(activity, content, activity.getString(R.string.services_refresh_error,
-                    activity.getString(R.string.error_operation)), activity.getColor(R.color.app_error))
+                    activity.getString(R.string.error_operation)), Tone.ERROR)
             }
             val articles = if (useCache) (0 until cached.length()).map { NewsArticle.from(cached.optJSONObject(it)) }
                 else snapshot?.news ?: emptyList()
             if (useCache) {
                 val university = entry.getJSONObject("data").optString("source") == "university"
-                UiHelper.note(activity, content, activity.getString(if (university) R.string.news_source_university else R.string.news_source_usos), UiHelper.MUTED)
-                if (university && language == "uk") UiHelper.note(activity, content, activity.getString(R.string.news_language_fallback), UiHelper.MUTED)
+                UiHelper.note(activity, content, activity.getString(if (university) R.string.news_source_university else R.string.news_source_usos), Tone.MUTED)
+                if (university && language == "uk") UiHelper.note(activity, content, activity.getString(R.string.news_language_fallback), Tone.MUTED)
             }
             if (snapshot == null && cached == null) {
-                UiHelper.note(activity, content, activity.getString(R.string.services_not_loaded), UiHelper.MUTED)
+                UiHelper.note(activity, content, activity.getString(R.string.services_not_loaded), Tone.MUTED)
                 content.addView(UiHelper.button(activity, activity.getString(R.string.btn_refresh), onRefresh, true))
             }
 
@@ -116,7 +116,7 @@ class NewsScreenController private constructor() {
                     )
                     if (q.isNotEmpty()) empty.addView(UiHelper.clearSearchButton(activity, search, onQueryChanged))
                 } else {
-                    UiHelper.note(activity, list, activity.getString(R.string.news_count, filtered.size), UiHelper.MUTED)
+                    UiHelper.note(activity, list, activity.getString(R.string.news_count, filtered.size), Tone.MUTED)
                     val inflater = LayoutInflater.from(activity)
                     for (a in filtered) {
                         val itemCard = inflater.inflate(R.layout.item_news_card, list, false)

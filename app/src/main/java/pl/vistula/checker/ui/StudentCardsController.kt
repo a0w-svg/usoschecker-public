@@ -21,11 +21,11 @@ class StudentCardsController private constructor() {
             status(activity, content, physical)
             val cards = physical.optJSONArray("data")
             if (cards == null || cards.length() == 0) {
-                UiHelper.note(activity, content, activity.getString(if (cards == null) R.string.services_load_hint else R.string.cards_physical_empty), UiHelper.MUTED)
+                UiHelper.note(activity, content, activity.getString(if (cards == null) R.string.services_load_hint else R.string.cards_physical_empty), Tone.MUTED)
             } else {
                 for (i in 0 until cards.length()) {
                     val card = StudentServices.Card(cards.optJSONObject(i))
-                    val cardBox = UiHelper.section(activity, content, Color.WHITE)
+                    val cardBox = UiHelper.section(activity, content)
                     line(activity, cardBox, R.string.cards_type, card.type)
                     line(activity, cardBox, R.string.cards_student_number, card.studentNumber)
                     line(activity, cardBox, R.string.cards_issue_date, HistoryScreenController.formatFullDate(card.issued))
@@ -33,23 +33,23 @@ class StudentCardsController private constructor() {
                 }
             }
             UiHelper.heading(activity, content, activity.getString(R.string.cards_mobile_title))
-            UiHelper.note(activity, content, activity.getString(R.string.cards_usage_guide), UiHelper.MUTED)
+            UiHelper.note(activity, content, activity.getString(R.string.cards_usage_guide), Tone.MUTED)
             val mobile = entry(services, "mcard")
             status(activity, content, mobile)
             val data = mobile.optJSONObject("data")
             if (data == null) {
                 UiHelper.empty(activity, content, activity.getString(R.string.cards_mobile_empty), activity.getString(R.string.services_load_hint))
             } else {
-                val box = UiHelper.section(activity, content, Color.WHITE)
+                val box = UiHelper.section(activity, content)
                 val latest = data.optJSONObject("latest_order")
                 val orderReason = StudentServices.localized(data.opt("why_cannot_order"), Language.currentLocale(activity).language)
                 val revokeReason = StudentServices.localized(data.opt("why_cannot_revoke"), Language.currentLocale(activity).language)
                 if (latest == null) {
-                    UiHelper.add(activity, box, activity.getString(R.string.cards_no_order), 18, UiHelper.INK, true)
+                    UiHelper.add(activity, box, activity.getString(R.string.cards_no_order), 18, Tone.INK, true)
                 } else {
                     val status = StudentServices.text(latest, "status")
                     val id = StudentServices.text(latest, "id")
-                    UiHelper.badge(activity, box, mobileStatus(activity, status), Color.rgb(214, 241, 229), UiHelper.GREEN)
+                    UiHelper.badge(activity, box, mobileStatus(activity, status), Surface.ACCENT, Tone.INK)
                     line(activity, box, R.string.cards_order_date, HistoryScreenController.formatFullDate(StudentServices.text(latest, "order_date")))
                     line(activity, box, R.string.cards_expiration, HistoryScreenController.formatFullDate(StudentServices.text(latest, "expiration_date")))
                     if (id.isNotEmpty() && pl.vistula.checker.MobileCardActions.ready(status)) {
@@ -68,7 +68,7 @@ class StudentCardsController private constructor() {
                     }
                 }
                 if (orderReason.isNotEmpty()) {
-                    UiHelper.note(activity, box, orderReason, UiHelper.MUTED)
+                    UiHelper.note(activity, box, orderReason, Tone.MUTED)
                 } else if (data.optBoolean("orderEligibilityKnown")) {
                     box.addView(
                         UiHelper.button(
@@ -79,7 +79,7 @@ class StudentCardsController private constructor() {
                         )
                     )
                 }
-                if (revokeReason.isNotEmpty()) UiHelper.note(activity, box, revokeReason, UiHelper.MUTED)
+                if (revokeReason.isNotEmpty()) UiHelper.note(activity, box, revokeReason, Tone.MUTED)
                 line(
                     activity,
                     box,
@@ -101,21 +101,21 @@ class StudentCardsController private constructor() {
                     activity,
                     content,
                     activity.getString(R.string.services_last_fetch, UiHelper.timestamp(entry.optLong("fetchedAt"))),
-                    UiHelper.MUTED
+                    Tone.MUTED
                 )
             }
             if (entry.optString("error").isNotEmpty()) {
-                if (entry.has("data")) UiHelper.note(activity, content, activity.getString(R.string.services_cached_note), UiHelper.MUTED)
+                if (entry.has("data")) UiHelper.note(activity, content, activity.getString(R.string.services_cached_note), Tone.MUTED)
                 UiHelper.note(
                     activity,
                     content,
                     activity.getString(R.string.services_refresh_error, ApiErrorUi.cached(activity, entry)),
-                    Color.rgb(160, 48, 40)
+                    Tone.ERROR
                 )
             }
             if (entry.optLong("retryAt") > System.currentTimeMillis()) {
                 UiHelper.note(activity, content, activity.getString(R.string.services_retry_at,
-                    UiHelper.timestamp(entry.optLong("retryAt"))), UiHelper.MUTED)
+                    UiHelper.timestamp(entry.optLong("retryAt"))), Tone.MUTED)
             }
         }
 
@@ -123,8 +123,8 @@ class StudentCardsController private constructor() {
         fun renderAccess(activity: MainActivity, content: LinearLayout, state: JSONObject, scope: String) {
             if (activity.isDemo()) return
             if (!activity.connected() || !StudentServices.hasScope(state.optString("scopes"), scope)) {
-                val box = UiHelper.section(activity, content, Color.WHITE)
-                UiHelper.add(activity, box, activity.getString(R.string.services_scope_required, scope), 14, UiHelper.INK, false)
+                val box = UiHelper.section(activity, content)
+                UiHelper.add(activity, box, activity.getString(R.string.services_scope_required, scope), 14, Tone.INK, false)
                 box.addView(UiHelper.button(activity, activity.getString(R.string.nav_account), { activity.navigate(Tabs.ACCOUNT) }, false))
             }
         }
@@ -132,7 +132,7 @@ class StudentCardsController private constructor() {
         @JvmStatic
         fun line(activity: MainActivity, box: LinearLayout, label: Int, value: String) {
             if (value.isNotEmpty()) {
-                UiHelper.add(activity, box, activity.getString(label, value), 14, UiHelper.MUTED, false)
+                UiHelper.add(activity, box, activity.getString(label, value), 14, Tone.MUTED, false)
             }
         }
 

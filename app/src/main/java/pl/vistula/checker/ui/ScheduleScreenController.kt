@@ -373,9 +373,9 @@ class ScheduleScreenController private constructor() {
 
                     val gap = breaks.remove(lesson.start.toInstant())
                     if (gap != null) {
-                        val breakCard = UiHelper.card(activity, dayTray!!, Color.rgb(240, 245, 241))
+                        val breakCard = UiHelper.card(activity, dayTray!!, Surface.SUCCESS)
                         breakCard.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), 0)
-                        UiHelper.add(activity, breakCard, activity.getString(R.string.schedule_break_title, gap.minutes), 14, UiHelper.GREEN, true)
+                        UiHelper.add(activity, breakCard, activity.getString(R.string.schedule_break_title, gap.minutes), 14, Tone.INK, true)
                         UiHelper.add(
                             activity,
                             breakCard,
@@ -385,7 +385,7 @@ class ScheduleScreenController private constructor() {
                                 gap.end.format(DateTimeFormatter.ofPattern("HH:mm"))
                             ),
                             13,
-                            UiHelper.MUTED,
+                            Tone.MUTED,
                             false
                         )
                     }
@@ -471,7 +471,7 @@ class ScheduleScreenController private constructor() {
                         summary.busyMinutes / 60,
                         summary.busyMinutes % 60
                     ),
-                    UiHelper.MUTED
+                    Tone.MUTED
                 )
             }
         }
@@ -521,7 +521,7 @@ class ScheduleScreenController private constructor() {
                     lesson.end.format(DateTimeFormatter.ofPattern("HH:mm"))
             )
             val summary = lessonSummary(lesson, activity)
-            if (summary.isNotEmpty()) UiHelper.note(activity, body, summary, UiHelper.INK)
+            if (summary.isNotEmpty()) UiHelper.note(activity, body, summary, Tone.INK)
             for (key in arrayOf("building", "groupNumber")) {
                 val value = lesson.record.optMeta(key)
                 if (value.isNotEmpty()) {
@@ -534,7 +534,7 @@ class ScheduleScreenController private constructor() {
                 }
             }
             try {
-                val raw = UiHelper.text(activity, lesson.record.json().toString(2), 12, UiHelper.INK, false)
+                val raw = UiHelper.text(activity, lesson.record.json().toString(2), 12, Tone.INK, false)
                 raw.setTextIsSelectable(true)
                 raw.visibility = View.GONE
                 body.addView(

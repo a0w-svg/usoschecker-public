@@ -53,8 +53,8 @@ class GpaSimulatorController private constructor() {
             val snapshot = Snapshot.from(raw)
             val summary = GradeSummary.of(snapshot.records.values)
 
-            val currentCard = UiHelper.section(activity, content, Color.rgb(238, 245, 242))
-            UiHelper.add(activity, currentCard, activity.getString(R.string.gpa_status_header), 11, UiHelper.GREEN, true)
+            val currentCard = UiHelper.section(activity, content)
+            UiHelper.add(activity, currentCard, activity.getString(R.string.gpa_status_header), 11, Tone.INK, true)
 
             val currentWeighted = if (!summary.ectsAverage.isNaN()) summary.ectsAverage else summary.average
             if (!summary.ectsAverage.isNaN()) {
@@ -63,7 +63,7 @@ class GpaSimulatorController private constructor() {
                     currentCard,
                     activity.getString(R.string.gpa_weighted, summary.ectsAverage),
                     24,
-                    UiHelper.INK,
+                    Tone.INK,
                     true
                 )
                 UiHelper.add(
@@ -71,7 +71,7 @@ class GpaSimulatorController private constructor() {
                     currentCard,
                     activity.getString(R.string.gpa_ects_summary, summary.totalEcts, summary.average),
                     13,
-                    UiHelper.MUTED,
+                    Tone.MUTED,
                     false
                 )
             } else if (!summary.average.isNaN()) {
@@ -80,7 +80,7 @@ class GpaSimulatorController private constructor() {
                     currentCard,
                     activity.getString(R.string.gpa_arithmetic, summary.average),
                     24,
-                    UiHelper.INK,
+                    Tone.INK,
                     true
                 )
                 UiHelper.add(
@@ -88,7 +88,7 @@ class GpaSimulatorController private constructor() {
                     currentCard,
                     activity.getString(R.string.gpa_no_ects_note),
                     13,
-                    UiHelper.MUTED,
+                    Tone.MUTED,
                     false
                 )
             } else {
@@ -97,7 +97,7 @@ class GpaSimulatorController private constructor() {
                     currentCard,
                     activity.getString(R.string.gpa_no_numeric),
                     20,
-                    UiHelper.INK,
+                    Tone.INK,
                     true
                 )
             }
@@ -106,14 +106,14 @@ class GpaSimulatorController private constructor() {
                 currentCard,
                 activity.getString(R.string.gpa_index_entries, summary.numeric + summary.other, summary.numeric),
                 12,
-                UiHelper.MUTED,
+                Tone.MUTED,
                 false
             )
 
             val estimates = UiHelper.disclosure(activity, content, "gpa.estimates", R.string.gpa_assumptions)
             // Rector's Scholarship
-            val scholarCard = UiHelper.section(activity, estimates, Color.WHITE)
-            UiHelper.add(activity, scholarCard, activity.getString(R.string.gpa_rector_title), 18, UiHelper.INK, true)
+            val scholarCard = UiHelper.section(activity, estimates)
+            UiHelper.add(activity, scholarCard, activity.getString(R.string.gpa_rector_title), 18, Tone.INK, true)
             val scholarText = ApiLanguage.`in`(Language.currentLocale(activity).language) { GpaCalculator.scholarshipStatus(currentWeighted) }
             val qualifiesScholar = currentWeighted >= GpaCalculator.SCHOLARSHIP_THRESHOLD
             UiHelper.add(
@@ -121,14 +121,14 @@ class GpaSimulatorController private constructor() {
                 scholarCard,
                 scholarText,
                 15,
-                if (qualifiesScholar) UiHelper.GREEN else Color.rgb(180, 100, 0),
+                if (qualifiesScholar) Tone.INK else Tone.WARNING,
                 true
             )
-            UiHelper.note(activity, scholarCard, activity.getString(R.string.gpa_rector_rule), UiHelper.MUTED)
+            UiHelper.note(activity, scholarCard, activity.getString(R.string.gpa_rector_rule), Tone.MUTED)
 
             // Honors Diploma
-            val honorsCard = UiHelper.section(activity, estimates, Color.WHITE)
-            UiHelper.add(activity, honorsCard, activity.getString(R.string.gpa_honors_title), 18, UiHelper.INK, true)
+            val honorsCard = UiHelper.section(activity, estimates)
+            UiHelper.add(activity, honorsCard, activity.getString(R.string.gpa_honors_title), 18, Tone.INK, true)
             val honorsText = ApiLanguage.`in`(Language.currentLocale(activity).language) { GpaCalculator.honorsStatus(currentWeighted) }
             val qualifiesHonors = currentWeighted >= GpaCalculator.HONORS_THRESHOLD
             UiHelper.add(
@@ -136,17 +136,17 @@ class GpaSimulatorController private constructor() {
                 honorsCard,
                 honorsText,
                 15,
-                if (qualifiesHonors) UiHelper.GREEN else UiHelper.MUTED,
+                if (qualifiesHonors) Tone.INK else Tone.MUTED,
                 true
             )
-            UiHelper.note(activity, honorsCard, activity.getString(R.string.gpa_honors_rule), UiHelper.MUTED)
+            UiHelper.note(activity, honorsCard, activity.getString(R.string.gpa_honors_rule), Tone.MUTED)
 
             // Simulator
-            val simCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, simCard, activity.getString(R.string.gpa_sim_card_title), 18, UiHelper.INK, true)
-            UiHelper.note(activity, simCard, activity.getString(R.string.gpa_sim_card_desc), UiHelper.MUTED)
+            val simCard = UiHelper.section(activity, content)
+            UiHelper.add(activity, simCard, activity.getString(R.string.gpa_sim_card_title), 18, Tone.INK, true)
+            UiHelper.note(activity, simCard, activity.getString(R.string.gpa_sim_card_desc), Tone.MUTED)
 
-            UiHelper.add(activity, simCard, activity.getString(R.string.gpa_target_label), 13, UiHelper.INK, true)
+            UiHelper.add(activity, simCard, activity.getString(R.string.gpa_target_label), 13, Tone.INK, true)
             UiHelper.chips(
                 activity,
                 simCard,
@@ -168,7 +168,7 @@ class GpaSimulatorController private constructor() {
                 }
             }
 
-            UiHelper.add(activity, simCard, activity.getString(R.string.gpa_remaining_ects_label), 13, UiHelper.INK, true)
+            UiHelper.add(activity, simCard, activity.getString(R.string.gpa_remaining_ects_label), 13, Tone.INK, true)
             UiHelper.chips(
                 activity,
                 simCard,
@@ -193,27 +193,23 @@ class GpaSimulatorController private constructor() {
             val currentEcts = if (!summary.totalEcts.isNaN() && summary.totalEcts > 0) summary.totalEcts else 30.0
             val sim = ApiLanguage.`in`(Language.currentLocale(activity).language) { GpaCalculator.simulate(currentWeighted, currentEcts, targetGpa, remainingEcts) }
 
-            val simResultBox = UiHelper.section(
-                activity,
-                simCard,
-                if (sim.achievable) Color.rgb(232, 243, 236) else Color.rgb(255, 238, 238)
-            )
+            val simResultBox = UiHelper.section(activity, simCard)
             UiHelper.add(
                 activity,
                 simResultBox,
                 if (sim.achievable) activity.getString(R.string.gpa_status_achievable) else activity.getString(R.string.gpa_status_unachievable),
                 11,
-                if (sim.achievable) UiHelper.GREEN else Color.rgb(160, 48, 40),
+                if (sim.achievable) Tone.INK else Tone.ERROR,
                 true
             )
-            UiHelper.add(activity, simResultBox, sim.statusMessage, 15, UiHelper.INK, true)
+            UiHelper.add(activity, simResultBox, sim.statusMessage, 15, Tone.INK, true)
             if (sim.achievable && sim.requiredGpa > 2.0 && sim.requiredGpa <= 5.0) {
                 UiHelper.add(
                     activity,
                     simResultBox,
                     activity.getString(R.string.gpa_required_average, sim.requiredGpa),
                     16,
-                    UiHelper.GREEN,
+                    Tone.INK,
                     true
                 )
             }

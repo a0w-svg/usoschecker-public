@@ -63,6 +63,7 @@ import pl.vistula.checker.ui.ApiErrorUi
 import pl.vistula.checker.ui.ApiExplorerController
 import pl.vistula.checker.ui.TabSections
 import pl.vistula.checker.ui.Tabs
+import pl.vistula.checker.ui.Tone
 import pl.vistula.checker.ui.Appearance
 import pl.vistula.checker.ui.AttendanceScreenController
 import pl.vistula.checker.ui.CampusGuideController
@@ -295,7 +296,7 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        swipeRefresh?.setColorSchemeColors(UiHelper.GREEN, Color.rgb(20, 110, 60))
+        swipeRefresh?.setColorSchemeColors(getColor(R.color.app_accent))
         swipeRefresh?.setOnRefreshListener {
             if (connected()) {
                 sync()
@@ -548,7 +549,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         try {
-            if (demo) content.addView(UiHelper.text(this, getString(R.string.demo_banner_note), 11, UiHelper.MUTED, false).apply {
+            if (demo) content.addView(UiHelper.text(this, getString(R.string.demo_banner_note), 11, Tone.MUTED, false).apply {
                 gravity = android.view.Gravity.CENTER
                 setPadding(0, 0, 0, UiHelper.dp(this@MainActivity, 8))
             })
@@ -642,7 +643,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         } catch (e: Exception) {
-            UiHelper.note(this, content, ApiErrorUi.message(this, e), Color.rgb(167, 49, 49))
+            UiHelper.note(this, content, ApiErrorUi.message(this, e), Tone.ERROR)
         }
         updateBusy(busy)
     }

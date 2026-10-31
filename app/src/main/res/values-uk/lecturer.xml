@@ -92,10 +92,8 @@
     <string name="token_registrations_title">Реєстрації за токенами</string>
     <string name="token_registrations_empty">Немає реєстрацій за токенами.</string>
     <string name="registration_rounds_empty">Для цієї реєстрації немає турів.</string>
-    <string name="staff_search_hint">Пошук викладача</string>
     <string name="staff_search_button">Пошук</string>
     <string name="staff_search_invalid">Введіть від 2 до 80 символів.</string>
-    <string name="staff_search_empty">Немає результатів. Шукайте викладача за прізвищем.</string>
     <string name="staff_search_more">Показано перші результати. Уточніть пошук.</string>
     <string name="staff_office">Кабінет: %1$s</string>
     <string name="staff_schedule_title">Розклад на наступні 7 днів</string>

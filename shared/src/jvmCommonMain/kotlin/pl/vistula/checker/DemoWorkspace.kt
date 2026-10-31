@@ -25,9 +25,20 @@ class DemoWorkspace {
     }
     init { reset(false) }
     fun reset(changed: Boolean) {
-        val data = Demo.state(changed).put("token", "demo").put("enabled", false).put("accountSession", vault.storePath)
-            .put("studentServices", DemoStudentServices.data()).put("campusOverride", "0000").put("staffStatus", 2).put("studentStatusCode", 2)
-        vault.write(data)
+        vault.write(state(changed, accountSession = vault.storePath))
+    }
+
+    companion object {
+        /**
+         * The complete demo state: schedule and grades plus every student service, flagged with `token == "demo"`.
+         * Shared by the desktop workspace and by Android screens that host shared Compose sections in demo mode.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun state(changed: Boolean, days: Int = 56, campus: String = "0000", accountSession: String = "demo"): JSONObject =
+            Demo.state(changed, days).put("token", "demo").put("enabled", false).put("accountSession", accountSession)
+                .put("studentServices", DemoStudentServices.data()).put("campusOverride", campus)
+                .put("staffStatus", 2).put("studentStatusCode", 2)
     }
 }
 

@@ -92,10 +92,8 @@
     <string name="token_registrations_title">Token registrations</string>
     <string name="token_registrations_empty">No token registrations.</string>
     <string name="registration_rounds_empty">No rounds for this registration.</string>
-    <string name="staff_search_hint">Search for a teacher</string>
     <string name="staff_search_button">Search</string>
     <string name="staff_search_invalid">Enter 2 to 80 characters.</string>
-    <string name="staff_search_empty">No results. Search for a teacher by name.</string>
     <string name="staff_search_more">Showing the first results. Refine your search.</string>
     <string name="staff_office">Office: %1$s</string>
     <string name="staff_schedule_title">Schedule for the next 7 days</string>

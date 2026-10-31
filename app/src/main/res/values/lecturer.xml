@@ -92,10 +92,8 @@
     <string name="token_registrations_title">Rejestracje żetonowe</string>
     <string name="token_registrations_empty">Brak rejestracji żetonowych.</string>
     <string name="registration_rounds_empty">Brak tur dla tej rejestracji.</string>
-    <string name="staff_search_hint">Szukaj prowadzącego</string>
     <string name="staff_search_button">Szukaj</string>
     <string name="staff_search_invalid">Wpisz od 2 do 80 znaków.</string>
-    <string name="staff_search_empty">Brak wyników. Wyszukaj prowadzącego po nazwisku.</string>
     <string name="staff_search_more">Pokazano pierwsze wyniki. Doprecyzuj wyszukiwanie.</string>
     <string name="staff_office">Pokój: %1$s</string>
     <string name="staff_schedule_title">Plan na najbliższe 7 dni</string>

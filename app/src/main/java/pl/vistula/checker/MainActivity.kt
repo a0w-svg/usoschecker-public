@@ -578,289 +578,10 @@ class MainActivity : AppCompatActivity() {
                     { q -> history.query = q },
                     { sync() }
                 )
-                Tabs.GRADES -> {
-                    if (!grades.semesterInitialized) {
-                        display().optJSONObject("snapshot")?.let { raw ->
-                            val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
-                            grades.semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
-                                ?: pl.vistula.checker.core.GradeSemesters.ordered(snapshot, java.time.LocalDate.now(UsosClient.ZONE)).firstOrNull().orEmpty()
-                            grades.semesterInitialized = true
-                        }
-                    }
-                    GradesScreenController.render(
-                    this,
-                    content,
-                    display(),
-                    state,
-                    demo,
-                    grades.semester,
-                    grades.type,
-                    grades.order,
-                    grades.query,
-                    grades.filtersExpanded,
-                    { exp ->
-                        grades.filtersExpanded = exp
-                        render()
-                    },
-                    { sem ->
-                        grades.semester = sem
-                        if (sem.isNotEmpty()) grades.semesterExpansion[sem] = true
-                        render()
-                    },
-                    { gt ->
-                        grades.type = gt
-                        render()
-                    },
-                    { go ->
-                        grades.order = go
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", go) }
-                        render()
-                    },
-                    { gq -> grades.query = gq },
-                    {
-                        grades.resetFilters()
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", grades.order) }
-                        render()
-                    },
-                    { sync() },
-                    object : GradesScreenController.GradesListener {
-                        override fun onFilterChanged() {
-                            render()
-                        }
-
-                        override fun onOpenTask(title: String) {
-                            editTask(null, title)
-                        }
-                    }
-                )
-                }
-                Tabs.API -> {
-                    val method = api.currentMethod
-                    val methodJson = api.currentMethodJson
-                    if (method != null && methodJson != null) {
-                        ApiExplorerController.renderMethodDetails(
-                            this,
-                            content,
-                            scroll,
-                            methodJson,
-                            api.favorites,
-                            uploadBytes,
-                            {
-                                api.closeMethod()
-                                render()
-                            },
-                            object : ApiExplorerController.ApiCallback {
-                                override fun onExecuteRequest(
-                                    metadata: JSONObject,
-                                    values: Map<String, String>,
-                                    method: String,
-                                    uploadBytes: ByteArray?,
-                                    onSuccess: Consumer<UsosClient.Response>,
-                                    onFailure: Consumer<String>
-                                ) {
-                                    executeApiRequest(metadata, values, method, uploadBytes, onSuccess, onFailure)
-                                }
-
-                                override fun onSelectUploadFile(currentMethod: String) {
-                                    api.uploadMethod = currentMethod
-                                    selectUpload.launch(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE))
-                                }
-
-                                override fun onSaveResponse(response: UsosClient.Response) {
-                                    saveResponseFile(response, "usos-response")
-                                }
-                            }
-                        )
-                    } else {
-                        ApiExplorerController.renderCatalog(
-                            this,
-                            content,
-                            catalog,
-                            api.query,
-                            api.limit,
-                            api.favoritesOnly,
-                            api.favorites,
-                            { q -> api.query = q },
-                            { lim -> api.limit = lim },
-                            { fav ->
-                                api.favoritesOnly = fav
-                                api.limit = pl.vistula.checker.ui.ApiExplorerState.DEFAULT_LIMIT
-                                render()
-                            },
-                            { showMethod(it) }
-                        )
-                    }
-                }
-                Tabs.ACCOUNT -> AccountScreenController.render(
-                    this,
-                    content,
-                    display(),
-                    state,
-                    demo,
-                    detectedPin,
-                    object : AccountScreenController.AccountListener {
-                        override fun onBeginOAuth(key: String, secret: String, scopes: String) {
-                            task(
-                                {
-                                    repository.begin(key, secret, scopes)
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    render()
-                                    browser(
-                                        "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" +
-                                            OAuth.encode(s.getString("requestToken"))
-                                    )
-                                }
-                            )
-                        }
-
-                        override fun onConfirmPin(pin: String) {
-                            task(
-                                {
-                                    repository.finish(pin)
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    detectedPin = ""
-                                    settingsPage = null
-                                    demo = false
-                                    tab = 0
-                                    ensureSchedule()
-                                    render()
-                                    if (Build.VERSION.SDK_INT >= 33 &&
-                                        checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-                                    ) {
-                                        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
-                                    }
-                                    sync()
-                                }
-                            )
-                        }
-
-                        override fun onToggleEnabled(enabled: Boolean) {
-                            task(
-                                {
-                                    repository.update { s -> s.put("enabled", enabled) }
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    if (enabled) SyncWorker.schedule(this@MainActivity, state.optLong("interval", 30L))
-                                    else SyncWorker.cancel(this@MainActivity)
-                                    render()
-                                }
-                            )
-                        }
-
-                        override fun onUpdateInterval(interval: Long) {
-                            task(
-                                {
-                                    repository.update { s -> s.put("interval", interval) }
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    ensureSchedule()
-                                    render()
-                                }
-                            )
-                        }
-
-                        override fun onDisconnect() {
-                            task(
-                                {
-                                    SyncWorker.cancel(this@MainActivity)
-                                    repository.disconnect()
-                                    ClassReminderReceiver.cancel(this@MainActivity)
-                                    androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
-                                    TodayScheduleWidget.updateAll(this@MainActivity)
-                                    QuickStatusWidget.updateAll(this@MainActivity)
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    detectedPin = ""
-                                    api.drafts = JSONObject()
-                                    uploadBytes = null
-                                    api.uploadMethod = null
-                                    exportResponse = null
-                                    pendingCalendar = null
-                                    grades.clearSemester()
-                                    demo = false
-                                    render()
-                                }
-                            )
-                        }
-
-                        override fun onStartDemo() {
-                            grades.clearSemester()
-                            grades.semesterInitialized = false
-                            demo = true
-                            tab = 0
-                            render()
-                        }
-
-                        override fun onEndDemo() {
-                            grades.clearSemester()
-                            demo = false
-                            render()
-                        }
-
-                        override fun onRequestNotifications() {
-                            requestNotifications()
-                        }
-                    }
-                )
-                Tabs.SCHEDULE -> {
-                    ScheduleScreenController.render(
-                        this,
-                        content,
-                        display(),
-                        state,
-                        demo,
-                        schedule.date,
-                        schedule.mode,
-                        demoPlanDays,
-                        { dVal ->
-                            schedule.date = dVal
-                            render()
-                        },
-                        { mVal ->
-                            schedule.mode = mVal
-                            render()
-                        },
-                        { sync() },
-                        object : ScheduleScreenController.ScheduleListener {
-                            override fun onOpenTask(title: String) {
-                                editTask(null, title)
-                            }
-
-                            override fun onAbsenceRecorded() {
-                                render()
-                            }
-                        }
-                    )
-                    if (schedule.focusCurrent && content.findViewById<View?>(R.id.schedule_swipe_content) != null) {
-                        schedule.focusCurrent = false
-                        val ongoing = content.findViewById<View?>(R.id.schedule_current_lesson)
-                        if (ongoing != null) {
-                            OneShotPreDrawListener.add(scroll) {
-                                if (tab != Tabs.SCHEDULE || content.findViewById<View?>(R.id.schedule_current_lesson) !== ongoing) return@add
-                                val cardPosition = IntArray(2)
-                                val viewportPosition = IntArray(2)
-                                ongoing.getLocationOnScreen(cardPosition)
-                                scroll.getLocationOnScreen(viewportPosition)
-                                scroll.scrollTo(
-                                    0,
-                                    max(0, scroll.scrollY + cardPosition[1] - viewportPosition[1] - UiHelper.dp(this, 8))
-                                )
-                            }
-                        }
-                    }
-                }
+                Tabs.GRADES -> renderGrades()
+                Tabs.API -> renderApiExplorer()
+                Tabs.ACCOUNT -> renderAccount()
+                Tabs.SCHEDULE -> renderSchedule()
                 Tabs.MORE -> MoreScreenController.render(this, content)
                 Tabs.TASKS -> TasksScreenController.render(
                     this,
@@ -924,6 +645,296 @@ class MainActivity : AppCompatActivity() {
         }
         updateBusy(busy)
     }
+
+    private fun renderGrades() {
+        if (!grades.semesterInitialized) {
+            display().optJSONObject("snapshot")?.let { raw ->
+                val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
+                grades.semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
+                    ?: pl.vistula.checker.core.GradeSemesters.ordered(snapshot, java.time.LocalDate.now(UsosClient.ZONE)).firstOrNull().orEmpty()
+                grades.semesterInitialized = true
+            }
+        }
+        GradesScreenController.render(
+        this,
+        content,
+        display(),
+        state,
+        demo,
+        grades.semester,
+        grades.type,
+        grades.order,
+        grades.query,
+        grades.filtersExpanded,
+        { exp ->
+            grades.filtersExpanded = exp
+            render()
+        },
+        { sem ->
+            grades.semester = sem
+            if (sem.isNotEmpty()) grades.semesterExpansion[sem] = true
+            render()
+        },
+        { gt ->
+            grades.type = gt
+            render()
+        },
+        { go ->
+            grades.order = go
+            getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", go) }
+            render()
+        },
+        { gq -> grades.query = gq },
+        {
+            grades.resetFilters()
+            getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", grades.order) }
+            render()
+        },
+        { sync() },
+        object : GradesScreenController.GradesListener {
+            override fun onFilterChanged() {
+                render()
+            }
+
+            override fun onOpenTask(title: String) {
+                editTask(null, title)
+            }
+        }
+    )
+    }
+
+    private fun renderApiExplorer() {
+        val method = api.currentMethod
+        val methodJson = api.currentMethodJson
+        if (method != null && methodJson != null) {
+            ApiExplorerController.renderMethodDetails(
+                this,
+                content,
+                scroll,
+                methodJson,
+                api.favorites,
+                uploadBytes,
+                {
+                    api.closeMethod()
+                    render()
+                },
+                object : ApiExplorerController.ApiCallback {
+                    override fun onExecuteRequest(
+                        metadata: JSONObject,
+                        values: Map<String, String>,
+                        method: String,
+                        uploadBytes: ByteArray?,
+                        onSuccess: Consumer<UsosClient.Response>,
+                        onFailure: Consumer<String>
+                    ) {
+                        executeApiRequest(metadata, values, method, uploadBytes, onSuccess, onFailure)
+                    }
+
+                    override fun onSelectUploadFile(currentMethod: String) {
+                        api.uploadMethod = currentMethod
+                        selectUpload.launch(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE))
+                    }
+
+                    override fun onSaveResponse(response: UsosClient.Response) {
+                        saveResponseFile(response, "usos-response")
+                    }
+                }
+            )
+        } else {
+            ApiExplorerController.renderCatalog(
+                this,
+                content,
+                catalog,
+                api.query,
+                api.limit,
+                api.favoritesOnly,
+                api.favorites,
+                { q -> api.query = q },
+                { lim -> api.limit = lim },
+                { fav ->
+                    api.favoritesOnly = fav
+                    api.limit = pl.vistula.checker.ui.ApiExplorerState.DEFAULT_LIMIT
+                    render()
+                },
+                { showMethod(it) }
+            )
+        }
+    }
+
+    private fun renderAccount() {
+        AccountScreenController.render(
+            this,
+            content,
+            display(),
+            state,
+            demo,
+            detectedPin,
+            object : AccountScreenController.AccountListener {
+                override fun onBeginOAuth(key: String, secret: String, scopes: String) {
+                    task(
+                        {
+                            repository.begin(key, secret, scopes)
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            render()
+                            browser(
+                                "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" +
+                                    OAuth.encode(s.getString("requestToken"))
+                            )
+                        }
+                    )
+                }
+
+                override fun onConfirmPin(pin: String) {
+                    task(
+                        {
+                            repository.finish(pin)
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            detectedPin = ""
+                            settingsPage = null
+                            demo = false
+                            tab = 0
+                            ensureSchedule()
+                            render()
+                            if (Build.VERSION.SDK_INT >= 33 &&
+                                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
+                            }
+                            sync()
+                        }
+                    )
+                }
+
+                override fun onToggleEnabled(enabled: Boolean) {
+                    task(
+                        {
+                            repository.update { s -> s.put("enabled", enabled) }
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            if (enabled) SyncWorker.schedule(this@MainActivity, state.optLong("interval", 30L))
+                            else SyncWorker.cancel(this@MainActivity)
+                            render()
+                        }
+                    )
+                }
+
+                override fun onUpdateInterval(interval: Long) {
+                    task(
+                        {
+                            repository.update { s -> s.put("interval", interval) }
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            ensureSchedule()
+                            render()
+                        }
+                    )
+                }
+
+                override fun onDisconnect() {
+                    task(
+                        {
+                            SyncWorker.cancel(this@MainActivity)
+                            repository.disconnect()
+                            ClassReminderReceiver.cancel(this@MainActivity)
+                            androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
+                            TodayScheduleWidget.updateAll(this@MainActivity)
+                            QuickStatusWidget.updateAll(this@MainActivity)
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            detectedPin = ""
+                            api.drafts = JSONObject()
+                            uploadBytes = null
+                            api.uploadMethod = null
+                            exportResponse = null
+                            pendingCalendar = null
+                            grades.clearSemester()
+                            demo = false
+                            render()
+                        }
+                    )
+                }
+
+                override fun onStartDemo() {
+                    grades.clearSemester()
+                    grades.semesterInitialized = false
+                    demo = true
+                    tab = 0
+                    render()
+                }
+
+                override fun onEndDemo() {
+                    grades.clearSemester()
+                    demo = false
+                    render()
+                }
+
+                override fun onRequestNotifications() {
+                    requestNotifications()
+                }
+            }
+        )
+    }
+
+    private fun renderSchedule() {
+        ScheduleScreenController.render(
+            this,
+            content,
+            display(),
+            state,
+            demo,
+            schedule.date,
+            schedule.mode,
+            demoPlanDays,
+            { dVal ->
+                schedule.date = dVal
+                render()
+            },
+            { mVal ->
+                schedule.mode = mVal
+                render()
+            },
+            { sync() },
+            object : ScheduleScreenController.ScheduleListener {
+                override fun onOpenTask(title: String) {
+                    editTask(null, title)
+                }
+
+                override fun onAbsenceRecorded() {
+                    render()
+                }
+            }
+        )
+        if (schedule.focusCurrent && content.findViewById<View?>(R.id.schedule_swipe_content) != null) {
+            schedule.focusCurrent = false
+            val ongoing = content.findViewById<View?>(R.id.schedule_current_lesson)
+            if (ongoing != null) {
+                OneShotPreDrawListener.add(scroll) {
+                    if (tab != Tabs.SCHEDULE || content.findViewById<View?>(R.id.schedule_current_lesson) !== ongoing) return@add
+                    val cardPosition = IntArray(2)
+                    val viewportPosition = IntArray(2)
+                    ongoing.getLocationOnScreen(cardPosition)
+                    scroll.getLocationOnScreen(viewportPosition)
+                    scroll.scrollTo(
+                        0,
+                        max(0, scroll.scrollY + cardPosition[1] - viewportPosition[1] - UiHelper.dp(this, 8))
+                    )
+                }
+            }
+        }
+    }
+
 
     @Throws(JSONException::class)
     fun display(): JSONObject = if (demo) Demo.state(demoChanged, demoPlanDays) else state

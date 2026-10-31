@@ -557,7 +557,7 @@ class MainActivity : AppCompatActivity() {
             when (tab) {
                 Tabs.LECTURER -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
                 Tabs.ACADEMIC_EXTRAS -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
-                Tabs.STAFF_DIRECTORY -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
+                Tabs.STAFF_DIRECTORY -> pl.vistula.checker.ui.StaffDirectoryController.render(this, content, studentServices())
                 Tabs.CARDS -> StudentCardsController.render(
                     this,
                     content,

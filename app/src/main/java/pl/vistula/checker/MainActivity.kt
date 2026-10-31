@@ -111,15 +111,9 @@ class MainActivity : AppCompatActivity() {
     private var simRemainingEcts: Double = 30.0
     private var filter: String = "wszystkie"
     private var historyQuery: String = ""
-    private var gradeQuery: String = ""
-    private var gradeType: String = "all"
-    private var gradeOrder: String = "name"
-    private var gradeFiltersExpanded: Boolean = false
-    private val gradeSemesterExpansion: MutableMap<String, Boolean> = HashMap()
-    fun gradeSemesterExpansion(): MutableMap<String, Boolean> = gradeSemesterExpansion
+    private val grades = pl.vistula.checker.ui.GradesUiState()
+    fun gradeSemesterExpansion(): MutableMap<String, Boolean> = grades.semesterExpansion
 
-    private var semester: String = ""
-    private var semesterInitialized = false
     private var taskFilter: String = "all"
     private var taskQuery: String = ""
     private var pendingCalendar: String? = null
@@ -216,7 +210,7 @@ class MainActivity : AppCompatActivity() {
             }
         )
         taskOrder = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due") ?: "due"
-        gradeOrder = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name") ?: "name"
+        grades.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name") ?: "name"
         calendarMode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
         apiFavorites = HashSet(
             getSharedPreferences("api_catalog", MODE_PRIVATE).getStringSet("favorites", emptySet()) ?: emptySet()
@@ -231,23 +225,12 @@ class MainActivity : AppCompatActivity() {
             tab = bundle.getInt("tab")
             filter = bundle.getString("filter", "wszystkie")
             historyQuery = bundle.getString("historyQuery", "")
-            gradeQuery = bundle.getString("gradeQuery", "")
-            gradeType = bundle.getString("gradeType", "all")
-            gradeOrder = bundle.getString("gradeOrder", gradeOrder)
-            gradeFiltersExpanded = bundle.getBoolean("gradeFiltersExpanded")
-            val expandedTerms = bundle.getBundle("gradeSemesterExpansion")
-            if (expandedTerms != null) {
-                for (term in expandedTerms.keySet()) {
-                    gradeSemesterExpansion[term] = expandedTerms.getBoolean(term)
-                }
-            }
+            grades.restore(bundle)
             calendarDate = bundle.getString("calendarDate", "")
             calendarDateSelected = bundle.getBoolean("calendarDateSelected", false)
             calendarQuery = bundle.getString("calendarQuery", "")
             calendarMode = bundle.getString("calendarMode", calendarMode)
             demoPlanDays = bundle.getInt("demoPlanDays", 56)
-            semester = bundle.getString("semester", "")
-            semesterInitialized = bundle.getBoolean("semesterInitialized", bundle.containsKey("semester"))
             taskFilter = bundle.getString("taskFilter", "all")
             taskQuery = bundle.getString("taskQuery", "")
             pendingCalendar = bundle.getString("pendingCalendar")
@@ -429,8 +412,7 @@ class MainActivity : AppCompatActivity() {
         outState.putBoolean("demoChanged", demoChanged)
         outState.putInt("tab", tab)
         outState.putString("filter", filter)
-        outState.putString("semester", semester)
-        outState.putBoolean("semesterInitialized", semesterInitialized)
+        grades.save(outState)
         outState.putString("taskFilter", taskFilter)
         outState.putString("taskQuery", taskQuery)
         outState.putString("taskOrder", taskOrder)
@@ -443,15 +425,6 @@ class MainActivity : AppCompatActivity() {
         outState.putString("attendanceFilter", attendanceFilter)
         outState.putString("demoTasks", demoTasks.toString())
         outState.putString("historyQuery", historyQuery)
-        outState.putString("gradeQuery", gradeQuery)
-        outState.putString("gradeType", gradeType)
-        outState.putString("gradeOrder", gradeOrder)
-        outState.putBoolean("gradeFiltersExpanded", gradeFiltersExpanded)
-        val expandedTerms = Bundle()
-        for ((key, value) in gradeSemesterExpansion) {
-            expandedTerms.putBoolean(key, value)
-        }
-        outState.putBundle("gradeSemesterExpansion", expandedTerms)
         outState.putString("apiQuery", apiQuery)
         outState.putInt("apiLimit", apiLimit)
     }
@@ -653,12 +626,12 @@ class MainActivity : AppCompatActivity() {
                     { sync() }
                 )
                 2 -> {
-                    if (!semesterInitialized) {
+                    if (!grades.semesterInitialized) {
                         display().optJSONObject("snapshot")?.let { raw ->
                             val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
-                            semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
+                            grades.semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
                                 ?: pl.vistula.checker.core.GradeSemesters.ordered(snapshot, java.time.LocalDate.now(UsosClient.ZONE)).firstOrNull().orEmpty()
-                            semesterInitialized = true
+                            grades.semesterInitialized = true
                         }
                     }
                     GradesScreenController.render(
@@ -667,37 +640,33 @@ class MainActivity : AppCompatActivity() {
                     display(),
                     state,
                     demo,
-                    semester,
-                    gradeType,
-                    gradeOrder,
-                    gradeQuery,
-                    gradeFiltersExpanded,
+                    grades.semester,
+                    grades.type,
+                    grades.order,
+                    grades.query,
+                    grades.filtersExpanded,
                     { exp ->
-                        gradeFiltersExpanded = exp
+                        grades.filtersExpanded = exp
                         render()
                     },
                     { sem ->
-                        semester = sem
-                        if (sem.isNotEmpty()) gradeSemesterExpansion[sem] = true
+                        grades.semester = sem
+                        if (sem.isNotEmpty()) grades.semesterExpansion[sem] = true
                         render()
                     },
                     { gt ->
-                        gradeType = gt
+                        grades.type = gt
                         render()
                     },
                     { go ->
-                        gradeOrder = go
+                        grades.order = go
                         getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", go) }
                         render()
                     },
-                    { gq -> gradeQuery = gq },
+                    { gq -> grades.query = gq },
                     {
-                        semester = ""
-                        gradeType = "all"
-                        gradeQuery = ""
-                        gradeOrder = "name"
-                        gradeSemesterExpansion.clear()
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", gradeOrder) }
+                        grades.resetFilters()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", grades.order) }
                         render()
                     },
                     { sync() },
@@ -867,8 +836,7 @@ class MainActivity : AppCompatActivity() {
                                     uploadMethod = null
                                     exportResponse = null
                                     pendingCalendar = null
-                                    gradeSemesterExpansion.clear()
-                                    semester = ""
+                                    grades.clearSemester()
                                     demo = false
                                     render()
                                 }
@@ -876,17 +844,15 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun onStartDemo() {
-                            gradeSemesterExpansion.clear()
-                            semester = ""
-                            semesterInitialized = false
+                            grades.clearSemester()
+                            grades.semesterInitialized = false
                             demo = true
                             tab = 0
                             render()
                         }
 
                         override fun onEndDemo() {
-                            gradeSemesterExpansion.clear()
-                            semester = ""
+                            grades.clearSemester()
                             demo = false
                             render()
                         }
@@ -1048,8 +1014,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun selectGradeSemester(term: String) {
-        semester = term
-        semesterInitialized = true
+        grades.select(term)
         if (tab == 2) render()
     }
 

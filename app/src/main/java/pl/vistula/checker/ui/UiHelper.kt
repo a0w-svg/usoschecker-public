@@ -397,34 +397,13 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun field(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): EditText {
-            val wrapper = TextInputLayout(context)
-            wrapper.boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE
-            wrapper.hint = hint
-            wrapper.defaultHintTextColor = ColorStateList.valueOf(context.getColor(R.color.app_muted))
-            val radius = dp(context, 12).toFloat()
-            wrapper.setBoxCornerRadii(radius, radius, radius, radius)
-            if (password) wrapper.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-            val e = TextInputEditText(wrapper.context)
-            e.setText(value)
-            e.textSize = 14f
-            e.setTextColor(foreground(context, INK))
-            e.isSaveEnabled = false
-            e.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
-            e.imeOptions = e.imeOptions or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-            wrapper.isSaveEnabled = false
-            e.minHeight = dp(context, 56)
-            e.inputType = InputType.TYPE_CLASS_TEXT or
-                (if (password) InputType.TYPE_TEXT_VARIATION_PASSWORD else InputType.TYPE_TEXT_FLAG_MULTI_LINE)
-            if (password) e.transformationMethod = PasswordTransformationMethod.getInstance()
-            if (password) {
-                e.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
-                e.imeOptions = e.imeOptions or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-            }
-            wrapper.addView(e, LinearLayout.LayoutParams(-1, -2))
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 16)
-            parent.addView(wrapper, p)
-            return e
+            val layout = LayoutInflater.from(context)
+                .inflate(if (password) R.layout.view_text_field_password else R.layout.view_text_field, parent, false) as TextInputLayout
+            layout.hint = hint
+            val input = layout.findViewById<TextInputEditText>(R.id.field_input)
+            input.setText(value)
+            parent.addView(layout)
+            return input
         }
 
         @JvmStatic
@@ -533,27 +512,24 @@ class UiHelper private constructor() {
             contentDescription: String?,
             onClear: Runnable?
         ): EditText {
-            val input = field(context, parent, hint, value, false)
+            val layout = LayoutInflater.from(context).inflate(R.layout.view_search_field, parent, false) as TextInputLayout
+            layout.hint = hint
+            val input = layout.findViewById<TextInputEditText>(R.id.field_input)
+            input.setText(value)
             if (contentDescription != null) input.contentDescription = contentDescription
-            val wrapper = parent.getChildAt(parent.childCount - 1) as TextInputLayout
-            wrapper.endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
-            wrapper.endIconContentDescription = context.getString(R.string.btn_clear_search)
             if (onClear != null) {
-                wrapper.setEndIconOnClickListener {
+                layout.setEndIconOnClickListener {
                     input.setText("")
                     onClear.run()
                 }
             }
-            input.inputType = InputType.TYPE_CLASS_TEXT
-            input.isSingleLine = true
-            input.imeOptions = EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
             input.setOnEditorActionListener { _, action, _ ->
                 if (action != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener false
-                val keyboard = context.getSystemService(InputMethodManager::class.java)
-                keyboard?.hideSoftInputFromWindow(input.windowToken, 0)
+                context.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(input.windowToken, 0)
                 input.clearFocus()
                 true
             }
+            parent.addView(layout)
             return input
         }
 

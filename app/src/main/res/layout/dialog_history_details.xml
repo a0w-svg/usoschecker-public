@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
+    <TextView
+        android:id="@+id/history_detail_title"
+        style="@style/Vistula.Text.Heading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp" />
+    <TextView
+        android:id="@+id/history_detail_kind"
+        style="@style/Vistula.Text.Strong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp" />
+    <TextView
+        android:id="@+id/history_detail_event"
+        style="@style/Vistula.Text.Strong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/history_detail_before"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/app_muted"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/history_detail_after"
+        style="@style/Vistula.Text.Strong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/history_detail_metadata"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/history_detail_detected"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/app_muted" />
+    <TextView
+        android:id="@+id/history_detail_server"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textColor="@color/app_muted"
+        android:visibility="gone" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/history_detail_share"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/history_detail_toggle"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/grades_full_data"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/history_detail_all"
+        style="@style/Vistula.Text.Micro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:textIsSelectable="true"
+        android:visibility="gone" />
+</LinearLayout>

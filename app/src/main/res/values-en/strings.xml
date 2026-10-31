@@ -149,6 +149,9 @@ Parameters preserved. Fix them or retry the request.</string>
     <string name="history_category_grade">GRADE</string>
     <string name="history_category_plan">SCHEDULE</string>
     <string name="history_btn_simulate">Simulate grade &amp; classroom change</string>
+    <string name="history_detail_kind">Action: %1$s · Type: %2$s</string>
+    <string name="history_detail_event">📅 %1$s</string>
+    <string name="history_detail_share">📤 %1$s</string>
     <string name="history_details_title">Change details</string>
     <string name="history_details_copy">Copy change details</string>
     <string name="history_item_plan_date">Class date: %1$s</string>

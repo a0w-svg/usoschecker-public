@@ -158,6 +158,9 @@
     <string name="history_category_grade">OCENA</string>
     <string name="history_category_plan">PLAN ZAJĘĆ</string>
     <string name="history_btn_simulate">Symuluj zmianę oceny i sali</string>
+    <string name="history_detail_kind">Akcja: %1$s · Typ: %2$s</string>
+    <string name="history_detail_event">📅 %1$s</string>
+    <string name="history_detail_share">📤 %1$s</string>
     <string name="history_details_title">Szczegóły zmiany</string>
     <string name="history_details_copy">Kopiuj szczegóły zmiany</string>
     <string name="history_item_plan_date">Termin zajęć: %1$s</string>

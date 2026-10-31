@@ -92,5 +92,14 @@
         <item name="android:minHeight">48dp</item>
         <item name="android:textColor">@color/vistula_button_text</item>
     </style>
+    <style name="Widget.Vistula.Chip" parent="Widget.Vistula.Button">
+        <item name="backgroundTint">@color/vistula_chip_tint</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:paddingStart">4dp</item>
+        <item name="android:paddingEnd">4dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
 </resources>
+
 

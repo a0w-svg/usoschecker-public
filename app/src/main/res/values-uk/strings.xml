@@ -151,6 +151,9 @@
     <string name="history_category_grade">ОЦІНКА</string>
     <string name="history_category_plan">РОЗКЛАД</string>
     <string name="history_btn_simulate">Симулювати зміну оцінки та аудиторії</string>
+    <string name="history_detail_kind">Дія: %1$s · Тип: %2$s</string>
+    <string name="history_detail_event">📅 %1$s</string>
+    <string name="history_detail_share">📤 %1$s</string>
     <string name="history_details_title">Деталі зміни</string>
     <string name="history_details_copy">Копіювати деталі зміни</string>
     <string name="history_item_plan_date">Дата заняття: %1$s</string>

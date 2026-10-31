@@ -116,11 +116,7 @@ class MainActivity : AppCompatActivity() {
 
     private val tasks = pl.vistula.checker.ui.TasksUiState()
     private var pendingCalendar: String? = null
-    private var calendarDate: String = ""
-    private var calendarDateSelected: Boolean = false
-    private var calendarMode: String = "list"
-    private var calendarQuery: String = ""
-    private var focusCurrentSchedule: Boolean = false
+    private val schedule = pl.vistula.checker.ui.ScheduleUiState()
     private var newsQuery: String = ""
     private var attendanceFilter: String = "all"
     private var documentQuery: String = ""
@@ -209,7 +205,7 @@ class MainActivity : AppCompatActivity() {
         )
         tasks.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due") ?: "due"
         grades.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name") ?: "name"
-        calendarMode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
+        schedule.mode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
         apiFavorites = HashSet(
             getSharedPreferences("api_catalog", MODE_PRIVATE).getStringSet("favorites", emptySet()) ?: emptySet()
         )
@@ -224,10 +220,7 @@ class MainActivity : AppCompatActivity() {
             filter = bundle.getString("filter", "wszystkie")
             historyQuery = bundle.getString("historyQuery", "")
             grades.restore(bundle)
-            calendarDate = bundle.getString("calendarDate", "")
-            calendarDateSelected = bundle.getBoolean("calendarDateSelected", false)
-            calendarQuery = bundle.getString("calendarQuery", "")
-            calendarMode = bundle.getString("calendarMode", calendarMode)
+            schedule.restore(bundle)
             demoPlanDays = bundle.getInt("demoPlanDays", 56)
             tasks.restore(bundle)
             pendingCalendar = bundle.getString("pendingCalendar")
@@ -257,7 +250,7 @@ class MainActivity : AppCompatActivity() {
             tab = intent.getIntExtra("tab", 0)
         }
 
-        focusCurrentSchedule = bundle == null && tab == 5
+        schedule.focusCurrent = bundle == null && tab == 5
         setContentView(R.layout.activity_main)
         root = findViewById(R.id.main_root)
         progress = findViewById(R.id.progress_text)
@@ -399,7 +392,7 @@ class MainActivity : AppCompatActivity() {
         } catch (ignored: JSONException) {
         }
         outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
-        outState.putString("calendarQuery", calendarQuery)
+        schedule.save(outState)
         outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
         outState.putDouble("simTargetGpa", simTargetGpa)
         outState.putDouble("simRemainingEcts", simRemainingEcts)
@@ -410,9 +403,6 @@ class MainActivity : AppCompatActivity() {
         outState.putString("filter", filter)
         grades.save(outState)
         tasks.save(outState)
-        outState.putString("calendarDate", calendarDate)
-        outState.putBoolean("calendarDateSelected", calendarDateSelected)
-        outState.putString("calendarMode", calendarMode)
         outState.putInt("demoPlanDays", demoPlanDays)
         outState.putString("pendingCalendar", pendingCalendar)
         outState.putString("newsQuery", newsQuery)
@@ -486,17 +476,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openScheduleDate(date: String) {
-        calendarDate = date
-        calendarDateSelected = true
+        schedule.select(date)
         navigate(5, false)
     }
 
     fun selectScheduleDay(date: String) {
-        calendarMode = "day"
+        schedule.mode = "day"
         openScheduleDate(date)
     }
 
-    fun hasSelectedScheduleDay(): Boolean = calendarDateSelected
+    fun hasSelectedScheduleDay(): Boolean = schedule.dateSelected
 
     private fun navigate(target: Int, focusCurrent: Boolean) {
         welcomeStep = -1
@@ -507,8 +496,8 @@ class MainActivity : AppCompatActivity() {
             val keyboard = getSystemService(InputMethodManager::class.java)
             keyboard?.hideSoftInputFromWindow(root.windowToken, 0)
         }
-        focusCurrentSchedule = focusCurrent && target == 5 && tab != 5
-        if (focusCurrentSchedule) calendarDateSelected = false
+        schedule.focusCurrent = focusCurrent && target == 5 && tab != 5
+        if (schedule.focusCurrent) schedule.dateSelected = false
         currentMethod = null
         currentMethodJson = null
         tab = target
@@ -863,15 +852,15 @@ class MainActivity : AppCompatActivity() {
                         display(),
                         state,
                         demo,
-                        calendarDate,
-                        calendarMode,
+                        schedule.date,
+                        schedule.mode,
                         demoPlanDays,
                         { dVal ->
-                            calendarDate = dVal
+                            schedule.date = dVal
                             render()
                         },
                         { mVal ->
-                            calendarMode = mVal
+                            schedule.mode = mVal
                             render()
                         },
                         { sync() },
@@ -885,8 +874,8 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     )
-                    if (focusCurrentSchedule && content.findViewById<View?>(R.id.schedule_swipe_content) != null) {
-                        focusCurrentSchedule = false
+                    if (schedule.focusCurrent && content.findViewById<View?>(R.id.schedule_swipe_content) != null) {
+                        schedule.focusCurrent = false
                         val ongoing = content.findViewById<View?>(R.id.schedule_current_lesson)
                         if (ongoing != null) {
                             OneShotPreDrawListener.add(scroll) {
@@ -1012,12 +1001,12 @@ class MainActivity : AppCompatActivity() {
         if (tab == 2) render()
     }
 
-    fun getCalendarDate(): String = calendarDate
+    fun getCalendarDate(): String = schedule.date
     fun setCalendarDate(date: String) {
-        this.calendarDate = date
+        schedule.date = date
     }
 
-    fun shouldFocusCurrentSchedule(): Boolean = focusCurrentSchedule
+    fun shouldFocusCurrentSchedule(): Boolean = schedule.focusCurrent
 
     fun setScheduleNavigation(action: IntConsumer?) {
         if (scroll is ScheduleScrollView) {
@@ -1025,9 +1014,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getCalendarMode(): String = calendarMode
+    fun getCalendarMode(): String = schedule.mode
     fun setCalendarMode(mode: String) {
-        this.calendarMode = mode
+        schedule.mode = mode
     }
 
     fun getDocumentQuery(): String = documentQuery
@@ -1398,9 +1387,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getCalendarQuery(): String = calendarQuery
+    fun getCalendarQuery(): String = schedule.query
     fun setCalendarQuery(query: String) {
-        calendarQuery = query
+        schedule.query = query
     }
 
     fun saveCalendar(ics: String) {

@@ -9,6 +9,7 @@ import android.graphics.Typeface
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
@@ -20,6 +21,7 @@ import androidx.core.view.ViewCompat
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -59,305 +61,264 @@ class TasksScreenController private constructor() {
             callback: TaskCallback
         ) {
             val today = LocalDate.now(UsosClient.ZONE)
-            var pending = 0
-            var doneCount = 0
-            var todayCount = 0
-            var weekCount = 0
-            var overdueCount = 0
-            var platonCount = 0
-            for (i in 0 until rows.length()) {
-                val t = rows.optJSONObject(i) ?: continue
-                if (PlatonLinks.isTaskLink(t.optString("platonUrl"))) platonCount++
-                val done = t.optBoolean("done")
-                if (done) doneCount++ else pending++
-                val due = TaskTools.dueDate(t)
-                if (!done && due != null) {
-                    if (due.isBefore(today)) overdueCount++
-                    if (due == today) todayCount++
-                    if (!due.isBefore(today) && due.isBefore(today.plusDays(7))) weekCount++
-                }
+            val counts = TaskCounts.of(rows, today)
+            val screen = LayoutInflater.from(activity).inflate(R.layout.screen_tasks, content, false)
+            content.addView(screen)
+
+            screen.findViewById<TextView>(R.id.tasks_summary).text =
+                activity.getString(R.string.tasks_summary, counts.pending, counts.done)
+            screen.findViewById<View>(R.id.tasks_add).setOnClickListener {
+                showTaskDialog(activity, null, "", rows.length(), callback)
             }
 
-            UiHelper.note(
-                activity,
-                content,
-                activity.getString(R.string.tasks_summary, pending, doneCount),
-                UiHelper.MUTED
-            )
-
-            val header = LinearLayout(activity)
-            header.gravity = Gravity.CENTER_VERTICAL
-            content.addView(header, content.childCount - 1)
-            val heading = TextView(activity)
-            heading.setText(R.string.nav_tasks)
-            heading.textSize = 20f
-            heading.setPadding(UiHelper.dp(activity, 8), 0, 0, 0)
-            ViewCompat.setAccessibilityHeading(heading, true)
-            heading.setTypeface(null, Typeface.BOLD)
-            heading.setTextColor(UiHelper.foreground(activity, UiHelper.INK))
-            header.addView(heading, LinearLayout.LayoutParams(0, -2, 1f))
-            val add = ScheduleScreenController.headerButton(activity, "+") {}
-            add.contentDescription = activity.getString(R.string.btn_add_task)
-            add.id = R.id.tasks_add
-            add.setOnClickListener { showTaskDialog(activity, null, "", rows.length(), callback) }
-            header.addView(add, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
-            val more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more) {}
-            more.contentDescription = activity.getString(R.string.tasks_options)
-            more.id = R.id.tasks_more
-            header.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
-
-            UiHelper.note(activity, content, activity.getString(R.string.local_data_note), UiHelper.MUTED)
-            val filterKeys = TasksUiState.FILTERS
-            val filterLabels = intArrayOf(
-                R.string.tasks_chip_all,
-                R.string.tasks_chip_open,
-                R.string.tasks_chip_done,
-                R.string.tasks_platon_title,
-                R.string.tasks_chip_today,
-                R.string.tasks_chip_week,
-                R.string.tasks_chip_overdue
-            )
-            val counts = intArrayOf(rows.length(), pending, doneCount, platonCount, todayCount, weekCount, overdueCount)
-            val orderKeys = TasksUiState.ORDERS
-            val orderLabels = intArrayOf(R.string.tasks_sort_due, R.string.tasks_sort_priority, R.string.tasks_sort_title)
-            if (TasksUiState.FILTER_ALL != taskFilter || TasksUiState.ORDER_DUE != taskOrder) {
-                var label = ""
-                for (i in filterKeys.indices) {
-                    if (filterKeys[i] == taskFilter) label = activity.getString(filterLabels[i])
-                }
-                if (TasksUiState.ORDER_DUE != taskOrder) {
-                    for (i in orderKeys.indices) {
-                        if (orderKeys[i] == taskOrder) label += " · " + activity.getString(orderLabels[i])
-                    }
-                }
-                val selected = ScheduleScreenController.headerButton(activity, "$label ×") {}
-                selected.contentDescription = activity.getString(R.string.grades_filter_reset)
-                selected.textSize = 12f
-                selected.setOnClickListener {
-                    onOrderChanged.accept(TasksUiState.ORDER_DUE)
-                    onFilterChanged.accept(TasksUiState.FILTER_ALL)
-                }
-                content.addView(selected)
-            }
-            val searchContainer = arrayOfNulls<View>(1)
-            val search = UiHelper.searchField(
-                activity,
-                content,
-                activity.getString(R.string.tasks_search_hint),
-                taskQuery,
-                null
-            ) {
+            val searchLayout = screen.findViewById<TextInputLayout>(R.id.tasks_search_layout)
+            val search = screen.findViewById<TextInputEditText>(R.id.tasks_search_input)
+            search.setText(taskQuery)
+            searchLayout.visibility = if (taskQuery.isEmpty()) View.GONE else View.VISIBLE
+            searchLayout.setEndIconOnClickListener {
+                search.setText("")
                 onQueryChanged.accept("")
-                val container = searchContainer[0]
-                if (container != null) {
-                    (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                        .hideSoftInputFromWindow(container.windowToken, 0)
-                    container.clearFocus()
-                    container.visibility = View.GONE
-                }
+                activity.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(searchLayout.windowToken, 0)
+                searchLayout.clearFocus()
+                searchLayout.visibility = View.GONE
             }
-            val searchBox = content.getChildAt(content.childCount - 1)
-            searchContainer[0] = searchBox
-            searchBox.visibility = if (taskQuery.isEmpty()) View.GONE else View.VISIBLE
+            search.setOnEditorActionListener { _, action, _ ->
+                if (action != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener false
+                activity.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(search.windowToken, 0)
+                true
+            }
+
+            bindFilterChip(activity, screen, taskFilter, taskOrder, onFilterChanged, onOrderChanged)
+            val more = screen.findViewById<View>(R.id.tasks_more)
             more.setOnClickListener {
-                val popup = PopupMenu(activity, more)
-                val menu = popup.menu
-                menu.add(R.string.tasks_search_action).setOnMenuItemClickListener {
-                    searchBox.visibility = View.VISIBLE
-                    search.requestFocus()
-                    (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                        .showSoftInput(search, 0)
-                    true
-                }
-                val filters = menu.addSubMenu(R.string.tasks_filter_title)
-                for (i in filterKeys.indices) {
-                    val key = filterKeys[i]
-                    filters.add("${activity.getString(filterLabels[i])} (${counts[i]})")
-                        .setCheckable(true)
-                        .setChecked(key == taskFilter)
-                        .setOnMenuItemClickListener {
-                            onFilterChanged.accept(key)
-                            true
-                        }
-                }
-                val ordering = menu.addSubMenu(R.string.tasks_sort_note)
-                for (i in orderKeys.indices) {
-                    val key = orderKeys[i]
-                    ordering.add(orderLabels[i])
-                        .setCheckable(true)
-                        .setChecked(key == taskOrder)
-                        .setOnMenuItemClickListener {
-                            onOrderChanged.accept(key)
-                            true
-                        }
-                }
-                menu.add(R.string.tasks_platon_open).setOnMenuItemClickListener {
-                    UiHelper.browser(activity, PlatonLinks.HOME)
-                    true
-                }
-                menu.add(R.string.tasks_platon_add).setOnMenuItemClickListener {
-                    showTaskDialog(activity, null, "", rows.length(), callback, true)
-                    true
-                }
-                menu.add(R.string.tasks_platon_title).setOnMenuItemClickListener {
-                    MaterialAlertDialogBuilder(activity)
-                        .setTitle(R.string.tasks_platon_title)
-                        .setMessage(R.string.tasks_platon_desc)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show()
-                    true
-                }
-                popup.show()
+                showOptionsMenu(activity, more, rows.length(), counts, taskFilter, taskOrder, searchLayout, search,
+                    onFilterChanged, onOrderChanged, callback)
             }
 
-            val list = LinearLayout(activity)
-            list.orientation = LinearLayout.VERTICAL
-            content.addView(list)
-
+            val list = screen.findViewById<LinearLayout>(R.id.tasks_list)
             val sorted = TaskTools.sorted(rows, taskOrder)
             val populate = Runnable {
                 list.removeAllViews()
-                var count = 0
-                val inflater = LayoutInflater.from(activity)
-
-                for (t in sorted) {
-                    val done = t.optBoolean("done")
-                    val due = TaskTools.dueDate(t)
-                    val titleText = t.optString("title")
-
-                    if (TaskTools.matches(t, taskFilter, search.text.toString(), today)) {
-                        ++count
-                        val id = t.optString("id")
-                        val card = inflater.inflate(R.layout.item_task_card, list, false)
-
-                        val title = card.findViewById<TextView>(R.id.task_item_title)
-                        val dueView = card.findViewById<TextView>(R.id.task_item_due)
-                        val toggle = card.findViewById<CheckBox>(R.id.task_item_btn_toggle)
-                        val options = card.findViewById<View>(R.id.task_item_more)
-                        title.text = titleText
-                        title.setTextColor(UiHelper.foreground(activity, if (done) UiHelper.MUTED else UiHelper.INK))
-                        if (done) {
-                            title.paintFlags = title.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                        }
-
-                        val formattedDate = due?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-                            ?: activity.getString(R.string.tasks_due_unknown)
-                        var statusText: String
-                        val statusColor: Int
-                        when {
-                            done -> {
-                                statusText = activity.getString(R.string.tasks_status_done, formattedDate)
-                                statusColor = UiHelper.MUTED
-                            }
-                            due != null && due.isBefore(today) -> {
-                                statusText = activity.getString(R.string.tasks_status_overdue, formattedDate)
-                                statusColor = Color.rgb(160, 48, 40)
-                            }
-                            today == due -> {
-                                statusText = activity.getString(R.string.tasks_status_today, formattedDate)
-                                statusColor = UiHelper.GREEN
-                            }
-                            else -> {
-                                statusText = activity.getString(R.string.tasks_status_due, formattedDate)
-                                statusColor = UiHelper.GREEN
-                            }
-                        }
-                        if (!done && TaskTools.priority(t) == 2) {
-                            statusText += " · " + activity.getString(R.string.tasks_priority_high)
-                        }
-                        if (PlatonLinks.isTaskLink(t.optString("platonUrl"))) {
-                            statusText += " · Platon"
-                        }
-                        dueView.text = statusText
-                        dueView.setTextColor(UiHelper.foreground(activity, statusColor))
-                        card.setOnClickListener { showTaskDialog(activity, t, "", rows.length(), callback) }
-                        toggle.isChecked = done
-                        toggle.contentDescription = "${activity.getString(if (done) R.string.tasks_btn_mark_open else R.string.tasks_btn_mark_done)}: $titleText"
-                        toggle.setOnClickListener { callback.onMutateTask(id, false) }
-                        options.contentDescription = activity.getString(R.string.tasks_task_options, titleText)
-                        options.setOnClickListener {
-                            val popup = PopupMenu(activity, options)
-                            popup.menu.add(R.string.tasks_btn_edit).setOnMenuItemClickListener {
-                                showTaskDialog(activity, t, "", rows.length(), callback)
-                                true
-                            }
-                            popup.menu.add(if (done) R.string.tasks_btn_mark_open else R.string.tasks_btn_mark_done)
-                                .setOnMenuItemClickListener {
-                                    callback.onMutateTask(id, false)
-                                    true
-                                }
-                            val url = t.optString("platonUrl")
-                            if (PlatonLinks.isTaskLink(url)) {
-                                popup.menu.add(R.string.tasks_platon_open_task)
-                                    .setOnMenuItemClickListener {
-                                        UiHelper.browser(activity, url)
-                                        true
-                                    }
-                            }
-                            popup.menu.add(R.string.tasks_btn_delete).setOnMenuItemClickListener {
-                                MaterialAlertDialogBuilder(activity)
-                                    .setTitle(R.string.tasks_delete_dialog_title)
-                                    .setMessage(titleText)
-                                    .setNegativeButton(R.string.btn_cancel, null)
-                                    .setPositiveButton(R.string.tasks_btn_delete) { _, _ -> callback.onMutateTask(id, true) }
-                                    .show()
-                                true
-                            }
-                            popup.show()
-                        }
-
-                        list.addView(card)
-                    }
+                var shown = 0
+                for (task in sorted) {
+                    if (!TaskTools.matches(task, taskFilter, search.text.toString(), today)) continue
+                    shown++
+                    list.addView(taskCard(activity, list, task, today, rows.length(), callback))
                 }
-
-                if (count == 0) {
-                    val emptyBox = UiHelper.card(activity, list, Color.WHITE)
-                    UiHelper.add(
-                        activity,
-                        emptyBox,
-                        if (rows.length() == 0) activity.getString(R.string.tasks_empty_title) else activity.getString(R.string.tasks_no_match_title),
-                        17,
-                        UiHelper.INK,
-                        true
-                    )
-                    UiHelper.add(
-                        activity,
-                        emptyBox,
-                        if (rows.length() == 0) activity.getString(R.string.tasks_empty_desc) else activity.getString(R.string.tasks_no_match_desc),
-                        14,
-                        UiHelper.MUTED,
-                        false
-                    )
-                    if (search.text.toString().trim().isNotEmpty()) {
-                        emptyBox.addView(
-                            UiHelper.button(
-                                activity,
-                                activity.getString(R.string.btn_clear_search),
-                                {
-                                    search.setText("")
-                                    onQueryChanged.accept("")
-                                },
-                                false
-                            )
-                        )
-                    } else if (TasksUiState.FILTER_ALL != taskFilter) {
-                        emptyBox.addView(
-                            UiHelper.button(
-                                activity,
-                                "${activity.getString(R.string.tasks_chip_all)} (${rows.length()})",
-                                { onFilterChanged.accept(TasksUiState.FILTER_ALL) },
-                                false
-                            )
-                        )
-                    }
+                if (shown == 0) {
+                    list.addView(emptyState(activity, list, rows.length(), search, taskFilter, onQueryChanged, onFilterChanged))
                 }
             }
-
             UiHelper.watchSearch(search) { value ->
                 onQueryChanged.accept(value)
                 populate.run()
             }
             populate.run()
+        }
+
+        /** Counts shown in the filter menu and summary line. */
+        private class TaskCounts(
+            val total: Int, val pending: Int, val done: Int, val platon: Int, val today: Int, val week: Int, val overdue: Int
+        ) {
+            fun asArray() = intArrayOf(total, pending, done, platon, today, week, overdue)
+
+            companion object {
+                fun of(rows: JSONArray, today: LocalDate): TaskCounts {
+                    var pending = 0
+                    var done = 0
+                    var dueToday = 0
+                    var week = 0
+                    var overdue = 0
+                    var platon = 0
+                    for (i in 0 until rows.length()) {
+                        val t = rows.optJSONObject(i) ?: continue
+                        if (PlatonLinks.isTaskLink(t.optString("platonUrl"))) platon++
+                        val isDone = t.optBoolean("done")
+                        if (isDone) done++ else pending++
+                        val due = TaskTools.dueDate(t)
+                        if (!isDone && due != null) {
+                            if (due.isBefore(today)) overdue++
+                            if (due == today) dueToday++
+                            if (!due.isBefore(today) && due.isBefore(today.plusDays(7))) week++
+                        }
+                    }
+                    return TaskCounts(rows.length(), pending, done, platon, dueToday, week, overdue)
+                }
+            }
+        }
+
+        private val FILTER_LABELS = intArrayOf(
+            R.string.tasks_chip_all, R.string.tasks_chip_open, R.string.tasks_chip_done, R.string.tasks_platon_title,
+            R.string.tasks_chip_today, R.string.tasks_chip_week, R.string.tasks_chip_overdue
+        )
+        private val ORDER_LABELS = intArrayOf(R.string.tasks_sort_due, R.string.tasks_sort_priority, R.string.tasks_sort_title)
+
+        /** The "active filter x" chip appears only while a non-default filter or order is applied. */
+        private fun bindFilterChip(
+            activity: MainActivity, screen: View, taskFilter: String, taskOrder: String,
+            onFilterChanged: Consumer<String>, onOrderChanged: Consumer<String>
+        ) {
+            if (TasksUiState.FILTER_ALL == taskFilter && TasksUiState.ORDER_DUE == taskOrder) return
+            var label = ""
+            TasksUiState.FILTERS.forEachIndexed { i, key -> if (key == taskFilter) label = activity.getString(FILTER_LABELS[i]) }
+            if (TasksUiState.ORDER_DUE != taskOrder) {
+                TasksUiState.ORDERS.forEachIndexed { i, key -> if (key == taskOrder) label += " · " + activity.getString(ORDER_LABELS[i]) }
+            }
+            screen.findViewById<MaterialButton>(R.id.tasks_filter_chip).apply {
+                text = activity.getString(R.string.tasks_filter_active, label)
+                visibility = View.VISIBLE
+                setOnClickListener {
+                    onOrderChanged.accept(TasksUiState.ORDER_DUE)
+                    onFilterChanged.accept(TasksUiState.FILTER_ALL)
+                }
+            }
+        }
+
+        private fun showOptionsMenu(
+            activity: MainActivity, anchor: View, total: Int, counts: TaskCounts, taskFilter: String, taskOrder: String,
+            searchLayout: TextInputLayout, search: TextInputEditText,
+            onFilterChanged: Consumer<String>, onOrderChanged: Consumer<String>, callback: TaskCallback
+        ) {
+            val popup = PopupMenu(activity, anchor)
+            val menu = popup.menu
+            menu.add(R.string.tasks_search_action).setOnMenuItemClickListener {
+                searchLayout.visibility = View.VISIBLE
+                search.requestFocus()
+                activity.getSystemService(InputMethodManager::class.java)?.showSoftInput(search, 0)
+                true
+            }
+            val filters = menu.addSubMenu(R.string.tasks_filter_title)
+            val numbers = counts.asArray()
+            TasksUiState.FILTERS.forEachIndexed { i, key ->
+                filters.add("${activity.getString(FILTER_LABELS[i])} (${numbers[i]})")
+                    .setCheckable(true)
+                    .setChecked(key == taskFilter)
+                    .setOnMenuItemClickListener { onFilterChanged.accept(key); true }
+            }
+            val ordering = menu.addSubMenu(R.string.tasks_sort_note)
+            TasksUiState.ORDERS.forEachIndexed { i, key ->
+                ordering.add(ORDER_LABELS[i])
+                    .setCheckable(true)
+                    .setChecked(key == taskOrder)
+                    .setOnMenuItemClickListener { onOrderChanged.accept(key); true }
+            }
+            menu.add(R.string.tasks_platon_open).setOnMenuItemClickListener {
+                UiHelper.browser(activity, PlatonLinks.HOME)
+                true
+            }
+            menu.add(R.string.tasks_platon_add).setOnMenuItemClickListener {
+                showTaskDialog(activity, null, "", total, callback, true)
+                true
+            }
+            menu.add(R.string.tasks_platon_title).setOnMenuItemClickListener {
+                MaterialAlertDialogBuilder(activity)
+                    .setTitle(R.string.tasks_platon_title)
+                    .setMessage(R.string.tasks_platon_desc)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+                true
+            }
+            popup.show()
+        }
+
+        private fun taskCard(
+            activity: MainActivity, list: LinearLayout, task: JSONObject, today: LocalDate, total: Int, callback: TaskCallback
+        ): View {
+            val done = task.optBoolean("done")
+            val due = TaskTools.dueDate(task)
+            val titleText = task.optString("title")
+            val id = task.optString("id")
+            val card = LayoutInflater.from(activity).inflate(R.layout.item_task_card, list, false)
+            val title = card.findViewById<TextView>(R.id.task_item_title)
+            val dueView = card.findViewById<TextView>(R.id.task_item_due)
+            val toggle = card.findViewById<CheckBox>(R.id.task_item_btn_toggle)
+            val options = card.findViewById<View>(R.id.task_item_more)
+
+            title.text = titleText
+            if (done) {
+                title.setTextColor(activity.getColor(R.color.app_muted))
+                title.paintFlags = title.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+            }
+
+            val formattedDate = due?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) ?: activity.getString(R.string.tasks_due_unknown)
+            var statusText = when {
+                done -> activity.getString(R.string.tasks_status_done, formattedDate)
+                due != null && due.isBefore(today) -> activity.getString(R.string.tasks_status_overdue, formattedDate)
+                today == due -> activity.getString(R.string.tasks_status_today, formattedDate)
+                else -> activity.getString(R.string.tasks_status_due, formattedDate)
+            }
+            if (!done && TaskTools.priority(task) == 2) statusText += " · " + activity.getString(R.string.tasks_priority_high)
+            if (PlatonLinks.isTaskLink(task.optString("platonUrl"))) statusText += " · Platon"
+            dueView.text = statusText
+            dueView.setTextColor(
+                activity.getColor(
+                    when {
+                        done -> R.color.app_muted
+                        due != null && due.isBefore(today) -> R.color.app_error
+                        else -> R.color.app_ink
+                    }
+                )
+            )
+
+            card.setOnClickListener { showTaskDialog(activity, task, "", total, callback) }
+            toggle.isChecked = done
+            toggle.contentDescription = "${activity.getString(if (done) R.string.tasks_btn_mark_open else R.string.tasks_btn_mark_done)}: $titleText"
+            toggle.setOnClickListener { callback.onMutateTask(id, false) }
+            options.contentDescription = activity.getString(R.string.tasks_task_options, titleText)
+            options.setOnClickListener { showTaskMenu(activity, options, task, done, titleText, id, total, callback) }
+            return card
+        }
+
+        private fun showTaskMenu(
+            activity: MainActivity, anchor: View, task: JSONObject, done: Boolean, titleText: String, id: String,
+            total: Int, callback: TaskCallback
+        ) {
+            val popup = PopupMenu(activity, anchor)
+            popup.menu.add(R.string.tasks_btn_edit).setOnMenuItemClickListener {
+                showTaskDialog(activity, task, "", total, callback)
+                true
+            }
+            popup.menu.add(if (done) R.string.tasks_btn_mark_open else R.string.tasks_btn_mark_done).setOnMenuItemClickListener {
+                callback.onMutateTask(id, false)
+                true
+            }
+            val url = task.optString("platonUrl")
+            if (PlatonLinks.isTaskLink(url)) {
+                popup.menu.add(R.string.tasks_platon_open_task).setOnMenuItemClickListener {
+                    UiHelper.browser(activity, url)
+                    true
+                }
+            }
+            popup.menu.add(R.string.tasks_btn_delete).setOnMenuItemClickListener {
+                MaterialAlertDialogBuilder(activity)
+                    .setTitle(R.string.tasks_delete_dialog_title)
+                    .setMessage(titleText)
+                    .setNegativeButton(R.string.btn_cancel, null)
+                    .setPositiveButton(R.string.tasks_btn_delete) { _, _ -> callback.onMutateTask(id, true) }
+                    .show()
+                true
+            }
+            popup.show()
+        }
+
+        private fun emptyState(
+            activity: MainActivity, list: LinearLayout, total: Int, search: TextInputEditText, taskFilter: String,
+            onQueryChanged: Consumer<String>, onFilterChanged: Consumer<String>
+        ): View {
+            val box = LayoutInflater.from(activity).inflate(R.layout.view_empty_state, list, false) as LinearLayout
+            box.findViewById<TextView>(R.id.empty_title).setText(if (total == 0) R.string.tasks_empty_title else R.string.tasks_no_match_title)
+            box.findViewById<TextView>(R.id.empty_description).setText(if (total == 0) R.string.tasks_empty_desc else R.string.tasks_no_match_desc)
+            if (search.text.toString().trim().isNotEmpty()) {
+                box.addView(UiHelper.button(activity, activity.getString(R.string.btn_clear_search), {
+                    search.setText("")
+                    onQueryChanged.accept("")
+                }, false))
+            } else if (TasksUiState.FILTER_ALL != taskFilter) {
+                box.addView(UiHelper.button(activity, "${activity.getString(R.string.tasks_chip_all)} ($total)", {
+                    onFilterChanged.accept(TasksUiState.FILTER_ALL)
+                }, false))
+            }
+            return box
         }
 
         @JvmStatic

@@ -180,6 +180,7 @@ Parameters preserved. Fix them or retry the request.</string>
     <string name="history_time_yesterday">Yesterday, %1$s</string>
     <string name="time_just_now">just now</string>
     <string name="time_minutes_ago">%1$d min ago</string>
+<string name="tasks_filter_active">%1$s ×</string>
 <string name="tasks_summary">To-do: %1$d · completed: %2$d</string>
     <string name="tasks_chip_all">All</string>
     <string name="tasks_chip_open">Open</string>

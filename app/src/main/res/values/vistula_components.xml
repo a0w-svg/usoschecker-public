@@ -75,4 +75,22 @@
         <item name="android:textSize">22sp</item>
         <item name="android:textStyle">bold</item>
     </style>
+    <style name="Widget.Vistula.HeaderButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:minHeight">64dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">4dp</item>
+        <item name="android:paddingEnd">4dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/vistula_button_text</item>
+    </style>
+    <style name="Widget.Vistula.FilterChip" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textSize">12sp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textColor">@color/vistula_button_text</item>
+    </style>
 </resources>
+

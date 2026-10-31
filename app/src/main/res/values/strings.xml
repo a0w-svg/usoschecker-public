@@ -191,6 +191,8 @@
     <string name="time_minutes_ago">%1$d min temu</string>
 
     <!-- Tasks Screen -->
+<string name="tasks_filter_active">%1$s ×</string>
+<string name="tasks_add_symbol" translatable="false">+</string>
 <string name="tasks_summary">Do zrobienia: %1$d · ukończone: %2$d</string>
     <string name="tasks_chip_all">Wszystkie</string>
     <string name="tasks_chip_open">Otwarte</string>

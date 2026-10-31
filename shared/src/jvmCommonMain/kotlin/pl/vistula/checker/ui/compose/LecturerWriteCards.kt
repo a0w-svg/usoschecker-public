@@ -49,6 +49,7 @@ import pl.vistula.checker.core.AccountRole
 import pl.vistula.checker.core.CampusAffiliation
 import pl.vistula.checker.core.FeatureAccess
 import pl.vistula.checker.core.LecturerServices
+import pl.vistula.checker.core.PointsInput
 import pl.vistula.checker.core.StudentServices
 import pl.vistula.checker.core.SyncProgress
 
@@ -311,9 +312,9 @@ internal fun ExperimentalLecturerWriteCard(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            isError = pointsInput.isNotEmpty() && pointsInput.toPointsOrNull() == null,
+                            isError = pointsInput.isNotEmpty() && PointsInput.parse(pointsInput) == null,
                             supportingText = {
-                                if (pointsInput.isNotEmpty() && pointsInput.toPointsOrNull() == null) {
+                                if (pointsInput.isNotEmpty() && PointsInput.parse(pointsInput) == null) {
                                     Text(tr("Podaj liczbę, np. 4,5", "Enter a number, e.g. 4.5", "Введіть число, напр. 4,5"))
                                 }
                             }
@@ -398,7 +399,7 @@ internal fun ExperimentalLecturerWriteCard(
 
             Button(
                 enabled = nodeId.isNotBlank() && when (writeMode) {
-                    "points" -> studentId.isNotBlank() && pointsInput.toPointsOrNull() != null
+                    "points" -> studentId.isNotBlank() && PointsInput.parse(pointsInput) != null
                     "grade" -> studentId.isNotBlank() && gradeOrderInput.toIntOrNull() != null
                     else -> namePlInput.isNotBlank() && nameEnInput.isNotBlank()
                 },
@@ -446,7 +447,7 @@ internal fun ExperimentalLecturerWriteCard(
                                     state = creds,
                                     nodeId = nodeId,
                                     studentId = studentId,
-                                    points = checkNotNull(pointsInput.toPointsOrNull()),
+                                    points = checkNotNull(PointsInput.parse(pointsInput)),
                                     publicComment = commentInput,
                                     lastChanged = lastChangedInput.ifBlank { null },
                                     preferences = preferences,
@@ -505,6 +506,3 @@ internal fun ExperimentalLecturerWriteCard(
         )
     }
 }
-
-/** Accepts both "4.5" and the Polish "4,5" decimal separator. */
-private fun String.toPointsOrNull(): Double? = replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() }

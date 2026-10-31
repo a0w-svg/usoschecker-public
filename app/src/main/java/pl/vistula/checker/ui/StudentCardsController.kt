@@ -125,7 +125,7 @@ class StudentCardsController private constructor() {
             if (!activity.connected() || !StudentServices.hasScope(state.optString("scopes"), scope)) {
                 val box = UiHelper.section(activity, content, Color.WHITE)
                 UiHelper.add(activity, box, activity.getString(R.string.services_scope_required, scope), 14, UiHelper.INK, false)
-                box.addView(UiHelper.button(activity, activity.getString(R.string.nav_account), { activity.navigate(4) }, false))
+                box.addView(UiHelper.button(activity, activity.getString(R.string.nav_account), { activity.navigate(Tabs.ACCOUNT) }, false))
             }
         }
 

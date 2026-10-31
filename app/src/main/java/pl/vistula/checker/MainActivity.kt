@@ -62,6 +62,7 @@ import pl.vistula.checker.core.TaskTools
 import pl.vistula.checker.ui.AccountScreenController
 import pl.vistula.checker.ui.ApiErrorUi
 import pl.vistula.checker.ui.ApiExplorerController
+import pl.vistula.checker.ui.Tabs
 import pl.vistula.checker.ui.Appearance
 import pl.vistula.checker.ui.AttendanceScreenController
 import pl.vistula.checker.ui.CampusGuideController
@@ -150,7 +151,7 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             if (!busy &&
                 api.currentMethod == null &&
-                tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12 &&
+                tab != Tabs.ACCOUNT && tab != Tabs.API && tab != Tabs.PAYMENTS && tab != Tabs.GPA_SIMULATOR && tab != Tabs.CAMPUS_GUIDE && tab != Tabs.NEWS && tab != Tabs.ATTENDANCE &&
                 currentFocus !is EditText
             ) {
                 load()
@@ -178,13 +179,13 @@ class MainActivity : AppCompatActivity() {
                     if (busy) return
                     if (welcomeStep > 0) {
                         showWelcome(welcomeStep - 1)
-                    } else if (tab == 4 && settingsPage != null && settingsPage != "overview") {
+                    } else if (tab == Tabs.ACCOUNT && settingsPage != null && settingsPage != "overview") {
                         openAccountPage(null)
                     } else if (api.currentMethod != null) {
                         api.closeMethod()
                         render()
-                    } else if (tab != 0) {
-                        navigate(if (tab == 1 || tab == 2 || tab == 5 || tab == 6) 0 else 6)
+                    } else if (tab != Tabs.HOME) {
+                        navigate(if (tab == Tabs.HISTORY || tab == Tabs.GRADES || tab == Tabs.SCHEDULE || tab == Tabs.MORE) 0 else 6)
                     } else {
                         isEnabled = false
                         onBackPressedDispatcher.onBackPressed()
@@ -227,10 +228,10 @@ class MainActivity : AppCompatActivity() {
             tab = 1
             history.filter = historyFilter(intent)
         } else if (intent.hasExtra("tab")) {
-            tab = intent.getIntExtra("tab", 0)
+            tab = Tabs.fromExternal(intent.getIntExtra("tab", 0))
         }
 
-        schedule.focusCurrent = bundle == null && tab == 5
+        schedule.focusCurrent = bundle == null && tab == Tabs.SCHEDULE
         setContentView(R.layout.activity_main)
         root = findViewById(R.id.main_root)
         progress = findViewById(R.id.progress_text)
@@ -305,11 +306,11 @@ class MainActivity : AppCompatActivity() {
         navigation?.setOnItemSelectedListener { item ->
             if (busy) return@setOnItemSelectedListener false
             when (item.itemId) {
-                R.id.nav_item_home -> navigate(0)
-                R.id.nav_item_grades -> navigate(2)
-                R.id.nav_item_plan -> navigate(5)
-                R.id.nav_item_history -> navigate(1)
-                R.id.nav_item_more -> navigate(6)
+                R.id.nav_item_home -> navigate(Tabs.HOME)
+                R.id.nav_item_grades -> navigate(Tabs.GRADES)
+                R.id.nav_item_plan -> navigate(Tabs.SCHEDULE)
+                R.id.nav_item_history -> navigate(Tabs.HISTORY)
+                R.id.nav_item_more -> navigate(Tabs.MORE)
             }
             true
         }
@@ -318,10 +319,10 @@ class MainActivity : AppCompatActivity() {
             if (busy) return@setOnTabSwipe
             val tabs = intArrayOf(0, 5, 2, 1, 6)
             val current = when (tab) {
-                0 -> 0
-                5 -> 1
-                2 -> 2
-                1 -> 3
+                Tabs.HOME -> 0
+                Tabs.SCHEDULE -> 1
+                Tabs.GRADES -> 2
+                Tabs.HISTORY -> 3
                 else -> 4
             }
             val next = current + direction
@@ -329,7 +330,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navigation?.setOnItemReselectedListener { item ->
-            if (!busy && item.itemId == R.id.nav_item_more && tab != 6) navigate(6)
+            if (!busy && item.itemId == R.id.nav_item_more && tab != Tabs.MORE) navigate(Tabs.MORE)
         }
 
         task(
@@ -388,9 +389,9 @@ class MainActivity : AppCompatActivity() {
         showReleaseUpdatesIfRequested()
         if (intent.getBooleanExtra("showHistory", false)) {
             history.open(historyFilter(intent))
-            navigate(1)
+            navigate(Tabs.HISTORY)
         } else if (intent.hasExtra("tab")) {
-            navigate(intent.getIntExtra("tab", 0))
+            navigate(Tabs.fromExternal(intent.getIntExtra("tab", 0)))
         }
     }
 
@@ -405,13 +406,13 @@ class MainActivity : AppCompatActivity() {
         io.execute { ClassReminderReceiver.scheduleNext(applicationContext) }
         handler.removeCallbacks(refresh)
         handler.postDelayed(refresh, 30000)
-        if (::content.isInitialized && !busy && tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12) {
+        if (::content.isInitialized && !busy && tab != Tabs.ACCOUNT && tab != Tabs.API && tab != Tabs.PAYMENTS && tab != Tabs.GPA_SIMULATOR && tab != Tabs.CAMPUS_GUIDE && tab != Tabs.NEWS && tab != Tabs.ATTENDANCE) {
             load()
         }
-        if (tab == 4 && state.optString("requestToken").isNotEmpty() && !connected()) {
+        if (tab == Tabs.ACCOUNT && state.optString("requestToken").isNotEmpty() && !connected()) {
             checkClipboardForPin()
         }
-        if (::content.isInitialized && !busy && tab == 4 && settingsPage == "settings.notifications") render()
+        if (::content.isInitialized && !busy && tab == Tabs.ACCOUNT && settingsPage == "settings.notifications") render()
     }
 
     override fun onPause() {
@@ -445,7 +446,7 @@ class MainActivity : AppCompatActivity() {
 
     fun openScheduleDate(date: String) {
         schedule.select(date)
-        navigate(5, false)
+        navigate(Tabs.SCHEDULE, false)
     }
 
     fun selectScheduleDay(date: String) {
@@ -464,19 +465,19 @@ class MainActivity : AppCompatActivity() {
             val keyboard = getSystemService(InputMethodManager::class.java)
             keyboard?.hideSoftInputFromWindow(root.windowToken, 0)
         }
-        schedule.focusCurrent = focusCurrent && target == 5 && tab != 5
+        schedule.focusCurrent = focusCurrent && target == Tabs.SCHEDULE && tab != Tabs.SCHEDULE
         if (schedule.focusCurrent) schedule.dateSelected = false
         api.closeMethod()
         tab = target
         scroll.scrollTo(0, 0)
         render()
         if (!demo && !busy) {
-            if (target == 10 && connected() && System.currentTimeMillis() - (studentServices().optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L) > 24 * 60 * 60_000L) {
+            if (target == Tabs.CAMPUS_GUIDE && connected() && System.currentTimeMillis() - (studentServices().optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L) > 24 * 60 * 60_000L) {
                 refreshStudentServices("affiliation")
                 return
             }
-            val targetSections = when (target) { 8 -> listOf("payments", "remittances"); 11 -> listOf("news"); 13 -> listOf("cards"); 14 -> listOf("documents"); 15 -> if (AccountRole.lecturer(serviceAccountState())) listOf("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports") else emptyList(); 16 -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses"); 17 -> listOf("staffDirectory"); else -> emptyList() }; val section = targetSections.firstOrNull()
-            if (target == 11 && !connected() && CampusAffiliation.selected(state).isEmpty()) return
+            val targetSections = when (target) { Tabs.PAYMENTS -> listOf("payments", "remittances"); Tabs.NEWS -> listOf("news"); Tabs.CARDS -> listOf("cards"); Tabs.DOCUMENTS -> listOf("documents"); Tabs.LECTURER -> if (AccountRole.lecturer(serviceAccountState())) listOf("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports") else emptyList(); Tabs.ACADEMIC_EXTRAS -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses"); Tabs.STAFF_DIRECTORY -> listOf("staffDirectory"); else -> emptyList() }; val section = targetSections.firstOrNull()
+            if (target == Tabs.NEWS && !connected() && CampusAffiliation.selected(state).isEmpty()) return
             val services = studentServices()
             val mobile = services.optJSONObject("mcard")
             // An upgraded installation may have a recent mobile-card cache but no physical-card entry yet.
@@ -512,7 +513,7 @@ class MainActivity : AppCompatActivity() {
         val gutter = max(16, (resources.configuration.screenWidthDp - 560) / 2)
         content.setPadding(
             UiHelper.dp(this, gutter),
-            UiHelper.dp(this, if (tab == 5) 0 else 12),
+            UiHelper.dp(this, if (tab == Tabs.SCHEDULE) 0 else 12),
             UiHelper.dp(this, gutter),
             UiHelper.dp(this, 24)
         )
@@ -524,9 +525,9 @@ class MainActivity : AppCompatActivity() {
         setNavigationVisible(true)
         navigation?.let { nav ->
             val navMenuId = when (tab) {
-                2 -> R.id.nav_item_grades
-                5 -> R.id.nav_item_plan
-                1 -> R.id.nav_item_history
+                Tabs.GRADES -> R.id.nav_item_grades
+                Tabs.SCHEDULE -> R.id.nav_item_plan
+                Tabs.HISTORY -> R.id.nav_item_history
                 6, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 -> R.id.nav_item_more
                 else -> R.id.nav_item_home
             }
@@ -550,18 +551,18 @@ class MainActivity : AppCompatActivity() {
             })
 
             when (tab) {
-                15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
-                16 -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
-                17 -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
-                13 -> StudentCardsController.render(
+                Tabs.LECTURER -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
+                Tabs.ACADEMIC_EXTRAS -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
+                Tabs.STAFF_DIRECTORY -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
+                Tabs.CARDS -> StudentCardsController.render(
                     this,
                     content,
                     if (demo) JSONObject().put("user", "Aleksandra Nowak · DEMO") else state,
                     studentServices()
                 )
-                14 -> StudentDocumentsController.render(this, content, state, studentServices())
-                0 -> HomeScreenController.render(this, content, display(), state, demo, demoTasks) { lessonDetails(it) }
-                1 -> HistoryScreenController.render(
+                Tabs.DOCUMENTS -> StudentDocumentsController.render(this, content, state, studentServices())
+                Tabs.HOME -> HomeScreenController.render(this, content, display(), state, demo, demoTasks) { lessonDetails(it) }
+                Tabs.HISTORY -> HistoryScreenController.render(
                     this,
                     content,
                     display(),
@@ -575,7 +576,7 @@ class MainActivity : AppCompatActivity() {
                     { q -> history.query = q },
                     { sync() }
                 )
-                2 -> {
+                Tabs.GRADES -> {
                     if (!grades.semesterInitialized) {
                         display().optJSONObject("snapshot")?.let { raw ->
                             val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
@@ -631,7 +632,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
                 }
-                3 -> {
+                Tabs.API -> {
                     val method = api.currentMethod
                     val methodJson = api.currentMethodJson
                     if (method != null && methodJson != null) {
@@ -688,7 +689,7 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                 }
-                4 -> AccountScreenController.render(
+                Tabs.ACCOUNT -> AccountScreenController.render(
                     this,
                     content,
                     display(),
@@ -811,7 +812,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 )
-                5 -> {
+                Tabs.SCHEDULE -> {
                     ScheduleScreenController.render(
                         this,
                         content,
@@ -845,7 +846,7 @@ class MainActivity : AppCompatActivity() {
                         val ongoing = content.findViewById<View?>(R.id.schedule_current_lesson)
                         if (ongoing != null) {
                             OneShotPreDrawListener.add(scroll) {
-                                if (tab != 5 || content.findViewById<View?>(R.id.schedule_current_lesson) !== ongoing) return@add
+                                if (tab != Tabs.SCHEDULE || content.findViewById<View?>(R.id.schedule_current_lesson) !== ongoing) return@add
                                 val cardPosition = IntArray(2)
                                 val viewportPosition = IntArray(2)
                                 ongoing.getLocationOnScreen(cardPosition)
@@ -858,8 +859,8 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-                6 -> MoreScreenController.render(this, content)
-                7 -> TasksScreenController.render(
+                Tabs.MORE -> MoreScreenController.render(this, content)
+                Tabs.TASKS -> TasksScreenController.render(
                     this,
                     content,
                     personalTasks(),
@@ -878,8 +879,8 @@ class MainActivity : AppCompatActivity() {
                     { tq -> tasks.query = tq },
                     taskCallback()
                 )
-                8 -> PaymentsScreenController.render(this, content, display(), state, connected(), studentServices()) { refreshStudentServices("payments", "remittances") }
-                9 -> GpaSimulatorController.render(
+                Tabs.PAYMENTS -> PaymentsScreenController.render(this, content, display(), state, connected(), studentServices()) { refreshStudentServices("payments", "remittances") }
+                Tabs.GPA_SIMULATOR -> GpaSimulatorController.render(
                     this,
                     content,
                     display(),
@@ -894,8 +895,8 @@ class MainActivity : AppCompatActivity() {
                         render()
                     }
                 )
-                10 -> CampusGuideController.render(this, content)
-                11 -> NewsScreenController.render(
+                Tabs.CAMPUS_GUIDE -> CampusGuideController.render(this, content)
+                Tabs.NEWS -> NewsScreenController.render(
                     this,
                     content,
                     display(),
@@ -904,7 +905,7 @@ class MainActivity : AppCompatActivity() {
                     { refreshStudentServices("news") },
                     studentServices().optJSONObject("news") ?: JSONObject()
                 )
-                12 -> AttendanceScreenController.render(
+                Tabs.ATTENDANCE -> AttendanceScreenController.render(
                     this,
                     content,
                     display(),
@@ -941,7 +942,7 @@ class MainActivity : AppCompatActivity() {
         welcomeStep = -1
         if (startDemo) {
             demo = true
-            navigate(0)
+            navigate(Tabs.HOME)
         } else if (configure) {
             demo = false
             tab = 4
@@ -949,7 +950,7 @@ class MainActivity : AppCompatActivity() {
             render()
             scroll.scrollTo(0, 0)
         } else {
-            navigate(0)
+            navigate(Tabs.HOME)
         }
     }
 
@@ -964,7 +965,7 @@ class MainActivity : AppCompatActivity() {
 
     fun selectGradeSemester(term: String) {
         grades.select(term)
-        if (tab == 2) render()
+        if (tab == Tabs.GRADES) render()
     }
 
     fun getCalendarDate(): String = schedule.date
@@ -1054,7 +1055,7 @@ class MainActivity : AppCompatActivity() {
             { result ->
                 state = result
                 render()
-                if (section == "affiliation" && tab == 11 && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
+                if (section == "affiliation" && tab == Tabs.NEWS && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
             }
         )
     }
@@ -1084,7 +1085,7 @@ class MainActivity : AppCompatActivity() {
         }, { latest ->
             state = latest
             render()
-            if (tab == 11 && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
+            if (tab == Tabs.NEWS && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
         })
     }
 
@@ -1146,7 +1147,7 @@ class MainActivity : AppCompatActivity() {
 
     fun openApiModule(module: String) {
         api.openModule(module)
-        navigate(3)
+        navigate(Tabs.API)
     }
 
     fun openApiMethod(method: String, parameters: Map<String, String>) {
@@ -1334,7 +1335,7 @@ class MainActivity : AppCompatActivity() {
             response.binary() -> ".bin"
             else -> ".txt"
         }
-        var filename = name.replace(Regex("[^\\p{L}\\p{N}._ -]"), "_")
+        var filename = name.replace(UNSAFE_FILE_CHARS, "_")
         if (filename.length > 100) filename = filename.substring(0, 100)
         if (filename.trim().isEmpty()) filename = "usos-document"
         try {
@@ -1375,7 +1376,7 @@ class MainActivity : AppCompatActivity() {
 
     fun openTasks(selectedFilter: String) {
         tasks.open(selectedFilter)
-        navigate(7)
+        navigate(Tabs.TASKS)
     }
 
     fun editTask(existing: JSONObject?, suggestedTitle: String?) {
@@ -1620,7 +1621,7 @@ class MainActivity : AppCompatActivity() {
                 }) { getString(R.string.service_action_unavailable) }
                 response
             },
-            { if (tab == 3 && api.currentMethod == metadata.optString("name")) onSuccess.accept(it) },
+            { if (tab == Tabs.API && api.currentMethod == metadata.optString("name")) onSuccess.accept(it) },
             onFailure
         )
     }
@@ -1640,7 +1641,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     loadingState = false
                     if (isDestroyed || busy) return@runOnUiThread
-                    val clockChanged = (tab == 0 || tab == 5) && renderedMinute != System.currentTimeMillis() / 60000
+                    val clockChanged = (tab == Tabs.HOME || tab == Tabs.SCHEDULE) && renderedMinute != System.currentTimeMillis() / 60000
                     if (state.toString() != latest.toString() || clockChanged) {
                         val position = scroll.scrollY
                         state = latest
@@ -1701,7 +1702,7 @@ class MainActivity : AppCompatActivity() {
                     busy = false
                     state = recovered
                     updateBusy(false)
-                    if (tab == 0 || tab == 1 || tab == 2 || tab == 5 || tab == 7) render()
+                    if (tab == Tabs.HOME || tab == Tabs.HISTORY || tab == Tabs.GRADES || tab == Tabs.SCHEDULE || tab == Tabs.TASKS) render()
                     failed.accept(ApiErrorUi.message(this, e))
                     error(ApiErrorUi.message(this, e))
                 }
@@ -1744,8 +1745,8 @@ class MainActivity : AppCompatActivity() {
             if (cb != null && cb.hasPrimaryClip() && cb.primaryClip != null && cb.primaryClip!!.itemCount > 0) {
                 val item = cb.primaryClip!!.getItemAt(0)
                 if (item != null && item.text != null) {
-                    val clip = item.text.toString().trim().replace(Regex("\\s+"), "")
-                    if (clip.matches(Regex("^[a-zA-Z0-9]{6,16}$")) && clip != detectedPin) {
+                    val clip = item.text.toString().trim().replace(WHITESPACE, "")
+                    if (clip.matches(PIN_SHAPE) && clip != detectedPin) {
                         detectedPin = clip
                         Toast.makeText(this, R.string.pin_detected_clipboard, Toast.LENGTH_LONG).show()
                         render()
@@ -1874,6 +1875,9 @@ class MainActivity : AppCompatActivity() {
     )
 
     companion object {
+        private val UNSAFE_FILE_CHARS = Regex("[^\\p{L}\\p{N}._ -]")
+        private val WHITESPACE = Regex("\\s+")
+        private val PIN_SHAPE = Regex("^[a-zA-Z0-9]{6,16}$")
         private fun historyFilter(intent: Intent): String {
             val kind = intent.getStringExtra("historyKind")
             return if ("ocena" == kind || "plan" == kind) kind else pl.vistula.checker.ui.HistoryUiState.ALL

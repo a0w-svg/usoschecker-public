@@ -96,7 +96,7 @@ class GradesScreenController private constructor() {
                     UiHelper.button(
                         activity,
                         if (connected) activity.getString(R.string.grades_refresh) else activity.getString(R.string.btn_connect),
-                        { if (connected) onRefresh.run() else activity.navigate(4) },
+                        { if (connected) onRefresh.run() else activity.navigate(Tabs.ACCOUNT) },
                         true
                     )
                 )
@@ -264,7 +264,7 @@ class GradesScreenController private constructor() {
                                 .show()
                         }
                         id == 7 -> onExpandToggled.accept(!filtersExpanded)
-                        id == 3 -> activity.navigate(9)
+                        id == 3 -> activity.navigate(Tabs.GPA_SIMULATOR)
                         id == 4 -> onRefresh.run()
                         id == 5 -> onResetFilters.run()
                         id == 6 -> MaterialAlertDialogBuilder(activity)

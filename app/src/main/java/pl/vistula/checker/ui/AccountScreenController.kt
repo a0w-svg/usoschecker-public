@@ -586,7 +586,7 @@ class AccountScreenController private constructor() {
                     ClassReminderReceiver.cancel(activity)
                     Toast.makeText(activity, R.string.account_toast_reminders_disabled, Toast.LENGTH_SHORT).show()
                 }
-                activity.navigate(4)
+                activity.navigate(Tabs.ACCOUNT)
             }
             reminderRow.addView(reminderSwitch)
 
@@ -609,7 +609,7 @@ class AccountScreenController private constructor() {
                     val min = value.toInt()
                     toolsPrefs.edit { putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, min) }
                     ClassReminderReceiver.scheduleNext(activity)
-                    activity.navigate(4)
+                    activity.navigate(Tabs.ACCOUNT)
                 }
             }
             notices.addView(reminderRow)

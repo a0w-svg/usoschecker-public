@@ -96,7 +96,7 @@ class CampusGuideController private constructor() {
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_finanse_view_subaccounts),
-                    { activity.navigate(8) },
+                    { activity.navigate(Tabs.PAYMENTS) },
                     true
                 )
             )

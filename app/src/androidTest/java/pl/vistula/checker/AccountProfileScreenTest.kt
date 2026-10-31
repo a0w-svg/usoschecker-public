@@ -85,4 +85,26 @@ class AccountProfileScreenTest {
         InstrumentationRegistry.getInstrumentation().uiAutomation
             .executeShellCommand("cp " + file.absolutePath + " /data/local/tmp/usos-account-connection.png").use { }
     }
+
+    @Test
+    fun reminderSwitchRevealsLeadTimeChipsWithoutLeavingThePage() {
+        val prefs = rule.activity.getSharedPreferences("student_tools", android.content.Context.MODE_PRIVATE)
+        main {
+            prefs.edit().putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, false).putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, 15).commit()
+            rule.activity.setDemo(true)
+            rule.activity.navigate(Tabs.ACCOUNT)
+            rule.activity.openAccountPage("settings.notifications")
+        }
+        main {
+            assertEquals(View.GONE, content().findViewById<View>(R.id.reminders_detail).visibility)
+            content().findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.reminders_switch).isChecked = true
+        }
+        main {
+            assertEquals(View.VISIBLE, content().findViewById<View>(R.id.reminders_detail).visibility)
+            content().findViewById<com.google.android.material.chip.Chip>(R.id.lead_30).performClick()
+            assertEquals(30, prefs.getInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, 0))
+            content().findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.reminders_switch).isChecked = false
+            prefs.edit().putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, 15).commit()
+        }
+    }
 }

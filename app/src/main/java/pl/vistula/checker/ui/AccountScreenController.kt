@@ -215,102 +215,8 @@ class AccountScreenController private constructor() {
                 content.addView(UiHelper.button(activity, activity.getString(R.string.btn_start_demo), { listener.onStartDemo() }, false))
             }
 
-            // Notifications
-            val notices = pages.page("settings.notifications", R.string.account_notices_heading)
-            UiHelper.add(
-                activity,
-                notices,
-                if (NotificationManagerCompat.from(activity).areNotificationsEnabled()) {
-                    activity.getString(R.string.account_notif_system_allowed)
-                } else {
-                    activity.getString(R.string.account_notif_system_blocked)
-                },
-                14,
-                Tone.MUTED,
-                false
-            )
-            notices.addView(
-                UiHelper.button(
-                    activity,
-                    activity.getString(R.string.account_btn_system_notif_settings),
-                    { listener.onRequestNotifications() },
-                    false
-                )
-            )
-            notices.addView(
-                UiHelper.button(
-                    activity,
-                    activity.getString(R.string.account_btn_send_test_notif),
-                    {
-                        NotificationHelper.sendTestNotification(activity)
-                        Toast.makeText(activity, R.string.account_toast_test_notif_sent, Toast.LENGTH_SHORT).show()
-                    },
-                    false
-                )
-            )
-
-            val toolsPrefs = activity.getSharedPreferences("student_tools", Context.MODE_PRIVATE)
-            val remindersOn = toolsPrefs.getBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, false)
-            val reminderMin = toolsPrefs.getInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, 15)
-
-            val reminderRow = LinearLayout(activity)
-            reminderRow.orientation = LinearLayout.VERTICAL
-            reminderRow.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 4))
-
-            val reminderSwitch = UiHelper.switchRow(activity, reminderRow, activity.getString(R.string.account_reminder_switch_label), remindersOn)
-            reminderSwitch.setOnCheckedChangeListener { _, isChecked ->
-                toolsPrefs.edit { putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, isChecked) }
-                if (isChecked) {
-                    ClassReminderReceiver.scheduleNext(activity)
-                    if (!ClassReminderReceiver.canNotify(activity)) listener.onRequestNotifications()
-                    Toast.makeText(activity, R.string.account_toast_reminders_enabled, Toast.LENGTH_SHORT).show()
-                } else {
-                    ClassReminderReceiver.cancel(activity)
-                    Toast.makeText(activity, R.string.account_toast_reminders_disabled, Toast.LENGTH_SHORT).show()
-                }
-                activity.navigate(Tabs.ACCOUNT)
-            }
-
-            if (remindersOn) {
-                if (!ClassReminderReceiver.canNotify(activity)) {
-                    UiHelper.note(activity, reminderRow, activity.getString(R.string.account_reminder_permission_missing), Tone.MUTED)
-                }
-                UiHelper.note(activity, reminderRow, activity.getString(R.string.account_reminder_lead_time_label), Tone.MUTED)
-                UiHelper.chips(
-                    activity,
-                    reminderRow,
-                    arrayOf("15", "30", "45"),
-                    arrayOf(
-                        activity.getString(R.string.account_lead_time_15),
-                        activity.getString(R.string.account_lead_time_30),
-                        activity.getString(R.string.account_lead_time_45)
-                    ),
-                    reminderMin.toString()
-                ) { value ->
-                    val min = value.toInt()
-                    toolsPrefs.edit { putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, min) }
-                    ClassReminderReceiver.scheduleNext(activity)
-                    activity.navigate(Tabs.ACCOUNT)
-                }
-            }
-            notices.addView(reminderRow)
-            UiHelper.note(activity, notices, activity.getString(R.string.account_channels_note), Tone.MUTED)
-
-            // Widgets
-            val widgetsCard = pages.page("settings.widgets", R.string.account_widgets_heading)
-            UiHelper.add(activity, widgetsCard, activity.getString(R.string.account_widgets_desc), 13, Tone.MUTED, false)
-            widgetsCard.addView(
-                UiHelper.button(
-                    activity,
-                    activity.getString(R.string.account_btn_update_widgets),
-                    {
-                        TodayScheduleWidget.updateAll(activity)
-                        QuickStatusWidget.updateAll(activity)
-                        Toast.makeText(activity, R.string.account_toast_widgets_updated, Toast.LENGTH_SHORT).show()
-                    },
-                    false
-                )
-            )
+            renderNotifications(activity, pages.page("settings.notifications", R.string.account_notices_heading), listener)
+            renderWidgets(activity, pages.page("settings.widgets", R.string.account_widgets_heading))
 
             val about = pages.page("settings.about", R.string.settings_about)
             about.addView(
@@ -323,6 +229,65 @@ class AccountScreenController private constructor() {
             )
             AppInfo.render(activity, about)
             pages.finish(if (!connected && state.optString("requestToken").isNotEmpty()) "settings.connection" else null)
+        }
+
+        /** Notification status, test button and class reminders (`view_account_notifications`). */
+        private fun renderNotifications(activity: MainActivity, page: LinearLayout, listener: AccountListener) {
+            val view = LayoutInflater.from(activity).inflate(R.layout.view_account_notifications, page, false)
+            val allowed = NotificationManagerCompat.from(activity).areNotificationsEnabled()
+            view.findViewById<TextView>(R.id.notif_status).apply {
+                setText(if (allowed) R.string.account_notif_system_allowed else R.string.account_notif_system_blocked)
+                if (!allowed) setTone(Tone.WARNING)
+            }
+            view.findViewById<View>(R.id.notif_settings).setOnClickListener { listener.onRequestNotifications() }
+            view.findViewById<View>(R.id.notif_test).setOnClickListener {
+                NotificationHelper.sendTestNotification(activity)
+                Toast.makeText(activity, R.string.account_toast_test_notif_sent, Toast.LENGTH_SHORT).show()
+            }
+
+            val prefs = activity.getSharedPreferences("student_tools", Context.MODE_PRIVATE)
+            val detail = view.findViewById<View>(R.id.reminders_detail)
+            val permission = view.findViewById<View>(R.id.reminders_permission)
+            fun showDetail(on: Boolean) {
+                detail.visibility = if (on) View.VISIBLE else View.GONE
+                permission.visibility = if (on && !ClassReminderReceiver.canNotify(activity)) View.VISIBLE else View.GONE
+            }
+            val switch = view.findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.reminders_switch)
+            switch.isChecked = prefs.getBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, false)
+            showDetail(switch.isChecked)
+
+            val lead = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.reminders_lead)
+            val chips = mapOf(R.id.lead_15 to 15, R.id.lead_30 to 30, R.id.lead_45 to 45)
+            val saved = prefs.getInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, 15)
+            lead.check(chips.entries.firstOrNull { it.value == saved }?.key ?: R.id.lead_15)
+            lead.setOnCheckedStateChangeListener { _, ids ->
+                val minutes = ids.firstOrNull()?.let { chips[it] } ?: return@setOnCheckedStateChangeListener
+                prefs.edit { putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, minutes) }
+                ClassReminderReceiver.scheduleNext(activity)
+            }
+            switch.setOnCheckedChangeListener { _, checked ->
+                prefs.edit { putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, checked) }
+                if (checked) {
+                    ClassReminderReceiver.scheduleNext(activity)
+                    if (!ClassReminderReceiver.canNotify(activity)) listener.onRequestNotifications()
+                    Toast.makeText(activity, R.string.account_toast_reminders_enabled, Toast.LENGTH_SHORT).show()
+                } else {
+                    ClassReminderReceiver.cancel(activity)
+                    Toast.makeText(activity, R.string.account_toast_reminders_disabled, Toast.LENGTH_SHORT).show()
+                }
+                showDetail(checked)
+            }
+            page.addView(view)
+        }
+
+        private fun renderWidgets(activity: MainActivity, page: LinearLayout) {
+            val view = LayoutInflater.from(activity).inflate(R.layout.view_account_widgets, page, false)
+            view.findViewById<View>(R.id.widgets_update).setOnClickListener {
+                TodayScheduleWidget.updateAll(activity)
+                QuickStatusWidget.updateAll(activity)
+                Toast.makeText(activity, R.string.account_toast_widgets_updated, Toast.LENGTH_SHORT).show()
+            }
+            page.addView(view)
         }
 
         /** Sign-in setup (`view_account_connection`): credentials, access scopes, browser login and PIN confirmation. */

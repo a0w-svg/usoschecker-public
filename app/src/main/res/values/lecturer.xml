@@ -116,4 +116,16 @@
     <string name="mail_attachments">Załączniki</string>
     <string name="mail_attachment_open">Otwórz załącznik</string>
     <string name="remittance_faculty">Wydział: %1$s</string>
+    <string name="lecturer_role_required">Funkcje wykładowcy są dostępne po połączeniu konta pracownika lub prowadzącego zajęcia.</string>
+    <string name="lecturer_group_click_hint">Dotknij, aby zobaczyć uczestników i prowadzących</string>
+    <string name="lecturer_node_click_hint">Dotknij, aby zobaczyć szczegóły i statystyki</string>
+    <string name="lecturer_attendance_click_hint">Dotknij, aby sprawdzić listę studentów</string>
+    <string name="theses_title">Prace dyplomowe</string>
+    <string name="theses_details_hint">Dotknij, aby zobaczyć szczegóły pracy</string>
+    <string name="thesis_supervisors">Promotorzy: %1$s</string>
+    <string name="thesis_authors">Autorzy: %1$s</string>
+    <string name="dormitory_details_hint">Dotknij, aby zobaczyć szczegóły akademika</string>
+    <string name="guide_chapter_title">Rozdział informatora: %1$s</string>
+    <string name="guide_page_hint">Dotknij, aby przeczytać stronę informatora</string>
+    <string name="allocation_period_hint">Dotknij, aby zobaczyć terminy akcji</string>
 </resources>

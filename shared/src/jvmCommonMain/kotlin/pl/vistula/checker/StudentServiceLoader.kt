@@ -15,7 +15,7 @@ object StudentServiceLoader {
         "affiliation", "teaching", "lecturerGroups", "lecturerTests",
         "lecturerMeetings", "lecturerAttendance", "lecturerReports",
         "staffDirectory", "registrations", "tokenRegistrations", "exams", "academicCalendar",
-        "mobility", "placementAndSlips", "campusGuide", "communications"
+        "mobility", "placementAndSlips", "campusGuide", "communications", "theses"
     )
 
     private val SCOPE_OPTIONAL_SECTIONS = setOf(

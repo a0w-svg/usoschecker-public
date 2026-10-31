@@ -26,7 +26,7 @@ class DemoWorkspace {
     init { reset(false) }
     fun reset(changed: Boolean) {
         val data = Demo.state(changed).put("token", "demo").put("enabled", false).put("accountSession", vault.storePath)
-            .put("studentServices", DemoStudentServices.data()).put("campusOverride", "0000")
+            .put("studentServices", DemoStudentServices.data()).put("campusOverride", "0000").put("staffStatus", 2).put("studentStatusCode", 2)
         vault.write(data)
     }
 }

@@ -116,4 +116,16 @@
     <string name="mail_attachments">Attachments</string>
     <string name="mail_attachment_open">Open attachment</string>
     <string name="remittance_faculty">Faculty: %1$s</string>
+    <string name="lecturer_role_required">Lecturer features are available after signing in to a teacher or staff account.</string>
+    <string name="lecturer_group_click_hint">Tap to view roster and teachers</string>
+    <string name="lecturer_node_click_hint">Tap to view details and statistics</string>
+    <string name="lecturer_attendance_click_hint">Tap to view attendance roster</string>
+    <string name="theses_title">Diploma theses</string>
+    <string name="theses_details_hint">Tap to view thesis details</string>
+    <string name="thesis_supervisors">Supervisors: %1$s</string>
+    <string name="thesis_authors">Authors: %1$s</string>
+    <string name="dormitory_details_hint">Tap to view dormitory details</string>
+    <string name="guide_chapter_title">Guide chapter: %1$s</string>
+    <string name="guide_page_hint">Tap to read guide page</string>
+    <string name="allocation_period_hint">Tap to view allocation dates</string>
 </resources>

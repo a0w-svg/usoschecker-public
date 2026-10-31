@@ -116,4 +116,16 @@
     <string name="mail_attachments">Вкладення</string>
     <string name="mail_attachment_open">Відкрити вкладення</string>
     <string name="remittance_faculty">Факультет: %1$s</string>
+    <string name="lecturer_role_required">Функції викладача доступні після підключення облікового запису викладача або співробітника.</string>
+    <string name="lecturer_group_click_hint">Торкніться, щоб переглянути учасників та викладачів</string>
+    <string name="lecturer_node_click_hint">Торкніться, щоб переглянути деталі та статистику</string>
+    <string name="lecturer_attendance_click_hint">Торкніться, щоб переглянути список присутності</string>
+    <string name="theses_title">Дипломні роботи</string>
+    <string name="theses_details_hint">Торкніться, щоб переглянути деталі роботи</string>
+    <string name="thesis_supervisors">Керівники: %1$s</string>
+    <string name="thesis_authors">Автори: %1$s</string>
+    <string name="dormitory_details_hint">Торкніться, щоб переглянути деталі гуртожитку</string>
+    <string name="guide_chapter_title">Розділ довідника: %1$s</string>
+    <string name="guide_page_hint">Торкніться, щоб прочитати сторінку довідника</string>
+    <string name="allocation_period_hint">Торкніться, щоб переглянути терміни кампанії</string>
 </resources>

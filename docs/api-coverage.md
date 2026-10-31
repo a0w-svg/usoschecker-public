@@ -5,9 +5,9 @@ Generated from bundled USOS API metadata (`app/src/main/assets/api/index.json` a
 ## Summary
 
 - **Total USOS API methods indexed**: 571
-- **Dedicated UI**: 129
+- **Dedicated UI**: 133
 - **Experimental Write UI**: 6
-- **Catalog Explorer (Read)**: 260
+- **Catalog Explorer (Read)**: 256
 - **Admin-Only / Blocked**: 97
 - **Mutating / Blocked in Catalog**: 79
 
@@ -272,9 +272,9 @@ Generated from bundled USOS API metadata (`app/src/main/assets/api/index.json` a
 | `services/guide/chapter` | `guide` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/guide/chapters` | `guide` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/guide/entries` | `guide` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
-| `services/guide/entry` | `guide` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
+| `services/guide/entry` | `guide` | consumer:required, token:optional | `none` | No | Yes | Campus Guide (Page Content) | Yes | No | Yes | Dedicated UI |
 | `services/guide/guide` | `guide` | consumer:required, token:optional | `none` | No | Yes | Campus Guide | Yes | No | Yes | Dedicated UI |
-| `services/guide/page` | `guide` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
+| `services/guide/page` | `guide` | consumer:required, token:optional | `none` | No | Yes | Campus Guide (Page Content) | Yes | No | Yes | Dedicated UI |
 | `services/guide/pages` | `guide` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/housing/allocation_period` | `housing` | consumer:ignored, token:ignored | `none` | No | Yes | Campus Guide (Dormitories) | Yes | No | Yes | Dedicated UI |
 | `services/housing/allocation_period_index` | `housing` | consumer:ignored, token:ignored | `none` | No | Yes | Campus Guide (Dormitories) | Yes | No | Yes | Dedicated UI |
@@ -544,8 +544,8 @@ Generated from bundled USOS API metadata (`app/src/main/assets/api/index.json` a
 | `services/theses/search_history_affect` | `theses` | consumer:required, token:required | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/theses/sign_report` | `theses` | consumer:required, token:required | `theses_protocols_write, staff_perspective` | No | Yes | Lecturer Surveys & Thesis Reports | Yes | No | Yes | Dedicated UI |
 | `services/theses/signable_reports` | `theses` | consumer:required, token:required | `staff_perspective` | No | Yes | Lecturer Surveys & Thesis Reports | Yes | No | Yes | Dedicated UI |
-| `services/theses/theses` | `theses` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
-| `services/theses/thesis` | `theses` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
+| `services/theses/theses` | `theses` | consumer:required, token:optional | `none` | No | Yes | Theses (Details) | Yes | No | Yes | Dedicated UI |
+| `services/theses/thesis` | `theses` | consumer:required, token:optional | `none` | No | Yes | Theses (Details) | Yes | No | Yes | Dedicated UI |
 | `services/theses/user` | `theses` | consumer:required, token:optional | `none` | No | Yes | Services / Profile | Yes | No | Yes | Dedicated UI |
 | `services/theses/users` | `theses` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/tt/classgroup` | `tt` | consumer:ignored, token:ignored | `none` | No | Yes | Schedule | Yes | No | Yes | Dedicated UI |

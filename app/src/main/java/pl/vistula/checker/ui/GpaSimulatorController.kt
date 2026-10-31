@@ -163,7 +163,8 @@ class GpaSimulatorController private constructor() {
             ) { value ->
                 try {
                     onTargetChanged.accept(value.toDouble())
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("GpaSimulatorController", e)
                 }
             }
 
@@ -184,7 +185,8 @@ class GpaSimulatorController private constructor() {
             ) { value ->
                 try {
                     onEctsChanged.accept(value.toDouble())
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("GpaSimulatorController", e)
                 }
             }
 

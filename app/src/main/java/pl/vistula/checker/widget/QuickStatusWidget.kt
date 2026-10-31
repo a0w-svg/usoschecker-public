@@ -105,7 +105,8 @@ class QuickStatusWidget : AppWidgetProvider() {
             if (demo) {
                 try {
                     state = Demo.state(false, 56)
-                } catch (ignored: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("QuickStatusWidget", e)
                 }
             }
             val raw = state.optJSONObject("snapshot")
@@ -113,7 +114,8 @@ class QuickStatusWidget : AppWidgetProvider() {
             if (raw != null) {
                 try {
                     snapshot = Snapshot.from(raw)
-                } catch (ignored: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("QuickStatusWidget", e)
                 }
             }
 

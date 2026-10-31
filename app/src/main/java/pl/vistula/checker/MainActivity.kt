@@ -1551,7 +1551,7 @@ class MainActivity : AppCompatActivity() {
                     val latest = repository.read()
                     val lastAffiliation = latest.optJSONObject("studentServices")?.optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L
                     if (System.currentTimeMillis() - lastAffiliation > 24 * 60 * 60_000L) {
-                        try { StudentServiceLoader.refresh(repository, "affiliation") } catch (_: Exception) { /* Optional campus data must not discard a valid grade sync. */ }
+                        try { StudentServiceLoader.refresh(repository, "affiliation") } catch (e: Exception) { Diagnostics.swallowed("MainActivity", e) /* Optional campus data must not discard a valid grade sync. */ }
                     }
                     ClassReminderReceiver.scheduleNext(this)
                     TodayScheduleWidget.updateAll(this)
@@ -1752,7 +1752,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        } catch (ignored: Exception) {
+        } catch (e: Exception) {
+            pl.vistula.checker.Diagnostics.swallowed("MainActivity", e)
         }
     }
 
@@ -1875,7 +1876,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private fun historyFilter(intent: Intent): String {
             val kind = intent.getStringExtra("historyKind")
-            return if ("ocena" == kind || "plan" == kind) kind else "wszystkie"
+            return if ("ocena" == kind || "plan" == kind) kind else pl.vistula.checker.ui.HistoryUiState.ALL
         }
     }
 }

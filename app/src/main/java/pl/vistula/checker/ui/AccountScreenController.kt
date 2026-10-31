@@ -103,7 +103,8 @@ class AccountScreenController private constructor() {
                 if (raw != null) {
                     try {
                         snapshot = Snapshot.from(raw)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        pl.vistula.checker.Diagnostics.swallowed("AccountScreenController", e)
                     }
                 }
 
@@ -485,7 +486,8 @@ class AccountScreenController private constructor() {
                                             Toast.makeText(activity, R.string.account_toast_pin_pasted, Toast.LENGTH_SHORT).show()
                                         }
                                     }
-                                } catch (_: Exception) {
+                                } catch (e: Exception) {
+                                    pl.vistula.checker.Diagnostics.swallowed("AccountScreenController", e)
                                 }
                             },
                             false

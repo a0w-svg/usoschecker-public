@@ -546,7 +546,8 @@ class ScheduleScreenController private constructor() {
                     )
                 )
                 body.addView(raw)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                pl.vistula.checker.Diagnostics.swallowed("ScheduleScreenControlle", e)
             }
             val scroller = UiHelper.dialogScroll(activity, body)
             MaterialAlertDialogBuilder(activity)

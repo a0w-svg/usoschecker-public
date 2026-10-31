@@ -4,7 +4,7 @@ import android.os.Bundle
 
 /** Filter and search of the History screen; survives recreation through [save] / [restore]. */
 class HistoryUiState {
-    var filter: String = "wszystkie"
+    var filter: String = ALL
     var query: String = ""
 
     /** Shows [selectedFilter] with an empty search, as when opened from a notification. */
@@ -19,7 +19,12 @@ class HistoryUiState {
     }
 
     fun restore(bundle: Bundle) {
-        filter = bundle.getString("filter", "wszystkie")
+        filter = bundle.getString("filter", ALL)
         query = bundle.getString("historyQuery", "")
+    }
+
+    companion object {
+        /** Filter key that shows every change; the other keys are change kinds or actions. */
+        const val ALL = "wszystkie"
     }
 }

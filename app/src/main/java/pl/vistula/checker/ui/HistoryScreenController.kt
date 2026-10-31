@@ -69,13 +69,14 @@ class HistoryScreenController private constructor() {
                             "Zmieniono" -> countModified++
                             "Usunięto" -> countRemoved++
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        pl.vistula.checker.Diagnostics.swallowed("HistoryScreenController", e)
                     }
                 }
             }
             allChanges.sortWith { a, b -> b.effectiveTimestamp().compareTo(a.effectiveTimestamp()) }
 
-            val filters = arrayOf("wszystkie", "ocena", "plan", "Dodano", "Zmieniono", "Usunięto")
+            val filters = arrayOf(HistoryUiState.ALL, "ocena", "plan", "Dodano", "Zmieniono", "Usunięto")
             val labels = arrayOf(
                 activity.getString(R.string.history_chip_all, allChanges.size),
                 activity.getString(R.string.history_chip_grades, countGrades),
@@ -104,7 +105,7 @@ class HistoryScreenController private constructor() {
                 for (i in filters.indices) {
                     if (filters[i] == filter) {
                         val activeFilter = ScheduleScreenController.headerButton(activity, "${labels[i]} ×") {
-                            onFilterChanged.accept("wszystkie")
+                            onFilterChanged.accept(HistoryUiState.ALL)
                         }
                         activeFilter.textSize = 14f
                         activeFilter.isSelected = true
@@ -116,7 +117,7 @@ class HistoryScreenController private constructor() {
 
             val rows = ArrayList<Change>()
             for (c in allChanges) {
-                if (filter == "wszystkie" || filter == c.kind || filter == c.action) {
+                if (filter == HistoryUiState.ALL || filter == c.kind || filter == c.action) {
                     rows.add(c)
                 }
             }
@@ -266,12 +267,12 @@ class HistoryScreenController private constructor() {
                                 false
                             )
                         )
-                    } else if (filter != "wszystkie") {
+                    } else if (filter != HistoryUiState.ALL) {
                         box.addView(
                             UiHelper.button(
                                 activity,
                                 activity.getString(R.string.history_show_all),
-                                { onFilterChanged.accept("wszystkie") },
+                                { onFilterChanged.accept(HistoryUiState.ALL) },
                                 false
                             )
                         )
@@ -312,7 +313,8 @@ class HistoryScreenController private constructor() {
                     val capDay = if (dayName.isEmpty()) "" else dayName.substring(0, 1).uppercase(loc) + dayName.substring(1)
                     return "$capDay, ${ld.format(DateTimeFormatter.ofPattern("d MMMM yyyy", loc))}"
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                pl.vistula.checker.Diagnostics.swallowed("HistoryScreenController", e)
             }
             return s
         }
@@ -620,7 +622,8 @@ class HistoryScreenController private constructor() {
                     )
                 )
                 box.addView(allData)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                pl.vistula.checker.Diagnostics.swallowed("HistoryScreenController", e)
             }
 
             val scroll = UiHelper.dialogScroll(activity, box)

@@ -216,7 +216,8 @@ class ClassReminderReceiver : BroadcastReceiver() {
         private fun currentState(context: Context): JSONObject {
             try {
                 return Repository(context).read()
-            } catch (ignored: Exception) {
+            } catch (e: Exception) {
+                pl.vistula.checker.Diagnostics.swallowed("ClassReminderReceiver", e)
             }
             return JSONObject()
         }
@@ -225,7 +226,8 @@ class ClassReminderReceiver : BroadcastReceiver() {
             try {
                 val raw = state.optJSONObject("snapshot")
                 if (state.optString("token").isNotEmpty() && raw != null) return Snapshot.from(raw)
-            } catch (ignored: Exception) {
+            } catch (e: Exception) {
+                pl.vistula.checker.Diagnostics.swallowed("ClassReminderReceiver", e)
             }
             return null
         }

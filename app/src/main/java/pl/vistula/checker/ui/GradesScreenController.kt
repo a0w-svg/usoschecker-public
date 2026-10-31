@@ -691,7 +691,8 @@ class GradesScreenController private constructor() {
                         )
                     )
                     body.addView(rawView)
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("GradesScreenController", e)
                 }
             }
             val courseIds = HashSet<String>()
@@ -741,7 +742,8 @@ class GradesScreenController private constructor() {
                         )
                         body.addView(text)
                         copied.append(test.json().toString(2)).append("\n")
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        pl.vistula.checker.Diagnostics.swallowed("GradesScreenController", e)
                     }
                 }
             }

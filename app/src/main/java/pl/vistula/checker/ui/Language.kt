@@ -63,7 +63,8 @@ class Language private constructor() {
                     if (loc != null && (loc.language == "pl" || loc.language == "en" || loc.language == "uk")) {
                         return loc
                     }
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("Language", e)
                 }
             }
             val system = Locale.getDefault()

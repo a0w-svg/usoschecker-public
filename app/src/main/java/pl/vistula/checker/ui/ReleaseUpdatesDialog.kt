@@ -129,7 +129,8 @@ class ReleaseUpdatesDialog private constructor() {
                         var result: AppRelease? = null
                         try {
                             result = ReleaseUpdates.check(application, true)
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            pl.vistula.checker.Diagnostics.swallowed("ReleaseUpdatesDialog", e)
                         }
                         val checked = result
                         Handler(Looper.getMainLooper()).post {

@@ -207,10 +207,13 @@ class HomeScreenController private constructor() {
             if (current.isNotEmpty() && upcoming != null && !upcoming.intersects(today)) {
                 sectionLink(activity, parent, R.string.design_next_class) { openDay(activity, upcoming.start.toLocalDate()) }
                 val nextBox = UiHelper.card(activity, parent)
-                nextBox.addView(UiHelper.actionRow(activity, upcoming.record.title, { details.accept(upcoming) }))
-                UiHelper.note(activity, nextBox, UiHelper.shortDate(upcoming.start.toLocalDate()) + " · " +
-                    upcoming.start.format(CLOCK) +
-                    if (upcoming.tentative()) " · " + activity.getString(R.string.design_tentative) else "", Tone.MUTED)
+                val row = inflate(activity, R.layout.item_home_lesson, nextBox)
+                val when_ = UiHelper.shortDate(upcoming.start.toLocalDate()) + " · " + upcoming.start.format(CLOCK) +
+                    if (upcoming.tentative()) " · " + activity.getString(R.string.design_tentative) else ""
+                row.findViewById<TextView>(R.id.home_lesson_title).text = upcoming.record.title
+                row.findViewById<TextView>(R.id.home_lesson_time).text = when_
+                row.setOnClickListener { details.accept(upcoming) }
+                nextBox.addView(row)
             }
         }
 

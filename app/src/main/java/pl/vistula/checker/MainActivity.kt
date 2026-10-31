@@ -114,10 +114,8 @@ class MainActivity : AppCompatActivity() {
     private val grades = pl.vistula.checker.ui.GradesUiState()
     fun gradeSemesterExpansion(): MutableMap<String, Boolean> = grades.semesterExpansion
 
-    private var taskFilter: String = "all"
-    private var taskQuery: String = ""
+    private val tasks = pl.vistula.checker.ui.TasksUiState()
     private var pendingCalendar: String? = null
-    private var taskOrder: String = "due"
     private var calendarDate: String = ""
     private var calendarDateSelected: Boolean = false
     private var calendarMode: String = "list"
@@ -209,7 +207,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-        taskOrder = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due") ?: "due"
+        tasks.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due") ?: "due"
         grades.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name") ?: "name"
         calendarMode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
         apiFavorites = HashSet(
@@ -231,10 +229,8 @@ class MainActivity : AppCompatActivity() {
             calendarQuery = bundle.getString("calendarQuery", "")
             calendarMode = bundle.getString("calendarMode", calendarMode)
             demoPlanDays = bundle.getInt("demoPlanDays", 56)
-            taskFilter = bundle.getString("taskFilter", "all")
-            taskQuery = bundle.getString("taskQuery", "")
+            tasks.restore(bundle)
             pendingCalendar = bundle.getString("pendingCalendar")
-            taskOrder = bundle.getString("taskOrder", "due")
             newsQuery = bundle.getString("newsQuery", "")
             attendanceFilter = bundle.getString("attendanceFilter", "all")
             documentQuery = bundle.getString("documentQuery", "")
@@ -413,9 +409,7 @@ class MainActivity : AppCompatActivity() {
         outState.putInt("tab", tab)
         outState.putString("filter", filter)
         grades.save(outState)
-        outState.putString("taskFilter", taskFilter)
-        outState.putString("taskQuery", taskQuery)
-        outState.putString("taskOrder", taskOrder)
+        tasks.save(outState)
         outState.putString("calendarDate", calendarDate)
         outState.putBoolean("calendarDateSelected", calendarDateSelected)
         outState.putString("calendarMode", calendarMode)
@@ -914,19 +908,19 @@ class MainActivity : AppCompatActivity() {
                     this,
                     content,
                     personalTasks(),
-                    taskFilter,
-                    taskOrder,
-                    taskQuery,
+                    tasks.filter,
+                    tasks.order,
+                    tasks.query,
                     { tf ->
-                        taskFilter = tf
+                        tasks.filter = tf
                         render()
                     },
                     { to ->
-                        taskOrder = to
+                        tasks.order = to
                         getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("taskOrder", to) }
                         render()
                     },
-                    { tq -> taskQuery = tq },
+                    { tq -> tasks.query = tq },
                     taskCallback()
                 )
                 8 -> PaymentsScreenController.render(this, content, display(), state, connected(), studentServices()) { refreshStudentServices("payments", "remittances") }
@@ -1428,8 +1422,7 @@ class MainActivity : AppCompatActivity() {
         if (demo) demoTasks else (state.optJSONArray("tasks") ?: JSONArray())
 
     fun openTasks(selectedFilter: String) {
-        taskFilter = selectedFilter
-        taskQuery = ""
+        tasks.open(selectedFilter)
         navigate(7)
     }
 

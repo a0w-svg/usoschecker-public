@@ -557,7 +557,7 @@ class MainActivity : AppCompatActivity() {
             when (tab) {
                 Tabs.LECTURER -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
                 Tabs.ACADEMIC_EXTRAS -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
-                Tabs.STAFF_DIRECTORY -> renderSharedSection(R.string.staff_directory_title, "staffDirectory")
+                Tabs.STAFF_DIRECTORY -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
                 Tabs.CARDS -> StudentCardsController.render(
                     this,
                     content,
@@ -646,22 +646,6 @@ class MainActivity : AppCompatActivity() {
             UiHelper.note(this, content, ApiErrorUi.message(this, e), Color.rgb(167, 49, 49))
         }
         updateBusy(busy)
-    }
-
-    /** Shows a section implemented once in the shared Compose UI inside the View-based tool screen. */
-    private fun renderSharedSection(title: Int, section: String) {
-        pl.vistula.checker.ui.ToolScreenUi.header(this, content, title, null)
-        val themeMode = when (Appearance.mode(this)) {
-            androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO -> "light"
-            androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES -> "dark"
-            else -> "system"
-        }
-        val demoState = if (demo) pl.vistula.checker.DemoWorkspace.state(demoChanged, demoPlanDays, demoCampus) else null
-        content.addView(
-            pl.vistula.checker.ui.compose.AndroidComposeBridge.createSectionView(
-                this, section, Language.currentLocale(this).language, themeMode, demoState
-            )
-        )
     }
 
     private fun renderGrades() {

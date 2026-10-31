@@ -58,45 +58,5 @@ object AndroidComposeBridge {
             }
         }
     }
-
-    /**
-     * Hosts one shared Compose tools section (for example `"staffDirectory"`) inside a View screen.
-     *
-     * @param fixedState demo state to show instead of the stored account, or null to use the real account
-     * @param themeMode "light", "dark" or "system"
-     */
-    @JvmStatic
-    fun createSectionView(
-        context: Context,
-        section: String,
-        language: String,
-        themeMode: String,
-        fixedState: org.json.JSONObject?
-    ): View {
-        val repository = SharedRepository(Vault(context.applicationContext))
-        val preferences = AndroidKeyValueStore(
-            context.applicationContext.getSharedPreferences("vistula_ui_prefs", Context.MODE_PRIVATE)
-        )
-        return ComposeView(context).apply {
-            setViewCompositionStrategy(androidx.compose.ui.platform.ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                SectionHost(
-                    section = section,
-                    repository = repository,
-                    preferences = preferences,
-                    language = language,
-                    themeMode = themeMode,
-                    fixedState = fixedState,
-                    onOpenUrl = { url ->
-                        try {
-                            require(pl.vistula.checker.core.WebLinks.isWebUrl(url))
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                        } catch (e: Exception) {
-                            android.util.Log.d("AndroidComposeBridge", "Ignored " + e.javaClass.simpleName)
-                        }
-                    }
-                )
-            }
-        }
-    }
 }
+

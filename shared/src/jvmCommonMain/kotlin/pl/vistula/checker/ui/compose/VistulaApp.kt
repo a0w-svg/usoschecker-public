@@ -1488,71 +1488,46 @@ fun MoreScreen(
             }
         }
 
-        SectionContent(
-            activeSection, state, snapshot, strings, repository, preferences, themeMode, language,
-            onThemeChanged, onLanguageChanged, onEnableDemo, onOpenUrl, onReloadState, onStatusMessage, runAsync
-        )
-    }
-}
-
-/** Content of one tools section; shared by [MoreScreen] and the Android-hosted [SectionHost]. */
-@Composable
-internal fun SectionContent(
-    activeSection: String,
-    state: JSONObject,
-    snapshot: Snapshot?,
-    strings: UiStrings,
-    repository: SharedRepository,
-    preferences: KeyValueStore,
-    themeMode: String,
-    language: String,
-    onThemeChanged: (String) -> Unit,
-    onLanguageChanged: (String) -> Unit,
-    onEnableDemo: () -> Unit,
-    onOpenUrl: (String) -> Unit,
-    onReloadState: () -> Unit,
-    onStatusMessage: (String) -> Unit,
-    runAsync: (() -> Unit) -> Unit
-) {
-    when (activeSection) {
-        "" -> Unit
-        "campus" -> CampusSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
-        "teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports" -> LecturerWorkspaceSection(state, repository, preferences, language, activeSection, onOpenUrl, onReloadState, onStatusMessage, runAsync)
-        "staffDirectory" -> StaffDirectorySection(state, repository, language, onReloadState, onStatusMessage, runAsync)
-        "registrations", "exams", "theses", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
-        "account" -> AccountSection(
-            state = state,
-            repository = repository,
-            preferences = preferences,
-            themeMode = themeMode,
-            language = language,
-            onThemeChanged = onThemeChanged,
-            onLanguageChanged = onLanguageChanged,
-            onEnableDemo = onEnableDemo,
-            onOpenUrl = onOpenUrl,
-            onReloadState = onReloadState,
-            onStatusMessage = onStatusMessage,
-            runAsync = runAsync
-        )
-        "gpa" -> GpaSimulatorSection(snapshot, language)
-        "tasks" -> TasksSection(state, repository, language, onReloadState, runAsync)
-        "news" -> NewsListCard(snapshot?.news?.take(10) ?: emptyList(), strings, onOpenUrl)
-        "attendance" -> AttendanceSection(
-            snapshot = snapshot,
-            preferences = preferences,
-            strings = strings,
-            onStatusMessage = onStatusMessage
-        )
-        "services", "cards", "documents", "payments" -> PaymentsAndServicesSection(
-            state = state,
-            language = language,
-            snapshot = snapshot,
-            repository = repository,
-            onOpenUrl = onOpenUrl,
-            onReloadState = onReloadState,
-            onStatusMessage = onStatusMessage,
-            runAsync = runAsync,
-            section = activeSection
-        )
+        when (activeSection) {
+            "" -> Unit
+            "campus" -> CampusSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
+            "teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports" -> LecturerWorkspaceSection(state, repository, preferences, language, activeSection, onOpenUrl, onReloadState, onStatusMessage, runAsync)
+            "staffDirectory" -> StaffDirectorySection(state, repository, language, onReloadState, onStatusMessage, runAsync)
+            "registrations", "exams", "theses", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
+            "account" -> AccountSection(
+                state = state,
+                repository = repository,
+                preferences = preferences,
+                themeMode = themeMode,
+                language = language,
+                onThemeChanged = onThemeChanged,
+                onLanguageChanged = onLanguageChanged,
+                onEnableDemo = onEnableDemo,
+                onOpenUrl = onOpenUrl,
+                onReloadState = onReloadState,
+                onStatusMessage = onStatusMessage,
+                runAsync = runAsync
+            )
+            "gpa" -> GpaSimulatorSection(snapshot, language)
+            "tasks" -> TasksSection(state, repository, language, onReloadState, runAsync)
+            "news" -> NewsListCard(snapshot?.news?.take(10) ?: emptyList(), strings, onOpenUrl)
+            "attendance" -> AttendanceSection(
+                snapshot = snapshot,
+                preferences = preferences,
+                strings = strings,
+                onStatusMessage = onStatusMessage
+            )
+            "services", "cards", "documents", "payments" -> PaymentsAndServicesSection(
+                state = state,
+                language = language,
+                snapshot = snapshot,
+                repository = repository,
+                onOpenUrl = onOpenUrl,
+                onReloadState = onReloadState,
+                onStatusMessage = onStatusMessage,
+                runAsync = runAsync,
+                section = activeSection
+            )
+        }
     }
 }

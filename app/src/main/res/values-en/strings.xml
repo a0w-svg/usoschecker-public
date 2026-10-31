@@ -478,6 +478,8 @@ Course grades:
 
 To add them, touch and hold an empty spot on your home screen and choose \"Widgets → Vistula\".</string>
 <string name="account_btn_open_usosapps">Open Vistula USOSapps</string>
+    <string name="account_student_number_copy">%1$s  📋</string>
+    <string name="account_email_line">✉ %1$s</string>
     <string name="account_program">🎓 Major: %1$s</string>
     <string name="account_stage">📚 Stage: %1$s</string>
     <string name="account_thesis_header">DIPLOMA THESIS</string>

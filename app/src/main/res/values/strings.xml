@@ -482,6 +482,8 @@
     <string name="account_widgets_heading">Widgety na ekranie głównym</string>
     <string name="account_widgets_desc">Dostępne są 2 interaktywne widgety na pulpit telefonu:\n1. Plan zajęć na dziś (najbliższe zajęcia, sala, czas, odliczanie)\n2. Karta Studenta i oceny (średnia ważona ECTS, status czesnego)\n\nAby je dodać, przytrzymaj palec na pustym miejscu ekranu głównego telefonu i wybierz „Widżety → Vistula”.</string>
 <string name="account_btn_open_usosapps">Otwórz USOSapps Vistuli</string>
+    <string name="account_student_number_copy">%1$s  📋</string>
+    <string name="account_email_line">✉ %1$s</string>
     <string name="account_program">🎓 Kierunek: %1$s</string>
     <string name="account_stage">📚 Etap: %1$s</string>
     <string name="account_thesis_header">PRACA DYPLOMOWA</string>

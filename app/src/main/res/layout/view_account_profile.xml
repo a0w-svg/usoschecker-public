@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="12dp">
+
+        <TextView
+            android:id="@+id/profile_avatar"
+            style="@style/Vistula.Text.Heading18"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="14dp"
+            android:background="@drawable/bg_avatar"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:textColor="@color/app_on_accent" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/profile_role"
+                style="@style/Vistula.Text.Strong"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:id="@+id/profile_name"
+                style="@style/Vistula.Text.Heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:id="@+id/profile_student_number"
+                style="@style/Vistula.Text.Strong"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:gravity="center_vertical"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/profile_email_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="2dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/profile_email"
+            style="@style/Vistula.Text.BodySmall"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/app_muted" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/profile_email_copy"
+            style="@style/Widget.Vistula.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="36dp"
+            android:text="@string/btn_copy"
+            android:textSize="11sp" />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/profile_program"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/profile_stage"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        android:textColor="@color/app_muted" />
+    <TextView
+        android:id="@+id/profile_admission"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        android:textColor="@color/app_muted" />
+    <TextView
+        android:id="@+id/profile_thesis_header"
+        style="@style/Vistula.Text.Strong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/profile_thesis_title"
+        style="@style/Vistula.Text.Strong"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/profile_thesis_status"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        android:textColor="@color/app_muted" />
+    <TextView
+        android:id="@+id/profile_thesis_supervisor"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        android:textColor="@color/app_muted" />
+    <TextView
+        android:id="@+id/profile_thesis_reviewer"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        android:textColor="@color/app_muted" />
+    <TextView
+        android:id="@+id/profile_thesis_unavailable"
+        style="@style/Vistula.Text.Note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        android:textColor="@color/app_muted" />
+</LinearLayout>

@@ -241,6 +241,16 @@ class UiHelper private constructor() {
         /** Detached widgets are inflated against a LinearLayout parent so their XML width and margins are kept for callers that add them to one. */
         private fun inflateHost(context: Context): LinearLayout = LinearLayout(context)
 
+        /** A labelled switch (48dp touch target, theme text colour) inflated from `view_switch_row`. */
+        @JvmStatic
+        fun switchRow(context: Context, parent: LinearLayout, label: String, checked: Boolean): com.google.android.material.materialswitch.MaterialSwitch {
+            val row = LayoutInflater.from(context).inflate(R.layout.view_switch_row, parent, false) as com.google.android.material.materialswitch.MaterialSwitch
+            row.text = label
+            row.isChecked = checked
+            parent.addView(row)
+            return row
+        }
+
         @JvmStatic
         fun button(context: Context, label: String?, action: Runnable, primary: Boolean): Button {
             val host = inflateHost(context)

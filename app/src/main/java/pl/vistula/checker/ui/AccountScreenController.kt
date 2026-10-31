@@ -10,11 +10,13 @@ import android.graphics.drawable.GradientDrawable
 import android.text.method.PasswordTransformationMethod
 import android.view.Gravity
 import android.view.View
+import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -117,87 +119,7 @@ class AccountScreenController private constructor() {
                 val stage = if (demo) "Semestr 5 · Studia stacjonarne" else state.optString("stage", "")
                 val admission = if (demo) "2024-10-01" else state.optString("admissionDate", "")
 
-                val topRow = LinearLayout(activity)
-                topRow.orientation = LinearLayout.HORIZONTAL
-                topRow.gravity = Gravity.CENTER_VERTICAL
-                topRow.setPadding(0, 0, 0, UiHelper.dp(activity, 12))
-
-                val avatar = UiHelper.text(activity, UiHelper.initials(userName), 19, Color.WHITE, true)
-                avatar.gravity = Gravity.CENTER
-                val avatarBg = GradientDrawable()
-                avatarBg.shape = GradientDrawable.OVAL
-                avatarBg.setColor(UiHelper.background(activity, UiHelper.GREEN))
-                avatar.background = avatarBg
-                val avParams = LinearLayout.LayoutParams(UiHelper.dp(activity, 52), UiHelper.dp(activity, 52))
-                avParams.rightMargin = UiHelper.dp(activity, 14)
-                topRow.addView(avatar, avParams)
-
-                val nameCol = LinearLayout(activity)
-                nameCol.orientation = LinearLayout.VERTICAL
-                nameCol.layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-                UiHelper.add(activity, nameCol, activity.getString(if (pl.vistula.checker.core.AccountRole.lecturer(state)) R.string.lecturer_title else R.string.student_card_badge), 11, UiHelper.GREEN, true)
-                UiHelper.add(activity, nameCol, userName, 20, UiHelper.INK, true)
-                if (studentNr.isNotEmpty()) {
-                    val nrView = UiHelper.text(activity, activity.getString(R.string.cards_student_number, studentNr) + "  📋", 14, UiHelper.INK, true)
-                    nrView.setOnClickListener { UiHelper.copyToClipboard(activity, activity.getString(R.string.cards_student_number, studentNr), studentNr) }
-                    nameCol.addView(nrView)
-                }
-                topRow.addView(nameCol)
-                profile.addView(topRow)
-
-                if (email.isNotEmpty()) {
-                    val emailRow = LinearLayout(activity)
-                    emailRow.orientation = LinearLayout.HORIZONTAL
-                    emailRow.gravity = Gravity.CENTER_VERTICAL
-                    emailRow.setPadding(0, UiHelper.dp(activity, 2), 0, UiHelper.dp(activity, 4))
-                    val emailText = UiHelper.text(activity, "✉ $email", 14, UiHelper.MUTED, false)
-                    emailText.layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-                    val copyEmail = UiHelper.button(
-                        activity,
-                        activity.getString(R.string.btn_copy),
-                        { UiHelper.copyToClipboard(activity, "Email", email) },
-                        false
-                    )
-                    copyEmail.minHeight = UiHelper.dp(activity, 36)
-                    copyEmail.textSize = 11f
-                    emailRow.addView(emailText)
-                    emailRow.addView(copyEmail)
-                    profile.addView(emailRow)
-                }
-
-                if (program.isNotEmpty()) {
-                    UiHelper.add(activity, profile, activity.getString(R.string.account_program, program), 14, UiHelper.INK, false)
-                }
-                if (stage.isNotEmpty()) {
-                    UiHelper.add(activity, profile, activity.getString(R.string.account_stage, stage), 13, UiHelper.MUTED, false)
-                }
-                if (admission.isNotEmpty()) {
-                    UiHelper.add(
-                        activity,
-                        profile,
-                        activity.getString(R.string.account_admission_date, HistoryScreenController.formatFullDate(admission)),
-                        12,
-                        UiHelper.MUTED,
-                        false
-                    )
-                }
-
-                val thesis = snapshot?.thesis
-                if (thesis != null && thesis.hasThesis()) {
-                    UiHelper.add(activity, profile, activity.getString(R.string.account_thesis_header), 11, UiHelper.GREEN, true)
-                    UiHelper.add(activity, profile, thesis.title, 15, UiHelper.INK, true)
-                    if (thesis.status.isNotEmpty()) {
-                        UiHelper.add(activity, profile, activity.getString(R.string.account_thesis_status, thesis.status), 13, UiHelper.MUTED, false)
-                    }
-                    if (thesis.supervisors.isNotEmpty()) {
-                        UiHelper.add(activity, profile, activity.getString(R.string.account_thesis_supervisor, thesis.supervisors), 13, UiHelper.MUTED, false)
-                    }
-                    if (thesis.reviewers.isNotEmpty()) {
-                        UiHelper.add(activity, profile, activity.getString(R.string.account_thesis_reviewer, thesis.reviewers), 13, UiHelper.MUTED, false)
-                    }
-                } else if (snapshot?.serviceErrors?.containsKey("theses") == true) {
-                    UiHelper.note(activity, profile, activity.getString(R.string.account_thesis_unavailable), UiHelper.MUTED)
-                }
+                bindProfile(activity, profile, state, snapshot, demo, userName, studentNr, email, program, stage, admission)
             }
 
             profileBody?.let { profile ->
@@ -233,12 +155,10 @@ class AccountScreenController private constructor() {
                 val authorizedScopes = state.optString("scopes")
                 if (pl.vistula.checker.core.AccountRole.lecturer(state)) {
                     val prefs = activity.getSharedPreferences("student_tools", Context.MODE_PRIVATE)
-                    val expSwitch = MaterialSwitch(activity).apply {
-                        setText(R.string.lecturer_experimental_setting)
-                        setTextColor(UiHelper.foreground(activity, UiHelper.INK))
-                        isChecked = prefs.getBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES, true)
-                    }
-                    accountControls.addView(expSwitch)
+                    val expSwitch = UiHelper.switchRow(
+                        activity, accountControls, activity.getString(R.string.lecturer_experimental_setting),
+                        prefs.getBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES, true)
+                    )
                     expSwitch.setOnCheckedChangeListener { _, checked ->
                         if (checked && !prefs.getBoolean(pl.vistula.checker.LecturerWriteActions.PREF_EXPERIMENTAL_WRITES_ACK, false)) {
                             expSwitch.isChecked = false
@@ -264,45 +184,21 @@ class AccountScreenController private constructor() {
                 if (!StudentServices.hasScope(authorizedScopes, "payments")) {
                     UiHelper.note(activity, accountControls, activity.getString(R.string.account_warn_no_payments_scope), Color.rgb(180, 110, 0))
                 }
-                val toggle = MaterialSwitch(activity)
-                toggle.setText(R.string.background_check)
-                toggle.setTextColor(UiHelper.foreground(activity, UiHelper.INK))
-                toggle.isChecked = state.optBoolean("enabled")
+                val toggle = UiHelper.switchRow(activity, box, activity.getString(R.string.background_check), state.optBoolean("enabled"))
                 if (state.optBoolean("authorizationError")) {
                     toggle.isEnabled = false
                     UiHelper.note(activity, box, activity.getString(R.string.account_session_expired), Color.rgb(167, 49, 49))
                 }
-                box.addView(toggle)
                 toggle.setOnCheckedChangeListener { _, checked -> listener.onToggleEnabled(checked) }
 
-                UiHelper.add(activity, box, activity.getString(R.string.sync_frequency), 14, UiHelper.MUTED, true)
-                val interval = Spinner(activity)
-                interval.adapter = ArrayAdapter(
-                    activity,
-                    android.R.layout.simple_spinner_dropdown_item,
-                    arrayOf(
-                        activity.getString(R.string.interval_15m),
-                        activity.getString(R.string.interval_30m),
-                        activity.getString(R.string.interval_1h),
-                        activity.getString(R.string.interval_2h)
-                    )
-                )
-                val values = longArrayOf(15L, 30L, 60L, 120L)
-                val selected = state.optLong("interval", 30L)
-                var position = 1
-                for (i in values.indices) {
-                    if (selected == values[i]) position = i
+                val frequency = LayoutInflater.from(activity).inflate(R.layout.view_sync_frequency, box, false)
+                val interval = frequency.findViewById<Spinner>(R.id.sync_interval)
+                val values = activity.resources.getIntArray(R.array.sync_interval_minutes).map { it.toLong() }
+                interval.setSelection(values.indexOf(state.optLong("interval", 30L)).takeIf { it >= 0 } ?: 1)
+                frequency.findViewById<View>(R.id.sync_interval_save).setOnClickListener {
+                    listener.onUpdateInterval(values[interval.selectedItemPosition])
                 }
-                interval.setSelection(position)
-                box.addView(interval)
-                box.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.btn_save_frequency),
-                        { listener.onUpdateInterval(values[interval.selectedItemPosition]) },
-                        false
-                    )
-                )
+                box.addView(frequency)
                 accountControls.addView(
                     UiHelper.button(
                         activity,
@@ -407,14 +303,8 @@ class AccountScreenController private constructor() {
                 var updatingChoices = false
                 val choices = linkedMapOf<String, MaterialSwitch>()
                 for ((feature, title) in features) {
-                    val choice = MaterialSwitch(activity).apply {
-                        text = activity.getString(title)
-                        minHeight = UiHelper.dp(activity, 48)
-                        setTextColor(UiHelper.foreground(activity, UiHelper.INK))
-                        isChecked = FeatureAccess.selected(scopes.text.toString(), feature)
-                    }
+                    val choice = UiHelper.switchRow(activity, access, activity.getString(title), FeatureAccess.selected(scopes.text.toString(), feature))
                     choices[feature] = choice
-                    access.addView(choice)
                     choice.setOnCheckedChangeListener { _, enabled ->
                         if (!updatingChoices) {
                             val next = FeatureAccess.change(scopes.text.toString(), feature, enabled)
@@ -572,10 +462,7 @@ class AccountScreenController private constructor() {
             reminderRow.orientation = LinearLayout.VERTICAL
             reminderRow.setPadding(0, UiHelper.dp(activity, 8), 0, UiHelper.dp(activity, 4))
 
-            val reminderSwitch = MaterialSwitch(activity)
-            reminderSwitch.text = activity.getString(R.string.account_reminder_switch_label)
-            reminderSwitch.isChecked = remindersOn
-            reminderSwitch.setTextColor(UiHelper.foreground(activity, UiHelper.INK))
+            val reminderSwitch = UiHelper.switchRow(activity, reminderRow, activity.getString(R.string.account_reminder_switch_label), remindersOn)
             reminderSwitch.setOnCheckedChangeListener { _, isChecked ->
                 toolsPrefs.edit { putBoolean(ClassReminderReceiver.PREF_REMINDERS_ENABLED, isChecked) }
                 if (isChecked) {
@@ -588,7 +475,6 @@ class AccountScreenController private constructor() {
                 }
                 activity.navigate(Tabs.ACCOUNT)
             }
-            reminderRow.addView(reminderSwitch)
 
             if (remindersOn) {
                 if (!ClassReminderReceiver.canNotify(activity)) {
@@ -642,6 +528,45 @@ class AccountScreenController private constructor() {
             )
             AppInfo.render(activity, about)
             pages.finish(if (!connected && state.optString("requestToken").isNotEmpty()) "settings.connection" else null)
+        }
+
+        /** Fills `view_account_profile`; empty values hide their line. */
+        private fun bindProfile(
+            activity: MainActivity, parent: LinearLayout, state: JSONObject, snapshot: Snapshot?, demo: Boolean,
+            userName: String, studentNr: String, email: String, program: String, stage: String, admission: String
+        ) {
+            val view = LayoutInflater.from(activity).inflate(R.layout.view_account_profile, parent, false)
+            fun line(id: Int, value: String) = view.findViewById<TextView>(id).apply {
+                text = value
+                visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+            }
+            view.findViewById<TextView>(R.id.profile_avatar).text = UiHelper.initials(userName)
+            view.findViewById<TextView>(R.id.profile_role).setText(
+                if (pl.vistula.checker.core.AccountRole.lecturer(state)) R.string.lecturer_title else R.string.student_card_badge
+            )
+            view.findViewById<TextView>(R.id.profile_name).text = userName
+            line(R.id.profile_student_number, if (studentNr.isEmpty()) "" else activity.getString(R.string.account_student_number_copy, activity.getString(R.string.cards_student_number, studentNr))).setOnClickListener {
+                UiHelper.copyToClipboard(activity, activity.getString(R.string.cards_student_number, studentNr), studentNr)
+            }
+            if (email.isNotEmpty()) {
+                view.findViewById<View>(R.id.profile_email_row).visibility = View.VISIBLE
+                view.findViewById<TextView>(R.id.profile_email).text = activity.getString(R.string.account_email_line, email)
+                view.findViewById<View>(R.id.profile_email_copy).setOnClickListener { UiHelper.copyToClipboard(activity, "Email", email) }
+            }
+            line(R.id.profile_program, if (program.isEmpty()) "" else activity.getString(R.string.account_program, program))
+            line(R.id.profile_stage, if (stage.isEmpty()) "" else activity.getString(R.string.account_stage, stage))
+            line(R.id.profile_admission, if (admission.isEmpty()) "" else activity.getString(R.string.account_admission_date, HistoryScreenController.formatFullDate(admission)))
+            val thesis = snapshot?.thesis
+            if (thesis != null && thesis.hasThesis()) {
+                line(R.id.profile_thesis_header, activity.getString(R.string.account_thesis_header))
+                line(R.id.profile_thesis_title, thesis.title)
+                line(R.id.profile_thesis_status, if (thesis.status.isEmpty()) "" else activity.getString(R.string.account_thesis_status, thesis.status))
+                line(R.id.profile_thesis_supervisor, if (thesis.supervisors.isEmpty()) "" else activity.getString(R.string.account_thesis_supervisor, thesis.supervisors))
+                line(R.id.profile_thesis_reviewer, if (thesis.reviewers.isEmpty()) "" else activity.getString(R.string.account_thesis_reviewer, thesis.reviewers))
+            } else if (snapshot?.serviceErrors?.containsKey("theses") == true) {
+                line(R.id.profile_thesis_unavailable, activity.getString(R.string.account_thesis_unavailable))
+            }
+            parent.addView(view)
         }
 
         private fun renderAcademicTerm(activity: MainActivity, content: LinearLayout, data: JSONObject?) {

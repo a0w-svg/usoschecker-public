@@ -480,6 +480,8 @@
 
 Щоб додати їх, затисніть палець на вільному місці головного екрана та виберіть «Віджети → Vistula».</string>
 <string name="account_btn_open_usosapps">Відкрити Vistula USOSapps</string>
+    <string name="account_student_number_copy">%1$s  📋</string>
+    <string name="account_email_line">✉ %1$s</string>
     <string name="account_program">🎓 Спеціальність: %1$s</string>
     <string name="account_stage">📚 Етап: %1$s</string>
     <string name="account_thesis_header">ДИПЛОМНА РОБОТА</string>

@@ -1,8 +1,10 @@
 package pl.vistula.checker.ui
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import com.google.android.material.button.MaterialButton
 import pl.vistula.checker.MainActivity
 import pl.vistula.checker.R
 
@@ -12,17 +14,12 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
     private val pages = mutableListOf<Page>()
 
     fun page(key: String, title: Int, primary: Boolean = false): LinearLayout {
-        val row = UiHelper.button(activity, activity.getString(title), { activity.openAccountPage(key) }, primary)
-        if (!primary) {
-            row.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
-            row.gravity = android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL
-            row.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_tool_next, 0)
-        }
+        val inflater = LayoutInflater.from(activity)
+        val row = inflater.inflate(if (primary) R.layout.view_button_primary else R.layout.item_settings_page, content, false) as MaterialButton
+        row.text = activity.getString(title)
+        row.setOnClickListener { activity.openAccountPage(key) }
         content.addView(row)
-        val body = LinearLayout(activity).apply {
-            orientation = LinearLayout.VERTICAL
-            visibility = View.GONE
-        }
+        val body = inflater.inflate(R.layout.view_settings_body, content, false) as LinearLayout
         content.addView(body)
         pages.add(Page(key, title, body, row))
         return body

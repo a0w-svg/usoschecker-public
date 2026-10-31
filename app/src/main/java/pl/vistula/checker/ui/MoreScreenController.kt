@@ -1,5 +1,6 @@
 package pl.vistula.checker.ui
 
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -76,24 +77,26 @@ class MoreScreenController private constructor() {
 
         @JvmStatic
         fun render(activity: MainActivity, content: LinearLayout) {
+            val inflater = LayoutInflater.from(activity)
             for (group in layout(AccountRole.mode(activity.serviceAccountState()))) {
-                UiHelper.sectionLabel(activity, content, activity.getString(group.title))
-                val tray = UiHelper.tray(activity, content)
+                val section = inflater.inflate(R.layout.view_more_group, content, false)
+                section.findViewById<TextView>(R.id.more_group_title).text = activity.getString(group.title)
+                val entries = section.findViewById<LinearLayout>(R.id.more_group_entries)
                 group.entries.forEachIndexed { index, entry ->
-                    if (index > 0) UiHelper.trayDivider(activity, tray)
-                    val tile = UiHelper.toolTile(
-                        activity, tray, "", activity.getString(entry.title), activity.getString(entry.description)
-                    ) {
-                        activity.navigate(entry.destination)
-                    } as LinearLayout
-                    tile.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                    tile.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
-                    (tile.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
-                    tile.findViewById<View>(R.id.tool_tile_icon).visibility = View.GONE
-                    tile.getChildAt(tile.childCount - 1).visibility = View.GONE
-                    tile.findViewById<TextView>(R.id.tool_tile_title).textSize = 15f
-                    tile.findViewById<TextView>(R.id.tool_tile_subtitle).textSize = 13f
+                    val row = inflater.inflate(R.layout.item_more_entry, entries, false)
+                    val title = activity.getString(entry.title)
+                    val description = activity.getString(entry.description)
+                    row.findViewById<TextView>(R.id.more_entry_title).text = title
+                    row.findViewById<TextView>(R.id.more_entry_description).text = description
+                    // The divider separates rows, so the first row has none.
+                    if (index == 0) row.findViewById<View>(R.id.more_entry_divider).visibility = View.GONE
+                    row.findViewById<View>(R.id.more_entry_root).apply {
+                        contentDescription = "$title. $description"
+                        setOnClickListener { activity.navigate(entry.destination) }
+                    }
+                    entries.addView(row)
                 }
+                content.addView(section)
             }
         }
     }

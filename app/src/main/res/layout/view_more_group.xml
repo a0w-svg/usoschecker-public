@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/more_group_title"
+        style="@style/Vistula.Text.Overline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:paddingStart="4dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="14dp"
+        android:textColor="@color/app_muted" />
+
+    <LinearLayout
+        android:id="@+id/more_group_entries"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:background="@drawable/bg_card"
+        android:clipToOutline="true"
+        android:orientation="vertical" />
+</LinearLayout>

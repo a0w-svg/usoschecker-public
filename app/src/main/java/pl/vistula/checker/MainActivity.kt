@@ -109,8 +109,7 @@ class MainActivity : AppCompatActivity() {
     // State preserved across configuration changes
     private var simTargetGpa: Double = 4.50
     private var simRemainingEcts: Double = 30.0
-    private var filter: String = "wszystkie"
-    private var historyQuery: String = ""
+    private val history = pl.vistula.checker.ui.HistoryUiState()
     private val grades = pl.vistula.checker.ui.GradesUiState()
     fun gradeSemesterExpansion(): MutableMap<String, Boolean> = grades.semesterExpansion
 
@@ -120,8 +119,6 @@ class MainActivity : AppCompatActivity() {
     private var newsQuery: String = ""
     private var attendanceFilter: String = "all"
     private var documentQuery: String = ""
-    private var apiModule: String = ""
-    private var apiDrafts: JSONObject = JSONObject()
     private var demoPlanDays: Int = 56
     private var renderedMinute: Long = 0
     private var loadingState: Boolean = false
@@ -129,17 +126,11 @@ class MainActivity : AppCompatActivity() {
     private var demoCampus: String = "0000"
 
     // API catalog state
-    private var apiQuery: String = ""
-    private var apiLimit: Int = 60
-    private var apiFavoritesOnly: Boolean = false
-    private var apiFavorites: MutableSet<String> = HashSet()
-    private var currentMethod: String? = null
-    private var currentMethodJson: JSONObject? = null
+    private val api = pl.vistula.checker.ui.ApiExplorerState()
     private lateinit var pendingFiles: PendingFilesModel
     private var uploadBytes: ByteArray?
         get() = pendingFiles.upload
         set(value) { pendingFiles.upload = value }
-    private var uploadMethod: String? = null
     private var exportResponse: UsosClient.Response?
         get() = pendingFiles.export
         set(value) { pendingFiles.export = value }
@@ -158,7 +149,7 @@ class MainActivity : AppCompatActivity() {
     private val refresh: Runnable = object : Runnable {
         override fun run() {
             if (!busy &&
-                currentMethod == null &&
+                api.currentMethod == null &&
                 tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12 &&
                 currentFocus !is EditText
             ) {
@@ -189,9 +180,8 @@ class MainActivity : AppCompatActivity() {
                         showWelcome(welcomeStep - 1)
                     } else if (tab == 4 && settingsPage != null && settingsPage != "overview") {
                         openAccountPage(null)
-                    } else if (currentMethod != null) {
-                        currentMethod = null
-                        currentMethodJson = null
+                    } else if (api.currentMethod != null) {
+                        api.closeMethod()
                         render()
                     } else if (tab != 0) {
                         navigate(if (tab == 1 || tab == 2 || tab == 5 || tab == 6) 0 else 6)
@@ -206,7 +196,7 @@ class MainActivity : AppCompatActivity() {
         tasks.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due") ?: "due"
         grades.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name") ?: "name"
         schedule.mode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
-        apiFavorites = HashSet(
+        api.favorites = HashSet(
             getSharedPreferences("api_catalog", MODE_PRIVATE).getStringSet("favorites", emptySet()) ?: emptySet()
         )
 
@@ -217,8 +207,7 @@ class MainActivity : AppCompatActivity() {
             demo = bundle.getBoolean("demo")
             demoChanged = bundle.getBoolean("demoChanged")
             tab = bundle.getInt("tab")
-            filter = bundle.getString("filter", "wszystkie")
-            historyQuery = bundle.getString("historyQuery", "")
+            history.restore(bundle)
             grades.restore(bundle)
             schedule.restore(bundle)
             demoPlanDays = bundle.getInt("demoPlanDays", 56)
@@ -227,25 +216,16 @@ class MainActivity : AppCompatActivity() {
             newsQuery = bundle.getString("newsQuery", "")
             attendanceFilter = bundle.getString("attendanceFilter", "all")
             documentQuery = bundle.getString("documentQuery", "")
-            apiModule = bundle.getString("apiModule", "")
-            try {
-                apiDrafts = JSONObject(bundle.getString("apiDrafts", "{}"))
-            } catch (ignored: JSONException) {
-            }
-            currentMethod = bundle.getString("currentMethod")
-            uploadMethod = bundle.getString("uploadMethod")
+            api.restore(bundle)
             try {
                 demoTasks = JSONArray(bundle.getString("demoTasks", "[]"))
             } catch (ignored: JSONException) {
             }
-            apiQuery = bundle.getString("apiQuery", "")
-            apiLimit = bundle.getInt("apiLimit", 60)
-            apiFavoritesOnly = bundle.getBoolean("apiFavoritesOnly")
             simTargetGpa = bundle.getDouble("simTargetGpa", 4.50)
             simRemainingEcts = bundle.getDouble("simRemainingEcts", 30.0)
         } else if (intent.getBooleanExtra("showHistory", false)) {
             tab = 1
-            filter = historyFilter(intent)
+            history.filter = historyFilter(intent)
         } else if (intent.hasExtra("tab")) {
             tab = intent.getIntExtra("tab", 0)
         }
@@ -368,7 +348,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 ensureSchedule()
-                val method = currentMethod
+                val method = api.currentMethod
                 if (method != null) {
                     showMethod(method)
                     return@task
@@ -384,23 +364,15 @@ class MainActivity : AppCompatActivity() {
         outState.putString("settingsPage", settingsPage)
         outState.putString("demoCampus", demoCampus)
         outState.putString("documentQuery", documentQuery)
-        outState.putString("apiModule", apiModule)
-        outState.putString("currentMethod", currentMethod)
-        outState.putString("uploadMethod", uploadMethod)
-        try {
-            outState.putString("apiDrafts", ApiCatalog.restorableDrafts(apiDrafts).toString())
-        } catch (ignored: JSONException) {
-        }
-        outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
+        api.save(outState)
         schedule.save(outState)
-        outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
         outState.putDouble("simTargetGpa", simTargetGpa)
         outState.putDouble("simRemainingEcts", simRemainingEcts)
         super.onSaveInstanceState(outState)
         outState.putBoolean("demo", demo)
         outState.putBoolean("demoChanged", demoChanged)
         outState.putInt("tab", tab)
-        outState.putString("filter", filter)
+        history.save(outState)
         grades.save(outState)
         tasks.save(outState)
         outState.putInt("demoPlanDays", demoPlanDays)
@@ -408,9 +380,6 @@ class MainActivity : AppCompatActivity() {
         outState.putString("newsQuery", newsQuery)
         outState.putString("attendanceFilter", attendanceFilter)
         outState.putString("demoTasks", demoTasks.toString())
-        outState.putString("historyQuery", historyQuery)
-        outState.putString("apiQuery", apiQuery)
-        outState.putInt("apiLimit", apiLimit)
     }
 
     public override fun onNewIntent(intent: Intent) {
@@ -418,8 +387,7 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         showReleaseUpdatesIfRequested()
         if (intent.getBooleanExtra("showHistory", false)) {
-            filter = historyFilter(intent)
-            historyQuery = ""
+            history.open(historyFilter(intent))
             navigate(1)
         } else if (intent.hasExtra("tab")) {
             navigate(intent.getIntExtra("tab", 0))
@@ -498,8 +466,7 @@ class MainActivity : AppCompatActivity() {
         }
         schedule.focusCurrent = focusCurrent && target == 5 && tab != 5
         if (schedule.focusCurrent) schedule.dateSelected = false
-        currentMethod = null
-        currentMethodJson = null
+        api.closeMethod()
         tab = target
         scroll.scrollTo(0, 0)
         render()
@@ -598,14 +565,14 @@ class MainActivity : AppCompatActivity() {
                     this,
                     content,
                     display(),
-                    filter,
-                    historyQuery,
+                    history.filter,
+                    history.query,
                     demo,
                     { f ->
-                        filter = f
+                        history.filter = f
                         render()
                     },
-                    { q -> historyQuery = q },
+                    { q -> history.query = q },
                     { sync() }
                 )
                 2 -> {
@@ -665,19 +632,18 @@ class MainActivity : AppCompatActivity() {
                 )
                 }
                 3 -> {
-                    val method = currentMethod
-                    val methodJson = currentMethodJson
+                    val method = api.currentMethod
+                    val methodJson = api.currentMethodJson
                     if (method != null && methodJson != null) {
                         ApiExplorerController.renderMethodDetails(
                             this,
                             content,
                             scroll,
                             methodJson,
-                            apiFavorites,
+                            api.favorites,
                             uploadBytes,
                             {
-                                currentMethod = null
-                                currentMethodJson = null
+                                api.closeMethod()
                                 render()
                             },
                             object : ApiExplorerController.ApiCallback {
@@ -693,7 +659,7 @@ class MainActivity : AppCompatActivity() {
                                 }
 
                                 override fun onSelectUploadFile(currentMethod: String) {
-                                    uploadMethod = currentMethod
+                                    api.uploadMethod = currentMethod
                                     selectUpload.launch(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE))
                                 }
 
@@ -707,15 +673,15 @@ class MainActivity : AppCompatActivity() {
                             this,
                             content,
                             catalog,
-                            apiQuery,
-                            apiLimit,
-                            apiFavoritesOnly,
-                            apiFavorites,
-                            { q -> apiQuery = q },
-                            { lim -> apiLimit = lim },
+                            api.query,
+                            api.limit,
+                            api.favoritesOnly,
+                            api.favorites,
+                            { q -> api.query = q },
+                            { lim -> api.limit = lim },
                             { fav ->
-                                apiFavoritesOnly = fav
-                                apiLimit = 60
+                                api.favoritesOnly = fav
+                                api.limit = pl.vistula.checker.ui.ApiExplorerState.DEFAULT_LIMIT
                                 render()
                             },
                             { showMethod(it) }
@@ -814,9 +780,9 @@ class MainActivity : AppCompatActivity() {
                                 { s ->
                                     state = s
                                     detectedPin = ""
-                                    apiDrafts = JSONObject()
+                                    api.drafts = JSONObject()
                                     uploadBytes = null
-                                    uploadMethod = null
+                                    api.uploadMethod = null
                                     exportResponse = null
                                     pendingCalendar = null
                                     grades.clearSemester()
@@ -1020,10 +986,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getDocumentQuery(): String = documentQuery
-    fun getApiModule(): String = apiModule
+    fun getApiModule(): String = api.module
     fun setApiModule(module: String) {
-        apiModule = module
-        apiLimit = 60
+        api.module = module
+        api.limit = pl.vistula.checker.ui.ApiExplorerState.DEFAULT_LIMIT
         render()
     }
 
@@ -1179,16 +1145,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openApiModule(module: String) {
-        apiModule = module
-        apiQuery = ""
-        apiLimit = 60
-        apiFavoritesOnly = false
+        api.openModule(module)
         navigate(3)
     }
 
     fun openApiMethod(method: String, parameters: Map<String, String>) {
         try {
-            apiDrafts.put(method, JSONObject(parameters))
+            api.drafts.put(method, JSONObject(parameters))
         } catch (e: JSONException) {
             error(ApiErrorUi.message(this, e))
             return
@@ -1198,18 +1161,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun apiDraft(method: String): JSONObject {
-        var draft = apiDrafts.optJSONObject(method)
+        var draft = api.drafts.optJSONObject(method)
         if (draft == null) {
             draft = JSONObject()
             try {
-                apiDrafts.put(method, draft)
+                api.drafts.put(method, draft)
             } catch (ignored: JSONException) {
             }
         }
         return draft
     }
 
-    fun apiUpload(method: String): ByteArray? = if (method == uploadMethod) uploadBytes else null
+    fun apiUpload(method: String): ByteArray? = if (method == api.uploadMethod) uploadBytes else null
 
     private fun liveService(scope: String): Boolean {
         if (demo) {
@@ -1614,8 +1577,8 @@ class MainActivity : AppCompatActivity() {
         task(
             { JSONObject(asset("api/" + name.replace("/", "__") + ".json")) },
             { json ->
-                currentMethod = name
-                currentMethodJson = json
+                api.currentMethod = name
+                api.currentMethodJson = json
                 render()
             }
         )
@@ -1657,7 +1620,7 @@ class MainActivity : AppCompatActivity() {
                 }) { getString(R.string.service_action_unavailable) }
                 response
             },
-            { if (tab == 3 && currentMethod == metadata.optString("name")) onSuccess.accept(it) },
+            { if (tab == 3 && api.currentMethod == metadata.optString("name")) onSuccess.accept(it) },
             onFailure
         )
     }
@@ -1849,7 +1812,7 @@ class MainActivity : AppCompatActivity() {
                 error(getString(R.string.error_invalid_document_uri))
                 return
             }
-            if (requestCode == 21 && currentMethod != null && currentMethod == uploadMethod) {
+            if (requestCode == 21 && api.currentMethod != null && api.currentMethod == api.uploadMethod) {
                 task(
                     {
                         contentResolver.openInputStream(uri).use { input ->

@@ -43,7 +43,7 @@ class GpaSimulatorController private constructor() {
                     UiHelper.button(
                         activity,
                         activity.getString(R.string.btn_connect),
-                        { activity.navigate(4) },
+                        { activity.navigate(Tabs.ACCOUNT) },
                         true
                     )
                 )
@@ -163,7 +163,8 @@ class GpaSimulatorController private constructor() {
             ) { value ->
                 try {
                     onTargetChanged.accept(value.toDouble())
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("GpaSimulatorController", e)
                 }
             }
 
@@ -184,7 +185,8 @@ class GpaSimulatorController private constructor() {
             ) { value ->
                 try {
                     onEctsChanged.accept(value.toDouble())
-                } catch (_: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("GpaSimulatorController", e)
                 }
             }
 
@@ -220,7 +222,7 @@ class GpaSimulatorController private constructor() {
                 UiHelper.button(
                     activity,
                     activity.getString(R.string.gpa_btn_all_grades),
-                    { activity.navigate(2) },
+                    { activity.navigate(Tabs.GRADES) },
                     false
                 )
             )

@@ -271,7 +271,7 @@ class ScreenRegressionTest {
         main { rule.activity.navigate(13) }
         has(rule.activity.getString(R.string.mcard_ready))
         has(rule.activity.getString(R.string.cards_activation))
-        absent(rule.activity.getString(R.string.cards_physical_title))
+        has(rule.activity.getString(R.string.cards_physical_title))
         capture("student-cards")
         main { rule.activity.mobileCardAction(false, "demo-order") }
         has(rule.activity.getString(R.string.mcard_ready))
@@ -341,7 +341,7 @@ class ScreenRegressionTest {
         }
         has(rule.activity.getString(R.string.services_scope_required, "cards"))
         has(rule.activity.getString(R.string.cards_mobile_empty))
-        absent(rule.activity.getString(R.string.cards_physical_title))
+        has(rule.activity.getString(R.string.cards_physical_title))
         main { rule.activity.navigate(14) }
         has(rule.activity.getString(R.string.services_scope_required, "adm_documents"))
     }

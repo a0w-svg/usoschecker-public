@@ -30,6 +30,7 @@ class PaymentsScreenController private constructor() {
 
     companion object {
         @JvmStatic
+        @JvmOverloads
         @Throws(JSONException::class)
         fun render(
             activity: MainActivity,
@@ -37,15 +38,17 @@ class PaymentsScreenController private constructor() {
             d: JSONObject,
             state: JSONObject,
             connected: Boolean,
+            servicesOverride: JSONObject? = null,
             onRefresh: Runnable
         ) {
+            val services = servicesOverride ?: state.optJSONObject("studentServices") ?: JSONObject()
             ToolScreenUi.header(activity, content, R.string.tool_payments_title) { menu ->
                 ToolScreenUi.action(menu, R.string.payments_refresh_btn, onRefresh)
                 ToolScreenUi.action(menu, R.string.payments_history_refresh) { activity.refreshStudentServices("remittances") }
                 ToolScreenUi.action(menu, R.string.tool_api_methods) { activity.openApiModule("payments") }
             }
             UiHelper.note(activity, content, activity.getString(R.string.payments_usage_guide), UiHelper.MUTED)
-            val entry = if (activity.isDemo()) JSONObject() else state.optJSONObject("studentServices")?.optJSONObject("payments") ?: JSONObject()
+            val entry = services.optJSONObject("payments") ?: JSONObject()
             val language = pl.vistula.checker.core.ApiLanguage.normalize(Language.currentLocale(activity).language)
             val cached = entry.optJSONObject("data")?.optJSONObject(language)
             val raw = d.optJSONObject("snapshot")
@@ -58,7 +61,7 @@ class PaymentsScreenController private constructor() {
                     UiHelper.timestamp(d.optLong("successAt"))), UiHelper.MUTED)
             }
             if (payments == null) {
-                renderRemittances(activity, content, state.optJSONObject("studentServices")?.optJSONObject("remittances") ?: JSONObject())
+                renderRemittances(activity, content, services.optJSONObject("remittances") ?: JSONObject())
                 UiHelper.empty(activity, content, activity.getString(R.string.payments_no_data_title),
                     activity.getString(R.string.services_not_loaded))
                 content.addView(UiHelper.button(activity,
@@ -93,9 +96,8 @@ class PaymentsScreenController private constructor() {
                 )
             }
 
-            renderDetails(activity, content, if (useCache) entry.optJSONObject("data") else null)
-            renderRemittances(activity, content, if (activity.isDemo()) JSONObject() else
-                state.optJSONObject("studentServices")?.optJSONObject("remittances") ?: JSONObject())
+            renderDetails(activity, content, entry.optJSONObject("data"))
+            renderRemittances(activity, content, services.optJSONObject("remittances") ?: JSONObject())
             if (payments.accounts.isEmpty() && payments.installments.isEmpty()) {
                 if (!scopeMissing) {
                     UiHelper.empty(

@@ -47,7 +47,7 @@ class HomeScreenController private constructor() {
             renderRecentChanges(activity, content, d)
             renderWeek(activity, content, d)
             renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"))
-            sectionLink(activity, content, R.string.design_shortcuts) { activity.navigate(6) }
+            sectionLink(activity, content, R.string.design_shortcuts) { activity.navigate(Tabs.MORE) }
             val shortcuts = arrayOf(
                 Triple(R.id.home_open_schedule, R.string.dashboard_plan, 5),
                 Triple(R.id.home_open_grades, R.string.dashboard_grades, 2),
@@ -114,8 +114,8 @@ class HomeScreenController private constructor() {
                         }
                         payBox.isClickable = true
                         payBox.isFocusable = true
-                        payBox.setOnClickListener { activity.navigate(8) }
-                        payBox.addView(UiHelper.button(activity, activity.getString(R.string.home_payments_btn), { activity.navigate(8) }, false))
+                        payBox.setOnClickListener { activity.navigate(Tabs.PAYMENTS) }
+                        payBox.addView(UiHelper.button(activity, activity.getString(R.string.home_payments_btn), { activity.navigate(Tabs.PAYMENTS) }, false))
                     }
                 }
 
@@ -173,12 +173,12 @@ class HomeScreenController private constructor() {
                     )
                     newsBox.isClickable = true
                     newsBox.isFocusable = true
-                    newsBox.setOnClickListener { activity.navigate(11) }
+                    newsBox.setOnClickListener { activity.navigate(Tabs.NEWS) }
                     newsBox.addView(
                         UiHelper.button(
                             activity,
                             activity.getString(R.string.home_news_all_btn, snap.news.size),
-                            { activity.navigate(11) },
+                            { activity.navigate(Tabs.NEWS) },
                             false
                         )
                     )
@@ -260,7 +260,7 @@ class HomeScreenController private constructor() {
             } else {
                 line(activity.getString(if (snapshot == null) R.string.refresh_offline else R.string.home_schedule_empty_hint), 14, UiHelper.MUTED, false)
                 hero.addView(UiHelper.button(activity, activity.getString(if (snapshot == null) R.string.btn_connect else R.string.btn_open_plan), {
-                    if (snapshot == null) activity.navigate(4) else openDay(activity, today)
+                    if (snapshot == null) activity.navigate(Tabs.ACCOUNT) else openDay(activity, today)
                 }, false))
             }
             // Concurrent classes and tentative times stay visible, without a false countdown.
@@ -358,8 +358,8 @@ class HomeScreenController private constructor() {
 
                 box.isClickable = true
                 box.isFocusable = true
-                box.setOnClickListener { activity.navigate(7) }
-                box.addView(UiHelper.button(activity, activity.getString(R.string.home_open_tasks), { activity.navigate(7) }, false))
+                box.setOnClickListener { activity.navigate(Tabs.TASKS) }
+                box.addView(UiHelper.button(activity, activity.getString(R.string.home_open_tasks), { activity.navigate(Tabs.TASKS) }, false))
             }
         }
 
@@ -367,7 +367,7 @@ class HomeScreenController private constructor() {
         private fun renderRecentChanges(activity: MainActivity, content: LinearLayout, d: JSONObject) {
             val rows = d.optJSONArray("history")
             if (rows != null && rows.length() != 0) {
-                sectionLink(activity, content, R.string.home_recent_changes) { activity.navigate(1) }
+                sectionLink(activity, content, R.string.home_recent_changes) { activity.navigate(Tabs.HISTORY) }
                 val recent = ArrayList<Change>()
                 for (i in 0 until rows.length()) {
                     recent.add(Change.from(rows.getJSONObject(i)))

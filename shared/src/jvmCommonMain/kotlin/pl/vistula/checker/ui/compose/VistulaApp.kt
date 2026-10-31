@@ -1343,7 +1343,7 @@ private fun GradeGroupDetailCard(
 @Composable
 fun HistoryScreen(state: JSONObject, strings: UiStrings = UiStrings.PL) {
     val language = strings.languageCode
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     val history = state.optJSONArray("history") ?: JSONArray()
     val all = remember(history.toString()) {
         (0 until history.length()).mapNotNull { runCatching { Change.from(history.getJSONObject(it)) }.getOrNull() }
@@ -1406,7 +1406,7 @@ fun MoreScreen(
     onNavigateTab: (VistulaTab) -> Unit = {}
 ) {
     val t = VistulaDesign.tokens
-    fun tr(pl: String, en: String, uk: String) = toolText(language, pl, en, uk)
+    val tr = Translator(language)
     var activeSection by remember(initialSection) { mutableStateOf(initialSection) }
     val mode = pl.vistula.checker.core.AccountRole.mode(state)
     val groups = buildList {
@@ -1419,6 +1419,8 @@ fun MoreScreen(
                 Triple("documents", tr("Dokumenty", "Documents", "Документи"), tr("Dokumenty i decyzje", "Documents and decisions", "Документи та рішення")),
                 Triple("payments", tr("Płatności", "Payments", "Платежі"), tr("Opłaty i terminy", "Fees and due dates", "Платежі й терміни")),
                 Triple("registrations", tr("Rejestracje", "Registrations", "Реєстрації"), tr("Tury zapisów i koszyki", "Course registration rounds", "Тури реєстрації на предмети")),
+                Triple("exams", tr("Egzaminy i kalendarz", "Exams & calendar", "Іспити та календар"), tr("Terminy sesji i egzaminy", "Exam sessions and exam dates", "Терміни сесії та іспити")),
+                Triple("theses", tr("Prace dyplomowe", "Theses", "Дипломні роботи"), tr("Status i promotorzy prac", "Thesis status and supervisors", "Статус та керівники робіт")),
                 Triple("tasks", strings.sectionTasks, tr("Własne zadania i terminy", "Your own tasks and deadlines", "Власні завдання й терміни")),
                 Triple("attendance", strings.sectionAttendance, tr("Nieobecności według przedmiotów", "Absences by course", "Пропуски за предметами")),
                 Triple("services", strings.sectionServices, tr("Pozostałe usługi i linki uczelniane", "Other services and university links", "Інші послуги та посилання університету"))
@@ -1491,7 +1493,7 @@ fun MoreScreen(
             "campus" -> CampusSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
             "teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports" -> LecturerWorkspaceSection(state, repository, preferences, language, activeSection, onOpenUrl, onReloadState, onStatusMessage, runAsync)
             "staffDirectory" -> StaffDirectorySection(state, repository, language, onReloadState, onStatusMessage, runAsync)
-            "registrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
+            "registrations", "exams", "theses", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
             "account" -> AccountSection(
                 state = state,
                 repository = repository,

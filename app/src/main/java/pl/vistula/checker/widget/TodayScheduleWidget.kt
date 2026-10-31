@@ -88,7 +88,8 @@ class TodayScheduleWidget : AppWidgetProvider() {
             if (demo) {
                 try {
                     state = Demo.state(false, 56)
-                } catch (ignored: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("TodayScheduleWidget", e)
                 }
             }
             val raw = state.optJSONObject("snapshot")
@@ -96,7 +97,8 @@ class TodayScheduleWidget : AppWidgetProvider() {
             if (raw != null) {
                 try {
                     snapshot = Snapshot.from(raw)
-                } catch (ignored: Exception) {
+                } catch (e: Exception) {
+                    pl.vistula.checker.Diagnostics.swallowed("TodayScheduleWidget", e)
                 }
             }
 

@@ -103,7 +103,8 @@ class AccountScreenController private constructor() {
                 if (raw != null) {
                     try {
                         snapshot = Snapshot.from(raw)
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
+                        pl.vistula.checker.Diagnostics.swallowed("AccountScreenController", e)
                     }
                 }
 
@@ -485,7 +486,8 @@ class AccountScreenController private constructor() {
                                             Toast.makeText(activity, R.string.account_toast_pin_pasted, Toast.LENGTH_SHORT).show()
                                         }
                                     }
-                                } catch (_: Exception) {
+                                } catch (e: Exception) {
+                                    pl.vistula.checker.Diagnostics.swallowed("AccountScreenController", e)
                                 }
                             },
                             false
@@ -584,7 +586,7 @@ class AccountScreenController private constructor() {
                     ClassReminderReceiver.cancel(activity)
                     Toast.makeText(activity, R.string.account_toast_reminders_disabled, Toast.LENGTH_SHORT).show()
                 }
-                activity.navigate(4)
+                activity.navigate(Tabs.ACCOUNT)
             }
             reminderRow.addView(reminderSwitch)
 
@@ -607,7 +609,7 @@ class AccountScreenController private constructor() {
                     val min = value.toInt()
                     toolsPrefs.edit { putInt(ClassReminderReceiver.PREF_REMINDER_MINUTES, min) }
                     ClassReminderReceiver.scheduleNext(activity)
-                    activity.navigate(4)
+                    activity.navigate(Tabs.ACCOUNT)
                 }
             }
             notices.addView(reminderRow)

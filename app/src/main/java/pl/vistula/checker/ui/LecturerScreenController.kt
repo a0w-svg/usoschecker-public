@@ -18,7 +18,14 @@ import pl.vistula.checker.core.StudentServices
 
 object LecturerScreenController {
     fun render(activity: MainActivity, content: LinearLayout, state: JSONObject, servicesOverride: JSONObject? = null) {
-        if (!AccountRole.lecturer(state)) return
+                if (!AccountRole.lecturer(state)) {
+            ToolScreenUi.header(activity, content, R.string.lecturer_title, null)
+            val box = UiHelper.section(activity, content, Color.WHITE)
+            UiHelper.add(activity, box, activity.getString(R.string.lecturer_title), 17, UiHelper.INK, true)
+            UiHelper.note(activity, box, activity.getString(R.string.lecturer_role_required), UiHelper.MUTED)
+            box.addView(UiHelper.button(activity, activity.getString(R.string.nav_home), { activity.navigate(0) }, true))
+            return
+        }
         val language = Language.currentLocale(activity).language
         val services = servicesOverride ?: state.optJSONObject("studentServices") ?: JSONObject()
         ToolScreenUi.header(activity, content, R.string.lecturer_title) { menu ->
@@ -78,6 +85,24 @@ object LecturerScreenController {
                     StudentServices.text(g, "term_id").takeIf { it.isNotEmpty() }
                 ).joinToString(" · ")
                 if (sub.isNotEmpty()) UiHelper.note(activity, box, sub, UiHelper.MUTED)
+                val unitId = StudentServices.text(g, "course_unit_id")
+                val groupNr = StudentServices.text(g, "group_number")
+                if (unitId.isNotEmpty() && groupNr.isNotEmpty()) {
+                    box.isClickable = true
+                    box.isFocusable = true
+                    UiHelper.note(activity, box, activity.getString(R.string.lecturer_group_click_hint), UiHelper.MUTED)
+                    box.setOnClickListener {
+                        if (activity.isDemo()) {
+                            showGroupDetails(activity, title, DemoStudentServices.demoGroupDetail(unitId, groupNr), language)
+                        } else {
+                            activity.universityRead({ client ->
+                                ToolServiceData.fetchGroupDetail(client, state, unitId, groupNr)
+                            }) { detail ->
+                                showGroupDetails(activity, title, detail, language)
+                            }
+                        }
+                    }
+                }
                 tray.addView(box)
             }
             for (i in 0 until coordinated.length()) {
@@ -128,6 +153,22 @@ object LecturerScreenController {
                         if (n.optBoolean("visible_for_students", false)) "Visible" else "Hidden"
                     ).joinToString(" · ")
                     UiHelper.note(activity, box, sub, UiHelper.MUTED)
+                    if (nodeId.isNotEmpty()) {
+                        box.isClickable = true
+                        box.isFocusable = true
+                        UiHelper.note(activity, box, activity.getString(R.string.lecturer_node_click_hint), UiHelper.MUTED)
+                        box.setOnClickListener {
+                            if (activity.isDemo()) {
+                                showNodeDetails(activity, nodeName, DemoStudentServices.demoNodeDetail(nodeId), language)
+                            } else {
+                                activity.universityRead({ client ->
+                                    ToolServiceData.fetchNodeDetail(client, state, nodeId)
+                                }) { detail ->
+                                    showNodeDetails(activity, nodeName, detail, language)
+                                }
+                            }
+                        }
+                    }
                     tray.addView(box)
                 }
             }
@@ -199,6 +240,16 @@ object LecturerScreenController {
                 UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
                 val comment = StudentServices.localized(m.opt("comment"), language)
                 if (comment.isNotEmpty()) UiHelper.note(activity, box, comment, UiHelper.MUTED)
+                val dates = m.optJSONArray("dates") ?: JSONArray()
+                if (dates.length() > 0) {
+                    val slots = (0 until dates.length()).mapNotNull { dIdx ->
+                        val d = dates.optJSONObject(dIdx) ?: return@mapNotNull null
+                        val time = listOf(StudentServices.text(d, "start_time"), StudentServices.text(d, "end_time")).filter { it.isNotEmpty() }.joinToString(" – ")
+                        val seats = d.optInt("seats_limit", 0).takeIf { it > 0 }?.let { "Limit: $it" }.orEmpty()
+                        listOf(time, seats).filter { it.isNotEmpty() }.joinToString(" · ")
+                    }.joinToString("\n")
+                    if (slots.isNotEmpty()) UiHelper.note(activity, box, slots, UiHelper.GREEN)
+                }
                 tray.addView(box)
             }
         }
@@ -228,6 +279,23 @@ object LecturerScreenController {
                     StudentServices.text(l, "mode").takeIf { it.isNotEmpty() }
                 ).joinToString(" · ")
                 if (sub.isNotEmpty()) UiHelper.note(activity, box, sub, UiHelper.MUTED)
+                val listId = StudentServices.text(l, "id")
+                if (listId.isNotEmpty()) {
+                    box.isClickable = true
+                    box.isFocusable = true
+                    UiHelper.note(activity, box, activity.getString(R.string.lecturer_attendance_click_hint), UiHelper.MUTED)
+                    box.setOnClickListener {
+                        if (activity.isDemo()) {
+                            showAttendanceDetails(activity, title, DemoStudentServices.demoAttendanceDetail(listId), language)
+                        } else {
+                            activity.universityRead({ client ->
+                                ToolServiceData.fetchAttendanceDetail(client, state, listId)
+                            }) { detail ->
+                                showAttendanceDetails(activity, title, detail, language)
+                            }
+                        }
+                    }
+                }
                 tray.addView(box)
             }
         }
@@ -280,16 +348,16 @@ object LecturerScreenController {
         val language = Language.currentLocale(activity).language
         ToolScreenUi.header(activity, content, R.string.academic_extras_title) { menu ->
             ToolScreenUi.action(menu, R.string.btn_refresh) {
-                activity.refreshStudentServices("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+                activity.refreshStudentServices("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
             }
         }
         UiHelper.note(activity, content, activity.getString(R.string.academic_extras_desc), UiHelper.MUTED)
-        val statusEntry = listOf("academicCalendar", "registrations", "exams", "mobility", "placementAndSlips", "campusGuide", "communications")
+        val statusEntry = listOf("academicCalendar", "registrations", "exams", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
             .mapNotNull { services.optJSONObject(it) }
             .maxByOrNull { it.optLong("attemptAt", it.optLong("fetchedAt", 0L)) } ?: JSONObject()
         StudentCardsController.status(activity, content, statusEntry)
         content.addView(UiHelper.button(activity, activity.getString(R.string.btn_refresh), {
-            activity.refreshStudentServices("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+            activity.refreshStudentServices("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
         }, false))
         val regs = services.optJSONObject("registrations")?.optJSONObject("data")?.optJSONArray("registrations") ?: JSONArray()
         val cart = services.optJSONObject("registrations")?.optJSONObject("data")?.optJSONArray("cart") ?: JSONArray()
@@ -396,6 +464,41 @@ object LecturerScreenController {
                         if (activity.isDemo()) showExamDetails(activity, title, DemoStudentServices.demoExamDetails(examId), language)
                         else activity.universityRead({ client -> ToolServiceData.fetchExamDetails(client, examId) }) { data ->
                             showExamDetails(activity, title, data, language)
+                        }
+                    }
+                }
+                tray.addView(box)
+            }
+        }
+        val thesisEntry = services.optJSONObject("theses")
+        val theses = thesisEntry?.optJSONObject("data")?.optJSONArray("theses") ?: JSONArray()
+        if (theses.length() > 0) {
+            UiHelper.sectionLabel(activity, content, activity.getString(R.string.theses_title))
+            val tray = UiHelper.tray(activity, content)
+            for (i in 0 until theses.length()) {
+                val t = theses.optJSONObject(i) ?: continue
+                if (i > 0) UiHelper.trayDivider(activity, tray)
+                val box = LinearLayout(activity).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
+                }
+                val thId = StudentServices.text(t, "id")
+                val title = StudentServices.localized(t.opt("title") ?: t.opt("titles"), language).ifEmpty { thId }
+                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+                UiHelper.note(activity, box, listOf(StudentServices.text(t, "type"), StudentServices.text(t, "status")).filter { it.isNotEmpty() }.joinToString(" · "), UiHelper.MUTED)
+                if (thId.isNotEmpty()) {
+                    box.isClickable = true
+                    box.isFocusable = true
+                    UiHelper.note(activity, box, activity.getString(R.string.theses_details_hint), UiHelper.MUTED)
+                    box.setOnClickListener {
+                        if (activity.isDemo()) {
+                            showThesisDetails(activity, title, DemoStudentServices.demoThesisDetail(thId), language)
+                        } else {
+                            activity.universityRead({ client ->
+                                ToolServiceData.fetchThesisDetail(client, thId)
+                            }) { detail ->
+                                showThesisDetails(activity, title, detail, language)
+                            }
                         }
                     }
                 }
@@ -552,6 +655,23 @@ object LecturerScreenController {
                 val title = StudentServices.localized(d.opt("name"), language).ifEmpty { StudentServices.text(d, "id") }
                 UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
                 UiHelper.note(activity, box, StudentServices.text(d, "address"), UiHelper.MUTED)
+                val dormId = StudentServices.text(d, "id")
+                if (dormId.isNotEmpty()) {
+                    box.isClickable = true
+                    box.isFocusable = true
+                    UiHelper.note(activity, box, activity.getString(R.string.dormitory_details_hint), UiHelper.MUTED)
+                    box.setOnClickListener {
+                        if (activity.isDemo()) {
+                            showDormitoryDetails(activity, title, DemoStudentServices.demoDormitoryDetail(dormId), language)
+                        } else {
+                            activity.universityRead({ client ->
+                                ToolServiceData.fetchDormitoryDetail(client, dormId)
+                            }) { detail ->
+                                showDormitoryDetails(activity, title, detail, language)
+                            }
+                        }
+                    }
+                }
                 tray.addView(box)
             }
             for (i in 0 until buildings.length()) {
@@ -589,6 +709,79 @@ object LecturerScreenController {
                     }
                 }
                 tray.addView(box)
+            }
+        }
+        val periods = guideData?.optJSONArray("allocationPeriods") ?: JSONArray()
+        if (periods.length() > 0) {
+            val tray = UiHelper.tray(activity, content)
+            for (i in 0 until periods.length()) {
+                val ap = periods.optJSONObject(i) ?: continue
+                if (i > 0) UiHelper.trayDivider(activity, tray)
+                val box = LinearLayout(activity).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
+                }
+                val apId = StudentServices.text(ap, "id")
+                val title = StudentServices.localized(ap.opt("name") ?: ap.opt("status_name"), language).ifEmpty { apId }
+                UiHelper.add(activity, box, title, 15, UiHelper.INK, true)
+                val desc = StudentServices.localized(ap.opt("description") ?: ap.opt("status_desc"), language)
+                if (desc.isNotEmpty()) UiHelper.note(activity, box, desc, UiHelper.MUTED)
+                if (apId.isNotEmpty()) {
+                    box.isClickable = true
+                    box.isFocusable = true
+                    UiHelper.note(activity, box, activity.getString(R.string.allocation_period_hint), UiHelper.MUTED)
+                    box.setOnClickListener {
+                        if (activity.isDemo()) {
+                            showAllocationPeriodDetails(activity, title, DemoStudentServices.demoAllocationPeriodDetail(apId), language)
+                        } else {
+                            activity.universityRead({ client ->
+                                ToolServiceData.fetchAllocationPeriodDetail(client, apId)
+                            }) { detail ->
+                                showAllocationPeriodDetails(activity, title, detail, language)
+                            }
+                        }
+                    }
+                }
+                tray.addView(box)
+            }
+        }
+        val chapters = guideData?.optJSONArray("guideChapters") ?: JSONArray()
+        if (chapters.length() > 0) {
+            val tray = UiHelper.tray(activity, content)
+            var cIdx = 0
+            for (i in 0 until chapters.length()) {
+                val ch = chapters.optJSONObject(i) ?: continue
+                val chTitle = StudentServices.localized(ch.opt("title"), language).ifEmpty { StudentServices.text(ch, "id") }
+                val pages = ch.optJSONArray("pages") ?: JSONArray()
+                for (j in 0 until pages.length()) {
+                    val pg = pages.optJSONObject(j) ?: continue
+                    if (cIdx++ > 0) UiHelper.trayDivider(activity, tray)
+                    val box = LinearLayout(activity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
+                    }
+                    val pgId = StudentServices.text(pg, "id")
+                    val pgTitle = StudentServices.localized(pg.opt("title"), language).ifEmpty { pgId }
+                    UiHelper.add(activity, box, pgTitle, 15, UiHelper.INK, true)
+                    UiHelper.note(activity, box, activity.getString(R.string.guide_chapter_title, chTitle), UiHelper.MUTED)
+                    if (pgId.isNotEmpty()) {
+                        box.isClickable = true
+                        box.isFocusable = true
+                        UiHelper.note(activity, box, activity.getString(R.string.guide_page_hint), UiHelper.MUTED)
+                        box.setOnClickListener {
+                            if (activity.isDemo()) {
+                                showGuidePageDetails(activity, pgTitle, DemoStudentServices.demoGuidePage(pgId), language)
+                            } else {
+                                activity.universityRead({ client ->
+                                    ToolServiceData.fetchGuidePage(client, pgId)
+                                }) { detail ->
+                                    showGuidePageDetails(activity, pgTitle, detail, language)
+                                }
+                            }
+                        }
+                    }
+                    tray.addView(box)
+                }
             }
         }
         UiHelper.sectionLabel(activity, content, activity.getString(R.string.campus_guide_title))
@@ -730,7 +923,7 @@ object LecturerScreenController {
                 tray.addView(box)
             }
         }
-        val anyRendered = regs.length() > 0 || cart.length() > 0 || tokens.length() > 0 || exams.length() > 0 || programmes.length() > 0 || usedEcts.isNotEmpty() || events.length() > 0 ||
+        val anyRendered = regs.length() > 0 || cart.length() > 0 || tokens.length() > 0 || exams.length() > 0 || theses.length() > 0 || programmes.length() > 0 || usedEcts.isNotEmpty() || events.length() > 0 ||
             primaryGroups.length() > 0 || studentMobs.length() > 0 || dorms.length() > 0 || buildings.length() > 0 ||
             statements.length() > 0 || notifications.length() > 0 || surveys.length() > 0 || messages.length() > 0 || plcTests.length() > 0 || slips.length() > 0
         if (!anyRendered) {
@@ -796,21 +989,18 @@ object LecturerScreenController {
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener {
-                        activity.universityRead({ client ->
-                            val profile = ToolServiceData.fetchStaffProfile(client, id)
-                            val today = java.time.LocalDate.now(UsosClient.ZONE).toString()
-                            profile to ToolServiceData.fetchStaffSchedule(client, id, today)
-                        }) { (profile, lessons) ->
-                            val lines = mutableListOf<String>()
-                            StudentServices.text(profile, "room").takeIf { it.isNotEmpty() }?.let { lines.add(activity.getString(R.string.staff_office, it)) }
-                            StudentServices.localized(profile.opt("office_hours"), language).takeIf { it.isNotEmpty() }?.let { lines.add(it) }
-                            lines.add(activity.getString(R.string.staff_schedule_title))
-                            if (lessons.length() == 0) lines.add(activity.getString(R.string.staff_schedule_empty))
-                            for (n in 0 until lessons.length()) {
-                                val lesson = lessons.optJSONObject(n) ?: continue
-                                lines.add(listOf(StudentServices.text(lesson, "start_time"), StudentServices.localized(lesson.opt("name"), language), StudentServices.text(lesson, "room_number")).filter { it.isNotEmpty() }.joinToString(" · "))
+                        if (activity.isDemo()) {
+                            val profile = DemoStudentServices.demoStaffProfile(id)
+                            val lessons = DemoStudentServices.demoStaffSchedule(id)
+                            showStaffScheduleDialog(activity, fullName.ifEmpty { id }, profile, lessons, language)
+                        } else {
+                            activity.universityRead({ client ->
+                                val profile = ToolServiceData.fetchStaffProfile(client, id)
+                                val today = java.time.LocalDate.now(UsosClient.ZONE).toString()
+                                profile to ToolServiceData.fetchStaffSchedule(client, id, today)
+                            }) { (profile, lessons) ->
+                                showStaffScheduleDialog(activity, fullName.ifEmpty { id }, profile, lessons, language)
                             }
-                            MaterialAlertDialogBuilder(activity).setTitle(fullName.ifEmpty { id }).setMessage(lines.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
                         }
                     }
                 }
@@ -1071,4 +1261,136 @@ object LecturerScreenController {
         MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.joinToString("\n\n"))
             .setPositiveButton(android.R.string.ok, null).show()
     }
+
+    private fun showStaffScheduleDialog(activity: MainActivity, fullName: String, profile: JSONObject, lessons: JSONArray, language: String) {
+        val lines = mutableListOf<String>()
+        StudentServices.text(profile, "room").takeIf { it.isNotEmpty() }?.let { lines.add(activity.getString(R.string.staff_office, it)) }
+        StudentServices.localized(profile.opt("office_hours"), language).takeIf { it.isNotEmpty() }?.let { lines.add(it) }
+        lines.add(activity.getString(R.string.staff_schedule_title))
+        if (lessons.length() == 0) lines.add(activity.getString(R.string.staff_schedule_empty))
+        for (n in 0 until lessons.length()) {
+            val lesson = lessons.optJSONObject(n) ?: continue
+            lines.add(listOf(StudentServices.text(lesson, "start_time"), StudentServices.localized(lesson.opt("name"), language), StudentServices.text(lesson, "room_number")).filter { it.isNotEmpty() }.joinToString(" · "))
+        }
+        MaterialAlertDialogBuilder(activity).setTitle(fullName).setMessage(lines.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showGroupDetails(activity: MainActivity, title: String, data: JSONObject, language: String) {
+        val lines = mutableListOf<String>()
+        val participants = data.optJSONArray("participants") ?: JSONArray()
+        val lecturers = data.optJSONArray("lecturers") ?: JSONArray()
+        if (lecturers.length() > 0) {
+            lines.add("Prowadzący / Lecturers:")
+            for (i in 0 until lecturers.length()) {
+                val l = lecturers.optJSONObject(i) ?: continue
+                lines.add("• " + listOf(StudentServices.text(l, "first_name"), StudentServices.text(l, "last_name")).filter { it.isNotBlank() }.joinToString(" "))
+            }
+        }
+        lines.add("Uczestnicy / Participants (${data.optInt("participantsTotal", participants.length())}):")
+        if (participants.length() == 0) lines.add("Brak zapisanych uczestników.")
+        for (i in 0 until participants.length()) {
+            val p = participants.optJSONObject(i) ?: continue
+            val name = listOf(StudentServices.text(p, "first_name"), StudentServices.text(p, "last_name")).filter { it.isNotBlank() }.joinToString(" ")
+            val num = StudentServices.text(p, "student_number").takeIf { it.isNotEmpty() }?.let { "($it)" }.orEmpty()
+            lines.add("• $name $num".trim())
+        }
+        MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.joinToString("\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showNodeDetails(activity: MainActivity, fallback: String, data: JSONObject, language: String) {
+        val lines = mutableListOf<String>()
+        val name = StudentServices.localized(data.opt("name"), language).ifEmpty { fallback }
+        val type = StudentServices.text(data, "type")
+        if (type.isNotEmpty()) lines.add("Typ / Type: $type")
+        val desc = StudentServices.localized(data.opt("description"), language)
+        if (desc.isNotEmpty()) lines.add(desc)
+        if (data.has("points_min") || data.has("points_max")) {
+            lines.add("Punkty: ${data.optDouble("points_min", 0.0)} – ${data.optDouble("points_max", 0.0)}")
+        }
+        val hist = data.optJSONArray("histogram") ?: JSONArray()
+        if (hist.length() > 0) {
+            lines.add("\nRozkład wyników / Distribution:")
+            for (i in 0 until hist.length()) {
+                val h = hist.optJSONObject(i) ?: continue
+                lines.add("${StudentServices.text(h, "label")}: ${h.optInt("count", 0)}")
+            }
+        }
+        MaterialAlertDialogBuilder(activity).setTitle(name).setMessage(lines.joinToString("\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showAttendanceDetails(activity: MainActivity, title: String, data: JSONObject, language: String) {
+        val lines = mutableListOf<String>()
+        val entries = data.optJSONArray("entries") ?: JSONArray()
+        lines.add("Data: ${StudentServices.text(data, "date")} · Tryb: ${StudentServices.text(data, "mode")}")
+        lines.add("\nStudenci / Students (${data.optInt("entriesTotal", entries.length())}):")
+        if (entries.length() == 0) lines.add("Brak wpisów.")
+        for (i in 0 until entries.length()) {
+            val e = entries.optJSONObject(i) ?: continue
+            val name = listOf(StudentServices.text(e, "first_name"), StudentServices.text(e, "last_name")).filter { it.isNotBlank() }.joinToString(" ")
+            val num = StudentServices.text(e, "student_number").takeIf { it.isNotEmpty() }?.let { "($it)" }.orEmpty()
+            val mode = StudentServices.text(e, "attendance_mode")
+            val comment = StudentServices.text(e, "comment").takeIf { it.isNotEmpty() }?.let { " - $it" }.orEmpty()
+            lines.add("• $name $num: $mode$comment")
+        }
+        MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.joinToString("\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showThesisDetails(activity: MainActivity, fallback: String, data: JSONObject, language: String) {
+        val lines = mutableListOf<String>()
+        val title = StudentServices.localized(data.opt("title") ?: data.opt("titles"), language).ifEmpty { fallback }
+        val type = StudentServices.text(data, "type")
+        if (type.isNotEmpty()) lines.add("Typ / Type: $type")
+        val status = StudentServices.text(data, "status")
+        if (status.isNotEmpty()) lines.add("Status: $status")
+        val sups = data.optJSONArray("supervisors") ?: JSONArray()
+        if (sups.length() > 0) {
+            val names = (0 until sups.length()).map { sups.optString(it) }.filter { it.isNotBlank() }.joinToString(", ")
+            lines.add(activity.getString(R.string.thesis_supervisors, names))
+        }
+        val authors = data.optJSONArray("authors") ?: JSONArray()
+        if (authors.length() > 0) {
+            val names = (0 until authors.length()).map { authors.optString(it) }.filter { it.isNotBlank() }.joinToString(", ")
+            lines.add(activity.getString(R.string.thesis_authors, names))
+        }
+        val fac = StudentServices.localized(data.opt("faculty_name"), language)
+        if (fac.isNotEmpty()) lines.add("Wydział: $fac")
+        MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showDormitoryDetails(activity: MainActivity, fallback: String, data: JSONObject, language: String) {
+        val lines = mutableListOf<String>()
+        val name = StudentServices.localized(data.opt("name"), language).ifEmpty { fallback }
+        val addr = StudentServices.text(data, "address")
+        if (addr.isNotEmpty()) lines.add("Adres: $addr")
+        val desc = StudentServices.localized(data.opt("description"), language)
+        if (desc.isNotEmpty()) lines.add("Opis: $desc")
+        MaterialAlertDialogBuilder(activity).setTitle(name).setMessage(lines.ifEmpty { listOf("Brak dodatkowych informacji.") }.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showAllocationPeriodDetails(activity: MainActivity, fallback: String, data: JSONObject, language: String) {
+        val lines = mutableListOf<String>()
+        val name = StudentServices.localized(data.opt("status_name"), language).ifEmpty { fallback }
+        val desc = StudentServices.localized(data.opt("status_desc"), language)
+        if (desc.isNotEmpty()) lines.add(desc)
+        val start = StudentServices.text(data, "start_date")
+        val end = StudentServices.text(data, "end_date")
+        if (start.isNotEmpty() || end.isNotEmpty()) lines.add("Termin: $start – $end")
+        MaterialAlertDialogBuilder(activity).setTitle(name).setMessage(lines.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showGuidePageDetails(activity: MainActivity, fallback: String, data: JSONObject, language: String) {
+        val lines = mutableListOf<String>()
+        val title = StudentServices.localized(data.opt("title"), language).ifEmpty { fallback }
+        val entries = data.optJSONArray("entries") ?: JSONArray()
+        for (i in 0 until entries.length()) {
+            val e = entries.optJSONObject(i) ?: continue
+            val eTitle = StudentServices.localized(e.opt("title"), language)
+            val eContent = StudentServices.text(e, "content")
+            if (eTitle.isNotEmpty()) lines.add("• $eTitle")
+            if (eContent.isNotEmpty()) lines.add(eContent)
+            lines.add("")
+        }
+        MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.ifEmpty { listOf("Brak treści strony.") }.joinToString("\n")).setPositiveButton(android.R.string.ok, null).show()
+    }
+
 }

@@ -549,4 +549,75 @@ class ToolServicesTest {
             assertEquals(1, writes)
         }
     }
+
+    @Test fun thesisDetailRequestsDocumentedFieldsAndSanitizesHtml() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/theses/thesis?"))
+            assertTrue(address.contains("ths_id=101"))
+            Connection("""{"id":"101","type":"mgr","title":{"pl":"Systemy <b>wbudowane</b>"},"faculty":{"id":"W1","name":{"pl":"Wydzial Informatyki"}},"authors":[{"id":"1","first_name":"Jan","last_name":"Kowalski"}],"supervisors":[{"id":"2","first_name":"Anna","last_name":"Nowak"}]}""")
+        }
+        val detail = ToolServiceData.fetchThesisDetail(client, "101")
+        assertEquals("101", detail.getString("id"))
+        assertEquals("Systemy <b>wbudowane</b>", detail.getJSONObject("title").getString("pl"))
+        assertEquals("Jan Kowalski", detail.getJSONArray("authors").getString(0))
+        assertEquals("Anna Nowak", detail.getJSONArray("supervisors").getString(0))
+    }
+
+    @Test fun dormitoryDetailParsesCorrectly() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/housing/dormitory?"))
+            assertTrue(address.contains("dormitory_id=D1"))
+            Connection("""{"id":"D1","name":{"pl":"Akademik 1"},"short_name":{"pl":"DS1"}}""")
+        }
+        val detail = ToolServiceData.fetchDormitoryDetail(client, "D1")
+        assertEquals("D1", detail.getString("id"))
+        assertEquals("Akademik 1", detail.getJSONObject("name").getString("pl"))
+    }
+
+    @Test fun allocationPeriodDetailParsesCorrectly() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/housing/allocation_period?"))
+            assertTrue(address.contains("allocation_period_id=P1"))
+            Connection("""{"id":"P1","status_name":{"pl":"Tura glowna"},"status_desc":{"pl":"Zapisy na pokoje"},"start_date":"2026-10-01","end_date":"2026-10-15"}""")
+        }
+        val detail = ToolServiceData.fetchAllocationPeriodDetail(client, "P1")
+        assertEquals("P1", detail.getString("id"))
+        assertEquals("Tura glowna", detail.getJSONObject("status_name").getString("pl"))
+        assertEquals("2026-10-01", detail.getString("start_date"))
+    }
+
+    @Test fun guidePageParsesEntriesAndHtml() {
+        val client = UsosClient(credentials(), {}) { address ->
+            assertTrue(address.contains("services/guide/page?"))
+            assertTrue(address.contains("page_id=PG1"))
+            Connection("""{"id":"PG1","title":{"pl":"Biblioteka"},"entries":[{"id":"E1","title":{"pl":"Zasady"},"content":"Regulamin <p>biblioteki</p>"}]}""")
+        }
+        val detail = ToolServiceData.fetchGuidePage(client, "PG1")
+        assertEquals("PG1", detail.getString("id"))
+        assertEquals("Biblioteka", detail.getJSONObject("title").getString("pl"))
+        val entry = detail.getJSONArray("entries").getJSONObject(0)
+        assertEquals("Zasady", entry.getJSONObject("title").getString("pl"))
+        assertTrue(entry.getString("content").contains("Regulamin"))
+        assertFalse(entry.getString("content").contains("<p>"))
+    }
+
+    @Test fun courseEditionAndUnitParseCorrectly() {
+        val client = UsosClient(credentials(), {}) { address ->
+            if (address.contains("services/courses/course_edition?")) {
+                Connection("""{"coordinators":[{"id":"1","first_name":"Jan","last_name":"Kowalski"}],"lecturers":[{"id":"2","first_name":"Adam","last_name":"Nowak"}]}""")
+            } else {
+                assertTrue(address.contains("services/courses/unit?"))
+                Connection("""{"id":"U1","classtype_id":"LAB","classtype_name":{"pl":"Laboratorium"}}""")
+            }
+        }
+        val edition = ToolServiceData.fetchCourseEdition(client, "C1", "2026Z")
+        assertEquals("C1", edition.getString("course_id"))
+        assertEquals("2026Z", edition.getString("term_id"))
+        assertEquals("Jan Kowalski", edition.getJSONArray("coordinators").getString(0))
+
+        val unit = ToolServiceData.fetchCourseUnit(client, "U1")
+        assertEquals("U1", unit.getString("id"))
+        assertEquals("LAB", unit.getString("classtype_id"))
+        assertEquals("Laboratorium", unit.getJSONObject("classtype_name").getString("pl"))
+    }
 }

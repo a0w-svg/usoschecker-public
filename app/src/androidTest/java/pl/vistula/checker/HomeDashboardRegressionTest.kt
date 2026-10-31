@@ -98,7 +98,7 @@ class HomeDashboardRegressionTest {
                 .put("details", JSONArray().put(payment))
             val state = JSONObject().put("studentServices", JSONObject().put("payments", JSONObject().put("data", data)))
             val content = LinearLayout(a)
-            pl.vistula.checker.ui.PaymentsScreenController.render(a, content, JSONObject(), state, false, {})
+            pl.vistula.checker.ui.PaymentsScreenController.render(a, content, JSONObject(), state, false, null) {}
             val expected = pl.vistula.checker.core.PaymentAmounts.format(1250, "PLN", language)
             fun includes(view: View): Boolean = (view is TextView && view.text.contains(expected)) ||
                 (view is ViewGroup && (0 until view.childCount).any { includes(view.getChildAt(it)) })

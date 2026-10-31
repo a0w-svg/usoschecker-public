@@ -52,6 +52,7 @@ import kotlin.math.max
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import pl.vistula.checker.core.AccountRole
 import pl.vistula.checker.core.ApiCatalog
 import pl.vistula.checker.core.CampusAffiliation
 import pl.vistula.checker.core.LessonTime
@@ -61,6 +62,8 @@ import pl.vistula.checker.core.TaskTools
 import pl.vistula.checker.ui.AccountScreenController
 import pl.vistula.checker.ui.ApiErrorUi
 import pl.vistula.checker.ui.ApiExplorerController
+import pl.vistula.checker.ui.TabSections
+import pl.vistula.checker.ui.Tabs
 import pl.vistula.checker.ui.Appearance
 import pl.vistula.checker.ui.AttendanceScreenController
 import pl.vistula.checker.ui.CampusGuideController
@@ -108,31 +111,16 @@ class MainActivity : AppCompatActivity() {
     // State preserved across configuration changes
     private var simTargetGpa: Double = 4.50
     private var simRemainingEcts: Double = 30.0
-    private var filter: String = "wszystkie"
-    private var historyQuery: String = ""
-    private var gradeQuery: String = ""
-    private var gradeType: String = "all"
-    private var gradeOrder: String = "name"
-    private var gradeFiltersExpanded: Boolean = false
-    private val gradeSemesterExpansion: MutableMap<String, Boolean> = HashMap()
-    fun gradeSemesterExpansion(): MutableMap<String, Boolean> = gradeSemesterExpansion
+    private val history = pl.vistula.checker.ui.HistoryUiState()
+    private val grades = pl.vistula.checker.ui.GradesUiState()
+    fun gradeSemesterExpansion(): MutableMap<String, Boolean> = grades.semesterExpansion
 
-    private var semester: String = ""
-    private var semesterInitialized = false
-    private var taskFilter: String = "all"
-    private var taskQuery: String = ""
+    private val tasks = pl.vistula.checker.ui.TasksUiState()
     private var pendingCalendar: String? = null
-    private var taskOrder: String = "due"
-    private var calendarDate: String = ""
-    private var calendarDateSelected: Boolean = false
-    private var calendarMode: String = "list"
-    private var calendarQuery: String = ""
-    private var focusCurrentSchedule: Boolean = false
+    private val schedule = pl.vistula.checker.ui.ScheduleUiState()
     private var newsQuery: String = ""
-    private var attendanceFilter: String = "all"
+    private var attendanceFilter: String = pl.vistula.checker.ui.AttendanceFilter.ALL
     private var documentQuery: String = ""
-    private var apiModule: String = ""
-    private var apiDrafts: JSONObject = JSONObject()
     private var demoPlanDays: Int = 56
     private var renderedMinute: Long = 0
     private var loadingState: Boolean = false
@@ -140,17 +128,11 @@ class MainActivity : AppCompatActivity() {
     private var demoCampus: String = "0000"
 
     // API catalog state
-    private var apiQuery: String = ""
-    private var apiLimit: Int = 60
-    private var apiFavoritesOnly: Boolean = false
-    private var apiFavorites: MutableSet<String> = HashSet()
-    private var currentMethod: String? = null
-    private var currentMethodJson: JSONObject? = null
+    private val api = pl.vistula.checker.ui.ApiExplorerState()
     private lateinit var pendingFiles: PendingFilesModel
     private var uploadBytes: ByteArray?
         get() = pendingFiles.upload
         set(value) { pendingFiles.upload = value }
-    private var uploadMethod: String? = null
     private var exportResponse: UsosClient.Response?
         get() = pendingFiles.export
         set(value) { pendingFiles.export = value }
@@ -169,8 +151,8 @@ class MainActivity : AppCompatActivity() {
     private val refresh: Runnable = object : Runnable {
         override fun run() {
             if (!busy &&
-                currentMethod == null &&
-                tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12 &&
+                api.currentMethod == null &&
+                tab != Tabs.ACCOUNT && tab != Tabs.API && tab != Tabs.PAYMENTS && tab != Tabs.GPA_SIMULATOR && tab != Tabs.CAMPUS_GUIDE && tab != Tabs.NEWS && tab != Tabs.ATTENDANCE &&
                 currentFocus !is EditText
             ) {
                 load()
@@ -198,14 +180,13 @@ class MainActivity : AppCompatActivity() {
                     if (busy) return
                     if (welcomeStep > 0) {
                         showWelcome(welcomeStep - 1)
-                    } else if (tab == 4 && settingsPage != null && settingsPage != "overview") {
+                    } else if (tab == Tabs.ACCOUNT && settingsPage != null && settingsPage != "overview") {
                         openAccountPage(null)
-                    } else if (currentMethod != null) {
-                        currentMethod = null
-                        currentMethodJson = null
+                    } else if (api.currentMethod != null) {
+                        api.closeMethod()
                         render()
-                    } else if (tab != 0) {
-                        navigate(if (tab == 1 || tab == 2 || tab == 5 || tab == 6) 0 else 6)
+                    } else if (tab != Tabs.HOME) {
+                        navigate(if (tab == Tabs.HISTORY || tab == Tabs.GRADES || tab == Tabs.SCHEDULE || tab == Tabs.MORE) 0 else 6)
                     } else {
                         isEnabled = false
                         onBackPressedDispatcher.onBackPressed()
@@ -214,10 +195,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-        taskOrder = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", "due") ?: "due"
-        gradeOrder = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", "name") ?: "name"
-        calendarMode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
-        apiFavorites = HashSet(
+        tasks.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("taskOrder", null)
+            ?.takeIf { it in pl.vistula.checker.ui.TasksUiState.ORDERS } ?: pl.vistula.checker.ui.TasksUiState.ORDER_DUE
+        grades.order = getSharedPreferences("student_tools", MODE_PRIVATE).getString("gradeOrder", null)
+            ?.takeIf { it in pl.vistula.checker.ui.GradesUiState.ORDERS } ?: pl.vistula.checker.ui.GradesUiState.ORDER_NAME
+        schedule.mode = getSharedPreferences("student_tools", MODE_PRIVATE).getString("calendarMode", "list") ?: "list"
+        api.favorites = HashSet(
             getSharedPreferences("api_catalog", MODE_PRIVATE).getStringSet("favorites", emptySet()) ?: emptySet()
         )
 
@@ -228,56 +211,30 @@ class MainActivity : AppCompatActivity() {
             demo = bundle.getBoolean("demo")
             demoChanged = bundle.getBoolean("demoChanged")
             tab = bundle.getInt("tab")
-            filter = bundle.getString("filter", "wszystkie")
-            historyQuery = bundle.getString("historyQuery", "")
-            gradeQuery = bundle.getString("gradeQuery", "")
-            gradeType = bundle.getString("gradeType", "all")
-            gradeOrder = bundle.getString("gradeOrder", gradeOrder)
-            gradeFiltersExpanded = bundle.getBoolean("gradeFiltersExpanded")
-            val expandedTerms = bundle.getBundle("gradeSemesterExpansion")
-            if (expandedTerms != null) {
-                for (term in expandedTerms.keySet()) {
-                    gradeSemesterExpansion[term] = expandedTerms.getBoolean(term)
-                }
-            }
-            calendarDate = bundle.getString("calendarDate", "")
-            calendarDateSelected = bundle.getBoolean("calendarDateSelected", false)
-            calendarQuery = bundle.getString("calendarQuery", "")
-            calendarMode = bundle.getString("calendarMode", calendarMode)
+            history.restore(bundle)
+            grades.restore(bundle)
+            schedule.restore(bundle)
             demoPlanDays = bundle.getInt("demoPlanDays", 56)
-            semester = bundle.getString("semester", "")
-            semesterInitialized = bundle.getBoolean("semesterInitialized", bundle.containsKey("semester"))
-            taskFilter = bundle.getString("taskFilter", "all")
-            taskQuery = bundle.getString("taskQuery", "")
+            tasks.restore(bundle)
             pendingCalendar = bundle.getString("pendingCalendar")
-            taskOrder = bundle.getString("taskOrder", "due")
             newsQuery = bundle.getString("newsQuery", "")
-            attendanceFilter = bundle.getString("attendanceFilter", "all")
+            attendanceFilter = pl.vistula.checker.ui.AttendanceFilter.statusOrAll(bundle.getString("attendanceFilter"))
             documentQuery = bundle.getString("documentQuery", "")
-            apiModule = bundle.getString("apiModule", "")
-            try {
-                apiDrafts = JSONObject(bundle.getString("apiDrafts", "{}"))
-            } catch (ignored: JSONException) {
-            }
-            currentMethod = bundle.getString("currentMethod")
-            uploadMethod = bundle.getString("uploadMethod")
+            api.restore(bundle)
             try {
                 demoTasks = JSONArray(bundle.getString("demoTasks", "[]"))
             } catch (ignored: JSONException) {
             }
-            apiQuery = bundle.getString("apiQuery", "")
-            apiLimit = bundle.getInt("apiLimit", 60)
-            apiFavoritesOnly = bundle.getBoolean("apiFavoritesOnly")
             simTargetGpa = bundle.getDouble("simTargetGpa", 4.50)
             simRemainingEcts = bundle.getDouble("simRemainingEcts", 30.0)
         } else if (intent.getBooleanExtra("showHistory", false)) {
             tab = 1
-            filter = historyFilter(intent)
+            history.filter = historyFilter(intent)
         } else if (intent.hasExtra("tab")) {
-            tab = intent.getIntExtra("tab", 0)
+            tab = Tabs.fromExternal(intent.getIntExtra("tab", 0))
         }
 
-        focusCurrentSchedule = bundle == null && tab == 5
+        schedule.focusCurrent = bundle == null && tab == Tabs.SCHEDULE
         setContentView(R.layout.activity_main)
         root = findViewById(R.id.main_root)
         progress = findViewById(R.id.progress_text)
@@ -352,11 +309,11 @@ class MainActivity : AppCompatActivity() {
         navigation?.setOnItemSelectedListener { item ->
             if (busy) return@setOnItemSelectedListener false
             when (item.itemId) {
-                R.id.nav_item_home -> navigate(0)
-                R.id.nav_item_grades -> navigate(2)
-                R.id.nav_item_plan -> navigate(5)
-                R.id.nav_item_history -> navigate(1)
-                R.id.nav_item_more -> navigate(6)
+                R.id.nav_item_home -> navigate(Tabs.HOME)
+                R.id.nav_item_grades -> navigate(Tabs.GRADES)
+                R.id.nav_item_plan -> navigate(Tabs.SCHEDULE)
+                R.id.nav_item_history -> navigate(Tabs.HISTORY)
+                R.id.nav_item_more -> navigate(Tabs.MORE)
             }
             true
         }
@@ -365,10 +322,10 @@ class MainActivity : AppCompatActivity() {
             if (busy) return@setOnTabSwipe
             val tabs = intArrayOf(0, 5, 2, 1, 6)
             val current = when (tab) {
-                0 -> 0
-                5 -> 1
-                2 -> 2
-                1 -> 3
+                Tabs.HOME -> 0
+                Tabs.SCHEDULE -> 1
+                Tabs.GRADES -> 2
+                Tabs.HISTORY -> 3
                 else -> 4
             }
             val next = current + direction
@@ -376,7 +333,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navigation?.setOnItemReselectedListener { item ->
-            if (!busy && item.itemId == R.id.nav_item_more && tab != 6) navigate(6)
+            if (!busy && item.itemId == R.id.nav_item_more && tab != Tabs.MORE) navigate(Tabs.MORE)
         }
 
         task(
@@ -395,7 +352,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 ensureSchedule()
-                val method = currentMethod
+                val method = api.currentMethod
                 if (method != null) {
                     showMethod(method)
                     return@task
@@ -411,48 +368,22 @@ class MainActivity : AppCompatActivity() {
         outState.putString("settingsPage", settingsPage)
         outState.putString("demoCampus", demoCampus)
         outState.putString("documentQuery", documentQuery)
-        outState.putString("apiModule", apiModule)
-        outState.putString("currentMethod", currentMethod)
-        outState.putString("uploadMethod", uploadMethod)
-        try {
-            outState.putString("apiDrafts", ApiCatalog.restorableDrafts(apiDrafts).toString())
-        } catch (ignored: JSONException) {
-        }
-        outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
-        outState.putString("calendarQuery", calendarQuery)
-        outState.putBoolean("apiFavoritesOnly", apiFavoritesOnly)
+        api.save(outState)
+        schedule.save(outState)
         outState.putDouble("simTargetGpa", simTargetGpa)
         outState.putDouble("simRemainingEcts", simRemainingEcts)
         super.onSaveInstanceState(outState)
         outState.putBoolean("demo", demo)
         outState.putBoolean("demoChanged", demoChanged)
         outState.putInt("tab", tab)
-        outState.putString("filter", filter)
-        outState.putString("semester", semester)
-        outState.putBoolean("semesterInitialized", semesterInitialized)
-        outState.putString("taskFilter", taskFilter)
-        outState.putString("taskQuery", taskQuery)
-        outState.putString("taskOrder", taskOrder)
-        outState.putString("calendarDate", calendarDate)
-        outState.putBoolean("calendarDateSelected", calendarDateSelected)
-        outState.putString("calendarMode", calendarMode)
+        history.save(outState)
+        grades.save(outState)
+        tasks.save(outState)
         outState.putInt("demoPlanDays", demoPlanDays)
         outState.putString("pendingCalendar", pendingCalendar)
         outState.putString("newsQuery", newsQuery)
         outState.putString("attendanceFilter", attendanceFilter)
         outState.putString("demoTasks", demoTasks.toString())
-        outState.putString("historyQuery", historyQuery)
-        outState.putString("gradeQuery", gradeQuery)
-        outState.putString("gradeType", gradeType)
-        outState.putString("gradeOrder", gradeOrder)
-        outState.putBoolean("gradeFiltersExpanded", gradeFiltersExpanded)
-        val expandedTerms = Bundle()
-        for ((key, value) in gradeSemesterExpansion) {
-            expandedTerms.putBoolean(key, value)
-        }
-        outState.putBundle("gradeSemesterExpansion", expandedTerms)
-        outState.putString("apiQuery", apiQuery)
-        outState.putInt("apiLimit", apiLimit)
     }
 
     public override fun onNewIntent(intent: Intent) {
@@ -460,11 +391,10 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
         showReleaseUpdatesIfRequested()
         if (intent.getBooleanExtra("showHistory", false)) {
-            filter = historyFilter(intent)
-            historyQuery = ""
-            navigate(1)
+            history.open(historyFilter(intent))
+            navigate(Tabs.HISTORY)
         } else if (intent.hasExtra("tab")) {
-            navigate(intent.getIntExtra("tab", 0))
+            navigate(Tabs.fromExternal(intent.getIntExtra("tab", 0)))
         }
     }
 
@@ -479,13 +409,13 @@ class MainActivity : AppCompatActivity() {
         io.execute { ClassReminderReceiver.scheduleNext(applicationContext) }
         handler.removeCallbacks(refresh)
         handler.postDelayed(refresh, 30000)
-        if (::content.isInitialized && !busy && tab != 4 && tab != 3 && tab != 8 && tab != 9 && tab != 10 && tab != 11 && tab != 12) {
+        if (::content.isInitialized && !busy && tab != Tabs.ACCOUNT && tab != Tabs.API && tab != Tabs.PAYMENTS && tab != Tabs.GPA_SIMULATOR && tab != Tabs.CAMPUS_GUIDE && tab != Tabs.NEWS && tab != Tabs.ATTENDANCE) {
             load()
         }
-        if (tab == 4 && state.optString("requestToken").isNotEmpty() && !connected()) {
+        if (tab == Tabs.ACCOUNT && state.optString("requestToken").isNotEmpty() && !connected()) {
             checkClipboardForPin()
         }
-        if (::content.isInitialized && !busy && tab == 4 && settingsPage == "settings.notifications") render()
+        if (::content.isInitialized && !busy && tab == Tabs.ACCOUNT && settingsPage == "settings.notifications") render()
     }
 
     override fun onPause() {
@@ -518,17 +448,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openScheduleDate(date: String) {
-        calendarDate = date
-        calendarDateSelected = true
-        navigate(5, false)
+        schedule.select(date)
+        navigate(Tabs.SCHEDULE, false)
     }
 
     fun selectScheduleDay(date: String) {
-        calendarMode = "day"
+        schedule.mode = "day"
         openScheduleDate(date)
     }
 
-    fun hasSelectedScheduleDay(): Boolean = calendarDateSelected
+    fun hasSelectedScheduleDay(): Boolean = schedule.dateSelected
 
     private fun navigate(target: Int, focusCurrent: Boolean) {
         welcomeStep = -1
@@ -539,27 +468,27 @@ class MainActivity : AppCompatActivity() {
             val keyboard = getSystemService(InputMethodManager::class.java)
             keyboard?.hideSoftInputFromWindow(root.windowToken, 0)
         }
-        focusCurrentSchedule = focusCurrent && target == 5 && tab != 5
-        if (focusCurrentSchedule) calendarDateSelected = false
-        currentMethod = null
-        currentMethodJson = null
+        schedule.focusCurrent = focusCurrent && target == Tabs.SCHEDULE && tab != Tabs.SCHEDULE
+        if (schedule.focusCurrent) schedule.dateSelected = false
+        api.closeMethod()
         tab = target
         scroll.scrollTo(0, 0)
         render()
         if (!demo && !busy) {
-            if (target == 10 && connected() && System.currentTimeMillis() - (studentServices().optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L) > 24 * 60 * 60_000L) {
+            if (target == Tabs.CAMPUS_GUIDE && connected() && System.currentTimeMillis() - (studentServices().optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L) > 24 * 60 * 60_000L) {
                 refreshStudentServices("affiliation")
                 return
             }
-            val targetSections = when (target) { 8 -> listOf("payments"); 11 -> listOf("news"); 13 -> listOf("cards"); 14 -> listOf("documents"); 15 -> listOf("teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports"); 16 -> listOf("registrations", "tokenRegistrations", "exams", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications"); 17 -> listOf("staffDirectory"); else -> emptyList() }; val section = targetSections.firstOrNull()
-            if (target == 11 && !connected() && CampusAffiliation.selected(state).isEmpty()) return
+            val targetSections = TabSections.forTab(target, AccountRole.lecturer(serviceAccountState()))
+            val section = targetSections.firstOrNull()
+            if (target == Tabs.NEWS && !connected() && CampusAffiliation.selected(state).isEmpty()) return
             val services = studentServices()
             val mobile = services.optJSONObject("mcard")
             // An upgraded installation may have a recent mobile-card cache but no physical-card entry yet.
             val physicalCardsMissing = section == "cards" && services.optJSONObject("physicalCards") == null &&
                 mobile != null && mobile.optLong("fetchedAt") > 0 && mobile.optString("error").isEmpty() &&
                 StudentServices.hasScope(state.optString("scopes"), "cards") && state.optLong("retryAt") <= System.currentTimeMillis()
-            val optionalScopes = setOf("news", "teaching", "lecturerGroups", "lecturerMeetings", "lecturerAttendance", "lecturerReports", "staffDirectory", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications")
+            val optionalScopes = setOf("news", "teaching", "lecturerGroups", "lecturerMeetings", "lecturerAttendance", "lecturerReports", "staffDirectory", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications", "theses")
             val staleSections = targetSections.filter { candidate ->
                 val allowed = candidate in optionalScopes ||
                     StudentServices.hasScope(state.optString("scopes"), StudentServiceLoader.requiredScope(candidate))
@@ -588,7 +517,7 @@ class MainActivity : AppCompatActivity() {
         val gutter = max(16, (resources.configuration.screenWidthDp - 560) / 2)
         content.setPadding(
             UiHelper.dp(this, gutter),
-            UiHelper.dp(this, if (tab == 5) 0 else 12),
+            UiHelper.dp(this, if (tab == Tabs.SCHEDULE) 0 else 12),
             UiHelper.dp(this, gutter),
             UiHelper.dp(this, 24)
         )
@@ -600,9 +529,9 @@ class MainActivity : AppCompatActivity() {
         setNavigationVisible(true)
         navigation?.let { nav ->
             val navMenuId = when (tab) {
-                2 -> R.id.nav_item_grades
-                5 -> R.id.nav_item_plan
-                1 -> R.id.nav_item_history
+                Tabs.GRADES -> R.id.nav_item_grades
+                Tabs.SCHEDULE -> R.id.nav_item_plan
+                Tabs.HISTORY -> R.id.nav_item_history
                 6, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 -> R.id.nav_item_more
                 else -> R.id.nav_item_home
             }
@@ -626,344 +555,57 @@ class MainActivity : AppCompatActivity() {
             })
 
             when (tab) {
-                15 -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
-                16 -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
-                17 -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
-                13 -> StudentCardsController.render(
+                Tabs.LECTURER -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
+                Tabs.ACADEMIC_EXTRAS -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
+                Tabs.STAFF_DIRECTORY -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
+                Tabs.CARDS -> StudentCardsController.render(
                     this,
                     content,
                     if (demo) JSONObject().put("user", "Aleksandra Nowak · DEMO") else state,
                     studentServices()
                 )
-                14 -> StudentDocumentsController.render(this, content, state, studentServices())
-                0 -> HomeScreenController.render(this, content, display(), state, demo, demoTasks) { lessonDetails(it) }
-                1 -> HistoryScreenController.render(
+                Tabs.DOCUMENTS -> StudentDocumentsController.render(this, content, state, studentServices())
+                Tabs.HOME -> HomeScreenController.render(this, content, display(), state, demo, demoTasks) { lessonDetails(it) }
+                Tabs.HISTORY -> HistoryScreenController.render(
                     this,
                     content,
                     display(),
-                    filter,
-                    historyQuery,
+                    history.filter,
+                    history.query,
                     demo,
                     { f ->
-                        filter = f
+                        history.filter = f
                         render()
                     },
-                    { q -> historyQuery = q },
+                    { q -> history.query = q },
                     { sync() }
                 )
-                2 -> {
-                    if (!semesterInitialized) {
-                        display().optJSONObject("snapshot")?.let { raw ->
-                            val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
-                            semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
-                                ?: pl.vistula.checker.core.GradeSemesters.ordered(snapshot, java.time.LocalDate.now(UsosClient.ZONE)).firstOrNull().orEmpty()
-                            semesterInitialized = true
-                        }
-                    }
-                    GradesScreenController.render(
-                    this,
-                    content,
-                    display(),
-                    state,
-                    demo,
-                    semester,
-                    gradeType,
-                    gradeOrder,
-                    gradeQuery,
-                    gradeFiltersExpanded,
-                    { exp ->
-                        gradeFiltersExpanded = exp
-                        render()
-                    },
-                    { sem ->
-                        semester = sem
-                        if (sem.isNotEmpty()) gradeSemesterExpansion[sem] = true
-                        render()
-                    },
-                    { gt ->
-                        gradeType = gt
-                        render()
-                    },
-                    { go ->
-                        gradeOrder = go
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", go) }
-                        render()
-                    },
-                    { gq -> gradeQuery = gq },
-                    {
-                        semester = ""
-                        gradeType = "all"
-                        gradeQuery = ""
-                        gradeOrder = "name"
-                        gradeSemesterExpansion.clear()
-                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", gradeOrder) }
-                        render()
-                    },
-                    { sync() },
-                    object : GradesScreenController.GradesListener {
-                        override fun onFilterChanged() {
-                            render()
-                        }
-
-                        override fun onOpenTask(title: String) {
-                            editTask(null, title)
-                        }
-                    }
-                )
-                }
-                3 -> {
-                    val method = currentMethod
-                    val methodJson = currentMethodJson
-                    if (method != null && methodJson != null) {
-                        ApiExplorerController.renderMethodDetails(
-                            this,
-                            content,
-                            scroll,
-                            methodJson,
-                            apiFavorites,
-                            uploadBytes,
-                            {
-                                currentMethod = null
-                                currentMethodJson = null
-                                render()
-                            },
-                            object : ApiExplorerController.ApiCallback {
-                                override fun onExecuteRequest(
-                                    metadata: JSONObject,
-                                    values: Map<String, String>,
-                                    method: String,
-                                    uploadBytes: ByteArray?,
-                                    onSuccess: Consumer<UsosClient.Response>,
-                                    onFailure: Consumer<String>
-                                ) {
-                                    executeApiRequest(metadata, values, method, uploadBytes, onSuccess, onFailure)
-                                }
-
-                                override fun onSelectUploadFile(currentMethod: String) {
-                                    uploadMethod = currentMethod
-                                    selectUpload.launch(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE))
-                                }
-
-                                override fun onSaveResponse(response: UsosClient.Response) {
-                                    saveResponseFile(response, "usos-response")
-                                }
-                            }
-                        )
-                    } else {
-                        ApiExplorerController.renderCatalog(
-                            this,
-                            content,
-                            catalog,
-                            apiQuery,
-                            apiLimit,
-                            apiFavoritesOnly,
-                            apiFavorites,
-                            { q -> apiQuery = q },
-                            { lim -> apiLimit = lim },
-                            { fav ->
-                                apiFavoritesOnly = fav
-                                apiLimit = 60
-                                render()
-                            },
-                            { showMethod(it) }
-                        )
-                    }
-                }
-                4 -> AccountScreenController.render(
-                    this,
-                    content,
-                    display(),
-                    state,
-                    demo,
-                    detectedPin,
-                    object : AccountScreenController.AccountListener {
-                        override fun onBeginOAuth(key: String, secret: String, scopes: String) {
-                            task(
-                                {
-                                    repository.begin(key, secret, scopes)
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    render()
-                                    browser(
-                                        "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" +
-                                            OAuth.encode(s.getString("requestToken"))
-                                    )
-                                }
-                            )
-                        }
-
-                        override fun onConfirmPin(pin: String) {
-                            task(
-                                {
-                                    repository.finish(pin)
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    detectedPin = ""
-                                    settingsPage = null
-                                    demo = false
-                                    tab = 0
-                                    ensureSchedule()
-                                    render()
-                                    if (Build.VERSION.SDK_INT >= 33 &&
-                                        checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-                                    ) {
-                                        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
-                                    }
-                                    sync()
-                                }
-                            )
-                        }
-
-                        override fun onToggleEnabled(enabled: Boolean) {
-                            task(
-                                {
-                                    repository.update { s -> s.put("enabled", enabled) }
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    if (enabled) SyncWorker.schedule(this@MainActivity, state.optLong("interval", 30L))
-                                    else SyncWorker.cancel(this@MainActivity)
-                                    render()
-                                }
-                            )
-                        }
-
-                        override fun onUpdateInterval(interval: Long) {
-                            task(
-                                {
-                                    repository.update { s -> s.put("interval", interval) }
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    ensureSchedule()
-                                    render()
-                                }
-                            )
-                        }
-
-                        override fun onDisconnect() {
-                            task(
-                                {
-                                    SyncWorker.cancel(this@MainActivity)
-                                    repository.disconnect()
-                                    ClassReminderReceiver.cancel(this@MainActivity)
-                                    androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
-                                    TodayScheduleWidget.updateAll(this@MainActivity)
-                                    QuickStatusWidget.updateAll(this@MainActivity)
-                                    repository.read()
-                                },
-                                { s ->
-                                    state = s
-                                    detectedPin = ""
-                                    apiDrafts = JSONObject()
-                                    uploadBytes = null
-                                    uploadMethod = null
-                                    exportResponse = null
-                                    pendingCalendar = null
-                                    gradeSemesterExpansion.clear()
-                                    semester = ""
-                                    demo = false
-                                    render()
-                                }
-                            )
-                        }
-
-                        override fun onStartDemo() {
-                            gradeSemesterExpansion.clear()
-                            semester = ""
-                            semesterInitialized = false
-                            demo = true
-                            tab = 0
-                            render()
-                        }
-
-                        override fun onEndDemo() {
-                            gradeSemesterExpansion.clear()
-                            semester = ""
-                            demo = false
-                            render()
-                        }
-
-                        override fun onRequestNotifications() {
-                            requestNotifications()
-                        }
-                    }
-                )
-                5 -> {
-                    ScheduleScreenController.render(
-                        this,
-                        content,
-                        display(),
-                        state,
-                        demo,
-                        calendarDate,
-                        calendarMode,
-                        demoPlanDays,
-                        { dVal ->
-                            calendarDate = dVal
-                            render()
-                        },
-                        { mVal ->
-                            calendarMode = mVal
-                            render()
-                        },
-                        { sync() },
-                        object : ScheduleScreenController.ScheduleListener {
-                            override fun onOpenTask(title: String) {
-                                editTask(null, title)
-                            }
-
-                            override fun onAbsenceRecorded() {
-                                render()
-                            }
-                        }
-                    )
-                    if (focusCurrentSchedule && content.findViewById<View?>(R.id.schedule_swipe_content) != null) {
-                        focusCurrentSchedule = false
-                        val ongoing = content.findViewById<View?>(R.id.schedule_current_lesson)
-                        if (ongoing != null) {
-                            OneShotPreDrawListener.add(scroll) {
-                                if (tab != 5 || content.findViewById<View?>(R.id.schedule_current_lesson) !== ongoing) return@add
-                                val cardPosition = IntArray(2)
-                                val viewportPosition = IntArray(2)
-                                ongoing.getLocationOnScreen(cardPosition)
-                                scroll.getLocationOnScreen(viewportPosition)
-                                scroll.scrollTo(
-                                    0,
-                                    max(0, scroll.scrollY + cardPosition[1] - viewportPosition[1] - UiHelper.dp(this, 8))
-                                )
-                            }
-                        }
-                    }
-                }
-                6 -> MoreScreenController.render(this, content)
-                7 -> TasksScreenController.render(
+                Tabs.GRADES -> renderGrades()
+                Tabs.API -> renderApiExplorer()
+                Tabs.ACCOUNT -> renderAccount()
+                Tabs.SCHEDULE -> renderSchedule()
+                Tabs.MORE -> MoreScreenController.render(this, content)
+                Tabs.TASKS -> TasksScreenController.render(
                     this,
                     content,
                     personalTasks(),
-                    taskFilter,
-                    taskOrder,
-                    taskQuery,
+                    tasks.filter,
+                    tasks.order,
+                    tasks.query,
                     { tf ->
-                        taskFilter = tf
+                        tasks.filter = tf
                         render()
                     },
                     { to ->
-                        taskOrder = to
+                        tasks.order = to
                         getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("taskOrder", to) }
                         render()
                     },
-                    { tq -> taskQuery = tq },
+                    { tq -> tasks.query = tq },
                     taskCallback()
                 )
-                8 -> PaymentsScreenController.render(this, content, display(), state, connected()) { refreshStudentServices("payments") }
-                9 -> GpaSimulatorController.render(
+                Tabs.PAYMENTS -> PaymentsScreenController.render(this, content, display(), state, connected(), studentServices()) { refreshStudentServices("payments", "remittances") }
+                Tabs.GPA_SIMULATOR -> GpaSimulatorController.render(
                     this,
                     content,
                     display(),
@@ -978,8 +620,8 @@ class MainActivity : AppCompatActivity() {
                         render()
                     }
                 )
-                10 -> CampusGuideController.render(this, content)
-                11 -> NewsScreenController.render(
+                Tabs.CAMPUS_GUIDE -> CampusGuideController.render(this, content)
+                Tabs.NEWS -> NewsScreenController.render(
                     this,
                     content,
                     display(),
@@ -988,7 +630,7 @@ class MainActivity : AppCompatActivity() {
                     { refreshStudentServices("news") },
                     studentServices().optJSONObject("news") ?: JSONObject()
                 )
-                12 -> AttendanceScreenController.render(
+                Tabs.ATTENDANCE -> AttendanceScreenController.render(
                     this,
                     content,
                     display(),
@@ -1005,6 +647,296 @@ class MainActivity : AppCompatActivity() {
         }
         updateBusy(busy)
     }
+
+    private fun renderGrades() {
+        if (!grades.semesterInitialized) {
+            display().optJSONObject("snapshot")?.let { raw ->
+                val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
+                grades.semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
+                    ?: pl.vistula.checker.core.GradeSemesters.ordered(snapshot, java.time.LocalDate.now(UsosClient.ZONE)).firstOrNull().orEmpty()
+                grades.semesterInitialized = true
+            }
+        }
+        GradesScreenController.render(
+        this,
+        content,
+        display(),
+        state,
+        demo,
+        grades.semester,
+        grades.type,
+        grades.order,
+        grades.query,
+        grades.filtersExpanded,
+        { exp ->
+            grades.filtersExpanded = exp
+            render()
+        },
+        { sem ->
+            grades.semester = sem
+            if (sem.isNotEmpty()) grades.semesterExpansion[sem] = true
+            render()
+        },
+        { gt ->
+            grades.type = gt
+            render()
+        },
+        { go ->
+            grades.order = go
+            getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", go) }
+            render()
+        },
+        { gq -> grades.query = gq },
+        {
+            grades.resetFilters()
+            getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("gradeOrder", grades.order) }
+            render()
+        },
+        { sync() },
+        object : GradesScreenController.GradesListener {
+            override fun onFilterChanged() {
+                render()
+            }
+
+            override fun onOpenTask(title: String) {
+                editTask(null, title)
+            }
+        }
+    )
+    }
+
+    private fun renderApiExplorer() {
+        val method = api.currentMethod
+        val methodJson = api.currentMethodJson
+        if (method != null && methodJson != null) {
+            ApiExplorerController.renderMethodDetails(
+                this,
+                content,
+                scroll,
+                methodJson,
+                api.favorites,
+                uploadBytes,
+                {
+                    api.closeMethod()
+                    render()
+                },
+                object : ApiExplorerController.ApiCallback {
+                    override fun onExecuteRequest(
+                        metadata: JSONObject,
+                        values: Map<String, String>,
+                        method: String,
+                        uploadBytes: ByteArray?,
+                        onSuccess: Consumer<UsosClient.Response>,
+                        onFailure: Consumer<String>
+                    ) {
+                        executeApiRequest(metadata, values, method, uploadBytes, onSuccess, onFailure)
+                    }
+
+                    override fun onSelectUploadFile(currentMethod: String) {
+                        api.uploadMethod = currentMethod
+                        selectUpload.launch(Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE))
+                    }
+
+                    override fun onSaveResponse(response: UsosClient.Response) {
+                        saveResponseFile(response, "usos-response")
+                    }
+                }
+            )
+        } else {
+            ApiExplorerController.renderCatalog(
+                this,
+                content,
+                catalog,
+                api.query,
+                api.limit,
+                api.favoritesOnly,
+                api.favorites,
+                { q -> api.query = q },
+                { lim -> api.limit = lim },
+                { fav ->
+                    api.favoritesOnly = fav
+                    api.limit = pl.vistula.checker.ui.ApiExplorerState.DEFAULT_LIMIT
+                    render()
+                },
+                { showMethod(it) }
+            )
+        }
+    }
+
+    private fun renderAccount() {
+        AccountScreenController.render(
+            this,
+            content,
+            display(),
+            state,
+            demo,
+            detectedPin,
+            object : AccountScreenController.AccountListener {
+                override fun onBeginOAuth(key: String, secret: String, scopes: String) {
+                    task(
+                        {
+                            repository.begin(key, secret, scopes)
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            render()
+                            browser(
+                                "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" +
+                                    OAuth.encode(s.getString("requestToken"))
+                            )
+                        }
+                    )
+                }
+
+                override fun onConfirmPin(pin: String) {
+                    task(
+                        {
+                            repository.finish(pin)
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            detectedPin = ""
+                            settingsPage = null
+                            demo = false
+                            tab = 0
+                            ensureSchedule()
+                            render()
+                            if (Build.VERSION.SDK_INT >= 33 &&
+                                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
+                            }
+                            sync()
+                        }
+                    )
+                }
+
+                override fun onToggleEnabled(enabled: Boolean) {
+                    task(
+                        {
+                            repository.update { s -> s.put("enabled", enabled) }
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            if (enabled) SyncWorker.schedule(this@MainActivity, state.optLong("interval", 30L))
+                            else SyncWorker.cancel(this@MainActivity)
+                            render()
+                        }
+                    )
+                }
+
+                override fun onUpdateInterval(interval: Long) {
+                    task(
+                        {
+                            repository.update { s -> s.put("interval", interval) }
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            ensureSchedule()
+                            render()
+                        }
+                    )
+                }
+
+                override fun onDisconnect() {
+                    task(
+                        {
+                            SyncWorker.cancel(this@MainActivity)
+                            repository.disconnect()
+                            ClassReminderReceiver.cancel(this@MainActivity)
+                            androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
+                            TodayScheduleWidget.updateAll(this@MainActivity)
+                            QuickStatusWidget.updateAll(this@MainActivity)
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            detectedPin = ""
+                            api.drafts = JSONObject()
+                            uploadBytes = null
+                            api.uploadMethod = null
+                            exportResponse = null
+                            pendingCalendar = null
+                            grades.clearSemester()
+                            demo = false
+                            render()
+                        }
+                    )
+                }
+
+                override fun onStartDemo() {
+                    grades.clearSemester()
+                    grades.semesterInitialized = false
+                    demo = true
+                    tab = 0
+                    render()
+                }
+
+                override fun onEndDemo() {
+                    grades.clearSemester()
+                    demo = false
+                    render()
+                }
+
+                override fun onRequestNotifications() {
+                    requestNotifications()
+                }
+            }
+        )
+    }
+
+    private fun renderSchedule() {
+        ScheduleScreenController.render(
+            this,
+            content,
+            display(),
+            state,
+            demo,
+            schedule.date,
+            schedule.mode,
+            demoPlanDays,
+            { dVal ->
+                schedule.date = dVal
+                render()
+            },
+            { mVal ->
+                schedule.mode = mVal
+                render()
+            },
+            { sync() },
+            object : ScheduleScreenController.ScheduleListener {
+                override fun onOpenTask(title: String) {
+                    editTask(null, title)
+                }
+
+                override fun onAbsenceRecorded() {
+                    render()
+                }
+            }
+        )
+        if (schedule.focusCurrent && content.findViewById<View?>(R.id.schedule_swipe_content) != null) {
+            schedule.focusCurrent = false
+            val ongoing = content.findViewById<View?>(R.id.schedule_current_lesson)
+            if (ongoing != null) {
+                OneShotPreDrawListener.add(scroll) {
+                    if (tab != Tabs.SCHEDULE || content.findViewById<View?>(R.id.schedule_current_lesson) !== ongoing) return@add
+                    val cardPosition = IntArray(2)
+                    val viewportPosition = IntArray(2)
+                    ongoing.getLocationOnScreen(cardPosition)
+                    scroll.getLocationOnScreen(viewportPosition)
+                    scroll.scrollTo(
+                        0,
+                        max(0, scroll.scrollY + cardPosition[1] - viewportPosition[1] - UiHelper.dp(this, 8))
+                    )
+                }
+            }
+        }
+    }
+
 
     @Throws(JSONException::class)
     fun display(): JSONObject = if (demo) Demo.state(demoChanged, demoPlanDays) else state
@@ -1025,7 +957,7 @@ class MainActivity : AppCompatActivity() {
         welcomeStep = -1
         if (startDemo) {
             demo = true
-            navigate(0)
+            navigate(Tabs.HOME)
         } else if (configure) {
             demo = false
             tab = 4
@@ -1033,7 +965,7 @@ class MainActivity : AppCompatActivity() {
             render()
             scroll.scrollTo(0, 0)
         } else {
-            navigate(0)
+            navigate(Tabs.HOME)
         }
     }
 
@@ -1047,17 +979,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun selectGradeSemester(term: String) {
-        semester = term
-        semesterInitialized = true
-        if (tab == 2) render()
+        grades.select(term)
+        if (tab == Tabs.GRADES) render()
     }
 
-    fun getCalendarDate(): String = calendarDate
+    fun getCalendarDate(): String = schedule.date
     fun setCalendarDate(date: String) {
-        this.calendarDate = date
+        schedule.date = date
     }
 
-    fun shouldFocusCurrentSchedule(): Boolean = focusCurrentSchedule
+    fun shouldFocusCurrentSchedule(): Boolean = schedule.focusCurrent
 
     fun setScheduleNavigation(action: IntConsumer?) {
         if (scroll is ScheduleScrollView) {
@@ -1065,16 +996,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getCalendarMode(): String = calendarMode
+    fun getCalendarMode(): String = schedule.mode
     fun setCalendarMode(mode: String) {
-        this.calendarMode = mode
+        schedule.mode = mode
     }
 
     fun getDocumentQuery(): String = documentQuery
-    fun getApiModule(): String = apiModule
+    fun getApiModule(): String = api.module
     fun setApiModule(module: String) {
-        apiModule = module
-        apiLimit = 60
+        api.module = module
+        api.limit = pl.vistula.checker.ui.ApiExplorerState.DEFAULT_LIMIT
         render()
     }
 
@@ -1127,7 +1058,11 @@ class MainActivity : AppCompatActivity() {
                 for (sec in sections) {
                     val secScope = StudentServiceLoader.requiredScope(sec)
                     if (sec in scopeOptional || StudentServices.hasScope(state.optString("scopes"), secScope)) {
-                        StudentServiceLoader.refresh(repository, sec)
+                        try {
+                            StudentServiceLoader.refresh(repository, sec)
+                        } catch (_: Exception) {
+                            // Ensure remaining sections in batch are loaded so all tables receive data
+                        }
                     }
                 }
                 repository.read()
@@ -1135,7 +1070,7 @@ class MainActivity : AppCompatActivity() {
             { result ->
                 state = result
                 render()
-                if (section == "affiliation" && tab == 11 && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
+                if (section == "affiliation" && tab == Tabs.NEWS && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
             }
         )
     }
@@ -1165,7 +1100,7 @@ class MainActivity : AppCompatActivity() {
         }, { latest ->
             state = latest
             render()
-            if (tab == 11 && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
+            if (tab == Tabs.NEWS && CampusAffiliation.selected(state).isNotEmpty()) refreshStudentServices("news")
         })
     }
 
@@ -1226,16 +1161,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun openApiModule(module: String) {
-        apiModule = module
-        apiQuery = ""
-        apiLimit = 60
-        apiFavoritesOnly = false
-        navigate(3)
+        api.openModule(module)
+        navigate(Tabs.API)
     }
 
     fun openApiMethod(method: String, parameters: Map<String, String>) {
         try {
-            apiDrafts.put(method, JSONObject(parameters))
+            api.drafts.put(method, JSONObject(parameters))
         } catch (e: JSONException) {
             error(ApiErrorUi.message(this, e))
             return
@@ -1245,18 +1177,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun apiDraft(method: String): JSONObject {
-        var draft = apiDrafts.optJSONObject(method)
+        var draft = api.drafts.optJSONObject(method)
         if (draft == null) {
             draft = JSONObject()
             try {
-                apiDrafts.put(method, draft)
+                api.drafts.put(method, draft)
             } catch (ignored: JSONException) {
             }
         }
         return draft
     }
 
-    fun apiUpload(method: String): ByteArray? = if (method == uploadMethod) uploadBytes else null
+    fun apiUpload(method: String): ByteArray? = if (method == api.uploadMethod) uploadBytes else null
 
     private fun liveService(scope: String): Boolean {
         if (demo) {
@@ -1418,7 +1350,7 @@ class MainActivity : AppCompatActivity() {
             response.binary() -> ".bin"
             else -> ".txt"
         }
-        var filename = name.replace(Regex("[^\\p{L}\\p{N}._ -]"), "_")
+        var filename = name.replace(UNSAFE_FILE_CHARS, "_")
         if (filename.length > 100) filename = filename.substring(0, 100)
         if (filename.trim().isEmpty()) filename = "usos-document"
         try {
@@ -1434,9 +1366,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getCalendarQuery(): String = calendarQuery
+    fun getCalendarQuery(): String = schedule.query
     fun setCalendarQuery(query: String) {
-        calendarQuery = query
+        schedule.query = query
     }
 
     fun saveCalendar(ics: String) {
@@ -1458,9 +1390,8 @@ class MainActivity : AppCompatActivity() {
         if (demo) demoTasks else (state.optJSONArray("tasks") ?: JSONArray())
 
     fun openTasks(selectedFilter: String) {
-        taskFilter = selectedFilter
-        taskQuery = ""
-        navigate(7)
+        tasks.open(selectedFilter)
+        navigate(Tabs.TASKS)
     }
 
     fun editTask(existing: JSONObject?, suggestedTitle: String?) {
@@ -1636,7 +1567,7 @@ class MainActivity : AppCompatActivity() {
                     val latest = repository.read()
                     val lastAffiliation = latest.optJSONObject("studentServices")?.optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L
                     if (System.currentTimeMillis() - lastAffiliation > 24 * 60 * 60_000L) {
-                        try { StudentServiceLoader.refresh(repository, "affiliation") } catch (_: Exception) { /* Optional campus data must not discard a valid grade sync. */ }
+                        try { StudentServiceLoader.refresh(repository, "affiliation") } catch (e: Exception) { Diagnostics.swallowed("MainActivity", e) /* Optional campus data must not discard a valid grade sync. */ }
                     }
                     ClassReminderReceiver.scheduleNext(this)
                     TodayScheduleWidget.updateAll(this)
@@ -1662,8 +1593,8 @@ class MainActivity : AppCompatActivity() {
         task(
             { JSONObject(asset("api/" + name.replace("/", "__") + ".json")) },
             { json ->
-                currentMethod = name
-                currentMethodJson = json
+                api.currentMethod = name
+                api.currentMethodJson = json
                 render()
             }
         )
@@ -1705,7 +1636,7 @@ class MainActivity : AppCompatActivity() {
                 }) { getString(R.string.service_action_unavailable) }
                 response
             },
-            { if (tab == 3 && currentMethod == metadata.optString("name")) onSuccess.accept(it) },
+            { if (tab == Tabs.API && api.currentMethod == metadata.optString("name")) onSuccess.accept(it) },
             onFailure
         )
     }
@@ -1725,7 +1656,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     loadingState = false
                     if (isDestroyed || busy) return@runOnUiThread
-                    val clockChanged = (tab == 0 || tab == 5) && renderedMinute != System.currentTimeMillis() / 60000
+                    val clockChanged = (tab == Tabs.HOME || tab == Tabs.SCHEDULE) && renderedMinute != System.currentTimeMillis() / 60000
                     if (state.toString() != latest.toString() || clockChanged) {
                         val position = scroll.scrollY
                         state = latest
@@ -1754,7 +1685,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun <T> task(job: Job<T>, done: Done<T>, failed: Consumer<String>) {
-        if (busy || isDestroyed) return
+        if (isDestroyed) return
+        if (busy) {
+            Toast.makeText(this, R.string.loading, Toast.LENGTH_SHORT).show()
+            return
+        }
         busy = true
         updateBusy(true)
         io.execute {
@@ -1782,7 +1717,7 @@ class MainActivity : AppCompatActivity() {
                     busy = false
                     state = recovered
                     updateBusy(false)
-                    if (tab == 0 || tab == 1 || tab == 2 || tab == 5 || tab == 7) render()
+                    if (tab == Tabs.HOME || tab == Tabs.HISTORY || tab == Tabs.GRADES || tab == Tabs.SCHEDULE || tab == Tabs.TASKS) render()
                     failed.accept(ApiErrorUi.message(this, e))
                     error(ApiErrorUi.message(this, e))
                 }
@@ -1825,15 +1760,16 @@ class MainActivity : AppCompatActivity() {
             if (cb != null && cb.hasPrimaryClip() && cb.primaryClip != null && cb.primaryClip!!.itemCount > 0) {
                 val item = cb.primaryClip!!.getItemAt(0)
                 if (item != null && item.text != null) {
-                    val clip = item.text.toString().trim().replace(Regex("\\s+"), "")
-                    if (clip.matches(Regex("^[a-zA-Z0-9]{6,16}$")) && clip != detectedPin) {
+                    val clip = item.text.toString().trim().replace(WHITESPACE, "")
+                    if (clip.matches(PIN_SHAPE) && clip != detectedPin) {
                         detectedPin = clip
                         Toast.makeText(this, R.string.pin_detected_clipboard, Toast.LENGTH_LONG).show()
                         render()
                     }
                 }
             }
-        } catch (ignored: Exception) {
+        } catch (e: Exception) {
+            pl.vistula.checker.Diagnostics.swallowed("MainActivity", e)
         }
     }
 
@@ -1893,7 +1829,7 @@ class MainActivity : AppCompatActivity() {
                 error(getString(R.string.error_invalid_document_uri))
                 return
             }
-            if (requestCode == 21 && currentMethod != null && currentMethod == uploadMethod) {
+            if (requestCode == 21 && api.currentMethod != null && api.currentMethod == api.uploadMethod) {
                 task(
                     {
                         contentResolver.openInputStream(uri).use { input ->
@@ -1954,9 +1890,12 @@ class MainActivity : AppCompatActivity() {
     )
 
     companion object {
+        private val UNSAFE_FILE_CHARS = Regex("[^\\p{L}\\p{N}._ -]")
+        private val WHITESPACE = Regex("\\s+")
+        private val PIN_SHAPE = Regex("^[a-zA-Z0-9]{6,16}$")
         private fun historyFilter(intent: Intent): String {
             val kind = intent.getStringExtra("historyKind")
-            return if ("ocena" == kind || "plan" == kind) kind else "wszystkie"
+            return if ("ocena" == kind || "plan" == kind) kind else pl.vistula.checker.ui.HistoryUiState.ALL
         }
     }
 }

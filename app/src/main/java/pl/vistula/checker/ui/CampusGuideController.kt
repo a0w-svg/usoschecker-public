@@ -67,7 +67,8 @@ class CampusGuideController private constructor() {
                     {
                         try {
                             activity.startActivity(Intent(Intent.ACTION_DIAL, "tel:+48224572300".toUri()))
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
                     },
                     false
@@ -80,7 +81,8 @@ class CampusGuideController private constructor() {
                     {
                         try {
                             activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:dziekanat@vistula.edu.pl".toUri()))
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
                     },
                     false
@@ -94,7 +96,7 @@ class CampusGuideController private constructor() {
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_finanse_view_subaccounts),
-                    { activity.navigate(8) },
+                    { activity.navigate(Tabs.PAYMENTS) },
                     true
                 )
             )
@@ -105,7 +107,8 @@ class CampusGuideController private constructor() {
                     {
                         try {
                             activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:finanse@vistula.edu.pl".toUri()))
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
                     },
                     false
@@ -122,7 +125,8 @@ class CampusGuideController private constructor() {
                     {
                         try {
                             activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:biblioteka@vistula.edu.pl".toUri()))
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
                     },
                     false
@@ -153,7 +157,8 @@ class CampusGuideController private constructor() {
                     {
                         try {
                             activity.startActivity(Intent(Intent.ACTION_SENDTO, "mailto:pomocit@vistula.edu.pl".toUri()))
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
                     },
                     false

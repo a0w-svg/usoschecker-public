@@ -364,6 +364,24 @@ object ToolServiceData {
                 } else JSONArray()
                 return LecturerServices.safeCommunications(statements, notifications, messages, categories, surveys)
             }
+                        "theses" -> {
+                val studentNumber = state.optString("studentNumber")
+                val userId = state.optString("userId").ifEmpty {
+                    try {
+                        JSONObject(client.get("services/users/user", mapOf("fields" to "id"))).optString("id")
+                    } catch (_: Exception) { "" }
+                }
+                val authoredTheses = if (userId.isNotEmpty()) {
+                    try {
+                        val raw = JSONObject(client.get("services/theses/user", mapOf(
+                            "user_id" to userId,
+                            "fields" to "authored_theses[id|type|title|titles|authors[id|first_name|last_name]|supervisors[id|first_name|last_name]|faculty[id|name]]"
+                        )))
+                        LecturerServices.safeTheses(raw.optJSONArray("authored_theses") ?: JSONArray())
+                    } catch (_: Exception) { JSONArray() }
+                } else JSONArray()
+                return JSONObject().put("theses", authoredTheses)
+            }
             "payments" -> {
                 val accounts = collection(client.get("services/payments/user_accounts", emptyMap()))
                 val payments = JSONArray(client.get("services/payments/user_payments", mapOf(
@@ -775,4 +793,70 @@ object ToolServiceData {
         if (value !is JSONObject && value !is JSONArray) throw JSONException("Expected collection")
         return value
     }
+
+    @JvmStatic
+    fun fetchThesisDetail(client: UsosClient, thesisId: String): JSONObject {
+        require(ID_PATTERN.matches(thesisId)) { "Invalid thesis_id" }
+        val raw = JSONObject(client.get("services/theses/thesis", mapOf(
+            "ths_id" to thesisId,
+            "fields" to "id|type|title|titles|authors[id|first_name|last_name]|supervisors[id|first_name|last_name]|faculty[id|name]"
+        )))
+        return LecturerServices.safeThesisDetail(raw)
+    }
+
+    @JvmStatic
+    fun fetchDormitoryDetail(client: UsosClient, dormitoryId: String): JSONObject {
+        require(ID_PATTERN.matches(dormitoryId)) { "Invalid dormitory_id" }
+        val raw = JSONObject(client.get("services/housing/dormitory", mapOf(
+            "dormitory_id" to dormitoryId,
+            "fields" to "id|name|short_name"
+        )))
+        return LecturerServices.safeDormitoryDetail(raw)
+    }
+
+    @JvmStatic
+    fun fetchAllocationPeriodDetail(client: UsosClient, periodId: String): JSONObject {
+        require(ID_PATTERN.matches(periodId)) { "Invalid allocation_period_id" }
+        val raw = JSONObject(client.get("services/housing/allocation_period", mapOf(
+            "allocation_period_id" to periodId,
+            "fields" to "id|term_id|status_name|status_desc|start_date|end_date"
+        )))
+        return LecturerServices.safeAllocationPeriodDetail(raw)
+    }
+
+    @JvmStatic
+    fun fetchGuidePage(client: UsosClient, pageId: String): JSONObject {
+        require(ID_PATTERN.matches(pageId)) { "Invalid page_id" }
+        val lang = if (ApiLanguage.current() == "pl") "pl" else "en"
+        val raw = JSONObject(client.get("services/guide/page", mapOf(
+            "page_id" to pageId,
+            "lang" to lang,
+            "fields" to "id|title|entries[id|title|content]"
+        )))
+        return LecturerServices.safeGuidePage(raw)
+    }
+
+    @JvmStatic
+    fun fetchCourseEdition(client: UsosClient, courseId: String, termId: String): JSONObject {
+        require(ID_PATTERN.matches(courseId)) { "Invalid course_id" }
+        require(ID_PATTERN.matches(termId)) { "Invalid term_id" }
+        val raw = JSONObject(client.get("services/courses/course_edition", mapOf(
+            "course_id" to courseId,
+            "term_id" to termId,
+            "fields" to "coordinators[id|first_name|last_name]|lecturers[id|first_name|last_name]"
+        )))
+        raw.put("course_id", courseId).put("term_id", termId)
+        return LecturerServices.safeCourseEdition(raw)
+    }
+
+    @JvmStatic
+    fun fetchCourseUnit(client: UsosClient, unitId: String): JSONObject {
+        require(ID_PATTERN.matches(unitId)) { "Invalid unit_id" }
+        val raw = JSONObject(client.get("services/courses/unit", mapOf(
+            "unit_id" to unitId,
+            "fields" to "id|classtype_id|classtype_name"
+        )))
+        return LecturerServices.safeCourseUnit(raw)
+    }
+
 }

@@ -91,7 +91,7 @@ object CampusSettingsController {
         if (activity.connected() && !activity.isDemo()) content.addView(UiHelper.button(activity,
             activity.getString(R.string.campus_detect), { activity.refreshStudentServices("affiliation") }, false))
         content.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_choose), {
-            activity.navigate(4)
+            activity.navigate(Tabs.ACCOUNT)
             activity.openAccountPage("settings.campus")
         }, false))
     }

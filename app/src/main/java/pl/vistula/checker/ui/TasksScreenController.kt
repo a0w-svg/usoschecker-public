@@ -107,7 +107,7 @@ class TasksScreenController private constructor() {
             header.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
 
             UiHelper.note(activity, content, activity.getString(R.string.local_data_note), UiHelper.MUTED)
-            val filterKeys = arrayOf("all", "open", "done", "platon", "today", "week", "overdue")
+            val filterKeys = TasksUiState.FILTERS
             val filterLabels = intArrayOf(
                 R.string.tasks_chip_all,
                 R.string.tasks_chip_open,
@@ -118,14 +118,14 @@ class TasksScreenController private constructor() {
                 R.string.tasks_chip_overdue
             )
             val counts = intArrayOf(rows.length(), pending, doneCount, platonCount, todayCount, weekCount, overdueCount)
-            val orderKeys = arrayOf("due", "priority", "title")
+            val orderKeys = TasksUiState.ORDERS
             val orderLabels = intArrayOf(R.string.tasks_sort_due, R.string.tasks_sort_priority, R.string.tasks_sort_title)
-            if ("all" != taskFilter || "due" != taskOrder) {
+            if (TasksUiState.FILTER_ALL != taskFilter || TasksUiState.ORDER_DUE != taskOrder) {
                 var label = ""
                 for (i in filterKeys.indices) {
                     if (filterKeys[i] == taskFilter) label = activity.getString(filterLabels[i])
                 }
-                if ("due" != taskOrder) {
+                if (TasksUiState.ORDER_DUE != taskOrder) {
                     for (i in orderKeys.indices) {
                         if (orderKeys[i] == taskOrder) label += " · " + activity.getString(orderLabels[i])
                     }
@@ -134,8 +134,8 @@ class TasksScreenController private constructor() {
                 selected.contentDescription = activity.getString(R.string.grades_filter_reset)
                 selected.textSize = 12f
                 selected.setOnClickListener {
-                    onOrderChanged.accept("due")
-                    onFilterChanged.accept("all")
+                    onOrderChanged.accept(TasksUiState.ORDER_DUE)
+                    onFilterChanged.accept(TasksUiState.FILTER_ALL)
                 }
                 content.addView(selected)
             }
@@ -340,12 +340,12 @@ class TasksScreenController private constructor() {
                                 false
                             )
                         )
-                    } else if ("all" != taskFilter) {
+                    } else if (TasksUiState.FILTER_ALL != taskFilter) {
                         emptyBox.addView(
                             UiHelper.button(
                                 activity,
                                 "${activity.getString(R.string.tasks_chip_all)} (${rows.length()})",
-                                { onFilterChanged.accept("all") },
+                                { onFilterChanged.accept(TasksUiState.FILTER_ALL) },
                                 false
                             )
                         )

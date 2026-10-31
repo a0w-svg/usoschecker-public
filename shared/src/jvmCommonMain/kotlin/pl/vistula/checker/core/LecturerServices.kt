@@ -771,4 +771,115 @@ object LecturerServices {
             .put("building_name", ApiLanguage.safe(building?.opt("name") ?: roomMeta?.opt("building_name")))
             .put("lessons", lessons)
     }
+
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun safeTheses(source: JSONArray): JSONArray = JSONArray().apply {
+        for (i in 0 until minOf(source.length(), 20)) {
+            val t = source.optJSONObject(i) ?: continue
+            put(safeThesisDetail(t))
+        }
+    }
+
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun safeThesisDetail(source: JSONObject): JSONObject {
+        val result = JSONObject()
+            .put("id", StudentServices.text(source, "id"))
+            .put("type", StudentServices.text(source, "type"))
+            .put("title", ApiLanguage.safe(source.opt("title") ?: source.opt("titles")))
+            .put("status", StudentServices.text(source, "status"))
+        val faculty = source.optJSONObject("faculty")
+        result.put("faculty_name", ApiLanguage.safe(faculty?.opt("name") ?: source.opt("faculty_name")))
+        val supervisors = JSONArray()
+        val sups = source.optJSONArray("supervisors") ?: JSONArray()
+        for (j in 0 until minOf(sups.length(), 10)) {
+            val sup = sups.optJSONObject(j) ?: continue
+            val name = listOf(StudentServices.text(sup, "first_name"), StudentServices.text(sup, "last_name"))
+                .filter { it.isNotBlank() }.joinToString(" ")
+            if (name.isNotEmpty()) supervisors.put(name)
+        }
+        result.put("supervisors", supervisors)
+        val authors = JSONArray()
+        val auths = source.optJSONArray("authors") ?: JSONArray()
+        for (j in 0 until minOf(auths.length(), 10)) {
+            val aut = auths.optJSONObject(j) ?: continue
+            val name = listOf(StudentServices.text(aut, "first_name"), StudentServices.text(aut, "last_name"))
+                .filter { it.isNotBlank() }.joinToString(" ")
+            if (name.isNotEmpty()) authors.put(name)
+        }
+        result.put("authors", authors)
+        return result
+    }
+
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun safeDormitoryDetail(source: JSONObject): JSONObject = JSONObject()
+        .put("id", StudentServices.text(source, "id"))
+        .put("name", ApiLanguage.safe(source.opt("name")))
+        .put("short_name", ApiLanguage.safe(source.opt("short_name")))
+        .put("address", StudentServices.text(source, "address"))
+        .put("description", ApiLanguage.safe(source.opt("description")))
+
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun safeAllocationPeriodDetail(source: JSONObject): JSONObject = JSONObject()
+        .put("id", StudentServices.text(source, "id"))
+        .put("term_id", StudentServices.text(source, "term_id"))
+        .put("status_name", ApiLanguage.safe(source.opt("status_name")))
+        .put("status_desc", ApiLanguage.safe(source.opt("status_desc")))
+        .put("start_date", StudentServices.text(source, "start_date"))
+        .put("end_date", StudentServices.text(source, "end_date"))
+
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun safeGuidePage(source: JSONObject): JSONObject {
+        val entries = JSONArray()
+        val rows = source.optJSONArray("entries") ?: JSONArray()
+        for (i in 0 until minOf(rows.length(), 30)) {
+            val e = rows.optJSONObject(i) ?: continue
+            entries.put(
+                JSONObject()
+                    .put("id", StudentServices.text(e, "id"))
+                    .put("title", ApiLanguage.safe(e.opt("title")))
+                    .put("content", StudentExtras.plainText(StudentServices.text(e, "content")).take(2000))
+            )
+        }
+        return JSONObject()
+            .put("id", StudentServices.text(source, "id"))
+            .put("title", ApiLanguage.safe(source.opt("title")))
+            .put("entries", entries)
+    }
+
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun safeCourseEdition(source: JSONObject): JSONObject {
+        val coords = JSONArray()
+        val rawCoords = source.optJSONArray("coordinators") ?: JSONArray()
+        for (i in 0 until minOf(rawCoords.length(), 20)) {
+            val c = rawCoords.optJSONObject(i) ?: continue
+            val name = listOf(StudentServices.text(c, "first_name"), StudentServices.text(c, "last_name")).filter { it.isNotBlank() }.joinToString(" ")
+            if (name.isNotEmpty()) coords.put(name)
+        }
+        val lecs = JSONArray()
+        val rawLecs = source.optJSONArray("lecturers") ?: JSONArray()
+        for (i in 0 until minOf(rawLecs.length(), 20)) {
+            val l = rawLecs.optJSONObject(i) ?: continue
+            val name = listOf(StudentServices.text(l, "first_name"), StudentServices.text(l, "last_name")).filter { it.isNotBlank() }.joinToString(" ")
+            if (name.isNotEmpty()) lecs.put(name)
+        }
+        return JSONObject()
+            .put("course_id", StudentServices.text(source, "course_id"))
+            .put("term_id", StudentServices.text(source, "term_id"))
+            .put("coordinators", coords)
+            .put("lecturers", lecs)
+    }
+
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun safeCourseUnit(source: JSONObject): JSONObject = JSONObject()
+        .put("id", StudentServices.text(source, "id"))
+        .put("classtype_id", StudentServices.text(source, "classtype_id"))
+        .put("classtype_name", ApiLanguage.safe(source.opt("classtype_name")))
+
 }

@@ -87,7 +87,7 @@ class ScheduleScreenController private constructor() {
                     UiHelper.button(
                         activity,
                         if (connected) activity.getString(R.string.btn_refresh) else activity.getString(R.string.btn_connect),
-                        { if (connected) onRefresh.run() else activity.navigate(4) },
+                        { if (connected) onRefresh.run() else activity.navigate(Tabs.ACCOUNT) },
                         true
                     )
                 )
@@ -546,7 +546,8 @@ class ScheduleScreenController private constructor() {
                     )
                 )
                 body.addView(raw)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                pl.vistula.checker.Diagnostics.swallowed("ScheduleScreenControlle", e)
             }
             val scroller = UiHelper.dialogScroll(activity, body)
             MaterialAlertDialogBuilder(activity)
@@ -661,7 +662,7 @@ class ScheduleScreenController private constructor() {
                 MaterialAlertDialogBuilder(activity)
                     .setTitle(activity.getString(R.string.attendance_alert_title))
                     .setMessage(activity.getString(R.string.attendance_alert_body, courseTitle, count, limit, alertMsg))
-                    .setPositiveButton(activity.getString(R.string.attendance_alert_btn_open)) { _, _ -> activity.navigate(12) }
+                    .setPositiveButton(activity.getString(R.string.attendance_alert_btn_open)) { _, _ -> activity.navigate(Tabs.ATTENDANCE) }
                     .setNegativeButton(activity.getString(R.string.attendance_alert_btn_understand), null)
                     .show()
             } else {

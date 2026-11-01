@@ -1,0 +1,61 @@
+package pl.vistula.checker
+
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
+import org.junit.Test
+
+class KeyRegistrationTest {
+    private class Fake(var body: String, var status: Int = 200) : HttpURLConnection(URL(UsosClient.BASE)) {
+        val sent = ByteArrayOutputStream()
+        override fun connect() {}
+        override fun disconnect() {}
+        override fun usingProxy(): Boolean = false
+        override fun getResponseCode(): Int = status
+        override fun getInputStream(): InputStream = ByteArrayInputStream(body.toByteArray())
+        override fun getErrorStream(): InputStream = inputStream
+        override fun getOutputStream(): OutputStream = sent
+    }
+
+    @Test
+    fun postsTheFormAndReturnsTheIssuedKeys() {
+        val fake = Fake("""{"status":"success","consumer_key":"abc","consumer_secret":"def"}""")
+        val address = arrayOf("")
+        val keys = KeyRegistration.register("My app", "", "me@example.com", UsosClient.ConnectionSource {
+            address[0] = it
+            fake
+        })
+        assertEquals(UsosClient.BASE + "developers/submit", address[0])
+        assertEquals("POST", fake.requestMethod)
+        assertEquals("appname=My+app&appurl=&email=me%40example.com", fake.sent.toString())
+        assertEquals("abc", keys.key)
+        assertEquals("def", keys.secret)
+    }
+
+    @Test
+    fun serverRefusalSurfacesItsOwnMessage() {
+        val fake = Fake("""{"status":"error","message":"Bad email"}""", 400)
+        try {
+            KeyRegistration.register("a", "", "x", UsosClient.ConnectionSource { fake })
+            fail()
+        } catch (e: KeyRegistration.Rejected) {
+            assertEquals("Bad email", e.message)
+        }
+    }
+
+    @Test
+    fun nonJsonAnswerIsAnIoFailure() {
+        try {
+            KeyRegistration.parse("<html>")
+            fail()
+        } catch (e: java.io.IOException) {
+            assertTrue(e !is KeyRegistration.Rejected)
+        }
+    }
+}

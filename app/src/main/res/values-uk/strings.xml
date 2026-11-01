@@ -707,4 +707,11 @@
     <string name="connect_step_key">1. Ключ API (один раз)</string>
     <string name="connect_step_paste">2. Вставте ключ</string>
     <string name="connect_step_login">3. Увійдіть</string>
+    <string name="btn_auto_key">Отримати ключ автоматично</string>
+    <string name="auto_key_note">Ваша пошта надходить лише до USOSapps вашого університету, який видає ключ. Ключ лишається в зашифрованому сховищі телефону.</string>
+    <string name="auto_key_email_hint">Email (для реєстрації ключа)</string>
+    <string name="auto_key_bad_email">Введіть коректну адресу email.</string>
+    <string name="auto_key_working">Реєструю ключ у USOSapps…</string>
+    <string name="auto_key_failed">Не вдалося отримати ключ: %1$s</string>
+    <string name="auto_key_unreachable">немає зв’язку з USOSapps. Скористайтеся ручними кроками нижче.</string>
 </resources>

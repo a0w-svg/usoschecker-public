@@ -701,4 +701,11 @@ Last download: %3$s</string>
     <string name="connect_step_key">1. API key (one time)</string>
     <string name="connect_step_paste">2. Paste the key</string>
     <string name="connect_step_login">3. Sign in</string>
+    <string name="btn_auto_key">Get the key automatically</string>
+    <string name="auto_key_note">Your email goes only to your university’s USOSapps, which issues the key. The key stays in this phone’s encrypted storage.</string>
+    <string name="auto_key_email_hint">Email (for the key registration)</string>
+    <string name="auto_key_bad_email">Enter a valid email address.</string>
+    <string name="auto_key_working">Registering the key with USOSapps…</string>
+    <string name="auto_key_failed">Could not get the key: %1$s</string>
+    <string name="auto_key_unreachable">could not reach USOSapps. Use the manual steps below.</string>
 </resources>

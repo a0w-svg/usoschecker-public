@@ -80,8 +80,9 @@ class WelcomeRegressionTest {
                 activity.findViewById<View>(R.id.welcome_continue).performClick()
                 assertEquals("settings.connection", activity.accountPage())
                 val inputs = views(activity.findViewById(R.id.main_content)).filterIsInstance<EditText>()
-                assertTrue(inputs.size >= 2)
-                assertNotNull(inputs[1].transformationMethod)
+                // Email (automatic key), consumer key, consumer secret: only the secret is masked.
+                assertTrue(inputs.size >= 3)
+                assertNotNull(inputs[2].transformationMethod)
                 assertTrue(Repository(activity).read().optString("key").isEmpty())
             }
         }

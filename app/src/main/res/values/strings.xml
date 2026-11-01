@@ -712,4 +712,11 @@
     <string name="connect_step_key">1. Klucz API (jednorazowo)</string>
     <string name="connect_step_paste">2. Wklej klucz</string>
     <string name="connect_step_login">3. Zaloguj się</string>
+    <string name="btn_auto_key">Pobierz klucz automatycznie</string>
+    <string name="auto_key_note">Twój e-mail trafia tylko do USOSapps Twojej uczelni, które wydaje klucz. Klucz zostaje w zaszyfrowanej pamięci telefonu.</string>
+    <string name="auto_key_email_hint">E-mail (do rejestracji klucza)</string>
+    <string name="auto_key_bad_email">Wpisz poprawny adres e-mail.</string>
+    <string name="auto_key_working">Rejestruję klucz w USOSapps…</string>
+    <string name="auto_key_failed">Nie udało się pobrać klucza: %1$s</string>
+    <string name="auto_key_unreachable">brak połączenia z USOSapps. Skorzystaj z ręcznych kroków poniżej.</string>
 </resources>

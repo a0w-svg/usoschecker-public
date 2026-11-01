@@ -395,6 +395,40 @@ class AccountScreenController private constructor() {
                 updatingChoices = false
             }
 
+            val emailLayout = UiHelper.fieldLayout(activity, view.findViewById(R.id.connection_email_host), activity.getString(R.string.auto_key_email_hint), state.optString("email"), false)
+            val email = emailLayout.findViewById<TextInputEditText>(R.id.field_input)
+            email.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            val autoKey = view.findViewById<View>(R.id.connection_auto_key)
+            autoKey.setOnClickListener {
+                val address = email.text.toString().trim()
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(address).matches()) {
+                    emailLayout.error = activity.getString(R.string.auto_key_bad_email)
+                    return@setOnClickListener
+                }
+                emailLayout.error = null
+                autoKey.isEnabled = false
+                Toast.makeText(activity, R.string.auto_key_working, Toast.LENGTH_SHORT).show()
+                Thread {
+                    val result = runCatching {
+                        pl.vistula.checker.KeyRegistration.register("USOS Checker", "", address)
+                    }
+                    activity.runOnUiThread {
+                        if (activity.isDestroyed) return@runOnUiThread
+                        autoKey.isEnabled = true
+                        result.onSuccess { keys ->
+                            key.setText(keys.key)
+                            secret.setText(keys.secret)
+                            keyLayout.error = null
+                            secretLayout.error = null
+                            view.findViewById<View>(R.id.connection_login).performClick()
+                        }.onFailure { failure ->
+                            val reason = (failure as? pl.vistula.checker.KeyRegistration.Rejected)?.message
+                                ?: activity.getString(R.string.auto_key_unreachable)
+                            Toast.makeText(activity, activity.getString(R.string.auto_key_failed, reason), Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }.start()
+            }
             view.findViewById<View>(R.id.connection_paste_keys).setOnClickListener {
                 val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
                 val text = clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()

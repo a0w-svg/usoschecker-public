@@ -88,6 +88,7 @@ class MoreScreenController private constructor() {
                     val description = activity.getString(entry.description)
                     row.findViewById<TextView>(R.id.more_entry_title).text = title
                     row.findViewById<TextView>(R.id.more_entry_description).text = description
+                    row.findViewById<TextView>(R.id.more_entry_badge).text = title.take(1).uppercase()
                     // The divider separates rows, so the first row has none.
                     if (index == 0) row.findViewById<View>(R.id.more_entry_divider).visibility = View.GONE
                     row.findViewById<View>(R.id.more_entry_root).apply {

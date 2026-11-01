@@ -16,15 +16,9 @@ object WelcomeScreenController {
         val box = UiHelper.card(activity, content)
         UiHelper.add(activity, box, activity.getString(R.string.welcome_get_key), 16, Tone.INK, true)
         UiHelper.note(activity, box, activity.getString(R.string.welcome_form_details), Tone.MUTED)
-        box.addView(UiHelper.button(activity, activity.getString(R.string.btn_register_usosapps), {
-            UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/developers/")
-        }, false))
         UiHelper.add(activity, box, activity.getString(R.string.welcome_copy_keys), 16, Tone.INK, true)
         UiHelper.note(activity, box, activity.getString(R.string.welcome_key_meaning), Tone.MUTED)
-        UiHelper.add(activity, box, activity.getString(R.string.welcome_login_step), 16, Tone.INK, true)
-        UiHelper.note(activity, box, activity.getString(R.string.welcome_login_explained), Tone.MUTED)
         UiHelper.note(activity, box, activity.getString(R.string.welcome_privacy), Tone.MUTED)
-        UiHelper.note(activity, box, activity.getString(R.string.welcome_no_key), Tone.MUTED)
         content.addView(UiHelper.button(activity, activity.getString(R.string.welcome_enter_keys), {
             activity.finishWelcome(false, true)
         }, true).apply { id = R.id.welcome_continue })

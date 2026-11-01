@@ -1,15 +1,12 @@
 <resources>
-    <string name="welcome_progress">Швидкий старт · 3 кроки</string>
+    <string name="welcome_progress">Швидкий старт · 2 кроки</string>
     <string name="welcome_title">Твій день в університеті. В одному місці.</string>
     <string name="welcome_intro">Розклад, оцінки та зміни з USOS — почніть із короткого налаштування або перегляньте демо.</string>
     <string name="welcome_privacy">У застосунку немає спільного ключа. Ваш ключ і секрет зберігаються лише в зашифрованому сховищі на телефоні.</string>
-    <string name="welcome_login_explained">Пароль вводьте лише на сайті USOS у браузері. Після надання доступу ви автоматично повернетеся до застосунку.</string>
-    <string name="welcome_get_key">1. Створіть ключ на сайті університету</string>
-    <string name="welcome_form_details">У “Sign up for an API key” введіть назву (напр. “My USOS Checker”) і свою пошту, потім надішліть форму.</string>
-    <string name="welcome_copy_keys">2. Скопіюйте Consumer Key і Consumer Secret</string>
-    <string name="welcome_key_meaning">Скопіюйте Consumer Key і Consumer Secret. На наступному екрані одне натискання вставить обидва та відкриє вхід.</string>
-    <string name="welcome_no_key">Немає форми чи ключів? Запитайте підтримку USOS університету або спробуйте демо.</string>
-    <string name="welcome_enter_keys">Маю ключ і секрет — далі</string>
+    <string name="welcome_get_key">1. Вкажіть email</string>
+    <string name="welcome_form_details">Застосунок сам зареєструє для вас ключ API в USOSapps вашого університету. Нічого копіювати не потрібно.</string>
+    <string name="welcome_copy_keys">2. Підтвердьте доступ у USOS</string>
+    <string name="welcome_key_meaning">Пароль вводьте лише на сайті USOS у браузері. Після підтвердження доступу ви автоматично повернетеся до застосунку.</string>
+    <string name="welcome_enter_keys">Почати</string>
     <string name="welcome_skip">Пропустити поки що</string>
-    <string name="welcome_login_step">3. Увійдіть у USOS</string>
 </resources>

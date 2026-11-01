@@ -1,15 +1,12 @@
 <resources>
-    <string name="welcome_progress">Quick start · 3 steps</string>
+    <string name="welcome_progress">Quick start · 2 steps</string>
     <string name="welcome_title">Your university day. In one place.</string>
     <string name="welcome_intro">Your USOS timetable, grades and changes — start with a quick setup or explore the demo.</string>
     <string name="welcome_privacy">The app has no shared key. Your key and secret stay only in encrypted storage on this phone.</string>
-    <string name="welcome_login_explained">You enter your password only on the USOS website in your browser. After approving access you return to the app automatically.</string>
-    <string name="welcome_get_key">1. Create a key on the university website</string>
-    <string name="welcome_form_details">Under “Sign up for an API key”, enter a name (e.g. “My USOS Checker”) and your email, then submit the form.</string>
-    <string name="welcome_copy_keys">2. Copy Consumer Key and Consumer Secret</string>
-    <string name="welcome_key_meaning">Copy the Consumer Key and Consumer Secret. On the next screen one tap pastes both and opens sign-in.</string>
-    <string name="welcome_no_key">No form or no keys? Ask your university’s USOS support or try the demo.</string>
-    <string name="welcome_enter_keys">I have both values — continue</string>
+    <string name="welcome_get_key">1. Enter your email</string>
+    <string name="welcome_form_details">The app registers an API key for you with your university’s USOSapps. Nothing to copy.</string>
+    <string name="welcome_copy_keys">2. Approve access in USOS</string>
+    <string name="welcome_key_meaning">You enter your password only on the USOS website in your browser. After approving access you return to the app automatically.</string>
+    <string name="welcome_enter_keys">Get started</string>
     <string name="welcome_skip">Skip for now</string>
-    <string name="welcome_login_step">3. Sign in to USOS</string>
 </resources>

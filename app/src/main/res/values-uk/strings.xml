@@ -102,9 +102,9 @@
     <string name="tool_api_desc">Розширені інструменти API</string>
 <string name="student_card_badge">СТУДЕНТСЬКИЙ КВИТОК VISTULA</string>
 <string name="connect_usos_title">Підключити до USOS</string>
-    <string name="connect_usos_desc">Увійдіть на сайті університету, підтвердьте згоди та вставте отриманий PIN. Пароль вводиться лише в браузері.</string>
+    <string name="connect_usos_desc">Пароль вводьте лише в браузері на сайті USOS. Після підтвердження доступу ви автоматично повернетеся до застосунку.</string>
     <string name="btn_how_to_register">❓ Як зареєструвати додаток в USOSapps?</string>
-<string name="btn_login_browser">1. Відкрити вхід до USOS</string>
+<string name="btn_login_browser">Відкрити вхід до USOS</string>
     <string name="btn_confirm_pin">2. Підключити обліковий запис</string>
     <string name="btn_paste_pin">📋 Вставити PIN із буфера</string>
     <string name="pin_detected_clipboard">📋 Виявлено код PIN у буфері</string>
@@ -239,7 +239,6 @@
     <string name="payments_balance">Баланс рахунку: %1$.2f %2$s</string>
     <string name="payments_copy_iban">Копіювати номер субрахунку (IBAN)</string>
     <string name="payments_iban_copied">Номер субрахунку скопійовано в буфер</string>
-    <string name="payments_schedule_heading">Графік платежів</string>
 <string name="payments_status_overdue_warn">Увага: Частина платежів прострочена!</string>
     <string name="payments_status_all_paid">Усі платежі здійснено вчасно.</string>
     <string name="payments_status_none_due">У завантажених внесках немає сум до сплати.</string>
@@ -702,4 +701,10 @@
     <string name="login_callback_ignored">Не вдалося зіставити повернення з входу USOS. Введіть PIN вручну.</string>
     <string name="btn_paste_keys">Вставити ключ і увійти</string>
     <string name="paste_keys_not_found">У буфері обміну немає Consumer Key і Consumer Secret. Скопіюйте обидва зі сторінки USOSapps.</string>
+    <string name="payments_copy_account">Копіювати номер рахунку</string>
+    <string name="payments_paid_group">Сплачені та скасовані</string>
+    <string name="payments_guide_title">Як працюють платежі</string>
+    <string name="connect_step_key">1. Ключ API (один раз)</string>
+    <string name="connect_step_paste">2. Вставте ключ</string>
+    <string name="connect_step_login">3. Увійдіть</string>
 </resources>

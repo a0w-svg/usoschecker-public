@@ -320,10 +320,12 @@ class AccountScreenController private constructor() {
                     else -> R.string.login_setup
                 }
             )
+            val status = view.findViewById<View>(R.id.connection_status)
             val setup = view.findViewById<View>(R.id.connection_setup)
             val advanced = view.findViewById<View>(R.id.connection_advanced)
             setup.visibility = if (pending) View.GONE else View.VISIBLE
             advanced.visibility = if (credentialsReady) View.GONE else View.VISIBLE
+            status.visibility = if (pending || credentialsReady) View.VISIBLE else View.GONE
             view.findViewById<View>(R.id.connection_toggle).setOnClickListener {
                 if (setup.isGone) {
                     setup.visibility = View.VISIBLE

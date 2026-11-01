@@ -111,9 +111,9 @@
     <!-- Account & OAuth -->
 <string name="student_card_badge">KARTA STUDENTA VISTULA</string>
 <string name="connect_usos_title">Połącz z USOS</string>
-    <string name="connect_usos_desc">Zaloguj się na stronie uczelni, zaakceptuj zgody i wklej otrzymany PIN. Hasło podajesz wyłącznie w przeglądarce.</string>
+    <string name="connect_usos_desc">Hasło wpisujesz tylko w przeglądarce na stronie USOS. Po zatwierdzeniu dostępu wrócisz do aplikacji automatycznie.</string>
     <string name="btn_how_to_register">❓ Jak zarejestrować aplikację w USOSapps?</string>
-<string name="btn_login_browser">1. Otwórz logowanie USOS</string>
+<string name="btn_login_browser">Otwórz logowanie USOS</string>
     <string name="btn_confirm_pin">2. Połącz konto</string>
     <string name="btn_paste_pin">📋 Wklej PIN ze schowka</string>
     <string name="pin_detected_clipboard">📋 Wykryto kod PIN ze schowka</string>
@@ -251,7 +251,6 @@
     <string name="payments_balance">Saldo konta: %1$.2f %2$s</string>
     <string name="payments_copy_iban">Kopiuj numer subkonta (IBAN)</string>
     <string name="payments_iban_copied">Numer subkonta skopiowany do schowka</string>
-    <string name="payments_schedule_heading">Harmonogram należności</string>
 <string name="payments_status_overdue_warn">Uwaga: Część rat jest po terminie płatności!</string>
     <string name="payments_status_all_paid" tools:ignore="UnusedResources">Wszystkie należności są opłacone na bieżąco.</string>
     <string name="payments_status_none_due">Brak kwot do zapłaty w pobranych ratach.</string>
@@ -707,4 +706,10 @@
     <string name="login_callback_ignored">Nie rozpoznano powrotu z logowania USOS. Wpisz PIN ręcznie.</string>
     <string name="btn_paste_keys">Wklej klucz i zaloguj</string>
     <string name="paste_keys_not_found">Nie znaleziono Consumer Key i Consumer Secret w schowku. Skopiuj oba ze strony USOSapps.</string>
+    <string name="payments_copy_account">Kopiuj numer konta</string>
+    <string name="payments_paid_group">Opłacone i anulowane</string>
+    <string name="payments_guide_title">Jak działają płatności</string>
+    <string name="connect_step_key">1. Klucz API (jednorazowo)</string>
+    <string name="connect_step_paste">2. Wklej klucz</string>
+    <string name="connect_step_login">3. Zaloguj się</string>
 </resources>

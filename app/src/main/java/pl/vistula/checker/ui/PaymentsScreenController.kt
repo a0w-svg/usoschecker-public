@@ -42,7 +42,6 @@ class PaymentsScreenController private constructor() {
                 ToolScreenUi.action(menu, R.string.payments_history_refresh) { activity.refreshStudentServices("remittances") }
                 ToolScreenUi.action(menu, R.string.tool_api_methods) { activity.openApiModule("payments") }
             }
-            UiHelper.note(activity, content, activity.getString(R.string.payments_usage_guide), Tone.MUTED)
             val entry = services.optJSONObject("payments") ?: JSONObject()
             val language = pl.vistula.checker.core.ApiLanguage.normalize(Language.currentLocale(activity).language)
             val cached = entry.optJSONObject("data")?.optJSONObject(language)
@@ -72,21 +71,41 @@ class PaymentsScreenController private constructor() {
                 (connected && authorizedScopes.isNotEmpty() && !hasPaymentsScope)
             if (scopeMissing) renderScopeWarning(activity, content, authorizedScopes)
 
-            renderDetails(activity, content, entry.optJSONObject("data"))
-            renderRemittances(activity, content, remittances)
             if (payments.accounts.isEmpty() && payments.installments.isEmpty()) {
+                renderDetails(activity, content, entry.optJSONObject("data"))
+                renderRemittances(activity, content, remittances)
                 if (!scopeMissing) {
                     UiHelper.empty(activity, content, activity.getString(R.string.payments_empty_title),
                         activity.getString(R.string.payments_empty_desc))
                 }
+                renderGuide(activity, content)
                 return
             }
-            if (payments.accounts.isNotEmpty()) renderAccounts(activity, content, payments)
             if (payments.installments.isNotEmpty()) {
-                UiHelper.heading(activity, content, activity.getString(R.string.payments_schedule_heading))
                 renderSummary(activity, content, payments, language)
-                for (installment in payments.installments) renderInstallment(activity, content, installment)
+                val transferAccount = payments.installments.firstOrNull { !it.isPaid() && it.bankAccountNumber.isNotEmpty() }?.bankAccountNumber
+                    ?: payments.accounts.firstOrNull { it.bankAccountNumber.isNotEmpty() }?.bankAccountNumber
+                if (!transferAccount.isNullOrEmpty()) {
+                    content.addView(UiHelper.button(activity, activity.getString(R.string.payments_copy_account), {
+                        copySensitive(activity, activity.getString(R.string.payment_clipboard_label), transferAccount, R.string.payments_account_copied)
+                    }, true))
+                }
+                val (settled, toPay) = payments.installments.partition { it.isPaid() || it.isCancelled() }
+                for (installment in toPay) renderInstallment(activity, content, installment)
+                if (settled.isNotEmpty()) {
+                    val done = UiHelper.disclosure(activity, content, "payments.paid", R.string.payments_paid_group)
+                    for (installment in settled) renderInstallment(activity, done, installment)
+                }
             }
+            renderDetails(activity, content, entry.optJSONObject("data"))
+            renderRemittances(activity, content, remittances)
+            if (payments.accounts.isNotEmpty()) renderAccounts(activity, content, payments)
+            renderGuide(activity, content)
+        }
+
+        private fun renderGuide(activity: MainActivity, content: LinearLayout) {
+            val guide = UiHelper.disclosure(activity, content, "payments.guide", R.string.payments_guide_title)
+            UiHelper.note(activity, guide, activity.getString(R.string.payments_usage_guide), Tone.MUTED)
         }
 
         private fun inflate(activity: MainActivity, layout: Int, parent: LinearLayout): View =
@@ -162,6 +181,7 @@ class PaymentsScreenController private constructor() {
             for (line in lines) {
                 (inflate(activity, R.layout.item_payment_amount, amounts) as TextView).also {
                     it.text = line
+                    it.typeface = android.graphics.Typeface.create(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD)
                     amounts.addView(it)
                 }
             }

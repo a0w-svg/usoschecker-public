@@ -100,9 +100,9 @@ Parameters preserved. Fix them or retry the request.</string>
     <string name="tool_api_desc">Advanced API tools</string>
 <string name="student_card_badge">VISTULA STUDENT CARD</string>
 <string name="connect_usos_title">Connect with USOS</string>
-    <string name="connect_usos_desc">Log in on university website, accept permissions, and paste received PIN. Password is only entered in browser.</string>
+    <string name="connect_usos_desc">You enter your password only in the browser on the USOS site. After you approve access you return to the app automatically.</string>
     <string name="btn_how_to_register">❓ How to register an app in USOSapps?</string>
-<string name="btn_login_browser">1. Open USOS login</string>
+<string name="btn_login_browser">Open USOS login</string>
     <string name="btn_confirm_pin">2. Connect account</string>
     <string name="btn_paste_pin">📋 Paste PIN from clipboard</string>
     <string name="pin_detected_clipboard">📋 PIN code detected in clipboard</string>
@@ -237,7 +237,6 @@ Parameters preserved. Fix them or retry the request.</string>
     <string name="payments_balance">Account balance: %1$.2f %2$s</string>
     <string name="payments_copy_iban">Copy subaccount number (IBAN)</string>
     <string name="payments_iban_copied">Subaccount number copied to clipboard</string>
-    <string name="payments_schedule_heading">Installment schedule</string>
 <string name="payments_status_overdue_warn">Attention: Some installments are past due date!</string>
     <string name="payments_status_all_paid">All payments are up to date.</string>
     <string name="payments_status_none_due">No amount is due in the downloaded installments.</string>
@@ -696,4 +695,10 @@ Last download: %3$s</string>
     <string name="login_callback_ignored">Could not match the USOS login return. Enter the PIN manually.</string>
     <string name="btn_paste_keys">Paste key and sign in</string>
     <string name="paste_keys_not_found">No Consumer Key and Consumer Secret found in the clipboard. Copy both from the USOSapps page.</string>
+    <string name="payments_copy_account">Copy account number</string>
+    <string name="payments_paid_group">Paid and cancelled</string>
+    <string name="payments_guide_title">How payments work</string>
+    <string name="connect_step_key">1. API key (one time)</string>
+    <string name="connect_step_paste">2. Paste the key</string>
+    <string name="connect_step_login">3. Sign in</string>
 </resources>

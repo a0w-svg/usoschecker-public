@@ -9,16 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp" />
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/connection_reopen"
-        style="@style/Widget.Vistula.Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/btn_register_usosapps"
-        android:gravity="start|center_vertical"
-        app:backgroundTint="@android:color/transparent"
-        xmlns:app="http://schemas.android.com/apk/res-auto" />
     <TextView
         android:id="@+id/connection_status"
         style="@style/Vistula.Text.Note.Muted"
@@ -36,13 +26,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+    <TextView
+        style="@style/Vistula.Text.Strong16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/connect_step_key" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_reopen"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_register_usosapps" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connection_help"
         style="@style/Widget.Vistula.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/btn_how_to_register" />
+    <TextView
+        style="@style/Vistula.Text.Strong16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/connect_step_paste" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connection_paste_keys"
         style="@style/Widget.Vistula.Button"
@@ -68,18 +77,14 @@
         android:layout_marginBottom="12dp"
         android:text="@string/settings_debug_credentials"
         android:visibility="gone" />
-            <LinearLayout
-                android:id="@+id/connection_raw_scopes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/connection_access"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+    <TextView
+        style="@style/Vistula.Text.Strong16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/connect_step_login" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connection_login"
         style="@style/Widget.Vistula.Button.Primary"
@@ -87,6 +92,21 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="@string/btn_login_browser" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:id="@+id/connection_raw_scopes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+            <LinearLayout
+                android:id="@+id/connection_access"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+        </LinearLayout>
     </LinearLayout>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connection_toggle"

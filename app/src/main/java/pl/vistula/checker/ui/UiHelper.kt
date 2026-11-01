@@ -131,6 +131,7 @@ class UiHelper private constructor() {
         /** Text role from `res/values/vistula_components.xml` for an exact size and weight, or null if none matches. */
         private fun textStyle(size: Int, bold: Boolean): Int? = if (bold) {
             when (size) {
+                30 -> R.style.Vistula_Text_Hero
                 28 -> R.style.Vistula_Text_Title
                 20 -> R.style.Vistula_Text_Heading
                 18 -> R.style.Vistula_Text_Heading18

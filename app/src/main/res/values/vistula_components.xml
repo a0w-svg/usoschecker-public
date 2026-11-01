@@ -9,11 +9,13 @@
         <item name="android:textSize">28sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineHeight">34sp</item>
     </style>
     <style name="Vistula.Text.Heading">
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:letterSpacing">-0.01</item>
+        <item name="android:lineHeight">26sp</item>
     </style>
     <style name="Vistula.Text.Heading18">
         <item name="android:textSize">18sp</item>
@@ -171,5 +173,6 @@
     <style name="Vistula.Text.Hero">
         <item name="android:textSize">30sp</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">38sp</item>
     </style>
 </resources>

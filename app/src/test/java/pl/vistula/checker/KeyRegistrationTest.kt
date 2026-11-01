@@ -21,17 +21,20 @@ class KeyRegistrationTest {
         override fun getInputStream(): InputStream = ByteArrayInputStream(body.toByteArray())
         override fun getErrorStream(): InputStream = inputStream
         override fun getOutputStream(): OutputStream = sent
+        override fun getHeaderFields(): Map<String, List<String>> = mapOf("Set-Cookie" to listOf("csrftoken=tok123; Path=/"))
     }
 
     @Test
     fun postsTheFormAndReturnsTheIssuedKeys() {
         val fake = Fake("""{"status":"success","consumer_key":"abc","consumer_secret":"def"}""")
-        val address = arrayOf("")
+        val address = ArrayList<String>()
         val keys = KeyRegistration.register("My app", "", "me@example.com", UsosClient.ConnectionSource {
-            address[0] = it
-            fake
+            address.add(it)
+            if (it.endsWith("developers/")) Fake("<html>") else fake
         })
-        assertEquals(UsosClient.BASE + "developers/submit", address[0])
+        assertEquals(listOf(UsosClient.BASE + "developers/", UsosClient.BASE + "developers/submit"), address)
+        assertEquals("tok123", fake.getRequestProperty("X-CSRFToken"))
+        assertEquals("csrftoken=tok123", fake.getRequestProperty("Cookie"))
         assertEquals("POST", fake.requestMethod)
         assertEquals("appname=My+app&appurl=&email=me%40example.com", fake.sent.toString())
         assertEquals("abc", keys.key)

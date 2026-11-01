@@ -17,6 +17,26 @@ object KeyRegistration {
     class Rejected(message: String) : IOException(message)
 
     private const val ENDPOINT = "developers/submit"
+    private const val PAGE = "developers/"
+
+    /** The developers page hands out a CSRF cookie that its own form script echoes back as a header. */
+    @Throws(IOException::class)
+    private fun csrfToken(connections: UsosClient.ConnectionSource): String {
+        val connection = connections.open(UsosClient.BASE + PAGE)
+        try {
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 15_000
+            connection.readTimeout = 20_000
+            connection.responseCode
+            val cookies = connection.headerFields?.entries
+                ?.filter { it.key.equals("Set-Cookie", ignoreCase = true) }
+                ?.flatMap { it.value.orEmpty() }
+                .orEmpty()
+            return cookies.firstNotNullOfOrNull { Regex("""csrftoken=([^;\s]+)""").find(it)?.groupValues?.get(1) }.orEmpty()
+        } finally {
+            connection.disconnect()
+        }
+    }
 
     @JvmStatic
     @JvmOverloads
@@ -31,8 +51,14 @@ object KeyRegistration {
     ): Keys {
         val form = listOf("appname" to appName, "appurl" to appUrl, "email" to email)
             .joinToString("&") { (name, value) -> name + "=" + URLEncoder.encode(value, "UTF-8") }
+        val token = csrfToken(connections)
         val connection = connections.open(UsosClient.BASE + ENDPOINT)
         try {
+            if (token.isNotEmpty()) {
+                connection.setRequestProperty("Cookie", "csrftoken=$token")
+                connection.setRequestProperty("X-CSRFToken", token)
+                connection.setRequestProperty("Referer", UsosClient.BASE + PAGE)
+            }
             connection.requestMethod = "POST"
             connection.doOutput = true
             connection.connectTimeout = 15_000

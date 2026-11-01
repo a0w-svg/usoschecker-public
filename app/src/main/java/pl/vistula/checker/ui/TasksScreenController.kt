@@ -252,10 +252,12 @@ class TasksScreenController private constructor() {
                     when {
                         done -> R.color.app_muted
                         due != null && due.isBefore(today) -> R.color.app_error
+                        today == due -> R.color.app_link
                         else -> R.color.app_ink
                     }
                 )
             )
+            if (!done && due != null && !due.isAfter(today)) dueView.setTypeface(dueView.typeface, android.graphics.Typeface.BOLD)
 
             card.setOnClickListener { showTaskDialog(activity, task, "", total, callback) }
             toggle.isChecked = done

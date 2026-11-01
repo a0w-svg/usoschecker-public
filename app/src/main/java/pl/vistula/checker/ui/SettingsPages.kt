@@ -13,6 +13,14 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
     private data class Page(val key: String, val title: Int, val body: LinearLayout, val row: View)
     private val pages = mutableListOf<Page>()
 
+    private var header: View? = null
+
+    /** Identity card shown above the page list; hidden once a single page is open. */
+    fun header(view: View) {
+        header = view
+        content.addView(view)
+    }
+
     fun page(key: String, title: Int, primary: Boolean = false): LinearLayout {
         val inflater = LayoutInflater.from(activity)
         val row = inflater.inflate(if (primary) R.layout.view_button_primary else R.layout.item_settings_page, content, false) as MaterialButton
@@ -30,7 +38,9 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
         if (selected == null) {
             val order = listOf("settings.connection", "settings.account", "settings.profile", "settings.campus",
                 "settings.sync", "settings.notifications", "settings.appearance", "settings.term", "settings.widgets", "settings.about")
+            header?.let { content.removeView(it) }
             for (page in pages) { content.removeView(page.row); content.removeView(page.body) }
+            header?.let { content.addView(it) }
             for (page in pages.sortedBy { order.indexOf(it.key) }) {
                 content.addView(page.row)
                 content.addView(page.body)

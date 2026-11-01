@@ -114,6 +114,18 @@ class AccountScreenController private constructor() {
                 val stage = if (demo) "Semestr 5 · Studia stacjonarne" else state.optString("stage", "")
                 val admission = if (demo) "2024-10-01" else state.optString("admissionDate", "")
 
+                val head = LayoutInflater.from(activity).inflate(R.layout.view_account_header, content, false)
+                head.findViewById<TextView>(R.id.account_header_avatar).text = UiHelper.initials(userName)
+                head.findViewById<TextView>(R.id.account_header_name).text = userName
+                head.findViewById<TextView>(R.id.account_header_detail).apply {
+                    val detail = listOf(
+                        activity.getString(if (pl.vistula.checker.core.AccountRole.lecturer(state)) R.string.lecturer_title else R.string.student_card_badge),
+                        if (studentNr.isEmpty()) "" else activity.getString(R.string.cards_student_number, studentNr)
+                    ).filter { it.isNotEmpty() }.joinToString(" · ")
+                    text = detail
+                }
+                head.contentDescription = userName
+                pages.header(head)
                 bindProfile(activity, profile, state, snapshot, demo, userName, studentNr, email, program, stage, admission)
             }
 

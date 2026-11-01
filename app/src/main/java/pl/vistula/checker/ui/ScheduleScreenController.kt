@@ -366,7 +366,6 @@ class ScheduleScreenController private constructor() {
                     val gap = breaks.remove(lesson.start.toInstant())
                     if (gap != null) {
                         val breakCard = UiHelper.inflate(activity, R.layout.item_schedule_break, dayTray!!)
-                        breakCard.backgroundTintList = ColorStateList.valueOf(activity.getColor(Surface.SUCCESS.color))
                         breakCard.findViewById<TextView>(R.id.break_title).text = activity.getString(R.string.schedule_break_title, gap.minutes)
                         breakCard.findViewById<TextView>(R.id.break_time).text = activity.getString(
                             R.string.schedule_break_time,

@@ -83,7 +83,7 @@ class SharedRepository @JvmOverloads constructor(
     }
 
     @Throws(Exception::class)
-    fun begin(key: String, secret: String, scopes: String?) {
+    fun begin(key: String, secret: String, scopes: String?, callback: String = "oob") {
         val normalizedScopes = StudentServices.normalizeScopes(scopes)
         synchronized(AUTH_LOCK) {
             val attempt = UUID.randomUUID().toString()
@@ -96,7 +96,14 @@ class SharedRepository @JvmOverloads constructor(
                 vault.write(s)
             }
             val credentials = JSONObject().put("key", key).put("secret", secret)
-            val request = clients.create(credentials).begin(normalizedScopes)
+            val client = clients.create(credentials)
+            val request = try {
+                client.begin(normalizedScopes, callback)
+            } catch (e: UsosClient.ApiException) {
+                // USOS refused the callback address: fall back to the PIN flow instead of failing the login.
+                if (callback == "oob" || e.status != 400) throw e
+                client.begin(normalizedScopes, "oob")
+            }
             synchronized(LOCK) {
                 val s = vault.read()
                 if (attempt != s.optString("authAttempt") || s.optString("token").isNotEmpty()) {

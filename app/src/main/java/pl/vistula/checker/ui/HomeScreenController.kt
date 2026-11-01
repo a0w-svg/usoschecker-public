@@ -49,7 +49,7 @@ class HomeScreenController private constructor() {
             renderFocus(activity, content, d, snapshot, lessons, onLessonDetails)
             renderRecentChanges(activity, content, d)
             renderWeek(activity, content, snapshot, lessons)
-            renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"))
+            renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"), if (demo) null else state.optJSONObject("studentServices"))
             sectionLink(activity, content, R.string.design_shortcuts) { activity.navigate(Tabs.MORE) }
             renderShortcuts(activity, content)
             snapshot ?: return
@@ -168,7 +168,7 @@ class HomeScreenController private constructor() {
             val view = inflate(activity, R.layout.view_home_focus, parent)
             parent.addView(view)
             view.findViewById<TextView>(R.id.home_updated).text =
-                activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(data.optLong("successAt")))
+                activity.getString(R.string.home_updated_at, UiHelper.timestamp(data.optLong("successAt")))
             view.findViewById<TextView>(R.id.home_caption).setText(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class)
             view.findViewById<TextView>(R.id.home_title).text =
                 focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming)
@@ -218,9 +218,9 @@ class HomeScreenController private constructor() {
         }
 
         private fun bindFocusLesson(activity: MainActivity, view: View, focus: LessonTime, ongoing: Boolean, now: Instant, today: LocalDate) {
-                        val room = room(focus.record)
-            val date = if (focus.start.toLocalDate() == today) "" else UiHelper.shortDate(focus.start.toLocalDate()) + " · "
-            val detail = date + focus.start.format(CLOCK) + "–" + focus.end.format(CLOCK) +
+            val room = room(focus.record)
+            // A later day is already named in the status pill below.
+            val detail = focus.start.format(CLOCK) + "–" + focus.end.format(CLOCK) +
                 if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room)
             view.findViewById<TextView>(R.id.home_detail).apply {
                 text = detail
@@ -239,7 +239,7 @@ class HomeScreenController private constructor() {
 
         private fun lessonRow(activity: MainActivity, parent: LinearLayout, lesson: LessonTime, details: Consumer<LessonTime>): View {
             val row = inflate(activity, R.layout.item_home_lesson, parent)
-                        val room = room(lesson.record)
+            val room = room(lesson.record)
             row.findViewById<TextView>(R.id.home_lesson_title).text = lesson.record.title
             val time = lesson.start.format(CLOCK) + "–" + lesson.end.format(CLOCK) +
                 (if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room)) +
@@ -261,43 +261,63 @@ class HomeScreenController private constructor() {
             parent.addView(PrototypeUi.week(activity, monday, today, lessons, false) { openDay(activity, it) }, LinearLayout.LayoutParams(-1, -2))
         }
 
-        @Throws(JSONException::class)
-        private fun renderDeadlinesPreview(activity: MainActivity, content: LinearLayout, rows: JSONArray?) {
-            if (rows == null) return
-            val open = ArrayList<JSONObject>()
-            for (i in 0 until rows.length()) {
-                val row = rows.getJSONObject(i)
-                if (!row.optBoolean("done")) open.add(row)
+        private class Deadline(val title: String, val due: LocalDate?, val open: () -> Unit)
+
+        /** Exam registration closing dates come from the cached exams service; past ones are not deadlines any more. */
+        private fun examDeadlines(activity: MainActivity, services: JSONObject?, today: LocalDate): List<Deadline> {
+            val exams = services?.optJSONObject("exams")?.optJSONObject("data")?.optJSONArray("exams") ?: return emptyList()
+            val result = ArrayList<Deadline>()
+            for (i in 0 until exams.length()) {
+                val exam = exams.optJSONObject(i) ?: continue
+                val due = runCatching { LocalDate.parse(exam.optString("registration_end").take(10)) }.getOrNull() ?: continue
+                if (due.isBefore(today)) continue
+                val course = pl.vistula.checker.core.ApiLanguage.text(exam.opt("course_name")).ifEmpty { exam.optString("code") }
+                result.add(Deadline(activity.getString(R.string.deadline_exam_registration, course), due) { activity.navigate(Tabs.ACADEMIC_EXTRAS) })
             }
-            if (open.isEmpty()) return
-            open.sortWith(compareBy { it.optString("due") })
+            return result
+        }
+
+        @Throws(JSONException::class)
+        private fun renderDeadlinesPreview(activity: MainActivity, content: LinearLayout, rows: JSONArray?, services: JSONObject?) {
+            val today = LocalDate.now(UsosClient.ZONE)
+            val all = ArrayList<Deadline>()
+            if (rows != null) {
+                for (i in 0 until rows.length()) {
+                    val row = rows.getJSONObject(i)
+                    if (!row.optBoolean("done")) all.add(Deadline(row.optString("title"), TaskTools.dueDate(row)) { activity.navigate(Tabs.TASKS) })
+                }
+            }
+            all.addAll(examDeadlines(activity, services, today))
+            if (all.isEmpty()) return
+            // Dated items first, soonest on top; items without a date stay last.
+            val open = all.sortedWith(compareBy<Deadline> { it.due == null }.thenBy { it.due })
             UiHelper.heading(activity, content, activity.getString(R.string.deadlines_upcoming))
             val box = UiHelper.card(activity, content)
-            val today = LocalDate.now(UsosClient.ZONE)
-            for (i in 0 until min(3, open.size)) {
-                val task = open[i]
-                val due = TaskTools.dueDate(task)
+            for (deadline in open.take(3)) {
+                val due = deadline.due
                 val item = inflate(activity, R.layout.item_home_deadline, box)
-                item.findViewById<TextView>(R.id.home_deadline_title).text = task.optString("title")
+                item.findViewById<TextView>(R.id.home_deadline_title).text = deadline.title
                 item.findViewById<TextView>(R.id.home_deadline_due).apply {
                     if (due == null) {
                         setText(R.string.tasks_due_unknown)
                     } else {
-                        val prefix = when {
-                            due.isBefore(today) -> "${activity.getString(R.string.tasks_chip_overdue)} · "
-                            due == today -> "${activity.getString(R.string.tasks_chip_today)} · "
-                            else -> ""
+                        val days = java.time.temporal.ChronoUnit.DAYS.between(today, due).toInt()
+                        val countdown = when {
+                            days < 0 -> activity.resources.getQuantityString(R.plurals.deadline_overdue_days, -days, -days)
+                            days == 0 -> activity.getString(R.string.tasks_chip_today)
+                            days == 1 -> activity.getString(R.string.deadline_tomorrow)
+                            else -> activity.resources.getQuantityString(R.plurals.deadline_in_days, days, days)
                         }
-                        val line = prefix + due.format(DUE_DATE)
-                        text = line
-                        if (due.isBefore(today)) setTone(Tone.ERROR)
+                        text = activity.getString(R.string.deadline_line, countdown, due.format(DUE_DATE))
+                        when {
+                            days < 0 -> setTone(Tone.ERROR)
+                            days <= 2 -> setTone(Tone.WARNING)
+                        }
                     }
                 }
+                item.setOnClickListener { deadline.open() }
                 box.addView(item)
             }
-            box.isClickable = true
-            box.isFocusable = true
-            box.setOnClickListener { activity.navigate(Tabs.TASKS) }
             box.addView(UiHelper.button(activity, activity.getString(R.string.home_open_tasks), { activity.navigate(Tabs.TASKS) }, false))
         }
 

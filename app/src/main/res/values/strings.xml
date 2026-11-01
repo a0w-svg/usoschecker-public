@@ -582,6 +582,11 @@
     <string name="tasks_chip_week">Najbliższe 7 dni</string>
     <string name="tasks_due_unknown">Brak poprawnego terminu</string>
     <string name="schedule_mode_week">Tydzień</string>
+    <string name="schedule_range_weekly">%1$s – %2$s</string>
+    <string name="schedule_range_days">%1$d–%2$s</string>
+    <string name="schedule_next_class_dated">%1$s (%2$s)</string>
+    <string name="schedule_add_task">Dodaj zadanie</string>
+    <string name="schedule_task_title">Zadanie: %1$s</string>
     <string name="schedule_previous_week">Poprzedni tydzień</string>
 <string name="schedule_day_label">Dzień</string>
 <string name="schedule_info_title">Informacje o planie</string>
@@ -683,4 +688,23 @@
     <string name="tasks_task_options">Opcje zadania: %1$s</string>
     <string name="tool_options">Opcje: %1$s</string>
     <string name="tool_api_methods">Metody API</string>
+    <string name="btn_reconnect">Zaloguj ponownie</string>
+    <plurals name="deadline_in_days">
+        <item quantity="one">Za %d dzień</item>
+        <item quantity="few">Za %d dni</item>
+        <item quantity="many">Za %d dni</item>
+        <item quantity="other">Za %d dnia</item>
+    </plurals>
+    <plurals name="deadline_overdue_days">
+        <item quantity="one">Zaległe %d dzień</item>
+        <item quantity="few">Zaległe %d dni</item>
+        <item quantity="many">Zaległe %d dni</item>
+        <item quantity="other">Zaległe %d dnia</item>
+    </plurals>
+    <string name="deadline_tomorrow">Jutro</string>
+    <string name="deadline_line">%1$s · %2$s</string>
+    <string name="deadline_exam_registration">Zapisy na egzamin: %s</string>
+    <string name="login_callback_ignored">Nie rozpoznano powrotu z logowania USOS. Wpisz PIN ręcznie.</string>
+    <string name="btn_paste_keys">Wklej klucz i zaloguj</string>
+    <string name="paste_keys_not_found">Nie znaleziono Consumer Key i Consumer Secret w schowku. Skopiuj oba ze strony USOSapps.</string>
 </resources>

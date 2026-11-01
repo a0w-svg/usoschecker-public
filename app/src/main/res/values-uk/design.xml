@@ -12,4 +12,5 @@
     <string name="design_updates">Оновлення</string>
     <string name="design_history_description">Зміни оцінок і розкладу</string>
     <string name="design_later_that_day">Пізніше цього дня</string>
+    <string name="home_updated_at">Оновлено: %1$s</string>
 </resources>

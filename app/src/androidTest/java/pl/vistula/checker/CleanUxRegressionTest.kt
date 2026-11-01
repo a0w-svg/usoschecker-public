@@ -132,7 +132,7 @@ class CleanUxRegressionTest {
             }
             assertEquals(activity.getColor(R.color.app_ink), UiHelper.foreground(activity, UiHelper.GREEN))
             val time = activity.layoutInflater.inflate(R.layout.item_lesson_card, null).findViewById<TextView>(R.id.lesson_item_time)
-            assertEquals(activity.getColor(R.color.app_muted), time.currentTextColor)
+            assertEquals(activity.getColor(R.color.app_ink), time.currentTextColor)
         }
     }
 

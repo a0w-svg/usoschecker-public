@@ -78,14 +78,6 @@ class WelcomeRegressionTest {
                 assertNotNull(activity.findViewById<View>(R.id.welcome_continue))
                 assertEquals(View.GONE, activity.findViewById<View>(R.id.bottom_navigation).visibility)
                 activity.findViewById<View>(R.id.welcome_continue).performClick()
-            }
-            scenario.recreate()
-            awaitReady(scenario)
-            capture("usos-welcome-keys")
-            scenario.onActivity { activity ->
-                val texts = views(activity.findViewById(R.id.main_content)).filterIsInstance<TextView>().map { it.text.toString() }
-                assertTrue(texts.contains(activity.getString(R.string.welcome_key_title)))
-                activity.findViewById<View>(R.id.welcome_continue).performClick()
                 assertEquals("settings.connection", activity.accountPage())
                 val inputs = views(activity.findViewById(R.id.main_content)).filterIsInstance<EditText>()
                 assertTrue(inputs.size >= 2)

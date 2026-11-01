@@ -577,6 +577,11 @@ ADMINISTRATIVE UNIVERSITY KEY REQUIRED</string>
     <string name="tasks_chip_week">Next 7 days</string>
     <string name="tasks_due_unknown">No valid due date</string>
     <string name="schedule_mode_week">Week</string>
+    <string name="schedule_range_weekly">%1$s – %2$s</string>
+    <string name="schedule_range_days">%1$d–%2$s</string>
+    <string name="schedule_next_class_dated">%1$s (%2$s)</string>
+    <string name="schedule_add_task">Add task</string>
+    <string name="schedule_task_title">Task: %1$s</string>
     <string name="schedule_previous_week">Previous week</string>
 <string name="schedule_day_label">Day</string>
 <string name="schedule_info_title">Schedule information</string>
@@ -676,4 +681,19 @@ Last download: %3$s</string>
     <string name="tasks_task_options">Task options: %1$s</string>
     <string name="tool_options">Options: %1$s</string>
     <string name="tool_api_methods">API methods</string>
+    <string name="btn_reconnect">Sign in again</string>
+    <plurals name="deadline_in_days">
+        <item quantity="one">In %d day</item>
+        <item quantity="other">In %d days</item>
+    </plurals>
+    <plurals name="deadline_overdue_days">
+        <item quantity="one">%d day overdue</item>
+        <item quantity="other">%d days overdue</item>
+    </plurals>
+    <string name="deadline_tomorrow">Tomorrow</string>
+    <string name="deadline_line">%1$s · %2$s</string>
+    <string name="deadline_exam_registration">Exam registration: %s</string>
+    <string name="login_callback_ignored">Could not match the USOS login return. Enter the PIN manually.</string>
+    <string name="btn_paste_keys">Paste key and sign in</string>
+    <string name="paste_keys_not_found">No Consumer Key and Consumer Secret found in the clipboard. Copy both from the USOSapps page.</string>
 </resources>

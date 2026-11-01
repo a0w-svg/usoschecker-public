@@ -387,15 +387,10 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun detailField(context: Context, parent: LinearLayout, label: String?, value: String?) {
-            val caption = text(context, label, 12, Tone.MUTED, false)
-            val captionParams = LinearLayout.LayoutParams(-1, -2)
-            captionParams.bottomMargin = dp(context, 3)
-            parent.addView(caption, captionParams)
-            val textView = text(context, value, 15, Tone.INK, false)
-            textView.setTextIsSelectable(true)
-            val valueParams = LinearLayout.LayoutParams(-1, -2)
-            valueParams.bottomMargin = dp(context, 14)
-            parent.addView(textView, valueParams)
+            val field = inflate(context, R.layout.view_detail_field, parent)
+            field.findViewById<TextView>(R.id.detail_caption).text = label
+            field.findViewById<TextView>(R.id.detail_value).text = value
+            parent.addView(field)
         }
 
         @JvmStatic

@@ -1,6 +1,5 @@
 package pl.vistula.checker.ui
 
-import androidx.core.content.withStyledAttributes
 import androidx.core.content.edit
 import androidx.core.view.isGone
 import androidx.core.view.isNotEmpty
@@ -8,13 +7,12 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.Typeface
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textfield.TextInputEditText
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -135,80 +133,74 @@ class ScheduleScreenController private constructor() {
             }
             activity.setScheduleNavigation(move)
 
-            val navBar = LinearLayout(activity)
-            navBar.gravity = Gravity.CENTER_VERTICAL
-            val previous = headerIcon(activity, R.drawable.ic_schedule_previous) { activity.selectScheduleDay(activeDate.minusWeeks(1).toString()) }
-            previous.contentDescription = activity.getString(R.string.schedule_previous_week)
-            val next = headerIcon(activity, R.drawable.ic_schedule_next) { activity.selectScheduleDay(activeDate.plusWeeks(1).toString()) }
-            next.contentDescription = activity.getString(R.string.schedule_next_week)
+            val screen = UiHelper.inflate(activity, R.layout.screen_schedule, content)
+            content.addView(screen)
+            val previous = screen.findViewById<View>(R.id.schedule_previous)
+            val next = screen.findViewById<View>(R.id.schedule_next)
+            previous.setOnClickListener { activity.selectScheduleDay(activeDate.minusWeeks(1).toString()) }
+            next.setOnClickListener { activity.selectScheduleDay(activeDate.plusWeeks(1).toString()) }
             val navLocale = Language.currentLocale(activity)
             val dateLabel = when {
                 calendarMode == "agenda" -> activity.getString(R.string.schedule_mode_agenda)
-                weekly -> monday.format(DateTimeFormatter.ofPattern("d MMM", navLocale)) + " – " +
+                weekly -> activity.getString(
+                    R.string.schedule_range_weekly,
+                    monday.format(DateTimeFormatter.ofPattern("d MMM", navLocale)),
                     monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", navLocale))
-                else -> "${monday.dayOfMonth}–${monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", navLocale))}"
+                )
+                else -> activity.getString(
+                    R.string.schedule_range_days, monday.dayOfMonth,
+                    monday.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM", navLocale))
+                )
             }
-            val date = headerButton(activity, dateLabel) {
-                val days = ArrayList(PlanBrowser.daysWithLessons(allLessons, activity.getCalendarQuery()))
-                if (days.isEmpty()) {
-                    Toast.makeText(activity, R.string.schedule_no_search_results, Toast.LENGTH_SHORT).show()
-                    return@headerButton
-                }
-                val labels = Array(days.size) { i ->
-                    days[i].format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", navLocale))
-                }
-                MaterialAlertDialogBuilder(activity)
-                    .setTitle(R.string.schedule_btn_choose_date)
-                    .setSingleChoiceItems(labels, days.indexOf(activeDate)) { dialog, index ->
-                        activity.setCalendarDate(days[index].toString())
-                        onModeChanged.accept(if (weekly) "week" else "day")
-                        dialog.dismiss()
+            screen.findViewById<MaterialButton>(R.id.schedule_date).apply {
+                text = dateLabel
+                contentDescription = "${activity.getString(R.string.schedule_btn_choose_date)}: $dateLabel"
+                setOnClickListener {
+                    val days = ArrayList(PlanBrowser.daysWithLessons(allLessons, activity.getCalendarQuery()))
+                    if (days.isEmpty()) {
+                        Toast.makeText(activity, R.string.schedule_no_search_results, Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
                     }
-                    .setNegativeButton(R.string.btn_close, null)
-                    .show()
+                    val labels = Array(days.size) { i ->
+                        days[i].format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", navLocale))
+                    }
+                    MaterialAlertDialogBuilder(activity)
+                        .setTitle(R.string.schedule_btn_choose_date)
+                        .setSingleChoiceItems(labels, days.indexOf(activeDate)) { dialog, index ->
+                            activity.setCalendarDate(days[index].toString())
+                            onModeChanged.accept(if (weekly) "week" else "day")
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton(R.string.btn_close, null)
+                        .show()
+                }
             }
-            date.contentDescription = "${activity.getString(R.string.schedule_btn_choose_date)}: $dateLabel"
-            date.textSize = 14f
-            date.setTextColor(activity.getColor(R.color.app_ink))
-            date.minHeight = UiHelper.dp(activity, 64)
-            date.minimumHeight = UiHelper.dp(activity, 64)
-            date.setPadding(
-                UiHelper.dp(activity, 8),
-                UiHelper.dp(activity, 4),
-                UiHelper.dp(activity, 8),
-                UiHelper.dp(activity, 4)
-            )
-            date.setTypeface(null, Typeface.NORMAL)
-            val more = headerIcon(activity, R.drawable.ic_schedule_more) {}
-            more.id = R.id.schedule_more
-            more.contentDescription = activity.getString(R.string.schedule_options)
-            previous.isEnabled = true
-            next.isEnabled = true
-            navBar.addView(previous, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
-            navBar.addView(date, LinearLayout.LayoutParams(0, -2, 1f))
-            navBar.addView(next, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
-            navBar.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
-            content.addView(navBar)
+            val more = screen.findViewById<View>(R.id.schedule_more)
             if (calendarMode != "agenda") {
-                content.addView(PrototypeUi.week(activity, monday, activeDate, allLessons, true) {
-                    activity.selectScheduleDay(it.toString())
-                }.apply { id = R.id.schedule_week_strip }, LinearLayout.LayoutParams(-1, -2))
+                screen.findViewById<LinearLayout>(R.id.schedule_week_host).addView(
+                    PrototypeUi.week(activity, monday, activeDate, allLessons, true) {
+                        activity.selectScheduleDay(it.toString())
+                    }.apply { id = R.id.schedule_week_strip },
+                    LinearLayout.LayoutParams(-1, -2)
+                )
             }
 
-            val search = UiHelper.searchField(
-                activity,
-                content,
-                activity.getString(R.string.schedule_search_hint),
-                activity.getCalendarQuery(),
-                null
-            ) { activity.setCalendarQuery("") }
-            val searchBox = content.getChildAt(content.childCount - 1)
+            val searchBox = screen.findViewById<TextInputLayout>(R.id.schedule_search)
+            searchBox.hint = activity.getString(R.string.schedule_search_hint)
+            val search = searchBox.findViewById<TextInputEditText>(R.id.field_input)
+            search.setText(activity.getCalendarQuery())
             searchBox.visibility = if (activity.getCalendarQuery().isEmpty()) View.GONE else View.VISIBLE
-            val results = LinearLayout(activity)
-            results.orientation = LinearLayout.VERTICAL
-            results.id = R.id.schedule_swipe_content
-            results.minimumHeight = UiHelper.dp(activity, 240)
-            content.addView(results)
+            searchBox.setEndIconOnClickListener {
+                search.setText("")
+                activity.setCalendarQuery("")
+            }
+            search.setOnEditorActionListener { _, action, _ ->
+                if (action != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener false
+                activity.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(search.windowToken, 0)
+                search.clearFocus()
+                true
+            }
+            val results = screen.findViewById<LinearLayout>(R.id.schedule_swipe_content)
             more.setOnClickListener {
                 val menu = PopupMenu(activity, more)
                 val modes = arrayOf("day", "week", "agenda")
@@ -343,7 +335,7 @@ class ScheduleScreenController private constructor() {
                     content.addView(
                         UiHelper.button(
                             activity,
-                            "${activity.getString(R.string.schedule_btn_next_class)} (${UiHelper.shortDate(nextAfter.start.toLocalDate())})",
+                            activity.getString(R.string.schedule_next_class_dated, activity.getString(R.string.schedule_btn_next_class), UiHelper.shortDate(nextAfter.start.toLocalDate())),
                             {
                                 onDateChanged.accept(targetLesson.start.toLocalDate().toString())
                                 onModeChanged.accept("day")
@@ -373,33 +365,23 @@ class ScheduleScreenController private constructor() {
 
                     val gap = breaks.remove(lesson.start.toInstant())
                     if (gap != null) {
-                        val breakCard = UiHelper.card(activity, dayTray!!, Surface.SUCCESS)
-                        breakCard.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), 0)
-                        UiHelper.add(activity, breakCard, activity.getString(R.string.schedule_break_title, gap.minutes), 14, Tone.INK, true)
-                        UiHelper.add(
-                            activity,
-                            breakCard,
-                            activity.getString(
-                                R.string.schedule_break_time,
-                                gap.start.format(DateTimeFormatter.ofPattern("HH:mm")),
-                                gap.end.format(DateTimeFormatter.ofPattern("HH:mm"))
-                            ),
-                            13,
-                            Tone.MUTED,
-                            false
+                        val breakCard = UiHelper.inflate(activity, R.layout.item_schedule_break, dayTray!!)
+                        breakCard.backgroundTintList = ColorStateList.valueOf(activity.getColor(Surface.SUCCESS.color))
+                        breakCard.findViewById<TextView>(R.id.break_title).text = activity.getString(R.string.schedule_break_title, gap.minutes)
+                        breakCard.findViewById<TextView>(R.id.break_time).text = activity.getString(
+                            R.string.schedule_break_time,
+                            gap.start.format(DateTimeFormatter.ofPattern("HH:mm")),
+                            gap.end.format(DateTimeFormatter.ofPattern("HH:mm"))
                         )
+                        dayTray.addView(breakCard)
                     }
 
                     val isConflict = conflictLessonKeys.contains(lesson.record.id)
                     val card = inflater.inflate(R.layout.item_lesson_card, dayTray, false)
-                    (card.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
-                    card.setBackgroundColor(Color.TRANSPARENT)
-                    card.setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 18), UiHelper.dp(activity, 16), UiHelper.dp(activity, 18))
                     val timeView = card.findViewById<TextView>(R.id.lesson_item_time)
                     val conflictBadge = card.findViewById<TextView>(R.id.lesson_item_conflict_badge)
                     val titleView = card.findViewById<TextView>(R.id.lesson_item_title)
                     val detailsView = card.findViewById<TextView>(R.id.lesson_item_details)
-                    val btnDetails = card.findViewById<MaterialButton>(R.id.lesson_item_btn_details)
 
                     var timeText = lesson.start.format(DateTimeFormatter.ofPattern("HH:mm")) + " – " +
                         lesson.end.format(DateTimeFormatter.ofPattern("HH:mm"))
@@ -420,11 +402,6 @@ class ScheduleScreenController private constructor() {
                     conflictBadge.visibility = if (isConflict) View.VISIBLE else View.GONE
 
                     titleView.text = lesson.record.title
-                    titleView.textSize = 17f
-                    titleView.setLineSpacing(UiHelper.dp(activity, 3).toFloat(), 1f)
-                    timeView.textSize = 15f
-                    timeView.setTypeface(null, Typeface.BOLD)
-                    timeView.setTextColor(activity.getColor(R.color.app_ink))
 
                     var summary = lessonSummary(lesson, activity)
                     val roomView = card.findViewById<TextView>(R.id.lesson_item_room)
@@ -432,8 +409,6 @@ class ScheduleScreenController private constructor() {
                     if (room.isNotEmpty()) {
                         roomView.visibility = View.VISIBLE
                         roomView.text = activity.getString(R.string.lesson_room_label, room)
-                        roomView.textSize = 14f
-                        roomView.setTypeface(null, Typeface.NORMAL)
                         val secondary = ArrayList<String>()
                         for (line in summary.split("\n")) {
                             if (line != activity.getString(R.string.notification_class_room, room)) secondary.add(line)
@@ -444,16 +419,9 @@ class ScheduleScreenController private constructor() {
                         if (lesson.tentative()) activity.getString(R.string.design_tentative) else "")
                         .filter { it.isNotBlank() }.joinToString(" · ")
                     detailsView.text = if (query.isNotBlank()) summary else basicDetails
-                    detailsView.textSize = 13f
                     detailsView.visibility = if (detailsView.text.isNotBlank()) View.VISIBLE else View.GONE
-                    (detailsView.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
                     card.contentDescription = listOf(lesson.record.title, timeText, roomView.text.toString(), summary).filter { it.isNotBlank() }.joinToString(". ")
-                    activity.withStyledAttributes(attrs = intArrayOf(android.R.attr.selectableItemBackground)) { card.foreground = getDrawable(0) }
-
-                    card.isClickable = true
-                    card.isFocusable = true
                     card.setOnClickListener { showLessonDetails(activity, lesson, listener) }
-                    btnDetails.visibility = View.GONE
                     val targetTray = checkNotNull(dayTray)
                     if (targetTray.isNotEmpty()) UiHelper.trayDivider(activity, targetTray)
                     targetTray.addView(card)
@@ -477,36 +445,9 @@ class ScheduleScreenController private constructor() {
         }
 
         @JvmStatic
-        fun headerButton(context: Context, label: String, action: Runnable): Button {
-            val button = UiHelper.button(context, label, action, false)
-            button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-            button.setPadding(UiHelper.dp(context, 4), 0, UiHelper.dp(context, 4), 0)
-            button.textSize = 28f
-            button.minHeight = UiHelper.dp(context, 64)
-            button.minimumHeight = UiHelper.dp(context, 64)
-            (button as MaterialButton).insetTop = 0
-            button.insetBottom = 0
-            return button
-        }
-
-        @JvmStatic
-        fun headerIcon(context: Context, icon: Int, action: Runnable): Button {
-            val button = headerButton(context, "", action) as MaterialButton
-            button.setIconResource(icon)
-            button.iconSize = UiHelper.dp(context, 20)
-            button.iconPadding = 0
-            button.iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
-            button.iconTint = button.textColors
-            button.gravity = Gravity.CENTER
-            return button
-        }
-
-        @JvmStatic
         fun showLessonDetails(activity: MainActivity, lesson: LessonTime, listener: ScheduleListener) {
             val details = UiHelper.shortDate(lesson.start.toLocalDate()) + "\n\n" + lesson.record.value
-            val body = LinearLayout(activity)
-            body.orientation = LinearLayout.VERTICAL
-            body.setPadding(UiHelper.dp(activity, 20), UiHelper.dp(activity, 8), UiHelper.dp(activity, 20), UiHelper.dp(activity, 8))
+            val body = UiHelper.inflate(activity, R.layout.view_dialog_body, LinearLayout(activity)) as LinearLayout
             UiHelper.detailField(
                 activity,
                 body,
@@ -554,7 +495,7 @@ class ScheduleScreenController private constructor() {
                 .setTitle(lesson.record.title)
                 .setView(scroller)
                 .setNegativeButton(activity.getString(R.string.btn_close), null)
-                .setNeutralButton("Dodaj zadanie") { _, _ -> listener.onOpenTask("Zadanie: ${lesson.record.title}") }
+                .setNeutralButton(R.string.schedule_add_task) { _, _ -> listener.onOpenTask(activity.getString(R.string.schedule_task_title, lesson.record.title)) }
                 .setPositiveButton(activity.getString(R.string.btn_more_options)) { _, _ ->
                     val options = arrayOf<CharSequence>(
                         activity.getString(R.string.lesson_option_absence),

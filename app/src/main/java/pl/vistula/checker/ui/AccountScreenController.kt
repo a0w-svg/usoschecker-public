@@ -46,6 +46,8 @@ class AccountScreenController private constructor() {
         fun onToggleEnabled(enabled: Boolean)
         fun onUpdateInterval(interval: Long)
         fun onDisconnect()
+        /** Starts a new browser login with the saved app key after the session expired. */
+        fun onReconnect(key: String, secret: String, scopes: String) = onBeginOAuth(key, secret, scopes)
         fun onStartDemo()
         fun onEndDemo()
         fun onRequestNotifications()
@@ -122,6 +124,15 @@ class AccountScreenController private constructor() {
             if (connected) {
                 if (state.optBoolean("authorizationError")) {
                     UiHelper.note(activity, content, activity.getString(R.string.account_session_expired), Tone.ERROR)
+                    val savedKey = state.optString("key")
+                    val savedSecret = state.optString("secret")
+                    if (savedKey.isNotEmpty() && savedSecret.isNotEmpty()) {
+                        content.addView(
+                            UiHelper.button(activity, activity.getString(R.string.btn_reconnect), {
+                                listener.onReconnect(savedKey, savedSecret, state.optString("scopes"))
+                            }, true)
+                        )
+                    }
                 }
                 val box = pages.page("settings.sync", R.string.sync_settings_title)
                 UiHelper.note(activity, box, activity.getString(R.string.settings_sync_hint), Tone.MUTED)
@@ -300,7 +311,7 @@ class AccountScreenController private constructor() {
             val pending = state.optString("requestToken").isNotEmpty()
             val credentialsReady = defaultKey.isNotEmpty() && defaultSecret.isNotEmpty()
 
-            view.findViewById<View>(R.id.connection_reopen).setOnClickListener { activity.showWelcome(1) }
+            view.findViewById<View>(R.id.connection_reopen).setOnClickListener { UiHelper.browser(activity, "https://usosapps.vistula.edu.pl/developers/") }
             view.findViewById<TextView>(R.id.connection_desc).setText(R.string.connect_usos_desc)
             view.findViewById<TextView>(R.id.connection_status).setText(
                 when {
@@ -342,7 +353,13 @@ class AccountScreenController private constructor() {
                 "profile" to R.string.settings_profile_access,
                 "lecturer" to R.string.lecturer_title
             )
-            val choicesHost = view.findViewById<LinearLayout>(R.id.connection_choices)
+            val accessBody = UiHelper.disclosure(activity, view.findViewById(R.id.connection_access), "settings.access", R.string.settings_access)
+            UiHelper.note(activity, accessBody, activity.getString(R.string.settings_access_hint), Tone.MUTED)
+            val choicesHost = LinearLayout(activity).apply {
+                id = R.id.connection_choices
+                orientation = LinearLayout.VERTICAL
+            }
+            accessBody.addView(choicesHost)
             var updatingChoices = false
             val choices = linkedMapOf<String, MaterialSwitch>()
             for ((feature, title) in features) {
@@ -364,6 +381,20 @@ class AccountScreenController private constructor() {
                 updatingChoices = false
             }
 
+            view.findViewById<View>(R.id.connection_paste_keys).setOnClickListener {
+                val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                val text = clipboard?.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.text?.toString()
+                val pair = KeyPaste.parse(text)
+                if (pair == null) {
+                    Toast.makeText(activity, R.string.paste_keys_not_found, Toast.LENGTH_LONG).show()
+                } else {
+                    key.setText(pair.first)
+                    secret.setText(pair.second)
+                    keyLayout.error = null
+                    secretLayout.error = null
+                    view.findViewById<View>(R.id.connection_login).performClick()
+                }
+            }
             view.findViewById<View>(R.id.connection_login).setOnClickListener {
                 val k = key.text.toString().trim().ifEmpty { buildKey }
                 val sec = secret.text.toString().trim().ifEmpty { buildSecret }

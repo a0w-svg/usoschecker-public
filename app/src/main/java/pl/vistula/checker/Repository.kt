@@ -60,8 +60,8 @@ class Repository(c: Context, clients: SharedRepository.ClientFactory) : StateRep
     }
 
     @Throws(Exception::class)
-    fun begin(key: String, secret: String, scopes: String?) {
-        delegate.begin(key, secret, scopes)
+    fun begin(key: String, secret: String, scopes: String?, callback: String = "oob") {
+        delegate.begin(key, secret, scopes, callback)
     }
 
     @Throws(Exception::class)

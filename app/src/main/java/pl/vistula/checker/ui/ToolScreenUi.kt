@@ -41,9 +41,9 @@ class ToolScreenUi private constructor() {
 
         @JvmStatic
         fun overflow(activity: MainActivity, parent: LinearLayout, description: String, actions: Consumer<Menu>): View {
-            val more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more) {}
+            val more = UiHelper.inflate(activity, R.layout.view_overflow_button, parent)
             more.contentDescription = description
-            parent.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 48), -2))
+            parent.addView(more)
             more.setOnClickListener {
                 val popup = PopupMenu(activity, more)
                 actions.accept(popup.menu)
@@ -53,4 +53,3 @@ class ToolScreenUi private constructor() {
         }
     }
 }
-

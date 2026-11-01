@@ -7,10 +7,14 @@
     android:saveEnabled="false"
     android:textColorHint="@color/app_muted"
     app:boxBackgroundMode="outline"
-    app:boxCornerRadiusBottomEnd="12dp"
-    app:boxCornerRadiusBottomStart="12dp"
-    app:boxCornerRadiusTopEnd="12dp"
-    app:boxCornerRadiusTopStart="12dp">
+    app:boxStrokeColor="@color/vistula_field_stroke"
+    app:boxStrokeWidth="1dp"
+    app:boxStrokeWidthFocused="2dp"
+    app:hintAnimationEnabled="false"
+    app:boxCornerRadiusBottomEnd="8dp"
+    app:boxCornerRadiusBottomStart="8dp"
+    app:boxCornerRadiusTopEnd="8dp"
+    app:boxCornerRadiusTopStart="8dp">
 
     <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/field_input"

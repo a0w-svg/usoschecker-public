@@ -45,11 +45,11 @@
     <style name="AppTheme" parent="AppThemeBase" />
     <style name="PrototypeNavigationText" parent="TextAppearance.Material3.LabelMedium">
         <item name="android:textSize">12sp</item>
-        <item name="android:textStyle">normal</item>
+        <item name="android:textStyle">bold</item>
     </style>
     <style name="PrototypeNavigationIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/app_secondary_container</item>
-        <item name="android:height">48dp</item>
+        <item name="android:height">44dp</item>
         <item name="expandedHeight">48dp</item>
         <item name="expandedWidth">wrap_content</item>
         <item name="expandedMarginHorizontal">2dp</item>

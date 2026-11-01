@@ -5,13 +5,14 @@
     android:orientation="vertical">
     <TextView
         android:id="@+id/home_deadline_title"
-        style="@style/Vistula.Text.Strong16"
+        style="@style/Vistula.Text.Strong"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="2dp" />
     <TextView
         android:id="@+id/home_deadline_due"
-        style="@style/Vistula.Text.Body.Muted"
+        style="@style/Vistula.Text.Caption.Muted"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp" />

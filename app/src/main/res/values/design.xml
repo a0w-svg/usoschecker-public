@@ -12,4 +12,5 @@
     <string name="design_updates">Aktualizacje</string>
     <string name="design_history_description">Zmiany ocen i planu</string>
     <string name="design_later_that_day">Później tego dnia</string>
+    <string name="home_updated_at">Zaktualizowano: %1$s</string>
 </resources>

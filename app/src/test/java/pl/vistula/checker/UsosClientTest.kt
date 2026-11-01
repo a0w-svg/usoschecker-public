@@ -583,6 +583,21 @@ class UsosClientTest {
     }
 
     @Test
+    fun beginSendsTheAppCallbackAndDefaultsToOutOfBand() {
+        val captured = ArrayList<String>()
+        val client = UsosClient(credentials(), {}) { address ->
+            captured.add(address)
+            val c = Connection()
+            c.body = "oauth_token=tok1&oauth_token_secret=sec1&oauth_callback_confirmed=true"
+            c
+        }
+        client.begin("grades", "usoschecker://oauth")
+        client.begin("grades")
+        assertTrue(captured[0].contains("oauth_callback=usoschecker%3A%2F%2Foauth"))
+        assertTrue(captured[1].contains("oauth_callback=oob"))
+    }
+
+    @Test
     fun paymentHttpFailuresAbortSnapshotWithTheirRetryAndAuthClassification() {
         for (endpoint in listOf("payments/user_accounts", "payments/user_payments")) {
             for (status in intArrayOf(401, 429, 503)) {

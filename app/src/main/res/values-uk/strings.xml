@@ -579,6 +579,11 @@
     <string name="tasks_chip_week">Найближчі 7 днів</string>
     <string name="tasks_due_unknown">Немає коректного терміну</string>
     <string name="schedule_mode_week">Тиждень</string>
+    <string name="schedule_range_weekly">%1$s – %2$s</string>
+    <string name="schedule_range_days">%1$d–%2$s</string>
+    <string name="schedule_next_class_dated">%1$s (%2$s)</string>
+    <string name="schedule_add_task">Додати завдання</string>
+    <string name="schedule_task_title">Завдання: %1$s</string>
     <string name="schedule_previous_week">Попередній тиждень</string>
 <string name="schedule_day_label">День</string>
 <string name="schedule_info_title">Інформація про розклад</string>
@@ -678,4 +683,23 @@
     <string name="tasks_task_options">Параметри завдання: %1$s</string>
     <string name="tool_options">Параметри: %1$s</string>
     <string name="tool_api_methods">Методи API</string>
+    <string name="btn_reconnect">Увійти знову</string>
+    <plurals name="deadline_in_days">
+        <item quantity="one">Через %d день</item>
+        <item quantity="few">Через %d дні</item>
+        <item quantity="many">Через %d днів</item>
+        <item quantity="other">Через %d дня</item>
+    </plurals>
+    <plurals name="deadline_overdue_days">
+        <item quantity="one">Прострочено на %d день</item>
+        <item quantity="few">Прострочено на %d дні</item>
+        <item quantity="many">Прострочено на %d днів</item>
+        <item quantity="other">Прострочено на %d дня</item>
+    </plurals>
+    <string name="deadline_tomorrow">Завтра</string>
+    <string name="deadline_line">%1$s · %2$s</string>
+    <string name="deadline_exam_registration">Реєстрація на іспит: %s</string>
+    <string name="login_callback_ignored">Не вдалося зіставити повернення з входу USOS. Введіть PIN вручну.</string>
+    <string name="btn_paste_keys">Вставити ключ і увійти</string>
+    <string name="paste_keys_not_found">У буфері обміну немає Consumer Key і Consumer Secret. Скопіюйте обидва зі сторінки USOSapps.</string>
 </resources>

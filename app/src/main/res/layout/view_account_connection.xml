@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/welcome_reopen"
+        android:text="@string/btn_register_usosapps"
         android:gravity="start|center_vertical"
         app:backgroundTint="@android:color/transparent"
         xmlns:app="http://schemas.android.com/apk/res-auto" />
@@ -43,6 +43,13 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="@string/btn_how_to_register" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_paste_keys"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_paste_keys" />
             <LinearLayout
                 android:id="@+id/connection_key_host"
                 android:layout_width="match_parent"
@@ -69,27 +76,10 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/connection_access"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-    <TextView
-        style="@style/Vistula.Text.Heading"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:text="@string/settings_access" />
-    <TextView
-        style="@style/Vistula.Text.Note.Muted"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:text="@string/settings_access_hint" />
-            <LinearLayout
-                android:id="@+id/connection_choices"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-        </LinearLayout>
+            android:orientation="vertical" />
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connection_login"
         style="@style/Widget.Vistula.Button.Primary"

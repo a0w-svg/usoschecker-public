@@ -265,9 +265,9 @@ class UsosClient @JvmOverloads constructor(
         request("GET", endpoint, params, true, token, tokenSecret)
 
     @Throws(Exception::class)
-    fun begin(scopes: String?): Map<String, String> {
+    fun begin(scopes: String?, callback: String = "oob"): Map<String, String> {
         val params = HashMap<String, String>()
-        params["oauth_callback"] = "oob"
+        params["oauth_callback"] = callback
         val normalized = StudentServices.normalizeScopes(scopes)
         if (normalized.isNotEmpty()) params["scopes"] = normalized
         val result = OAuth.form(request("GET", "services/oauth/request_token", params, true, "", ""))

@@ -12,4 +12,5 @@
     <string name="design_updates">Updates</string>
     <string name="design_history_description">Grade and schedule changes</string>
     <string name="design_later_that_day">Later that day</string>
+    <string name="home_updated_at">Updated %1$s</string>
 </resources>

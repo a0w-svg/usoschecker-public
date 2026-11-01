@@ -708,4 +708,8 @@ Last download: %3$s</string>
     <string name="auto_key_working">Registering the key with USOSapps…</string>
     <string name="auto_key_failed">Could not get the key: %1$s</string>
     <string name="auto_key_unreachable">could not reach USOSapps. Use the manual steps below.</string>
+    <string name="account_revoke_key_option">Also revoke my API key at USOSapps (you will get a confirmation email)</string>
+    <string name="account_revoke_check_mail">Check your mailbox: USOSapps sent a link to confirm revoking the key.</string>
+    <string name="account_revoke_unknown">USOSapps no longer knows this key — it was probably already revoked.</string>
+    <string name="account_revoke_failed">Could not revoke the key. Do it manually on the USOSapps Developers page.</string>
 </resources>

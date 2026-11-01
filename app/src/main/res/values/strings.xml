@@ -719,4 +719,8 @@
     <string name="auto_key_working">Rejestruję klucz w USOSapps…</string>
     <string name="auto_key_failed">Nie udało się pobrać klucza: %1$s</string>
     <string name="auto_key_unreachable">brak połączenia z USOSapps. Skorzystaj z ręcznych kroków poniżej.</string>
+    <string name="account_revoke_key_option">Odwołaj też mój klucz API w USOSapps (dostaniesz e-mail z potwierdzeniem)</string>
+    <string name="account_revoke_check_mail">Sprawdź skrzynkę e-mail: USOSapps przysłał link do potwierdzenia odwołania klucza.</string>
+    <string name="account_revoke_unknown">USOSapps nie zna już tego klucza — pewnie został odwołany.</string>
+    <string name="account_revoke_failed">Nie udało się odwołać klucza. Zrób to ręcznie na stronie USOSapps Developers.</string>
 </resources>

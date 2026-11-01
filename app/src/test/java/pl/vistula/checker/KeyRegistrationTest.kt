@@ -61,4 +61,14 @@ class KeyRegistrationTest {
             assertTrue(e !is KeyRegistration.Rejected)
         }
     }
+
+    @Test
+    fun revokeSendsTheKeyPairAndReadsTheAnswer() {
+        val address = arrayOf("")
+        val sent = KeyRegistration.revoke("k 1", "s&2", UsosClient.ConnectionSource { address[0] = it; Fake("true") })
+        assertTrue(sent)
+        assertTrue(address[0].endsWith("revoke_consumer_key?consumer_key=k+1&consumer_secret=s%262"))
+        assertEquals(false, KeyRegistration.revoke("a", "b", UsosClient.ConnectionSource { Fake("false") }))
+        assertEquals(false, KeyRegistration.revoke("a", "b", UsosClient.ConnectionSource { Fake("""{"message": "Key-pair not found."}""", 400) }))
+    }
 }

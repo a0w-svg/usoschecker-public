@@ -220,14 +220,23 @@ class AccountScreenController private constructor() {
                         activity,
                         activity.getString(R.string.btn_disconnect_account),
                         {
-                            MaterialAlertDialogBuilder(activity)
+                            var revoke = false
+                            val revokable = savedKeyPair(state)
+                            val dialog = MaterialAlertDialogBuilder(activity)
                                 .setTitle(activity.getString(R.string.account_disconnect_title))
-                                .setMessage(activity.getString(R.string.account_disconnect_message))
                                 .setNegativeButton(activity.getString(R.string.btn_cancel), null)
                                 .setPositiveButton(activity.getString(R.string.account_disconnect_btn)) { _, _ ->
+                                    if (revoke && revokable != null) revokeKey(activity, revokable.first, revokable.second)
                                     listener.onDisconnect()
                                 }
-                                .show()
+                            if (revokable != null) {
+                                dialog.setMultiChoiceItems(
+                                    arrayOf(activity.getString(R.string.account_revoke_key_option)), booleanArrayOf(false)
+                                ) { _, _, checked -> revoke = checked }
+                            } else {
+                                dialog.setMessage(activity.getString(R.string.account_disconnect_message))
+                            }
+                            dialog.show()
                         },
                         false
                     )
@@ -311,6 +320,24 @@ class AccountScreenController private constructor() {
                 Toast.makeText(activity, R.string.account_toast_widgets_updated, Toast.LENGTH_SHORT).show()
             }
             page.addView(view)
+        }
+
+        private fun savedKeyPair(state: JSONObject): Pair<String, String>? {
+            val key = state.optString("key")
+            val secret = state.optString("secret")
+            return if (key.isNotEmpty() && secret.isNotEmpty()) key to secret else null
+        }
+
+        /** Revokes the saved consumer key in the background; the university then emails a confirmation link. */
+        private fun revokeKey(activity: MainActivity, key: String, secret: String) {
+            val app = activity.applicationContext
+            Thread {
+                val message = runCatching { pl.vistula.checker.KeyRegistration.revoke(key, secret) }.fold(
+                    { if (it) R.string.account_revoke_check_mail else R.string.account_revoke_unknown },
+                    { R.string.account_revoke_failed }
+                )
+                android.os.Handler(android.os.Looper.getMainLooper()).post { Toast.makeText(app, message, Toast.LENGTH_LONG).show() }
+            }.start()
         }
 
         /** Sign-in setup (`view_account_connection`): credentials, access scopes, browser login and PIN confirmation. */

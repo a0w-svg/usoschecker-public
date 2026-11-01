@@ -74,6 +74,39 @@ object KeyRegistration {
         }
     }
 
+    /**
+     * Asks USOSapps to revoke the key pair. The server then emails the owner to confirm, so a `true` answer means
+     * "check your mailbox", not "already revoked". `false` means the pair is unknown (for example already revoked).
+     */
+    @JvmStatic
+    @JvmOverloads
+    @Throws(IOException::class)
+    fun revoke(
+        key: String,
+        secret: String,
+        connections: UsosClient.ConnectionSource = UsosClient.ConnectionSource { url ->
+            java.net.URI.create(url).toURL().openConnection() as java.net.HttpURLConnection
+        }
+    ): Boolean {
+        val query = "consumer_key=" + URLEncoder.encode(key, "UTF-8") + "&consumer_secret=" + URLEncoder.encode(secret, "UTF-8")
+        val connection = connections.open(UsosClient.BASE + "services/oauth/revoke_consumer_key?" + query)
+        try {
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 15_000
+            connection.readTimeout = 20_000
+            val ok = connection.responseCode in 200..299
+            val body = (if (ok) connection.inputStream else connection.errorStream)
+                ?.use { String(it.readBytes(), StandardCharsets.UTF_8) }.orEmpty().trim()
+            if (ok) return body == "true"
+            val message = try { JSONObject(body).optString("message") } catch (e: JSONException) { "" }
+            // The server answers "not found" with a 400, which is the same outcome as `false`.
+            if (message.contains("not found", ignoreCase = true)) return false
+            throw Rejected(message.ifBlank { "USOSapps refused the request" })
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     @JvmStatic
     @Throws(IOException::class)
     fun parse(body: String): Keys {

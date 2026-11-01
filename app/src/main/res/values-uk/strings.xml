@@ -714,4 +714,8 @@
     <string name="auto_key_working">Реєструю ключ у USOSapps…</string>
     <string name="auto_key_failed">Не вдалося отримати ключ: %1$s</string>
     <string name="auto_key_unreachable">немає зв’язку з USOSapps. Скористайтеся ручними кроками нижче.</string>
+    <string name="account_revoke_key_option">Також відкликати мій ключ API в USOSapps (надійде лист із підтвердженням)</string>
+    <string name="account_revoke_check_mail">Перевірте пошту: USOSapps надіслав посилання для підтвердження відкликання ключа.</string>
+    <string name="account_revoke_unknown">USOSapps більше не знає цього ключа — ймовірно, його вже відкликано.</string>
+    <string name="account_revoke_failed">Не вдалося відкликати ключ. Зробіть це вручну на сторінці USOSapps Developers.</string>
 </resources>

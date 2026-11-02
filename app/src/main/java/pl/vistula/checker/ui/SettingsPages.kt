@@ -36,7 +36,7 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
     fun finish(preferred: String? = null) {
         val selected = pages.firstOrNull { it.key == (activity.accountPage() ?: preferred) }
         if (selected == null) {
-            val order = listOf("settings.connection", "settings.account", "settings.profile", "settings.campus",
+            val order = listOf("settings.connection", "settings.account", "settings.access", "settings.profile", "settings.campus",
                 "settings.sync", "settings.notifications", "settings.appearance", "settings.term", "settings.widgets", "settings.about")
             header?.let { content.removeView(it) }
             for (page in pages) { content.removeView(page.row); content.removeView(page.body) }

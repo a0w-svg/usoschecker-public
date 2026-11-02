@@ -712,4 +712,5 @@ Last download: %3$s</string>
     <string name="account_revoke_check_mail">Check your mailbox: USOSapps sent a link to confirm revoking the key.</string>
     <string name="account_revoke_unknown">USOSapps no longer knows this key — it was probably already revoked.</string>
     <string name="account_revoke_failed">Could not revoke the key. Do it manually on the USOSapps Developers page.</string>
+    <string name="permissions_apply">Apply and sign in again</string>
 </resources>

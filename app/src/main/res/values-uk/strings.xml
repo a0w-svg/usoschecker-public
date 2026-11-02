@@ -718,4 +718,5 @@
     <string name="account_revoke_check_mail">Перевірте пошту: USOSapps надіслав посилання для підтвердження відкликання ключа.</string>
     <string name="account_revoke_unknown">USOSapps більше не знає цього ключа — ймовірно, його вже відкликано.</string>
     <string name="account_revoke_failed">Не вдалося відкликати ключ. Зробіть це вручну на сторінці USOSapps Developers.</string>
+    <string name="permissions_apply">Застосувати та увійти знову</string>
 </resources>

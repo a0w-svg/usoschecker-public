@@ -195,8 +195,6 @@ class AccountScreenController private constructor() {
                         }
                     }
                 }
-                val access = UiHelper.disclosure(activity, accountControls, "settings.granted", R.string.settings_access)
-                UiHelper.add(activity, access, activity.getString(R.string.account_oauth_consent, authorizedScopes), 14, Tone.MUTED, false)
                 if (!StudentServices.hasScope(authorizedScopes, "payments")) {
                     UiHelper.note(activity, accountControls, activity.getString(R.string.account_warn_no_payments_scope), Tone.WARNING)
                 }
@@ -247,6 +245,7 @@ class AccountScreenController private constructor() {
                 content.addView(UiHelper.button(activity, activity.getString(R.string.btn_start_demo), { listener.onStartDemo() }, false))
             }
 
+            if (!demo) renderPermissions(activity, pages.page("settings.access", R.string.settings_access), state, listener)
             renderNotifications(activity, pages.page("settings.notifications", R.string.account_notices_heading), listener)
             renderWidgets(activity, pages.page("settings.widgets", R.string.account_widgets_heading))
 
@@ -322,6 +321,73 @@ class AccountScreenController private constructor() {
             page.addView(view)
         }
 
+        private const val DEFAULT_SCOPES = "grades|studies|payments|cards|adm_documents|crstests|offline_access"
+
+        /** The permissions the next sign-in asks for: the single selection kept on the Permissions page. */
+        private fun desiredScopes(activity: MainActivity, state: JSONObject): String =
+            activity.getSharedPreferences("permissions", Context.MODE_PRIVATE).getString("desired", null)
+                ?: state.optString("scopes").ifEmpty { DEFAULT_SCOPES }
+
+        /** The only place where permissions are chosen. Connected accounts apply a change by signing in again. */
+        private fun renderPermissions(activity: MainActivity, page: LinearLayout, state: JSONObject, listener: AccountListener) {
+            val prefs = activity.getSharedPreferences("permissions", Context.MODE_PRIVATE)
+            val authorized = state.optString("scopes")
+            val connected = state.optString("token").isNotEmpty()
+            UiHelper.note(activity, page, activity.getString(R.string.settings_access_hint), Tone.MUTED)
+            if (connected) UiHelper.add(activity, page, activity.getString(R.string.account_oauth_consent, authorized), 14, Tone.MUTED, false)
+            val apply = UiHelper.button(activity, activity.getString(R.string.permissions_apply), {
+                listener.onReconnect(state.optString("key"), state.optString("secret"), desiredScopes(activity, state))
+            }, true)
+            fun refreshApply() {
+                val differs = StudentServices.normalizeScopes(desiredScopes(activity, state)) != StudentServices.normalizeScopes(authorized)
+                apply.visibility = if (connected && differs && state.optString("key").isNotEmpty()) View.VISIBLE else View.GONE
+            }
+            val rawScopes = UiHelper.disclosure(activity, page, "settings.rawScopes", R.string.settings_scope_advanced)
+            val scopes = UiHelper.field(
+                activity, rawScopes, activity.getString(R.string.settings_scope_advanced),
+                desiredScopes(activity, state), false
+            )
+            val features = linkedMapOf(
+                "payments" to R.string.tool_payments_title,
+                "cards" to R.string.cards_title,
+                "documents" to R.string.documents_title,
+                "tests" to R.string.settings_tests_access,
+                "profile" to R.string.settings_profile_access,
+                "lecturer" to R.string.lecturer_title
+            )
+            val accessBody = page
+            val choicesHost = LinearLayout(activity).apply {
+                id = R.id.connection_choices
+                orientation = LinearLayout.VERTICAL
+            }
+            accessBody.addView(choicesHost)
+            var updatingChoices = false
+            val choices = linkedMapOf<String, MaterialSwitch>()
+            for ((feature, title) in features) {
+                val choice = UiHelper.switchRow(activity, choicesHost, activity.getString(title), FeatureAccess.selected(scopes.text.toString(), feature))
+                choices[feature] = choice
+                choice.setOnCheckedChangeListener { _, enabled ->
+                    if (!updatingChoices) {
+                        val next = FeatureAccess.change(scopes.text.toString(), feature, enabled)
+                        if (next != scopes.text.toString()) scopes.setText(next)
+                    }
+                }
+            }
+            UiHelper.watchSearch(scopes) { value ->
+                prefs.edit().putString("desired", value.trim()).apply()
+                refreshApply()
+                updatingChoices = true
+                for ((feature, choice) in choices) {
+                    val selected = FeatureAccess.selected(value, feature)
+                    if (choice.isChecked != selected) choice.isChecked = selected
+                }
+                updatingChoices = false
+            }
+
+            page.addView(apply)
+            refreshApply()
+        }
+
         private fun savedKeyPair(state: JSONObject): Pair<String, String>? {
             val key = state.optString("key")
             val secret = state.optString("secret")
@@ -381,47 +447,6 @@ class AccountScreenController private constructor() {
             val secret = secretLayout.findViewById<TextInputEditText>(R.id.field_input)
             if (buildKey.isNotEmpty()) view.findViewById<View>(R.id.connection_debug).visibility = View.VISIBLE
 
-            val rawScopes = UiHelper.disclosure(activity, view.findViewById(R.id.connection_raw_scopes), "settings.rawScopes", R.string.settings_scope_advanced)
-            val scopes = UiHelper.field(
-                activity, rawScopes, activity.getString(R.string.settings_scope_advanced),
-                state.optString("scopes", "grades|studies|payments|cards|adm_documents|crstests|offline_access"), false
-            )
-            val features = linkedMapOf(
-                "payments" to R.string.tool_payments_title,
-                "cards" to R.string.cards_title,
-                "documents" to R.string.documents_title,
-                "tests" to R.string.settings_tests_access,
-                "profile" to R.string.settings_profile_access,
-                "lecturer" to R.string.lecturer_title
-            )
-            val accessBody = UiHelper.disclosure(activity, view.findViewById(R.id.connection_access), "settings.access", R.string.settings_access)
-            UiHelper.note(activity, accessBody, activity.getString(R.string.settings_access_hint), Tone.MUTED)
-            val choicesHost = LinearLayout(activity).apply {
-                id = R.id.connection_choices
-                orientation = LinearLayout.VERTICAL
-            }
-            accessBody.addView(choicesHost)
-            var updatingChoices = false
-            val choices = linkedMapOf<String, MaterialSwitch>()
-            for ((feature, title) in features) {
-                val choice = UiHelper.switchRow(activity, choicesHost, activity.getString(title), FeatureAccess.selected(scopes.text.toString(), feature))
-                choices[feature] = choice
-                choice.setOnCheckedChangeListener { _, enabled ->
-                    if (!updatingChoices) {
-                        val next = FeatureAccess.change(scopes.text.toString(), feature, enabled)
-                        if (next != scopes.text.toString()) scopes.setText(next)
-                    }
-                }
-            }
-            UiHelper.watchSearch(scopes) { value ->
-                updatingChoices = true
-                for ((feature, choice) in choices) {
-                    val selected = FeatureAccess.selected(value, feature)
-                    if (choice.isChecked != selected) choice.isChecked = selected
-                }
-                updatingChoices = false
-            }
-
             val emailLayout = UiHelper.fieldLayout(activity, view.findViewById(R.id.connection_email_host), activity.getString(R.string.auto_key_email_hint), state.optString("email"), false)
             val email = emailLayout.findViewById<TextInputEditText>(R.id.field_input)
             email.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
@@ -475,7 +500,7 @@ class AccountScreenController private constructor() {
                 val sec = secret.text.toString().trim().ifEmpty { buildSecret }
                 if (k.isNotEmpty() && sec.isNotEmpty()) {
                     val clean = LinkedHashSet<String>()
-                    for (part in scopes.text.toString().trim().split("|")) {
+                    for (part in desiredScopes(activity, state).trim().split("|")) {
                         val trimmed = part.trim()
                         if (trimmed.isNotEmpty()) clean.add(trimmed)
                     }

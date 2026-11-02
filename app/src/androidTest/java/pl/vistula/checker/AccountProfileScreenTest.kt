@@ -12,6 +12,7 @@ import java.io.File
 import java.io.FileOutputStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +47,8 @@ class AccountProfileScreenTest {
             assertTrue(content().findViewById<TextView>(R.id.profile_student_number).text.contains("34589"))
             assertEquals(View.GONE, content().findViewById<View>(R.id.profile_thesis_unavailable).visibility)
         }
+        main { rule.activity.openAccountPage("settings.access") }
+        main { assertTrue(content().findViewById<LinearLayout>(R.id.connection_choices).childCount >= 6) }
         SystemClock.sleep(400)
         val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
         assertNotNull(bitmap)
@@ -68,7 +71,8 @@ class AccountProfileScreenTest {
             val secretHost = content().findViewById<LinearLayout>(R.id.connection_secret_host)
             assertEquals(1, keyHost.childCount)
             assertEquals(1, secretHost.childCount)
-            assertTrue(content().findViewById<LinearLayout>(R.id.connection_choices).childCount >= 6)
+            // Permissions are chosen in one place only, not on the sign-in screen.
+            assertNull(content().findViewById<View>(R.id.connection_choices))
             assertEquals(View.GONE, content().findViewById<View>(R.id.connection_pin_section).visibility)
             if (BuildConfig.USOS_KEY.isBlank()) {
                 content().findViewById<View>(R.id.connection_login).performClick()

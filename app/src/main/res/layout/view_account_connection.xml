@@ -110,21 +110,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="@string/btn_login_browser" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <LinearLayout
-                android:id="@+id/connection_raw_scopes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-            <LinearLayout
-                android:id="@+id/connection_access"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-        </LinearLayout>
     </LinearLayout>
     <com.google.android.material.button.MaterialButton
         android:id="@+id/connection_toggle"

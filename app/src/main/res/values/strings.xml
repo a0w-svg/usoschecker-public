@@ -723,4 +723,5 @@
     <string name="account_revoke_check_mail">Sprawdź skrzynkę e-mail: USOSapps przysłał link do potwierdzenia odwołania klucza.</string>
     <string name="account_revoke_unknown">USOSapps nie zna już tego klucza — pewnie został odwołany.</string>
     <string name="account_revoke_failed">Nie udało się odwołać klucza. Zrób to ręcznie na stronie USOSapps Developers.</string>
+    <string name="permissions_apply">Zastosuj i zaloguj ponownie</string>
 </resources>

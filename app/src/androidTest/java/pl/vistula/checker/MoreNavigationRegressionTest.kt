@@ -170,11 +170,8 @@ class MoreNavigationRegressionTest {
             val content = rule.activity.findViewById<LinearLayout>(R.id.main_content)
             var count = 0
             fun verifyRows(view: View) {
-                if (view.id == R.id.tool_tile_root) {
-                    val icon = view.findViewById<TextView>(R.id.tool_tile_icon)
+                if (view.id == R.id.more_entry_root) {
                     count++
-                    assertEquals("", icon.text.toString())
-                    assertEquals(View.GONE, icon.visibility)
                     assertTrue(view.isClickable && view.isFocusable)
                 }
                 if (view is ViewGroup) repeat(view.childCount) { verifyRows(view.getChildAt(it)) }

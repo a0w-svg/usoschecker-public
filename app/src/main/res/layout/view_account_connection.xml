@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/connection_desc"
+        style="@style/Vistula.Text.Body.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp" />
+    <TextView
+        android:id="@+id/connection_status"
+        style="@style/Vistula.Text.Note.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp" />
+    <LinearLayout
+        android:id="@+id/connection_setup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/connection_key_step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+    <TextView
+        style="@style/Vistula.Text.Strong16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/connect_step_key" />
+    <LinearLayout
+        android:id="@+id/connection_email_host"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_auto_key"
+        style="@style/Widget.Vistula.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/btn_auto_key" />
+    <TextView
+        style="@style/Vistula.Text.Caption.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/auto_key_note" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/connection_advanced"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_reopen"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_register_usosapps" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_help"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/btn_how_to_register" />
+    <TextView
+        style="@style/Vistula.Text.Strong16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/connect_step_paste" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_paste_keys"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_paste_keys" />
+            <LinearLayout
+                android:id="@+id/connection_key_host"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+            <LinearLayout
+                android:id="@+id/connection_secret_host"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+    <TextView
+        android:id="@+id/connection_debug"
+        style="@style/Vistula.Text.Note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="@string/settings_debug_credentials"
+        android:visibility="gone" />
+        </LinearLayout>
+
+    <TextView
+        style="@style/Vistula.Text.Strong16"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:text="@string/connect_step_login" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_login"
+        style="@style/Widget.Vistula.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_login_browser" />
+    </LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_toggle"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/login_settings" />
+
+    <LinearLayout
+        android:id="@+id/connection_pin_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+    <TextView
+        style="@style/Vistula.Text.Body.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="@string/pin_hint" />
+        <LinearLayout
+            android:id="@+id/connection_pin_host"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    <TextView
+        android:id="@+id/connection_pin_detected"
+        style="@style/Vistula.Text.Note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:text="@string/pin_detected_clipboard"
+        android:visibility="gone" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_paste"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_paste_pin" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_confirm"
+        style="@style/Widget.Vistula.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_confirm_pin" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/connection_return"
+        style="@style/Widget.Vistula.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/btn_return_to_browser" />
+    </LinearLayout>
+</LinearLayout>

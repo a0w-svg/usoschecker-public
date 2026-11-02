@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textfield.TextInputEditText
+import android.widget.TextView
+import android.view.LayoutInflater
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -112,30 +114,24 @@ class ApiExplorerController private constructor() {
                         .show()
                 }
             }
-            if (favoritesOnly) {
-                UiHelper.note(activity, content, activity.getString(R.string.api_fav_filter), UiHelper.MUTED)
-            }
-            UiHelper.note(activity, content, activity.getString(R.string.api_catalog_scope_note), UiHelper.MUTED)
+            val screen = LayoutInflater.from(activity).inflate(R.layout.screen_api_catalog, content, false)
+            content.addView(screen)
+            if (favoritesOnly) screen.findViewById<View>(R.id.api_filter_note).visibility = View.VISIBLE
             val modules = ApiCatalog.modules(catalog)
-            UiHelper.note(
-                activity,
-                content,
-                activity.getString(R.string.api_modules_count, modules.size, catalog.length()),
-                UiHelper.MUTED
-            )
+            screen.findViewById<TextView>(R.id.api_modules_note).text =
+                activity.getString(R.string.api_modules_count, modules.size, catalog.length())
+
             val moduleValues = ArrayList<String>()
             val moduleLabels = ArrayList<String>()
             moduleValues.add("")
             moduleLabels.add(activity.getString(R.string.api_modules_all))
             for ((key, value) in modules) {
                 moduleValues.add(key)
-                moduleLabels.add("${ApiCatalog.label(key)} · $key ($value)")
+                moduleLabels.add(activity.getString(R.string.api_module_label, ApiCatalog.label(key), key, value))
             }
-            val modulePicker = Spinner(activity)
-            modulePicker.contentDescription = activity.getString(R.string.api_module_choose)
+            val modulePicker = screen.findViewById<Spinner>(R.id.api_module_picker)
             modulePicker.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, moduleLabels)
             modulePicker.setSelection(max(0, moduleValues.indexOf(activity.getApiModule())))
-            content.addView(modulePicker, LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 56)))
             modulePicker.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     if (modulePicker.isAttachedToWindow && moduleValues[position] != activity.getApiModule()) {
@@ -146,22 +142,16 @@ class ApiExplorerController private constructor() {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
 
-            val search = UiHelper.searchField(activity, content, activity.getString(R.string.api_search_hint), apiQuery, null, null)
-            val list = LinearLayout(activity)
-            list.orientation = LinearLayout.VERTICAL
-            content.addView(list)
-
+            val searchLayout = screen.findViewById<TextInputLayout>(R.id.api_search)
+            searchLayout.hint = activity.getString(R.string.api_search_hint)
+            val search = searchLayout.findViewById<TextInputEditText>(R.id.field_input)
+            search.setText(apiQuery)
+            val list = screen.findViewById<LinearLayout>(R.id.api_list)
             populateMethods(activity, list, catalog, apiQuery, apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
-
-            search.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence, st: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence, st: Int, before: Int, count: Int) {
-                    onQueryChanged.accept(s.toString())
-                    populateMethods(activity, list, catalog, s.toString(), apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
-                }
-
-                override fun afterTextChanged(e: Editable) {}
-            })
+            UiHelper.watchSearch(search) { value ->
+                onQueryChanged.accept(value)
+                populateMethods(activity, list, catalog, value, apiLimit, favoritesOnly, favorites, onShowMethod, onLimitChanged)
+            }
         }
 
         private fun populateMethods(
@@ -178,36 +168,24 @@ class ApiExplorerController private constructor() {
             list.removeAllViews()
             var count = 0
             var shown = 0
-
+            val account = activity.serviceAccountState()
+            val module = activity.getApiModule()
+            val inflater = LayoutInflater.from(activity)
             try {
                 for (i in 0 until catalog.length()) {
                     val entry = catalog.getJSONObject(i)
                     val name = entry.getString("name")
-                    val brief = entry.optString("brief_description").trim()
-                    if (ApiCatalog.visibleForAccount(name, activity.serviceAccountState()) && (!favoritesOnly || favorites.contains(name)) && ApiCatalog.matches(entry, activity.getApiModule(), search)) {
-                        ++count
-                        if (shown++ < apiLimit) {
-                            val b = UiHelper.button(
-                                activity,
-                                name.substring("services/".length) + "\n" + brief,
-                                { onShowMethod.accept(name) },
-                                false
-                            )
-                            b.gravity = Gravity.START or Gravity.CENTER_VERTICAL
-                            b.textSize = 13.0f
-                            b.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-                            b.setPadding(
-                                UiHelper.dp(activity, 8),
-                                UiHelper.dp(activity, 12),
-                                UiHelper.dp(activity, 8),
-                                UiHelper.dp(activity, 12)
-                            )
-                            list.addView(b, LinearLayout.LayoutParams(-1, -2))
-                            val divider = View(activity)
-                            divider.setBackgroundColor(activity.getColor(R.color.app_outline_soft))
-                            list.addView(divider, LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 1)))
-                        }
+                    if (!ApiCatalog.visibleForAccount(name, account) || (favoritesOnly && !favorites.contains(name)) ||
+                        !ApiCatalog.matches(entry, module, search)) continue
+                    count++
+                    if (shown++ >= apiLimit) continue
+                    val row = inflater.inflate(R.layout.item_api_method, list, false)
+                    row.findViewById<TextView>(R.id.api_method_name).text = name.substring("services/".length)
+                    row.findViewById<TextView>(R.id.api_method_brief).apply {
+                        showIfNotEmpty(entry.optString("brief_description").trim())
                     }
+                    row.findViewById<View>(R.id.api_method_row).setOnClickListener { onShowMethod.accept(name) }
+                    list.addView(row)
                 }
             } catch (_: JSONException) {
             }
@@ -220,7 +198,7 @@ class ApiExplorerController private constructor() {
                 } else {
                     activity.getString(R.string.api_count_match, min(count, apiLimit), count)
                 },
-                UiHelper.MUTED
+                Tone.MUTED
             )
 
             if (count > apiLimit) {
@@ -255,8 +233,8 @@ class ApiExplorerController private constructor() {
             scroll.smoothScrollTo(0, 0)
 
             content.addView(UiHelper.button(activity, activity.getString(R.string.api_btn_back_catalog), onBack, false))
-            UiHelper.add(activity, content, methodName.substring("services/".length), 20, UiHelper.INK, true)
-            UiHelper.note(activity, content, UiHelper.plain(metadata.optString("brief_description")), UiHelper.MUTED)
+            UiHelper.add(activity, content, methodName.substring("services/".length), 20, Tone.INK, true)
+            UiHelper.note(activity, content, UiHelper.plain(metadata.optString("brief_description")), Tone.MUTED)
 
             val favorite = UiHelper.button(
                 activity,
@@ -279,8 +257,8 @@ class ApiExplorerController private constructor() {
             content.addView(favorite)
 
             val auth = metadata.getJSONObject("auth_options")
-            val docs = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, docs, activity.getString(R.string.api_access_heading), 17, UiHelper.INK, true)
+            val docs = UiHelper.section(activity, content)
+            UiHelper.add(activity, docs, activity.getString(R.string.api_access_heading), 17, Tone.INK, true)
             UiHelper.add(
                 activity,
                 docs,
@@ -292,7 +270,7 @@ class ApiExplorerController private constructor() {
                     if (auth.optBoolean("administrative_only")) activity.getString(R.string.api_admin_key_required) else ""
                 ),
                 13,
-                UiHelper.MUTED,
+                Tone.MUTED,
                 false
             )
             val missing = ApiCatalog.missingScopes(metadata, activity.serviceAccountState().optString("scopes"))
@@ -301,32 +279,32 @@ class ApiExplorerController private constructor() {
                     activity,
                     docs,
                     activity.getString(R.string.api_missing_scopes, missing.joinToString(" | ")),
-                    Color.rgb(160, 90, 35)
+                    Tone.WARNING
                 )
             } else if (activity.connected() && !activity.isDemo()) {
-                UiHelper.note(activity, docs, activity.getString(R.string.api_access_available), UiHelper.GREEN)
+                UiHelper.note(activity, docs, activity.getString(R.string.api_access_available), Tone.INK)
             }
             if (metadata.optBoolean("beta")) {
-                UiHelper.note(activity, docs, activity.getString(R.string.api_beta_note), UiHelper.GREEN)
+                UiHelper.note(activity, docs, activity.getString(R.string.api_beta_note), Tone.INK)
             }
             if (!metadata.isNull("deprecated")) {
                 UiHelper.note(
                     activity,
                     docs,
                     activity.getString(R.string.api_deprecated_note, UiHelper.plain(metadata.opt("deprecated")?.toString().orEmpty())),
-                    Color.rgb(167, 99, 24)
+                    Tone.WARNING
                 )
             }
             val documentation = UiHelper.disclosure(activity, docs, "api.documentation", R.string.api_documentation)
-            UiHelper.add(activity, documentation, UiHelper.plain(metadata.optString("description")), 14, UiHelper.INK, false)
+            UiHelper.add(activity, documentation, UiHelper.plain(metadata.optString("description")), 14, Tone.INK, false)
 
             val arguments = metadata.getJSONArray("arguments")
             val inputs = LinkedHashMap<String, EditText>()
             val defaults = LinkedHashMap<String, String>()
             val draft = activity.apiDraft(methodName)
             val required = HashSet<String>()
-            val params = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, params, activity.getString(R.string.api_params_heading), 18, UiHelper.INK, true)
+            val params = UiHelper.section(activity, content)
+            UiHelper.add(activity, params, activity.getString(R.string.api_params_heading), 18, Tone.INK, true)
 
             val oauthKeys = setOf(
                 "oauth_consumer_key",
@@ -350,7 +328,7 @@ class ApiExplorerController private constructor() {
                         key + (if (needed) " *" else "") +
                             (if (defaultValue.isEmpty()) "" else activity.getString(R.string.api_param_default_val, defaultValue)),
                         13,
-                        UiHelper.INK,
+                        Tone.INK,
                         true
                     )
                     if (key == "data" && arg.optString("description").contains("multipart/form-data")) {
@@ -361,7 +339,7 @@ class ApiExplorerController private constructor() {
                             false
                         )
                         params.addView(uploadBtn)
-                        UiHelper.add(activity, params, UiHelper.plain(arg.optString("description")), 12, UiHelper.MUTED, false)
+                        UiHelper.add(activity, params, UiHelper.plain(arg.optString("description")), 12, Tone.MUTED, false)
                     } else {
                         val input = UiHelper.field(
                             activity,
@@ -380,7 +358,7 @@ class ApiExplorerController private constructor() {
                             } catch (_: JSONException) {
                             }
                         }
-                        UiHelper.add(activity, params, UiHelper.plain(arg.optString("description")), 12, UiHelper.MUTED, false)
+                        UiHelper.add(activity, params, UiHelper.plain(arg.optString("description")), 12, Tone.MUTED, false)
                     }
                 }
             }
@@ -402,10 +380,10 @@ class ApiExplorerController private constructor() {
                 )
             }
             if (required.isEmpty()) {
-                UiHelper.note(activity, params, activity.getString(R.string.api_no_required_params), UiHelper.MUTED)
+                UiHelper.note(activity, params, activity.getString(R.string.api_no_required_params), Tone.MUTED)
             }
 
-            UiHelper.add(activity, params, activity.getString(R.string.api_transport), 13, UiHelper.INK, true)
+            UiHelper.add(activity, params, activity.getString(R.string.api_transport), 13, Tone.INK, true)
             val transport = Spinner(activity)
             transport.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, arrayOf("GET", "POST"))
             val multipart = methodName == "services/blobbox/put" || methodName == "services/blobbox/put_unsigned"
@@ -421,18 +399,18 @@ class ApiExplorerController private constructor() {
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
             params.addView(transport)
-            UiHelper.note(activity, params, activity.getString(R.string.api_transport_hint), UiHelper.MUTED)
+            UiHelper.note(activity, params, activity.getString(R.string.api_transport_hint), Tone.MUTED)
             val currentUpload = activity.apiUpload(methodName)
             if (currentUpload != null) {
                 UiHelper.note(
                     activity,
                     params,
                     activity.getString(R.string.api_upload_selected, currentUpload.size),
-                    UiHelper.GREEN
+                    Tone.INK
                 )
             }
 
-            val result = UiHelper.text(activity, activity.getString(R.string.api_response_placeholder), 12, UiHelper.INK, false)
+            val result = UiHelper.text(activity, activity.getString(R.string.api_response_placeholder), 12, Tone.INK, false)
             result.setTextIsSelectable(true)
             result.typeface = Typeface.MONOSPACE
             var lastResponse: UsosClient.Response? = null
@@ -537,18 +515,18 @@ class ApiExplorerController private constructor() {
                 )
             )
 
-            val output = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, output, activity.getString(R.string.api_response_title), 17, UiHelper.INK, true)
+            val output = UiHelper.section(activity, content)
+            UiHelper.add(activity, output, activity.getString(R.string.api_response_title), 17, Tone.INK, true)
             output.addView(result)
             output.addView(saveResponse)
             output.addView(copyResponse)
             if (metadata.optString("returns").isNotEmpty()) {
                 val fields = UiHelper.disclosure(activity, content, "api.resultFields", R.string.api_result_fields)
-                UiHelper.add(activity, fields, UiHelper.plain(metadata.optString("returns")), 14, UiHelper.MUTED, false)
+                UiHelper.add(activity, fields, UiHelper.plain(metadata.optString("returns")), 14, Tone.MUTED, false)
             }
             if (metadata.optString("errors").isNotEmpty()) {
                 val errors = UiHelper.disclosure(activity, content, "api.errors", R.string.api_errors_reference)
-                UiHelper.add(activity, errors, UiHelper.plain(metadata.optString("errors")), 14, UiHelper.MUTED, false)
+                UiHelper.add(activity, errors, UiHelper.plain(metadata.optString("errors")), 14, Tone.MUTED, false)
             }
 
             content.addView(
@@ -564,7 +542,7 @@ class ApiExplorerController private constructor() {
                 activity,
                 content,
                 activity.getString(R.string.api_limits_note),
-                UiHelper.MUTED
+                Tone.MUTED
             )
         }
     }

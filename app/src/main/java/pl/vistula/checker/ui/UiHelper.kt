@@ -14,10 +14,7 @@ import android.net.Uri
 import android.os.PersistableBundle
 import android.text.Editable
 import android.text.Html
-import android.text.InputType
 import android.text.TextWatcher
-import android.text.method.PasswordTransformationMethod
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -53,6 +50,10 @@ import pl.vistula.checker.core.WebLinks
  */
 class UiHelper private constructor() {
     companion object {
+        /**
+         * Raw colours below are legacy: only the custom-drawn [pl.vistula.checker.DayTimelineView] and the theme tests use them.
+         * Screens pass a [Tone] or [Surface] instead, which resolves through colour resources.
+         */
         @JvmField
         val INK: Int = Color.rgb(27, 37, 32)
 
@@ -127,71 +128,90 @@ class UiHelper private constructor() {
             return (value * context.resources.displayMetrics.density).roundToInt()
         }
 
-        @JvmStatic
-        fun text(context: Context, value: String?, size: Int, color: Int, bold: Boolean): TextView {
-            val t = TextView(context)
+        /** Text role from `res/values/vistula_components.xml` for an exact size and weight, or null if none matches. */
+        private fun textStyle(size: Int, bold: Boolean): Int? = if (bold) {
+            when (size) {
+                30 -> R.style.Vistula_Text_Hero
+                28 -> R.style.Vistula_Text_Title
+                20 -> R.style.Vistula_Text_Heading
+                18 -> R.style.Vistula_Text_Heading18
+                17 -> R.style.Vistula_Text_Subheading
+                16 -> R.style.Vistula_Text_Strong16
+                15 -> R.style.Vistula_Text_Strong
+                14 -> R.style.Vistula_Text_Strong14
+                else -> null
+            }
+        } else {
+            when (size) {
+                16 -> R.style.Vistula_Text_Note
+                15 -> R.style.Vistula_Text_Body
+                14 -> R.style.Vistula_Text_BodySmall
+                13 -> R.style.Vistula_Text_Caption
+                12 -> R.style.Vistula_Text_Micro
+                else -> null
+            }
+        }
+
+        private fun styleText(t: TextView, value: String?, size: Int, tone: Tone, bold: Boolean): TextView {
             t.text = value
-            t.textSize = size.toFloat()
-            t.setTextColor(foreground(context, color))
-            t.setLineSpacing(dp(context, 3).toFloat(), 1f)
-            if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
+            val style = textStyle(size, bold)
+            if (style != null) {
+                t.setTextAppearance(style)
+            } else {
+                t.textSize = size.toFloat()
+                if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
+            }
+            // INK is the layout's own text colour; other tones come from colour resources (day and night variants).
+            if (tone != Tone.INK) t.setTextColor(t.context.getColor(tone.color))
             return t
         }
 
         @JvmStatic
-        fun add(context: Context, target: LinearLayout, value: String?, size: Int, color: Int, bold: Boolean) {
-            val t = text(context, value, max(15, size), color, bold)
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 12)
-            target.addView(t, p)
+        fun text(context: Context, value: String?, size: Int, tone: Tone, bold: Boolean): TextView {
+            val t = LayoutInflater.from(context).inflate(R.layout.view_text, inflateHost(context), false) as TextView
+            return styleText(t, value, size, tone, bold)
         }
 
         @JvmStatic
-        fun card(context: Context, parent: LinearLayout, color: Int): LinearLayout {
-            val box = LinearLayout(context)
-            box.orientation = LinearLayout.VERTICAL
-            box.setPadding(dp(context, 16), dp(context, 12), dp(context, 16), dp(context, 8))
-            val shape = GradientDrawable()
-            shape.setColor(background(context, color))
-            shape.cornerRadius = dp(context, 14).toFloat()
-            box.background = shape
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 14)
-            parent.addView(box, p)
+        fun add(context: Context, target: LinearLayout, value: String?, size: Int, tone: Tone, bold: Boolean) {
+            val t = LayoutInflater.from(context).inflate(R.layout.view_text_block, target, false) as TextView
+            // Body text in blocks is never smaller than 15sp, whatever size the caller asks for.
+            target.addView(styleText(t, value, max(15, size), tone, bold))
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun card(context: Context, parent: LinearLayout, surface: Surface = Surface.DEFAULT): LinearLayout {
+            val box = LayoutInflater.from(context).inflate(R.layout.view_card, parent, false) as LinearLayout
+            if (surface != Surface.DEFAULT) box.backgroundTintList = ColorStateList.valueOf(context.getColor(surface.color))
+            parent.addView(box)
             return box
         }
 
         @JvmStatic
-        fun tray(context: Context, parent: LinearLayout): LinearLayout = card(context, parent, Color.WHITE).apply {
-            setPadding(0, 0, 0, 0)
-            clipToOutline = true
+        fun tray(context: Context, parent: LinearLayout): LinearLayout {
+            val box = LayoutInflater.from(context).inflate(R.layout.view_tray, parent, false) as LinearLayout
+            parent.addView(box)
+            return box
         }
 
         @JvmStatic
         fun trayDivider(context: Context, parent: LinearLayout) {
-            parent.addView(View(context).apply { setBackgroundColor(context.getColor(R.color.app_outline_inner)) },
-                LinearLayout.LayoutParams(-1, dp(context, 1)).apply { marginStart = dp(context, 16); marginEnd = dp(context, 16) })
+            parent.addView(LayoutInflater.from(context).inflate(R.layout.view_tray_divider, parent, false))
         }
 
         @JvmStatic
         fun sectionLabel(context: Context, parent: LinearLayout, title: String) {
-            parent.addView(text(context, title, 11, MUTED, false).apply {
-                isAllCaps = true
-                letterSpacing = .12f
-                setPadding(dp(context, 4), dp(context, 24), dp(context, 4), dp(context, 14))
-                ViewCompat.setAccessibilityHeading(this, true)
-            })
+            val label = LayoutInflater.from(context).inflate(R.layout.view_section_label, parent, false) as TextView
+            label.text = title
+            ViewCompat.setAccessibilityHeading(label, true)
+            parent.addView(label)
         }
 
         @JvmStatic
-        fun section(context: Context, parent: LinearLayout, ignoredColor: Int): LinearLayout {
-            val box = LinearLayout(context)
-            box.orientation = LinearLayout.VERTICAL
-            box.setPadding(dp(context, 8), dp(context, 16), dp(context, 8), dp(context, 12))
-            box.setBackgroundResource(R.drawable.bg_section_divider)
-            val params = LinearLayout.LayoutParams(-1, -2)
-            params.bottomMargin = dp(context, 8)
-            parent.addView(box, params)
+        fun section(context: Context, parent: LinearLayout): LinearLayout {
+            val box = LayoutInflater.from(context).inflate(R.layout.view_section, parent, false) as LinearLayout
+            parent.addView(box)
             return box
         }
 
@@ -199,13 +219,11 @@ class UiHelper private constructor() {
         @JvmStatic
         fun disclosure(context: Context, parent: LinearLayout, key: String, title: Int): LinearLayout {
             val prefs = context.getSharedPreferences("tool_layout", Context.MODE_PRIVATE)
-            val group = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
-            val body = LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(dp(context, 8), dp(context, 8), dp(context, 8), dp(context, 8))
-            }
+            val group = LayoutInflater.from(context).inflate(R.layout.view_disclosure, parent, false) as LinearLayout
+            val toggle = group.findViewById<MaterialButton>(R.id.disclosure_toggle)
+            val body = group.findViewById<LinearLayout>(R.id.disclosure_body)
+            toggle.text = context.getString(title)
             var expanded = prefs.getBoolean(key, false)
-            val toggle = actionRow(context, context.getString(title), {}, false)
             fun update() {
                 body.visibility = if (expanded) View.VISIBLE else View.GONE
                 toggle.setCompoundDrawablesWithIntrinsicBounds(0, 0,
@@ -219,56 +237,41 @@ class UiHelper private constructor() {
                 prefs.edit { putBoolean(key, expanded) }
                 update()
             }
-            group.addView(toggle)
-            group.addView(body)
-            group.setBackgroundResource(R.drawable.bg_section_divider)
-            parent.addView(group, LinearLayout.LayoutParams(-1, -2))
+            parent.addView(group)
             update()
             return body
         }
 
+        /** Detached widgets are inflated against a LinearLayout parent so their XML width and margins are kept for callers that add them to one. */
+        private fun inflateHost(context: Context): LinearLayout = LinearLayout(context)
+
+        /** A labelled switch (48dp touch target, theme text colour) inflated from `view_switch_row`. */
+        @JvmStatic
+        fun switchRow(context: Context, parent: LinearLayout, label: String, checked: Boolean): com.google.android.material.materialswitch.MaterialSwitch {
+            val row = LayoutInflater.from(context).inflate(R.layout.view_switch_row, parent, false) as com.google.android.material.materialswitch.MaterialSwitch
+            row.text = label
+            row.isChecked = checked
+            parent.addView(row)
+            return row
+        }
+
         @JvmStatic
         fun button(context: Context, label: String?, action: Runnable, primary: Boolean): Button {
-            val b = MaterialButton(context)
-            b.maxLines = 4
-            b.isSingleLine = false
+            val host = inflateHost(context)
+            val layout = if (primary) R.layout.view_button_primary else R.layout.view_button
+            val b = LayoutInflater.from(context).inflate(layout, host, false) as MaterialButton
             b.text = label
-            b.isAllCaps = false
-            b.textSize = 15f
-            val states = arrayOf(intArrayOf(-android.R.attr.state_enabled), intArrayOf())
-            b.setTextColor(
-                ColorStateList(
-                    states,
-                    intArrayOf(
-                        context.getColor(R.color.app_disabled_content),
-                        context.getColor(if (primary) R.color.app_on_accent else R.color.app_ink)
-                    )
-                )
-            )
-            b.cornerRadius = dp(context, 14)
-            b.backgroundTintList = ColorStateList(
-                states,
-                intArrayOf(
-                    context.getColor(R.color.app_disabled_surface),
-                    context.getColor(if (primary) R.color.app_accent else R.color.app_inner_surface)
-                )
-            )
-            b.setPadding(dp(context, 16), dp(context, 10), dp(context, 16), dp(context, 10))
-            b.minHeight = dp(context, 48)
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 8)
-            b.layoutParams = p
             b.setOnClickListener { action.run() }
             return b
         }
 
         @JvmStatic
-        fun actionRow(context: Context, label: String?, action: Runnable, ignoredPrimary: Boolean): Button {
-            val button = button(context, label, action, false)
-            button.backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-            button.gravity = Gravity.START or Gravity.CENTER_VERTICAL
-            button.setPadding(dp(context, 8), dp(context, 10), dp(context, 8), dp(context, 10))
-            return button
+        fun actionRow(context: Context, label: String?, action: Runnable): Button {
+            val host = inflateHost(context)
+            val b = LayoutInflater.from(context).inflate(R.layout.view_action_row, host, false) as MaterialButton
+            b.text = label
+            b.setOnClickListener { action.run() }
+            return b
         }
 
         @JvmStatic
@@ -352,40 +355,43 @@ class UiHelper private constructor() {
 
         @JvmStatic
         fun heading(context: Context, parent: LinearLayout, value: String?) {
-            add(context, parent, value, 20, INK, true)
+            add(context, parent, value, 20, Tone.INK, true)
             ViewCompat.setAccessibilityHeading(parent.getChildAt(parent.childCount - 1), true)
         }
 
         @JvmStatic
         fun title(context: Context, parent: LinearLayout, value: String?, description: String?) {
-            add(context, parent, value, 28, INK, true)
+            add(context, parent, value, 28, Tone.INK, true)
             ViewCompat.setAccessibilityHeading(parent.getChildAt(parent.childCount - 1), true)
-            add(context, parent, description, 14, MUTED, false)
+            add(context, parent, description, 14, Tone.MUTED, false)
+        }
+
+        /** Inflates [layout] against [parent] (so its XML width and margins apply) without attaching it. */
+        @JvmStatic
+        fun inflate(context: Context, @androidx.annotation.LayoutRes layout: Int, parent: android.view.ViewGroup?): View =
+            LayoutInflater.from(context).inflate(layout, parent, false)
+
+        /** Adds the empty-state card and returns it so callers can append an action button. */
+        @JvmStatic
+        fun empty(context: Context, parent: LinearLayout, title: String?, description: String?): LinearLayout {
+            val box = inflate(context, R.layout.view_empty_state, parent) as LinearLayout
+            box.findViewById<TextView>(R.id.empty_title).text = title
+            box.findViewById<TextView>(R.id.empty_description).text = description
+            parent.addView(box)
+            return box
         }
 
         @JvmStatic
-        fun empty(context: Context, parent: LinearLayout, title: String?, description: String?) {
-            val box = card(context, parent, Color.WHITE)
-            add(context, box, title, 17, INK, true)
-            add(context, box, description, 14, MUTED, false)
-        }
-
-        @JvmStatic
-        fun note(context: Context, parent: LinearLayout, value: String?, color: Int) {
-            add(context, parent, value, 16, color, false)
+        fun note(context: Context, parent: LinearLayout, value: String?, tone: Tone) {
+            add(context, parent, value, 16, tone, false)
         }
 
         @JvmStatic
         fun detailField(context: Context, parent: LinearLayout, label: String?, value: String?) {
-            val caption = text(context, label, 12, MUTED, false)
-            val captionParams = LinearLayout.LayoutParams(-1, -2)
-            captionParams.bottomMargin = dp(context, 3)
-            parent.addView(caption, captionParams)
-            val textView = text(context, value, 15, INK, false)
-            textView.setTextIsSelectable(true)
-            val valueParams = LinearLayout.LayoutParams(-1, -2)
-            valueParams.bottomMargin = dp(context, 14)
-            parent.addView(textView, valueParams)
+            val field = inflate(context, R.layout.view_detail_field, parent)
+            field.findViewById<TextView>(R.id.detail_caption).text = label
+            field.findViewById<TextView>(R.id.detail_value).text = value
+            parent.addView(field)
         }
 
         @JvmStatic
@@ -405,44 +411,32 @@ class UiHelper private constructor() {
             return scroll
         }
 
+        /** Adds a Material text field and returns its layout, for callers that show errors on it. */
         @JvmStatic
-        fun field(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): EditText {
-            val wrapper = TextInputLayout(context)
-            wrapper.boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_OUTLINE
-            wrapper.hint = hint
-            wrapper.defaultHintTextColor = ColorStateList.valueOf(context.getColor(R.color.app_muted))
-            val radius = dp(context, 12).toFloat()
-            wrapper.setBoxCornerRadii(radius, radius, radius, radius)
-            if (password) wrapper.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
-            val e = TextInputEditText(wrapper.context)
-            e.setText(value)
-            e.textSize = 14f
-            e.setTextColor(foreground(context, INK))
-            e.isSaveEnabled = false
-            e.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
-            e.imeOptions = e.imeOptions or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-            wrapper.isSaveEnabled = false
-            e.minHeight = dp(context, 56)
-            e.inputType = InputType.TYPE_CLASS_TEXT or
-                (if (password) InputType.TYPE_TEXT_VARIATION_PASSWORD else InputType.TYPE_TEXT_FLAG_MULTI_LINE)
-            if (password) e.transformationMethod = PasswordTransformationMethod.getInstance()
+        fun fieldLayout(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): TextInputLayout {
+            val layout = inflate(context, R.layout.view_text_field, parent) as TextInputLayout
+            layout.hint = hint
+            val input = layout.findViewById<TextInputEditText>(R.id.field_input)
+            input.setText(value)
             if (password) {
-                e.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
-                e.imeOptions = e.imeOptions or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+                layout.endIconMode = TextInputLayout.END_ICON_PASSWORD_TOGGLE
+                input.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
             }
-            wrapper.addView(e, LinearLayout.LayoutParams(-1, -2))
-            val p = LinearLayout.LayoutParams(-1, -2)
-            p.bottomMargin = dp(context, 16)
-            parent.addView(wrapper, p)
-            return e
+            parent.addView(layout)
+            return layout
         }
 
         @JvmStatic
-        fun copyToClipboard(context: Context, label: String?, text: String?) {
+        fun field(context: Context, parent: LinearLayout, hint: String?, value: String?, password: Boolean): EditText =
+            fieldLayout(context, parent, hint, value, password).findViewById<TextInputEditText>(R.id.field_input)
+
+        @JvmStatic
+        @JvmOverloads
+        fun copyToClipboard(context: Context, label: String?, text: String?, @androidx.annotation.StringRes confirmation: Int = R.string.services_copied) {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
             if (clipboard != null) {
                 clipboard.setPrimaryClip(privateClip(label, text))
-                Toast.makeText(context, R.string.services_copied, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, confirmation, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -480,23 +474,15 @@ class UiHelper private constructor() {
             return date.format(DateTimeFormatter.ofPattern("EEE, d MMM", Language.currentLocale(null)))
         }
 
+        /** A small pill label on a tinted [surface] with [tone] text, inflated from `view_badge`. */
         @JvmStatic
-        fun badge(context: Context, parent: LinearLayout, text: String?, bg: Int, fg: Int): TextView {
-            val t = TextView(context)
-            t.text = text
-            t.textSize = 11f
-            t.setTextColor(foreground(context, fg))
-            t.setTypeface(Typeface.DEFAULT, Typeface.BOLD)
-            t.setPadding(dp(context, 10), dp(context, 4), dp(context, 10), dp(context, 4))
-            val d = GradientDrawable()
-            d.setColor(background(context, bg))
-            d.cornerRadius = dp(context, 8).toFloat()
-            t.background = d
-            val p = LinearLayout.LayoutParams(-2, -2)
-            p.bottomMargin = dp(context, 8)
-            p.rightMargin = dp(context, 6)
-            parent.addView(t, p)
-            return t
+        fun badge(context: Context, parent: LinearLayout, text: String?, surface: Surface, tone: Tone): TextView {
+            val badge = inflate(context, R.layout.view_badge, parent) as TextView
+            badge.text = text
+            badge.backgroundTintList = ColorStateList.valueOf(context.getColor(surface.color))
+            badge.setTone(tone)
+            parent.addView(badge)
+            return badge
         }
 
         @JvmStatic
@@ -543,29 +529,34 @@ class UiHelper private constructor() {
             contentDescription: String?,
             onClear: Runnable?
         ): EditText {
-            val input = field(context, parent, hint, value, false)
+            val layout = LayoutInflater.from(context).inflate(R.layout.view_search_field, parent, false) as TextInputLayout
+            layout.hint = hint
+            val input = layout.findViewById<TextInputEditText>(R.id.field_input)
+            input.setText(value)
             if (contentDescription != null) input.contentDescription = contentDescription
-            val wrapper = parent.getChildAt(parent.childCount - 1) as TextInputLayout
-            wrapper.endIconMode = TextInputLayout.END_ICON_CLEAR_TEXT
-            wrapper.endIconContentDescription = context.getString(R.string.btn_clear_search)
             if (onClear != null) {
-                wrapper.setEndIconOnClickListener {
+                layout.setEndIconOnClickListener {
                     input.setText("")
                     onClear.run()
                 }
             }
-            input.inputType = InputType.TYPE_CLASS_TEXT
-            input.isSingleLine = true
-            input.imeOptions = EditorInfo.IME_ACTION_SEARCH or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
             input.setOnEditorActionListener { _, action, _ ->
                 if (action != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener false
-                val keyboard = context.getSystemService(InputMethodManager::class.java)
-                keyboard?.hideSoftInputFromWindow(input.windowToken, 0)
+                context.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(input.windowToken, 0)
                 input.clearFocus()
                 true
             }
+            parent.addView(layout)
             return input
         }
+
+        /** The "clear search" action shown in empty states: empties [search] and reports the cleared query. */
+        @JvmStatic
+        fun clearSearchButton(context: Context, search: EditText, onQueryChanged: Consumer<String>): Button =
+            button(context, context.getString(R.string.btn_clear_search), {
+                search.setText("")
+                onQueryChanged.accept("")
+            }, false)
 
         @JvmStatic
         fun watchSearch(search: EditText, action: Consumer<String>) {
@@ -610,3 +601,8 @@ class UiHelper private constructor() {
     }
 }
 
+/** Shows [value], or hides the view when it is empty. */
+fun TextView.showIfNotEmpty(value: String) {
+    text = value
+    visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+}

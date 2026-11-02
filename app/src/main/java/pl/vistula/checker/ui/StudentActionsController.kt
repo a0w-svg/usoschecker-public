@@ -17,8 +17,8 @@ object StudentActionsController {
             id = R.id.student_document_details
         }
         lateinit var dialog: androidx.appcompat.app.AlertDialog
-        UiHelper.add(activity, body, document.status, 16, UiHelper.INK, true)
-        UiHelper.note(activity, body, document.typeName, UiHelper.MUTED)
+        UiHelper.add(activity, body, document.status, 16, Tone.INK, true)
+        UiHelper.note(activity, body, document.typeName, Tone.MUTED)
         StudentCardsController.line(activity, body, R.string.documents_published, HistoryScreenController.formatFullDate(document.published))
         StudentCardsController.line(activity, body, R.string.documents_delivered, HistoryScreenController.formatFullDate(document.delivered))
         if (document.downloadable()) body.addView(UiHelper.button(activity, activity.getString(R.string.documents_download), {
@@ -56,7 +56,7 @@ object StudentActionsController {
 
     fun receive(activity: MainActivity, document: StudentServices.Document) {
         val body = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
-        UiHelper.note(activity, body, activity.getString(R.string.documents_receive_confirm, document.name), UiHelper.MUTED)
+        UiHelper.note(activity, body, activity.getString(R.string.documents_receive_confirm, document.name), Tone.MUTED)
         val code = UiHelper.field(activity, body, activity.getString(R.string.documents_code_label), "", true)
         val dialog = MaterialAlertDialogBuilder(activity).setTitle(R.string.documents_receive)
             .setView(UiHelper.dialogScroll(activity, body)).setNegativeButton(R.string.btn_cancel, null)

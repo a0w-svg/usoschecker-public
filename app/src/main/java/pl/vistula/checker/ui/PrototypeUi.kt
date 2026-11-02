@@ -2,7 +2,6 @@ package pl.vistula.checker.ui
 
 import androidx.core.content.withStyledAttributes
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
@@ -36,11 +35,11 @@ internal object PrototypeUi {
                 context.withStyledAttributes(attrs = intArrayOf(android.R.attr.selectableItemBackgroundBorderless)) { foreground = getDrawable(0) }
                 setOnClickListener { onSelect(date) }
             }
-            day.addView(UiHelper.text(context, date.format(DateTimeFormatter.ofPattern("EEE", locale)).trimEnd('.').uppercase(locale), 11, UiHelper.MUTED, false).apply {
+            day.addView(UiHelper.text(context, date.format(DateTimeFormatter.ofPattern("EEE", locale)).trimEnd('.').uppercase(locale), 11, Tone.MUTED, false).apply {
                 letterSpacing = .08f; gravity = Gravity.CENTER
             })
             val size = UiHelper.dp(context, if (large) 38 else 34)
-            day.addView(UiHelper.text(context, date.dayOfMonth.toString(), 15, if (active) UiHelper.INK else UiHelper.MUTED, active).apply {
+            day.addView(UiHelper.text(context, date.dayOfMonth.toString(), 15, if (active) Tone.INK else Tone.MUTED, active).apply {
                 gravity = Gravity.CENTER
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL

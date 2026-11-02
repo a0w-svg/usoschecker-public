@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/home_updated"
+        style="@style/Vistula.Text.Caption.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center" />
+    <LinearLayout
+        android:id="@+id/home_hero"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="24dp"
+        android:paddingBottom="24dp">
+
+        <View
+            android:layout_width="28dp"
+            android:layout_height="2dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/app_accent"
+            android:importantForAccessibility="no" />
+    <TextView
+        android:id="@+id/home_caption"
+        style="@style/Vistula.Text.Caption.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:letterSpacing="0.08"
+        android:textAllCaps="true" />
+    <TextView
+        android:id="@+id/home_title"
+        style="@style/Vistula.Text.Hero"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:accessibilityHeading="true" />
+    <TextView
+        android:id="@+id/home_detail"
+        style="@style/Vistula.Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:textSize="15sp"
+        android:visibility="gone" />
+        <TextView
+            android:id="@+id/home_status"
+            style="@style/Vistula.Text.BodySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_pill_accent"
+            android:gravity="center"
+            android:paddingStart="14dp"
+            android:paddingTop="8dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="8dp"
+            android:textColor="@color/app_accent"
+            android:visibility="gone" />
+    <TextView
+        android:id="@+id/home_hint"
+        style="@style/Vistula.Text.BodySmall.Muted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/home_focus_action"
+            style="@style/Widget.Vistula.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

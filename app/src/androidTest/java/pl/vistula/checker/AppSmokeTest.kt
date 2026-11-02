@@ -269,7 +269,7 @@ class AppSmokeTest {
             assertNotNull(input)
             input!!.setText("grades/latest")
         }
-        click("grades/latest\nGet user's latest grades")
+        ApiCatalogTestHelper.click(activity(), "grades/latest")
         val until = System.currentTimeMillis() + 5000
         val found = booleanArrayOf(false)
         while (!found[0] && System.currentTimeMillis() < until) {
@@ -297,14 +297,14 @@ class AppSmokeTest {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
                 firstInput(activity().window.decorView as ViewGroup)!!.setText("grades/latest")
             }
-            click("grades/latest\nGet user's latest grades")
+            ApiCatalogTestHelper.click(activity(), "grades/latest")
             if (previous.contains("services/grades/latest")) click("Usuń z ulubionych")
             click("Dodaj do ulubionych")
             has("Usuń z ulubionych")
             click("← Wróć do katalogu")
             click(activity().getString(R.string.api_fav_filter))
-            has("grades/latest\nGet user's latest grades")
-            click("grades/latest\nGet user's latest grades")
+            ApiCatalogTestHelper.has(activity(), "grades/latest")
+            ApiCatalogTestHelper.click(activity(), "grades/latest")
             click("Usuń z ulubionych")
             click("← Wróć do katalogu")
             has("Brak pasujących metod. Spróbuj innej nazwy lub opisu.")

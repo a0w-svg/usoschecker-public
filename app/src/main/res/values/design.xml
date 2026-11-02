@@ -3,6 +3,7 @@
     <string name="design_next_class">Najbliższe zajęcia</string>
     <string name="design_later_today">Później dzisiaj</string>
     <string name="design_this_week">Ten tydzień</string>
+    <string name="home_section_link">%1$s  ›</string>
     <string name="design_shortcuts">Skróty</string>
     <string name="design_starts_minutes">Początek za %1$d min</string>
     <string name="design_tentative">Termin orientacyjny</string>
@@ -11,4 +12,5 @@
     <string name="design_updates">Aktualizacje</string>
     <string name="design_history_description">Zmiany ocen i planu</string>
     <string name="design_later_that_day">Później tego dnia</string>
+    <string name="home_updated_at">Zaktualizowano: %1$s</string>
 </resources>

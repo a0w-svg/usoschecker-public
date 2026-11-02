@@ -23,6 +23,7 @@ import org.json.JSONObject
 import org.json.JSONTokener
 import pl.vistula.checker.core.ApiFailure
 import pl.vistula.checker.core.RequestBudget
+import pl.vistula.checker.core.RetryPolicy
 import pl.vistula.checker.core.ApiLanguage
 import pl.vistula.checker.core.GradeBrowser
 import pl.vistula.checker.core.OAuth
@@ -123,7 +124,29 @@ class UsosClient @JvmOverloads constructor(
         filename: String?
     ): Response = requestDataWithBudget(method, endpoint, params, signed, suppliedToken, suppliedSecret, file, filename, RequestBudget())
 
+    private var pause: (Long) -> Unit = { Thread.sleep(it) }
+
+    /** Replaces the sleep between retries (tests use a no-op); returns this client for chaining. */
+    fun withRetryPause(pause: (Long) -> Unit): UsosClient = apply { this.pause = pause }
+
     private fun requestDataWithBudget(
+        method: String, endpoint: String, params: Map<String, String>, signed: Boolean,
+        suppliedToken: String, suppliedSecret: String, file: ByteArray?, filename: String?, budget: RequestBudget
+    ): Response {
+        var attempt = 0
+        while (true) {
+            try {
+                // Every attempt signs afresh, so the OAuth nonce and timestamp are never reused.
+                return requestOnce(method, endpoint, params, signed, suppliedToken, suppliedSecret, file, filename, budget)
+            } catch (e: Exception) {
+                if (!RetryPolicy.retryableNetworkError(e) || !RetryPolicy.allows(method, attempt) || budget.expired() || Thread.currentThread().isInterrupted) throw e
+                pause(RetryPolicy.delayMillis(attempt, Math.random()))
+                attempt++
+            }
+        }
+    }
+
+    private fun requestOnce(
         method: String, endpoint: String, params: Map<String, String>, signed: Boolean,
         suppliedToken: String, suppliedSecret: String, file: ByteArray?, filename: String?, budget: RequestBudget
     ): Response {
@@ -242,9 +265,9 @@ class UsosClient @JvmOverloads constructor(
         request("GET", endpoint, params, true, token, tokenSecret)
 
     @Throws(Exception::class)
-    fun begin(scopes: String?): Map<String, String> {
+    fun begin(scopes: String?, callback: String = "oob"): Map<String, String> {
         val params = HashMap<String, String>()
-        params["oauth_callback"] = "oob"
+        params["oauth_callback"] = callback
         val normalized = StudentServices.normalizeScopes(scopes)
         if (normalized.isNotEmpty()) params["scopes"] = normalized
         val result = OAuth.form(request("GET", "services/oauth/request_token", params, true, "", ""))

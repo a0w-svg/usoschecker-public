@@ -3,6 +3,7 @@
     <string name="design_next_class">Наступне заняття</string>
     <string name="design_later_today">Пізніше сьогодні</string>
     <string name="design_this_week">Цей тиждень</string>
+    <string name="home_section_link">%1$s  ›</string>
     <string name="design_shortcuts">Швидкий доступ</string>
     <string name="design_starts_minutes">Початок за %1$d хв</string>
     <string name="design_tentative">Орієнтовний час</string>
@@ -11,4 +12,5 @@
     <string name="design_updates">Оновлення</string>
     <string name="design_history_description">Зміни оцінок і розкладу</string>
     <string name="design_later_that_day">Пізніше цього дня</string>
+    <string name="home_updated_at">Оновлено: %1$s</string>
 </resources>

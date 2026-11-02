@@ -22,10 +22,10 @@ class CampusGuideController private constructor() {
             }
             CampusSettingsController.campusInformation(activity, content, activity.serviceAccountState())
             // Campus Location
-            val campusCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, campusCard, activity.getString(R.string.campus_name), 18, UiHelper.INK, true)
-            UiHelper.add(activity, campusCard, activity.getString(R.string.campus_address), 15, UiHelper.GREEN, true)
-            UiHelper.add(activity, campusCard, activity.getString(R.string.campus_metro), 13, UiHelper.MUTED, false)
+            val campusCard = UiHelper.section(activity, content)
+            UiHelper.add(activity, campusCard, activity.getString(R.string.campus_name), 18, Tone.INK, true)
+            UiHelper.add(activity, campusCard, activity.getString(R.string.campus_address), 15, Tone.INK, true)
+            UiHelper.add(activity, campusCard, activity.getString(R.string.campus_metro), 13, Tone.MUTED, false)
             campusCard.addView(
                 UiHelper.actionRow(
                     activity,
@@ -43,23 +43,19 @@ class CampusGuideController private constructor() {
                                 "https://www.google.com/maps/search/?api=1&query=Akademia%20Finans%C3%B3w%20i%20Biznesu%20Vistula%20Stok%C5%82osy%203%20Warszawa"
                             )
                         }
-                    },
-                    true
-                )
+                    })
             )
             campusCard.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_btn_website),
-                    { UiHelper.browser(activity, "https://vistula.edu.pl/") },
-                    false
-                )
+                    { UiHelper.browser(activity, "https://vistula.edu.pl/") })
             )
 
             // Dziekanat
             val dziekanatCard = UiHelper.disclosure(activity, content, "campus.dziekanat", R.string.campus_dziekanat_title)
-            UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_desc), 13, UiHelper.MUTED, false)
-            UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_hours), 13, UiHelper.INK, false)
+            UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_desc), 13, Tone.MUTED, false)
+            UiHelper.add(activity, dziekanatCard, activity.getString(R.string.campus_dziekanat_hours), 13, Tone.INK, false)
             dziekanatCard.addView(
                 UiHelper.actionRow(
                     activity,
@@ -70,9 +66,7 @@ class CampusGuideController private constructor() {
                         } catch (e: Exception) {
                             pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
-                    },
-                    false
-                )
+                    })
             )
             dziekanatCard.addView(
                 UiHelper.actionRow(
@@ -84,21 +78,17 @@ class CampusGuideController private constructor() {
                         } catch (e: Exception) {
                             pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
-                    },
-                    false
-                )
+                    })
             )
 
             // Finance
             val financeCard = UiHelper.disclosure(activity, content, "campus.finance", R.string.campus_finanse_title)
-            UiHelper.add(activity, financeCard, activity.getString(R.string.campus_finanse_desc), 13, UiHelper.MUTED, false)
+            UiHelper.add(activity, financeCard, activity.getString(R.string.campus_finanse_desc), 13, Tone.MUTED, false)
             financeCard.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_finanse_view_subaccounts),
-                    { activity.navigate(Tabs.PAYMENTS) },
-                    true
-                )
+                    { activity.navigate(Tabs.PAYMENTS) })
             )
             financeCard.addView(
                 UiHelper.actionRow(
@@ -110,14 +100,12 @@ class CampusGuideController private constructor() {
                         } catch (e: Exception) {
                             pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
-                    },
-                    false
-                )
+                    })
             )
 
             // Library
             val libraryCard = UiHelper.disclosure(activity, content, "campus.library", R.string.campus_library_title)
-            UiHelper.add(activity, libraryCard, activity.getString(R.string.campus_library_desc), 13, UiHelper.MUTED, false)
+            UiHelper.add(activity, libraryCard, activity.getString(R.string.campus_library_desc), 13, Tone.MUTED, false)
             libraryCard.addView(
                 UiHelper.actionRow(
                     activity,
@@ -128,28 +116,24 @@ class CampusGuideController private constructor() {
                         } catch (e: Exception) {
                             pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
-                    },
-                    false
-                )
+                    })
             )
 
             // Wi-Fi eduroam
-            val wifiCard = UiHelper.section(activity, content, Color.WHITE)
-            UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_title), 18, UiHelper.INK, true)
-            UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_desc), 13, UiHelper.MUTED, false)
-            UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_instructions), 13, UiHelper.INK, false)
+            val wifiCard = UiHelper.section(activity, content)
+            UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_title), 18, Tone.INK, true)
+            UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_desc), 13, Tone.MUTED, false)
+            UiHelper.add(activity, wifiCard, activity.getString(R.string.campus_wifi_instructions), 13, Tone.INK, false)
             wifiCard.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_wifi_copy),
-                    { UiHelper.copyToClipboard(activity, "SSID", "eduroam") },
-                    false
-                )
+                    { UiHelper.copyToClipboard(activity, "SSID", "eduroam") })
             )
 
             // IT Support
             val itCard = UiHelper.disclosure(activity, content, "campus.it", R.string.campus_it_title)
-            UiHelper.add(activity, itCard, activity.getString(R.string.campus_it_desc), 13, UiHelper.MUTED, false)
+            UiHelper.add(activity, itCard, activity.getString(R.string.campus_it_desc), 13, Tone.MUTED, false)
             itCard.addView(
                 UiHelper.actionRow(
                     activity,
@@ -160,9 +144,7 @@ class CampusGuideController private constructor() {
                         } catch (e: Exception) {
                             pl.vistula.checker.Diagnostics.swallowed("CampusGuideController", e)
                         }
-                    },
-                    false
-                )
+                    })
             )
 
             // Regulations
@@ -171,25 +153,19 @@ class CampusGuideController private constructor() {
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_rules_studies),
-                    { UiHelper.browser(activity, "https://vistula.edu.pl/uczelnia/wazne-dokumenty") },
-                    false
-                )
+                    { UiHelper.browser(activity, "https://vistula.edu.pl/uczelnia/wazne-dokumenty") })
             )
             linksCard.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_rules_templates),
-                    { UiHelper.browser(activity, "https://vistula.edu.pl/student/sprawy-studenckie") },
-                    false
-                )
+                    { UiHelper.browser(activity, "https://vistula.edu.pl/student/sprawy-studenckie") })
             )
             linksCard.addView(
                 UiHelper.actionRow(
                     activity,
                     activity.getString(R.string.campus_rules_programs),
-                    { UiHelper.browser(activity, "https://usosweb.vistula.edu.pl/") },
-                    false
-                )
+                    { UiHelper.browser(activity, "https://usosweb.vistula.edu.pl/") })
             )
         }
     }

@@ -1,13 +1,9 @@
 package pl.vistula.checker.ui
 
-import android.content.ClipboardManager
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.function.Consumer
 import org.json.JSONException
@@ -58,11 +54,11 @@ class NewsScreenController private constructor() {
             val entry = if (activity.isDemo() || data != null && CampusAffiliation.newsMatches(data, account)) cachedEntry
                 else JSONObject(cachedEntry.toString()).apply { remove("data"); remove("fetchedAt") }
             if (!activity.isDemo()) {
-                UiHelper.note(activity, content, CampusAffiliation.campuses[campus], UiHelper.MUTED)
+                UiHelper.note(activity, content, CampusAffiliation.campuses[campus], Tone.MUTED)
                 CampusAffiliation.website(campus)?.let { website ->
                     content.addView(UiHelper.actionRow(activity, activity.getString(R.string.campus_official_site), {
                         UiHelper.browser(activity, website)
-                    }, false))
+                    }))
                 }
             }
             val raw = if (activity.isDemo()) d.optJSONObject("snapshot") else null
@@ -75,17 +71,17 @@ class NewsScreenController private constructor() {
                 StudentCardsController.status(activity, content, entry)
             } else if (snapshot != null && snapshot.serviceErrors.containsKey("news")) {
                 UiHelper.note(activity, content, activity.getString(R.string.services_refresh_error,
-                    activity.getString(R.string.error_operation)), activity.getColor(R.color.app_error))
+                    activity.getString(R.string.error_operation)), Tone.ERROR)
             }
             val articles = if (useCache) (0 until cached.length()).map { NewsArticle.from(cached.optJSONObject(it)) }
                 else snapshot?.news ?: emptyList()
             if (useCache) {
                 val university = entry.getJSONObject("data").optString("source") == "university"
-                UiHelper.note(activity, content, activity.getString(if (university) R.string.news_source_university else R.string.news_source_usos), UiHelper.MUTED)
-                if (university && language == "uk") UiHelper.note(activity, content, activity.getString(R.string.news_language_fallback), UiHelper.MUTED)
+                UiHelper.note(activity, content, activity.getString(if (university) R.string.news_source_university else R.string.news_source_usos), Tone.MUTED)
+                if (university && language == "uk") UiHelper.note(activity, content, activity.getString(R.string.news_language_fallback), Tone.MUTED)
             }
             if (snapshot == null && cached == null) {
-                UiHelper.note(activity, content, activity.getString(R.string.services_not_loaded), UiHelper.MUTED)
+                UiHelper.note(activity, content, activity.getString(R.string.services_not_loaded), Tone.MUTED)
                 content.addView(UiHelper.button(activity, activity.getString(R.string.btn_refresh), onRefresh, true))
             }
 
@@ -112,36 +108,15 @@ class NewsScreenController private constructor() {
                 }
 
                 if (filtered.isEmpty()) {
-                    val emptyBox = UiHelper.section(activity, list, Color.WHITE)
-                    UiHelper.add(
-                        activity,
-                        emptyBox,
-                        if (q.isEmpty()) activity.getString(if (activity.isDemo()) R.string.news_empty_title else R.string.campus_news_empty) else activity.getString(R.string.news_no_match_title),
-                        17,
-                        UiHelper.INK,
-                        true
+                    val demo = activity.isDemo()
+                    val empty = UiHelper.empty(
+                        activity, list,
+                        activity.getString(if (q.isNotEmpty()) R.string.news_no_match_title else if (demo) R.string.news_empty_title else R.string.campus_news_empty),
+                        activity.getString(if (q.isNotEmpty()) R.string.news_no_match_desc else if (demo) R.string.news_empty_desc else R.string.campus_news_hint)
                     )
-                    UiHelper.note(
-                        activity,
-                        emptyBox,
-                        if (q.isEmpty()) activity.getString(if (activity.isDemo()) R.string.news_empty_desc else R.string.campus_news_hint) else activity.getString(R.string.news_no_match_desc),
-                        UiHelper.MUTED
-                    )
-                    if (q.isNotEmpty()) {
-                        emptyBox.addView(
-                            UiHelper.button(
-                                activity,
-                                activity.getString(R.string.btn_clear_search),
-                                {
-                                    search.setText("")
-                                    onQueryChanged.accept("")
-                                },
-                                false
-                            )
-                        )
-                    }
+                    if (q.isNotEmpty()) empty.addView(UiHelper.clearSearchButton(activity, search, onQueryChanged))
                 } else {
-                    UiHelper.note(activity, list, activity.getString(R.string.news_count, filtered.size), UiHelper.MUTED)
+                    UiHelper.note(activity, list, activity.getString(R.string.news_count, filtered.size), Tone.MUTED)
                     val inflater = LayoutInflater.from(activity)
                     for (a in filtered) {
                         val itemCard = inflater.inflate(R.layout.item_news_card, list, false)
@@ -180,47 +155,26 @@ class NewsScreenController private constructor() {
         }
 
         private fun showNewsDetails(activity: MainActivity, article: NewsArticle) {
-            val box = LinearLayout(activity)
-            box.orientation = LinearLayout.VERTICAL
-            box.setPadding(
-                UiHelper.dp(activity, 24),
-                UiHelper.dp(activity, 8),
-                UiHelper.dp(activity, 24),
-                UiHelper.dp(activity, 8)
-            )
-
-            UiHelper.add(activity, box, UiHelper.plain(article.title), 20, UiHelper.INK, true)
             val formattedDate = HistoryScreenController.formatFullDate(article.publicationDate)
             val meta = (if (formattedDate.isNotEmpty()) formattedDate else article.publicationDate) +
                 if (article.author.isNotEmpty()) " · ${article.author}" else ""
-            UiHelper.add(activity, box, meta, 13, UiHelper.GREEN, true)
+            val body = if (article.content.isEmpty()) article.headline else UiHelper.plain(article.content)
 
-            if (article.content.isNotEmpty() || article.headline.isNotEmpty()) {
-                UiHelper.add(
-                    activity,
-                    box,
-                    if (article.content.isEmpty()) article.headline else UiHelper.plain(article.content),
-                    15,
-                    UiHelper.INK,
-                    false
-                )
+            val scroll = LayoutInflater.from(activity).inflate(R.layout.dialog_news_article, null)
+            scroll.findViewById<TextView>(R.id.news_dialog_title).text = UiHelper.plain(article.title)
+            scroll.findViewById<TextView>(R.id.news_dialog_meta).text = meta
+            scroll.findViewById<TextView>(R.id.news_dialog_body).apply {
+                text = body
+                visibility = if (article.content.isNotEmpty() || article.headline.isNotEmpty()) View.VISIBLE else View.GONE
             }
-
-            val scroll = ScrollView(activity)
-            scroll.addView(box)
 
             val builder = MaterialAlertDialogBuilder(activity)
                 .setView(scroll)
                 .setPositiveButton(activity.getString(R.string.btn_close), null)
                 .setNeutralButton(activity.getString(R.string.news_copy_content)) { _, _ ->
-                    val cb = activity.getSystemService(ClipboardManager::class.java)
-                    if (cb != null) {
-                        val text = article.title + "\n\n" + meta + "\n\n" +
-                            (if (article.content.isEmpty()) article.headline else UiHelper.plain(article.content)) +
-                            if (article.url.isEmpty()) "" else "\n\n${article.url}"
-                        cb.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.tool_news_title), text))
-                        Toast.makeText(activity, activity.getString(R.string.news_copied_toast), Toast.LENGTH_SHORT).show()
-                    }
+                    val text = article.title + "\n\n" + meta + "\n\n" + body +
+                        if (article.url.isEmpty()) "" else "\n\n${article.url}"
+                    UiHelper.copyToClipboard(activity, activity.getString(R.string.tool_news_title), text, R.string.news_copied_toast)
                 }
 
             if (article.url.isNotEmpty()) {

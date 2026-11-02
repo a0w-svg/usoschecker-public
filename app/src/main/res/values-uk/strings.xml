@@ -102,9 +102,9 @@
     <string name="tool_api_desc">Розширені інструменти API</string>
 <string name="student_card_badge">СТУДЕНТСЬКИЙ КВИТОК VISTULA</string>
 <string name="connect_usos_title">Підключити до USOS</string>
-    <string name="connect_usos_desc">Увійдіть на сайті університету, підтвердьте згоди та вставте отриманий PIN. Пароль вводиться лише в браузері.</string>
+    <string name="connect_usos_desc">Пароль вводьте лише в браузері на сайті USOS. Після підтвердження доступу ви автоматично повернетеся до застосунку.</string>
     <string name="btn_how_to_register">❓ Як зареєструвати додаток в USOSapps?</string>
-<string name="btn_login_browser">1. Відкрити вхід до USOS</string>
+<string name="btn_login_browser">Відкрити вхід до USOS</string>
     <string name="btn_confirm_pin">2. Підключити обліковий запис</string>
     <string name="btn_paste_pin">📋 Вставити PIN із буфера</string>
     <string name="pin_detected_clipboard">📋 Виявлено код PIN у буфері</string>
@@ -151,6 +151,9 @@
     <string name="history_category_grade">ОЦІНКА</string>
     <string name="history_category_plan">РОЗКЛАД</string>
     <string name="history_btn_simulate">Симулювати зміну оцінки та аудиторії</string>
+    <string name="history_detail_kind">Дія: %1$s · Тип: %2$s</string>
+    <string name="history_detail_event">📅 %1$s</string>
+    <string name="history_detail_share">📤 %1$s</string>
     <string name="history_details_title">Деталі зміни</string>
     <string name="history_details_copy">Копіювати деталі зміни</string>
     <string name="history_item_plan_date">Дата заняття: %1$s</string>
@@ -182,6 +185,7 @@
     <string name="history_time_yesterday">Вчора, %1$s</string>
     <string name="time_just_now">щойно</string>
     <string name="time_minutes_ago">%1$d хв тому</string>
+<string name="tasks_filter_active">%1$s ×</string>
 <string name="tasks_summary">До виконання: %1$d · завершено: %2$d</string>
     <string name="tasks_chip_all">Усі</string>
     <string name="tasks_chip_open">Активні</string>
@@ -235,7 +239,6 @@
     <string name="payments_balance">Баланс рахунку: %1$.2f %2$s</string>
     <string name="payments_copy_iban">Копіювати номер субрахунку (IBAN)</string>
     <string name="payments_iban_copied">Номер субрахунку скопійовано в буфер</string>
-    <string name="payments_schedule_heading">Графік платежів</string>
 <string name="payments_status_overdue_warn">Увага: Частина платежів прострочена!</string>
     <string name="payments_status_all_paid">Усі платежі здійснено вчасно.</string>
     <string name="payments_status_none_due">У завантажених внесках немає сум до сплати.</string>
@@ -447,6 +450,8 @@
     <string name="gpa_chip_ects_45">45 ECTS</string>
     <string name="gpa_chip_ects_60">60 ECTS (весь рік)</string>
 <string name="share_generated_by">Згенеровано додатком Vistula Checker</string>
+    <string name="grades_summary_help">Про цю статистику</string>
+    <string name="grades_semester_picker">%1$s ▾</string>
     <string name="grades_all_terms">Усі семестри</string>
     <string name="grades_empty_title">Немає даних у цьому діапазоні</string>
     <string name="grades_share_subject">Виписка оцінок — Vistula USOS</string>
@@ -476,6 +481,8 @@
 
 Щоб додати їх, затисніть палець на вільному місці головного екрана та виберіть «Віджети → Vistula».</string>
 <string name="account_btn_open_usosapps">Відкрити Vistula USOSapps</string>
+    <string name="account_student_number_copy">%1$s  📋</string>
+    <string name="account_email_line">✉ %1$s</string>
     <string name="account_program">🎓 Спеціальність: %1$s</string>
     <string name="account_stage">📚 Етап: %1$s</string>
     <string name="account_thesis_header">ДИПЛОМНА РОБОТА</string>
@@ -571,6 +578,11 @@
     <string name="tasks_chip_week">Найближчі 7 днів</string>
     <string name="tasks_due_unknown">Немає коректного терміну</string>
     <string name="schedule_mode_week">Тиждень</string>
+    <string name="schedule_range_weekly">%1$s – %2$s</string>
+    <string name="schedule_range_days">%1$d–%2$s</string>
+    <string name="schedule_next_class_dated">%1$s (%2$s)</string>
+    <string name="schedule_add_task">Додати завдання</string>
+    <string name="schedule_task_title">Завдання: %1$s</string>
     <string name="schedule_previous_week">Попередній тиждень</string>
 <string name="schedule_day_label">День</string>
 <string name="schedule_info_title">Інформація про розклад</string>
@@ -670,4 +682,42 @@
     <string name="tasks_task_options">Параметри завдання: %1$s</string>
     <string name="tool_options">Параметри: %1$s</string>
     <string name="tool_api_methods">Методи API</string>
+    <string name="btn_reconnect">Увійти знову</string>
+    <plurals name="deadline_in_days">
+        <item quantity="one">Через %d день</item>
+        <item quantity="few">Через %d дні</item>
+        <item quantity="many">Через %d днів</item>
+        <item quantity="other">Через %d дня</item>
+    </plurals>
+    <plurals name="deadline_overdue_days">
+        <item quantity="one">Прострочено на %d день</item>
+        <item quantity="few">Прострочено на %d дні</item>
+        <item quantity="many">Прострочено на %d днів</item>
+        <item quantity="other">Прострочено на %d дня</item>
+    </plurals>
+    <string name="deadline_tomorrow">Завтра</string>
+    <string name="deadline_line">%1$s · %2$s</string>
+    <string name="deadline_exam_registration">Реєстрація на іспит: %s</string>
+    <string name="login_callback_ignored">Не вдалося зіставити повернення з входу USOS. Введіть PIN вручну.</string>
+    <string name="btn_paste_keys">Вставити ключ і увійти</string>
+    <string name="paste_keys_not_found">У буфері обміну немає Consumer Key і Consumer Secret. Скопіюйте обидва зі сторінки USOSapps.</string>
+    <string name="payments_copy_account">Копіювати номер рахунку</string>
+    <string name="payments_paid_group">Сплачені та скасовані</string>
+    <string name="payments_guide_title">Як працюють платежі</string>
+    <string name="connect_step_key">1. Ключ API (один раз)</string>
+    <string name="connect_step_paste">Вставте наявний ключ</string>
+    <string name="connect_step_login">2. Увійдіть</string>
+    <string name="btn_auto_key">Отримати ключ автоматично</string>
+    <string name="auto_key_note">Ваша пошта надходить лише до USOSapps вашого університету, який видає ключ. Ключ лишається в зашифрованому сховищі телефону.</string>
+    <string name="auto_key_email_hint">Email (для реєстрації ключа)</string>
+    <string name="auto_key_bad_email">Введіть коректну адресу email.</string>
+    <string name="auto_key_working">Реєструю ключ у USOSapps…</string>
+    <string name="auto_key_failed">Не вдалося отримати ключ: %1$s</string>
+    <string name="auto_key_unreachable">немає зв’язку з USOSapps. Скористайтеся ручними кроками нижче.</string>
+    <string name="account_revoke_key_option">Також відкликати мій ключ API в USOSapps (надійде лист із підтвердженням)</string>
+    <string name="account_revoke_check_mail">Перевірте пошту: USOSapps надіслав посилання для підтвердження відкликання ключа.</string>
+    <string name="account_revoke_unknown">USOSapps більше не знає цього ключа — ймовірно, його вже відкликано.</string>
+    <string name="account_revoke_failed">Не вдалося відкликати ключ. Зробіть це вручну на сторінці USOSapps Developers.</string>
+    <string name="permissions_apply">Застосувати та увійти знову</string>
+    <string name="login_manual_key">Ввести ключ вручну (необов’язково)</string>
 </resources>

@@ -1,11 +1,10 @@
 package pl.vistula.checker.ui
 
-import android.graphics.Color
-import android.widget.LinearLayout
-import android.view.Gravity
+import android.content.res.ColorStateList
 import android.view.View
-import android.graphics.drawable.GradientDrawable
-import androidx.core.view.ViewCompat
+import android.widget.LinearLayout
+import android.widget.TextView
+import com.google.android.material.button.MaterialButton
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -21,13 +20,15 @@ import pl.vistula.checker.R
 import pl.vistula.checker.UsosClient
 import pl.vistula.checker.core.Change
 import pl.vistula.checker.core.LessonTime
+import pl.vistula.checker.core.PaymentAmounts
 import pl.vistula.checker.core.Record
 import pl.vistula.checker.core.ScheduleConflictDetector
 import pl.vistula.checker.core.Snapshot
 import pl.vistula.checker.core.TaskTools
 
 /**
- * Controller for rendering the Home dashboard screen.
+ * Controller for the Home dashboard. Each block is inflated from XML (`view_home_*`, `item_home_*`);
+ * this class decides what to show and binds the data.
  */
 class HomeScreenController private constructor() {
 
@@ -43,158 +44,31 @@ class HomeScreenController private constructor() {
             demoTasks: JSONArray?,
             onLessonDetails: Consumer<LessonTime>
         ) {
-            renderFocus(activity, content, d, onLessonDetails)
+            val snapshot = d.optJSONObject("snapshot")?.let { Snapshot.from(it) }
+            val lessons = LessonTime.sorted(snapshot?.records?.values ?: emptyList())
+            renderFocus(activity, content, d, snapshot, lessons, onLessonDetails)
             renderRecentChanges(activity, content, d)
-            renderWeek(activity, content, d)
-            renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"))
+            renderWeek(activity, content, snapshot, lessons)
+            renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"), if (demo) null else state.optJSONObject("studentServices"))
             sectionLink(activity, content, R.string.design_shortcuts) { activity.navigate(Tabs.MORE) }
-            val shortcuts = arrayOf(
-                Triple(R.id.home_open_schedule, R.string.dashboard_plan, 5),
-                Triple(R.id.home_open_grades, R.string.dashboard_grades, 2),
-                Triple(R.id.home_open_tasks, R.string.dashboard_tasks, 7),
-                Triple(R.id.home_open_news, R.string.dashboard_news, 11)
-            )
-            for (pair in shortcuts.toList().chunked(2)) {
-                val row = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
-                pair.forEachIndexed { index, (id, title, destination) ->
-                    val button = UiHelper.button(activity, activity.getString(title), {
-                        if (destination == 5) {
-                            activity.setCalendarQuery("")
-                            activity.setCalendarMode("day")
-                            activity.openScheduleDate(LocalDate.now(UsosClient.ZONE).toString())
-                        } else activity.navigate(destination)
-                    }, false).apply { this.id = id }
-                    row.addView(button, LinearLayout.LayoutParams(0, -2, 1f).apply {
-                        if (index > 0) marginStart = UiHelper.dp(activity, 8)
-                    })
-                }
-                content.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = UiHelper.dp(activity, 4) })
-            }
-
-            // Payments alert, schedule conflict, latest news
-            val rawSnap = d.optJSONObject("snapshot")
-            if (rawSnap != null) {
-                val snap = Snapshot.from(rawSnap)
-                val payments = snap.payments
-                if (payments != null) {
-                    val unpaid = payments.totalUnpaidAmount()
-                    if (payments.hasOverdue() || (!payments.hasUnknownSettlement() && unpaid > 0)) {
-                        val payBox = UiHelper.card(
-                            activity,
-                            content,
-                            if (payments.hasOverdue()) Color.rgb(255, 240, 240) else Color.WHITE
-                        )
-                        UiHelper.add(
-                            activity,
-                            payBox,
-                            if (payments.hasOverdue()) {
-                                activity.getString(R.string.home_payments_attention)
-                            } else {
-                                activity.getString(R.string.home_payments_regular)
-                            },
-                            11,
-                            if (payments.hasOverdue()) Color.rgb(160, 48, 40) else UiHelper.GREEN,
-                            true
-                        )
-                        UiHelper.add(activity, payBox, if (payments.hasUnknownSettlement()) activity.getString(R.string.payments_settlement_unknown)
-                            else activity.getString(R.string.home_payments_due,
-                                pl.vistula.checker.core.PaymentAmounts.unpaid(payments, Language.currentLocale(activity).language)), 19, UiHelper.INK, true)
-                        if (payments.accounts.isNotEmpty()) {
-                            UiHelper.add(
-                                activity,
-                                payBox,
-                                activity.getString(
-                                    R.string.home_payments_subaccount,
-                                    PaymentsScreenController.formatIban(payments.accounts[0].bankAccountNumber)
-                                ),
-                                13,
-                                UiHelper.MUTED,
-                                false
-                            )
-                        }
-                        payBox.isClickable = true
-                        payBox.isFocusable = true
-                        payBox.setOnClickListener { activity.navigate(Tabs.PAYMENTS) }
-                        payBox.addView(UiHelper.button(activity, activity.getString(R.string.home_payments_btn), { activity.navigate(Tabs.PAYMENTS) }, false))
-                    }
-                }
-
-                val conflicts = ScheduleConflictDetector.findConflicts(snap.records.values)
-                if (conflicts.isNotEmpty()) {
-                    val conflictBox = UiHelper.card(activity, content, Color.rgb(255, 243, 224))
-                    UiHelper.add(
-                        activity,
-                        conflictBox,
-                        activity.getString(R.string.home_conflicts_title, conflicts.size),
-                        11,
-                        Color.rgb(217, 119, 6),
-                        true
-                    )
-                    UiHelper.add(activity, conflictBox, activity.getString(R.string.home_conflicts_heading), 17, UiHelper.INK, true)
-                    UiHelper.add(activity, conflictBox, conflicts[0].description(), 13, UiHelper.INK, false)
-                    if (conflicts.size > 1) {
-                        UiHelper.note(
-                            activity,
-                            conflictBox,
-                            activity.getString(R.string.home_conflicts_more, conflicts.size - 1),
-                            UiHelper.MUTED
-                        )
-                    }
-                    conflictBox.addView(
-                        UiHelper.button(
-                            activity,
-                            activity.getString(R.string.home_conflicts_btn),
-                            {
-                                activity.setCalendarMode("day")
-                                activity.openScheduleDate(conflicts[0].first.date)
-                            },
-                            false
-                        )
-                    )
-                }
-
-                if (snap.news.isNotEmpty()) {
-                    val top = snap.news[0]
-                    val newsBox = UiHelper.card(activity, content, Color.WHITE)
-                    UiHelper.add(activity, newsBox, activity.getString(R.string.home_news_title), 11, UiHelper.MUTED, true)
-                    UiHelper.add(activity, newsBox, top.title, 17, UiHelper.INK, true)
-                    if (top.headline.isNotEmpty()) {
-                        UiHelper.add(activity, newsBox, top.headline, 13, UiHelper.MUTED, false)
-                    }
-                    val formattedPubDate = HistoryScreenController.formatFullDate(top.publicationDate)
-                    UiHelper.add(
-                        activity,
-                        newsBox,
-                        (if (formattedPubDate.isEmpty()) top.publicationDate else formattedPubDate) +
-                            if (top.author.isNotEmpty()) " · ${top.author}" else "",
-                        12,
-                        UiHelper.MUTED,
-                        false
-                    )
-                    newsBox.isClickable = true
-                    newsBox.isFocusable = true
-                    newsBox.setOnClickListener { activity.navigate(Tabs.NEWS) }
-                    newsBox.addView(
-                        UiHelper.button(
-                            activity,
-                            activity.getString(R.string.home_news_all_btn, snap.news.size),
-                            { activity.navigate(Tabs.NEWS) },
-                            false
-                        )
-                    )
-                }
-            }
-
+            renderShortcuts(activity, content)
+            snapshot ?: return
+            renderPaymentsAlert(activity, content, snapshot)
+            renderConflictAlert(activity, content, snapshot)
+            renderNewsAlert(activity, content, snapshot)
         }
 
+        private val CLOCK = DateTimeFormatter.ofPattern("HH:mm")
+        private val DUE_DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+
+        private fun inflate(activity: MainActivity, layout: Int, parent: LinearLayout): View =
+            UiHelper.inflate(activity, layout, parent)
+
         private fun sectionLink(activity: MainActivity, parent: LinearLayout, title: Int, action: () -> Unit) {
-            val label = UiHelper.actionRow(activity, activity.getString(title).uppercase(Language.currentLocale(activity)) + "  ›", { action() }, false)
-            label.textSize = 13f
-            label.letterSpacing = .08f
-            label.setTextColor(activity.getColor(R.color.app_muted))
-            label.setPadding(0, UiHelper.dp(activity, 12), 0, 0)
-            ViewCompat.setAccessibilityHeading(label, true)
-            parent.addView(label)
+            val link = inflate(activity, R.layout.view_section_link, parent) as MaterialButton
+            link.text = activity.getString(R.string.home_section_link, activity.getString(title))
+            link.setOnClickListener { action() }
+            parent.addView(link)
         }
 
         private fun openDay(activity: MainActivity, day: LocalDate) {
@@ -203,183 +77,263 @@ class HomeScreenController private constructor() {
             activity.openScheduleDate(day.toString())
         }
 
-        private fun renderFocus(activity: MainActivity, parent: LinearLayout, data: JSONObject, details: Consumer<LessonTime>) {
-            val snapshot = data.optJSONObject("snapshot")?.let { Snapshot.from(it) }
+        private fun renderShortcuts(activity: MainActivity, content: LinearLayout) {
+            val view = inflate(activity, R.layout.view_home_shortcuts, content)
+            view.findViewById<View>(R.id.home_open_schedule).setOnClickListener { openDay(activity, LocalDate.now(UsosClient.ZONE)) }
+            view.findViewById<View>(R.id.home_open_grades).setOnClickListener { activity.navigate(Tabs.GRADES) }
+            view.findViewById<View>(R.id.home_open_tasks).setOnClickListener { activity.navigate(Tabs.TASKS) }
+            view.findViewById<View>(R.id.home_open_news).setOnClickListener { activity.navigate(Tabs.NEWS) }
+            content.addView(view)
+        }
+
+        private fun tint(activity: MainActivity, view: View, color: Int) {
+            view.backgroundTintList = ColorStateList.valueOf(activity.getColor(color))
+        }
+
+        private fun alert(
+            activity: MainActivity, content: LinearLayout, eyebrow: String, eyebrowColor: Int, title: String,
+            body: String, note: String, button: String, destination: () -> Unit
+        ): View {
+            val card = inflate(activity, R.layout.view_home_alert, content)
+            card.findViewById<TextView>(R.id.alert_eyebrow).apply {
+                text = eyebrow
+                setTextColor(activity.getColor(eyebrowColor))
+            }
+            card.findViewById<TextView>(R.id.alert_title).text = title
+            card.findViewById<TextView>(R.id.alert_body).showIfNotEmpty(body)
+            card.findViewById<TextView>(R.id.alert_note).showIfNotEmpty(note)
+            card.findViewById<MaterialButton>(R.id.alert_button).apply {
+                text = button
+                setOnClickListener { destination() }
+            }
+            card.setOnClickListener { destination() }
+            content.addView(card)
+            return card
+        }
+
+        private fun renderPaymentsAlert(activity: MainActivity, content: LinearLayout, snapshot: Snapshot) {
+            val payments = snapshot.payments ?: return
+            val overdue = payments.hasOverdue()
+            if (!overdue && (payments.hasUnknownSettlement() || payments.totalUnpaidAmount() <= 0)) return
+            val title = if (payments.hasUnknownSettlement()) activity.getString(R.string.payments_settlement_unknown)
+                else activity.getString(R.string.home_payments_due, PaymentAmounts.unpaid(payments, Language.currentLocale(activity).language))
+            val subaccount = payments.accounts.firstOrNull()?.let {
+                activity.getString(R.string.home_payments_subaccount, PaymentsScreenController.formatIban(it.bankAccountNumber))
+            }.orEmpty()
+            val card = alert(
+                activity, content,
+                activity.getString(if (overdue) R.string.home_payments_attention else R.string.home_payments_regular),
+                if (overdue) R.color.app_error else R.color.app_ink,
+                title, subaccount, "", activity.getString(R.string.home_payments_btn)
+            ) { activity.navigate(Tabs.PAYMENTS) }
+            if (overdue) tint(activity, card, R.color.app_badge_error_bg)
+        }
+
+        private fun renderConflictAlert(activity: MainActivity, content: LinearLayout, snapshot: Snapshot) {
+            val conflicts = ScheduleConflictDetector.findConflicts(snapshot.records.values)
+            if (conflicts.isEmpty()) return
+            val card = alert(
+                activity, content,
+                activity.getString(R.string.home_conflicts_title, conflicts.size), R.color.app_warning,
+                activity.getString(R.string.home_conflicts_heading), conflicts[0].description(),
+                if (conflicts.size > 1) activity.getString(R.string.home_conflicts_more, conflicts.size - 1) else "",
+                activity.getString(R.string.home_conflicts_btn)
+            ) {
+                activity.setCalendarMode("day")
+                activity.openScheduleDate(conflicts[0].first.date)
+            }
+            tint(activity, card, R.color.app_badge_warning_bg)
+        }
+
+        private fun renderNewsAlert(activity: MainActivity, content: LinearLayout, snapshot: Snapshot) {
+            val top = snapshot.news.firstOrNull() ?: return
+            val formattedDate = HistoryScreenController.formatFullDate(top.publicationDate)
+            val dateLine = (if (formattedDate.isEmpty()) top.publicationDate else formattedDate) +
+                if (top.author.isNotEmpty()) " · ${top.author}" else ""
+            alert(
+                activity, content, activity.getString(R.string.home_news_title), R.color.app_muted,
+                top.title, top.headline, dateLine, activity.getString(R.string.home_news_all_btn, snapshot.news.size)
+            ) { activity.navigate(Tabs.NEWS) }
+        }
+
+        private fun renderFocus(
+            activity: MainActivity, parent: LinearLayout, data: JSONObject, snapshot: Snapshot?,
+            lessons: List<LessonTime>, details: Consumer<LessonTime>
+        ) {
             val now = Instant.now()
             val today = LocalDate.now(UsosClient.ZONE)
-            val lessons = LessonTime.sorted(snapshot?.records?.values ?: emptyList())
             val current = lessons.filter { !it.tentative() && it.current(now) }
             val focus = current.firstOrNull() ?: lessons.firstOrNull { it.start.toInstant().isAfter(now) }
-            val updated = UiHelper.text(activity,
-                activity.getString(R.string.payments_data_freshness, UiHelper.timestamp(data.optLong("successAt"))), 14, UiHelper.MUTED, false)
-            updated.gravity = Gravity.CENTER
-            parent.addView(updated, LinearLayout.LayoutParams(-1, -2).apply { topMargin = UiHelper.dp(activity, 12) })
 
-            val hero = LinearLayout(activity).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setPadding(0, UiHelper.dp(activity, 32), 0, UiHelper.dp(activity, 32))
-            }
-            parent.addView(hero, LinearLayout.LayoutParams(-1, -2))
-            hero.addView(View(activity).apply { setBackgroundColor(activity.getColor(R.color.app_accent)) },
-                LinearLayout.LayoutParams(UiHelper.dp(activity, 28), UiHelper.dp(activity, 2)).apply { bottomMargin = UiHelper.dp(activity, 16) })
-            fun line(value: String, size: Int, color: Int, bold: Boolean) = UiHelper.text(activity, value, size, color, bold).also {
-                it.gravity = Gravity.CENTER
-                hero.addView(it, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = UiHelper.dp(activity, 12) })
-            }
-            val caption = line(activity.getString(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class), 13, UiHelper.MUTED, false)
-            caption.isAllCaps = true
-            caption.letterSpacing = .08f
-            val title = line(focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming), 34, UiHelper.INK, true)
-            ViewCompat.setAccessibilityHeading(title, true)
+            val view = inflate(activity, R.layout.view_home_focus, parent)
+            parent.addView(view)
+            view.findViewById<TextView>(R.id.home_updated).text =
+                activity.getString(R.string.home_updated_at, UiHelper.timestamp(data.optLong("successAt")))
+            view.findViewById<TextView>(R.id.home_caption).setText(if (current.isNotEmpty()) R.string.classes_ongoing else R.string.design_next_class)
+            view.findViewById<TextView>(R.id.home_title).text =
+                focus?.record?.title ?: activity.getString(if (snapshot == null) R.string.dashboard_no_data else R.string.classes_no_upcoming)
+
             if (focus != null) {
-                val clock = DateTimeFormatter.ofPattern("HH:mm")
-                val room = room(focus.record)
-                val date = if (focus.start.toLocalDate() == today) "" else UiHelper.shortDate(focus.start.toLocalDate()) + " · "
-                line(date + focus.start.format(clock) + "–" + focus.end.format(clock) +
-                    if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room), 17, UiHelper.INK, false)
-                val status = when {
-                    focus.tentative() -> activity.getString(R.string.design_tentative)
-                    current.isNotEmpty() -> activity.getString(R.string.home_classes_remaining_min, max(1L, (Duration.between(now, focus.end.toInstant()).seconds + 59) / 60))
-                    focus.start.toLocalDate() == today -> activity.getString(R.string.design_starts_minutes, max(1L, (Duration.between(now, focus.start.toInstant()).seconds + 59) / 60))
-                    else -> focus.start.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity)))
+                bindFocusLesson(activity, view, focus, current.isNotEmpty(), now, today)
+                view.findViewById<View>(R.id.home_hero).apply {
+                    isClickable = true
+                    isFocusable = true
+                    setOnClickListener { details.accept(focus) }
                 }
-                val badge = UiHelper.text(activity, status, 14, UiHelper.INK, false).apply {
-                    setTextColor(activity.getColor(R.color.app_accent))
-                    gravity = Gravity.CENTER
-                    setPadding(UiHelper.dp(activity, 14), UiHelper.dp(activity, 8), UiHelper.dp(activity, 14), UiHelper.dp(activity, 8))
-                    background = GradientDrawable().apply {
-                        setColor(activity.getColor(R.color.app_accent_container))
-                        cornerRadius = UiHelper.dp(activity, 24).toFloat()
-                    }
-                }
-                hero.addView(badge, LinearLayout.LayoutParams(-2, -2))
-                hero.isClickable = true
-                hero.isFocusable = true
-                hero.setOnClickListener { details.accept(focus) }
             } else {
-                line(activity.getString(if (snapshot == null) R.string.refresh_offline else R.string.home_schedule_empty_hint), 14, UiHelper.MUTED, false)
-                hero.addView(UiHelper.button(activity, activity.getString(if (snapshot == null) R.string.btn_connect else R.string.btn_open_plan), {
-                    if (snapshot == null) activity.navigate(Tabs.ACCOUNT) else openDay(activity, today)
-                }, false))
+                view.findViewById<TextView>(R.id.home_hint).apply {
+                    setText(if (snapshot == null) R.string.refresh_offline else R.string.home_schedule_empty_hint)
+                    visibility = View.VISIBLE
+                }
+                view.findViewById<MaterialButton>(R.id.home_focus_action).apply {
+                    setText(if (snapshot == null) R.string.btn_connect else R.string.btn_open_plan)
+                    visibility = View.VISIBLE
+                    setOnClickListener { if (snapshot == null) activity.navigate(Tabs.ACCOUNT) else openDay(activity, today) }
+                }
             }
+
             // Concurrent classes and tentative times stay visible, without a false countdown.
             val focusDate = focus?.start?.toLocalDate() ?: today
             val rest = lessons.filter { it !== focus && it.intersects(focusDate) && it.end.toInstant().isAfter(now) }
             if (rest.isNotEmpty()) {
                 sectionLink(activity, parent, if (focusDate == today) R.string.design_later_today else R.string.design_later_that_day) { openDay(activity, focusDate) }
-                val box = UiHelper.card(activity, parent, Color.WHITE)
+                val box = UiHelper.card(activity, parent)
                 rest.forEachIndexed { index, lesson ->
-                    if (index > 0) divider(activity, box)
-                    val row = LinearLayout(activity).apply {
-                        orientation = LinearLayout.VERTICAL
-                        minimumHeight = UiHelper.dp(activity, 64)
-                        setPadding(0, UiHelper.dp(activity, 12), 0, UiHelper.dp(activity, 4))
-                        isClickable = true; isFocusable = true
-                        setOnClickListener { details.accept(lesson) }
-                    }
-                    UiHelper.add(activity, row, lesson.record.title, 16, UiHelper.INK, true)
-                    val clock = DateTimeFormatter.ofPattern("HH:mm")
-                    val room = room(lesson.record)
-                    UiHelper.add(activity, row, lesson.start.format(clock) + "–" + lesson.end.format(clock) +
-                        (if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room)) +
-                        (if (lesson.tentative()) " · " + activity.getString(R.string.design_tentative) else ""), 13, UiHelper.MUTED, false)
-                    box.addView(row)
+                    if (index > 0) UiHelper.trayDivider(activity, box)
+                    box.addView(lessonRow(activity, box, lesson, details))
                 }
             }
             val upcoming = lessons.firstOrNull { it.start.toInstant().isAfter(now) }
             if (current.isNotEmpty() && upcoming != null && !upcoming.intersects(today)) {
                 sectionLink(activity, parent, R.string.design_next_class) { openDay(activity, upcoming.start.toLocalDate()) }
-                val nextBox = UiHelper.card(activity, parent, Color.WHITE)
-                nextBox.addView(UiHelper.actionRow(activity, upcoming.record.title, { details.accept(upcoming) }, false))
-                UiHelper.note(activity, nextBox, UiHelper.shortDate(upcoming.start.toLocalDate()) + " · " +
-                    upcoming.start.format(DateTimeFormatter.ofPattern("HH:mm")) +
-                    if (upcoming.tentative()) " · " + activity.getString(R.string.design_tentative) else "", UiHelper.MUTED)
+                val nextBox = UiHelper.card(activity, parent)
+                val row = inflate(activity, R.layout.item_home_lesson, nextBox)
+                val when_ = UiHelper.shortDate(upcoming.start.toLocalDate()) + " · " + upcoming.start.format(CLOCK) +
+                    if (upcoming.tentative()) " · " + activity.getString(R.string.design_tentative) else ""
+                row.findViewById<TextView>(R.id.home_lesson_title).text = upcoming.record.title
+                row.findViewById<TextView>(R.id.home_lesson_time).text = when_
+                row.setOnClickListener { details.accept(upcoming) }
+                nextBox.addView(row)
             }
         }
 
-        private fun divider(activity: MainActivity, parent: LinearLayout) {
-            parent.addView(View(activity).apply { setBackgroundColor(activity.getColor(R.color.app_outline_inner)) },
-                LinearLayout.LayoutParams(-1, UiHelper.dp(activity, 1)))
+        private fun bindFocusLesson(activity: MainActivity, view: View, focus: LessonTime, ongoing: Boolean, now: Instant, today: LocalDate) {
+            val room = room(focus.record)
+            // A later day is already named in the status pill below.
+            val detail = focus.start.format(CLOCK) + "–" + focus.end.format(CLOCK) +
+                if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room)
+            view.findViewById<TextView>(R.id.home_detail).apply {
+                text = detail
+                visibility = View.VISIBLE
+            }
+            view.findViewById<TextView>(R.id.home_status).apply {
+                text = when {
+                    focus.tentative() -> activity.getString(R.string.design_tentative)
+                    ongoing -> activity.getString(R.string.home_classes_remaining_min, max(1L, (Duration.between(now, focus.end.toInstant()).seconds + 59) / 60))
+                    focus.start.toLocalDate() == today -> activity.getString(R.string.design_starts_minutes, max(1L, (Duration.between(now, focus.start.toInstant()).seconds + 59) / 60))
+                    else -> focus.start.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Language.currentLocale(activity)))
+                }
+                visibility = View.VISIBLE
+            }
+        }
+
+        private fun lessonRow(activity: MainActivity, parent: LinearLayout, lesson: LessonTime, details: Consumer<LessonTime>): View {
+            val row = inflate(activity, R.layout.item_home_lesson, parent)
+            val room = room(lesson.record)
+            row.findViewById<TextView>(R.id.home_lesson_title).text = lesson.record.title
+            val time = lesson.start.format(CLOCK) + "–" + lesson.end.format(CLOCK) +
+                (if (room.isEmpty()) "" else " · " + activity.getString(R.string.lesson_room_label, room)) +
+                (if (lesson.tentative()) " · " + activity.getString(R.string.design_tentative) else "")
+            row.findViewById<TextView>(R.id.home_lesson_time).text = time
+            row.setOnClickListener { details.accept(lesson) }
+            return row
         }
 
         private fun room(record: Record): String = record.optMeta("room").trim().ifEmpty {
             record.value.lineSequence().firstOrNull { it.startsWith("Sala ") }?.substring(5)?.trim().orEmpty()
         }
 
-        private fun renderWeek(activity: MainActivity, parent: LinearLayout, data: JSONObject) {
-            val snapshot = data.optJSONObject("snapshot")?.let { Snapshot.from(it) } ?: return
+        private fun renderWeek(activity: MainActivity, parent: LinearLayout, snapshot: Snapshot?, lessons: List<LessonTime>) {
+            if (snapshot == null) return
             val today = LocalDate.now(UsosClient.ZONE)
             val monday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-            val lessons = LessonTime.sorted(snapshot.records.values)
             sectionLink(activity, parent, R.string.design_this_week) { openDay(activity, today) }
             parent.addView(PrototypeUi.week(activity, monday, today, lessons, false) { openDay(activity, it) }, LinearLayout.LayoutParams(-1, -2))
         }
 
+        private class Deadline(val title: String, val due: LocalDate?, val open: () -> Unit)
+
+        /** Exam registration closing dates come from the cached exams service; past ones are not deadlines any more. */
+        private fun examDeadlines(activity: MainActivity, services: JSONObject?, today: LocalDate): List<Deadline> {
+            val exams = services?.optJSONObject("exams")?.optJSONObject("data")?.optJSONArray("exams") ?: return emptyList()
+            val result = ArrayList<Deadline>()
+            for (i in 0 until exams.length()) {
+                val exam = exams.optJSONObject(i) ?: continue
+                val due = runCatching { LocalDate.parse(exam.optString("registration_end").take(10)) }.getOrNull() ?: continue
+                if (due.isBefore(today)) continue
+                val course = pl.vistula.checker.core.ApiLanguage.text(exam.opt("course_name")).ifEmpty { exam.optString("code") }
+                result.add(Deadline(activity.getString(R.string.deadline_exam_registration, course), due) { activity.navigate(Tabs.ACADEMIC_EXTRAS) })
+            }
+            return result
+        }
+
         @Throws(JSONException::class)
-        private fun renderDeadlinesPreview(activity: MainActivity, content: LinearLayout, rows: JSONArray?) {
-            if (rows == null) return
-            val open = ArrayList<JSONObject>()
-            for (i in 0 until rows.length()) {
-                val row = rows.getJSONObject(i)
-                if (!row.optBoolean("done")) {
-                    open.add(row)
+        private fun renderDeadlinesPreview(activity: MainActivity, content: LinearLayout, rows: JSONArray?, services: JSONObject?) {
+            val today = LocalDate.now(UsosClient.ZONE)
+            val all = ArrayList<Deadline>()
+            if (rows != null) {
+                for (i in 0 until rows.length()) {
+                    val row = rows.getJSONObject(i)
+                    if (!row.optBoolean("done")) all.add(Deadline(row.optString("title"), TaskTools.dueDate(row)) { activity.navigate(Tabs.TASKS) })
                 }
             }
-
-            if (open.isNotEmpty()) {
-                open.sortWith(compareBy { it.optString("due") })
-                UiHelper.heading(activity, content, activity.getString(R.string.deadlines_upcoming))
-                val box = UiHelper.card(activity, content, Color.WHITE)
-                val today = LocalDate.now(UsosClient.ZONE)
-
-                for (i in 0 until min(3, open.size)) {
-                    val t = open[i]
-                    val due = TaskTools.dueDate(t)
-                    UiHelper.add(activity, box, t.optString("title"), 16, UiHelper.INK, true)
+            all.addAll(examDeadlines(activity, services, today))
+            if (all.isEmpty()) return
+            // Dated items first, soonest on top; items without a date stay last.
+            val open = all.sortedWith(compareBy<Deadline> { it.due == null }.thenBy { it.due })
+            UiHelper.heading(activity, content, activity.getString(R.string.deadlines_upcoming))
+            val box = UiHelper.card(activity, content)
+            for (deadline in open.take(3)) {
+                val due = deadline.due
+                val item = inflate(activity, R.layout.item_home_deadline, box)
+                item.findViewById<TextView>(R.id.home_deadline_title).text = deadline.title
+                item.findViewById<TextView>(R.id.home_deadline_due).apply {
                     if (due == null) {
-                        UiHelper.note(activity, box, activity.getString(R.string.tasks_due_unknown), UiHelper.MUTED)
-                        continue
+                        setText(R.string.tasks_due_unknown)
+                    } else {
+                        val days = java.time.temporal.ChronoUnit.DAYS.between(today, due).toInt()
+                        val countdown = when {
+                            days < 0 -> activity.resources.getQuantityString(R.plurals.deadline_overdue_days, -days, -days)
+                            days == 0 -> activity.getString(R.string.tasks_chip_today)
+                            days == 1 -> activity.getString(R.string.deadline_tomorrow)
+                            else -> activity.resources.getQuantityString(R.plurals.deadline_in_days, days, days)
+                        }
+                        text = activity.getString(R.string.deadline_line, countdown, due.format(DUE_DATE))
+                        when {
+                            days < 0 -> setTone(Tone.ERROR)
+                            days <= 2 -> setTone(Tone.WARNING)
+                        }
                     }
-                    val prefix = when {
-                        due.isBefore(today) -> "${activity.getString(R.string.tasks_chip_overdue)} · "
-                        due == today -> "${activity.getString(R.string.tasks_chip_today)} · "
-                        else -> ""
-                    }
-                    UiHelper.add(
-                        activity,
-                        box,
-                        prefix + due.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")),
-                        13,
-                        if (due.isBefore(today)) Color.rgb(160, 48, 40) else UiHelper.MUTED,
-                        false
-                    )
                 }
-
-                box.isClickable = true
-                box.isFocusable = true
-                box.setOnClickListener { activity.navigate(Tabs.TASKS) }
-                box.addView(UiHelper.button(activity, activity.getString(R.string.home_open_tasks), { activity.navigate(Tabs.TASKS) }, false))
+                item.setOnClickListener { deadline.open() }
+                box.addView(item)
             }
+            box.addView(UiHelper.button(activity, activity.getString(R.string.home_open_tasks), { activity.navigate(Tabs.TASKS) }, false))
         }
 
         @Throws(Exception::class)
         private fun renderRecentChanges(activity: MainActivity, content: LinearLayout, d: JSONObject) {
             val rows = d.optJSONArray("history")
-            if (rows != null && rows.length() != 0) {
-                sectionLink(activity, content, R.string.home_recent_changes) { activity.navigate(Tabs.HISTORY) }
-                val recent = ArrayList<Change>()
-                for (i in 0 until rows.length()) {
-                    recent.add(Change.from(rows.getJSONObject(i)))
-                }
-                recent.sortWith { a, b -> b.effectiveTimestamp().compareTo(a.effectiveTimestamp()) }
-                val box = UiHelper.tray(activity, content)
-                recent.take(2).forEachIndexed { index, change ->
-                    if (index > 0) UiHelper.trayDivider(activity, box)
-                    HistoryScreenController.renderChangeRow(activity, box, change)
-                }
+            if (rows == null || rows.length() == 0) return
+            sectionLink(activity, content, R.string.home_recent_changes) { activity.navigate(Tabs.HISTORY) }
+            val recent = ArrayList<Change>()
+            for (i in 0 until rows.length()) recent.add(Change.from(rows.getJSONObject(i)))
+            recent.sortWith { a, b -> b.effectiveTimestamp().compareTo(a.effectiveTimestamp()) }
+            val box = UiHelper.tray(activity, content)
+            recent.take(2).forEachIndexed { index, change ->
+                if (index > 0) UiHelper.trayDivider(activity, box)
+                HistoryScreenController.renderChangeRow(activity, box, change)
             }
         }
     }
 }
-

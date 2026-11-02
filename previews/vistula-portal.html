@@ -1,0 +1,320 @@
+<title>Portal Vistula</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.25.6/babel.min.js"></script>
+<style>
+  /* Layout: collapsible navy sidebar + sticky glass header + bento grid. Single committed light look. */
+  :root { --navy:#002855; --blue:#0066CC; --cyan:#00A3E0; --bg:#F8FAFC; --card:#FFFFFF; --ink:#0F172A; --muted:#475569; --faint:#94A3B8; --line:#E2E8F0; color-scheme: light; }
+  html, body { height: 100%; }
+  body { margin:0; background: var(--bg); color: var(--ink); font-family:'Plus Jakarta Sans', system-ui, sans-serif; }
+  .mono { font-family:'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:0 2px 10px rgba(0,40,85,.04); transition:all .2s; }
+  .card:hover { border-color: rgba(0,102,204,.4); background:#fbfcfe; }
+  button:focus-visible, input:focus-visible, a:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+const ICONS = {
+  home: "M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  cal: "M7 3v4M17 3v4M4 9h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z",
+  cap: "M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5",
+  card: "M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM2 10h20",
+  doc: "M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7zM14 3v4h4M9 13h6M9 17h6",
+  search: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-5-5",
+  x: "M6 6l12 12M18 6L6 18",
+  menu: "M4 6h16M4 12h16M4 18h16",
+  pin: "M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2",
+  bell: "M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4",
+  check: "M5 12l5 5 9-10",
+  chev: "M9 6l6 6-6 6",
+  download: "M12 4v11M7 11l5 5 5-5M5 20h14",
+};
+const Icon = ({ n, s = 18, className = "" }) => (
+  <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true"><path d={ICONS[n]} /></svg>
+);
+
+const NAV = [
+  { id: "home", label: "Pulpit", icon: "home" },
+  { id: "plan", label: "Plan Zajęć", icon: "cal" },
+  { id: "grades", label: "Oceny i ECTS", icon: "cap" },
+  { id: "fin", label: "Finanse / Czesne", icon: "card" },
+  { id: "docs", label: "Dokumenty", icon: "doc" },
+];
+
+const TODAY = [
+  { s: "08:30", e: "10:00", name: "Rachunkowość zarządcza", type: "Wykład", room: "A-204", who: "dr Anna Wójcik" },
+  { s: "10:15", e: "11:45", name: "Statystyka w biznesie", type: "Ćwiczenia", room: "B-112", who: "dr Piotr Nowak" },
+  { s: "12:30", e: "14:00", name: "Prawo gospodarcze", type: "Wykład", room: "A-101", who: "prof. Marek Lis" },
+  { s: "15:00", e: "16:30", name: "Język angielski B2", type: "Lektorat", room: "C-018", who: "mgr Emily Hart" },
+];
+const WEEK = {
+  Pon: TODAY,
+  Wt: [{ s: "09:00", e: "10:30", name: "Finanse przedsiębiorstw", type: "Wykład", room: "A-204", who: "dr Ewa Kruk" }, { s: "11:00", e: "12:30", name: "Marketing cyfrowy", type: "Projekt", room: "D-005", who: "mgr Tomasz Bis" }],
+  Śr: [{ s: "10:15", e: "11:45", name: "Statystyka w biznesie", type: "Wykład", room: "A-101", who: "dr Piotr Nowak" }],
+  Czw: [{ s: "08:30", e: "10:00", name: "Prawo gospodarcze", type: "Ćwiczenia", room: "B-112", who: "mgr Julia Rak" }, { s: "13:00", e: "14:30", name: "Język angielski B2", type: "Lektorat", room: "C-018", who: "mgr Emily Hart" }],
+  Pt: [{ s: "09:00", e: "11:00", name: "Seminarium dyplomowe", type: "Seminarium", room: "E-210", who: "dr Ewa Kruk" }],
+};
+const GRADES = [
+  { c: "Rachunkowość finansowa", ects: 6, g: 4.5, st: "Zaliczone" },
+  { c: "Ekonomia", ects: 5, g: 5.0, st: "Zaliczone" },
+  { c: "Matematyka finansowa", ects: 5, g: 4.0, st: "Zaliczone" },
+  { c: "Prawo gospodarcze", ects: 4, g: null, st: "W trakcie" },
+  { c: "Statystyka w biznesie", ects: 5, g: 3.5, st: "Zaliczone" },
+  { c: "Marketing cyfrowy", ects: 5, g: null, st: "W trakcie" },
+];
+const INSTALLMENTS = [
+  { n: "Rata 1/6", d: "2026-10-10", a: 1450, st: "paid" },
+  { n: "Rata 2/6", d: "2026-11-10", a: 1450, st: "due" },
+  { n: "Rata 3/6", d: "2026-12-10", a: 1450, st: "later" },
+  { n: "Rata 4/6", d: "2027-01-10", a: 1450, st: "later" },
+];
+const NEWS = [
+  { k: "deadline", t: "Wpis na seminarium dyplomowe", m: "do 7 listopada, 23:59", c: "#EF4444" },
+  { k: "ann", t: "Zmiana sali: Prawo gospodarcze w A-101", m: "Dziekanat · dziś", c: "#0066CC" },
+  { k: "fin", t: "Rata 2/6 czesnego płatna do 10 listopada", m: "Finanse · 9 dni", c: "#F59E0B" },
+  { k: "deadline", t: "Złożenie projektu z marketingu cyfrowego", m: "do 14 listopada", c: "#EF4444" },
+  { k: "ann", t: "Dzień otwarty biblioteki, godziny wydłużone", m: "Biblioteka · wczoraj", c: "#0066CC" },
+];
+const DOCS = [
+  { n: "Zaświadczenie o statusie studenta", d: "Gotowe od ręki" },
+  { n: "Odpis indeksu", d: "Do 3 dni roboczych" },
+  { n: "Potwierdzenie opłat za studia", d: "Gotowe od ręki" },
+  { n: "Legitymacja studencka", d: "Do 7 dni roboczych" },
+];
+const pln = (v) => v.toLocaleString("pl-PL", { style: "currency", currency: "PLN" });
+const toMin = (t) => parseInt(t.slice(0, 2)) * 60 + parseInt(t.slice(3));
+const NOW = 10 * 60 + 40; // fixed demo clock: 10:40
+
+function status(l) {
+  if (NOW >= toMin(l.e)) return ["Zakończone", "#64748B", "#F1F5F9"];
+  if (NOW >= toMin(l.s)) return ["Trwa teraz", "#047857", "#E7F8F1"];
+  return ["Wkrótce", "#0066CC", "#E6EEF8"];
+}
+
+function Badge({ children, fg, bg }) {
+  return <span className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-semibold" style={{ color: fg, background: bg }}>{children}</span>;
+}
+function Btn({ children, onClick, primary, className = "" }) {
+  return <button onClick={onClick} className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${primary ? "bg-[#002855] text-white hover:bg-[#0a3a73]" : "border border-[#E2E8F0] bg-white text-[#0F172A] hover:border-[#0066CC]/40 hover:bg-slate-50/60"} ${className}`}>{children}</button>;
+}
+function H({ children, right }) {
+  return <div className="flex items-center justify-between mb-4"><h2 className="text-base font-semibold tracking-tight text-[#002855]">{children}</h2>{right}</div>;
+}
+
+function Schedule({ items }) {
+  return (
+    <ol className="relative space-y-3">
+      {items.map((l, i) => {
+        const [lab, fg, bg] = status(l);
+        const live = lab === "Trwa teraz";
+        return (
+          <li key={i} className={`grid grid-cols-[64px_1fr] gap-3 rounded-xl border p-3 transition-all duration-200 ${live ? "border-[#0066CC]/40 bg-[#E6EEF8]/50" : "border-[#E2E8F0] hover:border-[#0066CC]/40 hover:bg-slate-50/60"}`}>
+            <div className="mono text-sm leading-tight text-[#0F172A]"><div className="font-semibold">{l.s}</div><div className="text-[#475569]">{l.e}</div></div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2"><span className="font-semibold text-sm truncate">{l.name}</span><Badge fg={fg} bg={bg}>{live && <span className="h-1.5 w-1.5 rounded-full bg-[#10B981]" />}{lab}</Badge></div>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#475569]"><span>{l.type}</span><span className="inline-flex items-center gap-1"><Icon n="pin" s={13} /><span className="mono">{l.room}</span></span><span>{l.who}</span></div>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function Ring({ value, max }) {
+  const r = 52, c = 2 * Math.PI * r, p = value / max;
+  return (
+    <svg viewBox="0 0 128 128" className="h-32 w-32" role="img" aria-label={`${value} z ${max} punktów ECTS`}>
+      <circle cx="64" cy="64" r={r} fill="none" stroke="#E2E8F0" strokeWidth="10" />
+      <circle cx="64" cy="64" r={r} fill="none" stroke="#0066CC" strokeWidth="10" strokeLinecap="round" strokeDasharray={`${c * p} ${c}`} transform="rotate(-90 64 64)" />
+      <text x="64" y="64" textAnchor="middle" className="mono" fontSize="26" fontWeight="600" fill="#002855">{value}</text>
+      <text x="64" y="84" textAnchor="middle" fontSize="11" fill="#475569">z {max} ECTS</text>
+    </svg>
+  );
+}
+
+function Modal({ title, onClose, children }) {
+  useEffect(() => { const f = (e) => e.key === "Escape" && onClose(); window.addEventListener("keydown", f); return () => window.removeEventListener("keydown", f); }, []);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F172A]/40 backdrop-blur-sm" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label={title} className="card w-full max-w-md p-6 hover:!border-[#E2E8F0] hover:!bg-white" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4"><h3 className="text-lg font-semibold tracking-tight text-[#002855]">{title}</h3><button onClick={onClose} aria-label="Zamknij" className="rounded-lg p-1.5 text-[#475569] hover:bg-slate-100"><Icon n="x" /></button></div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({ go, pay, filter, setFilter }) {
+  const list = NEWS.filter((n) => filter === "all" || n.k === filter);
+  const FILTERS = [["all", "Wszystkie"], ["deadline", "Terminy"], ["ann", "Ogłoszenia"], ["fin", "Finanse"]];
+  return (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-6">
+      <section className="card p-5 lg:col-span-4">
+        <H right={<button onClick={() => go("plan")} className="text-sm font-semibold text-[#0066CC] hover:underline">Cały tydzień</button>}>Dzisiejszy plan</H>
+        <Schedule items={TODAY} />
+      </section>
+      <section className="card p-5 lg:col-span-2">
+        <H>Postęp i ECTS</H>
+        <div className="flex flex-col items-center gap-4">
+          <Ring value={96} max={180} />
+          <div className="w-full space-y-3">
+            {[["Semestr 3", 30, 30], ["Semestr 4", 24, 30], ["Semestr 5", 12, 30]].map(([n, v, m]) => (
+              <div key={n}><div className="mb-1 flex justify-between text-xs text-[#475569]"><span>{n}</span><span className="mono">{v}/{m}</span></div><div className="h-1.5 rounded-full bg-[#E2E8F0]"><div className="h-1.5 rounded-full bg-[#00A3E0]" style={{ width: `${(v / m) * 100}%` }} /></div></div>
+            ))}
+          </div>
+          <div className="flex w-full items-center justify-between border-t border-[#E2E8F0] pt-3 text-sm"><span className="text-[#475569]">Średnia ocen</span><span className="mono text-lg font-semibold text-[#002855]">4,38</span></div>
+        </div>
+      </section>
+      <section className="card p-5 lg:col-span-2">
+        <H>Czesne</H>
+        <Badge fg="#92400E" bg="#FEF3C7">Rata do zapłaty</Badge>
+        <div className="mono mt-3 text-3xl font-semibold tracking-tight text-[#002855]">{pln(1450)}</div>
+        <div className="mt-1 text-sm text-[#475569]">Termin: <span className="mono">10.11.2026</span> · za 9 dni</div>
+        <div className="mt-4 flex gap-2"><Btn primary onClick={pay} className="flex-1">Zapłać teraz</Btn><Btn onClick={() => go("fin")}>Harmonogram</Btn></div>
+      </section>
+      <section className="card p-5 lg:col-span-4">
+        <H>Ogłoszenia i terminy</H>
+        <div className="mb-4 flex flex-wrap gap-2" role="tablist">
+          {FILTERS.map(([k, l]) => (
+            <button key={k} role="tab" aria-selected={filter === k} onClick={() => setFilter(k)} className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-200 ${filter === k ? "border-[#002855] bg-[#002855] text-white" : "border-[#E2E8F0] bg-white text-[#475569] hover:border-[#0066CC]/40"}`}>{l}</button>
+          ))}
+        </div>
+        <ul className="divide-y divide-[#E2E8F0]">
+          {list.map((n, i) => (
+            <li key={i} className="flex items-center gap-3 py-3"><span className="h-2 w-2 shrink-0 rounded-full" style={{ background: n.c }} /><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">{n.t}</div><div className="text-xs text-[#475569]">{n.m}</div></div><Icon n="chev" s={16} className="text-[#94A3B8]" /></li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
+
+function Plan() {
+  const [day, setDay] = useState("Pon");
+  return (
+    <section className="card p-5">
+      <H>Plan zajęć</H>
+      <div className="mb-4 flex flex-wrap gap-2" role="tablist">{Object.keys(WEEK).map((d) => <button key={d} role="tab" aria-selected={day === d} onClick={() => setDay(d)} className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-all duration-200 ${day === d ? "bg-[#002855] text-white" : "border border-[#E2E8F0] text-[#475569] hover:border-[#0066CC]/40"}`}>{d}</button>)}</div>
+      <Schedule items={WEEK[day]} />
+    </section>
+  );
+}
+function Grades() {
+  const total = GRADES.filter((g) => g.g).reduce((a, g) => a + g.ects, 0);
+  return (
+    <section className="card p-5">
+      <H right={<Badge fg="#047857" bg="#E7F8F1">{total} ECTS zdobyte</Badge>}>Oceny i ECTS</H>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[480px] text-sm">
+          <thead><tr className="border-b border-[#E2E8F0] text-left text-xs uppercase tracking-wider text-[#475569]"><th className="py-2 font-semibold">Przedmiot</th><th className="font-semibold">ECTS</th><th className="font-semibold">Ocena</th><th className="font-semibold">Status</th></tr></thead>
+          <tbody>{GRADES.map((g) => (
+            <tr key={g.c} className="border-b border-[#E2E8F0] last:border-0 hover:bg-slate-50/60"><td className="py-3 font-semibold">{g.c}</td><td className="mono">{g.ects}</td><td className="mono font-semibold text-[#002855]">{g.g ? g.g.toFixed(1).replace(".", ",") : "–"}</td><td>{g.g ? <Badge fg="#047857" bg="#E7F8F1">{g.st}</Badge> : <Badge fg="#92400E" bg="#FEF3C7">{g.st}</Badge>}</td></tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+function Finance({ pay }) {
+  return (
+    <section className="card p-5">
+      <H>Harmonogram opłat</H>
+      <ul className="divide-y divide-[#E2E8F0]">{INSTALLMENTS.map((r) => (
+        <li key={r.n} className="flex flex-wrap items-center gap-3 py-3"><div className="min-w-0 flex-1"><div className="text-sm font-semibold">{r.n}</div><div className="mono text-xs text-[#475569]">{r.d}</div></div><div className="mono text-sm font-semibold">{pln(r.a)}</div>
+          {r.st === "paid" && <Badge fg="#047857" bg="#E7F8F1"><Icon n="check" s={12} />Opłacona</Badge>}
+          {r.st === "due" && <Btn primary onClick={pay}>Zapłać</Btn>}
+          {r.st === "later" && <Badge fg="#475569" bg="#F1F5F9">Zaplanowana</Badge>}</li>
+      ))}</ul>
+    </section>
+  );
+}
+function Docs() {
+  const [req, setReq] = useState(null);
+  const [done, setDone] = useState([]);
+  return (
+    <section className="card p-5">
+      <H>Dokumenty</H>
+      <ul className="divide-y divide-[#E2E8F0]">{DOCS.map((d) => (
+        <li key={d.n} className="flex flex-wrap items-center gap-3 py-3"><Icon n="doc" className="text-[#0066CC]" /><div className="min-w-0 flex-1"><div className="text-sm font-semibold">{d.n}</div><div className="text-xs text-[#475569]">{d.d}</div></div>
+          {done.includes(d.n) ? <Badge fg="#047857" bg="#E7F8F1"><Icon n="check" s={12} />Zamówiono</Badge> : <Btn onClick={() => setReq(d)}>Zamów</Btn>}</li>
+      ))}</ul>
+      {req && <Modal title="Zamów dokument" onClose={() => setReq(null)}>
+        <p className="text-sm text-[#475569]">{req.n}</p>
+        <label htmlFor="lang" className="mt-4 block text-xs font-semibold text-[#475569]">Wersja językowa</label>
+        <select id="lang" className="mt-1 w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm"><option>Polska</option><option>Angielska</option></select>
+        <div className="mt-5 flex justify-end gap-2"><Btn onClick={() => setReq(null)}>Anuluj</Btn><Btn primary onClick={() => { setDone([...done, req.n]); setReq(null); }}>Wyślij zamówienie</Btn></div>
+      </Modal>}
+    </section>
+  );
+}
+
+function Palette({ onClose, go }) {
+  const [q, setQ] = useState("");
+  const [i, setI] = useState(0);
+  const items = NAV.filter((n) => n.label.toLowerCase().includes(q.toLowerCase()));
+  const pick = (n) => { go(n.id); onClose(); };
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[15vh] bg-[#0F172A]/40 backdrop-blur-sm" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label="Szybkie wyszukiwanie" className="card w-full max-w-lg overflow-hidden hover:!bg-white hover:!border-[#E2E8F0]" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 border-b border-[#E2E8F0] px-4"><Icon n="search" className="text-[#475569]" />
+          <input id="cmdk" autoFocus value={q} onChange={(e) => { setQ(e.target.value); setI(0); }} aria-label="Przejdź do widoku" placeholder="Przejdź do…" className="w-full bg-transparent py-3.5 text-sm outline-none placeholder:text-[#64748B]"
+            onKeyDown={(e) => { if (e.key === "Escape") onClose(); if (e.key === "ArrowDown") setI((i + 1) % Math.max(items.length, 1)); if (e.key === "ArrowUp") setI((i - 1 + items.length) % Math.max(items.length, 1)); if (e.key === "Enter" && items[i]) pick(items[i]); }} /></div>
+        <ul className="max-h-72 overflow-auto p-2">
+          {items.map((n, k) => <li key={n.id}><button onClick={() => pick(n)} onMouseEnter={() => setI(k)} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${k === i ? "bg-[#E6EEF8] text-[#002855]" : ""}`}><Icon n={n.icon} />{n.label}</button></li>)}
+          {!items.length && <li className="px-3 py-6 text-center text-sm text-[#475569]">Brak wyników dla „{q}”</li>}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [view, setView] = useState("home");
+  const [open, setOpen] = useState(true);
+  const [cmd, setCmd] = useState(false);
+  const [payM, setPayM] = useState(false);
+  const [paid, setPaid] = useState(false);
+  const [filter, setFilter] = useState("all");
+  useEffect(() => { const f = (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setCmd(true); } }; window.addEventListener("keydown", f); return () => window.removeEventListener("keydown", f); }, []);
+  const title = NAV.find((n) => n.id === view).label;
+  return (
+    <div className="flex min-h-screen">
+      <aside className={`sticky top-0 flex h-screen shrink-0 flex-col bg-[#002855] text-white transition-all duration-200 ${open ? "w-60" : "w-[68px]"}`}>
+        <div className="flex h-16 items-center gap-3 px-4"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-sm font-bold">V</div>{open && <div className="leading-tight"><div className="text-sm font-semibold tracking-tight">AFiB Vistula</div><div className="text-[11px] text-white/70">Portal studenta</div></div>}</div>
+        <nav className="flex-1 space-y-1 px-3 pt-2" aria-label="Główna nawigacja">
+          {NAV.map((n) => <button key={n.id} onClick={() => setView(n.id)} aria-current={view === n.id ? "page" : undefined} title={n.label} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${view === n.id ? "bg-white text-[#002855]" : "text-white/80 hover:bg-white/10 hover:text-white"}`}><Icon n={n.icon} className="shrink-0" />{open && <span className="truncate">{n.label}</span>}</button>)}
+        </nav>
+        <div className="border-t border-white/10 p-3"><div className="flex items-center gap-3 rounded-lg px-1 py-1"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#00A3E0] text-xs font-bold text-[#002855]">AK</div>{open && <div className="min-w-0 leading-tight"><div className="truncate text-sm font-semibold">Anna Kowalska</div><div className="mono text-[11px] text-white/70">nr 61842</div></div>}</div></div>
+      </aside>
+      <div className="min-w-0 flex-1">
+        <header className="sticky top-0 z-30 flex flex-wrap items-center gap-3 border-b border-[#E2E8F0] bg-white/80 px-4 py-3 backdrop-blur-md sm:px-8">
+          <button onClick={() => setOpen(!open)} aria-label={open ? "Zwiń menu" : "Rozwiń menu"} className="rounded-lg p-2 text-[#475569] hover:bg-slate-100"><Icon n="menu" /></button>
+          <div className="min-w-0 flex-1"><h1 className="truncate text-xl font-semibold tracking-tight text-[#002855]">{view === "home" ? "Dzień dobry, Anno" : title}</h1><p className="mono hidden text-xs text-[#475569] sm:block">poniedziałek, 2 listopada 2026</p></div>
+          <button onClick={() => setCmd(true)} className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#475569] transition-all duration-200 hover:border-[#0066CC]/40"><Icon n="search" s={16} /><span className="hidden sm:inline">Szukaj…</span><kbd className="mono rounded border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 text-[11px]">⌘K</kbd></button>
+        </header>
+        <main className="mx-auto max-w-6xl p-4 sm:p-8">
+          {view === "home" && <Dashboard go={setView} pay={() => setPayM(true)} filter={filter} setFilter={setFilter} />}
+          {view === "plan" && <Plan />}
+          {view === "grades" && <Grades />}
+          {view === "fin" && <Finance pay={() => setPayM(true)} />}
+          {view === "docs" && <Docs />}
+        </main>
+      </div>
+      {cmd && <Palette onClose={() => setCmd(false)} go={setView} />}
+      {payM && <Modal title="Płatność rat" onClose={() => setPayM(false)}>
+        {paid ? <div className="text-sm"><Badge fg="#047857" bg="#E7F8F1"><Icon n="check" s={12} />Płatność przyjęta</Badge><p className="mt-3 text-[#475569]">To jest podgląd. Żadna płatność nie została wykonana.</p><div className="mt-5 flex justify-end"><Btn primary onClick={() => { setPayM(false); setPaid(false); }}>Gotowe</Btn></div></div> :
+        <div><p className="text-sm text-[#475569]">Rata 2/6 · termin <span className="mono">10.11.2026</span></p><div className="mono my-4 text-3xl font-semibold text-[#002855]">{pln(1450)}</div><div className="flex justify-end gap-2"><Btn onClick={() => setPayM(false)}>Anuluj</Btn><Btn primary onClick={() => setPaid(true)}>Potwierdź płatność</Btn></div></div>}
+      </Modal>}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>

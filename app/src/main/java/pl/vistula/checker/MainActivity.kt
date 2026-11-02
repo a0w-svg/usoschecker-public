@@ -53,7 +53,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import pl.vistula.checker.core.AccountRole
-import pl.vistula.checker.core.ApiCatalog
 import pl.vistula.checker.core.CampusAffiliation
 import pl.vistula.checker.core.LessonTime
 import pl.vistula.checker.core.OAuth
@@ -64,6 +63,7 @@ import pl.vistula.checker.ui.ApiErrorUi
 import pl.vistula.checker.ui.ApiExplorerController
 import pl.vistula.checker.ui.TabSections
 import pl.vistula.checker.ui.Tabs
+import pl.vistula.checker.ui.Tone
 import pl.vistula.checker.ui.Appearance
 import pl.vistula.checker.ui.AttendanceScreenController
 import pl.vistula.checker.ui.CampusGuideController
@@ -178,9 +178,7 @@ class MainActivity : AppCompatActivity() {
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (busy) return
-                    if (welcomeStep > 0) {
-                        showWelcome(welcomeStep - 1)
-                    } else if (tab == Tabs.ACCOUNT && settingsPage != null && settingsPage != "overview") {
+                    if (tab == Tabs.ACCOUNT && settingsPage != null && settingsPage != "overview") {
                         openAccountPage(null)
                     } else if (api.currentMethod != null) {
                         api.closeMethod()
@@ -296,7 +294,7 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        swipeRefresh?.setColorSchemeColors(UiHelper.GREEN, Color.rgb(20, 110, 60))
+        swipeRefresh?.setColorSchemeColors(getColor(R.color.app_accent))
         swipeRefresh?.setOnRefreshListener {
             if (connected()) {
                 sync()
@@ -389,6 +387,7 @@ class MainActivity : AppCompatActivity() {
     public override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        handleOAuthCallback(intent)
         showReleaseUpdatesIfRequested()
         if (intent.getBooleanExtra("showHistory", false)) {
             history.open(historyFilter(intent))
@@ -396,6 +395,49 @@ class MainActivity : AppCompatActivity() {
         } else if (intent.hasExtra("tab")) {
             navigate(Tabs.fromExternal(intent.getIntExtra("tab", 0)))
         }
+    }
+
+    /** Finishes the OAuth login with the verifier from the callback link or the typed PIN, then runs the first sync. */
+    private fun confirmLogin(pin: String) {
+        task(
+            {
+                repository.finish(pin)
+                repository.read()
+            },
+            { s ->
+                state = s
+                detectedPin = ""
+                settingsPage = null
+                demo = false
+                tab = 0
+                ensureSchedule()
+                render()
+                if (Build.VERSION.SDK_INT >= 33 &&
+                    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
+                }
+                sync()
+            }
+        )
+    }
+
+    /**
+     * USOS returns the user through `usoschecker://oauth?oauth_token=...&oauth_verifier=...`. The link is untrusted input:
+     * it is used only when it carries the pending request token, once; anything else falls back to the PIN field.
+     */
+    private fun handleOAuthCallback(intent: Intent?) {
+        val uri = intent?.data ?: return
+        if (uri.scheme != OAUTH_SCHEME || uri.host != OAUTH_HOST) return
+        intent.data = null
+        val pending = state.optString("requestToken")
+        val token = uri.getQueryParameter("oauth_token").orEmpty()
+        val verifier = uri.getQueryParameter("oauth_verifier").orEmpty().trim().replace(WHITESPACE, "")
+        if (pending.isEmpty() || connected() || token != pending || !verifier.matches(PIN_SHAPE)) {
+            Toast.makeText(this, R.string.login_callback_ignored, Toast.LENGTH_LONG).show()
+            return
+        }
+        confirmLogin(verifier)
     }
 
     private fun showReleaseUpdatesIfRequested() {
@@ -407,6 +449,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         io.execute { ClassReminderReceiver.scheduleNext(applicationContext) }
+        handleOAuthCallback(intent)
         handler.removeCallbacks(refresh)
         handler.postDelayed(refresh, 30000)
         if (::content.isInitialized && !busy && tab != Tabs.ACCOUNT && tab != Tabs.API && tab != Tabs.PAYMENTS && tab != Tabs.GPA_SIMULATOR && tab != Tabs.CAMPUS_GUIDE && tab != Tabs.NEWS && tab != Tabs.ATTENDANCE) {
@@ -523,7 +566,7 @@ class MainActivity : AppCompatActivity() {
         )
         if (welcomeStep >= 0 && !demo && state.optString("token").isEmpty()) {
             setNavigationVisible(false)
-            pl.vistula.checker.ui.WelcomeScreenController.render(this, content, welcomeStep)
+            pl.vistula.checker.ui.WelcomeScreenController.render(this, content)
             return
         }
         setNavigationVisible(true)
@@ -549,7 +592,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         try {
-            if (demo) content.addView(UiHelper.text(this, getString(R.string.demo_banner_note), 11, UiHelper.MUTED, false).apply {
+            if (demo) content.addView(UiHelper.text(this, getString(R.string.demo_banner_note), 11, Tone.MUTED, false).apply {
                 gravity = android.view.Gravity.CENTER
                 setPadding(0, 0, 0, UiHelper.dp(this@MainActivity, 8))
             })
@@ -557,7 +600,7 @@ class MainActivity : AppCompatActivity() {
             when (tab) {
                 Tabs.LECTURER -> pl.vistula.checker.ui.LecturerScreenController.render(this, content, serviceAccountState(), studentServices())
                 Tabs.ACADEMIC_EXTRAS -> pl.vistula.checker.ui.LecturerScreenController.renderAcademicExtras(this, content, studentServices())
-                Tabs.STAFF_DIRECTORY -> pl.vistula.checker.ui.LecturerScreenController.renderStaffDirectory(this, content, studentServices())
+                Tabs.STAFF_DIRECTORY -> pl.vistula.checker.ui.StaffDirectoryController.render(this, content, studentServices())
                 Tabs.CARDS -> StudentCardsController.render(
                     this,
                     content,
@@ -643,7 +686,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         } catch (e: Exception) {
-            UiHelper.note(this, content, ApiErrorUi.message(this, e), Color.rgb(167, 49, 49))
+            UiHelper.note(this, content, ApiErrorUi.message(this, e), Tone.ERROR)
         }
         updateBusy(busy)
     }
@@ -775,7 +818,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onBeginOAuth(key: String, secret: String, scopes: String) {
                     task(
                         {
-                            repository.begin(key, secret, scopes)
+                            repository.begin(key, secret, scopes, OAUTH_CALLBACK)
                             repository.read()
                         },
                         { s ->
@@ -789,29 +832,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                override fun onConfirmPin(pin: String) {
-                    task(
-                        {
-                            repository.finish(pin)
-                            repository.read()
-                        },
-                        { s ->
-                            state = s
-                            detectedPin = ""
-                            settingsPage = null
-                            demo = false
-                            tab = 0
-                            ensureSchedule()
-                            render()
-                            if (Build.VERSION.SDK_INT >= 33 &&
-                                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-                            ) {
-                                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 10)
-                            }
-                            sync()
-                        }
-                    )
-                }
+                override fun onConfirmPin(pin: String) = confirmLogin(pin)
 
                 override fun onToggleEnabled(enabled: Boolean) {
                     task(
@@ -838,6 +859,30 @@ class MainActivity : AppCompatActivity() {
                             state = s
                             ensureSchedule()
                             render()
+                        }
+                    )
+                }
+
+                override fun onReconnect(key: String, secret: String, scopes: String) {
+                    task(
+                        {
+                            SyncWorker.cancel(this@MainActivity)
+                            repository.disconnect()
+                            ClassReminderReceiver.cancel(this@MainActivity)
+                            androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
+                            TodayScheduleWidget.updateAll(this@MainActivity)
+                            QuickStatusWidget.updateAll(this@MainActivity)
+                            repository.begin(key, secret, scopes, OAUTH_CALLBACK)
+                            repository.read()
+                        },
+                        { s ->
+                            state = s
+                            detectedPin = ""
+                            render()
+                            browser(
+                                "https://usosapps.vistula.edu.pl/services/oauth/authorize?oauth_token=" +
+                                    OAuth.encode(s.getString("requestToken"))
+                            )
                         }
                     )
                 }
@@ -946,7 +991,7 @@ class MainActivity : AppCompatActivity() {
     fun isDemo(): Boolean = demo
 
     fun showWelcome(step: Int = 0) {
-        welcomeStep = step.coerceIn(0, 1)
+        welcomeStep = 0
         getSharedPreferences("welcome", MODE_PRIVATE).edit { putInt("step", welcomeStep) }
         render()
         scroll.scrollTo(0, 0)
@@ -1893,6 +1938,9 @@ class MainActivity : AppCompatActivity() {
         private val UNSAFE_FILE_CHARS = Regex("[^\\p{L}\\p{N}._ -]")
         private val WHITESPACE = Regex("\\s+")
         private val PIN_SHAPE = Regex("^[a-zA-Z0-9]{6,16}$")
+        private const val OAUTH_SCHEME = "usoschecker"
+        private const val OAUTH_HOST = "oauth"
+        private const val OAUTH_CALLBACK = "$OAUTH_SCHEME://$OAUTH_HOST"
         private fun historyFilter(intent: Intent): String {
             val kind = intent.getStringExtra("historyKind")
             return if ("ocena" == kind || "plan" == kind) kind else pl.vistula.checker.ui.HistoryUiState.ALL

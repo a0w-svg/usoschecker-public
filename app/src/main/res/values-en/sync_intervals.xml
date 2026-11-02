@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sync_interval_labels">
+        <item>@string/interval_15m</item>
+        <item>@string/interval_30m</item>
+        <item>@string/interval_1h</item>
+        <item>@string/interval_2h</item>
+    </string-array>
+    <integer-array name="sync_interval_minutes">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+    </integer-array>
+</resources>

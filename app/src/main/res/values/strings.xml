@@ -111,9 +111,9 @@
     <!-- Account & OAuth -->
 <string name="student_card_badge">KARTA STUDENTA VISTULA</string>
 <string name="connect_usos_title">Połącz z USOS</string>
-    <string name="connect_usos_desc">Zaloguj się na stronie uczelni, zaakceptuj zgody i wklej otrzymany PIN. Hasło podajesz wyłącznie w przeglądarce.</string>
+    <string name="connect_usos_desc">Hasło wpisujesz tylko w przeglądarce na stronie USOS. Po zatwierdzeniu dostępu wrócisz do aplikacji automatycznie.</string>
     <string name="btn_how_to_register">❓ Jak zarejestrować aplikację w USOSapps?</string>
-<string name="btn_login_browser">1. Otwórz logowanie USOS</string>
+<string name="btn_login_browser">Otwórz logowanie USOS</string>
     <string name="btn_confirm_pin">2. Połącz konto</string>
     <string name="btn_paste_pin">📋 Wklej PIN ze schowka</string>
     <string name="pin_detected_clipboard">📋 Wykryto kod PIN ze schowka</string>
@@ -158,6 +158,9 @@
     <string name="history_category_grade">OCENA</string>
     <string name="history_category_plan">PLAN ZAJĘĆ</string>
     <string name="history_btn_simulate">Symuluj zmianę oceny i sali</string>
+    <string name="history_detail_kind">Akcja: %1$s · Typ: %2$s</string>
+    <string name="history_detail_event">📅 %1$s</string>
+    <string name="history_detail_share">📤 %1$s</string>
     <string name="history_details_title">Szczegóły zmiany</string>
     <string name="history_details_copy">Kopiuj szczegóły zmiany</string>
     <string name="history_item_plan_date">Termin zajęć: %1$s</string>
@@ -191,6 +194,8 @@
     <string name="time_minutes_ago">%1$d min temu</string>
 
     <!-- Tasks Screen -->
+<string name="tasks_filter_active">%1$s ×</string>
+<string name="tasks_add_symbol" translatable="false">+</string>
 <string name="tasks_summary">Do zrobienia: %1$d · ukończone: %2$d</string>
     <string name="tasks_chip_all">Wszystkie</string>
     <string name="tasks_chip_open">Otwarte</string>
@@ -246,7 +251,6 @@
     <string name="payments_balance">Saldo konta: %1$.2f %2$s</string>
     <string name="payments_copy_iban">Kopiuj numer subkonta (IBAN)</string>
     <string name="payments_iban_copied">Numer subkonta skopiowany do schowka</string>
-    <string name="payments_schedule_heading">Harmonogram należności</string>
 <string name="payments_status_overdue_warn">Uwaga: Część rat jest po terminie płatności!</string>
     <string name="payments_status_all_paid" tools:ignore="UnusedResources">Wszystkie należności są opłacone na bieżąco.</string>
     <string name="payments_status_none_due">Brak kwot do zapłaty w pobranych ratach.</string>
@@ -450,6 +454,8 @@
     <string name="gpa_chip_ects_45">45 ECTS</string>
     <string name="gpa_chip_ects_60">60 ECTS (cały rok)</string>
 <string name="share_generated_by">Wygenerowano z aplikacji Vistula Checker</string>
+    <string name="grades_summary_help">Pomoc: statystyki ocen</string>
+    <string name="grades_semester_picker">%1$s ▾</string>
     <string name="grades_all_terms">Wszystkie semestry</string>
     <string name="grades_empty_title">Brak danych w tym zakresie</string>
     <string name="grades_share_subject">Wykaz ocen — Vistula USOS</string>
@@ -477,6 +483,8 @@
     <string name="account_widgets_heading">Widgety na ekranie głównym</string>
     <string name="account_widgets_desc">Dostępne są 2 interaktywne widgety na pulpit telefonu:\n1. Plan zajęć na dziś (najbliższe zajęcia, sala, czas, odliczanie)\n2. Karta Studenta i oceny (średnia ważona ECTS, status czesnego)\n\nAby je dodać, przytrzymaj palec na pustym miejscu ekranu głównego telefonu i wybierz „Widżety → Vistula”.</string>
 <string name="account_btn_open_usosapps">Otwórz USOSapps Vistuli</string>
+    <string name="account_student_number_copy">%1$s  📋</string>
+    <string name="account_email_line">✉ %1$s</string>
     <string name="account_program">🎓 Kierunek: %1$s</string>
     <string name="account_stage">📚 Etap: %1$s</string>
     <string name="account_thesis_header">PRACA DYPLOMOWA</string>
@@ -573,6 +581,11 @@
     <string name="tasks_chip_week">Najbliższe 7 dni</string>
     <string name="tasks_due_unknown">Brak poprawnego terminu</string>
     <string name="schedule_mode_week">Tydzień</string>
+    <string name="schedule_range_weekly">%1$s – %2$s</string>
+    <string name="schedule_range_days">%1$d–%2$s</string>
+    <string name="schedule_next_class_dated">%1$s (%2$s)</string>
+    <string name="schedule_add_task">Dodaj zadanie</string>
+    <string name="schedule_task_title">Zadanie: %1$s</string>
     <string name="schedule_previous_week">Poprzedni tydzień</string>
 <string name="schedule_day_label">Dzień</string>
 <string name="schedule_info_title">Informacje o planie</string>
@@ -621,6 +634,8 @@
     <string name="login_step_pin">Krok 2 z 2: wklej PIN ze strony USOS i połącz konto.</string>
     <string name="login_ready">Klucz jest gotowy. Krok 1 z 2: otwórz logowanie USOS.</string>
     <string name="login_setup">Jednorazowo dodaj klucz aplikacji poniżej. Następnie otwórz logowanie USOS.</string>
+    <string name="login_consumer_key" translatable="false">Consumer Key</string>
+    <string name="login_consumer_secret" translatable="false">Consumer Secret</string>
     <string name="login_key_required">Wpisz Consumer Key</string>
     <string name="login_secret_required">Wpisz Consumer Secret</string>
     <string name="attendance_type_required">Wybierz rodzaj zajęć</string>
@@ -659,6 +674,7 @@
     <string name="history_search_action">Szukaj zmian</string>
     <string name="history_clear_filter">Wyczyść filtr</string>
     <string name="grades_options">Opcje ocen</string>
+    <string name="grades_help_symbol" translatable="false">?</string>
     <string name="grades_search_action">Szukaj ocen</string>
     <string name="grades_data_status">Aktualność danych</string>
     <string name="grades_filter_type">Typ ocen</string>
@@ -671,4 +687,42 @@
     <string name="tasks_task_options">Opcje zadania: %1$s</string>
     <string name="tool_options">Opcje: %1$s</string>
     <string name="tool_api_methods">Metody API</string>
+    <string name="btn_reconnect">Zaloguj ponownie</string>
+    <plurals name="deadline_in_days">
+        <item quantity="one">Za %d dzień</item>
+        <item quantity="few">Za %d dni</item>
+        <item quantity="many">Za %d dni</item>
+        <item quantity="other">Za %d dnia</item>
+    </plurals>
+    <plurals name="deadline_overdue_days">
+        <item quantity="one">Zaległe %d dzień</item>
+        <item quantity="few">Zaległe %d dni</item>
+        <item quantity="many">Zaległe %d dni</item>
+        <item quantity="other">Zaległe %d dnia</item>
+    </plurals>
+    <string name="deadline_tomorrow">Jutro</string>
+    <string name="deadline_line">%1$s · %2$s</string>
+    <string name="deadline_exam_registration">Zapisy na egzamin: %s</string>
+    <string name="login_callback_ignored">Nie rozpoznano powrotu z logowania USOS. Wpisz PIN ręcznie.</string>
+    <string name="btn_paste_keys">Wklej klucz i zaloguj</string>
+    <string name="paste_keys_not_found">Nie znaleziono Consumer Key i Consumer Secret w schowku. Skopiuj oba ze strony USOSapps.</string>
+    <string name="payments_copy_account">Kopiuj numer konta</string>
+    <string name="payments_paid_group">Opłacone i anulowane</string>
+    <string name="payments_guide_title">Jak działają płatności</string>
+    <string name="connect_step_key">1. Klucz API (jednorazowo)</string>
+    <string name="connect_step_paste">Wklej posiadany klucz</string>
+    <string name="connect_step_login">2. Zaloguj się</string>
+    <string name="btn_auto_key">Pobierz klucz automatycznie</string>
+    <string name="auto_key_note">Twój e-mail trafia tylko do USOSapps Twojej uczelni, które wydaje klucz. Klucz zostaje w zaszyfrowanej pamięci telefonu.</string>
+    <string name="auto_key_email_hint">E-mail (do rejestracji klucza)</string>
+    <string name="auto_key_bad_email">Wpisz poprawny adres e-mail.</string>
+    <string name="auto_key_working">Rejestruję klucz w USOSapps…</string>
+    <string name="auto_key_failed">Nie udało się pobrać klucza: %1$s</string>
+    <string name="auto_key_unreachable">brak połączenia z USOSapps. Skorzystaj z ręcznych kroków poniżej.</string>
+    <string name="account_revoke_key_option">Odwołaj też mój klucz API w USOSapps (dostaniesz e-mail z potwierdzeniem)</string>
+    <string name="account_revoke_check_mail">Sprawdź skrzynkę e-mail: USOSapps przysłał link do potwierdzenia odwołania klucza.</string>
+    <string name="account_revoke_unknown">USOSapps nie zna już tego klucza — pewnie został odwołany.</string>
+    <string name="account_revoke_failed">Nie udało się odwołać klucza. Zrób to ręcznie na stronie USOSapps Developers.</string>
+    <string name="permissions_apply">Zastosuj i zaloguj ponownie</string>
+    <string name="login_manual_key">Wpisz klucz ręcznie (opcjonalnie)</string>
 </resources>

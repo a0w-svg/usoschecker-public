@@ -3,16 +3,19 @@ package pl.vistula.checker.ui
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isGone
 import androidx.core.view.isNotEmpty
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.view.Gravity
 import android.view.View
+import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.button.MaterialButton
+import android.widget.TextView
+import android.view.inputmethod.EditorInfo
+import android.view.LayoutInflater
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -38,6 +41,8 @@ import pl.vistula.checker.core.UsosParser
 class HistoryScreenController private constructor() {
 
     companion object {
+        private val LEADING_SYMBOLS = Regex("^[^\\p{L}]+")
+
         @JvmStatic
         fun render(
             activity: MainActivity,
@@ -85,32 +90,25 @@ class HistoryScreenController private constructor() {
                 activity.getString(R.string.history_chip_modified, countModified),
                 activity.getString(R.string.history_chip_removed, countRemoved)
             )
-            val header = LinearLayout(activity)
-            header.gravity = Gravity.CENTER_VERTICAL
-            for (i in 0..2) {
-                val button = UiHelper.button(activity, labels[i], { onFilterChanged.accept(filters[i]) }, false)
-                button.textSize = 12f
-                button.isSelected = filters[i] == filter
-                button.backgroundTintList = android.content.res.ColorStateList.valueOf(activity.getColor(
-                    if (button.isSelected) R.color.app_secondary_container else R.color.app_background))
-                button.setPadding(UiHelper.dp(activity, 4), UiHelper.dp(activity, 8), UiHelper.dp(activity, 4), UiHelper.dp(activity, 8))
-                header.addView(button, LinearLayout.LayoutParams(0, -2, 1f))
+            val screen = LayoutInflater.from(activity).inflate(R.layout.screen_history, content, false)
+            content.addView(screen)
+            val chips = intArrayOf(R.id.history_chip_0, R.id.history_chip_1, R.id.history_chip_2)
+            for (i in chips.indices) {
+                screen.findViewById<MaterialButton>(chips[i]).apply {
+                    text = labels[i]
+                    isSelected = filters[i] == filter
+                    setOnClickListener { onFilterChanged.accept(filters[i]) }
+                }
             }
-            val more = ScheduleScreenController.headerIcon(activity, R.drawable.ic_schedule_more) {}
-            more.id = R.id.history_more
-            more.contentDescription = activity.getString(R.string.history_options)
-            header.addView(more, LinearLayout.LayoutParams(UiHelper.dp(activity, 56), -2))
-            content.addView(header)
             if (filter !in filters.take(3)) {
-                for (i in filters.indices) {
-                    if (filters[i] == filter) {
-                        val activeFilter = ScheduleScreenController.headerButton(activity, "${labels[i]} ×") {
-                            onFilterChanged.accept(HistoryUiState.ALL)
-                        }
-                        activeFilter.textSize = 14f
-                        activeFilter.isSelected = true
-                        activeFilter.contentDescription = "${labels[i]}. ${activity.getString(R.string.history_clear_filter)}"
-                        content.addView(activeFilter)
+                val index = filters.indexOf(filter)
+                if (index >= 0) {
+                    screen.findViewById<MaterialButton>(R.id.history_active_filter).apply {
+                        text = activity.getString(R.string.tasks_filter_active, labels[index])
+                        contentDescription = "${labels[index]}. ${activity.getString(R.string.history_clear_filter)}"
+                        isSelected = true
+                        visibility = View.VISIBLE
+                        setOnClickListener { onFilterChanged.accept(HistoryUiState.ALL) }
                     }
                 }
             }
@@ -122,16 +120,22 @@ class HistoryScreenController private constructor() {
                 }
             }
 
-            val search = UiHelper.searchField(
-                activity,
-                content,
-                activity.getString(R.string.history_search_hint),
-                query,
-                null
-            ) { onQueryChanged.accept("") }
-
-            val searchBox = content.getChildAt(content.childCount - 1)
+            val searchBox = screen.findViewById<TextInputLayout>(R.id.history_search)
+            searchBox.hint = activity.getString(R.string.history_search_hint)
+            val search = searchBox.findViewById<TextInputEditText>(R.id.field_input)
+            search.setText(query)
             searchBox.visibility = if (query.isEmpty()) View.GONE else View.VISIBLE
+            searchBox.setEndIconOnClickListener {
+                search.setText("")
+                onQueryChanged.accept("")
+            }
+            search.setOnEditorActionListener { _, action, _ ->
+                if (action != EditorInfo.IME_ACTION_SEARCH) return@setOnEditorActionListener false
+                activity.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(search.windowToken, 0)
+                search.clearFocus()
+                true
+            }
+            val more = screen.findViewById<View>(R.id.history_more)
             more.setOnClickListener {
                 val menu = PopupMenu(activity, more)
                 for (i in filters.indices) {
@@ -149,10 +153,7 @@ class HistoryScreenController private constructor() {
                         id == 7 -> {
                             searchBox.visibility = View.VISIBLE
                             search.requestFocus()
-                            search.post {
-                                (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                                    .showSoftInput(search, 0)
-                            }
+                            search.post { activity.getSystemService(InputMethodManager::class.java)?.showSoftInput(search, 0) }
                         }
                         id == 8 -> onSimulate?.run()
                     }
@@ -161,9 +162,7 @@ class HistoryScreenController private constructor() {
                 menu.show()
             }
 
-            val list = LinearLayout(activity)
-            list.orientation = LinearLayout.VERTICAL
-            content.addView(list)
+            val list = screen.findViewById<LinearLayout>(R.id.history_list)
 
             val populate = Runnable {
                 list.removeAllViews()
@@ -230,52 +229,18 @@ class HistoryScreenController private constructor() {
                 }
 
                 if (count == 0) {
-                    val box = UiHelper.card(activity, list, Color.WHITE)
-                    UiHelper.add(
-                        activity,
-                        box,
-                        if (currentQuery.trim().isEmpty()) {
-                            activity.getString(R.string.history_empty_title)
-                        } else {
-                            activity.getString(R.string.history_no_match_title)
-                        },
-                        17,
-                        UiHelper.INK,
-                        true
+                    val noQuery = currentQuery.trim().isEmpty()
+                    val box = UiHelper.empty(
+                        activity, list,
+                        activity.getString(if (noQuery) R.string.history_empty_title else R.string.history_no_match_title),
+                        activity.getString(if (noQuery) R.string.history_empty_desc else R.string.history_no_match_desc)
                     )
-                    UiHelper.add(
-                        activity,
-                        box,
-                        if (currentQuery.trim().isEmpty()) {
-                            activity.getString(R.string.history_empty_desc)
-                        } else {
-                            activity.getString(R.string.history_no_match_desc)
-                        },
-                        14,
-                        UiHelper.MUTED,
-                        false
-                    )
-                    if (currentQuery.trim().isNotEmpty()) {
-                        box.addView(
-                            UiHelper.button(
-                                activity,
-                                activity.getString(R.string.btn_clear_search),
-                                {
-                                    search.setText("")
-                                    onQueryChanged.accept("")
-                                },
-                                false
-                            )
-                        )
+                    if (!noQuery) {
+                        box.addView(UiHelper.clearSearchButton(activity, search, onQueryChanged))
                     } else if (filter != HistoryUiState.ALL) {
-                        box.addView(
-                            UiHelper.button(
-                                activity,
-                                activity.getString(R.string.history_show_all),
-                                { onFilterChanged.accept(HistoryUiState.ALL) },
-                                false
-                            )
-                        )
+                        box.addView(UiHelper.button(activity, activity.getString(R.string.history_show_all), {
+                            onFilterChanged.accept(HistoryUiState.ALL)
+                        }, false))
                     } else if (demo && onSimulate != null) {
                         box.addView(UiHelper.button(activity, activity.getString(R.string.history_btn_simulate), onSimulate, true))
                     }
@@ -457,40 +422,36 @@ class HistoryScreenController private constructor() {
 
         @JvmStatic
         fun renderChangeRow(activity: MainActivity, parent: LinearLayout, change: Change) {
-            val row = LinearLayout(activity).apply {
-                gravity = Gravity.CENTER_VERTICAL
-                minimumHeight = UiHelper.dp(activity, 64)
-                setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 14), UiHelper.dp(activity, 16), UiHelper.dp(activity, 14))
-                isClickable = true; isFocusable = true
-                activity.withStyledAttributes(attrs = intArrayOf(android.R.attr.selectableItemBackground)) { foreground = getDrawable(0) }
-                setOnClickListener { showChangeDetails(activity, change) }
-            }
-            val text = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
-            text.addView(UiHelper.text(activity, change.title, 15, UiHelper.INK, true))
-            val diffs = getDiffSummaryList(activity, change).map { it.replaceFirst(Regex("^[^\\p{L}]+"), "") }
+            val row = LayoutInflater.from(activity).inflate(R.layout.item_history_row, parent, false)
+            val diffs = getDiffSummaryList(activity, change).map { it.replaceFirst(LEADING_SYMBOLS, "") }
             val firstDiff = diffs.firstOrNull().orEmpty()
-            val kind = firstDiff.substringBefore(":").ifEmpty { activity.getString(when (change.action) {
-                "Dodano" -> R.string.history_action_added
-                "Usunięto" -> R.string.history_action_removed
-                else -> R.string.history_action_modified
-            }) }
+            val kind = firstDiff.substringBefore(":").ifEmpty {
+                activity.getString(
+                    when (change.action) {
+                        "Dodano" -> R.string.history_action_added
+                        "Usunięto" -> R.string.history_action_removed
+                        else -> R.string.history_action_modified
+                    }
+                )
+            }
             val detail = listOf(kind, formatRelativeTime(activity, change.effectiveTimestamp())).filter { it.isNotEmpty() }.joinToString(" · ")
-            text.addView(UiHelper.text(activity, detail, 13, UiHelper.MUTED, false))
-            row.addView(text, LinearLayout.LayoutParams(0, -2, 1f))
             val value = if (firstDiff.contains(":")) firstDiff.substringAfter(":").trim()
                 else if (change.kind == "ocena") change.after.substringBefore(" · ") else ""
-            if (value.isNotEmpty()) row.addView(UiHelper.text(activity, value, 15, UiHelper.INK, true).apply {
-                maxWidth = activity.resources.displayMetrics.widthPixels / 3
-                gravity = Gravity.END
-            }, LinearLayout.LayoutParams(-2, -2).apply { marginStart = UiHelper.dp(activity, 12) })
+
+            row.findViewById<TextView>(R.id.history_row_title).text = change.title
+            row.findViewById<TextView>(R.id.history_row_detail).text = detail
+            row.findViewById<TextView>(R.id.history_row_value).apply {
+                text = value
+                visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+            }
             row.contentDescription = (listOf(change.title, detail) + diffs).joinToString(". ")
-            ViewCompat.setScreenReaderFocusable(row, true)
-            parent.addView(row, LinearLayout.LayoutParams(-1, -2))
+            row.setOnClickListener { showChangeDetails(activity, change) }
+            parent.addView(row)
         }
 
         @JvmStatic
         fun renderChangeCard(activity: MainActivity, parent: LinearLayout, c: Change) {
-            val box = UiHelper.card(activity, parent, Color.WHITE)
+            val box = UiHelper.card(activity, parent)
             box.isClickable = true
             box.isFocusable = true
 
@@ -508,15 +469,15 @@ class HistoryScreenController private constructor() {
                 box,
                 "$category · $action" + if (time.isEmpty()) "" else " · $time",
                 12,
-                UiHelper.MUTED,
+                Tone.MUTED,
                 false
             )
-            UiHelper.add(activity, box, c.title, 17, UiHelper.INK, true)
+            UiHelper.add(activity, box, c.title, 17, Tone.INK, true)
 
             val diffs = getDiffSummaryList(activity, c)
             if (c.action == "Zmieniono" && diffs.isNotEmpty()) {
                 for (i in 0 until min(3, diffs.size)) {
-                    UiHelper.add(activity, box, diffs[i].replaceFirst(Regex("^[^\\p{L}]+"), ""), 14, UiHelper.INK, false)
+                    UiHelper.add(activity, box, diffs[i].replaceFirst(LEADING_SYMBOLS, ""), 14, Tone.INK, false)
                 }
             } else {
                 val value = when (c.action) {
@@ -525,12 +486,12 @@ class HistoryScreenController private constructor() {
                     else -> if (c.after.isEmpty()) c.before else c.after
                 }
                 if (value.isNotEmpty()) {
-                    UiHelper.add(activity, box, value, 14, UiHelper.INK, false)
+                    UiHelper.add(activity, box, value, 14, Tone.INK, false)
                 }
             }
             val eventDate = eventDateDescription(activity, c)
             if (eventDate.isNotEmpty()) {
-                UiHelper.add(activity, box, eventDate, 12, UiHelper.MUTED, false)
+                UiHelper.add(activity, box, eventDate, 12, Tone.MUTED, false)
             }
             ViewCompat.setScreenReaderFocusable(box, true)
             ViewCompat.replaceAccessibilityAction(
@@ -546,101 +507,64 @@ class HistoryScreenController private constructor() {
 
         @JvmStatic
         fun showChangeDetails(activity: MainActivity, c: Change) {
-            val box = LinearLayout(activity)
-            box.orientation = LinearLayout.VERTICAL
-            box.setPadding(
-                UiHelper.dp(activity, 24),
-                UiHelper.dp(activity, 8),
-                UiHelper.dp(activity, 24),
-                UiHelper.dp(activity, 8)
-            )
-
-            UiHelper.add(activity, box, c.title, 20, UiHelper.INK, true)
-            UiHelper.add(activity, box, "Akcja: ${c.action} · Typ: ${c.kind}", 13, UiHelper.GREEN, true)
-
+            val box = LayoutInflater.from(activity).inflate(R.layout.dialog_history_details, LinearLayout(activity), false) as LinearLayout
+            fun show(id: Int, value: String) = box.findViewById<TextView>(id).apply {
+                text = value
+                visibility = if (value.isEmpty()) View.GONE else View.VISIBLE
+            }
+            show(R.id.history_detail_title, c.title)
+            show(R.id.history_detail_kind, activity.getString(R.string.history_detail_kind, c.action, c.kind))
             val eventDateText = eventDateDescription(activity, c)
-            if (eventDateText.isNotEmpty()) {
-                UiHelper.add(activity, box, "📅 $eventDateText", 14, UiHelper.GREEN, true)
-            }
-
-            if (c.before.isNotEmpty()) {
-                UiHelper.add(activity, box, activity.getString(R.string.history_value_before, c.before), 14, UiHelper.MUTED, false)
-            }
-            if (c.after.isNotEmpty()) {
-                UiHelper.add(activity, box, activity.getString(R.string.history_value_after, c.after), 14, UiHelper.INK, true)
-            }
+            show(R.id.history_detail_event, if (eventDateText.isEmpty()) "" else activity.getString(R.string.history_detail_event, eventDateText))
+            show(R.id.history_detail_before, if (c.before.isEmpty()) "" else activity.getString(R.string.history_value_before, c.before))
+            show(R.id.history_detail_after, if (c.after.isEmpty()) "" else activity.getString(R.string.history_value_after, c.after))
             val metadataDetails = changeMetadata(activity, c)
-            if (metadataDetails.isNotEmpty()) {
-                UiHelper.add(activity, box, metadataDetails, 14, UiHelper.INK, false)
-            }
+            show(R.id.history_detail_metadata, metadataDetails)
 
-            val detailsLocale = Language.currentLocale(activity)
             val detectedTime = if (c.detectedAt > 0) {
                 Instant.ofEpochMilli(c.detectedAt).atZone(UsosClient.ZONE)
-                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", detailsLocale))
+                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss", Language.currentLocale(activity)))
             } else {
                 c.date
             }
-            UiHelper.add(activity, box, activity.getString(R.string.history_detected_prefix, detectedTime), 12, UiHelper.MUTED, false)
-            if (c.sourceTime.isNotEmpty()) {
-                UiHelper.add(activity, box, activity.getString(R.string.history_server_time, c.sourceTime), 12, UiHelper.MUTED, false)
-            }
+            show(R.id.history_detail_detected, activity.getString(R.string.history_detected_prefix, detectedTime))
+            show(R.id.history_detail_server, if (c.sourceTime.isEmpty()) "" else activity.getString(R.string.history_server_time, c.sourceTime))
 
             val fullShareText = buildShareText(activity, c, eventDateText, metadataDetails, detectedTime)
-            box.addView(
-                UiHelper.button(
-                    activity,
-                    "📤 ${activity.getString(R.string.share_change_btn)}",
-                    {
-                        val share = Intent(Intent.ACTION_SEND).setType("text/plain")
-                        share.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.history_share_subject, c.title, c.action))
-                        share.putExtra(Intent.EXTRA_TEXT, fullShareText)
-                        try {
-                            activity.startActivity(Intent.createChooser(share, activity.getString(R.string.share_change_title)))
-                        } catch (_: Exception) {
-                            val cb = activity.getSystemService(ClipboardManager::class.java)
-                            if (cb != null) {
-                                cb.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.history_clipboard_label), fullShareText))
-                                Toast.makeText(activity, R.string.toast_history_details_copied, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    },
-                    false
-                )
-            )
-
+            box.findViewById<MaterialButton>(R.id.history_detail_share).apply {
+                text = activity.getString(R.string.history_detail_share, activity.getString(R.string.share_change_btn))
+                setOnClickListener {
+                    val share = Intent(Intent.ACTION_SEND).setType("text/plain")
+                    share.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.history_share_subject, c.title, c.action))
+                    share.putExtra(Intent.EXTRA_TEXT, fullShareText)
+                    try {
+                        activity.startActivity(Intent.createChooser(share, activity.getString(R.string.share_change_title)))
+                    } catch (_: Exception) {
+                        copyDetails(activity, fullShareText)
+                    }
+                }
+            }
             try {
-                val allData = UiHelper.text(activity, c.json().toString(2), 12, UiHelper.INK, false)
-                allData.setTextIsSelectable(true)
-                allData.visibility = View.GONE
-                box.addView(
-                    UiHelper.button(
-                        activity,
-                        activity.getString(R.string.grades_full_data),
-                        { allData.visibility = if (allData.isGone) View.VISIBLE else View.GONE },
-                        false
-                    )
-                )
-                box.addView(allData)
+                val allData = box.findViewById<TextView>(R.id.history_detail_all)
+                allData.text = c.json().toString(2)
+                box.findViewById<View>(R.id.history_detail_toggle).apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener { allData.visibility = if (allData.isGone) View.VISIBLE else View.GONE }
+                }
             } catch (e: Exception) {
                 pl.vistula.checker.Diagnostics.swallowed("HistoryScreenController", e)
             }
 
-            val scroll = UiHelper.dialogScroll(activity, box)
-
             MaterialAlertDialogBuilder(activity)
                 .setTitle(activity.getString(R.string.history_details_title))
-                .setView(scroll)
+                .setView(UiHelper.dialogScroll(activity, box))
                 .setPositiveButton(activity.getString(R.string.btn_close), null)
-                .setNeutralButton(activity.getString(R.string.history_details_copy)) { _, _ ->
-                    val cb = activity.getSystemService(ClipboardManager::class.java)
-                    if (cb != null) {
-                        cb.setPrimaryClip(UiHelper.privateClip(activity.getString(R.string.history_clipboard_label), fullShareText))
-                        Toast.makeText(activity, R.string.toast_history_details_copied, Toast.LENGTH_SHORT).show()
-                    }
-                }
+                .setNeutralButton(activity.getString(R.string.history_details_copy)) { _, _ -> copyDetails(activity, fullShareText) }
                 .show()
         }
+
+        private fun copyDetails(activity: MainActivity, text: String) =
+            UiHelper.copyToClipboard(activity, activity.getString(R.string.history_clipboard_label), text, R.string.toast_history_details_copied)
 
         private fun buildShareText(
             activity: MainActivity,

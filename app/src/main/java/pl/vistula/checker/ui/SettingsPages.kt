@@ -1,8 +1,10 @@
 package pl.vistula.checker.ui
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import com.google.android.material.button.MaterialButton
 import pl.vistula.checker.MainActivity
 import pl.vistula.checker.R
 
@@ -11,18 +13,21 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
     private data class Page(val key: String, val title: Int, val body: LinearLayout, val row: View)
     private val pages = mutableListOf<Page>()
 
+    private var header: View? = null
+
+    /** Identity card shown above the page list; hidden once a single page is open. */
+    fun header(view: View) {
+        header = view
+        content.addView(view)
+    }
+
     fun page(key: String, title: Int, primary: Boolean = false): LinearLayout {
-        val row = UiHelper.button(activity, activity.getString(title), { activity.openAccountPage(key) }, primary)
-        if (!primary) {
-            row.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.TRANSPARENT)
-            row.gravity = android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL
-            row.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_tool_next, 0)
-        }
+        val inflater = LayoutInflater.from(activity)
+        val row = inflater.inflate(if (primary) R.layout.view_button_primary else R.layout.item_settings_page, content, false) as MaterialButton
+        row.text = activity.getString(title)
+        row.setOnClickListener { activity.openAccountPage(key) }
         content.addView(row)
-        val body = LinearLayout(activity).apply {
-            orientation = LinearLayout.VERTICAL
-            visibility = View.GONE
-        }
+        val body = inflater.inflate(R.layout.view_settings_body, content, false) as LinearLayout
         content.addView(body)
         pages.add(Page(key, title, body, row))
         return body
@@ -31,9 +36,11 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
     fun finish(preferred: String? = null) {
         val selected = pages.firstOrNull { it.key == (activity.accountPage() ?: preferred) }
         if (selected == null) {
-            val order = listOf("settings.connection", "settings.account", "settings.profile", "settings.campus",
+            val order = listOf("settings.connection", "settings.account", "settings.access", "settings.profile", "settings.campus",
                 "settings.sync", "settings.notifications", "settings.appearance", "settings.term", "settings.widgets", "settings.about")
+            header?.let { content.removeView(it) }
             for (page in pages) { content.removeView(page.row); content.removeView(page.body) }
+            header?.let { content.addView(it) }
             for (page in pages.sortedBy { order.indexOf(it.key) }) {
                 content.addView(page.row)
                 content.addView(page.body)
@@ -46,7 +53,7 @@ class SettingsPages(private val activity: MainActivity, private val content: Lin
         ToolScreenUi.header(activity, content, selected.title, null)
         content.addView(UiHelper.actionRow(activity, activity.getString(R.string.settings_back), {
             activity.openAccountPage(null)
-        }, false))
+        }))
         selected.body.visibility = View.VISIBLE
         content.addView(selected.body)
     }

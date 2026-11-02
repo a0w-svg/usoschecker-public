@@ -35,7 +35,7 @@ class ReleaseUpdatesDialog private constructor() {
             layout.orientation = LinearLayout.VERTICAL
             val padding = (24 * activity.resources.displayMetrics.density).roundToInt()
             layout.setPadding(padding, 0, padding, padding)
-            val status = UiHelper.text(activity, "", 15, UiHelper.INK, false)
+            val status = UiHelper.text(activity, "", 15, Tone.INK, false)
             layout.addView(status)
             status.setTextIsSelectable(true)
             var latest: AppRelease? = ReleaseUpdates.cached(application)
@@ -94,16 +94,16 @@ class ReleaseUpdatesDialog private constructor() {
                     false
                 )
             )
-            UiHelper.note(activity, layout, activity.getString(R.string.updates_background_note), UiHelper.MUTED)
+            UiHelper.note(activity, layout, activity.getString(R.string.updates_background_note), Tone.MUTED)
             UiHelper.add(
                 activity,
                 layout,
                 activity.getString(R.string.updates_installed_notes, BuildConfig.VERSION_NAME),
                 16,
-                UiHelper.INK,
+                Tone.INK,
                 true
             )
-            UiHelper.note(activity, layout, installedNotes(activity), UiHelper.MUTED)
+            UiHelper.note(activity, layout, installedNotes(activity), Tone.MUTED)
             val scroll = ScrollView(activity)
             scroll.addView(layout)
             val dialog = MaterialAlertDialogBuilder(activity)

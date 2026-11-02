@@ -374,7 +374,7 @@ class AccountScreenController private constructor() {
                 }
             }
             UiHelper.watchSearch(scopes) { value ->
-                prefs.edit().putString("desired", value.trim()).apply()
+                prefs.edit { putString("desired", value.trim()) }
                 refreshApply()
                 updatingChoices = true
                 for ((feature, choice) in choices) {

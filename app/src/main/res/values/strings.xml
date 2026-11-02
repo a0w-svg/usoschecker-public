@@ -710,8 +710,8 @@
     <string name="payments_paid_group">Opłacone i anulowane</string>
     <string name="payments_guide_title">Jak działają płatności</string>
     <string name="connect_step_key">1. Klucz API (jednorazowo)</string>
-    <string name="connect_step_paste">2. Wklej klucz</string>
-    <string name="connect_step_login">3. Zaloguj się</string>
+    <string name="connect_step_paste">Wklej posiadany klucz</string>
+    <string name="connect_step_login">2. Zaloguj się</string>
     <string name="btn_auto_key">Pobierz klucz automatycznie</string>
     <string name="auto_key_note">Twój e-mail trafia tylko do USOSapps Twojej uczelni, które wydaje klucz. Klucz zostaje w zaszyfrowanej pamięci telefonu.</string>
     <string name="auto_key_email_hint">E-mail (do rejestracji klucza)</string>
@@ -724,4 +724,5 @@
     <string name="account_revoke_unknown">USOSapps nie zna już tego klucza — pewnie został odwołany.</string>
     <string name="account_revoke_failed">Nie udało się odwołać klucza. Zrób to ręcznie na stronie USOSapps Developers.</string>
     <string name="permissions_apply">Zastosuj i zaloguj ponownie</string>
+    <string name="login_manual_key">Wpisz klucz ręcznie (opcjonalnie)</string>
 </resources>

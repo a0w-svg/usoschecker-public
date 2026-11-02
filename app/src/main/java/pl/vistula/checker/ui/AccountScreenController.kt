@@ -427,14 +427,17 @@ class AccountScreenController private constructor() {
             )
             val status = view.findViewById<View>(R.id.connection_status)
             val setup = view.findViewById<View>(R.id.connection_setup)
+            val keyStep = view.findViewById<View>(R.id.connection_key_step)
             val advanced = view.findViewById<View>(R.id.connection_advanced)
             setup.visibility = if (pending) View.GONE else View.VISIBLE
-            advanced.visibility = if (credentialsReady) View.GONE else View.VISIBLE
+            // A saved or built-in key makes step 1 pointless; manual entry is always optional and starts collapsed.
+            keyStep.visibility = if (credentialsReady) View.GONE else View.VISIBLE
+            advanced.visibility = View.GONE
             status.visibility = if (pending || credentialsReady) View.VISIBLE else View.GONE
+            view.findViewById<TextView>(R.id.connection_toggle).setText(if (pending) R.string.login_settings else R.string.login_manual_key)
             view.findViewById<View>(R.id.connection_toggle).setOnClickListener {
                 if (setup.isGone) {
                     setup.visibility = View.VISIBLE
-                    advanced.visibility = View.VISIBLE
                 } else {
                     advanced.visibility = if (advanced.isVisible) View.GONE else View.VISIBLE
                 }

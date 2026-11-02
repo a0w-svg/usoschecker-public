@@ -705,8 +705,8 @@
     <string name="payments_paid_group">Сплачені та скасовані</string>
     <string name="payments_guide_title">Як працюють платежі</string>
     <string name="connect_step_key">1. Ключ API (один раз)</string>
-    <string name="connect_step_paste">2. Вставте ключ</string>
-    <string name="connect_step_login">3. Увійдіть</string>
+    <string name="connect_step_paste">Вставте наявний ключ</string>
+    <string name="connect_step_login">2. Увійдіть</string>
     <string name="btn_auto_key">Отримати ключ автоматично</string>
     <string name="auto_key_note">Ваша пошта надходить лише до USOSapps вашого університету, який видає ключ. Ключ лишається в зашифрованому сховищі телефону.</string>
     <string name="auto_key_email_hint">Email (для реєстрації ключа)</string>
@@ -719,4 +719,5 @@
     <string name="account_revoke_unknown">USOSapps більше не знає цього ключа — ймовірно, його вже відкликано.</string>
     <string name="account_revoke_failed">Не вдалося відкликати ключ. Зробіть це вручну на сторінці USOSapps Developers.</string>
     <string name="permissions_apply">Застосувати та увійти знову</string>
+    <string name="login_manual_key">Ввести ключ вручну (необов’язково)</string>
 </resources>

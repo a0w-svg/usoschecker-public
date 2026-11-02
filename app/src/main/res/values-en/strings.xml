@@ -699,8 +699,8 @@ Last download: %3$s</string>
     <string name="payments_paid_group">Paid and cancelled</string>
     <string name="payments_guide_title">How payments work</string>
     <string name="connect_step_key">1. API key (one time)</string>
-    <string name="connect_step_paste">2. Paste the key</string>
-    <string name="connect_step_login">3. Sign in</string>
+    <string name="connect_step_paste">Paste a key you already have</string>
+    <string name="connect_step_login">2. Sign in</string>
     <string name="btn_auto_key">Get the key automatically</string>
     <string name="auto_key_note">Your email goes only to your university’s USOSapps, which issues the key. The key stays in this phone’s encrypted storage.</string>
     <string name="auto_key_email_hint">Email (for the key registration)</string>
@@ -713,4 +713,5 @@ Last download: %3$s</string>
     <string name="account_revoke_unknown">USOSapps no longer knows this key — it was probably already revoked.</string>
     <string name="account_revoke_failed">Could not revoke the key. Do it manually on the USOSapps Developers page.</string>
     <string name="permissions_apply">Apply and sign in again</string>
+    <string name="login_manual_key">Enter a key manually (optional)</string>
 </resources>

@@ -47,8 +47,6 @@ class AccountProfileScreenTest {
             assertTrue(content().findViewById<TextView>(R.id.profile_student_number).text.contains("34589"))
             assertEquals(View.GONE, content().findViewById<View>(R.id.profile_thesis_unavailable).visibility)
         }
-        main { rule.activity.openAccountPage("settings.access") }
-        main { assertTrue(content().findViewById<LinearLayout>(R.id.connection_choices).childCount >= 6) }
         SystemClock.sleep(400)
         val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
         assertNotNull(bitmap)
@@ -80,6 +78,8 @@ class AccountProfileScreenTest {
                 assertNotNull(keyLayout.error)
             }
         }
+        main { rule.activity.openAccountPage("settings.access") }
+        main { assertTrue(content().findViewById<LinearLayout>(R.id.connection_choices).childCount >= 6) }
         SystemClock.sleep(400)
         val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
         assertNotNull(bitmap)

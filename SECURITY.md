@@ -132,8 +132,8 @@ statusu wiadomości. Do stanu konta trafiają zminimalizowane dane: zadania, lis
 (postęp, ocena), 20 ostatnich wiadomości (nadawca, temat, data) i wpisy w historii zmian.
 „Wyloguj z Platona” oraz odłączenie USOS usuwają link, znaczniki synchronizacji i ciasteczka
 wbudowanej przeglądarki (również sesję Microsoft w niej). Powiadomienia z Platona mają treść
-prywatną na ekranie blokady. W kompilacjach debug WebView może być sprawdzany przez DevTools;
-wydania release tego nie włączają.
+prywatną na ekranie blokady. Debugowanie zawartości WebView (DevTools) nie jest włączane w żadnej
+kompilacji.
 
 ## Tryb wykładowcy i eksperymentalny zapis ocen
 

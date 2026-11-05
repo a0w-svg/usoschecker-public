@@ -44,7 +44,6 @@ class PlatonLoginActivity : AppCompatActivity() {
             isIndeterminate = true
             visibility = View.GONE
         }
-        if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
         web = WebView(this).apply {
             layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
             settings.apply {
@@ -68,11 +67,7 @@ class PlatonLoginActivity : AppCompatActivity() {
                 override fun onPageFinished(view: WebView, url: String?) {
                     loadBar.visibility = View.GONE
                     CookieManager.getInstance().flush()
-                    if (signedIn(url)) {
-                        // Debug builds only: lets a developer inspect Platon pages with the signed-in WebView.
-                        val keep = BuildConfig.DEBUG && getSharedPreferences("student_tools", MODE_PRIVATE).getBoolean("platonKeepOpen", false)
-                        if (!keep) done()
-                    }
+                    if (signedIn(url)) done()
                     else if (!casTried && isPlatonLoginForm(url)) {
                         // Not signed in: go straight to the university (CAS / Microsoft) sign-in, once.
                         casTried = true

@@ -22,6 +22,12 @@ class SyncWorker(context: Context, params: WorkerParameters) : Worker(context, p
         return try {
             val context = applicationContext
             Repository(context).syncAndNotify(false, Consumer {})
+            try {
+                TaskDeadlineReminder.notifyIfDue(context, Repository(context).read().optJSONArray("tasks"))
+            } catch (e: Exception) {
+                Diagnostics.swallowed("SyncWorker", e)
+            }
+            PlatonRunner.runInBackground(context)
             ClassReminderReceiver.scheduleNext(context)
             TodayScheduleWidget.updateAll(context)
             QuickStatusWidget.updateAll(context)
@@ -39,7 +45,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : Worker(context, p
         @JvmStatic
         fun schedule(context: Context, minutes: Long) {
             val work = PeriodicWorkRequest.Builder(SyncWorker::class.java, minutes, TimeUnit.MINUTES)
-                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).setRequiresBatteryNotLow(true).build())
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
                 .build()
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.UPDATE, work)

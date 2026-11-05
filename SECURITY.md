@@ -119,6 +119,22 @@ Drugie uruchomienie desktopu nie otwiera tego samego magazynu: blokada instancji
 jest utrzymywana przez cały czas życia procesu, również podczas jego zamykania.
 Chroni to operacje konta przed wzajemnym nadpisaniem przez dwie aplikacje.
 
+## Platon (zadania, kursy, wiadomości)
+
+Platon nie przyjmuje tokenów USOS ani kluczy aplikacji. Logowanie odbywa się w wbudowanym
+WebView z ograniczeniem do hostów uczelni i Microsoft (HTTPS), z `FLAG_SECURE`; aplikacja nie
+widzi ani nie zapisuje hasła. Sesja to ciasteczka WebView; `PlatonClient` dołącza je wyłącznie do
+żądań HTTPS do `platon.vistula.edu.pl`, nie podąża za przekierowaniami poza ten host (traktuje je
+jako wygasłą sesję) i ogranicza rozmiar odpowiedzi. Odnawianie sesji w tle używa ukrytego WebView
+i istniejącej sesji Microsoft; po porażce aplikacja prosi o logowanie. Aplikacja tylko czyta strony
+(GET oraz formularze listujące POST z tokenem anty-CSRF); nie wysyła plików, nie zmienia ocen ani
+statusu wiadomości. Do stanu konta trafiają zminimalizowane dane: zadania, lista kursów
+(postęp, ocena), 20 ostatnich wiadomości (nadawca, temat, data) i wpisy w historii zmian.
+„Wyloguj z Platona” oraz odłączenie USOS usuwają link, znaczniki synchronizacji i ciasteczka
+wbudowanej przeglądarki (również sesję Microsoft w niej). Powiadomienia z Platona mają treść
+prywatną na ekranie blokady. Debugowanie zawartości WebView (DevTools) nie jest włączane w żadnej
+kompilacji.
+
 ## Tryb wykładowcy i eksperymentalny zapis ocen
 
 Tryb konta (`STUDENT`, `LECTURER`, `BOTH`) jest wykrywany automatycznie na podstawie

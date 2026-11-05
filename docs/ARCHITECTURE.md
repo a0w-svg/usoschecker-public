@@ -31,6 +31,15 @@ Rule of thumb: put logic that needs no Android classes in `shared/.../core` so i
 3. Add a branch in `MainActivity.render()` and, if it has filters or a search box, a `XUiState` class with `save` / `restore`.
 4. Add strings to `values/`, `values-en/` and `values-uk/`.
 
+## Platon integration
+
+Platon has no public API, so the app reads its HTML with the session of an in-app WebView.
+
+- `PlatonLoginActivity` signs the student in (CAS/Microsoft or local account) and closes itself when a signed-in page appears. `PlatonSession` renews an expired session silently in a hidden WebView through the Microsoft session.
+- `PlatonClient` fetches pages (and POSTs list forms) with the WebView cookie, only over HTTPS to `platon.vistula.edu.pl`; off-site redirects count as an expired session.
+- `PlatonCrawler`, `PlatonTaskParser` and `PlatonSync` (`shared/.../core`) turn pages into tasks, courses and messages and merge them into the task list without losing the student's edits. They are pure JVM and covered by `PlatonSyncTest`.
+- `PlatonRunner` (app) applies a crawl to the state, writes `platonCourses`, `platonMessages` and Changes-feed entries (kind `platon`), and sends notifications. `SyncWorker` calls it in the background; `MainActivity` calls it for manual and automatic syncs.
+
 ## Compose UI (shared)
 
 Files in `shared/.../ui/compose` are split by section. Text goes through `val tr = Translator(language)` and is called as `tr("pl", "en", "uk")`. Larger screens live in their own file (for example `LecturerWriteCards.kt`, `StaffDirectorySection.kt`, `AcademicExtrasSection.kt`).

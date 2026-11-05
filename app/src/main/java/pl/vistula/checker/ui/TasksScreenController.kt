@@ -39,6 +39,16 @@ class TasksScreenController private constructor() {
     interface TaskCallback {
         fun onSaveTask(task: JSONObject)
         fun onMutateTask(id: String, remove: Boolean)
+        /** Signs in to Platon (WebView) and chooses the page that lists assignments. */
+        fun onPlatonConnect() {}
+        /** Re-reads the chosen Platon page and merges its assignments into the task list. */
+        fun onPlatonSync() {}
+        /** Shows progress and grade of the student's current Platon courses. */
+        fun onPlatonCourses() {}
+        /** Shows the latest Platon inbox messages, unread first marked. */
+        fun onPlatonMessages() {}
+        /** Signs out of Platon on this device and drops cached courses and messages. */
+        fun onPlatonDisconnect() {}
     }
 
     companion object {
@@ -61,8 +71,22 @@ class TasksScreenController private constructor() {
             val screen = LayoutInflater.from(activity).inflate(R.layout.screen_tasks, content, false)
             content.addView(screen)
 
-            screen.findViewById<TextView>(R.id.tasks_summary).text =
-                activity.getString(R.string.tasks_summary, counts.pending, counts.done)
+            val prefs = activity.getSharedPreferences("student_tools", android.content.Context.MODE_PRIVATE)
+            val extra = ArrayList<String>()
+            val figures = ArrayList<String>()
+            if (rows.length() > 0) figures.add(activity.getString(R.string.tasks_summary_progress, TaskTools.completionPercent(rows)))
+            if (counts.overdue > 0) figures.add(activity.getString(R.string.tasks_summary_overdue, counts.overdue))
+            if (figures.isNotEmpty()) extra.add(figures.joinToString(" · "))
+            val syncedAt = prefs.getLong("platonSyncedAt", 0L)
+            if (syncedAt > 0) extra.add(activity.getString(R.string.tasks_platon_last_sync, java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT).format(java.util.Date(syncedAt))))
+            val syncError = prefs.getString("platonLastError", null)
+            if (!syncError.isNullOrEmpty()) extra.add(activity.getString(R.string.tasks_platon_last_error, syncError))
+            val summary = activity.getString(R.string.tasks_summary, counts.pending, counts.done)
+            screen.findViewById<TextView>(R.id.tasks_summary_extra).apply {
+                text = extra.joinToString("\n")
+                visibility = if (extra.isEmpty()) View.GONE else View.VISIBLE
+            }
+            screen.findViewById<TextView>(R.id.tasks_summary).text = summary
             screen.findViewById<View>(R.id.tasks_add).setOnClickListener {
                 showTaskDialog(activity, null, "", rows.length(), callback)
             }
@@ -103,7 +127,7 @@ class TasksScreenController private constructor() {
                     list.addView(taskCard(activity, list, task, today, rows.length(), callback))
                 }
                 if (shown == 0) {
-                    emptyState(activity, list, rows.length(), search, taskFilter, onQueryChanged, onFilterChanged)
+                    emptyState(activity, list, rows.length(), search, taskFilter, onQueryChanged, onFilterChanged, callback)
                 }
             }
             UiHelper.watchSearch(search) { value ->
@@ -199,6 +223,26 @@ class TasksScreenController private constructor() {
                     .setChecked(key == taskOrder)
                     .setOnMenuItemClickListener { onOrderChanged.accept(key); true }
             }
+            menu.add(R.string.tasks_platon_sync).setOnMenuItemClickListener {
+                callback.onPlatonSync()
+                true
+            }
+            menu.add(R.string.tasks_platon_messages_menu).setOnMenuItemClickListener {
+                callback.onPlatonMessages()
+                true
+            }
+            menu.add(R.string.tasks_platon_courses_menu).setOnMenuItemClickListener {
+                callback.onPlatonCourses()
+                true
+            }
+            menu.add(R.string.tasks_platon_connect).setOnMenuItemClickListener {
+                callback.onPlatonConnect()
+                true
+            }
+            menu.add(R.string.tasks_platon_disconnect).setOnMenuItemClickListener {
+                callback.onPlatonDisconnect()
+                true
+            }
             menu.add(R.string.tasks_platon_open).setOnMenuItemClickListener {
                 UiHelper.browser(activity, PlatonLinks.HOME)
                 true
@@ -237,7 +281,9 @@ class TasksScreenController private constructor() {
                 title.paintFlags = title.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             }
 
-            val formattedDate = due?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) ?: activity.getString(R.string.tasks_due_unknown)
+            val dueTime = task.optString("dueTime")
+            val formattedDate = (due?.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))?.let { if (dueTime.isEmpty()) it else "$it $dueTime" })
+                ?: activity.getString(R.string.tasks_due_unknown)
             var statusText = when {
                 done -> activity.getString(R.string.tasks_status_done, formattedDate)
                 due != null && due.isBefore(today) -> activity.getString(R.string.tasks_status_overdue, formattedDate)
@@ -245,7 +291,20 @@ class TasksScreenController private constructor() {
                 else -> activity.getString(R.string.tasks_status_due, formattedDate)
             }
             if (!done && TaskTools.priority(task) == 2) statusText += " · " + activity.getString(R.string.tasks_priority_high)
+            val daysLeft = TaskTools.daysLeft(task, today)
+            if (!done && daysLeft != null && daysLeft in 1..14) statusText += " · " + activity.getString(R.string.tasks_days_left, daysLeft.toInt())
+            val course = task.optString("course")
+            if (course.isNotEmpty()) statusText += " · $course"
+            val remote = task.optString("remoteStatus")
+            if (remote.isNotEmpty() && !done) statusText += " · $remote"
             if (PlatonLinks.isTaskLink(task.optString("platonUrl"))) statusText += " · Platon"
+            val percent = TaskTools.progress(task)
+            card.findViewById<android.widget.ProgressBar>(R.id.task_item_progress).apply {
+                visibility = if (!done && percent > 0) View.VISIBLE else View.GONE
+                progress = percent
+                contentDescription = activity.getString(R.string.tasks_progress_label, percent)
+            }
+            if (!done && percent > 0) statusText += " · $percent%"
             dueView.text = statusText
             dueView.setTextColor(
                 activity.getColor(
@@ -302,7 +361,7 @@ class TasksScreenController private constructor() {
 
         private fun emptyState(
             activity: MainActivity, list: LinearLayout, total: Int, search: TextInputEditText, taskFilter: String,
-            onQueryChanged: Consumer<String>, onFilterChanged: Consumer<String>
+            onQueryChanged: Consumer<String>, onFilterChanged: Consumer<String>, callback: TaskCallback
         ) {
             val box = UiHelper.empty(
                 activity, list,
@@ -315,6 +374,15 @@ class TasksScreenController private constructor() {
                 box.addView(UiHelper.button(activity, "${activity.getString(R.string.tasks_chip_all)} ($total)", {
                     onFilterChanged.accept(TasksUiState.FILTER_ALL)
                 }, false))
+            } else if (total == 0) {
+                val linked = activity.getSharedPreferences("student_tools", android.content.Context.MODE_PRIVATE)
+                    .getString("platonSource", null).isNullOrEmpty().not()
+                box.addView(UiHelper.button(
+                    activity,
+                    activity.getString(if (linked) R.string.tasks_platon_sync else R.string.tasks_platon_connect),
+                    { if (linked) callback.onPlatonSync() else callback.onPlatonConnect() },
+                    true
+                ))
             }
         }
 
@@ -358,6 +426,20 @@ class TasksScreenController private constructor() {
             priority.setSelection(if (existing == null) 1 else TaskTools.priority(existing))
 
             notes.setText(if (existing == null) "" else existing.optString("notes"))
+
+            val progressBar = dialogView.findViewById<android.widget.SeekBar>(R.id.task_input_progress)
+            val progressLabel = dialogView.findViewById<TextView>(R.id.task_input_progress_label)
+            var progressTouched = false
+            progressBar.progress = if (existing == null) 0 else TaskTools.progress(existing)
+            progressLabel.text = activity.getString(R.string.tasks_progress_label, progressBar.progress)
+            progressBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(bar: android.widget.SeekBar, value: Int, fromUser: Boolean) {
+                    if (fromUser) progressTouched = true
+                    progressLabel.text = activity.getString(R.string.tasks_progress_label, value)
+                }
+                override fun onStartTrackingTouch(bar: android.widget.SeekBar) {}
+                override fun onStopTrackingTouch(bar: android.widget.SeekBar) {}
+            })
 
             val storedDue = if (existing == null) null else TaskTools.dueDate(existing)
             var due = storedDue ?: LocalDate.now(UsosClient.ZONE)
@@ -425,6 +507,8 @@ class TasksScreenController private constructor() {
                                     .put("title", title)
                                     .put("due", due.toString())
                                     .put("done", existing != null && existing.optBoolean("done"))
+                                    .put("progress", if (existing != null && existing.optBoolean("done")) 100 else minOf(progressBar.progress, 100))
+                                    .put("progressManual", progressTouched || (existing != null && existing.optBoolean("progressManual")))
                                     .put("priority", priority.selectedItemPosition)
                                     .put("notes", notesText.trim())
                                 dialog.dismiss()

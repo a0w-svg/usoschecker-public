@@ -1,3 +1,7 @@
+• Platon in the app: assignments with deadlines, course progress, grades and messages from Platon in one place. Sign in once with one tap; the session renews itself.
+• Notifications for new assignments, grade changes and new Platon messages, and for upcoming deadlines. Platon events also appear in the Changes screen.
+• Class reminders work again after a phone restart and after an app update.
+• The account screen is hidden from screenshots, and notifications no longer show their content on the lock screen.
 • New dashboard with day plan, recent grades, deadlines and shortcuts to the main screens.
 • Desktop: a responsive wide layout, today and tomorrow previews, and direct access to tasks and payments.
 • Windows x64: MSI installer and portable ZIP with a bundled Java runtime.

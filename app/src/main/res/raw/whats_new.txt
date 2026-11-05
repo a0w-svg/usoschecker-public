@@ -1,3 +1,7 @@
+• Platon w aplikacji: zadania z terminami, postęp kursów, oceny i wiadomości z Platona w jednym miejscu. Zaloguj się raz jednym dotknięciem; sesja odnawia się sama.
+• Powiadomienia o nowych zadaniach, zmianach ocen i nowych wiadomościach z Platona oraz o zbliżających się terminach. Zdarzenia z Platona trafiają też do ekranu Zmiany.
+• Przypomnienia o zajęciach działają ponownie po restarcie telefonu i po aktualizacji aplikacji.
+• Ekran konta jest ukryty w zrzutach ekranu, a powiadomienia nie pokazują treści na ekranie blokady.
 • Nowy wygląd w barwach Vistula: jaśniejsze karty, wyraźniejsze nagłówki i spójne przyciski w całej aplikacji.
 • Prostsze łączenie z USOS: podajesz tylko e-mail, a aplikacja sama rejestruje klucz API i otwiera logowanie. Po zatwierdzeniu dostępu wracasz do aplikacji automatycznie; PIN zostaje jako rozwiązanie awaryjne.
 • Ręczne wpisanie klucza jest teraz opcjonalne, a uprawnienia ustawiasz w jednym miejscu: Konto → Dostęp do danych USOS.

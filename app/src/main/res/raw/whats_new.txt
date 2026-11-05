@@ -1,3 +1,6 @@
+• Szybsze odświeżanie w tle: aplikacja nie odszyfrowuje i nie wczytuje danych przy każdym odświeżeniu, gdy nic się nie zmieniło.
+• Okna szczegółów prowadzącego (grupy, frekwencja, prace dyplomowe, akademiki) są w pełni przetłumaczone na polski, angielski i ukraiński.
+• Uzupełnione opisy nowości po angielsku i ukraińsku.
 • Platon w aplikacji: zadania z terminami, postęp kursów, oceny i wiadomości z Platona w jednym miejscu. Zaloguj się raz jednym dotknięciem; sesja odnawia się sama.
 • Powiadomienia o nowych zadaniach, zmianach ocen i nowych wiadomościach z Platona oraz o zbliżających się terminach. Zdarzenia z Platona trafiają też do ekranu Zmiany.
 • Przypomnienia o zajęciach działają ponownie po restarcie telefonu i po aktualizacji aplikacji.

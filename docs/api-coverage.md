@@ -5,11 +5,11 @@ Generated from bundled USOS API metadata (`app/src/main/assets/api/index.json` a
 ## Summary
 
 - **Total USOS API methods indexed**: 571
-- **Dedicated UI**: 133
+- **Dedicated UI**: 134
 - **Experimental Write UI**: 6
 - **Catalog Explorer (Read)**: 256
 - **Admin-Only / Blocked**: 97
-- **Mutating / Blocked in Catalog**: 79
+- **Mutating / Blocked in Catalog**: 78
 
 ## Method Matrix
 
@@ -256,7 +256,7 @@ Generated from bundled USOS API metadata (`app/src/main/assets/api/index.json` a
 | `services/grades/grade_type` | `grades` | consumer:ignored, token:ignored | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/grades/grade_type_index` | `grades` | consumer:ignored, token:ignored | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/grades/grade_types` | `grades` | consumer:ignored, token:ignored | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
-| `services/grades/latest` | `grades` | consumer:required, token:required | `grades` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
+| `services/grades/latest` | `grades` | consumer:required, token:required | `grades` | No | No | API Explorer | No | No | Yes | Catalog Explorer (Read) |
 | `services/grades/terms` | `grades` | consumer:required, token:required | `grades` | No | Yes | Grades | Yes | No | Yes | Dedicated UI |
 | `services/grades/terms2` | `grades` | consumer:required, token:required | `grades` | No | Yes | Grades | Yes | No | Yes | Dedicated UI |
 | `services/grades/update_grade` | `grades` | consumer:required, token:required | `none` | Yes | Yes | None (Admin-only) | Yes | No | Yes | Dedicated UI |
@@ -420,7 +420,7 @@ Generated from bundled USOS API metadata (`app/src/main/assets/api/index.json` a
 | `services/oauth/authorize` | `oauth` | consumer:ignored, token:ignored | `none` | No | Yes | Account (OAuth) | No | No | Yes | Dedicated UI |
 | `services/oauth/proxy` | `oauth` | consumer:required, token:optional | `none` | No | No | API Explorer | No | No | Catalog Test | Catalog Explorer (Read) |
 | `services/oauth/request_token` | `oauth` | consumer:required, token:ignored | `none` | No | Yes | Account (OAuth) | No | No | Yes | Dedicated UI |
-| `services/oauth/revoke_consumer_key` | `oauth` | consumer:optional, token:ignored | `none` | No | No | API Explorer | No | No | Catalog Test | Mutating / Blocked in Catalog |
+| `services/oauth/revoke_consumer_key` | `oauth` | consumer:optional, token:ignored | `none` | No | Yes | API Explorer | No | No | Yes | Dedicated UI |
 | `services/oauth/revoke_token` | `oauth` | consumer:required, token:required | `none` | No | No | API Explorer | No | No | Catalog Test | Mutating / Blocked in Catalog |
 | `services/oauth2/impersonated_token` | `oauth2` | consumer:required, token:optional | `none` | Yes | Yes | None (Admin-only) | Yes | No | Yes | Dedicated UI |
 | `services/payments/choose_installment_plan` | `payments` | consumer:required, token:required | `payments` | No | Yes | Payments | No | Student Write | Yes | Dedicated UI |

@@ -68,6 +68,9 @@ class SharedRepository @JvmOverloads constructor(
         }
     }
 
+    /** Cheap change indicator of the stored state (no decryption); equal values mean nothing was written. */
+    fun stamp(): Long = vault.stamp()
+
     @Throws(Exception::class)
     override fun read(): JSONObject = synchronized(LOCK) {
         localizedView(vault.read(), languageProvider.get())

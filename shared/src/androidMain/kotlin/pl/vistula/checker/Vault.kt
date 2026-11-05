@@ -41,8 +41,22 @@ class Vault(context: Context) : VaultStore {
         return store.getKey(ALIAS, null) as SecretKey
     }
 
+    private val cache: StateCache = CACHES.computeIfAbsent(storePath) { StateCache() }
+
+    override fun stamp(): Long = StateCache.stampOf(file.baseFile.lastModified(), file.baseFile.length())
+
     @Throws(Exception::class)
     override fun read(): JSONObject {
+        val before = stamp()
+        cache.get(before)?.let { return it }
+        val state = decrypt()
+        // Keyed by the stamp seen BEFORE decrypting: a write that lands meanwhile makes this entry a miss, never stale.
+        cache.put(before, state)
+        return state
+    }
+
+    @Throws(Exception::class)
+    private fun decrypt(): JSONObject {
         val bytes = try {
             file.readFully()
         } catch (e: FileNotFoundException) {
@@ -72,16 +86,22 @@ class Vault(context: Context) : VaultStore {
             file.finishWrite(stream)
         } catch (e: Exception) {
             file.failWrite(stream)
+            cache.invalidate()
             throw e
         }
+        cache.put(stamp(), state)
     }
 
     override fun clear() {
         file.delete()
+        cache.invalidate()
     }
 
     companion object {
         private const val ALIAS = "vistula_checker_local_v1"
+
+        /** One cache per state directory, shared by every Vault instance in the process. */
+        private val CACHES = java.util.concurrent.ConcurrentHashMap<String, StateCache>()
     }
 }
 

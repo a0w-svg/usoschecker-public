@@ -19,6 +19,7 @@ object TaskTools {
             throw IllegalArgumentException("Nieprawidłowa treść zadania.")
         val platonUrl = PlatonLinks.normalize(replacement.optString("platonUrl"))
         val copy = JSONObject(replacement.toString())
+        if (copy.has("progress")) copy.put("progress", maxOf(0, minOf(100, copy.optInt("progress", 0))))
         if (platonUrl.isEmpty()) copy.remove("platonUrl") else copy.put("platonUrl", platonUrl)
         val result = if (source == null) JSONArray() else JSONArray(source.toString())
         for (i in 0 until result.length()) {
@@ -34,6 +35,36 @@ object TaskTools {
 
     @JvmStatic
     fun priority(task: JSONObject): Int = maxOf(0, minOf(2, task.optInt("priority", 1)))
+
+    /** Completion in percent; a finished task is always 100. */
+    @JvmStatic
+    fun progress(task: JSONObject): Int =
+        if (task.optBoolean("done")) 100 else maxOf(0, minOf(99, task.optInt("progress", 0)))
+
+    /** Days until the deadline (negative when overdue), or null without a valid date. */
+    @JvmStatic
+    fun daysLeft(task: JSONObject, today: LocalDate): Long? =
+        dueDate(task)?.let { java.time.temporal.ChronoUnit.DAYS.between(today, it) }
+
+    /** Toggles completion, keeping progress consistent: done is 100%, reopening a finished task resets it. */
+    @JvmStatic
+    @Throws(JSONException::class)
+    fun toggled(task: JSONObject): JSONObject {
+        val copy = JSONObject(task.toString())
+        val done = !task.optBoolean("done")
+        copy.put("done", done)
+        if (done) copy.put("progress", 100) else copy.put("progress", 0)
+        return copy
+    }
+
+    /** Share of finished tasks among all, 0..100. */
+    @JvmStatic
+    fun completionPercent(source: JSONArray?): Int {
+        if (source == null || source.length() == 0) return 0
+        var done = 0
+        for (i in 0 until source.length()) if (source.optJSONObject(i)?.optBoolean("done") == true) done++
+        return done * 100 / source.length()
+    }
 
     @JvmStatic
     fun dueDate(task: JSONObject): LocalDate? = try {

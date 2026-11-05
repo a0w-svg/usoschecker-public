@@ -54,7 +54,11 @@ USOS Checker zbiera najważniejsze informacje z USOS Akademii Finansów i Biznes
 | **Plan** | Widoki dnia, tygodnia i agendy; wyszukiwanie, szczegóły zajęć, prowadzący, sale, kolizje, przerwy i eksport `.ics`. |
 | **Oceny** | Semestry, wyszukiwanie, filtry, terminy zaliczeń, przedmioty bez ocen oraz pomocnicze podsumowania średniej. |
 | **Zmiany** | Historia dodanych, zmienionych i usuniętych wpisów z wartościami przed i po zmianie. |
-| **Więcej** | Zadania, osobista frekwencja, płatności, legitymacje, dokumenty i decyzje, wiadomości uczelni, kampus, kalkulator GPA, konto i katalog API. |
+| **Więcej** | Zadania (także z Platona), osobista frekwencja, płatności, legitymacje, dokumenty i decyzje, wiadomości uczelni, kampus, kalkulator GPA, konto i katalog API. |
+
+### Platon
+
+Zadania, terminy, postęp kursów, oceny i wiadomości z platformy `platon.vistula.edu.pl` w menu **Zadania** (⋮). Platon nie ma publicznego API i nie przyjmuje tokenów USOS, dlatego logowanie odbywa się w wbudowanej przeglądarce (konto uczelniane przez Microsoft lub konto lokalne), a aplikacja czyta strony Platona z sesją tej przeglądarki. Hasło nie jest zapisywane. Wygasłą sesję aplikacja odnawia po cichu przez sesję Microsoft; gdy to się nie uda, prosi o ponowne logowanie. Synchronizacja działa po otwarciu Zadań, po odświeżeniu USOS i w tle; nowe zadania, zmiany ocen i wiadomości trafiają do powiadomień oraz ekranu **Zmiany** (filtr *Platon*). „Wyloguj z Platona” usuwa połączenie i dane z przeglądarki aplikacji. Szczegóły: [SECURITY.md](SECURITY.md).
 
 Interfejs obsługuje **polski, angielski i ukraiński**. Android dopasowuje motyw do telefonu lub pozwala wybrać jasny albo ciemny OLED. Tryb demo działa oddzielnie od prawdziwego konta.
 

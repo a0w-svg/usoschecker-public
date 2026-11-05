@@ -20,6 +20,23 @@ class NotificationHelper private constructor() {
         const val CHANNEL_SCHEDULE: String = "usos_schedule"
         const val CHANNEL_REMINDERS: String = "usos_reminders"
 
+        /** Redacted lock-screen version: only the channel name, never lesson, grade or message text. */
+        @JvmStatic
+        fun publicVersion(context: Context, channel: String): android.app.Notification {
+            val text = pl.vistula.checker.ui.Language.localizedContext(context)
+            val title = text.getString(
+                when (channel) {
+                    CHANNEL_GRADES -> R.string.notification_grades_channel
+                    CHANNEL_SCHEDULE -> R.string.notification_schedule_channel
+                    else -> R.string.notification_reminders_channel
+                }
+            )
+            return NotificationCompat.Builder(context, channel)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle(title)
+                .build()
+        }
+
         @JvmStatic
         fun createChannels(context: Context) {
             val textContext = pl.vistula.checker.ui.Language.localizedContext(context)
@@ -116,6 +133,7 @@ class NotificationHelper private constructor() {
                     .setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                    .setPublicVersion(NotificationHelper.publicVersion(context, CHANNEL_GRADES))
                     .setContentIntent(pending)
                     .setAutoCancel(true)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -178,6 +196,7 @@ class NotificationHelper private constructor() {
                     .setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(title)
                     .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                    .setPublicVersion(NotificationHelper.publicVersion(context, CHANNEL_SCHEDULE))
                     .setContentIntent(pending)
                     .setAutoCancel(true)
                     .addAction(R.drawable.ic_nav_plan, textContext.getString(R.string.notification_open_schedule), pending)

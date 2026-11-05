@@ -17,6 +17,10 @@
             <TextView android:id="@+id/task_item_due" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:layout_marginTop="5dp"
                 android:textSize="12sp" android:textColor="@color/app_muted"/>
+            <ProgressBar android:id="@+id/task_item_progress" style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="4dp"
+                android:layout_marginTop="6dp" android:max="100" android:visibility="gone"
+                android:progressTint="@color/app_link"/>
         </LinearLayout>
         <ImageButton android:id="@+id/task_item_more" android:layout_width="48dp"
             android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless"

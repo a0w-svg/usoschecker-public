@@ -50,6 +50,7 @@ class HomeScreenController private constructor() {
             renderRecentChanges(activity, content, d)
             renderWeek(activity, content, snapshot, lessons)
             renderDeadlinesPreview(activity, content, if (demo) demoTasks else state.optJSONArray("tasks"), if (demo) null else state.optJSONObject("studentServices"))
+            if (!demo) renderPlatonUnread(activity, content, state)
             sectionLink(activity, content, R.string.design_shortcuts) { activity.navigate(Tabs.MORE) }
             renderShortcuts(activity, content)
             snapshot ?: return
@@ -275,6 +276,16 @@ class HomeScreenController private constructor() {
                 result.add(Deadline(activity.getString(R.string.deadline_exam_registration, course), due) { activity.navigate(Tabs.ACADEMIC_EXTRAS) })
             }
             return result
+        }
+
+        /** One tappable line when the Platon inbox has unread messages (they include grade notices). */
+        private fun renderPlatonUnread(activity: MainActivity, content: LinearLayout, state: JSONObject) {
+            val rows = state.optJSONArray("platonMessages") ?: return
+            var unread = 0
+            for (i in 0 until rows.length()) if (rows.optJSONObject(i)?.optBoolean("unread") == true) unread++
+            if (unread == 0) return
+            val box = UiHelper.card(activity, content)
+            box.addView(UiHelper.button(activity, activity.getString(R.string.home_platon_unread, unread), { activity.openPlatonMessages() }, false))
         }
 
         @Throws(JSONException::class)

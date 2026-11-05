@@ -59,6 +59,7 @@ class HistoryScreenController private constructor() {
             val allChanges = ArrayList<Change>()
             var countGrades = 0
             var countPlan = 0
+            var countPlaton = 0
             var countAdded = 0
             var countModified = 0
             var countRemoved = 0
@@ -69,6 +70,7 @@ class HistoryScreenController private constructor() {
                         allChanges.add(c)
                         if ("ocena" == c.kind) countGrades++
                         else if ("plan" == c.kind) countPlan++
+                        else if ("platon" == c.kind) countPlaton++
                         when (c.action) {
                             "Dodano" -> countAdded++
                             "Zmieniono" -> countModified++
@@ -81,14 +83,15 @@ class HistoryScreenController private constructor() {
             }
             allChanges.sortWith { a, b -> b.effectiveTimestamp().compareTo(a.effectiveTimestamp()) }
 
-            val filters = arrayOf(HistoryUiState.ALL, "ocena", "plan", "Dodano", "Zmieniono", "Usunięto")
+            val filters = arrayOf(HistoryUiState.ALL, "ocena", "plan", "Dodano", "Zmieniono", "Usunięto", "platon")
             val labels = arrayOf(
                 activity.getString(R.string.history_chip_all, allChanges.size),
                 activity.getString(R.string.history_chip_grades, countGrades),
                 activity.getString(R.string.history_chip_plan, countPlan),
                 activity.getString(R.string.history_chip_added, countAdded),
                 activity.getString(R.string.history_chip_modified, countModified),
-                activity.getString(R.string.history_chip_removed, countRemoved)
+                activity.getString(R.string.history_chip_removed, countRemoved),
+                activity.getString(R.string.history_chip_platon, countPlaton)
             )
             val screen = LayoutInflater.from(activity).inflate(R.layout.screen_history, content, false)
             content.addView(screen)
@@ -142,20 +145,20 @@ class HistoryScreenController private constructor() {
                     menu.menu.add(1, i + 1, i, labels[i]).setCheckable(true).isChecked = filters[i] == filter
                 }
                 menu.menu.setGroupCheckable(1, true, true)
-                menu.menu.add(2, 7, 7, R.string.history_search_action)
+                menu.menu.add(2, 100, 100, R.string.history_search_action)
                 if (demo && onSimulate != null) {
-                    menu.menu.add(2, 8, 8, R.string.history_btn_simulate)
+                    menu.menu.add(2, 101, 101, R.string.history_btn_simulate)
                 }
                 menu.setOnMenuItemClickListener { item ->
                     val id = item.itemId
                     when {
                         id in 1..filters.size -> onFilterChanged.accept(filters[id - 1])
-                        id == 7 -> {
+                        id == 100 -> {
                             searchBox.visibility = View.VISIBLE
                             search.requestFocus()
                             search.post { activity.getSystemService(InputMethodManager::class.java)?.showSoftInput(search, 0) }
                         }
-                        id == 8 -> onSimulate?.run()
+                        id == 101 -> onSimulate?.run()
                     }
                     true
                 }
@@ -356,6 +359,14 @@ class HistoryScreenController private constructor() {
         @JvmStatic
         fun getDiffSummaryList(context: Context, c: Change): List<String> {
             val diffs = ArrayList<String>()
+            if ("platon" == c.kind) {
+                val label = when (c.optMeta("platonEvent")) {
+                    "task" -> R.string.platon_event_task
+                    "grade" -> R.string.platon_event_grade
+                    else -> R.string.platon_event_message
+                }
+                diffs.add("🌐 ${context.getString(label)}: ${c.optMeta("summary")}")
+            }
             val diffGrade = c.optMeta("diffGrade")
             if ("ocena" == c.kind && diffGrade.isNotEmpty()) {
                 diffs.add("🎓 ${context.getString(R.string.change_grade)}: $diffGrade")
@@ -455,7 +466,11 @@ class HistoryScreenController private constructor() {
             box.isClickable = true
             box.isFocusable = true
 
-            val category = activity.getString(if (c.kind == "ocena") R.string.history_category_grade else R.string.history_category_plan)
+            val category = activity.getString(when (c.kind) {
+                "ocena" -> R.string.history_category_grade
+                "platon" -> R.string.history_category_platon
+                else -> R.string.history_category_plan
+            })
             val action = activity.getString(
                 when (c.action) {
                     "Dodano" -> R.string.history_action_added

@@ -57,6 +57,25 @@
             android:layout_marginBottom="16dp"
             android:minHeight="48dp" />
 
+        <TextView
+            android:id="@+id/task_input_progress_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:labelFor="@id/task_input_progress"
+            android:text="@string/tasks_progress_title"
+            android:textColor="@color/app_muted"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/task_input_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:max="100"
+            android:minHeight="48dp"
+            android:saveEnabled="false" />
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/task_notes_layout"
             android:layout_width="match_parent"

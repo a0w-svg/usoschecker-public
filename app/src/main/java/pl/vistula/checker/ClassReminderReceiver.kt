@@ -106,6 +106,7 @@ class ClassReminderReceiver : BroadcastReceiver() {
                     .setSmallIcon(R.drawable.ic_notification)
                     .setContentTitle(textContext.getString(R.string.notification_class_title, title))
                     .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                    .setPublicVersion(NotificationHelper.publicVersion(context, NotificationHelper.CHANNEL_REMINDERS))
                     .setContentText(content)
                     .setStyle(NotificationCompat.BigTextStyle().bigText(content + "\n" + textContext.getString(R.string.notification_schedule_hint)))
                     .setContentIntent(pi)

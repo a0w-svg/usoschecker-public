@@ -146,6 +146,14 @@ class MainActivity : AppCompatActivity() {
         onDocumentResult(23, result.resultCode, result.data)
     }
 
+    private val platonLogin = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val url = result.data?.getStringExtra(PlatonLoginActivity.EXTRA_URL)
+        if (result.resultCode == RESULT_OK && url != null) {
+            getSharedPreferences("student_tools", MODE_PRIVATE).edit { putString("platonSource", url) }
+            syncPlatonTasks()
+        }
+    }
+
     private lateinit var repository: Repository
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val refresh: Runnable = object : Runnable {
@@ -450,6 +458,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         io.execute { ClassReminderReceiver.scheduleNext(applicationContext) }
         handleOAuthCallback(intent)
+        if (::content.isInitialized && tab == Tabs.TASKS) autoSyncPlaton()
         handler.removeCallbacks(refresh)
         handler.postDelayed(refresh, 30000)
         if (::content.isInitialized && !busy && tab != Tabs.ACCOUNT && tab != Tabs.API && tab != Tabs.PAYMENTS && tab != Tabs.GPA_SIMULATOR && tab != Tabs.CAMPUS_GUIDE && tab != Tabs.NEWS && tab != Tabs.ATTENDANCE) {
@@ -517,6 +526,8 @@ class MainActivity : AppCompatActivity() {
         tab = target
         scroll.scrollTo(0, 0)
         render()
+        if (target == Tabs.TASKS) autoSyncPlaton()
+        if (target == Tabs.HOME || target == Tabs.TASKS) offerPlaton()
         if (!demo && !busy) {
             if (target == Tabs.CAMPUS_GUIDE && connected() && System.currentTimeMillis() - (studentServices().optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L) > 24 * 60 * 60_000L) {
                 refreshStudentServices("affiliation")
@@ -553,6 +564,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun render() {
+        // Consumer key/secret and the PIN are typed on the Account tab: keep it out of screenshots and recents.
+        if (tab == Tabs.ACCOUNT) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
         if (isDestroyed) return
         renderedMinute = System.currentTimeMillis() / 60000
         content.removeAllViews()
@@ -868,6 +882,7 @@ class MainActivity : AppCompatActivity() {
                         {
                             SyncWorker.cancel(this@MainActivity)
                             repository.disconnect()
+                            PlatonRunner.forget(this@MainActivity)
                             ClassReminderReceiver.cancel(this@MainActivity)
                             androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
                             TodayScheduleWidget.updateAll(this@MainActivity)
@@ -892,6 +907,7 @@ class MainActivity : AppCompatActivity() {
                         {
                             SyncWorker.cancel(this@MainActivity)
                             repository.disconnect()
+                            PlatonRunner.forget(this@MainActivity)
                             ClassReminderReceiver.cancel(this@MainActivity)
                             androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
                             TodayScheduleWidget.updateAll(this@MainActivity)
@@ -1462,7 +1478,201 @@ class MainActivity : AppCompatActivity() {
                 if (demo != wasDemo) return
                 mutateTasks(id, remove, session)
             }
+
+            override fun onPlatonConnect() = connectPlaton()
+
+            override fun onPlatonSync() = syncPlatonTasks()
+
+            override fun onPlatonCourses() = showPlatonCourses()
+
+            override fun onPlatonMessages() = showPlatonMessages()
+
+            override fun onPlatonDisconnect() = disconnectPlaton()
         }
+    }
+
+    private class PlatonOutcome(val state: JSONObject?, val found: Int, val added: Int, val updated: Int, val skipped: Int)
+
+    /** Opens the Platon sign-in WebView; the chosen assignments page is then synchronised. */
+    fun connectPlaton() {
+        if (demo) {
+            Toast.makeText(this, R.string.services_demo_action, Toast.LENGTH_LONG).show()
+            return
+        }
+        val saved = getSharedPreferences("student_tools", MODE_PRIVATE).getString("platonSource", null)
+        platonLogin.launch(Intent(this, PlatonLoginActivity::class.java).putExtra(PlatonLoginActivity.EXTRA_URL, saved))
+    }
+
+    /** Reads the chosen Platon page with the WebView session and merges assignments, progress and deadlines. */
+    fun syncPlatonTasks(auto: Boolean = false) {
+        if (demo) {
+            if (!auto) Toast.makeText(this, R.string.services_demo_action, Toast.LENGTH_LONG).show()
+            return
+        }
+        val source = getSharedPreferences("student_tools", MODE_PRIVATE).getString("platonSource", null)
+        if (source.isNullOrEmpty()) {
+            if (!auto) connectPlaton()
+            return
+        }
+        val session = repository.editSession(state)
+        task(
+            {
+                try {
+                    PlatonRunner.exclusive(wait = true) {
+                        val crawled = PlatonRunner.crawlRenewing(applicationContext, source)
+                        var summary: PlatonRunner.Summary? = null
+                        if (crawled.tasks.isNotEmpty() || crawled.courses.isNotEmpty() || crawled.messages.isNotEmpty()) {
+                            repository.update(session) { s -> summary = PlatonRunner.apply(s, crawled, System.currentTimeMillis()) }
+                        }
+                        PlatonRunner.clearError(applicationContext)
+                        PlatonOutcome(repository.read(), summary?.found ?: 0, summary?.added ?: 0, summary?.updated ?: 0, summary?.skipped ?: 0)
+                    }!!
+                } catch (e: PlatonClient.SessionExpiredException) {
+                    PlatonOutcome(null, 0, 0, 0, 0)
+                } catch (e: Exception) {
+                    PlatonRunner.recordError(applicationContext, e)
+                    throw e
+                }
+            },
+            { outcome ->
+                val fresh = outcome.state
+                when {
+                    fresh == null -> {
+                        if (auto) Toast.makeText(this, R.string.tasks_platon_expired, Toast.LENGTH_SHORT).show()
+                        else {
+                            Toast.makeText(this, R.string.tasks_platon_expired, Toast.LENGTH_LONG).show()
+                            connectPlaton()
+                        }
+                    }
+                    outcome.found == 0 -> {
+                        if (!auto) Toast.makeText(this, R.string.tasks_platon_none, Toast.LENGTH_LONG).show()
+                    }
+                    else -> {
+                        state = fresh
+                        render()
+                        getSharedPreferences("student_tools", MODE_PRIVATE).edit { putLong("platonSyncedAt", System.currentTimeMillis()); }
+                        platonAutoTried = false
+                        val text = getString(R.string.tasks_platon_synced, outcome.added, outcome.updated) +
+                            if (outcome.skipped > 0) "\n" + getString(R.string.tasks_error_limit) else ""
+                        if (!auto || outcome.added + outcome.updated > 0) Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        )
+    }
+
+    private fun disconnectPlaton() {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.tasks_platon_disconnect_title)
+            .setMessage(R.string.tasks_platon_disconnect_message)
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.tasks_platon_disconnect) { _, _ ->
+                val session = repository.editSession(state)
+                task(
+                    {
+                        PlatonRunner.forget(applicationContext)
+                        repository.update(session) { s ->
+                            s.remove("platonCourses")
+                            s.remove("platonMessages")
+                        }
+                        repository.read()
+                    },
+                    { s ->
+                        state = s
+                        render()
+                        Toast.makeText(this, R.string.tasks_platon_disconnected, Toast.LENGTH_LONG).show()
+                    }
+                )
+            }
+            .show()
+    }
+
+    fun openPlatonMessages() {
+        navigate(Tabs.TASKS)
+        showPlatonMessages()
+    }
+
+    private fun showPlatonMessages() {
+        val rows = state.optJSONArray("platonMessages")
+        if (rows == null || rows.length() == 0) {
+            Toast.makeText(this, R.string.tasks_platon_courses_empty, Toast.LENGTH_LONG).show()
+            return
+        }
+        val text = StringBuilder()
+        var unread = 0
+        for (i in 0 until rows.length()) {
+            val m = rows.optJSONObject(i) ?: continue
+            val isUnread = m.optBoolean("unread")
+            if (isUnread) unread++
+            if (text.isNotEmpty()) text.append("\n\n")
+            if (isUnread) text.append("● ")
+            text.append(m.optString("subject")).append('\n').append(m.optString("sender"))
+            val date = m.optString("date")
+            if (date.isNotEmpty()) text.append(" · ").append(date)
+        }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.tasks_platon_messages_title, unread))
+            .setMessage(text)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun showPlatonCourses() {
+        val rows = state.optJSONArray("platonCourses")
+        if (rows == null || rows.length() == 0) {
+            Toast.makeText(this, R.string.tasks_platon_courses_empty, Toast.LENGTH_LONG).show()
+            return
+        }
+        val text = StringBuilder()
+        for (i in 0 until rows.length()) {
+            val c = rows.optJSONObject(i) ?: continue
+            if (text.isNotEmpty()) text.append("\n\n")
+            text.append(c.optString("title")).append('\n')
+                .append(getString(R.string.tasks_platon_course_line, c.optInt("progress"), c.optString("grade").ifEmpty { "—" }, c.optInt("runs")))
+            val badge = c.optString("badge")
+            if (badge.isNotEmpty()) text.append(" · ").append(badge)
+        }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.tasks_platon_courses_title, rows.length()))
+            .setMessage(text)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    /** Right after the USOS sign-in succeeds, offers the one-tap Platon sign-in once. */
+    private fun offerPlaton() {
+        val prefs = getSharedPreferences("student_tools", MODE_PRIVATE)
+        if (demo || !connected() || prefs.getBoolean("platonOffered", false) || !prefs.getString("platonSource", null).isNullOrEmpty()) return
+        prefs.edit { putBoolean("platonOffered", true) }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.tasks_platon_offer_title)
+            .setMessage(R.string.tasks_platon_offer_message)
+            .setNegativeButton(R.string.tasks_platon_offer_later, null)
+            .setPositiveButton(R.string.tasks_platon_connect) { _, _ -> connectPlaton() }
+            .show()
+    }
+
+    private var platonAutoTried = false
+
+    /** Refreshes Platon assignments when Tasks opens, at most every 30 minutes and once per app start after a failure. */
+    private fun autoSyncPlaton(maxAgeMs: Long = 30 * 60_000L) {
+        if (demo || busy || platonAutoTried) return
+        val prefs = getSharedPreferences("student_tools", MODE_PRIVATE)
+        if (prefs.getString("platonSource", null).isNullOrEmpty()) return
+        if (prefs.getBoolean("platonExpired", false)) {
+            // The background refresh found the Platon session expired: ask once for a one-tap sign-in.
+            prefs.edit { putBoolean("platonExpired", false) }
+            platonAutoTried = true
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.tasks_platon_expired)
+                .setNegativeButton(R.string.tasks_platon_offer_later, null)
+                .setPositiveButton(R.string.tasks_platon_connect) { _, _ -> connectPlaton() }
+                .show()
+            return
+        }
+        if (System.currentTimeMillis() - prefs.getLong("platonSyncedAt", 0L) < maxAgeMs) return
+        platonAutoTried = true
+        syncPlatonTasks(auto = true)
     }
 
     fun savePersonalTask(entry: JSONObject) {
@@ -1565,10 +1775,10 @@ class MainActivity : AppCompatActivity() {
         val result = JSONArray()
         if (source != null) {
             for (i in 0 until source.length()) {
-                val entry = JSONObject(source.getJSONObject(i).toString())
+                var entry = JSONObject(source.getJSONObject(i).toString())
                 if (entry.getString("id") == id) {
                     if (remove) continue
-                    entry.put("done", !entry.optBoolean("done"))
+                    entry = TaskTools.toggled(entry)
                 }
                 result.put(entry)
             }
@@ -1629,6 +1839,8 @@ class MainActivity : AppCompatActivity() {
                         else -> getString(R.string.sync_result_changes, result.changes)
                     }
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    platonAutoTried = false
+                    autoSyncPlaton(maxAgeMs = 5 * 60_000L)
                 }
             )
         }

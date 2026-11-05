@@ -1,9 +1,15 @@
+• Faster background refresh: the app no longer decrypts and reloads your data on every refresh when nothing has changed.
+• Lecturer detail windows (groups, attendance, theses, dormitories) are fully translated into Polish, English and Ukrainian.
+• Release notes are now complete in English and Ukrainian.
 • Platon in the app: assignments with deadlines, course progress, grades and messages from Platon in one place. Sign in once with one tap; the session renews itself.
 • Notifications for new assignments, grade changes and new Platon messages, and for upcoming deadlines. Platon events also appear in the Changes screen.
 • Class reminders work again after a phone restart and after an app update.
 • The account screen is hidden from screenshots, and notifications no longer show their content on the lock screen.
-• New dashboard with day plan, recent grades, deadlines and shortcuts to the main screens.
-• Desktop: a responsive wide layout, today and tomorrow previews, and direct access to tasks and payments.
-• Windows x64: MSI installer and portable ZIP with a bundled Java runtime.
-• Installment amounts show two decimal places and a currency unit, including currency inherited from the parent payment.
-• Dedicated Windows build and launch checks in CI, plus clearer dashboard empty states.
+• New look in Vistula colours: lighter cards, clearer headings and consistent buttons across the app.
+• Simpler USOS connection: you only enter your e-mail, and the app registers the API key itself and opens the sign-in. After you approve access you return to the app automatically; the PIN remains as a fallback.
+• Entering a key manually is now optional, and you set permissions in one place: Settings → USOS data access.
+• When you disconnect the account you can revoke the API key in USOSapps right away.
+• On the home screen: a countdown to task and exam deadlines.
+• Simpler Payments: the amount due first and copying the account number, paid instalments collapsed below.
+• Plan, More, Settings, Tasks, Messages and Absences in a new card layout.
+• Fix for overlapping lines in large headings.

@@ -1904,19 +1904,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Change stamp and language of the state last read by [load]; equal values mean there is nothing new to read. */
+    private var loadedKey: String? = null
+
     private fun load() {
         if (loadingState || busy || isDestroyed) return
         loadingState = true
         io.execute {
             try {
-                val latest = repository.read()
+                val key = repository.stamp().takeIf { it != pl.vistula.checker.StateCache.NO_STAMP }
+                    ?.let { "$it/${Language.currentLocale(this).language}" }
+                val unchanged = key != null && key == loadedKey
+                val latest = if (unchanged) null else repository.read()
                 runOnUiThread {
                     loadingState = false
                     if (isDestroyed || busy) return@runOnUiThread
                     val clockChanged = (tab == Tabs.HOME || tab == Tabs.SCHEDULE) && renderedMinute != System.currentTimeMillis() / 60000
-                    if (state.toString() != latest.toString() || clockChanged) {
+                    if (latest != null) loadedKey = key
+                    if ((latest != null && state.toString() != latest.toString()) || clockChanged) {
                         val position = scroll.scrollY
-                        state = latest
+                        if (latest != null) state = latest
                         render()
                         scroll.post { scroll.scrollTo(0, position) }
                     }

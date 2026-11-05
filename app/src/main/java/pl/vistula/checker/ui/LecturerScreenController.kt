@@ -1201,14 +1201,14 @@ object LecturerScreenController {
         val participants = data.optJSONArray("participants") ?: JSONArray()
         val lecturers = data.optJSONArray("lecturers") ?: JSONArray()
         if (lecturers.length() > 0) {
-            lines.add("Prowadzący / Lecturers:")
+            lines.add(activity.getString(R.string.lecturer_dlg_lecturers))
             for (i in 0 until lecturers.length()) {
                 val l = lecturers.optJSONObject(i) ?: continue
                 lines.add("• " + listOf(StudentServices.text(l, "first_name"), StudentServices.text(l, "last_name")).filter { it.isNotBlank() }.joinToString(" "))
             }
         }
-        lines.add("Uczestnicy / Participants (${data.optInt("participantsTotal", participants.length())}):")
-        if (participants.length() == 0) lines.add("Brak zapisanych uczestników.")
+        lines.add(activity.getString(R.string.lecturer_dlg_participants, data.optInt("participantsTotal", participants.length())))
+        if (participants.length() == 0) lines.add(activity.getString(R.string.lecturer_dlg_no_participants))
         for (i in 0 until participants.length()) {
             val p = participants.optJSONObject(i) ?: continue
             val name = listOf(StudentServices.text(p, "first_name"), StudentServices.text(p, "last_name")).filter { it.isNotBlank() }.joinToString(" ")
@@ -1222,15 +1222,15 @@ object LecturerScreenController {
         val lines = mutableListOf<String>()
         val name = StudentServices.localized(data.opt("name"), language).ifEmpty { fallback }
         val type = StudentServices.text(data, "type")
-        if (type.isNotEmpty()) lines.add("Typ / Type: $type")
+        if (type.isNotEmpty()) lines.add(activity.getString(R.string.lecturer_dlg_type, type))
         val desc = StudentServices.localized(data.opt("description"), language)
         if (desc.isNotEmpty()) lines.add(desc)
         if (data.has("points_min") || data.has("points_max")) {
-            lines.add("Punkty: ${data.optDouble("points_min", 0.0)} – ${data.optDouble("points_max", 0.0)}")
+            lines.add(activity.getString(R.string.lecturer_dlg_points, data.optDouble("points_min", 0.0).toString(), data.optDouble("points_max", 0.0).toString()))
         }
         val hist = data.optJSONArray("histogram") ?: JSONArray()
         if (hist.length() > 0) {
-            lines.add("\nRozkład wyników / Distribution:")
+            lines.add("\n" + activity.getString(R.string.lecturer_dlg_distribution))
             for (i in 0 until hist.length()) {
                 val h = hist.optJSONObject(i) ?: continue
                 lines.add("${StudentServices.text(h, "label")}: ${h.optInt("count", 0)}")
@@ -1242,9 +1242,9 @@ object LecturerScreenController {
     private fun showAttendanceDetails(activity: MainActivity, title: String, data: JSONObject, language: String) {
         val lines = mutableListOf<String>()
         val entries = data.optJSONArray("entries") ?: JSONArray()
-        lines.add("Data: ${StudentServices.text(data, "date")} · Tryb: ${StudentServices.text(data, "mode")}")
-        lines.add("\nStudenci / Students (${data.optInt("entriesTotal", entries.length())}):")
-        if (entries.length() == 0) lines.add("Brak wpisów.")
+        lines.add(activity.getString(R.string.lecturer_dlg_attendance_header, StudentServices.text(data, "date"), StudentServices.text(data, "mode")))
+        lines.add("\n" + activity.getString(R.string.lecturer_dlg_students, data.optInt("entriesTotal", entries.length())))
+        if (entries.length() == 0) lines.add(activity.getString(R.string.lecturer_dlg_no_entries))
         for (i in 0 until entries.length()) {
             val e = entries.optJSONObject(i) ?: continue
             val name = listOf(StudentServices.text(e, "first_name"), StudentServices.text(e, "last_name")).filter { it.isNotBlank() }.joinToString(" ")
@@ -1260,9 +1260,9 @@ object LecturerScreenController {
         val lines = mutableListOf<String>()
         val title = StudentServices.localized(data.opt("title") ?: data.opt("titles"), language).ifEmpty { fallback }
         val type = StudentServices.text(data, "type")
-        if (type.isNotEmpty()) lines.add("Typ / Type: $type")
+        if (type.isNotEmpty()) lines.add(activity.getString(R.string.lecturer_dlg_type, type))
         val status = StudentServices.text(data, "status")
-        if (status.isNotEmpty()) lines.add("Status: $status")
+        if (status.isNotEmpty()) lines.add(activity.getString(R.string.lecturer_dlg_status, status))
         val sups = data.optJSONArray("supervisors") ?: JSONArray()
         if (sups.length() > 0) {
             val names = (0 until sups.length()).map { sups.optString(it) }.filter { it.isNotBlank() }.joinToString(", ")
@@ -1274,7 +1274,7 @@ object LecturerScreenController {
             lines.add(activity.getString(R.string.thesis_authors, names))
         }
         val fac = StudentServices.localized(data.opt("faculty_name"), language)
-        if (fac.isNotEmpty()) lines.add("Wydział: $fac")
+        if (fac.isNotEmpty()) lines.add(activity.getString(R.string.payments_faculty, fac))
         MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
     }
 
@@ -1282,10 +1282,10 @@ object LecturerScreenController {
         val lines = mutableListOf<String>()
         val name = StudentServices.localized(data.opt("name"), language).ifEmpty { fallback }
         val addr = StudentServices.text(data, "address")
-        if (addr.isNotEmpty()) lines.add("Adres: $addr")
+        if (addr.isNotEmpty()) lines.add(activity.getString(R.string.lecturer_dlg_address, addr))
         val desc = StudentServices.localized(data.opt("description"), language)
-        if (desc.isNotEmpty()) lines.add("Opis: $desc")
-        MaterialAlertDialogBuilder(activity).setTitle(name).setMessage(lines.ifEmpty { listOf("Brak dodatkowych informacji.") }.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
+        if (desc.isNotEmpty()) lines.add(activity.getString(R.string.lecturer_dlg_description, desc))
+        MaterialAlertDialogBuilder(activity).setTitle(name).setMessage(lines.ifEmpty { listOf(activity.getString(R.string.lecturer_dlg_no_extra)) }.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
     }
 
     private fun showAllocationPeriodDetails(activity: MainActivity, fallback: String, data: JSONObject, language: String) {
@@ -1295,7 +1295,7 @@ object LecturerScreenController {
         if (desc.isNotEmpty()) lines.add(desc)
         val start = StudentServices.text(data, "start_date")
         val end = StudentServices.text(data, "end_date")
-        if (start.isNotEmpty() || end.isNotEmpty()) lines.add("Termin: $start – $end")
+        if (start.isNotEmpty() || end.isNotEmpty()) lines.add(activity.getString(R.string.lecturer_dlg_term, start, end))
         MaterialAlertDialogBuilder(activity).setTitle(name).setMessage(lines.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
     }
 
@@ -1311,7 +1311,7 @@ object LecturerScreenController {
             if (eContent.isNotEmpty()) lines.add(eContent)
             lines.add("")
         }
-        MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.ifEmpty { listOf("Brak treści strony.") }.joinToString("\n")).setPositiveButton(android.R.string.ok, null).show()
+        MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(lines.ifEmpty { listOf(activity.getString(R.string.lecturer_dlg_no_content)) }.joinToString("\n")).setPositiveButton(android.R.string.ok, null).show()
     }
 
 }

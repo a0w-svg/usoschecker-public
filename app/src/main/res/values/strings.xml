@@ -765,4 +765,19 @@
     <string name="platon_event_grade">Zmiana oceny</string>
     <string name="platon_event_message">Nowa wiadomość</string>
     <string name="tasks_platon_last_error">Ostatnia synchronizacja Platona nie powiodła się (%1$s).</string>
+    <string name="lecturer_dlg_lecturers">Prowadzący:</string>
+    <string name="lecturer_dlg_participants">Uczestnicy (%1$d):</string>
+    <string name="lecturer_dlg_no_participants">Brak zapisanych uczestników.</string>
+    <string name="lecturer_dlg_type">Typ: %1$s</string>
+    <string name="lecturer_dlg_points">Punkty: %1$s – %2$s</string>
+    <string name="lecturer_dlg_distribution">Rozkład wyników:</string>
+    <string name="lecturer_dlg_attendance_header">Data: %1$s · Tryb: %2$s</string>
+    <string name="lecturer_dlg_students">Studenci (%1$d):</string>
+    <string name="lecturer_dlg_no_entries">Brak wpisów.</string>
+    <string name="lecturer_dlg_status">Status: %1$s</string>
+    <string name="lecturer_dlg_address">Adres: %1$s</string>
+    <string name="lecturer_dlg_description">Opis: %1$s</string>
+    <string name="lecturer_dlg_no_extra">Brak dodatkowych informacji.</string>
+    <string name="lecturer_dlg_term">Termin: %1$s – %2$s</string>
+    <string name="lecturer_dlg_no_content">Brak treści strony.</string>
 </resources>

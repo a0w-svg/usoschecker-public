@@ -15,6 +15,9 @@ interface VaultStore {
     fun write(state: JSONObject)
 
     fun clear()
+
+    /** Cheap value that changes whenever the stored state changes; [StateCache.NO_STAMP] when unsupported. */
+    fun stamp(): Long = StateCache.NO_STAMP
 }
 
 /** Platform-agnostic key-value preferences store (SharedPreferences on Android, JSON file on Desktop). */

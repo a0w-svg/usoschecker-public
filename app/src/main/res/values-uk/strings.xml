@@ -760,4 +760,19 @@
     <string name="platon_event_grade">Зміна оцінки</string>
     <string name="platon_event_message">Нове повідомлення</string>
     <string name="tasks_platon_last_error">Остання синхронізація з Platon не вдалася (%1$s).</string>
+    <string name="lecturer_dlg_lecturers">Викладачі:</string>
+    <string name="lecturer_dlg_participants">Учасники (%1$d):</string>
+    <string name="lecturer_dlg_no_participants">Немає записаних учасників.</string>
+    <string name="lecturer_dlg_type">Тип: %1$s</string>
+    <string name="lecturer_dlg_points">Бали: %1$s – %2$s</string>
+    <string name="lecturer_dlg_distribution">Розподіл результатів:</string>
+    <string name="lecturer_dlg_attendance_header">Дата: %1$s · Режим: %2$s</string>
+    <string name="lecturer_dlg_students">Студенти (%1$d):</string>
+    <string name="lecturer_dlg_no_entries">Записів немає.</string>
+    <string name="lecturer_dlg_status">Статус: %1$s</string>
+    <string name="lecturer_dlg_address">Адреса: %1$s</string>
+    <string name="lecturer_dlg_description">Опис: %1$s</string>
+    <string name="lecturer_dlg_no_extra">Додаткової інформації немає.</string>
+    <string name="lecturer_dlg_term">Період: %1$s – %2$s</string>
+    <string name="lecturer_dlg_no_content">На сторінці немає вмісту.</string>
 </resources>

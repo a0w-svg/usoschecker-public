@@ -35,7 +35,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Kontrola wydania nie powiodla sie. Sprawdz raporty Gradle przed publikacja.' }
     if ($DeviceTests) {
         $expectedTests = 0
-        Get-ChildItem -LiteralPath (Join-Path $projectDirectory 'app/src/androidTest') -Recurse -Include '*Test.java','*Test.kt' | ForEach-Object {
+        # -File + a name filter: Windows PowerShell 5.1 ignores -Include with -LiteralPath and returns directories.
+        Get-ChildItem -LiteralPath (Join-Path $projectDirectory 'app/src/androidTest') -Recurse -File | Where-Object { $_.Name -like '*Test.java' -or $_.Name -like '*Test.kt' } | ForEach-Object {
             $expectedTests += [regex]::Matches([System.IO.File]::ReadAllText($_.FullName), '@Test\b').Count
         }
         Assert-DeviceReport 'debug' $expectedTests

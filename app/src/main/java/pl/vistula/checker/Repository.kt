@@ -51,6 +51,9 @@ class Repository(c: Context, clients: SharedRepository.ClientFactory) : StateRep
         delegate.update(session.inner, operation)
     }
 
+    /** Changes only when the stored state is written; lets the UI skip reading when nothing happened. */
+    fun stamp(): Long = delegate.stamp()
+
     @Throws(Exception::class)
     override fun read(): JSONObject = delegate.read()
 

@@ -754,4 +754,19 @@ Last download: %3$s</string>
     <string name="platon_event_grade">Grade change</string>
     <string name="platon_event_message">New message</string>
     <string name="tasks_platon_last_error">The last Platon sync failed (%1$s).</string>
+    <string name="lecturer_dlg_lecturers">Lecturers:</string>
+    <string name="lecturer_dlg_participants">Participants (%1$d):</string>
+    <string name="lecturer_dlg_no_participants">No enrolled participants.</string>
+    <string name="lecturer_dlg_type">Type: %1$s</string>
+    <string name="lecturer_dlg_points">Points: %1$s – %2$s</string>
+    <string name="lecturer_dlg_distribution">Score distribution:</string>
+    <string name="lecturer_dlg_attendance_header">Date: %1$s · Mode: %2$s</string>
+    <string name="lecturer_dlg_students">Students (%1$d):</string>
+    <string name="lecturer_dlg_no_entries">No entries.</string>
+    <string name="lecturer_dlg_status">Status: %1$s</string>
+    <string name="lecturer_dlg_address">Address: %1$s</string>
+    <string name="lecturer_dlg_description">Description: %1$s</string>
+    <string name="lecturer_dlg_no_extra">No additional information.</string>
+    <string name="lecturer_dlg_term">Period: %1$s – %2$s</string>
+    <string name="lecturer_dlg_no_content">This page has no content.</string>
 </resources>

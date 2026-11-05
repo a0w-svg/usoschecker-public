@@ -10,9 +10,11 @@ import java.util.concurrent.Executors
  * periodic sync keeps its own WorkManager schedule), so reminders do not stay silent until the app is opened.
  */
 class BootReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent?) {
-        val action = intent?.action
-        if (action != Intent.ACTION_BOOT_COMPLETED && action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+    override fun onReceive(context: Context, intent: Intent) {
+        // Only the two system broadcasts declared in the manifest are accepted; anything else is ignored.
+        val booted = Intent.ACTION_BOOT_COMPLETED.equals(intent.action)
+        val updated = Intent.ACTION_MY_PACKAGE_REPLACED.equals(intent.action)
+        if (!booted && !updated) return
         val app = context.applicationContext
         val pending = goAsync()
         EXECUTOR.execute {

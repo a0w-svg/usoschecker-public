@@ -1,4 +1,4 @@
-package pl.vistula.checker
+package pl.vistula.checker.core
 
 import java.time.LocalDate
 import org.json.JSONArray
@@ -6,11 +6,9 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import pl.vistula.checker.core.PlatonCrawler
-import pl.vistula.checker.core.PlatonTask
 import pl.vistula.checker.core.PlatonTaskParser.PlatonCourse
 
-class PlatonRunnerTest {
+class PlatonStateTest {
     private val url = "https://platon.vistula.edu.pl/Zadanie/1"
     private fun task(id: String, submitted: Boolean = false) =
         PlatonTask("$url$id", "Zadanie $id", "Kurs", LocalDate.of(2026, 12, 1), "", submitted, null)
@@ -19,7 +17,7 @@ class PlatonRunnerTest {
     @Test
     fun firstSyncIsSilent() {
         val state = JSONObject()
-        val summary = PlatonRunner.apply(state, PlatonCrawler.Result(listOf(task("a")), listOf(course("NZal"))), 1L)
+        val summary = PlatonState.apply(state, PlatonCrawler.Result(listOf(task("a")), listOf(course("NZal"))), 1L)
         assertTrue(summary.newTitles.isEmpty())
         assertTrue(summary.gradeChanges.isEmpty())
         assertEquals(1, state.getJSONArray("tasks").length())
@@ -29,8 +27,8 @@ class PlatonRunnerTest {
     @Test
     fun laterSyncReportsNewAssignmentsAndGradeChanges() {
         val state = JSONObject()
-        PlatonRunner.apply(state, PlatonCrawler.Result(listOf(task("a")), listOf(course("NZal"))), 1L)
-        val summary = PlatonRunner.apply(
+        PlatonState.apply(state, PlatonCrawler.Result(listOf(task("a")), listOf(course("NZal"))), 1L)
+        val summary = PlatonState.apply(
             state, PlatonCrawler.Result(listOf(task("a"), task("b"), task("c", submitted = true)), listOf(course("Dst"))), 2L)
         assertEquals(listOf("Zadanie b"), summary.newTitles)
         assertEquals(listOf("Kurs" to "Dst"), summary.gradeChanges)
@@ -44,7 +42,7 @@ class PlatonRunnerTest {
         val grade = history.getJSONObject(1)
         assertEquals("Zmieniono", grade.getString("action"))
         assertEquals("NZal → Dst", grade.getJSONObject("metadata").getString("summary"))
-        val again = PlatonRunner.apply(state, PlatonCrawler.Result(listOf(task("a"), task("b")), listOf(course("Dst"))), 3L)
+        val again = PlatonState.apply(state, PlatonCrawler.Result(listOf(task("a"), task("b")), listOf(course("Dst"))), 3L)
         assertTrue(again.newTitles.isEmpty() && again.gradeChanges.isEmpty())
         assertEquals(2, state.getJSONArray("history").length())
         assertTrue(state.optJSONArray("tasks") is JSONArray)

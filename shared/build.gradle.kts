@@ -28,20 +28,20 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api("org.jetbrains.compose.runtime:runtime:1.12.2")
-            api("org.jetbrains.compose.foundation:foundation:1.12.2")
-            api("org.jetbrains.compose.material3:material3:1.9.0")
-            api("org.jetbrains.compose.ui:ui:1.12.2")
+            api(libs.compose.runtime)
+            api(libs.compose.foundation)
+            api(libs.compose.material3)
+            api(libs.compose.ui)
         }
         val jvmCommonMain = getByName("jvmCommonMain") {
             dependencies {
                 // Android ships org.json in the platform; desktop gets the real library below.
-                compileOnly("org.json:json:20260814")
+                compileOnly(libs.json)
             }
         }
         val desktopMain = getByName("desktopMain") {
             dependencies {
-                implementation("org.json:json:20260814")
+                implementation(libs.json)
                 api(compose.desktop.currentOs)
             }
         }

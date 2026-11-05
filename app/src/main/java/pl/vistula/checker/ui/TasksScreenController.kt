@@ -71,15 +71,15 @@ class TasksScreenController private constructor() {
             val screen = LayoutInflater.from(activity).inflate(R.layout.screen_tasks, content, false)
             content.addView(screen)
 
-            val prefs = activity.getSharedPreferences("student_tools", android.content.Context.MODE_PRIVATE)
+            val prefs = pl.vistula.checker.StudentPrefs(activity)
             val extra = ArrayList<String>()
             val figures = ArrayList<String>()
             if (rows.length() > 0) figures.add(activity.getString(R.string.tasks_summary_progress, TaskTools.completionPercent(rows)))
             if (counts.overdue > 0) figures.add(activity.getString(R.string.tasks_summary_overdue, counts.overdue))
             if (figures.isNotEmpty()) extra.add(figures.joinToString(" · "))
-            val syncedAt = prefs.getLong("platonSyncedAt", 0L)
+            val syncedAt = prefs.platonSyncedAt
             if (syncedAt > 0) extra.add(activity.getString(R.string.tasks_platon_last_sync, java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT).format(java.util.Date(syncedAt))))
-            val syncError = prefs.getString("platonLastError", null)
+            val syncError = prefs.platonLastError
             if (!syncError.isNullOrEmpty()) extra.add(activity.getString(R.string.tasks_platon_last_error, syncError))
             val summary = activity.getString(R.string.tasks_summary, counts.pending, counts.done)
             screen.findViewById<TextView>(R.id.tasks_summary_extra).apply {
@@ -375,8 +375,7 @@ class TasksScreenController private constructor() {
                     onFilterChanged.accept(TasksUiState.FILTER_ALL)
                 }, false))
             } else if (total == 0) {
-                val linked = activity.getSharedPreferences("student_tools", android.content.Context.MODE_PRIVATE)
-                    .getString("platonSource", null).isNullOrEmpty().not()
+                val linked = pl.vistula.checker.StudentPrefs(activity).platonLinked
                 box.addView(UiHelper.button(
                     activity,
                     activity.getString(if (linked) R.string.tasks_platon_sync else R.string.tasks_platon_connect),

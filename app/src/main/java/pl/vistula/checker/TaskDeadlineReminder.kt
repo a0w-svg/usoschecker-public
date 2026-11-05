@@ -16,14 +16,13 @@ import pl.vistula.checker.core.TaskTools
 /** Once a day tells the student about open tasks that are overdue, due today or due tomorrow. */
 object TaskDeadlineReminder {
     private const val NOTIFICATION_ID = 3002
-    private const val PREFS = "student_tools"
 
     fun notifyIfDue(context: Context, tasks: JSONArray?, today: LocalDate = LocalDate.now(UsosClient.ZONE)) {
         if (tasks == null || tasks.length() == 0) return
         if (Build.VERSION.SDK_INT >= 33 &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.getString("taskReminderDay", null) == today.toString()) return
+        val prefs = StudentPrefs(context)
+        if (prefs.taskReminderDay == today.toString()) return
 
         var overdue = 0
         var dueToday = 0
@@ -67,7 +66,7 @@ object TaskDeadlineReminder {
             .build()
         try {
             NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
-            prefs.edit { putString("taskReminderDay", today.toString()) }
+            prefs.taskReminderDay = today.toString()
         } catch (ignored: SecurityException) {
         }
     }

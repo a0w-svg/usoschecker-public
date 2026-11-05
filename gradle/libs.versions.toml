@@ -1,0 +1,15 @@
+# Single source for versions that more than one module uses. Plugin versions stay in the root build.gradle
+# (Dependabot reads them there). Resolved coordinates are unchanged, so DEPENDENCIES.md still applies.
+[versions]
+compose = "1.12.2"
+composeMaterial3 = "1.9.0"
+json = "20260814"
+junit = "4.13.2"
+
+[libraries]
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMaterial3" }
+json = { module = "org.json:json", version.ref = "json" }
+junit = { module = "junit:junit", version.ref = "junit" }

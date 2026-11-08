@@ -17,6 +17,8 @@ Rule of thumb: put logic that needs no Android classes in `shared/.../core` so i
 
 `MainActivity` is the single activity. It owns the data (`state`, `repository`), runs background work through `task(...)`, and renders one screen at a time into `content` by switching on the current tab (see `Tabs`).
 
+Screen flows that need dialogs, toasts and background work are kept out of it. `PlatonFlow` (sign-in, sync, courses, messages, sign-out) and `TasksFlow` (add, edit, complete, delete with undo; demo and real tasks) talk to the Activity only through the small `FlowHost` interface. `StudentPrefs` is the typed wrapper for the `student_tools` SharedPreferences file; add new keys to `StudentPrefs.Keys` instead of calling `getSharedPreferences` directly.
+
 - **Screen controllers** (`app/.../ui/*ScreenController.kt`) are stateless objects with a `render(...)` function. They receive everything they need as parameters and report user actions through callbacks.
 - **UI state holders** keep what a screen remembers between renders and across configuration changes:
   `GradesUiState`, `TasksUiState`, `ScheduleUiState`, `HistoryUiState`, `ApiExplorerState`.
@@ -44,6 +46,17 @@ Platon has no public API, so the app reads its HTML with the session of an in-ap
 
 Files in `shared/.../ui/compose` are split by section. Text goes through `val tr = Translator(language)` and is called as `tr("pl", "en", "uk")`. Larger screens live in their own file (for example `LecturerWriteCards.kt`, `StaffDirectorySection.kt`, `AcademicExtrasSection.kt`).
 
+## Stored state and schema version
+
+Account data is one JSON object in the encrypted vault. Shared key names are in `StateKeys`; the shape version is
+`StateSchema.CURRENT`. When you change the shape of existing data, raise `CURRENT` and add an idempotent step to
+`StateSchema.migrate` (with a test). Reads shown to the UI are migrated in memory, and every write persists the
+migrated state. Pure state logic lives in `shared/.../core` (for example `PlatonState`, `PlatonSync`, `TaskTools`) so it
+runs in plain JUnit and on desktop. The Android vault caches the decrypted state, validated by the file's stamp
+(`StateCache`), so repeated reads do not decrypt again.
+
+Versions used by more than one module are in `gradle/libs.versions.toml`.
+
 ## Data flow
 
 1. `SyncWorker` or a user refresh calls `UsosClient` (OAuth1 over HTTPS).
@@ -54,7 +67,7 @@ Files in `shared/.../ui/compose` are split by section. Text goes through `val tr
 
 | Command | Covers |
 |---|---|
-| `./gradlew :core:test :shared:desktopTest :app:testDebugUnitTest` | pure logic, UI state holders, formatters, HTTP client with fakes |
+| `./gradlew :core:test :shared:desktopTest :app:testDebugUnitTest` | pure logic, UI state holders, formatters, HTTP client with fakes, repository concurrency and edit-session rules |
 | `./gradlew :app:connectedDebugAndroidTest -PisolatedTests` | device UI regression tests; needs an emulator and installs the separate QA app |
 
 Always pass `-PisolatedTests` for device tests: they refuse to run against the real app's data.
@@ -64,3 +77,5 @@ Always pass `-PisolatedTests` for device tests: they refuse to run against the r
 - The launcher activity is exported. Treat every intent extra as untrusted; use `Tabs.fromExternal` for tab ids.
 - Never log exception messages, URLs or response bodies (`Diagnostics` follows this).
 - Never write tokens, keys or the signing key into the repository or release artifacts.
+
+Platon parsers are tested against anonymized page samples in `core/src/test/resources/platon`. When Platon changes its markup, replace the sample with a new anonymized capture and `PlatonFixturesTest` shows what broke.

@@ -19,6 +19,7 @@ import pl.vistula.checker.core.ApiLanguage
 import pl.vistula.checker.core.Change
 import pl.vistula.checker.core.Diff
 import pl.vistula.checker.core.Snapshot
+import pl.vistula.checker.core.StateSchema
 import pl.vistula.checker.core.StudentServices
 import pl.vistula.checker.core.UsosParser
 
@@ -59,6 +60,7 @@ class SharedRepository @JvmOverloads constructor(
     fun update(session: EditSession, operation: StateRepository.Update) {
         synchronized(LOCK) {
             val current = vault.read()
+            StateSchema.migrate(current)
             if (session.epoch !== editEpochs[storePath]) throw loginChanged()
             for (i in IDENTITY_FIELDS.indices) {
                 if (session.identity[i] != current.optString(IDENTITY_FIELDS[i])) throw loginChanged()
@@ -73,13 +75,14 @@ class SharedRepository @JvmOverloads constructor(
 
     @Throws(Exception::class)
     override fun read(): JSONObject = synchronized(LOCK) {
-        localizedView(vault.read(), languageProvider.get())
+        localizedView(vault.read().also { StateSchema.migrate(it) }, languageProvider.get())
     }
 
     @Throws(Exception::class)
     override fun update(operation: StateRepository.Update) {
         synchronized(LOCK) {
             val state = vault.read()
+            StateSchema.migrate(state)
             operation.apply(state)
             vault.write(state)
         }

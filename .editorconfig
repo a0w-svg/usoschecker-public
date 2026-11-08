@@ -1,0 +1,17 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{kt,kts,java}]
+indent_size = 4
+max_line_length = 160
+
+[*.{xml,json,yml,yaml,toml}]
+indent_size = 2
+
+[*.{md,txt}]
+trim_trailing_whitespace = false

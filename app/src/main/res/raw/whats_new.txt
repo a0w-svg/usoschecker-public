@@ -1,3 +1,5 @@
+• Porządki pod maską: obsługa zadań i Platona została wydzielona z głównej aktywności, a zapisane dane mają wersję formatu z automatyczną migracją (ukończone zadania zawsze pokazują 100% postępu).
+• Więcej testów: współbieżne zapisy i zmiana konta w repozytorium oraz zapisane fragmenty stron Platona, które wykryją zmianę ich układu.
 • Szybsze odświeżanie w tle: aplikacja nie odszyfrowuje i nie wczytuje danych przy każdym odświeżeniu, gdy nic się nie zmieniło.
 • Okna szczegółów prowadzącego (grupy, frekwencja, prace dyplomowe, akademiki) są w pełni przetłumaczone na polski, angielski i ukraiński.
 • Uzupełnione opisy nowości po angielsku i ukraińsku.

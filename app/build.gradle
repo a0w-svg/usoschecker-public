@@ -31,8 +31,8 @@ android {
         applicationId = 'pl.vistula.checker'
         minSdk = 31
         targetSdk = 36
-        versionCode = 23
-        versionName = '1.7.0'
+        versionCode = 24
+        versionName = '1.8.0'
         testInstrumentationRunner = 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField "String", "USOS_KEY", '""'
         buildConfigField "String", "USOS_SECRET", '""'
@@ -131,8 +131,8 @@ dependencies {
     implementation 'androidx.core:core:1.19.1'
     implementation 'androidx.browser:browser:1.10.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.2.0'
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.json:json:20260814'
+    testImplementation libs.junit
+    testImplementation libs.json
     androidTestImplementation 'androidx.test:runner:1.7.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.7.0'

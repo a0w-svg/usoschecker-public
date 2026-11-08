@@ -1,3 +1,5 @@
+• Under the hood: tasks and Platon handling were moved out of the main activity, and stored data now carries a format version with automatic migration (completed tasks always show 100% progress).
+• More tests: concurrent writes and account switching in the repository, plus saved Platon page samples that will reveal a change of their layout.
 • Faster background refresh: the app no longer decrypts and reloads your data on every refresh when nothing has changed.
 • Lecturer detail windows (groups, attendance, theses, dormitories) are fully translated into Polish, English and Ukrainian.
 • Release notes are now complete in English and Ukrainian.

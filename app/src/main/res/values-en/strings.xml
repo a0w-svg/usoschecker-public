@@ -769,4 +769,20 @@ Last download: %3$s</string>
     <string name="lecturer_dlg_no_extra">No additional information.</string>
     <string name="lecturer_dlg_term">Period: %1$s – %2$s</string>
     <string name="lecturer_dlg_no_content">This page has no content.</string>
+    <string name="tasks_platon_settings_menu">Platon settings</string>
+    <string name="tasks_platon_settings_title">Platon settings</string>
+    <string name="tasks_platon_setting_notify_tasks">Notify about new assignments</string>
+    <string name="tasks_platon_setting_notify_grades">Notify about grade changes</string>
+    <string name="tasks_platon_setting_notify_messages">Notify about new messages</string>
+    <string name="tasks_platon_setting_auto_refresh">Refresh when Tasks opens</string>
+    <string name="tasks_platon_setting_semesters">Semesters…</string>
+    <string name="tasks_platon_semesters_title">Platon semesters</string>
+    <string name="tasks_platon_semesters_empty">Sync with Platon first to find the available semesters.</string>
+    <string name="tasks_platon_semesters_apply">Apply and sync</string>
+    <string name="tasks_platon_message_confirm_title">Open this message?</string>
+    <string name="tasks_platon_message_confirm_message">Opening it marks the message as read in Platon, just like in the browser.</string>
+    <string name="tasks_platon_message_open">Open</string>
+    <string name="tasks_platon_message_failed">The message could not be read.</string>
+    <string name="tasks_platon_course_assignments">Assignments from Platon:</string>
+    <string name="tasks_platon_course_no_assignments">No Platon assignments for this course.</string>
 </resources>

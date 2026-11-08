@@ -17,10 +17,45 @@ object PlatonState {
         val gradeChanges: List<Pair<String, String>>,
         val newMessages: List<String> = emptyList(),
         val events: List<Event> = emptyList(),
-    )
+    ) {
+        /** Same summary limited to the kinds of news the student wants notifications for. */
+        fun only(tasks: Boolean, grades: Boolean, messages: Boolean): Summary = Summary(
+            found, added, updated, skipped,
+            if (tasks) newTitles else emptyList(),
+            if (grades) gradeChanges else emptyList(),
+            if (messages) newMessages else emptyList(),
+            events,
+        )
+    }
 
     /** One Platon change shown in the Changes feed; [type] is "task", "grade" or "message". */
     class Event(val type: String, val title: String, val before: String, val after: String)
+
+    /** Marks inbox message [id] as read in the stored list; true when a stored unread message was changed. */
+    @JvmStatic
+    fun markMessageRead(s: JSONObject, id: String): Boolean {
+        val rows = s.optJSONArray(StateKeys.PLATON_MESSAGES) ?: return false
+        for (i in 0 until rows.length()) {
+            val m = rows.optJSONObject(i) ?: continue
+            if (m.optString("id") == id && m.optBoolean("unread")) {
+                m.put("unread", false)
+                return true
+            }
+        }
+        return false
+    }
+
+    /** Tasks of [tasks] that Platon listed under the course called [courseTitle], in the given order. */
+    @JvmStatic
+    fun assignmentsFor(tasks: JSONArray?, courseTitle: String): List<JSONObject> {
+        val result = ArrayList<JSONObject>()
+        if (tasks == null) return result
+        for (i in 0 until tasks.length()) {
+            val t = tasks.optJSONObject(i) ?: continue
+            if (t.optString("source") == "platon" && t.optString("course").trim().equals(courseTitle.trim(), ignoreCase = true)) result.add(t)
+        }
+        return result
+    }
 
     /** Merges [crawled] into the account state [s] and reports what is new or changed. */
     fun apply(s: JSONObject, crawled: PlatonCrawler.Result, now: Long): Summary {
@@ -53,6 +88,11 @@ object PlatonState {
         }
         val newTitles = if (known.isEmpty() && firstRun) emptyList()
         else crawled.tasks.filter { it.externalId !in known && !it.submitted }.map { it.title }
+        if (crawled.semesters.isNotEmpty()) {
+            val list = JSONArray()
+            crawled.semesters.forEach { list.put(it) }
+            s.put(StateKeys.PLATON_SEMESTERS, list)
+        }
         val seenMessages = HashSet<String>()
         val hadMessages = s.optJSONArray(StateKeys.PLATON_MESSAGES) != null
         s.optJSONArray(StateKeys.PLATON_MESSAGES)?.let { rows ->

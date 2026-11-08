@@ -80,6 +80,51 @@ object PlatonTaskParser {
         return courses.filter { val r = rank(it.label); r == null || r == newest }
     }
 
+    private fun semesterRank(code: String): Int = code.substring(0, 4).toInt() * 2 + if (code.endsWith("Z")) 1 else 0
+
+    /** Semester code ("2026Z" winter, "2026L" summer) found in a course label, or null. */
+    @JvmStatic
+    fun semesterOf(label: String): String? = SEMESTER.find(label)?.value
+
+    /** Distinct semester codes found in [courses], newest first. */
+    @JvmStatic
+    fun semesters(courses: List<CourseEntry>): List<String> =
+        courses.mapNotNull { semesterOf(it.label) }.distinct().sortedByDescending { semesterRank(it) }
+
+    /** Courses of the [selected] semesters (and courses without a code); the newest semester when none is selected. */
+    @JvmStatic
+    fun inSemesters(courses: List<CourseEntry>, selected: Set<String>): List<CourseEntry> =
+        if (selected.isEmpty()) currentSemester(courses)
+        else courses.filter { val s = semesterOf(it.label); s == null || s in selected }
+
+    /** A message opened from the inbox. */
+    data class PlatonMessageDetail(val subject: String, val sender: String, val date: String, val body: String)
+
+    private val DETAIL_BODY = Regex("(?is)<div[^>]*class=\"[^\"]*mail-body[^\"]*\"[^>]*>(.*?)</div>")
+    private val DETAIL_HEADER = Regex("(?is)mail-box-header.*?<div[^>]*class=\"text\"[^>]*>(.*?)</div>\\s*<span>(.*?)</span>")
+    private val DETAIL_SENDER = Regex("(?is)class=\"user-text\"[^>]*>(.*?)</div>")
+    private val LINE_BREAK = Regex("(?i)<br\\s*/?>")
+    private val BLANK_RUNS = Regex("\\n{3,}")
+
+    /** Subject, sender, date and text of a message page; null when the page has no message body. */
+    @JvmStatic
+    fun parseMessageDetail(html: String?): PlatonMessageDetail? {
+        if (html.isNullOrBlank()) return null
+        val clean = SCRIPTS.replace(html.take(MAX_HTML), " ")
+        val body = DETAIL_BODY.find(clean)?.groupValues?.get(1) ?: return null
+        val header = DETAIL_HEADER.find(clean)
+        val text = decode(TAGS.replace(LINE_BREAK.replace(body, "\n"), " "))
+            .lines().joinToString("\n") { it.replace(SPACES, " ").trim() }
+            .replace(BLANK_RUNS, "\n\n").trim()
+        if (text.isEmpty()) return null
+        return PlatonMessageDetail(
+            subject = header?.let { text(it.groupValues[1]) }.orEmpty().take(300),
+            sender = DETAIL_SENDER.find(clean)?.let { text(it.groupValues[1]) }.orEmpty().take(120),
+            date = header?.let { text(it.groupValues[2]) }.orEmpty().take(40),
+            body = text.take(8000),
+        )
+    }
+
     /** Anti-forgery token of a Platon form page; never logged or stored. */
     @JvmStatic
     fun formToken(html: String?): String? =

@@ -775,4 +775,20 @@
     <string name="lecturer_dlg_no_extra">Додаткової інформації немає.</string>
     <string name="lecturer_dlg_term">Період: %1$s – %2$s</string>
     <string name="lecturer_dlg_no_content">На сторінці немає вмісту.</string>
+    <string name="tasks_platon_settings_menu">Налаштування Platon</string>
+    <string name="tasks_platon_settings_title">Налаштування Platon</string>
+    <string name="tasks_platon_setting_notify_tasks">Сповіщати про нові завдання</string>
+    <string name="tasks_platon_setting_notify_grades">Сповіщати про зміни оцінок</string>
+    <string name="tasks_platon_setting_notify_messages">Сповіщати про нові повідомлення</string>
+    <string name="tasks_platon_setting_auto_refresh">Оновлювати під час відкриття Завдань</string>
+    <string name="tasks_platon_setting_semesters">Семестри…</string>
+    <string name="tasks_platon_semesters_title">Семестри Platon</string>
+    <string name="tasks_platon_semesters_empty">Спочатку синхронізуйте з Platon, щоб дізнатися доступні семестри.</string>
+    <string name="tasks_platon_semesters_apply">Застосувати й синхронізувати</string>
+    <string name="tasks_platon_message_confirm_title">Відкрити повідомлення?</string>
+    <string name="tasks_platon_message_confirm_message">Після відкриття Platon позначить повідомлення як прочитане, як і в браузері.</string>
+    <string name="tasks_platon_message_open">Відкрити</string>
+    <string name="tasks_platon_message_failed">Не вдалося прочитати повідомлення.</string>
+    <string name="tasks_platon_course_assignments">Завдання з Platon:</string>
+    <string name="tasks_platon_course_no_assignments">Для цього курсу немає завдань з Platon.</string>
 </resources>

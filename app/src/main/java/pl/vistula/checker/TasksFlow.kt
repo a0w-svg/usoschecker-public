@@ -47,6 +47,8 @@ class TasksFlow(private val host: FlowHost, private val platon: PlatonFlow) {
             override fun onPlatonMessages() = platon.showMessages()
 
             override fun onPlatonDisconnect() = platon.disconnect()
+
+            override fun onPlatonSettings() = platon.showSettings()
         }
     }
 

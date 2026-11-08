@@ -21,6 +21,8 @@ object PlatonCrawler {
         val tasks: List<PlatonTask>,
         val courses: List<PlatonTaskParser.PlatonCourse>,
         val messages: List<PlatonTaskParser.PlatonMessage> = emptyList(),
+        /** Every semester code found in the student's course list, newest first (for the semester picker). */
+        val semesters: List<String> = emptyList(),
     )
 
     private const val MESSAGES_PAGE = "https://platon.vistula.edu.pl/Wiadomosci"
@@ -52,19 +54,22 @@ object PlatonCrawler {
         start: String,
         post: ((String, Map<String, String>) -> Pair<String, String>)? = null,
         fetch: (String) -> Pair<String, String>,
-    ): List<PlatonTask> = crawlAll(start, post, fetch).tasks
+    ): List<PlatonTask> = crawlAll(start, post, fetch = fetch).tasks
 
     @JvmStatic
     fun crawlAll(
         start: String,
         post: ((String, Map<String, String>) -> Pair<String, String>)? = null,
+        semesters: Set<String> = emptySet(),
         fetch: (String) -> Pair<String, String>,
     ): Result {
         val found = LinkedHashMap<String, PlatonTask>()
         var cards: List<PlatonTaskParser.PlatonCourse> = emptyList()
+        var available: List<String> = emptyList()
         if (post != null) {
-            val listed = try { currentCourses(fetch, post) } catch (e: IOException) { Listing(emptyList(), emptyList()) }
+            val listed = try { currentCourses(fetch, post, semesters) } catch (e: IOException) { Listing(emptyList(), emptyList(), emptyList()) }
             cards = listed.cards
+            available = listed.semesters
             for (course in listed.entries) {
                 val page = try { fetch(course.url) } catch (e: IOException) { continue }
                 PlatonTaskParser.parseElements(page.second, page.first).forEach { found.putIfAbsent(it.externalId, it) }
@@ -72,18 +77,23 @@ object PlatonCrawler {
         }
         if (found.isEmpty()) legacy(start, fetch, found)
         val messages = if (post != null) inbox(fetch, post) else emptyList()
-        return Result(if (found.isEmpty()) emptyList() else details(found, fetch), cards, messages)
+        return Result(if (found.isEmpty()) emptyList() else details(found, fetch), cards, messages, available)
     }
 
-    private class Listing(val entries: List<PlatonTaskParser.CourseEntry>, val cards: List<PlatonTaskParser.PlatonCourse>)
+    private class Listing(
+        val entries: List<PlatonTaskParser.CourseEntry>,
+        val cards: List<PlatonTaskParser.PlatonCourse>,
+        val semesters: List<String>,
+    )
 
     /** All pages of the student's course list, reduced to the current semester. */
     private fun currentCourses(
         fetch: (String) -> Pair<String, String>,
         post: (String, Map<String, String>) -> Pair<String, String>,
+        selected: Set<String>,
     ): Listing {
         val html = fetch(LIST_PAGE).second
-        val token = PlatonTaskParser.formToken(html) ?: return Listing(emptyList(), emptyList())
+        val token = PlatonTaskParser.formToken(html) ?: return Listing(emptyList(), emptyList(), emptyList())
         val all = LinkedHashMap<String, PlatonTaskParser.CourseEntry>()
         val cards = LinkedHashMap<String, PlatonTaskParser.PlatonCourse>()
         for (page in 1..MAX_PAGES) {
@@ -98,9 +108,9 @@ object PlatonCrawler {
             fresh.forEach { all[it.url] = it }
             PlatonTaskParser.parseCourseCards(result.second, result.first).forEach { cards.putIfAbsent(it.url, it) }
         }
-        val current = PlatonTaskParser.currentSemester(all.values.toList()).take(MAX_COURSES)
-        val urls = current.map { it.url }.toSet()
-        return Listing(current, cards.values.filter { it.url in urls })
+        val chosen = PlatonTaskParser.inSemesters(all.values.toList(), selected).take(MAX_COURSES)
+        val urls = chosen.map { it.url }.toSet()
+        return Listing(chosen, cards.values.filter { it.url in urls }, PlatonTaskParser.semesters(all.values.toList()))
     }
 
     private fun legacy(start: String, fetch: (String) -> Pair<String, String>, found: MutableMap<String, PlatonTask>) {

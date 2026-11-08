@@ -127,8 +127,10 @@ widzi ani nie zapisuje hasła. Sesja to ciasteczka WebView; `PlatonClient` doł�
 żądań HTTPS do `platon.vistula.edu.pl`, nie podąża za przekierowaniami poza ten host (traktuje je
 jako wygasłą sesję) i ogranicza rozmiar odpowiedzi. Odnawianie sesji w tle używa ukrytego WebView
 i istniejącej sesji Microsoft; po porażce aplikacja prosi o logowanie. Aplikacja tylko czyta strony
-(GET oraz formularze listujące POST z tokenem anty-CSRF); nie wysyła plików, nie zmienia ocen ani
-statusu wiadomości. Do stanu konta trafiają zminimalizowane dane: zadania, lista kursów
+(GET oraz formularze listujące POST z tokenem anty-CSRF); nie wysyła plików i nie zmienia ocen. Jedyny skutek
+uboczny odczytu to ten sam co w przeglądarce: otwarcie wiadomości w aplikacji sprawia, że Platon oznacza ją
+jako przeczytaną, dlatego nieprzeczytana wiadomość otwiera się dopiero po potwierdzeniu, a identyfikator
+wiadomości trafia do adresu tylko jako zwykła liczba (`PlatonLinks.messageUrl`). Do stanu konta trafiają zminimalizowane dane: zadania, lista kursów
 (postęp, ocena), 20 ostatnich wiadomości (nadawca, temat, data) i wpisy w historii zmian.
 „Wyloguj z Platona” oraz odłączenie USOS usuwają link, znaczniki synchronizacji i ciasteczka
 wbudowanej przeglądarki (również sesję Microsoft w niej). Powiadomienia z Platona mają treść

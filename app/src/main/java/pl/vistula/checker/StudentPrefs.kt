@@ -37,6 +37,29 @@ class StudentPrefs(private val context: Context) {
         get() = prefs.getString(Keys.PLATON_LAST_ERROR, null)?.takeIf { it.isNotEmpty() }
         set(value) = prefs.edit { if (value.isNullOrEmpty()) remove(Keys.PLATON_LAST_ERROR) else putString(Keys.PLATON_LAST_ERROR, value) }
 
+    /** Semester codes ("2026Z") the Platon sync reads; empty means "the newest semester only". */
+    var platonSemesters: Set<String>
+        get() = prefs.getString(Keys.PLATON_SEMESTERS, null).orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+        set(value) = prefs.edit { if (value.isEmpty()) remove(Keys.PLATON_SEMESTERS) else putString(Keys.PLATON_SEMESTERS, value.sorted().joinToString(",")) }
+
+    /** Which Platon news raises a notification in the background refresh (all on by default). */
+    var platonNotifyTasks: Boolean
+        get() = prefs.getBoolean(Keys.PLATON_NOTIFY_TASKS, true)
+        set(value) = prefs.edit { putBoolean(Keys.PLATON_NOTIFY_TASKS, value) }
+
+    var platonNotifyGrades: Boolean
+        get() = prefs.getBoolean(Keys.PLATON_NOTIFY_GRADES, true)
+        set(value) = prefs.edit { putBoolean(Keys.PLATON_NOTIFY_GRADES, value) }
+
+    var platonNotifyMessages: Boolean
+        get() = prefs.getBoolean(Keys.PLATON_NOTIFY_MESSAGES, true)
+        set(value) = prefs.edit { putBoolean(Keys.PLATON_NOTIFY_MESSAGES, value) }
+
+    /** Refresh Platon automatically when the Tasks screen opens. */
+    var platonAutoRefresh: Boolean
+        get() = prefs.getBoolean(Keys.PLATON_AUTO_REFRESH, true)
+        set(value) = prefs.edit { putBoolean(Keys.PLATON_AUTO_REFRESH, value) }
+
     var taskOrder: String?
         get() = prefs.getString(Keys.TASK_ORDER, null)
         set(value) = prefs.edit { putString(Keys.TASK_ORDER, value) }
@@ -61,6 +84,7 @@ class StudentPrefs(private val context: Context) {
         remove(Keys.PLATON_OFFERED)
         remove(Keys.PLATON_EXPIRED)
         remove(Keys.PLATON_LAST_ERROR)
+        remove(Keys.PLATON_SEMESTERS)
     }
 
     object Keys {
@@ -69,6 +93,11 @@ class StudentPrefs(private val context: Context) {
         const val PLATON_OFFERED = "platonOffered"
         const val PLATON_EXPIRED = "platonExpired"
         const val PLATON_LAST_ERROR = "platonLastError"
+        const val PLATON_SEMESTERS = "platonSemesters"
+        const val PLATON_NOTIFY_TASKS = "platonNotifyTasks"
+        const val PLATON_NOTIFY_GRADES = "platonNotifyGrades"
+        const val PLATON_NOTIFY_MESSAGES = "platonNotifyMessages"
+        const val PLATON_AUTO_REFRESH = "platonAutoRefresh"
         const val TASK_ORDER = "taskOrder"
         const val GRADE_ORDER = "gradeOrder"
         const val CALENDAR_MODE = "calendarMode"

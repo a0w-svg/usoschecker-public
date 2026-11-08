@@ -1,3 +1,6 @@
+• Platon: read your messages in the app (an unread message asks first, because Platon then marks it as read), and a course shows its progress, grade and its assignments.
+• Platon: choose which semesters to sync (the newest by default), for example to see last year's assignments.
+• Platon settings: separate notifications for new assignments, grade changes and new messages, and an option to stop refreshing when Tasks opens.
 • Under the hood: tasks and Platon handling were moved out of the main activity, and stored data now carries a format version with automatic migration (completed tasks always show 100% progress).
 • More tests: concurrent writes and account switching in the repository, plus saved Platon page samples that will reveal a change of their layout.
 • Faster background refresh: the app no longer decrypts and reloads your data on every refresh when nothing has changed.

@@ -19,12 +19,13 @@ object PlatonRunner {
 
     /** Network part: reads courses, assignments and deadlines. Throws [PlatonClient.SessionExpiredException]. */
     @Throws(Exception::class)
-    fun crawl(source: String): PlatonCrawler.Result = PlatonCrawler.crawlAll(
+    fun crawl(source: String, semesters: Set<String> = emptySet()): PlatonCrawler.Result = PlatonCrawler.crawlAll(
         source,
         { address, form ->
             val page = PlatonClient.fetch(address, form)
             page.url to page.html
         },
+        semesters,
     ) { address ->
         val page = PlatonClient.fetch(address)
         page.url to page.html
@@ -35,11 +36,14 @@ object PlatonRunner {
      * Microsoft session ([PlatonSession]) and retries once. Call from a background thread only.
      */
     @Throws(Exception::class)
-    fun crawlRenewing(context: Context, source: String): PlatonCrawler.Result = try {
-        crawl(source)
-    } catch (e: PlatonClient.SessionExpiredException) {
-        if (!PlatonSession.refresh(context)) throw e
-        crawl(source)
+    fun crawlRenewing(context: Context, source: String): PlatonCrawler.Result {
+        val semesters = StudentPrefs(context).platonSemesters
+        return try {
+            crawl(source, semesters)
+        } catch (e: PlatonClient.SessionExpiredException) {
+            if (!PlatonSession.refresh(context)) throw e
+            crawl(source, semesters)
+        }
     }
 
     /** Signs out of Platon on this device: forgets the linked page, flags and the in-app browser's cookies. */
@@ -69,7 +73,7 @@ object PlatonRunner {
                 Repository(context).update { s -> summary = PlatonState.apply(s, crawled, now) }
                 prefs.platonSyncedAt = now
                 prefs.platonLastError = null
-                summary?.let { notify(context, it) }
+                summary?.let { notify(context, it.only(prefs.platonNotifyTasks, prefs.platonNotifyGrades, prefs.platonNotifyMessages)) }
             } catch (e: PlatonClient.SessionExpiredException) {
                 prefs.platonExpired = true
             } catch (e: Exception) {

@@ -163,10 +163,10 @@ class PlatonCourseListTest {
         val course = """<h1>Przedmiot - Kurs - 2026Z       Wróć do: x</h1><div class="dd3-content To_Be_Evaluated"> Zad<br>
             <a href="/LmsProfil/SciezkaSzkoleniowaElementUzytkownik/RedirectToElement?sciezkaSzkoleniowaElementId=7&amp;sciezkaSzkoleniowaElementTyp=ZADANIE">p</a>
             <span class="label label-success">Zadanie</span><span rel="tooltip" title="Oczekuje na ocenę">Oczekuje na ocenę</span></div>"""
-        var posts = 0
+        val posts = java.util.concurrent.atomic.AtomicInteger()
         val tasks = PlatonCrawler.crawl("https://platon.vistula.edu.pl/StronaStartowa", { url, form ->
             assertEquals(endpoint, url)
-            posts++
+            posts.incrementAndGet()
             url to if (form["Page"] == "1") """<a href="/LmsProfil/X/ElementyBySciezkaSzkoleniowaId/9">Uruchom Kurs - 2026Z</a>""" else ""
         }) { url ->
             url to when {
@@ -176,7 +176,8 @@ class PlatonCourseListTest {
                 else -> throw java.io.IOException("404")
             }
         }
-        assertEquals(2, posts)
+        // Pages are requested in a wave, so the empty page that ends the list is requested too.
+        assertTrue(posts.get() in 2..5)
         assertEquals(1, tasks.size)
         assertEquals("Oczekuje na ocenę", tasks[0].status)
         assertEquals(LocalDate.of(2026, 12, 1), tasks[0].due)

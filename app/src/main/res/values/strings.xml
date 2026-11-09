@@ -780,4 +780,20 @@
     <string name="lecturer_dlg_no_extra">Brak dodatkowych informacji.</string>
     <string name="lecturer_dlg_term">Termin: %1$s – %2$s</string>
     <string name="lecturer_dlg_no_content">Brak treści strony.</string>
+    <string name="tasks_platon_settings_menu">Ustawienia Platona</string>
+    <string name="tasks_platon_settings_title">Ustawienia Platona</string>
+    <string name="tasks_platon_setting_notify_tasks">Powiadamiaj o nowych zadaniach</string>
+    <string name="tasks_platon_setting_notify_grades">Powiadamiaj o zmianach ocen</string>
+    <string name="tasks_platon_setting_notify_messages">Powiadamiaj o nowych wiadomościach</string>
+    <string name="tasks_platon_setting_auto_refresh">Odświeżaj po otwarciu Zadań</string>
+    <string name="tasks_platon_setting_semesters">Semestry…</string>
+    <string name="tasks_platon_semesters_title">Semestry z Platona</string>
+    <string name="tasks_platon_semesters_empty">Najpierw zsynchronizuj z Platonem, aby poznać dostępne semestry.</string>
+    <string name="tasks_platon_semesters_apply">Zastosuj i synchronizuj</string>
+    <string name="tasks_platon_message_confirm_title">Otworzyć wiadomość?</string>
+    <string name="tasks_platon_message_confirm_message">Otwarcie oznaczy wiadomość jako przeczytaną w Platonie, tak jak w przeglądarce.</string>
+    <string name="tasks_platon_message_open">Otwórz</string>
+    <string name="tasks_platon_message_failed">Nie udało się odczytać wiadomości.</string>
+    <string name="tasks_platon_course_assignments">Zadania z Platona:</string>
+    <string name="tasks_platon_course_no_assignments">Brak zadań z Platona dla tego kursu.</string>
 </resources>

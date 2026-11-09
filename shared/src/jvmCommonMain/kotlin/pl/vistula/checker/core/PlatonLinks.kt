@@ -27,6 +27,16 @@ object PlatonLinks {
         }
     }
 
+    private val MESSAGE_ID = Regex("\\d{1,12}")
+
+    /** Address of an inbox message page, or null when [id] is not a plain number (it is placed in a URL). */
+    @JvmStatic
+    fun messageUrl(id: String?): String? =
+        if (id != null && MESSAGE_ID.matches(id))
+            "https://platon.vistula.edu.pl/Wiadomosci/Wiadomosci/Wiadomosc?wiadomoscId=$id&operacja=Podglad" +
+                "&katalogSymbol=ODBIORCZA&katalogId=1&objectId=0&kandydatId=0&czyBaza=False"
+        else null
+
     @JvmStatic
     fun isTaskLink(address: String?): Boolean = try {
         normalize(address).isNotEmpty()

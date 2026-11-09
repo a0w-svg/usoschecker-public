@@ -14,6 +14,12 @@ import java.util.Locale
 import java.util.TreeMap
 import java.util.TreeSet
 import java.util.UUID
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.Semaphore
 import java.util.function.Consumer
 import kotlin.math.max
 import kotlin.math.min
@@ -261,8 +267,90 @@ class UsosClient @JvmOverloads constructor(
     }
 
     @Throws(Exception::class)
-    fun get(endpoint: String, params: Map<String, String>): String =
-        request("GET", endpoint, params, true, token, tokenSecret)
+    fun get(endpoint: String, params: Map<String, String>): String {
+        // After a session, cooldown or network failure the sync is over: start no further requests (in flight ones finish).
+        halted?.let { throw it }
+        // Several stages are fetched at once; the gate keeps the number of requests in flight below USOS limits.
+        gate.acquire()
+        try {
+            halted?.let { throw it }
+            return request("GET", endpoint, params, true, token, tokenSecret)
+        } catch (e: ApiException) {
+            if (e.authorization || e.retryable || e.status == 401) halt(e)
+            throw e
+        } catch (e: IOException) {
+            // A request cancelled on purpose (a sibling page failed) is not a network failure; a timeout is.
+            val cancelled = Thread.currentThread().isInterrupted || (e is java.io.InterruptedIOException && e !is java.net.SocketTimeoutException)
+            if (!cancelled) halt(e)
+            throw e
+        } finally {
+            gate.release()
+        }
+    }
+
+    @Volatile private var halted: Exception? = null
+    @Volatile private var haltedStage: String? = null
+
+    /** Label of the prefetched stage the current thread works for (inherited by threads it starts). */
+    private val stageOfThread = InheritableThreadLocal<String?>()
+
+    @Synchronized private fun halt(failure: Exception) {
+        if (halted == null) {
+            halted = failure
+            haltedStage = stageOfThread.get()
+        }
+    }
+
+    private var parallelism = MAX_PARALLEL_REQUESTS
+    private var gate = Semaphore(MAX_PARALLEL_REQUESTS)
+
+    /**
+     * How many stages of a sync may run at once. 1 keeps the strictly sequential order (nothing is requested after a
+     * failure, as before); the default is [MAX_PARALLEL_REQUESTS]. Returns this client for chaining.
+     */
+    fun withParallelism(count: Int): UsosClient = apply {
+        parallelism = count.coerceIn(1, MAX_PARALLEL_REQUESTS)
+        gate = Semaphore(parallelism)
+    }
+
+    /**
+     * A request started ahead of the code that needs it. Without an executor it runs on first [await], in the order the
+     * sequential code would have made it. [await] rethrows the request's own exception.
+     */
+    private class Ahead<T>(private val future: Future<T>?, private val lazy: (() -> T)?) {
+        private var done = false
+        private var value: T? = null
+
+        @Suppress("UNCHECKED_CAST")
+        @Throws(Exception::class)
+        fun await(): T {
+            if (future == null) {
+                if (!done) {
+                    value = lazy!!.invoke()
+                    done = true
+                }
+                return value as T
+            }
+            return try {
+                future.get()
+            } catch (e: ExecutionException) {
+                throw (e.cause as? Exception) ?: e
+            }
+        }
+    }
+
+    private fun <T> ahead(executor: ExecutorService?, label: String, block: () -> T): Ahead<T> =
+        if (executor == null) Ahead(null, block) else Ahead(
+            executor.submit(Callable {
+                stageOfThread.set(label)
+                try {
+                    block()
+                } finally {
+                    stageOfThread.remove()
+                }
+            }),
+            null,
+        )
 
     @Throws(Exception::class)
     fun begin(scopes: String?, callback: String = "oob"): Map<String, String> {
@@ -327,7 +415,7 @@ class UsosClient @JvmOverloads constructor(
         )
     }
 
-    private var stage = "Rozpoczęcie synchronizacji"
+    @Volatile private var stage = "Rozpoczęcie synchronizacji"
 
     private fun reportProgress(message: String) {
         stage = message + (if (message.startsWith("Pobieranie planu")) " · tt/student" else "")
@@ -338,7 +426,8 @@ class UsosClient @JvmOverloads constructor(
     fun snapshot(): Snapshot = try {
         fetchSnapshot()
     } catch (e: Exception) {
-        throw SyncException(stage, e)
+        // A failure raised by a prefetched stage keeps that stage's name even if another stage was awaited first.
+        throw SyncException(if (halted === e) (haltedStage ?: stage) else stage, e)
     }
 
     private fun interface SnapshotParser {
@@ -362,6 +451,48 @@ class UsosClient @JvmOverloads constructor(
             loadTimetable(s, start)
             return s
         }
+        val executor = if (parallelism > 1) Executors.newFixedThreadPool(PREFETCH_THREADS) { r -> Thread(r, "usos-prefetch").apply { isDaemon = true } } else null
+        try {
+            return fetchStudentData(s, start, executor)
+        } finally {
+            executor?.shutdownNow()
+        }
+    }
+
+    /** The student snapshot. Independent stages are requested up front and awaited where the data is needed. */
+    @Throws(Exception::class)
+    private fun fetchStudentData(s: Snapshot, start: LocalDate, executor: ExecutorService?): Snapshot {
+        val paymentsWanted = StudentServices.hasScope(scopes, "payments")
+        val ectsAhead = ahead(executor, "Pobieranie punktów ECTS · courses/user_ects_points") { get("services/courses/user_ects_points", emptyMap()) }
+        val accountsAhead = if (paymentsWanted) ahead(executor, "Pobieranie subkont studenta · payments/user_accounts") { get("services/payments/user_accounts", emptyMap()) } else null
+        val paymentsAhead = if (paymentsWanted) ahead(executor, "Pobieranie należności i rat · payments/user_payments") { get(
+                    "services/payments/user_payments",
+                    mapOf(
+                        "fields" to "id|description|type|state|account_number|payment_deadline|total_amount|saldo_amount|currency|chosen_installment_plan[id|currency|installments[amount|payment_date|description|number]]"
+                    )
+                ) } else null
+        val thesesAhead = ahead(executor, "Pobieranie prac dyplomowych · theses/user") {
+            val user = JSONObject(get("services/users/user", mapOf("fields" to "id")))
+            val userId = StudentServices.text(user, "id")
+            if (userId.isBlank()) throw JSONException("Missing user ID")
+            JSONObject(get(
+                "services/theses/user",
+                mapOf("user_id" to userId, "fields" to "authored_theses[id|title|titles|supervisors[first_name|last_name]]")
+            ))
+        }
+        val testsAhead = if (StudentServices.hasScope(scopes, "crstests")) ahead(executor, "Pobieranie sprawdzianów cząstkowych · crstests/participant2") { get(
+                        "services/crstests/participant2",
+                        mapOf(
+                            "active_terms_only" to "false",
+                            "fields" to "course_edition[course[id|name]|term[id]]|root[id|type|visible_for_students|subnodes_deep[id|parent_id|name|type|visible_for_students]]"
+                        )
+                    ) } else null
+        val newsAhead = ahead(executor, "Pobieranie komunikatów uczelni · news/search") { get(
+                "services/news/search",
+                mapOf("num" to "10", "fields" to "items[article[id|title|publication_date|author|headline_html|content_html]]")
+            ) }
+        val timetableAhead = ahead(executor, "Pobieranie planu · tt/student") { fetchTimetable(start) { } }
+
         reportProgress("Pobieranie semestrów · courses/user")
         val editions = JSONObject(
             get(
@@ -374,7 +505,7 @@ class UsosClient @JvmOverloads constructor(
         reportProgress("Pobieranie punktów ECTS · courses/user_ects_points")
         var ectsPoints: Map<String, Double> = emptyMap()
         try {
-            val ectsRaw = get("services/courses/user_ects_points", emptyMap())
+            val ectsRaw = ectsAhead.await()
             ectsPoints = UsosParser.ectsPoints(JSONObject(ectsRaw))
         } catch (e: Exception) {
             optionalFailure(e)
@@ -405,7 +536,7 @@ class UsosClient @JvmOverloads constructor(
         if (!paymentsScopeMissing) {
             reportProgress("Pobieranie subkont studenta · payments/user_accounts")
             try {
-                val accRaw = get("services/payments/user_accounts", emptyMap())
+                val accRaw = accountsAhead!!.await()
                 accountsRaw = JSONTokener(accRaw).nextValue()
             } catch (e: ApiException) {
                 if (e.status == 403 && !e.authorization) {
@@ -420,12 +551,7 @@ class UsosClient @JvmOverloads constructor(
         if (!paymentsScopeMissing) {
             reportProgress("Pobieranie należności i rat · payments/user_payments")
             try {
-                val payRaw = get(
-                    "services/payments/user_payments",
-                    mapOf(
-                        "fields" to "id|description|type|state|account_number|payment_deadline|total_amount|saldo_amount|currency|chosen_installment_plan[id|currency|installments[amount|payment_date|description|number]]"
-                    )
-                )
+                val payRaw = paymentsAhead!!.await()
                 paymentsRaw = JSONTokener(payRaw).nextValue()
             } catch (e: ApiException) {
                 if (e.status == 403 && !e.authorization) {
@@ -449,13 +575,7 @@ class UsosClient @JvmOverloads constructor(
 
         reportProgress("Pobieranie prac dyplomowych · theses/user")
         try {
-            val user = JSONObject(get("services/users/user", mapOf("fields" to "id")))
-            val userId = StudentServices.text(user, "id")
-            if (userId.isBlank()) throw JSONException("Missing user ID")
-            val thesesRaw = JSONObject(get(
-                "services/theses/user",
-                mapOf("user_id" to userId, "fields" to "authored_theses[id|title|titles|supervisors[first_name|last_name]]")
-            ))
+            val thesesRaw = thesesAhead.await()
             if (thesesRaw.optJSONArray("authored_theses") == null) throw JSONException("Missing authored theses")
             parseLanguages(s) { variant -> variant.thesis = UsosParser.thesis(thesesRaw) }
         } catch (e: Exception) {
@@ -466,15 +586,7 @@ class UsosClient @JvmOverloads constructor(
         if (StudentServices.hasScope(scopes, "crstests")) {
             reportProgress("Pobieranie sprawdzianów cząstkowych · crstests/participant2")
             try {
-                val tests = JSONArray(
-                    get(
-                        "services/crstests/participant2",
-                        mapOf(
-                            "active_terms_only" to "false",
-                            "fields" to "course_edition[course[id|name]|term[id]]|root[id|type|visible_for_students|subnodes_deep[id|parent_id|name|type|visible_for_students]]"
-                        )
-                    )
-                )
+                val tests = JSONArray(testsAhead!!.await())
                 enrichCourseTestNodes(tests)
                 parseLanguages(s) { variant ->
                     variant.tests.addAll(UsosParser.courseTestTrees(tests, UsosParser.courseNames(editions)))
@@ -489,10 +601,7 @@ class UsosClient @JvmOverloads constructor(
 
         reportProgress("Pobieranie komunikatów uczelni · news/search")
         try {
-            val newsRaw = get(
-                "services/news/search",
-                mapOf("num" to "10", "fields" to "items[article[id|title|publication_date|author|headline_html|content_html]]")
-            )
+            val newsRaw = newsAhead.await()
             parseLanguages(s) { variant -> variant.news.addAll(UsosParser.newsArticles(JSONTokener(newsRaw).nextValue())) }
         } catch (e: Exception) {
             optionalFailure(e)
@@ -521,7 +630,8 @@ class UsosClient @JvmOverloads constructor(
             parseLanguages(s) { variant -> UsosParser.grades(variant, grades, UsosParser.courseNames(editions), points) }
             i += 8
         }
-        loadTimetable(s, start)
+        reportProgress("Pobieranie planu · tt/student")
+        applyTimetable(s, timetableAhead.await())
         enrichGradeUnits(s)
         for (translation in s.localized.values) {
             for (record in translation.records.values) {
@@ -622,8 +732,17 @@ class UsosClient @JvmOverloads constructor(
         if (budget.expired()) throw JSONException("Course-test detail time limit exceeded")
     }
 
+    /** Lecturer accounts: no other stages, so the timetable is fetched and applied in one go with live progress. */
     @Throws(Exception::class)
     private fun loadTimetable(s: Snapshot, start: LocalDate) {
+        applyTimetable(s, fetchTimetable(start) { reportProgress(it) })
+    }
+
+    private class Timetable(val weeks: List<JSONArray>, val lecturerNames: Map<String, String>)
+
+    /** Network part of the timetable: every week page and the lecturers' names. Safe to run on another thread. */
+    @Throws(Exception::class)
+    private fun fetchTimetable(start: LocalDate, progress: (String) -> Unit): Timetable {
         val weeks = TimetableLoader.load(
             start,
             planDays,
@@ -639,9 +758,9 @@ class UsosClient @JvmOverloads constructor(
                     )
                 )
             },
-            Consumer { reportProgress(it) }
+            Consumer { progress(it) }
         )
-        reportProgress("Pobieranie nazwisk prowadzących · users/users")
+        progress("Pobieranie nazwisk prowadzących · users/users")
         val lecturerNames = resolveLecturers(weeks) { ids ->
             JSONObject(
                 get(
@@ -650,9 +769,15 @@ class UsosClient @JvmOverloads constructor(
                 )
             )
         }
+        return Timetable(weeks, lecturerNames)
+    }
+
+    /** Parsing part of the timetable; runs on the sync thread so records keep their order. */
+    @Throws(Exception::class)
+    private fun applyTimetable(s: Snapshot, timetable: Timetable) {
         reportProgress("Odczyt planu zajęć · " + if (lecturer) "tt/user" else "tt/student")
-        for (rows in weeks) {
-            parseLanguages(s) { variant -> UsosParser.timetable(variant, rows, lecturerNames) }
+        for (rows in timetable.weeks) {
+            parseLanguages(s) { variant -> UsosParser.timetable(variant, rows, timetable.lecturerNames) }
         }
     }
 
@@ -747,6 +872,10 @@ class UsosClient @JvmOverloads constructor(
     }
 
     companion object {
+        /** Requests in flight at once during a sync (stages are fetched in parallel; USOS limits bursts). */
+        private const val MAX_PARALLEL_REQUESTS = 4
+        private const val PREFETCH_THREADS = 4
+
         const val BASE: String = "https://usosapps.vistula.edu.pl/"
         @JvmField val ZONE: ZoneId = ZoneId.of("Europe/Warsaw")
 

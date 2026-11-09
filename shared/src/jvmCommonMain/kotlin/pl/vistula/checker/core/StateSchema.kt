@@ -11,6 +11,7 @@ object StateKeys {
     const val SNAPSHOT = "snapshot"
     const val PLATON_COURSES = "platonCourses"
     const val PLATON_MESSAGES = "platonMessages"
+    const val PLATON_SEMESTERS = "platonSemesters"
 }
 
 /**

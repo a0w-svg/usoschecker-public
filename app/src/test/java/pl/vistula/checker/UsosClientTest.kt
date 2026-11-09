@@ -530,7 +530,7 @@ class UsosClientTest {
         val connection = Connection()
         connection.status = 401
         connection.body = "oauth_problem=token_expired"
-        val client = UsosClient(credentials(), {}) { connection }
+        val client = UsosClient(credentials(), {}) { connection }.withParallelism(1)
         try {
             client.snapshot()
             fail("Expected expired session")
@@ -671,7 +671,7 @@ class UsosClientTest {
                         connection.body = if (status == 401) "oauth_problem=token_expired" else "{}"
                     }
                     connection
-                }
+                }.withParallelism(1) // strictly sequential: nothing at all may be requested after the failure
                 try {
                     client.snapshot()
                     fail("Optional-module failures must preserve the previous snapshot")
@@ -727,6 +727,46 @@ class UsosClientTest {
         val res = client.finish(state, " 1234 5678 \n")
         assertEquals("accTok", res["oauth_token"])
         assertTrue(captured[0].contains("oauth_verifier=12345678"))
+    }
+    @Test
+    fun parallelAndSequentialSyncsProduceTheSameSnapshot() {
+        fun snapshotJson(parallelism: Int): String =
+            UsosClient(credentials(), {}) { address -> snapshotConnection(address) }.withParallelism(parallelism).snapshot().json().toString()
+        val sequential = snapshotJson(1)
+        assertEquals(sequential, snapshotJson(4))
+        assertEquals(sequential, snapshotJson(2))
+    }
+
+    @Test
+    fun aRateLimitOrSessionFailureStopsFurtherRequests() {
+        for (status in intArrayOf(401, 429, 503)) {
+            val requests = intArrayOf(0)
+            val client = UsosClient(credentials(), {}) { address ->
+                requests[0]++
+                val connection = snapshotConnection(address)
+                if (address.contains("news/search")) {
+                    connection.status = status
+                    connection.body = if (status == 401) "oauth_problem=token_expired" else "{}"
+                }
+                connection
+            }.withParallelism(4)
+            try {
+                client.get("services/news/search", emptyMap())
+                fail("Expected the failure")
+            } catch (expected: UsosClient.ApiException) {
+                assertEquals(status, expected.status)
+            }
+            val before = requests[0]
+            for (endpoint in listOf("services/courses/user", "services/terms/terms", "services/payments/user_accounts")) {
+                try {
+                    client.get(endpoint, emptyMap())
+                    fail("No request may start after the failure")
+                } catch (again: UsosClient.ApiException) {
+                    assertEquals(status, again.status)
+                }
+            }
+            assertEquals("requests were sent after the failure (status $status)", before, requests[0])
+        }
     }
 }
 

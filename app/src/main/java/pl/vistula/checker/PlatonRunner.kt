@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.edit
 import pl.vistula.checker.core.PlatonCrawler
 import pl.vistula.checker.core.PlatonState
+import pl.vistula.checker.core.StateKeys
 
 /** One Platon synchronisation, shared by the Tasks screen and the background worker. */
 object PlatonRunner {
@@ -19,12 +20,18 @@ object PlatonRunner {
 
     /** Network part: reads courses, assignments and deadlines. Throws [PlatonClient.SessionExpiredException]. */
     @Throws(Exception::class)
-    fun crawl(source: String): PlatonCrawler.Result = PlatonCrawler.crawlAll(
+    fun crawl(
+        source: String,
+        semesters: Set<String> = emptySet(),
+        known: Map<String, PlatonCrawler.KnownDeadline> = emptyMap(),
+    ): PlatonCrawler.Result = PlatonCrawler.crawlAll(
         source,
         { address, form ->
             val page = PlatonClient.fetch(address, form)
             page.url to page.html
         },
+        semesters,
+        known,
     ) { address ->
         val page = PlatonClient.fetch(address)
         page.url to page.html
@@ -35,11 +42,18 @@ object PlatonRunner {
      * Microsoft session ([PlatonSession]) and retries once. Call from a background thread only.
      */
     @Throws(Exception::class)
-    fun crawlRenewing(context: Context, source: String): PlatonCrawler.Result = try {
-        crawl(source)
-    } catch (e: PlatonClient.SessionExpiredException) {
-        if (!PlatonSession.refresh(context)) throw e
-        crawl(source)
+    fun crawlRenewing(
+        context: Context,
+        source: String,
+        known: Map<String, PlatonCrawler.KnownDeadline> = emptyMap(),
+    ): PlatonCrawler.Result {
+        val semesters = StudentPrefs(context).platonSemesters
+        return try {
+            crawl(source, semesters, known)
+        } catch (e: PlatonClient.SessionExpiredException) {
+            if (!PlatonSession.refresh(context)) throw e
+            crawl(source, semesters, known)
+        }
     }
 
     /** Signs out of Platon on this device: forgets the linked page, flags and the in-app browser's cookies. */
@@ -62,14 +76,15 @@ object PlatonRunner {
         // Skip when the student's own sync is already running; the next periodic run will catch up.
         exclusive(wait = false) {
             try {
-                val crawled = crawlRenewing(context, source)
+                val known = PlatonState.knownDeadlines(Repository(context).read().optJSONArray(StateKeys.TASKS))
+                val crawled = crawlRenewing(context, source, known)
                 if (crawled.tasks.isEmpty() && crawled.courses.isEmpty() && crawled.messages.isEmpty()) return@exclusive
                 var summary: PlatonState.Summary? = null
                 val now = System.currentTimeMillis()
                 Repository(context).update { s -> summary = PlatonState.apply(s, crawled, now) }
                 prefs.platonSyncedAt = now
                 prefs.platonLastError = null
-                summary?.let { notify(context, it) }
+                summary?.let { notify(context, it.only(prefs.platonNotifyTasks, prefs.platonNotifyGrades, prefs.platonNotifyMessages)) }
             } catch (e: PlatonClient.SessionExpiredException) {
                 prefs.platonExpired = true
             } catch (e: Exception) {

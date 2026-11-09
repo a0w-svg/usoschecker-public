@@ -49,6 +49,8 @@ class TasksScreenController private constructor() {
         fun onPlatonMessages() {}
         /** Signs out of Platon on this device and drops cached courses and messages. */
         fun onPlatonDisconnect() {}
+        /** Platon notification, refresh and semester choices. */
+        fun onPlatonSettings() {}
     }
 
     companion object {
@@ -237,6 +239,10 @@ class TasksScreenController private constructor() {
             }
             menu.add(R.string.tasks_platon_connect).setOnMenuItemClickListener {
                 callback.onPlatonConnect()
+                true
+            }
+            menu.add(R.string.tasks_platon_settings_menu).setOnMenuItemClickListener {
+                callback.onPlatonSettings()
                 true
             }
             menu.add(R.string.tasks_platon_disconnect).setOnMenuItemClickListener {

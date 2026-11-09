@@ -5,7 +5,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.json.JSONObject
+import pl.vistula.checker.core.PlatonLinks
 import pl.vistula.checker.core.PlatonState
+import pl.vistula.checker.core.PlatonTaskParser
 import pl.vistula.checker.core.StateKeys
 import pl.vistula.checker.ui.Tabs
 
@@ -56,11 +58,12 @@ class PlatonFlow(private val host: FlowHost) {
         val repository = host.repository
         val session = repository.editSession(host.state)
         val context = activity.applicationContext
+        val known = PlatonState.knownDeadlines(host.state.optJSONArray(StateKeys.TASKS))
         host.runTask(
             {
                 try {
                     PlatonRunner.exclusive(wait = true) {
-                        val crawled = PlatonRunner.crawlRenewing(context, source)
+                        val crawled = PlatonRunner.crawlRenewing(context, source, known)
                         var summary: PlatonState.Summary? = null
                         if (crawled.tasks.isNotEmpty() || crawled.courses.isNotEmpty() || crawled.messages.isNotEmpty()) {
                             repository.update(session) { s -> summary = PlatonState.apply(s, crawled, System.currentTimeMillis()) }
@@ -137,50 +140,199 @@ class PlatonFlow(private val host: FlowHost) {
         showMessages()
     }
 
+    /** The cached inbox as a list; tapping a message opens it (after a confirmation when it is unread). */
     fun showMessages() {
         val rows = host.state.optJSONArray(StateKeys.PLATON_MESSAGES)
         if (rows == null || rows.length() == 0) {
             Toast.makeText(activity, R.string.tasks_platon_courses_empty, Toast.LENGTH_LONG).show()
             return
         }
-        val text = StringBuilder()
+        val labels = ArrayList<CharSequence>()
+        val ids = ArrayList<String>()
         var unread = 0
         for (i in 0 until rows.length()) {
             val m = rows.optJSONObject(i) ?: continue
             val isUnread = m.optBoolean("unread")
             if (isUnread) unread++
-            if (text.isNotEmpty()) text.append("\n\n")
-            if (isUnread) text.append("● ")
-            text.append(m.optString("subject")).append('\n').append(m.optString("sender"))
+            val line = StringBuilder()
+            if (isUnread) line.append("● ")
+            line.append(m.optString("subject")).append('\n').append(m.optString("sender"))
             val date = m.optString("date")
-            if (date.isNotEmpty()) text.append(" · ").append(date)
+            if (date.isNotEmpty()) line.append(" · ").append(date)
+            labels.add(line)
+            ids.add(m.optString("id"))
         }
         MaterialAlertDialogBuilder(activity)
             .setTitle(activity.getString(R.string.tasks_platon_messages_title, unread))
-            .setMessage(text)
+            .setItems(labels.toTypedArray()) { _, which -> openMessage(ids[which]) }
             .setPositiveButton(android.R.string.ok, null)
             .show()
     }
 
+    /**
+     * Reads one message in the app. Opening a message makes Platon mark it as read (exactly as in the browser), so an
+     * unread message asks first. Only the message page is requested; nothing is sent to Platon.
+     */
+    private fun openMessage(id: String) {
+        val url = PlatonLinks.messageUrl(id) ?: return
+        val unread = host.state.optJSONArray(StateKeys.PLATON_MESSAGES)?.let { rows ->
+            (0 until rows.length()).any { rows.optJSONObject(it)?.let { m -> m.optString("id") == id && m.optBoolean("unread") } == true }
+        } ?: false
+        if (!unread) {
+            fetchMessage(id, url)
+            return
+        }
+        MaterialAlertDialogBuilder(activity)
+            .setTitle(R.string.tasks_platon_message_confirm_title)
+            .setMessage(R.string.tasks_platon_message_confirm_message)
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.tasks_platon_message_open) { _, _ -> fetchMessage(id, url) }
+            .show()
+    }
+
+    private fun fetchMessage(id: String, url: String) {
+        val repository = host.repository
+        val session = repository.editSession(host.state)
+        host.runTask(
+            {
+                try {
+                    val detail = PlatonTaskParser.parseMessageDetail(PlatonClient.fetch(url).html)
+                    var fresh: JSONObject? = null
+                    if (detail != null) {
+                        repository.update(session) { s -> PlatonState.markMessageRead(s, id) }
+                        fresh = repository.read()
+                    }
+                    MessageResult(detail, fresh, expired = false)
+                } catch (e: PlatonClient.SessionExpiredException) {
+                    MessageResult(null, null, expired = true)
+                }
+            },
+            { result ->
+                result.state?.let {
+                    host.state = it
+                    host.render()
+                }
+                val detail = result.detail
+                when {
+                    result.expired -> {
+                        Toast.makeText(activity, R.string.tasks_platon_expired, Toast.LENGTH_LONG).show()
+                        connect()
+                    }
+                    detail == null -> Toast.makeText(activity, R.string.tasks_platon_message_failed, Toast.LENGTH_LONG).show()
+                    else -> {
+                        val header = listOf(detail.sender, detail.date).filter { it.isNotEmpty() }.joinToString(" · ")
+                        MaterialAlertDialogBuilder(activity)
+                            .setTitle(detail.subject.ifEmpty { activity.getString(R.string.tasks_platon_messages_menu) })
+                            .setMessage((if (header.isEmpty()) "" else header + "\n\n") + detail.body)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
+                    }
+                }
+            },
+        )
+    }
+
+    private class MessageResult(val detail: PlatonTaskParser.PlatonMessageDetail?, val state: JSONObject?, val expired: Boolean)
+
+    /** The cached courses as a list; tapping one shows its progress, grade and the assignments Platon listed for it. */
     fun showCourses() {
         val rows = host.state.optJSONArray(StateKeys.PLATON_COURSES)
         if (rows == null || rows.length() == 0) {
             Toast.makeText(activity, R.string.tasks_platon_courses_empty, Toast.LENGTH_LONG).show()
             return
         }
-        val text = StringBuilder()
+        val labels = ArrayList<CharSequence>()
+        val courses = ArrayList<JSONObject>()
         for (i in 0 until rows.length()) {
             val c = rows.optJSONObject(i) ?: continue
-            if (text.isNotEmpty()) text.append("\n\n")
-            text.append(c.optString("title")).append('\n')
-                .append(activity.getString(R.string.tasks_platon_course_line, c.optInt("progress"), c.optString("grade").ifEmpty { "—" }, c.optInt("runs")))
-            val badge = c.optString("badge")
-            if (badge.isNotEmpty()) text.append(" · ").append(badge)
+            labels.add(c.optString("title") + "\n" + courseLine(c))
+            courses.add(c)
         }
         MaterialAlertDialogBuilder(activity)
-            .setTitle(activity.getString(R.string.tasks_platon_courses_title, rows.length()))
-            .setMessage(text)
+            .setTitle(activity.getString(R.string.tasks_platon_courses_title, courses.size))
+            .setItems(labels.toTypedArray()) { _, which -> showCourse(courses[which]) }
             .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun courseLine(c: JSONObject): String {
+        val badge = c.optString("badge")
+        return activity.getString(R.string.tasks_platon_course_line, c.optInt("progress"), c.optString("grade").ifEmpty { "—" }, c.optInt("runs")) +
+            if (badge.isNotEmpty()) " · $badge" else ""
+    }
+
+    private fun showCourse(course: JSONObject) {
+        val text = StringBuilder(courseLine(course)).append("\n\n")
+        val assignments = PlatonState.assignmentsFor(host.state.optJSONArray(StateKeys.TASKS), course.optString("title"))
+        if (assignments.isEmpty()) {
+            text.append(activity.getString(R.string.tasks_platon_course_no_assignments))
+        } else {
+            text.append(activity.getString(R.string.tasks_platon_course_assignments)).append('\n')
+            for (t in assignments) {
+                text.append(if (t.optBoolean("done")) "✓ " else "○ ").append(t.optString("title"))
+                val due = t.optString("due")
+                if (due.isNotEmpty()) text.append(" · ").append(due)
+                val status = t.optString("remoteStatus")
+                if (status.isNotEmpty()) text.append(" · ").append(status)
+                text.append('\n')
+            }
+        }
+        MaterialAlertDialogBuilder(activity)
+            .setTitle(course.optString("title"))
+            .setMessage(text.toString().trimEnd())
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    /** Notification and refresh choices, with a shortcut to the semester picker. Nothing here changes Platon itself. */
+    fun showSettings() {
+        val labels = arrayOf(
+            activity.getString(R.string.tasks_platon_setting_notify_tasks),
+            activity.getString(R.string.tasks_platon_setting_notify_grades),
+            activity.getString(R.string.tasks_platon_setting_notify_messages),
+            activity.getString(R.string.tasks_platon_setting_auto_refresh),
+        )
+        val checked = booleanArrayOf(prefs.platonNotifyTasks, prefs.platonNotifyGrades, prefs.platonNotifyMessages, prefs.platonAutoRefresh)
+        MaterialAlertDialogBuilder(activity)
+            .setTitle(R.string.tasks_platon_settings_title)
+            .setMultiChoiceItems(labels, checked) { _, which, value -> checked[which] = value }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setNeutralButton(R.string.tasks_platon_setting_semesters) { _, _ ->
+                saveSettings(checked)
+                showSemesters()
+            }
+            .setPositiveButton(R.string.btn_save) { _, _ -> saveSettings(checked) }
+            .show()
+    }
+
+    private fun saveSettings(checked: BooleanArray) {
+        prefs.platonNotifyTasks = checked[0]
+        prefs.platonNotifyGrades = checked[1]
+        prefs.platonNotifyMessages = checked[2]
+        prefs.platonAutoRefresh = checked[3]
+    }
+
+    /** Which semesters the sync reads. Older semesters add their assignments to the list; the choice is reversible. */
+    fun showSemesters() {
+        val rows = host.state.optJSONArray(StateKeys.PLATON_SEMESTERS)
+        val available = (0 until (rows?.length() ?: 0)).mapNotNull { rows?.optString(it)?.takeIf { code -> code.isNotEmpty() } }
+        if (available.isEmpty()) {
+            Toast.makeText(activity, R.string.tasks_platon_semesters_empty, Toast.LENGTH_LONG).show()
+            return
+        }
+        val saved = prefs.platonSemesters
+        val selected = if (saved.isEmpty()) setOf(available.first()) else saved
+        val checked = BooleanArray(available.size) { available[it] in selected }
+        MaterialAlertDialogBuilder(activity)
+            .setTitle(R.string.tasks_platon_semesters_title)
+            .setMultiChoiceItems(available.toTypedArray(), checked) { _, which, value -> checked[which] = value }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.tasks_platon_semesters_apply) { _, _ ->
+                val chosen = available.filterIndexed { i, _ -> checked[i] }.toSet()
+                // Only the newest semester (or nothing) selected is the default; store nothing for it.
+                prefs.platonSemesters = if (chosen.isEmpty() || chosen == setOf(available.first())) emptySet() else chosen
+                sync()
+            }
             .show()
     }
 
@@ -199,7 +351,7 @@ class PlatonFlow(private val host: FlowHost) {
     /** Refreshes Platon when Tasks opens, at most every [maxAgeMs] and once per app start after a failure. */
     fun autoSync(maxAgeMs: Long = DEFAULT_MAX_AGE_MS) {
         if (host.isDemo || host.isBusy || autoTried) return
-        if (!prefs.platonLinked) return
+        if (!prefs.platonLinked || !prefs.platonAutoRefresh) return
         if (prefs.platonExpired) {
             // The background refresh found the Platon session expired: ask once for a one-tap sign-in.
             prefs.platonExpired = false

@@ -31,6 +31,21 @@ object PlatonState {
     /** One Platon change shown in the Changes feed; [type] is "task", "grade" or "message". */
     class Event(val type: String, val title: String, val before: String, val after: String)
 
+    /** Deadlines already stored for Platon tasks, by task key, so a sync does not fetch them again. */
+    @JvmStatic
+    fun knownDeadlines(tasks: JSONArray?): Map<String, PlatonCrawler.KnownDeadline> {
+        val result = HashMap<String, PlatonCrawler.KnownDeadline>()
+        if (tasks == null) return result
+        for (i in 0 until tasks.length()) {
+            val t = tasks.optJSONObject(i) ?: continue
+            val id = t.optString("externalId")
+            if (id.isEmpty() || t.optString("source") != "platon") continue
+            val due = try { java.time.LocalDate.parse(t.optString("due")) } catch (e: Exception) { continue }
+            result[id] = PlatonCrawler.KnownDeadline(due, t.optString("dueTime"))
+        }
+        return result
+    }
+
     /** Marks inbox message [id] as read in the stored list; true when a stored unread message was changed. */
     @JvmStatic
     fun markMessageRead(s: JSONObject, id: String): Boolean {

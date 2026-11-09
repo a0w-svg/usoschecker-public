@@ -4,6 +4,7 @@
 • Under the hood: tasks and Platon handling were moved out of the main activity, and stored data now carries a format version with automatic migration (completed tasks always show 100% progress).
 • More tests: concurrent writes and account switching in the repository, plus saved Platon page samples that will reveal a change of their layout.
 • Faster background refresh: the app no longer decrypts and reloads your data on every refresh when nothing has changed.
+• Much faster refresh: USOS and Platon fetch independent data at the same time (capped so the servers are not overloaded), and Platon assignments with a known deadline are not fetched again. After a sign-in error or rate limit, further requests stop.
 • Lecturer detail windows (groups, attendance, theses, dormitories) are fully translated into Polish, English and Ukrainian.
 • Release notes are now complete in English and Ukrainian.
 • Platon in the app: assignments with deadlines, course progress, grades and messages from Platon in one place. Sign in once with one tap; the session renews itself.

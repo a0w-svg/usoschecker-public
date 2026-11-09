@@ -171,3 +171,77 @@ class PlatonDepthTest {
         assertTrue(grades.newTitles.isEmpty())
     }
 }
+
+class PlatonSpeedTest {
+    @Test
+    fun parallelMapKeepsOrderSkipsIoFailuresAndRethrowsOthers() {
+        val results = Parallel.map((1..20).toList(), 5) { n ->
+            if (n % 7 == 0) throw java.io.IOException("skip $n")
+            n * 2
+        }
+        assertEquals((1..20).map { if (it % 7 == 0) null else it * 2 }, results)
+        assertEquals(emptyList<Int?>(), Parallel.map(emptyList<Int>(), 5) { it })
+        try {
+            Parallel.map((1..10).toList(), 4) { n -> if (n == 3) throw IllegalStateException("session") else n }
+            org.junit.Assert.fail("a non-IO failure must be rethrown")
+        } catch (expected: IllegalStateException) {
+            assertEquals("session", expected.message)
+        }
+    }
+
+    @Test
+    fun parallelMapNeverExceedsItsThreadLimit() {
+        val running = java.util.concurrent.atomic.AtomicInteger()
+        val peak = java.util.concurrent.atomic.AtomicInteger()
+        Parallel.map((1..30).toList(), 3) {
+            val now = running.incrementAndGet()
+            peak.accumulateAndGet(now) { a, b -> maxOf(a, b) }
+            Thread.sleep(5)
+            running.decrementAndGet()
+        }
+        assertTrue("peak ${peak.get()}", peak.get() in 1..3)
+    }
+
+    @Test
+    fun submittedAssignmentsKeepKnownDeadlinesWithoutRefetching() {
+        val page = "https://platon.vistula.edu.pl/StronaStartowa"
+        fun course(task: Int, state: String) =
+            """<h1>Przedmiot - Kurs - 2026Z       Wróć do: x</h1><div class="dd3-content $state"> Zad $task<br>
+               <a href="/LmsProfil/SciezkaSzkoleniowaElementUzytkownik/RedirectToElement?sciezkaSzkoleniowaElementId=$task&amp;sciezkaSzkoleniowaElementTyp=ZADANIE">p</a>
+               <span class="label label-success">Zadanie</span></div>"""
+        val courseUrl = "https://platon.vistula.edu.pl/LmsProfil/X/ElementyBySciezkaSzkoleniowaId/1"
+        val fetched = java.util.concurrent.CopyOnWriteArrayList<String>()
+        val knownId = "platon:https://platon.vistula.edu.pl/LmsProfil/SciezkaSzkoleniowaElementUzytkownik/RedirectToElement?sciezkaSzkoleniowaElementId=11&sciezkaSzkoleniowaElementTyp=ZADANIE"
+        val result = PlatonCrawler.crawlAll(
+            page,
+            { url, form -> url to (if (form["Page"] == "1") """<a href="/LmsProfil/X/ElementyBySciezkaSzkoleniowaId/1">Uruchom Kurs - 2026Z</a>""" else "") },
+            known = mapOf(knownId to PlatonCrawler.KnownDeadline(LocalDate.of(2026, 11, 20), "12:00")),
+        ) { url ->
+            fetched.add(url)
+            url to when {
+                url.contains("SciezkiSzkoleniowe") -> """<input name="__RequestVerificationToken" value="t">"""
+                url == courseUrl -> course(11, "To_Be_Evaluated") + course(12, "Not_Attempted")
+                url.contains("ElementId=12") -> "Data oddania: 01.12.2026"
+                else -> throw java.io.IOException("404")
+            }
+        }
+        val byTitle = result.tasks.associateBy { it.title }
+        assertEquals(LocalDate.of(2026, 11, 20), byTitle.getValue("Zad 11").due)
+        assertEquals("12:00", byTitle.getValue("Zad 11").dueTime)
+        assertEquals(LocalDate.of(2026, 12, 1), byTitle.getValue("Zad 12").due)
+        assertTrue("submitted task with a known deadline must not be fetched", fetched.none { it.contains("ElementId=11") })
+        assertTrue(fetched.any { it.contains("ElementId=12") })
+    }
+
+    @Test
+    fun knownDeadlinesComeFromStoredPlatonTasksOnly() {
+        val tasks = org.json.JSONArray()
+            .put(org.json.JSONObject().put("source", "platon").put("externalId", "platon:a").put("due", "2026-11-20").put("dueTime", "09:00"))
+            .put(org.json.JSONObject().put("source", "platon").put("externalId", "platon:b").put("due", "garbage"))
+            .put(org.json.JSONObject().put("externalId", "platon:c").put("due", "2026-11-21"))
+        val known = PlatonState.knownDeadlines(tasks)
+        assertEquals(setOf("platon:a"), known.keys)
+        assertEquals("09:00", known.getValue("platon:a").time)
+        assertTrue(PlatonState.knownDeadlines(null).isEmpty())
+    }
+}

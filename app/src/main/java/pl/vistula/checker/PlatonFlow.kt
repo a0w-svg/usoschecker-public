@@ -58,11 +58,12 @@ class PlatonFlow(private val host: FlowHost) {
         val repository = host.repository
         val session = repository.editSession(host.state)
         val context = activity.applicationContext
+        val known = PlatonState.knownDeadlines(host.state.optJSONArray(StateKeys.TASKS))
         host.runTask(
             {
                 try {
                     PlatonRunner.exclusive(wait = true) {
-                        val crawled = PlatonRunner.crawlRenewing(context, source)
+                        val crawled = PlatonRunner.crawlRenewing(context, source, known)
                         var summary: PlatonState.Summary? = null
                         if (crawled.tasks.isNotEmpty() || crawled.courses.isNotEmpty() || crawled.messages.isNotEmpty()) {
                             repository.update(session) { s -> summary = PlatonState.apply(s, crawled, System.currentTimeMillis()) }

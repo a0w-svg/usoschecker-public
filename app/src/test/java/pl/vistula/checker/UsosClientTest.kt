@@ -530,7 +530,7 @@ class UsosClientTest {
         val connection = Connection()
         connection.status = 401
         connection.body = "oauth_problem=token_expired"
-        val client = UsosClient(credentials(), {}) { connection }
+        val client = UsosClient(credentials(), {}) { connection }.withParallelism(1)
         try {
             client.snapshot()
             fail("Expected expired session")

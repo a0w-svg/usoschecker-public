@@ -19,28 +19,52 @@ import pl.vistula.checker.widget.TodayScheduleWidget
 
 class SyncWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
-        return try {
-            val context = applicationContext
+        val context = applicationContext
+        var failure: Exception? = null
+        try {
             Repository(context).syncAndNotify(false, Consumer {})
-            try {
-                TaskDeadlineReminder.notifyIfDue(context, Repository(context).read().optJSONArray("tasks"))
-            } catch (e: Exception) {
-                Diagnostics.swallowed("SyncWorker", e)
-            }
-            PlatonRunner.runInBackground(context)
-            ClassReminderReceiver.scheduleNext(context)
+        } catch (e: Exception) {
+            failure = e
+        }
+        // The steps below do not need a fresh USOS snapshot: Platon is another server, and reminders and widgets
+        // work from saved data. A failed USOS sync must not silence them.
+        step("tasks") { TaskDeadlineReminder.notifyIfDue(context, Repository(context).read().optJSONArray("tasks")) }
+        step("platon") { PlatonRunner.runInBackground(context) }
+        step("reminders") { ClassReminderReceiver.scheduleNext(context) }
+        step("widgets") {
             TodayScheduleWidget.updateAll(context)
             QuickStatusWidget.updateAll(context)
-            Result.success()
+        }
+        val failed = failure ?: return Result.success()
+        return if (shouldRetry(Repository.cause(failed), runAttemptCount)) Result.retry() else Result.failure()
+    }
+
+    private inline fun step(name: String, block: () -> Unit) {
+        try {
+            block()
         } catch (e: Exception) {
-            val cause = Repository.cause(e)
-            if (cause is UsosClient.ApiException && !cause.retryable) return Result.failure()
-            if (runAttemptCount < 3) Result.retry() else Result.failure()
+            Diagnostics.swallowed("SyncWorker/$name", e)
         }
     }
 
     companion object {
         const val NAME: String = "usos_periodic_sync"
+
+        /**
+         * Retry only what can heal within minutes: network failures and API answers marked retryable. A cooldown,
+         * a missing scope, an expired session or an unreadable store fail the same way again, so they wait for
+         * the next period instead of waking the phone three more times.
+         */
+        @JvmStatic
+        fun shouldRetry(cause: Exception, attempt: Int): Boolean {
+            if (attempt >= 3) return false
+            return when (cause) {
+                is UsosClient.ApiException -> cause.retryable
+                is VaultUnreadableException -> false
+                is java.io.IOException -> true
+                else -> false
+            }
+        }
 
         @JvmStatic
         fun schedule(context: Context, minutes: Long) {

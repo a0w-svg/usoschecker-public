@@ -71,12 +71,10 @@ Android wymaga **wersji 12 lub nowszej**. Aktualizacje APK zachowują podpis pop
 ### Pierwsze uruchomienie — własny klucz API
 
 1. W ekranie powitalnym wybierz **Skonfiguruj dostęp**. Możesz też uruchomić demo lub pominąć konfigurację.
-2. Otwórz [oficjalny formularz USOSapps Vistuli](https://usosapps.vistula.edu.pl/developers/). W sekcji **Sign up for an API key** podaj nazwę aplikacji i prawidłowy adres e-mail. Stronę aplikacji możesz zostawić pustą.
-3. Skopiuj **Consumer Key** i **Consumer Secret** do odpowiadających im pól w aplikacji. Nie udostępniaj sekretu.
-4. Wybierz zakresy dostępu i otwórz logowanie USOS. Hasło uczelniane wpisujesz na stronie uczelni w przeglądarce.
-5. Po zatwierdzeniu zgód wróć do aplikacji, wklej **PIN** i potwierdź połączenie.
+2. Podaj adres e-mail i wybierz **Pobierz klucz automatycznie**. Aplikacja rejestruje Twój własny klucz w [USOSapps Vistuli](https://usosapps.vistula.edu.pl/developers/) i otwiera logowanie USOS. E-mail trafia wyłącznie do USOSapps uczelni.
+3. Hasło uczelniane wpisujesz na stronie uczelni w przeglądarce. Po zatwierdzeniu zgód Android wraca do aplikacji sam; na komputerze wklej **PIN** pokazany przez USOS.
 
-Przewodnik można ponownie otworzyć w **Więcej → Konto → Połączenie z USOS**. Jeżeli formularz nie jest dostępny lub nie możesz uzyskać klucza, skontaktuj się z pomocą USOS uczelni; demo pozostaje dostępne.
+Ręczne wpisanie **Consumer Key** i **Consumer Secret** z formularza USOSapps pozostaje dostępne jako opcja (Android: **Wpisz klucz ręcznie**, desktop: pola pod przyciskiem). Nie udostępniaj sekretu. Zakresy dostępu ustawisz w **Więcej → Konto → Dostęp do danych USOS**. Przy odłączaniu konta możesz od razu odwołać klucz w USOSapps. Jeżeli nie możesz uzyskać klucza, skontaktuj się z pomocą USOS uczelni; demo pozostaje dostępne.
 
 <details>
 <summary>Podgląd przewodnika pierwszego uruchomienia</summary>
@@ -118,6 +116,10 @@ USOS Checker brings together key information from Vistula University’s USOS. O
 | **Changes** | Added, updated and removed records, with before/after values. |
 | **More** | Tasks, personal attendance, payments, student cards, documents and decisions, university news, campus information, GPA calculator, account settings and API catalog. |
 
+### Platon
+
+Assignments, deadlines, course progress, grades and messages from `platon.vistula.edu.pl` appear in the **Tasks** menu (⋮) on Android. Platon has no public API and does not accept USOS tokens, so you sign in inside an in-app browser (university account through Microsoft, or a local account) and the app reads Platon pages with that browser’s session. The password is not stored. An expired session is renewed silently through the Microsoft session; when that fails, the app asks you to sign in again. Platon syncs when you open Tasks, after a USOS refresh and in the background; new assignments, grade changes and messages go to notifications and to **Changes** (filter *Platon*). Messages can be read in the app (an unread one asks first, because Platon then marks it as read), a course shows its progress, grade and assignments, and “Platon settings” hold the notification choices, refresh-on-open and the semesters to sync (the newest by default). “Sign out of Platon” removes the link and the in-app browser’s data. Details: [SECURITY.md](SECURITY.md).
+
 The interface supports **Polish, English and Ukrainian**. Android follows the phone’s theme or uses a manual light/OLED dark setting. Demo mode is separate from your real account.
 
 ### Download
@@ -129,12 +131,10 @@ Android requires **version 12 or later**. APK updates keep the signing identity 
 ### First launch — bring your own API key
 
 1. Choose **Set up access** on the welcome screen. You can also explore the demo or skip setup.
-2. Open [Vistula’s official USOSapps form](https://usosapps.vistula.edu.pl/developers/). Under **Sign up for an API key**, enter an application name and a valid email address. The application webpage is optional.
-3. Copy **Consumer Key** and **Consumer Secret** into the matching fields in the app. Keep the secret private.
-4. Select access scopes and open USOS sign-in. Enter your university password on the university website in your browser.
-5. After approving access, return to the app, paste the **PIN** and confirm the connection.
+2. Enter your email address and choose **Get the key automatically**. The app registers your own key with [Vistula’s USOSapps](https://usosapps.vistula.edu.pl/developers/) and opens USOS sign-in. The email goes only to the university’s USOSapps.
+3. Enter your university password on the university website in your browser. After you approve access, Android returns to the app by itself; on a computer, paste the **PIN** shown by USOS.
 
-Reopen the guide under **More → Account → USOS connection**. If the form is unavailable or you cannot obtain a key, contact your university’s USOS support; demo mode remains available.
+Typing **Consumer Key** and **Consumer Secret** from the USOSapps form by hand remains available (Android: **Enter a key manually**, desktop: the fields below the button). Keep the secret private. Access scopes are under **More → Account → USOS data access**. When you disconnect, you can revoke the key at USOSapps in the same step. If you cannot obtain a key, contact your university’s USOS support; demo mode remains available.
 
 ### Privacy and data
 

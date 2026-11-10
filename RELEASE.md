@@ -143,8 +143,8 @@ i sala są rozdzielone, a rodzaj zajęć jest widoczny bez otwierania szczegół
 Regresja obejmuje pełne etykiety ocen i osobne pole sali. Test okna desktopowego
 sprawdza etykiety ocen oraz zachowuje zrzuty obu ekranów w jasnym i ciemnym motywie.
 
-Wersje instalatorów desktopowych i aplikacji Android są zgodne (`1.6.0`, Android
-`versionCode` 21). Z pełnym JDK 21 i SDK Android 37:
+Wersja instalatorów desktopowych (`packageVersion` w `desktopApp/build.gradle.kts`) musi być równa
+`versionName` aplikacji Android; pilnuje tego `scripts/test_release_consistency.py`. Z pełnym JDK 21 i SDK Android 37:
 
 ```sh
 bash gradlew :shared:desktopTest :desktopApp:createDistributable :desktopApp:packageDeb

@@ -791,4 +791,8 @@
     <string name="tasks_platon_message_failed">Не вдалося прочитати повідомлення.</string>
     <string name="tasks_platon_course_assignments">Завдання з Platon:</string>
     <string name="tasks_platon_course_no_assignments">Для цього курсу немає завдань з Platon.</string>
+    <string name="error_storage">Не вдалося прочитати дані, збережені на цьому телефоні. Спробуйте ще раз; якщо не допоможе, скиньте локальні дані та підключіться знову.</string>
+    <string name="vault_unreadable_title">Не вдалося прочитати збережені дані</string>
+    <string name="vault_unreadable_message">Зашифровані дані облікового запису на цьому телефоні пошкоджено або втрачено ключ шифрування. Можна спробувати пізніше або скинути локальні дані: токени, оцінки, розклад, історію та завдання. Обліковий запис USOS не змінюється — після скидання ви підключите його знову.</string>
+    <string name="vault_reset_btn">Скинути локальні дані</string>
 </resources>

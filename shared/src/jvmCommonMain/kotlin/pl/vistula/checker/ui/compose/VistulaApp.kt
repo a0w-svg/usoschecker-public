@@ -181,6 +181,9 @@ fun VistulaApp(
     val strings = remember(language) { UiStrings.forLanguage(language) }
     var statusMessage by remember { mutableStateOf("") }
     var isRefreshing by remember { mutableStateOf(false) }
+    // The encrypted store exists but cannot be decrypted; nothing works until it is cleared, which needs a yes.
+    var vaultUnreadable by remember { mutableStateOf(false) }
+    var vaultResetDismissed by remember { mutableStateOf(false) }
 
     LaunchedEffect(externalTabTrigger, externalNavigationTrigger) {
         if (externalTabTrigger != null) {
@@ -201,8 +204,10 @@ fun VistulaApp(
                 demoMode = true
                 state = demoWorkspace.repository.read()
             } else state = loaded
+            vaultUnreadable = false
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
+            if (activeRepository === repository && e is pl.vistula.checker.VaultUnreadableException) vaultUnreadable = true
             statusMessage = pl.vistula.checker.core.SyncProgress.error(e, language)
         }
     }
@@ -254,6 +259,7 @@ fun VistulaApp(
     }
 
     val refreshAll: () -> Unit = {
+        vaultResetDismissed = false
         runAsync {
             try {
                 if ("demo" == state.optString("token")) {
@@ -293,6 +299,24 @@ fun VistulaApp(
     }
 
     VistulaTheme(themeMode = themeMode) {
+        if (vaultUnreadable && !vaultResetDismissed && !demoMode) androidx.compose.material3.AlertDialog(
+            onDismissRequest = { vaultResetDismissed = true },
+            title = { Text(toolText(language, "Nie można odczytać zapisanych danych", "Saved data cannot be read", "Не вдалося прочитати збережені дані")) },
+            text = { Text(toolText(language,
+                "Zaszyfrowane dane konta na tym komputerze są uszkodzone albo klucz szyfrujący został utracony. Możesz spróbować ponownie później albo usunąć dane lokalne: tokeny, zapis ocen, plan, historię i własne zadania. Konto w USOS pozostaje bez zmian — po usunięciu połączysz je od nowa.",
+                "The encrypted account data on this computer is damaged or its encryption key was lost. You can try again later or reset local data: tokens, cached grades, schedule, history and personal tasks. Your USOS account is not changed — after the reset you connect it again.",
+                "Зашифровані дані облікового запису на цьому комп’ютері пошкоджено або втрачено ключ шифрування. Можна спробувати пізніше або скинути локальні дані: токени, оцінки, розклад, історію та завдання. Обліковий запис USOS не змінюється — після скидання ви підключите його знову.")) },
+            // Disabled while another task runs: runAsync would drop the reset without a word.
+            confirmButton = { androidx.compose.material3.Button(enabled = !isRefreshing, onClick = {
+                // The dialog closes only once the reset has really started; a failed reset brings it back on reload.
+                if (!gate.isRunning()) {
+                    vaultUnreadable = false
+                    runAsync { repository.disconnect(); setStatus("") }
+                }
+            }) { Text(toolText(language, "Usuń dane lokalne", "Reset local data", "Скинути локальні дані")) } },
+            dismissButton = { androidx.compose.material3.OutlinedButton(onClick = { vaultResetDismissed = true }) {
+                Text(toolText(language, "Anuluj", "Cancel", "Скасувати")) } }
+        )
         BoxWithConstraints(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             // Prototype breakpoints: the menu moves to the top and the Today stage opens up at 1100dp.
             val isWide = maxWidth >= 1100.dp * maxOf(1f, androidx.compose.ui.platform.LocalDensity.current.fontScale)

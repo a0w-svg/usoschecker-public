@@ -72,9 +72,11 @@ class ReleaseUpdates private constructor() {
             val now = System.currentTimeMillis()
             val last = prefs.getLong("checkedAt", 0)
             var release = cached(context)
-            if (!force && last > 0 && now >= last && now - last < TimeUnit.HOURS.toMillis(12)) {
+            // Without a usable cached release (cleared or written by another version) the throttle has nothing to
+            // answer with, so the release is fetched again.
+            if (release != null && !force && last > 0 && now >= last && now - last < TimeUnit.HOURS.toMillis(12)) {
                 notifyAvailable(context, release)
-                return release!!
+                return release
             }
             val json = source.fetch()
             release = AppRelease.parse(json) ?: throw IOException("Release not ready")

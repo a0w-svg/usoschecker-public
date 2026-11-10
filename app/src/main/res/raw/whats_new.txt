@@ -1,3 +1,12 @@
+• Desktop (Windows, Linux): naprawiono połączenie z USOS. Dołączone środowisko Java nie ufało certyfikatowi serwerów uczelni, więc logowanie, pobieranie klucza, odświeżanie i wiadomości nie działały wcale. Android dostał ten sam certyfikat główny dla starszych wersji systemu.
+• Więcej: naprawiono sekcje, które zawsze były puste, bo aplikacja prosiła USOS o nieistniejące pola: akademiki i okresy przydziału, mobilność, testy poziomujące, oświadczenia do wypełnienia, komunikaty, grupy własne oraz ankiety i protokoły w panelu prowadzącego.
+• Logowanie nie gubi się, gdy system zatrzyma aplikację podczas otwartej przeglądarki: powrót z USOS kończy połączenie także po ponownym uruchomieniu.
+• Gdy zapisanych danych nie da się odczytać (utracony klucz, uszkodzony plik), aplikacja proponuje usunięcie danych lokalnych zamiast powtarzać ten sam błąd.
+• Odświeżanie w tle: Platon, przypomnienia i widżety działają także wtedy, gdy USOS chwilowo nie odpowiada; bez zbędnych ponowień, gdy serwer prosi o przerwę.
+• Bezpieczeństwo: odwołanie klucza API wysyła sekret w treści żądania, a nie w adresie; rejestracja klucza odrzuca przekierowania i ogranicza rozmiar odpowiedzi.
+• Platon: awaria wbudowanej przeglądarki nie zamyka już całej aplikacji.
+• Desktop: klucz API można pobrać automatycznie po podaniu e-maila i odwołać przy odłączaniu konta; powiadomienia o zmianach są po polsku, angielsku i ukraińsku.
+• Sprawdzanie aktualizacji nie kończy się błędem, gdy zapisana informacja o wydaniu jest nieczytelna.
 • Platon: wiadomości można czytać w aplikacji (nieprzeczytana wiadomość najpierw prosi o potwierdzenie, bo Platon oznacza ją wtedy jako przeczytaną), a kurs pokazuje postęp, ocenę i swoje zadania.
 • Platon: wybór semestrów do synchronizacji (domyślnie najnowszy), np. aby zobaczyć zadania z poprzedniego roku.
 • Ustawienia Platona: osobne powiadomienia o nowych zadaniach, zmianach ocen i nowych wiadomościach oraz wyłączenie odświeżania po otwarciu Zadań.

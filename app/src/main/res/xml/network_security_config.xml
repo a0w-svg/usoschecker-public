@@ -5,10 +5,16 @@
             <certificates src="system" />
         </trust-anchors>
     </base-config>
+    <!-- The university's certificates chain to "Certum Trusted Root CA". Older Android versions may not ship that
+         root, so it is bundled for the university's hosts only; chain and host name checks are unchanged. -->
     <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">usosapps.vistula.edu.pl</domain>
-        <domain includeSubdomains="true">usosweb.vistula.edu.pl</domain>
-        <domain includeSubdomains="true">platon.vistula.edu.pl</domain>
+        <domain includeSubdomains="true">vistula.edu.pl</domain>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="@raw/certum_trusted_root_ca" />
+        </trust-anchors>
+    </domain-config>
+    <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">api.github.com</domain>
         <domain includeSubdomains="true">github.com</domain>
         <trust-anchors>
@@ -16,4 +22,3 @@
         </trust-anchors>
     </domain-config>
 </network-security-config>
-

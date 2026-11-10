@@ -796,4 +796,8 @@
     <string name="tasks_platon_message_failed">Nie udało się odczytać wiadomości.</string>
     <string name="tasks_platon_course_assignments">Zadania z Platona:</string>
     <string name="tasks_platon_course_no_assignments">Brak zadań z Platona dla tego kursu.</string>
+    <string name="error_storage">Nie można odczytać danych zapisanych na tym telefonie. Spróbuj ponownie; jeśli to nie pomoże, usuń dane lokalne i połącz konto od nowa.</string>
+    <string name="vault_unreadable_title">Nie można odczytać zapisanych danych</string>
+    <string name="vault_unreadable_message">Zaszyfrowane dane konta na tym telefonie są uszkodzone albo klucz szyfrujący został utracony. Możesz spróbować ponownie później albo usunąć dane lokalne: tokeny, zapis ocen, plan, historię i własne zadania. Konto w USOS pozostaje bez zmian — po usunięciu połączysz je od nowa.</string>
+    <string name="vault_reset_btn">Usuń dane lokalne</string>
 </resources>

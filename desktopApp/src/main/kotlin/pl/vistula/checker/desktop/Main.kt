@@ -36,14 +36,20 @@ private class DesktopSession {
     private val instance = DesktopInstanceLock(directory)
     init { Runtime.getRuntime().addShutdownHook(Thread({ instance.close() }, "desktop-instance-lock")) }
     val preferences = DesktopKeyValueStore(File(directory, "preferences.json"))
-    val notifier = DesktopNotifier()
+    val notifier = DesktopNotifier { language() }
     val repository = SharedRepository(DesktopVault(directory),
         { language() }, { preferences.putString("attendance_data", "{}") }, notifier)
     val scheduler = DesktopSyncScheduler(repository)
     fun language() = ApiLanguage.normalize(preferences.getString("ui_language", preferences.getString("language", "pl")))
 }
 
-fun main() = application {
+fun main() {
+    // Before any connection: the bundled Java runtime does not know the university's certificate root.
+    runCatching { pl.vistula.checker.DesktopTrust.install() }
+    desktopApplication()
+}
+
+private fun desktopApplication() = application {
     val startup = remember { runCatching { DesktopSession() } }
     val session = startup.getOrNull()
     DisposableEffect(session) {

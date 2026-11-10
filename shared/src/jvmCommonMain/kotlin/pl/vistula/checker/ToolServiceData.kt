@@ -125,7 +125,7 @@ object ToolServiceData {
                 val surveys = if (StudentServices.hasScope(scopes, "surveys_reports")) {
                     try {
                         JSONArray(client.get("services/surveys/surveys_about_me2", mapOf(
-                            "fields" to "id|name|headline_html|start_date|end_date|number_of_answers|group"
+                            "fields" to "id|name|headline_html|start_date|end_date|filled_out_count|group"
                         )))
                     } catch (_: Exception) {
                         JSONArray()
@@ -134,7 +134,7 @@ object ToolServiceData {
                 val signable = if (StudentServices.hasScope(scopes, "staff_perspective")) {
                     try {
                         JSONArray(client.get("services/theses/signable_reports", mapOf(
-                            "fields" to "id|type|title"
+                            "fields" to "id|name|status"
                         )))
                     } catch (_: Exception) {
                         JSONArray()
@@ -209,7 +209,7 @@ object ToolServiceData {
                 val primaryGroups = if (hasStudies) {
                     try {
                         JSONArray(client.get("services/prgroups/user", mapOf(
-                            "fields" to "id|number|description|programme|stage|term"
+                            "fields" to "id|name"
                         )))
                     } catch (_: Exception) {
                         JSONArray()
@@ -218,7 +218,7 @@ object ToolServiceData {
                 val customGroups = if (hasStudies) {
                     try {
                         JSONArray(client.get("services/csgroups/user", mapOf(
-                            "fields" to "id|name|description|expiration_date"
+                            "fields" to "id|name"
                         )))
                     } catch (_: Exception) {
                         JSONArray()
@@ -237,7 +237,7 @@ object ToolServiceData {
                 val studentMobs = if (!AccountRole.lecturerOnly(state)) {
                     try {
                         JSONArray(client.get("services/mobility/student", mapOf(
-                            "fields" to "id|mobility_category|programme|host_institution|start_date|end_date|state"
+                            "fields" to "id|role|student_programme|receiving_institution|term|start_date|end_date|state"
                         )))
                     } catch (_: Exception) {
                         JSONArray()
@@ -246,7 +246,7 @@ object ToolServiceData {
                 val coordMobs = if (AccountRole.lecturer(state) && StudentServices.hasScope(scopes, "staff_perspective")) {
                     try {
                         JSONArray(client.get("services/mobility/coordinator", mapOf(
-                            "fields" to "id|mobility_category|programme|host_institution|start_date|end_date|state"
+                            "fields" to "id|role|student_programme|receiving_institution|term|start_date|end_date|state"
                         )))
                     } catch (_: Exception) {
                         JSONArray()
@@ -260,16 +260,16 @@ object ToolServiceData {
                 val scopes = state.optString("scopes")
                 val tests = if (StudentServices.hasScope(scopes, "placement_tests")) {
                     try {
-                        JSONArray(client.get("services/plctests/user", mapOf(
-                            "fields" to "test[id|name|description|max_score]|result"
-                        )))
+                        // A dictionary keyed by test ID, not a list.
+                        rows(client.get("services/plctests/user", mapOf("fields" to "test|value")))
                     } catch (_: Exception) {
                         JSONArray()
                     }
                 } else JSONArray()
                 val slips = if (StudentServices.hasScope(scopes, "slips")) {
                     try {
-                        JSONArray(client.get("services/slips/to_be_answered", mapOf(
+                        // A dictionary with the rows under "items".
+                        rows(client.get("services/slips/to_be_answered", mapOf(
                             "langpref" to if (ApiLanguage.current() == "pl") "pl" else "en",
                             "num" to "20",
                             "fields" to "id|slip|question",
@@ -299,14 +299,14 @@ object ToolServiceData {
                 }
                 val dorms = try {
                     JSONArray(client.get("services/housing/dormitory_index", mapOf(
-                        "fields" to "id|name|short_name|address|description"
+                        "fields" to "id|name|short_name"
                     )))
                 } catch (_: Exception) {
                     JSONArray()
                 }
                 val periods = try {
                     JSONArray(client.get("services/housing/allocation_period_index", mapOf(
-                        "fields" to "id|name|description"
+                        "fields" to "id|term_id|status_name|status_desc|start_date|end_date"
                     )))
                 } catch (_: Exception) {
                     JSONArray()
@@ -324,7 +324,7 @@ object ToolServiceData {
                 val scopes = state.optString("scopes")
                 val statements = try {
                     JSONArray(client.get("services/events2/personalized_statements", mapOf(
-                        "fields" to "id|subject|content|expiration_date"
+                        "fields" to "id|title|content|start|end|sent_at"
                     )))
                 } catch (_: Exception) {
                     JSONArray()
@@ -849,12 +849,28 @@ object ToolServiceData {
         return LecturerServices.safeCourseEdition(raw)
     }
 
+    /**
+     * Rows of an answer that may be a list, a dictionary with the rows under `items`, or a dictionary keyed by ID
+     * (null values, used by USOS for "not found", are skipped).
+     */
+    @JvmStatic
+    fun rows(raw: String): JSONArray {
+        val value = org.json.JSONTokener(raw).nextValue()
+        if (value is JSONArray) return value
+        val result = JSONArray()
+        if (value is JSONObject) {
+            value.optJSONArray("items")?.let { return it }
+            for (key in value.keys().asSequence().toList().sorted()) value.optJSONObject(key)?.let { result.put(it) }
+        }
+        return result
+    }
+
     @JvmStatic
     fun fetchCourseUnit(client: UsosClient, unitId: String): JSONObject {
         require(ID_PATTERN.matches(unitId)) { "Invalid unit_id" }
         val raw = JSONObject(client.get("services/courses/unit", mapOf(
             "unit_id" to unitId,
-            "fields" to "id|classtype_id|classtype_name"
+            "fields" to "id|classtype_id"
         )))
         return LecturerServices.safeCourseUnit(raw)
     }

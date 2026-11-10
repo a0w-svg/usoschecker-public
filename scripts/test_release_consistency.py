@@ -16,6 +16,13 @@ class ReleaseConsistencyTest(unittest.TestCase):
         self.assertIsNotNone(code, "versionCode must be an integer")
         self.assertGreater(int(code.group(1)), 0)
 
+    def test_desktop_installers_carry_the_android_version(self):
+        name = re.search(r"versionName\s*=\s*'([\d.]+)'", GRADLE).group(1)
+        desktop = (ROOT / "desktopApp/build.gradle.kts").read_text(encoding="utf-8")
+        package = re.search(r'packageVersion = "([\d.]+)"', desktop)
+        self.assertIsNotNone(package, "desktop packageVersion must be a literal MAJOR.MINOR.PATCH")
+        self.assertEqual(name, package.group(1), "desktop packageVersion must match Android versionName")
+
     def test_release_notes_exist_in_every_language(self):
         for folder in ("raw", "raw-en", "raw-uk"):
             notes = (RAW / folder / "whats_new.txt").read_text(encoding="utf-8").strip()

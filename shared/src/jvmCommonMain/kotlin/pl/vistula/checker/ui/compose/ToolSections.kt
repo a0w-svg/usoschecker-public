@@ -43,6 +43,7 @@ import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONObject
 import pl.vistula.checker.DemoStudentServices
+import pl.vistula.checker.KeyRegistration
 import pl.vistula.checker.KeyValueStore
 import pl.vistula.checker.ToolServiceData
 import pl.vistula.checker.SharedRepository
@@ -86,6 +87,16 @@ fun AccountSection(
     var pinInput by remember(pendingToken) { mutableStateOf("") }
     var showSecret by remember(state.optString("secret"), state.optString("accountSession")) { mutableStateOf(false) }
     var confirmDisconnect by remember(state.optString("accountSession")) { mutableStateOf(false) }
+    var revokeKey by remember(confirmDisconnect) { mutableStateOf(false) }
+    var emailInput by remember { mutableStateOf("") }
+    val beginLogin: (String, String, String) -> Unit = { key, secret, scopes ->
+        repository.begin(key, secret, scopes)
+        val token = repository.read().optString("requestToken")
+        check(token.isNotBlank())
+        onOpenUrl(UsosClient.BASE + "services/oauth/authorize?oauth_token=" + OAuth.encode(token))
+        onReloadState()
+        onStatusMessage(t("Autoryzuj w przeglądarce i wklej PIN.", "Authorize in your browser and paste the PIN.", "Авторизуйтеся в браузері та вставте PIN."))
+    }
     val editSession = remember(state.optString("accountSession"), state.optString("token")) { repository.editSession(state) }
 
     Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -114,8 +125,41 @@ fun AccountSection(
                     }
                 }
                 else -> {
-                    Text(t("Połącz konto własnym kluczem OAuth i kodem PIN z USOS.",
-                        "Connect with your OAuth credentials and the PIN from USOS.", "Підключіться власними даними OAuth і PIN-кодом USOS."))
+                    if (pendingToken.isEmpty()) {
+                        Text(t("Podaj e-mail, a aplikacja sama zarejestruje klucz API w USOSapps i otworzy logowanie.",
+                            "Enter your email and the app registers the API key with USOSapps and opens sign-in.",
+                            "Вкажіть email, і застосунок сам зареєструє ключ API в USOSapps та відкриє вхід."))
+                        OutlinedTextField(value = emailInput, onValueChange = { emailInput = it },
+                            label = { Text(t("E-mail (do rejestracji klucza)", "Email (for the key registration)", "Email (для реєстрації ключа)")) },
+                            modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        Button(enabled = emailInput.isNotBlank(), onClick = {
+                            val address = emailInput.trim(); val scopes = scopesInput.trim()
+                            if (!KeyRegistration.plausibleEmail(address)) {
+                                onStatusMessage(t("Wpisz poprawny adres e-mail.", "Enter a valid email address.", "Введіть коректну адресу email."))
+                            } else runAsync {
+                                onStatusMessage(t("Rejestruję klucz w USOSapps…", "Registering the key with USOSapps…", "Реєструю ключ у USOSapps…"))
+                                val keys = try {
+                                    KeyRegistration.register("USOS Checker", "", address)
+                                } catch (e: java.io.IOException) {
+                                    val reason = (e as? KeyRegistration.Rejected)?.message ?: t(
+                                        "brak połączenia z USOSapps. Skorzystaj z ręcznych kroków poniżej.",
+                                        "could not reach USOSapps. Use the manual steps below.",
+                                        "немає зв’язку з USOSapps. Скористайтеся ручними кроками нижче.")
+                                    onStatusMessage(t("Nie udało się pobrać klucza: ", "Could not get the key: ", "Не вдалося отримати ключ: ") + reason)
+                                    return@runAsync
+                                }
+                                // Kept in the fields so a failed sign-in start does not need a second registration.
+                                keyInput = keys.key; secretInput = keys.secret
+                                beginLogin(keys.key, keys.secret, scopes)
+                            }
+                        }) { Text(t("Pobierz klucz automatycznie", "Get the key automatically", "Отримати ключ автоматично")) }
+                        Text(t("Twój e-mail trafia tylko do USOSapps Twojej uczelni, które wydaje klucz. Klucz zostaje w zaszyfrowanym magazynie na tym komputerze.",
+                            "Your email goes only to your university’s USOSapps, which issues the key. The key stays in the encrypted store on this computer.",
+                            "Ваша пошта надходить лише до USOSapps вашого університету, який видає ключ. Ключ лишається в зашифрованому сховищі цього комп’ютера."),
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Text(t("Albo połącz konto własnym kluczem OAuth i kodem PIN z USOS.",
+                        "Or connect with your own OAuth credentials and the PIN from USOS.", "Або підключіться власними даними OAuth і PIN-кодом USOS."))
                     OutlinedTextField(value = keyInput, onValueChange = { keyInput = it }, label = { Text("Consumer Key") },
                         modifier = Modifier.fillMaxWidth(), singleLine = true)
                     OutlinedTextField(value = secretInput, onValueChange = { secretInput = it }, label = { Text("Consumer Secret") },
@@ -130,14 +174,7 @@ fun AccountSection(
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(enabled = keyInput.isNotBlank() && secretInput.isNotBlank(), onClick = {
                             val key = keyInput.trim(); val secret = secretInput.trim(); val scopes = scopesInput.trim()
-                            runAsync {
-                                repository.begin(key, secret, scopes)
-                                val token = repository.read().optString("requestToken")
-                                check(token.isNotBlank())
-                                onOpenUrl(UsosClient.BASE + "services/oauth/authorize?oauth_token=" + OAuth.encode(token))
-                                onReloadState()
-                                onStatusMessage(t("Autoryzuj w przeglądarce i wklej PIN.", "Authorize in your browser and paste the PIN.", "Авторизуйтеся в браузері та вставте PIN."))
-                            }
+                            runAsync { beginLogin(key, secret, scopes) }
                         }) { Text(t("1. Rozpocznij logowanie", "1. Start sign-in", "1. Почати вхід")) }
                         OutlinedButton(onClick = onEnableDemo) { Text(t("Wypróbuj demo", "Try demo", "Спробувати демо")) }
                     }
@@ -180,10 +217,40 @@ fun AccountSection(
     if (confirmDisconnect) androidx.compose.material3.AlertDialog(
         onDismissRequest = { confirmDisconnect = false },
         title = { Text(t("Odłączyć konto?", "Disconnect account?", "Відключити обліковий запис?")) },
-        text = { Text(t("Usunie to lokalne dane konta z tego urządzenia.", "This removes local account data from this device.", "Це видалить локальні дані облікового запису з цього пристрою.")) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(t("Usunie to lokalne dane konta z tego urządzenia.", "This removes local account data from this device.", "Це видалить локальні дані облікового запису з цього пристрою."))
+                if (state.optString("key").isNotEmpty() && state.optString("secret").isNotEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        androidx.compose.material3.Switch(checked = revokeKey, onCheckedChange = { revokeKey = it })
+                        Text(t("Odwołaj też mój klucz API w USOSapps (dostaniesz e-mail z potwierdzeniem)",
+                            "Also revoke my API key at USOSapps (you will get a confirmation email)",
+                            "Також відкликати мій ключ API в USOSapps (надійде лист із підтвердженням)"))
+                    }
+                }
+            }
+        },
         confirmButton = { Button(onClick = {
+            val revokable = if (revokeKey) state.optString("key") to state.optString("secret") else null
             confirmDisconnect = false
-            runAsync { repository.disconnect(); secretInput = ""; pinInput = ""; onReloadState() }
+            runAsync {
+                repository.disconnect(); secretInput = ""; pinInput = ""; onReloadState()
+                if (revokable != null) onStatusMessage(
+                    try {
+                        if (KeyRegistration.revoke(revokable.first, revokable.second))
+                            t("Sprawdź skrzynkę e-mail: USOSapps przysłał link do potwierdzenia odwołania klucza.",
+                                "Check your mailbox: USOSapps sent a link to confirm revoking the key.",
+                                "Перевірте пошту: USOSapps надіслав посилання для підтвердження відкликання ключа.")
+                        else t("USOSapps nie zna już tego klucza — pewnie został odwołany.",
+                            "USOSapps no longer knows this key — it was probably already revoked.",
+                            "USOSapps більше не знає цього ключа — ймовірно, його вже відкликано.")
+                    } catch (e: java.io.IOException) {
+                        t("Nie udało się odwołać klucza. Zrób to ręcznie na stronie USOSapps Developers.",
+                            "Could not revoke the key. Do it manually on the USOSapps Developers page.",
+                            "Не вдалося відкликати ключ. Зробіть це вручну на сторінці USOSapps Developers.")
+                    }
+                )
+            }
         }) { Text(t("Odłącz", "Disconnect", "Відключити")) } },
         dismissButton = { OutlinedButton(onClick = { confirmDisconnect = false }) { Text(t("Anuluj", "Cancel", "Скасувати")) } }
     )

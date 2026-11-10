@@ -239,10 +239,16 @@ class DesktopVault @JvmOverloads constructor(
     override fun read(): JSONObject = locked {
         if (!Files.exists(stateFile.toPath(), LinkOption.NOFOLLOW_LINKS)) return@locked JSONObject()
         val bytes = DesktopPlatform.readPrivate(stateFile, MAX_STATE_BYTES)
-        if (bytes.size < 29 || bytes[0].toInt() != 1) throw IOException("Cannot read saved data")
+        if (bytes.size < 29 || bytes[0].toInt() != 1) throw VaultUnreadableException()
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes, 1, 12))
-        JSONObject(String(cipher.doFinal(bytes, 13, bytes.size - 13), StandardCharsets.UTF_8))
+        try {
+            JSONObject(String(cipher.doFinal(bytes, 13, bytes.size - 13), StandardCharsets.UTF_8))
+        } catch (e: javax.crypto.AEADBadTagException) {
+            throw VaultUnreadableException(e)
+        } catch (e: org.json.JSONException) {
+            throw VaultUnreadableException(e)
+        }
     }
 
     override fun write(state: JSONObject): Unit = locked {
@@ -333,7 +339,9 @@ class DesktopKeyValueStore @JvmOverloads constructor(
 }
 
 /** System tray notification publisher for Desktop. */
-class DesktopNotifier : ChangeNotifier, AutoCloseable {
+class DesktopNotifier @JvmOverloads constructor(
+    private val language: () -> String = { "pl" }
+) : ChangeNotifier, AutoCloseable {
     private var trayIcon: TrayIcon? = null
 
     @Synchronized
@@ -361,15 +369,24 @@ class DesktopNotifier : ChangeNotifier, AutoCloseable {
     override fun notifyChanges(changes: List<Change>) {
         if (changes.isEmpty()) return
         val icon = ensureTrayIcon() ?: return
-        val title = if (changes.size == 1) {
-            "${changes[0].action}: ${changes[0].title}"
-        } else {
-            "Wykryto zmiany w USOS (${changes.size})"
-        }
-        val body = changes.take(3).joinToString("\n") { c ->
-            "${c.title}: ${c.after.ifEmpty { c.before }}"
-        }
+        val (title, body) = message(changes, language())
         icon.displayMessage(title, body, TrayIcon.MessageType.INFO)
+    }
+
+    companion object {
+        /** Title and body of the notification; the changes themselves arrive already translated. */
+        @JvmStatic
+        fun message(changes: List<Change>, language: String): Pair<String, String> {
+            val title = if (changes.size == 1) {
+                "${changes[0].action}: ${changes[0].title}"
+            } else when (pl.vistula.checker.core.ApiLanguage.normalize(language)) {
+                "en" -> "Changes found in USOS (${changes.size})"
+                "uk" -> "Виявлено зміни в USOS (${changes.size})"
+                else -> "Wykryto zmiany w USOS (${changes.size})"
+            }
+            val body = changes.take(3).joinToString("\n") { c -> "${c.title}: ${c.after.ifEmpty { c.before }}" }
+            return title to body
+        }
     }
 }
 
@@ -407,14 +424,15 @@ class DesktopSyncScheduler(
         reminderFuture?.cancel(false)
         reminderFuture = null
         if (!enabled || snapshot == null) return
-        val account = repository.read()
+        val account = try { repository.read() } catch (_: Exception) { return }
         if (account.optString("token").isEmpty() || account.optString("token") == "demo") return
         val now = Instant.now()
         val next = ReminderPlanner.next(snapshot, emptySet(), now) ?: return
         val delayMs = (ReminderPlanner.triggerAt(next, leadMinutes, now) - now.toEpochMilli()).coerceAtLeast(1000L)
         reminderFuture = executor.schedule(
             {
-                if (SharedRepository.sameAccount(account, repository.read())) {
+                val current = try { repository.read() } catch (_: Exception) { null }
+                if (current != null && SharedRepository.sameAccount(account, current)) {
                     onReminderTriggered(next.record.title, next.record.value)
                 }
             },

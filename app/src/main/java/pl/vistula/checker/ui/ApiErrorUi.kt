@@ -22,6 +22,7 @@ object ApiErrorUi {
             is UsosClient.ApiException -> http(cause.status, cause.authorization)
             is SocketTimeoutException -> R.string.error_timeout
             is JSONException -> R.string.error_format
+            is pl.vistula.checker.VaultUnreadableException -> R.string.error_storage
             is IOException -> R.string.error_network
             else -> R.string.error_operation
         }
@@ -32,6 +33,7 @@ object ApiErrorUi {
         "timeout" -> R.string.error_timeout
         "format" -> R.string.error_format
         "network" -> R.string.error_network
+        "storage" -> R.string.error_storage
         "http" -> http(entry.optInt("httpStatus"), entry.optBoolean("authorizationError"))
         else -> if (entry.optBoolean("authorizationError")) R.string.account_session_expired else R.string.error_operation
     })

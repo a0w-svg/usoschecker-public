@@ -78,6 +78,35 @@ oczyść wszystkie dotknięte referencje historii, ponów skan i usuń publiczne
 artefakty/logi zawierające sekret. Czyszczenie współdzielonej historii wymaga
 koordynacji z innymi autorami; skaner nie zmienia historii automatycznie.
 
+## Certyfikat serwerów uczelni
+
+Serwery `*.vistula.edu.pl` (USOS, Platon, strona uczelni, logowanie CAS) używają certyfikatu z łańcucha
+„Certum Trusted Root CA”. Windows, przeglądarki i nowsze wersje Androida ufają temu rootowi, ale środowisko Java
+dołączone do aplikacji desktopowej go nie zawiera, przez co każde połączenie z USOS kończyło się błędem TLS.
+Aplikacja dołącza ten jeden publiczny root (SHA-256
+`FE7696573855773E37A95E7AD4D9CC96C30157C15D31765BA9B15704E1AE78FD`, zgodny z magazynami Androida i Windows):
+na desktopie jako dodatek do domyślnych zaufanych urzędów (`DesktopTrust`), na Androidzie w
+`network_security_config.xml` wyłącznie dla domeny `vistula.edu.pl`. Weryfikacja łańcucha i nazwy hosta pozostaje
+bez zmian; plik jest odrzucany, jeśli jego odcisk różni się od zapisanego w kodzie. Testy pilnują odcisku i zakresu.
+
+## Klucz API i lokalny magazyn
+
+Automatyczna rejestracja klucza (`KeyRegistration`) wysyła nazwę aplikacji i adres e-mail wyłącznie do
+`usosapps.vistula.edu.pl`. Rejestracja i odwołanie klucza odrzucają przekierowania, nie korzystają z cache HTTP
+i ograniczają rozmiar odpowiedzi do 64 KB. Przy odwołaniu Consumer Key i Consumer Secret są przesyłane w treści
+żądania POST, a nie w adresie, dzięki czemu sekret nie trafia do logów serwera ani pośredników.
+
+Odłączenie konta na Androidzie usuwa zaszyfrowany stan; klucz w Android Keystore pozostaje (nie da się go
+wyeksportować, a bez usuniętego pliku niczego nie odszyfruje) i jest tworzony pod blokadą, aby dwa równoczesne
+pierwsze zapisy nie wygenerowały dwóch kluczy. Gdy zapisanego stanu nie da się odszyfrować (utracony klucz, uszkodzony plik),
+aplikacja nie zastępuje go po cichu pustym magazynem: zgłasza `VaultUnreadableException` i proponuje usunięcie
+danych lokalnych, które wykonuje dopiero po potwierdzeniu. Brak pliku klucza na desktopie przy istniejącym
+stanie nadal jest błędem bez automatycznej naprawy.
+
+Link powrotny logowania (`usoschecker://oauth`) jest danymi niezaufanymi: aplikacja używa go tylko raz i tylko
+wtedy, gdy zawiera oczekujący token żądania. Link czeka na odczyt zapisanego stanu, więc powrót z przeglądarki
+po zatrzymaniu aplikacji przez system nie gubi logowania i nie omija tego sprawdzenia.
+
 ## Publiczne aktualności uczelni
 
 Ekran aktualności pobiera publiczne wpisy z `https://vistula.edu.pl/wp-json/wp/v2/posts`.
@@ -135,7 +164,8 @@ wiadomości trafia do adresu tylko jako zwykła liczba (`PlatonLinks.messageUrl`
 „Wyloguj z Platona” oraz odłączenie USOS usuwają link, znaczniki synchronizacji i ciasteczka
 wbudowanej przeglądarki (również sesję Microsoft w niej). Powiadomienia z Platona mają treść
 prywatną na ekranie blokady. Debugowanie zawartości WebView (DevTools) nie jest włączane w żadnej
-kompilacji.
+kompilacji. Geolokalizacja w obu WebView jest wyłączona, a awaria procesu renderującego zamyka logowanie
+(lub kończy ciche odnawianie sesji) zamiast całej aplikacji.
 
 ## Tryb wykładowcy i eksperymentalny zapis ocen
 

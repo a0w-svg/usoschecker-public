@@ -20,6 +20,13 @@ interface VaultStore {
     fun stamp(): Long = StateCache.NO_STAMP
 }
 
+/**
+ * The stored state exists but cannot be decrypted or parsed (lost key, damaged file). Retrying does not help;
+ * the only recovery is clearing the store, which the UI offers after an explicit confirmation.
+ * The message never carries the underlying detail.
+ */
+class VaultUnreadableException(cause: Throwable? = null) : java.io.IOException("Saved data cannot be read", cause)
+
 /** Platform-agnostic key-value preferences store (SharedPreferences on Android, JSON file on Desktop). */
 interface KeyValueStore {
     fun getString(key: String, defaultValue: String = ""): String

@@ -59,6 +59,24 @@ runs in plain JUnit and on desktop. The Android vault caches the decrypted state
 
 Versions used by more than one module are in `gradle/libs.versions.toml`.
 
+## Failure handling
+
+- `VaultUnreadableException` (a subtype of `IOException`) means the stored state exists but cannot be decrypted or
+  parsed. It is never retried and never replaced silently; `MainActivity.offerVaultReset` and the desktop dialog in
+  `VistulaApp` clear the store only after a confirmation.
+- `SyncWorker` runs the USOS sync first and then every independent step (task deadlines, Platon, class reminders,
+  widgets) even when the sync failed. `SyncWorker.shouldRetry` decides which failures are worth a retry.
+- An OAuth return link waits in the intent until `stateLoaded` is true and no task is running
+  (`MainActivity.handleOAuthCallback`).
+
+## Requests and field selectors
+
+USOS answers a request that names an unknown result field with HTTP 400, and optional sections swallow that
+error and stay empty. `scripts/check_field_selectors.py` compares every `"fields" to "…"` selector next to a
+`services/…` call with the result fields in the bundled API metadata (`app/src/main/assets/api`); list methods are
+checked through the method that defines their elements. It runs with the script tests. When adding a request,
+write the parser test from the declared fields (see `RealShapeServicesTest`), not from guessed ones.
+
 ## Data flow
 
 1. `SyncWorker` or a user refresh calls `UsosClient` (OAuth1 over HTTPS).

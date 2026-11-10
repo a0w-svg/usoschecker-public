@@ -453,7 +453,7 @@ object LecturerServices {
                     .put("headline", ApiLanguage.safe(s.opt("headline_html")))
                     .put("start_date", StudentServices.text(s, "start_date"))
                     .put("end_date", StudentServices.text(s, "end_date"))
-                    .put("number_of_answers", s.optInt("number_of_answers", 0))
+                    .put("number_of_answers", s.optInt("filled_out_count", s.optInt("number_of_answers", 0)))
                     .put("course_unit_id", StudentServices.text(grp, "course_unit_id").ifEmpty { StudentServices.text(s, "course_unit_id") })
                     .put("group_number", StudentServices.text(grp, "group_number").ifEmpty { StudentServices.text(s, "group_number") })
                     .put("course_name", ApiLanguage.safe(grp?.opt("course_name") ?: s.opt("course_name")))
@@ -466,7 +466,7 @@ object LecturerServices {
                 JSONObject()
                     .put("id", StudentServices.text(t, "id"))
                     .put("type", StudentServices.text(t, "type"))
-                    .put("title", ApiLanguage.safe(t.opt("title") ?: t.opt("titles")))
+                    .put("title", ApiLanguage.safe(t.opt("name") ?: t.opt("title") ?: t.opt("titles")))
                     .put("status", StudentServices.text(t, "status"))
             )
         }
@@ -488,7 +488,8 @@ object LecturerServices {
                 JSONObject()
                     .put("id", StudentServices.text(g, "id"))
                     .put("number", StudentServices.text(g, "number"))
-                    .put("description", ApiLanguage.safe(g.opt("description")))
+                    // A primary group has only an ID and a name; the name is what the screen shows as description.
+                    .put("description", ApiLanguage.safe(g.opt("description") ?: g.opt("name")))
                     .put("programme_id", StudentServices.text(prog, "id").ifEmpty { StudentServices.text(g, "programme_id") })
                     .put("programme_name", ApiLanguage.safe(prog?.opt("name") ?: prog?.opt("description")))
                     .put("stage_id", StudentServices.text(stage, "id").ifEmpty { StudentServices.text(g, "stage_id") })
@@ -519,14 +520,15 @@ object LecturerServices {
         for (i in 0 until minOf(items.length(), 50)) {
             val m = items.optJSONObject(i) ?: continue
             val cat = m.optJSONObject("mobility_category")
-            val prog = m.optJSONObject("programme")
-            val inst = m.optJSONObject("host_institution") ?: m.optJSONObject("institution")
+            val studentProgramme = m.optJSONObject("student_programme")
+            val prog = studentProgramme?.optJSONObject("programme") ?: m.optJSONObject("programme")
+            val inst = m.optJSONObject("receiving_institution") ?: m.optJSONObject("host_institution") ?: m.optJSONObject("institution")
             val state = m.optJSONObject("state")
             result.put(
                 JSONObject()
                     .put("id", StudentServices.text(m, "id"))
-                    .put("category", ApiLanguage.safe(cat?.opt("name") ?: m.opt("category")))
-                    .put("programme", ApiLanguage.safe(prog?.opt("name") ?: m.opt("programme")))
+                    .put("category", ApiLanguage.safe(cat?.opt("name") ?: m.opt("category") ?: m.opt("role")))
+                    .put("programme", ApiLanguage.safe(prog?.opt("name") ?: prog?.opt("description") ?: m.opt("programme")))
                     .put("institution", ApiLanguage.safe(inst?.opt("name") ?: m.opt("institution")))
                     .put("start_date", StudentServices.text(m, "start_date").ifEmpty { StudentServices.text(m, "planned_start_date") })
                     .put("end_date", StudentServices.text(m, "end_date").ifEmpty { StudentServices.text(m, "planned_end_date") })
@@ -550,7 +552,7 @@ object LecturerServices {
                     .put("name", ApiLanguage.safe(t.opt("name")))
                     .put("description", ApiLanguage.safe(t.opt("description")))
                     .put("max_score", StudentServices.text(t, "max_score"))
-                    .put("score", StudentServices.text(res, "score").ifEmpty { StudentServices.text(row, "score") })
+                    .put("score", StudentServices.text(res, "score").ifEmpty { StudentServices.text(row, "score") }.ifEmpty { StudentServices.text(row, "value") })
                     .put("level", StudentServices.text(res, "level").ifEmpty { StudentServices.text(row, "level") })
             )
         }
@@ -641,8 +643,12 @@ object LecturerServices {
             safePeriods.put(
                 JSONObject()
                     .put("id", StudentServices.text(p, "id"))
-                    .put("name", ApiLanguage.safe(p.opt("name")))
-                    .put("description", ApiLanguage.safe(p.opt("description")))
+                    // An allocation period has no name of its own: its status and term identify it.
+                    .put("name", ApiLanguage.safe(p.opt("name") ?: p.opt("status_name")))
+                    .put("description", ApiLanguage.safe(p.opt("description") ?: p.opt("status_desc")))
+                    .put("term_id", StudentServices.text(p, "term_id"))
+                    .put("start_date", StudentServices.text(p, "start_date"))
+                    .put("end_date", StudentServices.text(p, "end_date"))
             )
         }
         return JSONObject()
@@ -668,8 +674,9 @@ object LecturerServices {
                 JSONObject()
                     .put("id", StudentServices.text(s, "id"))
                     .put("subject", StudentServices.text(s, "subject").ifEmpty { ApiLanguage.text(s.opt("title")) }.take(200))
-                    .put("content", StudentServices.text(s, "content").take(300))
-                    .put("expiration_date", StudentServices.text(s, "expiration_date"))
+                    // Title and content are language dictionaries; the screen shows plain text.
+                    .put("content", StudentExtras.plainText(StudentServices.text(s, "content").ifEmpty { ApiLanguage.text(s.opt("content")) }).take(300))
+                    .put("expiration_date", StudentServices.text(s, "expiration_date").ifEmpty { StudentServices.text(s, "end") }.take(10))
             )
         }
         val safeNotifications = JSONArray()

@@ -104,6 +104,10 @@ class MainActivity : AppCompatActivity() {
     private var demo: Boolean = false
     private var demoChanged: Boolean = false
     private var busy: Boolean = false
+
+    /** False until the saved state has been read once; an OAuth return link waits for it. */
+    private var stateLoaded: Boolean = false
+    private var vaultResetOffered: Boolean = false
     private var mobileActivationDialog: androidx.appcompat.app.AlertDialog? = null
     private var tab: Int = 0
 
@@ -364,6 +368,7 @@ class MainActivity : AppCompatActivity() {
             },
             { result ->
                 state = result
+                stateLoaded = true
                 val welcome = getSharedPreferences("welcome", MODE_PRIVATE)
                 if (!welcome.getBoolean("seen", false)) {
                     if (state.optString("token").isNotEmpty() || state.optString("key").isNotEmpty()) {
@@ -448,10 +453,15 @@ class MainActivity : AppCompatActivity() {
     /**
      * USOS returns the user through `usoschecker://oauth?oauth_token=...&oauth_verifier=...`. The link is untrusted input:
      * it is used only when it carries the pending request token, once; anything else falls back to the PIN field.
+     *
+     * The link is kept until the saved state has been read and no task is running. Android may stop the app while the
+     * browser is open, and then the link arrives before the pending request token is known; handling it at once
+     * would drop a valid login.
      */
     private fun handleOAuthCallback(intent: Intent?) {
         val uri = intent?.data ?: return
         if (uri.scheme != OAUTH_SCHEME || uri.host != OAUTH_HOST) return
+        if (!stateLoaded || busy) return
         intent.data = null
         val pending = state.optString("requestToken")
         val token = uri.getQueryParameter("oauth_token").orEmpty()
@@ -917,32 +927,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                override fun onDisconnect() {
-                    task(
-                        {
-                            SyncWorker.cancel(this@MainActivity)
-                            repository.disconnect()
-                            PlatonRunner.forget(this@MainActivity)
-                            ClassReminderReceiver.cancel(this@MainActivity)
-                            androidx.core.app.NotificationManagerCompat.from(this@MainActivity).cancelAll()
-                            TodayScheduleWidget.updateAll(this@MainActivity)
-                            QuickStatusWidget.updateAll(this@MainActivity)
-                            repository.read()
-                        },
-                        { s ->
-                            state = s
-                            detectedPin = ""
-                            api.drafts = JSONObject()
-                            uploadBytes = null
-                            api.uploadMethod = null
-                            exportResponse = null
-                            pendingCalendar = null
-                            grades.clearSemester()
-                            demo = false
-                            render()
-                        }
-                    )
-                }
+                override fun onDisconnect() = disconnectAccount()
 
                 override fun onStartDemo() {
                     grades.clearSemester()
@@ -1658,6 +1643,7 @@ class MainActivity : AppCompatActivity() {
                     } catch (e: Exception) {
                         error(ApiErrorUi.message(this, e))
                     }
+                    handleOAuthCallback(intent)
                 }
             } catch (e: Exception) {
                 val latest: JSONObject = try {
@@ -1673,10 +1659,56 @@ class MainActivity : AppCompatActivity() {
                     updateBusy(false)
                     if (tab == Tabs.HOME || tab == Tabs.HISTORY || tab == Tabs.GRADES || tab == Tabs.SCHEDULE || tab == Tabs.TASKS) render()
                     failed.accept(ApiErrorUi.message(this, e))
-                    error(ApiErrorUi.message(this, e))
+                    if (Repository.cause(e) is VaultUnreadableException) offerVaultReset() else error(ApiErrorUi.message(this, e))
+                    handleOAuthCallback(intent)
                 }
             }
         }
+    }
+
+    /** Removes the account and everything stored for it on this phone, then shows the signed-out app. */
+    private fun disconnectAccount() {
+        task(
+            {
+                SyncWorker.cancel(this)
+                repository.disconnect()
+                PlatonRunner.forget(this)
+                ClassReminderReceiver.cancel(this)
+                androidx.core.app.NotificationManagerCompat.from(this).cancelAll()
+                TodayScheduleWidget.updateAll(this)
+                QuickStatusWidget.updateAll(this)
+                repository.read()
+            },
+            { s ->
+                state = s
+                stateLoaded = true
+                detectedPin = ""
+                api.drafts = JSONObject()
+                uploadBytes = null
+                api.uploadMethod = null
+                exportResponse = null
+                pendingCalendar = null
+                grades.clearSemester()
+                demo = false
+                render()
+            }
+        )
+    }
+
+    /**
+     * The encrypted store cannot be decrypted (lost Keystore key or a damaged file), so no action can succeed until it
+     * is cleared. Clearing is the same as disconnecting and happens only after the student confirms.
+     */
+    private fun offerVaultReset() {
+        if (vaultResetOffered || isFinishing) return
+        vaultResetOffered = true
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.vault_unreadable_title)
+            .setMessage(R.string.vault_unreadable_message)
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.vault_reset_btn) { _, _ -> disconnectAccount() }
+            .setOnDismissListener { vaultResetOffered = false }
+            .show()
     }
 
     private fun updateBusy(value: Boolean) {

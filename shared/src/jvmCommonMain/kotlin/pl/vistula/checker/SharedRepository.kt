@@ -434,7 +434,7 @@ class SharedRepository @JvmOverloads constructor(
             if (e is UsosClient.ApiException || e is IllegalStateException || e is IllegalArgumentException) {
                 return e.message ?: "Nie udało się wykonać operacji."
             }
-            if (e is IOException) return "Nie udało się pobrać lub zapisać danych. Poprzedni zapis został zachowany."
+            if (e is IOException && e !is VaultUnreadableException) return "Nie udało się pobrać lub zapisać danych. Poprzedni zapis został zachowany."
             return "Nie udało się odczytać bezpiecznego magazynu danych. Spróbuj ponownie lub odłącz konto."
         }
     }

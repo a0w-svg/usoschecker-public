@@ -785,4 +785,8 @@ Last download: %3$s</string>
     <string name="tasks_platon_message_failed">The message could not be read.</string>
     <string name="tasks_platon_course_assignments">Assignments from Platon:</string>
     <string name="tasks_platon_course_no_assignments">No Platon assignments for this course.</string>
+    <string name="error_storage">The data saved on this phone cannot be read. Try again; if that does not help, reset local data and connect again.</string>
+    <string name="vault_unreadable_title">Saved data cannot be read</string>
+    <string name="vault_unreadable_message">The encrypted account data on this phone is damaged or its encryption key was lost. You can try again later or reset local data: tokens, cached grades, schedule, history and personal tasks. Your USOS account is not changed — after the reset you connect it again.</string>
+    <string name="vault_reset_btn">Reset local data</string>
 </resources>

@@ -63,11 +63,44 @@ class KeyRegistrationTest {
     }
 
     @Test
+    fun redirectsAreRefusedAndNeverFollowed() {
+        val fake = Fake("", 302)
+        try {
+            KeyRegistration.revoke("a", "b", UsosClient.ConnectionSource { fake })
+            fail()
+        } catch (e: java.io.IOException) {
+            assertTrue(e !is KeyRegistration.Rejected)
+        }
+        assertEquals(false, fake.instanceFollowRedirects)
+        assertEquals(false, fake.useCaches)
+        try {
+            KeyRegistration.register("a", "", "x@example.com", UsosClient.ConnectionSource { Fake("", 301) })
+            fail()
+        } catch (e: java.io.IOException) {
+            assertTrue(e !is KeyRegistration.Rejected)
+        }
+    }
+
+    @Test
+    fun oversizedAnswerIsRejected() {
+        try {
+            KeyRegistration.revoke("a", "b", UsosClient.ConnectionSource { Fake("x".repeat(70_000)) })
+            fail()
+        } catch (e: java.io.IOException) {
+            assertTrue(e !is KeyRegistration.Rejected)
+        }
+    }
+
+    @Test
     fun revokeSendsTheKeyPairAndReadsTheAnswer() {
         val address = arrayOf("")
-        val sent = KeyRegistration.revoke("k 1", "s&2", UsosClient.ConnectionSource { address[0] = it; Fake("true") })
+        val fake = Fake("true")
+        val sent = KeyRegistration.revoke("k 1", "s&2", UsosClient.ConnectionSource { address[0] = it; fake })
         assertTrue(sent)
-        assertTrue(address[0].endsWith("revoke_consumer_key?consumer_key=k+1&consumer_secret=s%262"))
+        // The secret travels in the body: nothing of the pair may appear in the address.
+        assertEquals(UsosClient.BASE + "services/oauth/revoke_consumer_key", address[0])
+        assertEquals("POST", fake.requestMethod)
+        assertEquals("consumer_key=k+1&consumer_secret=s%262", fake.sent.toString())
         assertEquals(false, KeyRegistration.revoke("a", "b", UsosClient.ConnectionSource { Fake("false") }))
         assertEquals(false, KeyRegistration.revoke("a", "b", UsosClient.ConnectionSource { Fake("""{"message": "Key-pair not found."}""", 400) }))
     }

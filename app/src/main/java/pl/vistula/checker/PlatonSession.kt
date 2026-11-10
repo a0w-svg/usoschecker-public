@@ -72,6 +72,7 @@ object PlatonSession {
             domStorageEnabled = true
             allowFileAccess = false
             allowContentAccess = false
+            setGeolocationEnabled(false)
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         }
         web.webViewClient = object : WebViewClient() {
@@ -88,6 +89,12 @@ object PlatonSession {
             }
 
             override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {}
+
+            /** A crashed renderer ends the silent renewal instead of the whole app; the caller asks for a sign-in. */
+            override fun onRenderProcessGone(view: WebView, detail: android.webkit.RenderProcessGoneDetail): Boolean {
+                finish(false)
+                return true
+            }
         }
         web.loadUrl(PlatonLinks.HOME)
     }

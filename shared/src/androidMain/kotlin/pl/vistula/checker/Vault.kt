@@ -7,7 +7,6 @@ import android.security.keystore.KeyProperties
 import android.util.AtomicFile
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -22,7 +21,7 @@ class Vault(context: Context) : VaultStore {
     override val storePath: String = context.noBackupFilesDir.absolutePath
 
     @Throws(Exception::class)
-    private fun key(): SecretKey {
+    private fun key(): SecretKey = synchronized(KEY_LOCK) {
         val store = KeyStore.getInstance("AndroidKeyStore")
         store.load(null)
         if (!store.containsAlias(ALIAS)) {
@@ -38,7 +37,7 @@ class Vault(context: Context) : VaultStore {
             )
             generator.generateKey()
         }
-        return store.getKey(ALIAS, null) as SecretKey
+        store.getKey(ALIAS, null) as SecretKey
     }
 
     private val cache: StateCache = CACHES.computeIfAbsent(storePath) { StateCache() }
@@ -65,12 +64,21 @@ class Vault(context: Context) : VaultStore {
             if (!base.exists() && !File(base.path + ".bak").exists()) return JSONObject()
             throw e
         }
-        if (bytes.size < 29 || bytes[0].toInt() != 1) {
-            throw IOException("Nie można odczytać zapisanych danych.")
+        // A truncated file, a wrong key (lost or replaced Keystore entry) and damaged content cannot heal by retrying.
+        if (bytes.size < 29 || bytes[0].toInt() != 1) throw VaultUnreadableException()
+        try {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes, 1, 12))
+            return JSONObject(String(cipher.doFinal(bytes, 13, bytes.size - 13), StandardCharsets.UTF_8))
+        } catch (e: javax.crypto.AEADBadTagException) {
+            throw VaultUnreadableException(e)
+        } catch (e: java.security.InvalidKeyException) {
+            throw VaultUnreadableException(e)
+        } catch (e: java.security.UnrecoverableKeyException) {
+            throw VaultUnreadableException(e)
+        } catch (e: org.json.JSONException) {
+            throw VaultUnreadableException(e)
         }
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes, 1, 12))
-        return JSONObject(String(cipher.doFinal(bytes, 13, bytes.size - 13), StandardCharsets.UTF_8))
     }
 
     @Throws(Exception::class)
@@ -95,10 +103,13 @@ class Vault(context: Context) : VaultStore {
     override fun clear() {
         file.delete()
         cache.invalidate()
+        // The Keystore key stays: one alias serves every Vault directory of the app, so deleting it here would make
+        // another store unreadable. Without the deleted file the key decrypts nothing.
     }
 
     companion object {
         private const val ALIAS = "vistula_checker_local_v1"
+        private val KEY_LOCK = Any()
 
         /** One cache per state directory, shared by every Vault instance in the process. */
         private val CACHES = java.util.concurrent.ConcurrentHashMap<String, StateCache>()

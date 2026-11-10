@@ -1,3 +1,12 @@
+• Desktop (Windows, Linux): the connection to USOS is fixed. The bundled Java runtime did not trust the university servers’ certificate, so sign-in, key registration, refresh and news did not work at all. Android carries the same root certificate for older system versions.
+• More: fixed sections that were always empty because the app asked USOS for fields that do not exist: dormitories and allocation periods, mobility, placement tests, questionnaires to answer, statements, custom groups, and surveys and exam reports in the lecturer panel.
+• Sign-in is no longer lost when the system stops the app while the browser is open: returning from USOS completes the connection even after a restart.
+• When saved data cannot be read (lost key, damaged file), the app offers to reset local data instead of repeating the same error.
+• Background refresh: Platon, reminders and widgets keep working when USOS is temporarily down; no pointless retries when the server asks for a pause.
+• Security: revoking the API key sends the secret in the request body, not in the address; key registration refuses redirects and limits the answer size.
+• Platon: a crash of the in-app browser no longer closes the whole app.
+• Desktop: get the API key automatically from your email and revoke it when disconnecting; change notifications are in Polish, English and Ukrainian.
+• The update check no longer fails when the saved release information is unreadable.
 • Platon: read your messages in the app (an unread message asks first, because Platon then marks it as read), and a course shows its progress, grade and its assignments.
 • Platon: choose which semesters to sync (the newest by default), for example to see last year's assignments.
 • Platon settings: separate notifications for new assignments, grade changes and new messages, and an option to stop refreshing when Tasks opens.

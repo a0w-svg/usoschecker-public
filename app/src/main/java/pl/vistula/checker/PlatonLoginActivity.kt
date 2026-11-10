@@ -52,6 +52,7 @@ class PlatonLoginActivity : AppCompatActivity() {
                 allowFileAccess = false
                 allowContentAccess = false
                 setSupportMultipleWindows(false)
+                setGeolocationEnabled(false)
                 mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
                 @Suppress("DEPRECATION")
                 savePassword = false
@@ -62,6 +63,16 @@ class PlatonLoginActivity : AppCompatActivity() {
 
                 override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                     loadBar.visibility = View.VISIBLE
+                }
+
+                /** Without this the app process dies together with a crashed or reclaimed renderer. */
+                override fun onRenderProcessGone(view: WebView, detail: android.webkit.RenderProcessGoneDetail): Boolean {
+                    if (!finished) {
+                        finished = true
+                        setResult(RESULT_CANCELED)
+                        finish()
+                    }
+                    return true
                 }
 
                 override fun onPageFinished(view: WebView, url: String?) {

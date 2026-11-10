@@ -30,6 +30,7 @@ object SyncProgress {
         is pl.vistula.checker.UsosClient.ApiException -> "http"
         is java.net.SocketTimeoutException -> "timeout"
         is org.json.JSONException, is java.time.format.DateTimeParseException -> "format"
+        is pl.vistula.checker.VaultUnreadableException -> "storage"
         is java.io.IOException -> "network"
         else -> "operation"
     }
@@ -57,6 +58,7 @@ object SyncProgress {
                 "timeout" -> "error_timeout"
                 "format" -> "error_format"
                 "network" -> "error_network"
+                "storage" -> "error_storage"
                 else -> "error_operation"
             }
         }
@@ -70,6 +72,7 @@ object SyncProgress {
                 "error_server" -> ApiLanguage.label("Serwer jest chwilowo niedostępny. Spróbuj później.", "The server is temporarily unavailable. Try again later.", "Сервер тимчасово недоступний. Спробуйте пізніше.")
                 "error_format" -> ApiLanguage.label("Odpowiedź ma nieznany format. Zachowano poprzednie dane.", "The response format was not recognized. Previous data was preserved.", "Невідомий формат відповіді. Попередні дані збережено.")
                 "error_network" -> ApiLanguage.label("Nie udało się połączyć. Sprawdź internet i spróbuj ponownie.", "Could not connect. Check your connection and try again.", "Не вдалося підключитися. Перевірте інтернет і спробуйте ще раз.")
+                "error_storage" -> ApiLanguage.label("Nie można odczytać danych zapisanych na tym urządzeniu. Spróbuj ponownie; jeśli to nie pomoże, usuń dane lokalne w ustawieniach konta i połącz konto od nowa.", "The data saved on this device cannot be read. Try again; if that does not help, reset local data in the account settings and connect again.", "Не вдалося прочитати дані, збережені на цьому пристрої. Спробуйте ще раз; якщо не допоможе, скиньте локальні дані в налаштуваннях облікового запису та підключіться знову.")
                 else -> ApiLanguage.label("Nie udało się wykonać operacji. Sprawdź dane i spróbuj ponownie.", "The operation could not be completed. Check the details and try again.", "Не вдалося виконати дію. Перевірте дані та спробуйте ще раз.")
             }
         }

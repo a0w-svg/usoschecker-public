@@ -14,6 +14,7 @@ import pl.vistula.checker.UsosClient
 import pl.vistula.checker.DemoStudentServices
 import pl.vistula.checker.core.AccountRole
 import pl.vistula.checker.core.CampusAffiliation
+import pl.vistula.checker.core.LecturerServices
 import pl.vistula.checker.core.StudentServices
 
 object LecturerScreenController {
@@ -244,7 +245,7 @@ object LecturerScreenController {
                 if (dates.length() > 0) {
                     val slots = (0 until dates.length()).mapNotNull { dIdx ->
                         val d = dates.optJSONObject(dIdx) ?: return@mapNotNull null
-                        val time = listOf(StudentServices.text(d, "start_time"), StudentServices.text(d, "end_time")).filter { it.isNotEmpty() }.joinToString(" – ")
+                        val time = LecturerServices.lessonSpan(StudentServices.text(d, "start_time"), StudentServices.text(d, "end_time"), language)
                         val seats = d.optInt("seats_limit", 0).takeIf { it > 0 }?.let { "Limit: $it" }.orEmpty()
                         listOf(time, seats).filter { it.isNotEmpty() }.joinToString(" · ")
                     }.joinToString("\n")
@@ -332,9 +333,28 @@ object LecturerScreenController {
                     orientation = LinearLayout.VERTICAL
                     setPadding(UiHelper.dp(activity, 16), UiHelper.dp(activity, 12), UiHelper.dp(activity, 16), UiHelper.dp(activity, 12))
                 }
-                val title = StudentServices.localized(t.opt("title"), language).ifEmpty { StudentServices.text(t, "id") }
+                val id = StudentServices.text(t, "id")
+                val title = StudentServices.localized(t.opt("title") ?: t.opt("titles"), language).ifEmpty { id }
                 UiHelper.add(activity, box, title, 15, Tone.INK, true)
-                UiHelper.note(activity, box, StudentServices.text(t, "type"), Tone.MUTED)
+                val sub = listOf(StudentServices.text(t, "type"), StudentServices.text(t, "status"))
+                    .filter { it.isNotEmpty() }
+                    .joinToString(" · ")
+                if (sub.isNotEmpty()) UiHelper.note(activity, box, sub, Tone.MUTED)
+                if (id.isNotEmpty()) {
+                    box.isClickable = true
+                    box.isFocusable = true
+                    box.setOnClickListener {
+                        if (activity.isDemo()) {
+                            showThesisDetails(activity, title, DemoStudentServices.demoThesisDetail(id), language)
+                        } else {
+                            activity.universityRead({ client ->
+                                ToolServiceData.fetchThesisDetail(client, id)
+                            }) { detail ->
+                                showThesisDetails(activity, title, detail, language)
+                            }
+                        }
+                    }
+                }
                 tray.addView(box)
             }
         }
@@ -378,17 +398,21 @@ object LecturerScreenController {
                     box.isClickable = true
                     box.isFocusable = true
                     box.setOnClickListener {
-                        activity.universityRead({ client -> ToolServiceData.fetchRegistrationRounds(client, registrationId) }) { rounds ->
+                        fun showRounds(rounds: JSONArray) {
                             val lines = (0 until rounds.length()).mapNotNull { index ->
                                 val round = rounds.optJSONObject(index) ?: return@mapNotNull null
-                                listOf(StudentServices.localized(round.opt("name"), language), StudentServices.text(round, "status"),
-                                    StudentServices.text(round, "start_date"), StudentServices.text(round, "end_date"))
-                                    .filter { it.isNotEmpty() }.joinToString(" · ")
+                                listOf(
+                                    StudentServices.localized(round.opt("name"), language),
+                                    StudentServices.text(round, "status"),
+                                    LecturerServices.lessonSpan(StudentServices.text(round, "start_date"), StudentServices.text(round, "end_date"), language)
+                                ).filter { it.isNotEmpty() }.joinToString(" · ")
                             }
                             MaterialAlertDialogBuilder(activity).setTitle(desc)
                                 .setMessage(lines.ifEmpty { listOf(activity.getString(R.string.registration_rounds_empty)) }.joinToString("\n\n"))
                                 .setPositiveButton(android.R.string.ok, null).show()
                         }
+                        if (activity.isDemo()) showRounds(DemoStudentServices.demoRegistrationRounds(registrationId))
+                        else activity.universityRead({ client -> ToolServiceData.fetchRegistrationRounds(client, registrationId) }, ::showRounds)
                     }
                 }
                 tray.addView(box)
@@ -685,12 +709,12 @@ object LecturerScreenController {
                 UiHelper.add(activity, box, title, 15, Tone.INK, true)
                 UiHelper.note(activity, box, StudentServices.text(b, "postal_address"), Tone.MUTED)
                 val buildingId = StudentServices.text(b, "id")
-                if (buildingId.isNotEmpty() && !activity.isDemo()) {
+                if (buildingId.isNotEmpty()) {
                     box.isClickable = true
                     box.isFocusable = true
                     UiHelper.note(activity, box, activity.getString(R.string.campus_building_rooms_hint), Tone.MUTED)
                     box.setOnClickListener {
-                        activity.universityRead({ client -> ToolServiceData.fetchBuildingRooms(client, buildingId) }) { rooms ->
+                        fun showRooms(rooms: JSONArray) {
                             if (rooms.length() == 0) {
                                 MaterialAlertDialogBuilder(activity).setTitle(title).setMessage(R.string.campus_rooms_empty).setPositiveButton(android.R.string.ok, null).show()
                             } else {
@@ -706,6 +730,8 @@ object LecturerScreenController {
                                 dialog.show()
                             }
                         }
+                        if (activity.isDemo()) showRooms(DemoStudentServices.demoBuildingRooms(buildingId))
+                        else activity.universityRead({ client -> ToolServiceData.fetchBuildingRooms(client, buildingId) }, ::showRooms)
                     }
                 }
                 tray.addView(box)
@@ -905,7 +931,7 @@ object LecturerScreenController {
                 val title = StudentServices.localized(pt.opt("name"), language).ifEmpty { StudentServices.text(pt, "id") }
                 UiHelper.add(activity, box, title, 15, Tone.INK, true)
                 val score = listOfNotNull(
-                    StudentServices.text(pt, "points").takeIf { it.isNotEmpty() },
+                    StudentServices.text(pt, "score").ifEmpty { StudentServices.text(pt, "points") }.takeIf { it.isNotEmpty() },
                     StudentServices.text(pt, "max_score").takeIf { it.isNotEmpty() }?.let { "/ $it" },
                     StudentServices.localized(pt.opt("level"), language).takeIf { it.isNotEmpty() }
                 ).joinToString(" ")
@@ -1044,8 +1070,14 @@ object LecturerScreenController {
             val lessons = data.optJSONArray("lessons") ?: JSONArray()
             val rows = (0 until lessons.length()).mapNotNull { index ->
                 val lesson = lessons.optJSONObject(index) ?: return@mapNotNull null
-                listOf(StudentServices.text(lesson, "start_time"), StudentServices.text(lesson, "end_time"), StudentServices.localized(lesson.opt("name"), language))
-                    .filter { it.isNotEmpty() }.joinToString(" · ")
+                val title = StudentServices.localized(lesson.opt("name"), language)
+                val classType = StudentServices.localized(lesson.opt("classtype_name"), language)
+                    .takeIf { it.isNotEmpty() && !title.contains(it, ignoreCase = true) }
+                listOfNotNull(
+                    LecturerServices.lessonSpan(StudentServices.text(lesson, "start_time"), StudentServices.text(lesson, "end_time"), language).takeIf { it.isNotEmpty() },
+                    title.takeIf { it.isNotEmpty() },
+                    classType
+                ).joinToString(" · ")
             }
             MaterialAlertDialogBuilder(activity).setTitle(activity.getString(R.string.campus_room_title, StudentServices.text(data, "number").ifEmpty { roomId }))
                 .setMessage(rows.ifEmpty { listOf(activity.getString(R.string.campus_room_schedule_empty)) }.joinToString("\n\n"))
@@ -1172,7 +1204,7 @@ object LecturerScreenController {
             val group = groups.optJSONObject(i) ?: continue
             val parts = listOf(
                 StudentServices.text(group, "number").takeIf { it.isNotEmpty() }?.let { activity.getString(R.string.exam_group_number, it) }.orEmpty(),
-                StudentServices.text(group, "exam_start"), StudentServices.text(group, "exam_end"),
+                LecturerServices.lessonSpan(StudentServices.text(group, "exam_start"), StudentServices.text(group, "exam_end"), language),
                 StudentServices.text(group, "room_number").takeIf { it.isNotEmpty() }?.let { activity.getString(R.string.campus_room_title, it) }.orEmpty()
             ).filter { it.isNotEmpty() }
             if (parts.isNotEmpty()) lines.add(parts.joinToString(" · "))
@@ -1191,7 +1223,15 @@ object LecturerScreenController {
         if (lessons.length() == 0) lines.add(activity.getString(R.string.staff_schedule_empty))
         for (n in 0 until lessons.length()) {
             val lesson = lessons.optJSONObject(n) ?: continue
-            lines.add(listOf(StudentServices.text(lesson, "start_time"), StudentServices.localized(lesson.opt("name"), language), StudentServices.text(lesson, "room_number")).filter { it.isNotEmpty() }.joinToString(" · "))
+            val title = StudentServices.localized(lesson.opt("name"), language)
+            val classType = StudentServices.localized(lesson.opt("classtype_name"), language)
+                .takeIf { it.isNotEmpty() && !title.contains(it, ignoreCase = true) }
+            lines.add(listOfNotNull(
+                LecturerServices.lessonSpan(StudentServices.text(lesson, "start_time"), StudentServices.text(lesson, "end_time"), language).takeIf { it.isNotEmpty() },
+                title.takeIf { it.isNotEmpty() },
+                classType,
+                StudentServices.text(lesson, "room_number").takeIf { it.isNotEmpty() }
+            ).joinToString(" · "))
         }
         MaterialAlertDialogBuilder(activity).setTitle(fullName).setMessage(lines.joinToString("\n\n")).setPositiveButton(android.R.string.ok, null).show()
     }

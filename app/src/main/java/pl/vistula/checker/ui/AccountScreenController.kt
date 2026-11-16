@@ -205,6 +205,21 @@ class AccountScreenController private constructor() {
                 }
                 toggle.setOnCheckedChangeListener { _, checked -> listener.onToggleEnabled(checked) }
 
+                val studentPrefs = pl.vistula.checker.StudentPrefs(activity)
+                val platonToggle = UiHelper.switchRow(
+                    activity,
+                    box,
+                    activity.getString(R.string.tasks_platon_setting_sync_enabled),
+                    studentPrefs.platonLinked && studentPrefs.platonSyncEnabled
+                )
+                platonToggle.setOnCheckedChangeListener { _, checked ->
+                    studentPrefs.platonSyncEnabled = checked
+                    studentPrefs.platonAutoRefresh = checked
+                    if (checked && !studentPrefs.platonLinked) {
+                        activity.connectPlaton()
+                    }
+                }
+
                 val frequency = LayoutInflater.from(activity).inflate(R.layout.view_sync_frequency, box, false)
                 val interval = frequency.findViewById<Spinner>(R.id.sync_interval)
                 val values = activity.resources.getIntArray(R.array.sync_interval_minutes).map { it.toLong() }

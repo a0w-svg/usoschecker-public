@@ -180,9 +180,10 @@ internal fun LecturerWorkspaceSection(
             }
         )
     }
-    var selectedGroupDetail by remember { mutableStateOf<JSONObject?>(null) }
-    var selectedNodeDetail by remember { mutableStateOf<JSONObject?>(null) }
-    var selectedAttendanceDetail by remember { mutableStateOf<JSONObject?>(null) }
+    val sessionKey = state.optString("accountSession")
+    var selectedGroupDetail by remember(sessionKey) { mutableStateOf<JSONObject?>(null) }
+    var selectedNodeDetail by remember(sessionKey) { mutableStateOf<JSONObject?>(null) }
+    var selectedAttendanceDetail by remember(sessionKey) { mutableStateOf<JSONObject?>(null) }
     val live = state.optString("token").isNotEmpty() && state.optString("token") != "demo" && !state.optBoolean("authorizationError")
     LaunchedEffect(subTab, state.optString("accountSession"), live) {
         if (!live) return@LaunchedEffect
@@ -204,6 +205,13 @@ internal fun LecturerWorkspaceSection(
         }
     }
     val services = state.optJSONObject("studentServices")
+    fun refreshOrNull(sectionName: String): (() -> Unit)? =
+        if (state.optString("token") == "demo") null else ({
+            runAsync {
+                StudentServiceLoader.refresh(repository, sectionName)
+                onReloadState()
+            }
+        })
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -223,12 +231,7 @@ internal fun LecturerWorkspaceSection(
             "courses" -> {
                 SectionHead(
                     title = tr("Prowadzone przedmioty", "Conducted courses", "Предмети, що викладаються"),
-                    onClick = {
-                        runAsync {
-                            StudentServiceLoader.refresh(repository, "teaching")
-                            onReloadState()
-                        }
-                    },
+                    onClick = refreshOrNull("teaching"),
                     modifier = Modifier
                 )
                 val entry = services?.optJSONObject("teaching")
@@ -262,12 +265,7 @@ internal fun LecturerWorkspaceSection(
             "groups" -> {
                 SectionHead(
                     title = tr("Grupy zajęciowe i koordynacja", "Class groups & coordination", "Навчальні групи та координація"),
-                    onClick = {
-                        runAsync {
-                            StudentServiceLoader.refresh(repository, "lecturerGroups")
-                            onReloadState()
-                        }
-                    },
+                    onClick = refreshOrNull("lecturerGroups"),
                     modifier = Modifier
                 )
                 val entry = services?.optJSONObject("lecturerGroups")
@@ -371,12 +369,7 @@ internal fun LecturerWorkspaceSection(
             "tests" -> {
                 SectionHead(
                     title = tr("Drzewa sprawdzianów i ocen", "Course test & gradebook trees", "Дерева тестів та оцінок"),
-                    onClick = {
-                        runAsync {
-                            StudentServiceLoader.refresh(repository, "lecturerTests")
-                            onReloadState()
-                        }
-                    },
+                    onClick = refreshOrNull("lecturerTests"),
                     modifier = Modifier
                 )
                 val entry = services?.optJSONObject("lecturerTests")
@@ -467,12 +460,7 @@ internal fun LecturerWorkspaceSection(
             "meetings" -> {
                 SectionHead(
                     title = tr("Konsultacje i spotkania prowadzącego", "Lecturer consultations & meetings", "Консультації та зустрічі викладача"),
-                    onClick = {
-                        runAsync {
-                            StudentServiceLoader.refresh(repository, "lecturerMeetings")
-                            onReloadState()
-                        }
-                    },
+                    onClick = refreshOrNull("lecturerMeetings"),
                     modifier = Modifier
                 )
                 val entry = services?.optJSONObject("lecturerMeetings")
@@ -490,7 +478,8 @@ internal fun LecturerWorkspaceSection(
                             val dates = m.optJSONArray("dates") ?: JSONArray()
                             val firstDate = if (dates.length() > 0) {
                                 val slot = dates.getJSONObject(0)
-                                "${slot.optString("start_time")} – ${slot.optString("end_time")} (${tr("limit", "limit", "ліміт")}: ${slot.optInt("seats_limit")})"
+                                val span = LecturerServices.lessonSpan(slot.optString("start_time"), slot.optString("end_time"), language)
+                                "$span (${tr("limit", "limit", "ліміт")}: ${slot.optInt("seats_limit")})"
                             } else ""
                             ItemRow(
                                 title = name,
@@ -504,12 +493,7 @@ internal fun LecturerWorkspaceSection(
             "attendance" -> {
                 SectionHead(
                     title = tr("Listy obecności w USOS", "USOS attendance lists", "Списки присутності в USOS"),
-                    onClick = {
-                        runAsync {
-                            StudentServiceLoader.refresh(repository, "lecturerAttendance")
-                            onReloadState()
-                        }
-                    },
+                    onClick = refreshOrNull("lecturerAttendance"),
                     modifier = Modifier
                 )
                 val entry = services?.optJSONObject("lecturerAttendance")
@@ -596,12 +580,7 @@ internal fun LecturerWorkspaceSection(
             "reports" -> {
                 SectionHead(
                     title = tr("Ankiety dydaktyczne i protokoły prac dyplomowych", "Teaching surveys & thesis reports", "Анкети викладання та протоколи дипломних робіт"),
-                    onClick = {
-                        runAsync {
-                            StudentServiceLoader.refresh(repository, "lecturerReports")
-                            onReloadState()
-                        }
-                    },
+                    onClick = refreshOrNull("lecturerReports"),
                     modifier = Modifier
                 )
                 val entry = services?.optJSONObject("lecturerReports")

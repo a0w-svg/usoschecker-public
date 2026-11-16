@@ -576,7 +576,7 @@ fun PaymentsAndServicesSection(
                 val lines = mutableListOf<String>()
                 val d = StudentServices.text(rem, "date")
                 if (d.isNotEmpty()) lines.add(t("Data: ", "Date: ", "Дата: ") + d)
-                if (rem.has("is_settled")) {
+                if (rem.has("is_settled") && !rem.isNull("is_settled")) {
                     lines.add(if (rem.optBoolean("is_settled")) t("Rozliczona", "Settled", "Розраховано") else t("Nierozliczona", "Not settled", "Не розраховано"))
                 }
                 if (rem.has("remaining") && !rem.isNull("remaining")) {
@@ -630,8 +630,9 @@ fun PaymentsAndServicesSection(
                     Text(payments.statusNotice, color = MaterialTheme.colorScheme.tertiary, style = MaterialTheme.typography.bodyMedium)
                 }
                 payments.accounts.forEach { acc ->
+                    val formattedIban = acc.bankAccountNumber.replace(" ", "").chunked(4).joinToString(" ")
                     Text(
-                        "${acc.name}: ${acc.bankAccountNumber} · ${acc.balance} ${acc.currency}",
+                        "${acc.name}: $formattedIban · ${pl.vistula.checker.core.PaymentAmounts.format(acc.balance, acc.currency, language)}",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium
                     )
@@ -660,10 +661,12 @@ fun PaymentsAndServicesSection(
                         val remId = StudentServices.text(rem, "id")
                         val cur = pl.vistula.checker.core.PaymentAmounts.currencyCode(rem.opt("currency"))
                         val desc = StudentServices.localized(rem.opt("description"), language).ifEmpty { remId }
-                        val isSettled = rem.optBoolean("is_settled")
+                        val settledLabel = if (rem.has("is_settled") && !rem.isNull("is_settled")) {
+                            if (rem.optBoolean("is_settled")) t("Rozliczona", "Settled", "Розраховано") else t("Nierozliczona", "Not settled", "Не розраховано")
+                        } else StudentServices.text(rem, "status")
                         val sub = listOf(
                             StudentServices.text(rem, "date"),
-                            if (isSettled) t("Rozliczona", "Settled", "Розраховано") else t("Nierozliczona", "Not settled", "Не розраховано")
+                            settledLabel
                         ).filter { it.isNotBlank() }.joinToString(" · ")
                         Row(
                             modifier = Modifier.fillMaxWidth().clickable(enabled = remId.isNotEmpty()) { loadRemittance(remId) }.padding(vertical = 4.dp),
@@ -756,7 +759,10 @@ fun PaymentsAndServicesSection(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(doc.name.ifEmpty { doc.id }, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                            Text("${doc.typeName} · ${doc.status}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            val docSub = listOf(doc.typeName, doc.status).filter { it.isNotBlank() }.joinToString(" · ")
+                            if (docSub.isNotEmpty()) {
+                                Text(docSub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
                 }
@@ -787,7 +793,7 @@ fun PaymentsAndServicesSection(
     }
 
     if (section == "services") {
-        AcademicExtrasSection(state, repository, language, "services", onReloadState, onStatusMessage, runAsync)
+        AcademicExtrasSection(state, repository, language, "services", onReloadState, onStatusMessage, runAsync, onOpenUrl)
     }
     if (section == "services") Card(
         modifier = Modifier.fillMaxWidth(),

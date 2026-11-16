@@ -59,9 +59,12 @@ internal class ExtrasEnv(
     val language: String,
     val onReloadState: () -> Unit,
     val onStatusMessage: (String) -> Unit,
-    val runAsync: (() -> Unit) -> Unit
+    val runAsync: (() -> Unit) -> Unit,
+    val onOpenUrl: (String) -> Unit = {}
 ) {
     val tr = Translator(language)
     val services: JSONObject? = state.optJSONObject("studentServices")
-    val live: Boolean = state.optString("token").isNotEmpty() && state.optString("token") != "demo" && !state.optBoolean("authorizationError")
+    val isDemo: Boolean = state.optString("token") == "demo"
+    val live: Boolean = state.optString("token").isNotEmpty() && !isDemo && !state.optBoolean("authorizationError")
+    fun refreshOrNull(block: () -> Unit): (() -> Unit)? = if (isDemo) null else ({ runAsync { block(); onReloadState() } })
 }

@@ -782,6 +782,7 @@
     <string name="lecturer_dlg_no_content">Brak treści strony.</string>
     <string name="tasks_platon_settings_menu">Ustawienia Platona</string>
     <string name="tasks_platon_settings_title">Ustawienia Platona</string>
+    <string name="tasks_platon_setting_sync_enabled">Synchronizuj z Platonem (opcjonalnie)</string>
     <string name="tasks_platon_setting_notify_tasks">Powiadamiaj o nowych zadaniach</string>
     <string name="tasks_platon_setting_notify_grades">Powiadamiaj o zmianach ocen</string>
     <string name="tasks_platon_setting_notify_messages">Powiadamiaj o nowych wiadomościach</string>

@@ -777,6 +777,7 @@
     <string name="lecturer_dlg_no_content">На сторінці немає вмісту.</string>
     <string name="tasks_platon_settings_menu">Налаштування Platon</string>
     <string name="tasks_platon_settings_title">Налаштування Platon</string>
+    <string name="tasks_platon_setting_sync_enabled">Синхронізувати з Platon (необов’язково)</string>
     <string name="tasks_platon_setting_notify_tasks">Сповіщати про нові завдання</string>
     <string name="tasks_platon_setting_notify_grades">Сповіщати про зміни оцінок</string>
     <string name="tasks_platon_setting_notify_messages">Сповіщати про нові повідомлення</string>

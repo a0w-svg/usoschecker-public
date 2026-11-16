@@ -117,6 +117,32 @@ class CoreTest {
     }
 
     @Test
+    fun timetableDeltaKeepsUnchangedLessonsAndUpdatesOnlyChanges() {
+        val old = Snapshot("2026-10-12", "2027-02-01")
+        val keptLesson = lesson("plan:keep", "2026-10-14", "09:00 Sala 204")
+        val changedOld = lesson("plan:change", "2026-10-15", "10:00 Sala 101")
+        val removedOld = lesson("plan:removed", "2026-10-16", "12:00 Sala 102")
+        old.add(keptLesson)
+        old.add(changedOld)
+        old.add(removedOld)
+
+        val current = Snapshot("2026-10-12", "2027-02-01")
+        val sameCopy = lesson("plan:keep", "2026-10-14", "09:00 Sala 204")
+        val changedNew = lesson("plan:change", "2026-10-15", "10:00 Sala 305")
+        val addedNew = lesson("plan:added", "2026-10-17", "14:00 Sala 210")
+        current.add(sameCopy)
+        current.add(changedNew)
+        current.add(addedNew)
+
+        val delta = current.applyTimetableDelta(old)
+        assertEquals(3, delta)
+        assertSame(keptLesson, current.records["plan:keep"])
+        assertSame(changedNew, current.records["plan:change"])
+        assertSame(addedNew, current.records["plan:added"])
+        assertFalse(current.records.containsKey("plan:removed"))
+    }
+
+    @Test
     fun parsesTerms2IncludingUnitExamsAndNullSessions() {
         val grades = JSONObject(
             """

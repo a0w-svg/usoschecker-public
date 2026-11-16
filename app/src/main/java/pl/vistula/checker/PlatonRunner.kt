@@ -68,9 +68,10 @@ object PlatonRunner {
         }
     }
 
-    /** Background refresh after the periodic USOS sync; silent when signed out or offline. */
+    /** Background refresh after the periodic USOS sync; silent when signed out, disabled, or offline. */
     fun runInBackground(context: Context) {
         val prefs = StudentPrefs(context)
+        if (!prefs.platonSyncEnabled || !prefs.platonAutoRefresh) return
         val source = prefs.platonSource ?: return
         if (System.currentTimeMillis() - prefs.platonSyncedAt < MIN_BACKGROUND_GAP_MS) return
         // Skip when the student's own sync is already running; the next periodic run will catch up.

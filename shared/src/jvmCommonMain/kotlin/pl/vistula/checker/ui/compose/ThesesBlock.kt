@@ -65,12 +65,7 @@ internal fun ThesesBlock(env: ExtrasEnv) {
     var selectedThesis by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
     SectionHead(
         title = tr("Prace dyplomowe", "Theses", "Дипломні роботи"),
-        onClick = {
-            runAsync {
-                StudentServiceLoader.refresh(repository, "theses")
-                onReloadState()
-            }
-        },
+        onClick = env.refreshOrNull { StudentServiceLoader.refresh(repository, "theses") },
         modifier = Modifier
     )
     val thesisEntry = services?.optJSONObject("theses")

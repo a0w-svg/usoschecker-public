@@ -198,11 +198,11 @@ fun VistulaApp(
     val reloadState: () -> Unit = { scope.launch(Dispatchers.Main.immediate) { stateVersion++ } }
     LaunchedEffect(activeRepository, stateVersion, language) {
         try {
-            val loaded = withContext(Dispatchers.IO) { SharedRepository.localizedView(activeRepository.read(), language) }
+            val loaded = withContext(Dispatchers.IO) { activeRepository.read(language) }
             if (activeRepository === repository && loaded.optString("token") == "demo") {
                 legacyDemo = true
                 demoMode = true
-                state = demoWorkspace.repository.read()
+                state = withContext(Dispatchers.IO) { demoWorkspace.repository.read(language) }
             } else state = loaded
             vaultUnreadable = false
         } catch (e: Exception) {
@@ -661,18 +661,61 @@ internal fun RecentGradesCard(
 }
 
 @Composable
-internal fun NewsListCard(news: List<NewsArticle>, strings: UiStrings, onOpenUrl: (String) -> Unit) {
+internal fun NewsListCard(
+    news: List<NewsArticle>,
+    strings: UiStrings,
+    onOpenUrl: (String) -> Unit,
+    onRefresh: (() -> Unit)? = null,
+    errorEntry: JSONObject? = null,
+    searchable: Boolean = false
+) {
+    var query by remember { mutableStateOf("") }
+    val filtered = remember(news, query) {
+        if (query.isBlank()) news
+        else news.filter { a ->
+            pl.vistula.checker.core.StudentSearch.matches(query, a.title, a.headline, a.content, a.author, a.publicationDate)
+        }
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(strings.newsTitle, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-            if (news.isEmpty()) {
-                Text(strings.noNewsCached, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(strings.newsTitle, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).semantics { heading() })
+                if (onRefresh != null) {
+                    OutlinedButton(onClick = onRefresh) {
+                        Text(toolText(strings.languageCode, "Odśwież", "Refresh", "Оновити"))
+                    }
+                }
+            }
+            ServiceStatusBanner(errorEntry, strings.languageCode)
+            if (searchable && news.isNotEmpty()) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text(toolText(strings.languageCode, "Szukaj w aktualnościach", "Search news", "Пошук у новинах")) },
+                    trailingIcon = {
+                        if (query.isNotEmpty()) {
+                            TextButton(onClick = { query = "" }) {
+                                Text(toolText(strings.languageCode, "Wyczyść", "Clear", "Очистити"))
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+            if (filtered.isEmpty()) {
+                Text(
+                    if (news.isEmpty()) strings.noNewsCached
+                    else toolText(strings.languageCode, "Brak pasujących aktualności.", "No matching news articles.", "Немає відповідних новин."),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             } else {
-                news.forEach { article ->
+                filtered.forEach { article ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -730,12 +773,15 @@ fun ScheduleScreen(
     val filteredLessons = remember(allLessons, searchQuery, selectedType) {
         allLessons.filter { lt ->
             val r = lt.record
-            val matchesQuery = searchQuery.isBlank() ||
-                r.title.contains(searchQuery, ignoreCase = true) ||
-                r.value.contains(searchQuery, ignoreCase = true) ||
-                r.optMeta("room").contains(searchQuery, ignoreCase = true) ||
-                r.optMeta("building").contains(searchQuery, ignoreCase = true) ||
-                r.optMeta("lecturers").contains(searchQuery, ignoreCase = true)
+            val matchesQuery = pl.vistula.checker.core.StudentSearch.matches(
+                searchQuery,
+                r.title,
+                r.value,
+                r.optMeta("room"),
+                r.optMeta("building"),
+                r.optMeta("lecturers"),
+                r.optMeta("classType")
+            )
             val matchesType = selectedType.isEmpty() || r.optMeta("classType").equals(selectedType, ignoreCase = true)
             matchesQuery && matchesType
         }
@@ -807,6 +853,9 @@ fun ScheduleScreen(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             label = { Text(strings.searchScheduleHint) },
+            trailingIcon = if (searchQuery.isNotEmpty()) {
+                { TextButton(onClick = { searchQuery = "" }) { Text("×", fontSize = 18.sp) } }
+            } else null,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(percent = 50),
             singleLine = true
@@ -1109,10 +1158,11 @@ fun GradesScreen(
 ) {
     val allRecords = snapshot?.records?.values ?: emptyList()
     val termOrder = remember(snapshot) {
-        val terms = LinkedHashSet<String>()
-        allRecords.forEach { if (it.kind == "ocena" && it.term.isNotEmpty()) terms.add(it.term) }
-        snapshot?.courses?.forEach { if (it.term.isNotEmpty()) terms.add(it.term) }
-        terms.toList().sortedDescending()
+        if (snapshot != null) {
+            pl.vistula.checker.core.GradeSemesters.ordered(snapshot, LocalDate.now(UsosClient.ZONE))
+        } else {
+            emptyList()
+        }
     }
 
     var selectedTerm by remember(termOrder) { mutableStateOf(snapshot?.let {
@@ -1166,6 +1216,9 @@ fun GradesScreen(
         }
         if (showSearch || searchQuery.isNotEmpty()) OutlinedTextField(
             value = searchQuery, onValueChange = { searchQuery = it }, label = { Text(strings.searchGradesHint) },
+            trailingIcon = if (searchQuery.isNotEmpty()) {
+                { TextButton(onClick = { searchQuery = "" }) { Text("×", fontSize = 18.sp) } }
+            } else null,
             modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(24.dp)
         )
         if (showOptions) Tray {
@@ -1348,14 +1401,22 @@ private fun GradeGroupDetailCard(
                 OutlinedButton(onClick = onClose) { Text(strings.btnClose) }
             }
             group.forEach { g ->
-                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(GradeBrowser.classType(g, snapshot), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                         Text(GradeBrowser.symbol(g), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                     }
                     Text(g.value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    val metaLine = listOfNotNull(
+                        g.optMeta("modificationAuthorName").takeIf { it.isNotEmpty() },
+                        g.optMeta("dateAcquisition").takeIf { it.isNotEmpty() }
+                            ?: g.optMeta("dateModified").takeIf { it.isNotEmpty() }
+                    ).joinToString(" · ")
+                    if (metaLine.isNotEmpty()) {
+                        Text(metaLine, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     val comment = g.optMeta("comment")
-                    if (comment.isNotEmpty()) {
+                    if (comment.isNotEmpty() && !g.value.contains(comment)) {
                         Text(comment, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
@@ -1368,22 +1429,39 @@ private fun GradeGroupDetailCard(
 fun HistoryScreen(state: JSONObject, strings: UiStrings = UiStrings.PL) {
     val language = strings.languageCode
     val tr = Translator(language)
-    val history = state.optJSONArray("history") ?: JSONArray()
-    val all = remember(history.toString()) {
+    val t = VistulaDesign.tokens
+    val all = remember(state) {
+        val history = state.optJSONArray("history") ?: JSONArray()
         (0 until history.length()).mapNotNull { runCatching { Change.from(history.getJSONObject(it)) }.getOrNull() }
             .sortedByDescending { it.effectiveTimestamp() }
     }
     var filter by remember { mutableStateOf("all") }
-    val grades = all.count { it.kind == "ocena" }
-    val picked = when (filter) {
-        "grades" -> all.filter { it.kind == "ocena" }
-        "timetable" -> all.filter { it.kind != "ocena" }
-        else -> all
+    var searchQuery by remember { mutableStateOf("") }
+    var expandedIndex by remember { mutableStateOf(-1) }
+    val grades = remember(all) { all.count { it.kind == "ocena" } }
+    val picked = remember(all, filter, searchQuery) {
+        val byKind = when (filter) {
+            "grades" -> all.filter { it.kind == "ocena" }
+            "timetable" -> all.filter { it.kind != "ocena" }
+            else -> all
+        }
+        if (searchQuery.isBlank()) byKind
+        else byKind.filter {
+            pl.vistula.checker.core.StudentSearch.matches(
+                searchQuery,
+                it.title,
+                it.before,
+                it.after,
+                it.kind,
+                it.action,
+                it.date
+            )
+        }
     }
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         PillSegment(
             listOf(
@@ -1391,17 +1469,60 @@ fun HistoryScreen(state: JSONObject, strings: UiStrings = UiStrings.PL) {
                 "grades" to tr("Oceny", "Grades", "Оцінки") + " $grades",
                 "timetable" to tr("Plan", "Timetable", "Розклад") + " ${all.size - grades}"
             ),
-            filter, { filter = it }
+            filter, { filter = it; expandedIndex = -1 }
         )
+        if (all.isNotEmpty()) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it; expandedIndex = -1 },
+                label = { Text(tr("Szukaj w historii…", "Search history…", "Пошук в історії…")) },
+                trailingIcon = if (searchQuery.isNotEmpty()) {
+                    { TextButton(onClick = { searchQuery = ""; expandedIndex = -1 }) { Text("×", fontSize = 18.sp) } }
+                } else null,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(percent = 50),
+                singleLine = true
+            )
+        }
         if (picked.isEmpty()) {
             QuietLine(if (all.isEmpty()) strings.historyEmpty else tr("Brak zmian w tej kategorii", "Nothing in this category", "У цій категорії нічого немає"))
         } else {
             Column {
-                SectionHead(tr("Najnowsze", "Latest", "Останні"))
+                SectionHead(tr("Najnowsze", "Latest", "Останні") + " (${picked.size})")
                 Tray {
                     picked.forEachIndexed { i, change ->
                         if (i > 0) TrayDivider()
-                        ChangeRow(change, language)
+                        Column(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                expandedIndex = if (expandedIndex == i) -1 else i
+                            }
+                        ) {
+                            ChangeRow(change, language)
+                            if (expandedIndex == i) {
+                                Column(
+                                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    if (change.before.isNotEmpty() && change.before != change.after) {
+                                        Text(
+                                            tr("Wcześniej: ", "Before: ", "Раніше: ") + change.before,
+                                            fontSize = 13.sp,
+                                            color = t.muted
+                                        )
+                                    }
+                                    if (change.after.isNotEmpty()) {
+                                        Text(
+                                            tr("Teraz: ", "Now: ", "Тепер: ") + change.after,
+                                            fontSize = 13.sp,
+                                            color = t.text
+                                        )
+                                    }
+                                    if (change.date.isNotEmpty()) {
+                                        Text(change.date, fontSize = 12.sp, color = t.muted)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1517,7 +1638,7 @@ fun MoreScreen(
             "campus" -> CampusSection(state, repository, language, onOpenUrl, onReloadState, onStatusMessage, runAsync)
             "teaching", "lecturerGroups", "lecturerTests", "lecturerMeetings", "lecturerAttendance", "lecturerReports" -> LecturerWorkspaceSection(state, repository, preferences, language, activeSection, onOpenUrl, onReloadState, onStatusMessage, runAsync)
             "staffDirectory" -> StaffDirectorySection(state, repository, language, onReloadState, onStatusMessage, runAsync)
-            "registrations", "exams", "theses", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync)
+            "registrations", "exams", "theses", "academicCalendar", "mobility", "placementAndSlips", "campusGuide", "communications" -> AcademicExtrasSection(state, repository, language, activeSection, onReloadState, onStatusMessage, runAsync, onOpenUrl)
             "account" -> AccountSection(
                 state = state,
                 repository = repository,
@@ -1534,7 +1655,19 @@ fun MoreScreen(
             )
             "gpa" -> GpaSimulatorSection(snapshot, language)
             "tasks" -> TasksSection(state, repository, language, onReloadState, runAsync)
-            "news" -> NewsListCard(snapshot?.news?.take(10) ?: emptyList(), strings, onOpenUrl)
+            "news" -> NewsListCard(
+                news = ToolReadModels.news(state, snapshot, language).take(25),
+                strings = strings,
+                onOpenUrl = onOpenUrl,
+                onRefresh = if (state.optString("token") == "demo") null else ({
+                    runAsync {
+                        pl.vistula.checker.StudentServiceLoader.refresh(repository, "news")
+                        onReloadState()
+                    }
+                }),
+                errorEntry = state.optJSONObject("studentServices")?.optJSONObject("news"),
+                searchable = true
+            )
             "attendance" -> AttendanceSection(
                 snapshot = snapshot,
                 preferences = preferences,

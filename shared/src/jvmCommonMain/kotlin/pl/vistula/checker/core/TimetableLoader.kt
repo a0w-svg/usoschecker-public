@@ -12,6 +12,9 @@ import org.json.JSONException
 
 /** Fetches every seven-day page before returning any timetable data. */
 object TimetableLoader {
+    const val MIN_DAYS = 56
+    const val MAX_DAYS = 112
+
     fun interface Source {
         @Throws(Exception::class)
         fun fetch(start: LocalDate, days: Int): JSONArray
@@ -20,10 +23,10 @@ object TimetableLoader {
     @JvmStatic
     @Throws(Exception::class)
     fun load(start: LocalDate, days: Int, source: Source, progress: Consumer<String>): List<JSONArray> {
-        if (days < 7 || days > 112 || days % 7 != 0) {
+        if (days < 7 || days > MAX_DAYS || days % 7 != 0) {
             throw IllegalArgumentException("Nieprawidłowy zakres planu.")
         }
-        val pool = Executors.newFixedThreadPool(3)
+        val pool = Executors.newFixedThreadPool(4)
         val pending = ArrayList<Future<JSONArray>>()
         try {
             val pages = days / 7

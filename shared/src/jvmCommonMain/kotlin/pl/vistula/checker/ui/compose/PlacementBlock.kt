@@ -63,12 +63,7 @@ internal fun PlacementBlock(env: ExtrasEnv) {
     val onReloadState = env.onReloadState
     SectionHead(
         title = tr("Testy poziomujące i obiegówki", "Placement tests & clearance slips", "Тести рівня та обхідні листи"),
-        onClick = {
-            runAsync {
-                StudentServiceLoader.refresh(repository, "placementAndSlips")
-                onReloadState()
-            }
-        },
+        onClick = env.refreshOrNull { StudentServiceLoader.refresh(repository, "placementAndSlips") },
         modifier = Modifier
     )
     val plcEntry = services?.optJSONObject("placementAndSlips")

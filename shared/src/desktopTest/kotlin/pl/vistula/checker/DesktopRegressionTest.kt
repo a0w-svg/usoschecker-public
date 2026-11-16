@@ -148,4 +148,13 @@ class DesktopRegressionTest {
         state.put("successAt", 300L)
         assertEquals(10.0, ToolReadModels.payments(state, snapshot, "en")!!.accounts[0].balance)
     }
+
+    @Test fun newsReadModelReadsCampusServiceCacheAndFallsBackToSnapshot() {
+        val demoState = DemoWorkspace().repository.read()
+        val snapshot = Snapshot.from(demoState.getJSONObject("snapshot"))
+        assertEquals(2, ToolReadModels.news(demoState, snapshot, "pl").size)
+        val unit = demoState.getJSONObject("studentServices").getJSONObject("affiliation")
+            .getJSONObject("data").getJSONArray("units").getJSONObject(0)
+        assertEquals("0000", unit.getString("campus"))
+    }
 }

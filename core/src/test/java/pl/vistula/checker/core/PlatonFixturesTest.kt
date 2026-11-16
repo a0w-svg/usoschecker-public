@@ -212,15 +212,19 @@ class PlatonSpeedTest {
         val courseUrl = "https://platon.vistula.edu.pl/LmsProfil/X/ElementyBySciezkaSzkoleniowaId/1"
         val fetched = java.util.concurrent.CopyOnWriteArrayList<String>()
         val knownId = "platon:https://platon.vistula.edu.pl/LmsProfil/SciezkaSzkoleniowaElementUzytkownik/RedirectToElement?sciezkaSzkoleniowaElementId=11&sciezkaSzkoleniowaElementTyp=ZADANIE"
+        val knownOpenId = "platon:https://platon.vistula.edu.pl/LmsProfil/SciezkaSzkoleniowaElementUzytkownik/RedirectToElement?sciezkaSzkoleniowaElementId=13&sciezkaSzkoleniowaElementTyp=ZADANIE"
         val result = PlatonCrawler.crawlAll(
             page,
             { url, form -> url to (if (form["Page"] == "1") """<a href="/LmsProfil/X/ElementyBySciezkaSzkoleniowaId/1">Uruchom Kurs - 2026Z</a>""" else "") },
-            known = mapOf(knownId to PlatonCrawler.KnownDeadline(LocalDate.of(2026, 11, 20), "12:00")),
+            known = mapOf(
+                knownId to PlatonCrawler.KnownDeadline(LocalDate.of(2026, 11, 20), "12:00"),
+                knownOpenId to PlatonCrawler.KnownDeadline(LocalDate.of(2026, 11, 25), "23:59"),
+            ),
         ) { url ->
             fetched.add(url)
             url to when {
                 url.contains("SciezkiSzkoleniowe") -> """<input name="__RequestVerificationToken" value="t">"""
-                url == courseUrl -> course(11, "To_Be_Evaluated") + course(12, "Not_Attempted")
+                url == courseUrl -> course(11, "To_Be_Evaluated") + course(12, "Not_Attempted") + course(13, "Not_Attempted")
                 url.contains("ElementId=12") -> "Data oddania: 01.12.2026"
                 else -> throw java.io.IOException("404")
             }
@@ -229,7 +233,10 @@ class PlatonSpeedTest {
         assertEquals(LocalDate.of(2026, 11, 20), byTitle.getValue("Zad 11").due)
         assertEquals("12:00", byTitle.getValue("Zad 11").dueTime)
         assertEquals(LocalDate.of(2026, 12, 1), byTitle.getValue("Zad 12").due)
+        assertEquals(LocalDate.of(2026, 11, 25), byTitle.getValue("Zad 13").due)
+        assertEquals("23:59", byTitle.getValue("Zad 13").dueTime)
         assertTrue("submitted task with a known deadline must not be fetched", fetched.none { it.contains("ElementId=11") })
+        assertTrue("open task with a known deadline must not be fetched", fetched.none { it.contains("ElementId=13") })
         assertTrue(fetched.any { it.contains("ElementId=12") })
     }
 

@@ -26,7 +26,7 @@ class UsosClientTest {
             Connection().apply { body = "[]" }
         }
         val snapshot = client.snapshot()
-        assertEquals(8, calls.get())
+        assertEquals(16, calls.get())
         assertTrue(snapshot.courses.isEmpty())
         assertNull(snapshot.payments)
     }
@@ -43,7 +43,7 @@ class UsosClientTest {
             } else snapshotConnection(address)
         }
         assertNotNull(client.snapshot().payments)
-        assertEquals(8, pages.get())
+        assertEquals(16, pages.get())
     }
 
     @Test
@@ -61,7 +61,7 @@ class UsosClientTest {
             assertTrue(snapshot.payments!!.scopeMissing)
             assertTrue(snapshot.payments!!.statusNotice.contains("payments"))
             assertEquals(1, gradeRequests.get())
-            assertEquals(8, planPages.get())
+            assertEquals(16, planPages.get())
         }
     }
 
@@ -441,7 +441,7 @@ class UsosClientTest {
         assertEquals(1, snapshot.courses.size)
         assertEquals("Finanse", snapshot.courses[0].title)
         assertEquals("2026Z", snapshot.courses[0].term)
-        assertEquals(8, pages.get())
+        assertEquals(16, pages.get())
     }
 
     @Test
@@ -767,6 +767,65 @@ class UsosClientTest {
             }
             assertEquals("requests were sent after the failure (status $status)", before, requests[0])
         }
+    }
+
+    @Test
+    fun gradeAuthorReusesCachedLecturerNamesAndPersistsResolvedAuthors() {
+        val state = credentials().put("lecturerNames", JSONObject().put("77", "dr hab. Anna Nowak"))
+        val userBatchRequests = ArrayList<String>()
+        val client = UsosClient(state, {}) { address ->
+            val connection = snapshotConnection(address)
+            when {
+                address.contains("courses/user") && !address.contains("user_ects_points") -> {
+                    connection.body = """{"course_editions":{"2026Z":[{"course_id":"FIN","course_name":{"pl":"Finanse"}}]}}"""
+                }
+                address.contains("grades/terms2") -> {
+                    connection.body = """{"2026Z":{"FIN":{"course_grades":[{"1":{"exam_id":10,"exam_session_number":1,"value_symbol":"5","modification_author":"77"}},{"1":{"exam_id":11,"exam_session_number":1,"value_symbol":"4.5","modification_author":"88"}}],"course_units_grades":{}}}}"""
+                }
+                address.contains("services/users/users?") -> {
+                    userBatchRequests.add(address)
+                    connection.body = """{"88":{"first_name":"Jan","last_name":"Kowalski","titles":{"before":"dr"}}}"""
+                }
+            }
+            connection
+        }
+        val snapshot = client.snapshot()
+        assertEquals(1, userBatchRequests.size)
+        val decoded = java.net.URLDecoder.decode(userBatchRequests.single(), "UTF-8")
+        assertTrue(decoded.contains("user_ids=88&") || decoded.endsWith("user_ids=88"))
+        assertFalse(decoded.contains("user_ids=77"))
+        assertEquals("dr hab. Anna Nowak", snapshot.records["grade:10:1"]!!.optMeta("modificationAuthorName"))
+        assertEquals("Jan Kowalski", snapshot.records["grade:11:1"]!!.optMeta("modificationAuthorName"))
+        assertEquals("dr hab. Anna Nowak", snapshot.lecturerNames["77"])
+        assertEquals("Jan Kowalski", snapshot.lecturerNames["88"])
+    }
+
+    @Test
+    fun parallelCourseTestNodeDetailsPreserveDeterministicOrdering() {
+        val client = UsosClient(credentials(), {}) { address ->
+            when {
+                address.contains("crstests/participant2") -> Connection().apply {
+                    body = """[{"course_edition":{"course":{"id":"FIN","name":{"pl":"Finanse"}},"term":{"id":"2026Z"}},"root":{"id":"r","type":"root","visible_for_students":true,"subnodes_deep":[{"id":"n1","parent_id":"r","type":"task","visible_for_students":true,"name":{"pl":"Test 1"}},{"id":"n2","parent_id":"r","type":"task","visible_for_students":true,"name":{"pl":"Test 2"}},{"id":"n3","parent_id":"r","type":"task","visible_for_students":true,"name":{"pl":"Test 3"}}]}}]"""
+                }
+                address.contains("crstests/node2") -> Connection().apply {
+                    val id = when {
+                        address.contains("node_id=n1") -> "n1"
+                        address.contains("node_id=n2") -> "n2"
+                        else -> "n3"
+                    }
+                    val pts = when (id) {
+                        "n1" -> 11
+                        "n2" -> 15
+                        else -> 19
+                    }
+                    body = """{"id":"$id","parent_id":"r","type":"task","visible_for_students":true,"task_node_details":{"points_max":20,"students_points":{"points":$pts,"last_changed":"2026-10-10"}}}"""
+                }
+                else -> snapshotConnection(address)
+            }
+        }.withParallelism(3)
+        val snapshot = client.snapshot()
+        assertEquals(listOf("Test 1", "Test 2", "Test 3"), snapshot.tests.map { it.testName })
+        assertEquals(listOf(11.0, 15.0, 19.0), snapshot.tests.map { it.points })
     }
 }
 

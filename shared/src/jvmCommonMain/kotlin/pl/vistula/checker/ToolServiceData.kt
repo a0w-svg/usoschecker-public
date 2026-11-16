@@ -17,6 +17,8 @@ import pl.vistula.checker.core.UsosParser
 /** Independent, localized read models; only parsed fields enter the encrypted service cache. */
 object ToolServiceData {
     private val ID_PATTERN = Regex("[A-Za-z0-9_-]{1,64}")
+    /** `room` is a `services/geo/room` reference, so only its number is requested. */
+    private const val STAFF_FIELDS = "id|first_name|last_name|titles|office_hours|room[number]"
 
     fun fetch(client: UsosClient, section: String, campus: String = "", state: JSONObject = JSONObject()): JSONObject {
         val result = JSONObject()
@@ -149,7 +151,7 @@ object ToolServiceData {
                     "teachers_only" to "true",
                     "num" to LecturerServices.MAX_STAFF_RESULTS.toString(),
                     "start" to "0",
-                    "fields" to "users[id|first_name|last_name|titles]|next_page|total"
+                    "fields" to "users[$STAFF_FIELDS]|next_page|total"
                 )))
                 val users = raw.optJSONArray("users") ?: JSONArray()
                 return LecturerServices.safeStaffDirectory(users, raw.optBoolean("next_page", false), raw.optInt("total", users.length()))
@@ -520,6 +522,28 @@ object ToolServiceData {
             "start" to "0"
         )))
         val items = raw.optJSONArray("items") ?: JSONArray()
+        // The search only returns `user_id` and a highlighted `match`; fill in titles, room and office hours.
+        val ids = (0 until minOf(items.length(), LecturerServices.MAX_STAFF_RESULTS))
+            .mapNotNull { items.optJSONObject(it)?.let { item -> StudentServices.text(item, "user_id") } }
+            .filter { ID_PATTERN.matches(it) }.distinct()
+        if (ids.isNotEmpty()) {
+            val details = try {
+                JSONObject(client.get("services/users/users", mapOf(
+                    "user_ids" to ids.joinToString("|"),
+                    "fields" to STAFF_FIELDS
+                )))
+            } catch (e: UsosClient.ApiException) {
+                if (e.authorization || e.retryable) throw e
+                null
+            } catch (_: JSONException) {
+                null
+            }
+            if (details != null) for (i in 0 until items.length()) {
+                val item = items.optJSONObject(i) ?: continue
+                val user = details.optJSONObject(StudentServices.text(item, "user_id")) ?: continue
+                item.put("user", user)
+            }
+        }
         return LecturerServices.safeStaffDirectory(items, raw.optBoolean("next_page", false), items.length())
     }
 
@@ -528,7 +552,7 @@ object ToolServiceData {
         require(ID_PATTERN.matches(userId)) { "Invalid user_id" }
         val user = JSONObject(client.get("services/users/user", mapOf(
             "user_id" to userId,
-            "fields" to "id|first_name|last_name|titles|office_hours|room"
+            "fields" to STAFF_FIELDS
         )))
         return LecturerServices.safeStaffDirectory(JSONArray().put(user)).getJSONArray("users").getJSONObject(0)
     }

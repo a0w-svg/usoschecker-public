@@ -29,6 +29,7 @@ class PlatonFlow(private val host: FlowHost) {
         val url = result.data?.getStringExtra(PlatonLoginActivity.EXTRA_URL)
         if (result.resultCode == android.app.Activity.RESULT_OK && url != null) {
             prefs.platonSource = url
+            prefs.platonSyncEnabled = true
             sync()
         }
     }
@@ -287,12 +288,19 @@ class PlatonFlow(private val host: FlowHost) {
     /** Notification and refresh choices, with a shortcut to the semester picker. Nothing here changes Platon itself. */
     fun showSettings() {
         val labels = arrayOf(
+            activity.getString(R.string.tasks_platon_setting_sync_enabled),
+            activity.getString(R.string.tasks_platon_setting_auto_refresh),
             activity.getString(R.string.tasks_platon_setting_notify_tasks),
             activity.getString(R.string.tasks_platon_setting_notify_grades),
             activity.getString(R.string.tasks_platon_setting_notify_messages),
-            activity.getString(R.string.tasks_platon_setting_auto_refresh),
         )
-        val checked = booleanArrayOf(prefs.platonNotifyTasks, prefs.platonNotifyGrades, prefs.platonNotifyMessages, prefs.platonAutoRefresh)
+        val checked = booleanArrayOf(
+            prefs.platonSyncEnabled,
+            prefs.platonAutoRefresh,
+            prefs.platonNotifyTasks,
+            prefs.platonNotifyGrades,
+            prefs.platonNotifyMessages,
+        )
         MaterialAlertDialogBuilder(activity)
             .setTitle(R.string.tasks_platon_settings_title)
             .setMultiChoiceItems(labels, checked) { _, which, value -> checked[which] = value }
@@ -306,10 +314,11 @@ class PlatonFlow(private val host: FlowHost) {
     }
 
     private fun saveSettings(checked: BooleanArray) {
-        prefs.platonNotifyTasks = checked[0]
-        prefs.platonNotifyGrades = checked[1]
-        prefs.platonNotifyMessages = checked[2]
-        prefs.platonAutoRefresh = checked[3]
+        prefs.platonSyncEnabled = checked[0]
+        prefs.platonAutoRefresh = checked[1]
+        prefs.platonNotifyTasks = checked[2]
+        prefs.platonNotifyGrades = checked[3]
+        prefs.platonNotifyMessages = checked[4]
     }
 
     /** Which semesters the sync reads. Older semesters add their assignments to the list; the choice is reversible. */
@@ -351,7 +360,7 @@ class PlatonFlow(private val host: FlowHost) {
     /** Refreshes Platon when Tasks opens, at most every [maxAgeMs] and once per app start after a failure. */
     fun autoSync(maxAgeMs: Long = DEFAULT_MAX_AGE_MS) {
         if (host.isDemo || host.isBusy || autoTried) return
-        if (!prefs.platonLinked || !prefs.platonAutoRefresh) return
+        if (!prefs.platonLinked || !prefs.platonSyncEnabled || !prefs.platonAutoRefresh) return
         if (prefs.platonExpired) {
             // The background refresh found the Platon session expired: ask once for a one-tap sign-in.
             prefs.platonExpired = false

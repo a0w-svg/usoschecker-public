@@ -61,9 +61,10 @@ internal fun AcademicExtrasSection(
     section: String,
     onReloadState: () -> Unit,
     onStatusMessage: (String) -> Unit,
-    runAsync: (() -> Unit) -> Unit
+    runAsync: (() -> Unit) -> Unit,
+    onOpenUrl: (String) -> Unit = {}
 ) {
-    val env = ExtrasEnv(state, repository, language, onReloadState, onStatusMessage, runAsync)
+    val env = ExtrasEnv(state, repository, language, onReloadState, onStatusMessage, runAsync, onOpenUrl)
     val services = env.services
     val live = env.live
     LaunchedEffect(section, state.optString("accountSession"), live) {
@@ -122,7 +123,7 @@ internal fun AcademicExtrasSection(
 }
 
 @Composable
-internal fun MailDetailCard(message: JSONObject, language: String, onClose: () -> Unit) {
+internal fun MailDetailCard(message: JSONObject, language: String, onOpenUrl: (String) -> Unit = {}, onClose: () -> Unit) {
     val tr = Translator(language)
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -140,14 +141,20 @@ internal fun MailDetailCard(message: JSONObject, language: String, onClose: () -
             for (i in 0 until attachments.length()) {
                 val a = attachments.optJSONObject(i) ?: continue
                 val size = if (a.has("size")) "${(a.optInt("size") + 1023) / 1024} KB" else ""
-                Text("📎 " + listOf(a.optString("filename").ifEmpty { a.optString("id") }, size, a.optString("description")).filter { it.isNotBlank() }.joinToString(" · "))
+                val label = "📎 " + listOf(a.optString("filename").ifEmpty { a.optString("id") }, size, a.optString("description")).filter { it.isNotBlank() }.joinToString(" · ")
+                val url = a.optString("url")
+                if (url.isNotEmpty() && pl.vistula.checker.core.WebLinks.isWebUrl(url)) {
+                    OutlinedButton(onClick = { onOpenUrl(url) }) { Text(label) }
+                } else {
+                    Text(label)
+                }
             }
         }
     }
 }
 
 @Composable
-internal fun SurveyDetailCard(survey: JSONObject, language: String, onClose: () -> Unit) {
+internal fun SurveyDetailCard(survey: JSONObject, language: String, onOpenUrl: (String) -> Unit = {}, onClose: () -> Unit) {
     val tr = Translator(language)
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -178,6 +185,11 @@ internal fun SurveyDetailCard(survey: JSONObject, language: String, onClose: () 
             }
             if (survey.optBoolean("questions_truncated")) Text(tr("Pokazano pierwsze pytania.", "Showing the first questions only.", "Показано лише перші питання."), style = MaterialTheme.typography.bodySmall)
             Text(tr("Ankietę wypełnisz w USOSweb.", "Fill out the survey in USOSweb.", "Заповніть анкету в USOSweb."), style = MaterialTheme.typography.bodySmall)
+            if (survey.optBoolean("can_i_fill_out") && !survey.optBoolean("did_i_fill_out")) {
+                OutlinedButton(onClick = { onOpenUrl("https://usosweb.vistula.edu.pl/") }) {
+                    Text(tr("Otwórz USOSweb", "Open USOSweb", "Відкрити USOSweb"))
+                }
+            }
         }
     }
 }

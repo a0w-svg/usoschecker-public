@@ -47,8 +47,8 @@ object PlatonClient {
             val connection = URL(current).openConnection() as HttpURLConnection
             try {
                 connection.instanceFollowRedirects = false
-                connection.connectTimeout = 15_000
-                connection.readTimeout = 20_000
+                connection.connectTimeout = 8_000
+                connection.readTimeout = 12_000
                 connection.setRequestProperty("Cookie", cookie)
                 connection.setRequestProperty("Accept", "text/html")
                 connection.setRequestProperty("User-Agent", "VistulaChecker/" + BuildConfig.VERSION_NAME)

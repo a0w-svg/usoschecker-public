@@ -64,12 +64,7 @@ internal fun MobilityBlock(env: ExtrasEnv) {
     val onReloadState = env.onReloadState
     SectionHead(
         title = tr("Mobilność studencka i wymiany (Erasmus+)", "Academic mobility & exchanges (Erasmus+)", "Академічна мобільність та обміни (Erasmus+)"),
-        onClick = {
-            runAsync {
-                StudentServiceLoader.refresh(repository, "mobility")
-                onReloadState()
-            }
-        },
+        onClick = env.refreshOrNull { StudentServiceLoader.refresh(repository, "mobility") },
         modifier = Modifier
     )
     val mobEntry = services?.optJSONObject("mobility")

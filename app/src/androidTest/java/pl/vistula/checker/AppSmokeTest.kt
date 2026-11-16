@@ -737,27 +737,30 @@ class AppSmokeTest {
         for (i in 1..61) lecturers.put(i)
         val week = JSONArray().put(JSONObject().put("lecturer_ids", lecturers))
         val sizes = ArrayList<Int>()
-        val names = UsosClient.resolveLecturers(listOf(week, week)) { ids ->
+        val names = UsosClient.resolveLecturers(listOf(week, week), UsosClient.LecturerSource { ids ->
             sizes.add(ids.size)
             val result = JSONObject()
             for (id in ids) result.put(id, JSONObject().put("first_name", "Anna").put("last_name", "Kowalska $id"))
             result
-        }
+        })
         assertEquals(listOf(50, 11), sizes)
         assertEquals(61, names.size)
         assertEquals("Anna Kowalska 61", names["61"])
         assertTrue(
-            UsosClient.resolveLecturers(listOf(JSONArray())) {
-                fail("Unexpected lookup")
-                JSONObject()
-            }.isEmpty()
+            UsosClient.resolveLecturers(
+                listOf(JSONArray()),
+                UsosClient.LecturerSource {
+                    fail("Unexpected lookup")
+                    JSONObject()
+                }
+            ).isEmpty()
         )
     }
 
     @Test(expected = IOException::class)
     fun incompleteLecturerDirectoryRejectsDownload() {
         val week = JSONArray().put(JSONObject().put("lecturer_ids", JSONArray().put(1)))
-        UsosClient.resolveLecturers(listOf(week)) { JSONObject() }
+        UsosClient.resolveLecturers(listOf(week), UsosClient.LecturerSource { JSONObject() })
     }
 
     @Test

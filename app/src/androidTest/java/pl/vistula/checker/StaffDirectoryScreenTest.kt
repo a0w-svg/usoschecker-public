@@ -47,6 +47,11 @@ class StaffDirectoryScreenTest {
             content().findViewById<TextInputEditText>(R.id.staff_search_input).setText("a")
             content().findViewById<View>(R.id.staff_search_button).performClick()
             assertNotNull(content().findViewById<TextInputLayout>(R.id.staff_search_layout).error)
+
+            content().findViewById<TextInputEditText>(R.id.staff_search_input).setText("Nowak")
+            assertEquals(null, content().findViewById<TextInputLayout>(R.id.staff_search_layout).error)
+            content().findViewById<View>(R.id.staff_search_button).performClick()
+            assertEquals(1, names.childCount)
         }
         SystemClock.sleep(400)
         val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()

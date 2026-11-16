@@ -87,7 +87,7 @@ class TodayScheduleWidget : AppWidgetProvider() {
             val demo = state.optString("token").isEmpty()
             if (demo) {
                 try {
-                    state = Demo.state(false, 56)
+                    state = Demo.state(false)
                 } catch (e: Exception) {
                     pl.vistula.checker.Diagnostics.swallowed("TodayScheduleWidget", e)
                 }

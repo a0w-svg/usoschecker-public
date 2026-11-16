@@ -63,8 +63,7 @@ internal fun StudentDashboard(
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) { while (true) { delay(60_000); now = Instant.now() } }
     val today = now.atZone(UsosClient.ZONE).toLocalDate()
-    val records = snapshot?.records?.values ?: emptyList()
-    val lessons = LessonTime.sorted(records)
+    val lessons = remember(snapshot) { LessonTime.sorted(snapshot?.records?.values ?: emptyList()) }
     val clock = DateTimeFormatter.ofPattern("HH:mm")
     val dayShort = DateTimeFormatter.ofPattern("EEE, d MMM", locale)
     val limit = if (isWide) 5 else 3
@@ -75,9 +74,11 @@ internal fun StudentDashboard(
     val laterThatDay = if (next == null) emptyList() else lessons.filter {
         it.intersects(heroDate) && it.start.toInstant().isAfter(next.start.toInstant())
     }
-    val history = state.optJSONArray("history") ?: JSONArray()
-    val recent = (0 until history.length()).mapNotNull { runCatching { Change.from(history.getJSONObject(it)) }.getOrNull() }
-        .sortedByDescending { it.effectiveTimestamp() }
+    val recent = remember(state) {
+        val history = state.optJSONArray("history") ?: JSONArray()
+        (0 until history.length()).mapNotNull { runCatching { Change.from(history.getJSONObject(it)) }.getOrNull() }
+            .sortedByDescending { it.effectiveTimestamp() }
+    }
 
     fun roomOf(l: LessonTime) = l.record.optMeta("room").let { if (it.isEmpty()) "" else tr("Sala ", "Room ", "Аудиторія ") + it }
     fun facts(l: LessonTime, withDate: Boolean): String = listOfNotNull(

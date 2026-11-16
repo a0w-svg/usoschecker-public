@@ -86,18 +86,13 @@ internal fun CommunicationsBlock(env: ExtrasEnv) {
     }
     SectionHead(
         title = tr("Oświadczenia, powiadomienia i USOSmail", "Statements, notifications & USOSmail", "Заяви, сповіщення та USOSmail"),
-        onClick = {
-            runAsync {
-                StudentServiceLoader.refresh(repository, "communications")
-                onReloadState()
-            }
-        },
+        onClick = env.refreshOrNull { StudentServiceLoader.refresh(repository, "communications") },
         modifier = Modifier
     )
     val commEntry = services?.optJSONObject("communications")
     ServiceStatusBanner(commEntry, language)
-    surveyDetail?.let { SurveyDetailCard(it, language) { surveyDetail = null } }
-    mailDetail?.let { MailDetailCard(it, language) { mailDetail = null } }
+    surveyDetail?.let { SurveyDetailCard(it, language, env.onOpenUrl) { surveyDetail = null } }
+    mailDetail?.let { MailDetailCard(it, language, env.onOpenUrl) { mailDetail = null } }
     val commData = commEntry?.optJSONObject("data")
     val statements = commData?.optJSONArray("statements") ?: JSONArray()
     val notifications = commData?.optJSONArray("notifications") ?: JSONArray()

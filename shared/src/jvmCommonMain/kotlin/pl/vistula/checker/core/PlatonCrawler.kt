@@ -8,16 +8,17 @@ import java.io.IOException
  * throw; an [IOException] on one assignment only skips its deadline, anything else aborts the sync.
  */
 object PlatonCrawler {
-    private const val MAX_COURSES = 40
-    private const val MAX_DETAILS = 60
+    private const val MAX_COURSES = 24
+    private const val MAX_DETAILS = 40
 
     /** Requests in flight at once; Platon is a shared university server, so this stays modest. */
-    private const val PARALLEL = 5
+    private const val PARALLEL = 6
+    private const val PAGE_WAVE = 2
 
     /** Training board whose server-rendered HTML lists the current courses (the home page loads them with JavaScript). */
     private const val LIST_PAGE = "https://platon.vistula.edu.pl/LmsProfil/SciezkaSzkoleniowaUzytkownik/SciezkiSzkoleniowe"
     private const val LIST_ENDPOINT = "https://platon.vistula.edu.pl/LmsProfil/SciezkaSzkoleniowaUzytkownik/SciezkaSzkoleniowaLista"
-    private const val MAX_PAGES = 8
+    private const val MAX_PAGES = 6
     private const val BOARD = "https://platon.vistula.edu.pl/TablicaSzkoleniowa"
 
     class Result(
@@ -109,13 +110,13 @@ object PlatonCrawler {
         val token = PlatonTaskParser.formToken(html) ?: return Listing(emptyList(), emptyList(), emptyList())
         val all = LinkedHashMap<String, PlatonTaskParser.CourseEntry>()
         val cards = LinkedHashMap<String, PlatonTaskParser.PlatonCourse>()
-        // Pages are requested in waves of PARALLEL; a page past the end is empty, which ends the walk.
+        // Pages are requested in compact waves; an empty page or a page with only older semesters ends the walk early.
         var next = 1
         var more = true
         while (more && next <= MAX_PAGES) {
-            val wave = (next until minOf(next + PARALLEL, MAX_PAGES + 1)).toList()
+            val wave = (next until minOf(next + PAGE_WAVE, MAX_PAGES + 1)).toList()
             next += wave.size
-            val results = Parallel.map(wave, PARALLEL) { page ->
+            val results = Parallel.map(wave, PAGE_WAVE) { page ->
                 post(
                     LIST_ENDPOINT,
                     mapOf(
@@ -131,6 +132,16 @@ object PlatonCrawler {
                 if (fresh.isEmpty()) { more = false; break }
                 fresh.forEach { all[it.url] = it }
                 PlatonTaskParser.parseCourseCards(result.second, result.first).forEach { cards.putIfAbsent(it.url, it) }
+                if (selected.isEmpty()) {
+                    val newest = PlatonTaskParser.semesters(all.values.toList()).firstOrNull()
+                    val pageSemesters = PlatonTaskParser.semesters(fresh)
+                    if (newest != null && pageSemesters.isNotEmpty() && newest !in pageSemesters &&
+                        PlatonTaskParser.inSemesters(fresh, emptySet()).isEmpty()
+                    ) {
+                        more = false
+                        break
+                    }
+                }
             }
         }
         val chosen = PlatonTaskParser.inSemesters(all.values.toList(), selected).take(MAX_COURSES)
@@ -161,8 +172,8 @@ object PlatonCrawler {
             val task = result[i]
             if (!task.needsDetail) continue
             val earlier = known[task.externalId]
-            if (task.submitted && earlier != null) {
-                // Submitted work keeps its deadline; no need to open the page again.
+            if (earlier != null) {
+                // Any assignment with an already known deadline keeps it; no need to open the detail page again.
                 result[i] = task.copy(due = earlier.due, dueTime = earlier.time, needsDetail = false)
             } else if (wanted.size < MAX_DETAILS) {
                 wanted.add(i)

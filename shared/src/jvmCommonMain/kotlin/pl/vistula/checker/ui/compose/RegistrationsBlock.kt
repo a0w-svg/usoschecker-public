@@ -67,12 +67,9 @@ internal fun RegistrationsBlock(env: ExtrasEnv) {
     var tokenDetails by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
     SectionHead(
         title = tr("Rejestracje i koszyk zapisów (tylko odczyt)", "Course registrations & cart (read-only)", "Реєстрації та кошик записів (лише читання)"),
-        onClick = {
-            runAsync {
-                StudentServiceLoader.refresh(repository, "registrations")
-                StudentServiceLoader.refresh(repository, "tokenRegistrations")
-                onReloadState()
-            }
+        onClick = env.refreshOrNull {
+            StudentServiceLoader.refresh(repository, "registrations")
+            StudentServiceLoader.refresh(repository, "tokenRegistrations")
         },
         modifier = Modifier
     )
@@ -90,11 +87,15 @@ internal fun RegistrationsBlock(env: ExtrasEnv) {
                 val r = regs.getJSONObject(i)
                 val id = r.optString("id")
                 val title = StudentServices.localized(r.opt("description"), language).ifEmpty { id }
+                val canInspectRounds = id.isNotEmpty() && (live || state.optString("token") == "demo")
                 ItemRow(
                     title = title,
-                    sub = listOf(r.optString("status"), StudentServices.localized(r.opt("message"), language)).filter { it.isNotBlank() }.joinToString(" · "),
-                    onClick = if (live && id.isNotEmpty()) ({
-                        runAsync {
+                    sub = listOf(r.optString("status"), StudentServices.localized(r.opt("message"), language),
+                        if (canInspectRounds) tr("Zobacz tury", "View rounds", "Переглянути тури") else "").filter { it.isNotBlank() }.joinToString(" · "),
+                    onClick = if (canInspectRounds) ({
+                        if (state.optString("token") == "demo") {
+                            registrationRounds = title to DemoStudentServices.demoRegistrationRounds(id)
+                        } else runAsync {
                             val creds = repository.read()
                             check(SharedRepository.sameAccount(state, creds))
                             val rounds = ToolServiceData.fetchRegistrationRounds(UsosClient(creds), id)
@@ -124,7 +125,8 @@ internal fun RegistrationsBlock(env: ExtrasEnv) {
                 if (rounds.length() == 0) Text(tr("Brak tur dla tej rejestracji.", "No rounds for this registration.", "Для цієї реєстрації немає турів."))
                 for (i in 0 until rounds.length()) {
                     val round = rounds.optJSONObject(i) ?: continue
-                    Text(listOf(StudentServices.localized(round.opt("name"), language), round.optString("status"), round.optString("start_date"), round.optString("end_date")).filter { it.isNotBlank() }.joinToString(" · "))
+                    val span = LecturerServices.lessonSpan(round.optString("start_date"), round.optString("end_date"), language)
+                    Text(listOf(StudentServices.localized(round.opt("name"), language), round.optString("status"), span).filter { it.isNotBlank() }.joinToString(" · "))
                 }
                 OutlinedButton(onClick = { registrationRounds = null }) { Text(tr("Zamknij", "Close", "Закрити")) }
             }
@@ -170,8 +172,9 @@ internal fun RegistrationsBlock(env: ExtrasEnv) {
                     val round = rounds.optJSONObject(i) ?: continue
                     val start = round.optString("start_date")
                     val end = round.optString("end_date")
+                    val span = if (start.isNotBlank() || end.isNotBlank()) LecturerServices.lessonSpan(start, end, language) else ""
                     val items = listOf(StudentServices.localized(round.opt("name"), language).ifEmpty { round.optString("id") },
-                        if (start.isNotBlank() || end.isNotBlank()) "${start.ifBlank { "—" }} – ${end.ifBlank { "—" }}" else "",
+                        span,
                         if (round.has("selection_limit")) tr("Limit wyborów: ", "Choice limit: ", "Ліміт виборів: ") + round.optInt("selection_limit") else "",
                         if (round.optBoolean("is_prioritized")) tr("Z priorytetami", "Prioritized", "З пріоритетами") else "",
                         if (round.optBoolean("is_only_entitled")) tr("Tylko uprawnieni", "Eligible students only", "Лише для уповноважених") else "")

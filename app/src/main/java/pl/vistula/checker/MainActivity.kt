@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
     private var newsQuery: String = ""
     private var attendanceFilter: String = pl.vistula.checker.ui.AttendanceFilter.ALL
     private var documentQuery: String = ""
-    private var demoPlanDays: Int = 56
+    private var demoPlanDays: Int = pl.vistula.checker.core.TimetableLoader.MAX_DAYS
     private var renderedMinute: Long = 0
     private var loadingState: Boolean = false
     private var settingsPage: String? = null
@@ -239,7 +239,7 @@ class MainActivity : AppCompatActivity() {
             history.restore(bundle)
             grades.restore(bundle)
             schedule.restore(bundle)
-            demoPlanDays = bundle.getInt("demoPlanDays", 56)
+            demoPlanDays = bundle.getInt("demoPlanDays", pl.vistula.checker.core.TimetableLoader.MAX_DAYS)
             tasks.restore(bundle)
             pendingCalendar = bundle.getString("pendingCalendar")
             newsQuery = bundle.getString("newsQuery", "")
@@ -552,7 +552,6 @@ class MainActivity : AppCompatActivity() {
         scroll.scrollTo(0, 0)
         render()
         if (target == Tabs.TASKS) platon.autoSync()
-        if (target == Tabs.HOME || target == Tabs.TASKS) platon.offer()
         if (!demo && !busy) {
             if (target == Tabs.CAMPUS_GUIDE && connected() && System.currentTimeMillis() - (studentServices().optJSONObject("affiliation")?.optLong("attemptAt") ?: 0L) > 24 * 60 * 60_000L) {
                 refreshStudentServices("affiliation")
@@ -731,8 +730,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun renderGrades() {
+        val displayed = display()
         if (!grades.semesterInitialized) {
-            display().optJSONObject("snapshot")?.let { raw ->
+            displayed.optJSONObject("snapshot")?.let { raw ->
                 val snapshot = pl.vistula.checker.core.Snapshot.from(raw)
                 grades.semester = pl.vistula.checker.core.GradeSemesters.current(snapshot, java.time.LocalDate.now(UsosClient.ZONE))
                     ?: pl.vistula.checker.core.GradeSemesters.ordered(snapshot, java.time.LocalDate.now(UsosClient.ZONE)).firstOrNull().orEmpty()
@@ -742,7 +742,7 @@ class MainActivity : AppCompatActivity() {
         GradesScreenController.render(
         this,
         content,
-        display(),
+        displayed,
         state,
         demo,
         grades.semester,
@@ -1461,6 +1461,8 @@ class MainActivity : AppCompatActivity() {
     fun mutateTasks(id: String, remove: Boolean) = tasksFlow.mutate(id, remove)
 
     fun openPlatonMessages() = platon.openMessages()
+
+    fun connectPlaton() = platon.connect()
 
     fun lessonDetails(lesson: LessonTime) {
         ScheduleScreenController.showLessonDetails(

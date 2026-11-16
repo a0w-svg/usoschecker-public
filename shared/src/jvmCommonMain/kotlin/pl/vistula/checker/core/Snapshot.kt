@@ -20,6 +20,7 @@ class Snapshot(
     @JvmField var thesis: ThesisInfo? = null
     @JvmField val tests: MutableList<CourseTestRecord> = ArrayList()
     @JvmField val news: MutableList<NewsArticle> = ArrayList()
+    @JvmField val lecturerNames: MutableMap<String, String> = TreeMap()
 
     fun forLanguage(language: String?): Snapshot =
         localized.getOrDefault(ApiLanguage.normalize(language), this)
@@ -42,6 +43,39 @@ class Snapshot(
     }
 
     fun covers(date: String): Boolean = date >= start && date < end
+
+    /**
+     * Merges timetable (`plan`) records incrementally against [previous]:
+     * unchanged lessons keep their existing [Record] instances across all UI languages,
+     * and only added, modified, or removed lessons within the window are updated.
+     * Returns the number of timetable entries that were added, modified, or removed.
+     */
+    fun applyTimetableDelta(previous: Snapshot?): Int {
+        if (previous == null) return records.values.count { it.kind == "plan" }
+        var delta = 0
+        for ((id, r) in ArrayList(records.entries)) {
+            if (r.kind != "plan") continue
+            val old = previous.records[id]
+            if (old != null && old.kind == "plan" && r.same(old)) {
+                records[id] = old
+                for ((lang, variant) in localized) {
+                    val prevLang = previous.localized[lang]?.records?.get(id)
+                    val curLang = variant.records[id]
+                    if (prevLang != null && curLang != null && curLang.same(prevLang)) {
+                        variant.records[id] = prevLang
+                    }
+                }
+            } else {
+                delta++
+            }
+        }
+        for (old in previous.records.values) {
+            if (old.kind == "plan" && covers(old.date) && !records.containsKey(old.id)) {
+                delta++
+            }
+        }
+        return delta
+    }
 
     @Throws(JSONException::class)
     fun json(): JSONObject {
@@ -81,7 +115,10 @@ class Snapshot(
     companion object {
         @JvmStatic
         @Throws(JSONException::class)
-        fun from(o: JSONObject): Snapshot {
+        fun from(o: JSONObject): Snapshot = from(o, true)
+
+        @Throws(JSONException::class)
+        private fun from(o: JSONObject, includeLocalized: Boolean): Snapshot {
             val s = Snapshot(o.getString("start"), o.getString("end"))
             val rows = o.getJSONArray("records")
             for (i in 0 until rows.length()) s.add(Record.from(rows.getJSONObject(i)))
@@ -125,14 +162,12 @@ class Snapshot(
                     }
                 }
             }
-            val translations = o.optJSONObject("localized")
+            val translations = if (includeLocalized) o.optJSONObject("localized") else null
             if (translations != null) {
                 for (language in arrayOf("en", "uk")) {
                     val translation = translations.optJSONObject(language)
                     if (translation != null) {
-                        val flat = JSONObject(translation.toString())
-                        flat.remove("localized")
-                        s.localized[language] = from(flat)
+                        s.localized[language] = from(translation, false)
                     }
                 }
             }

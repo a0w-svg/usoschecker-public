@@ -771,6 +771,7 @@ Last download: %3$s</string>
     <string name="lecturer_dlg_no_content">This page has no content.</string>
     <string name="tasks_platon_settings_menu">Platon settings</string>
     <string name="tasks_platon_settings_title">Platon settings</string>
+    <string name="tasks_platon_setting_sync_enabled">Synchronise with Platon (optional)</string>
     <string name="tasks_platon_setting_notify_tasks">Notify about new assignments</string>
     <string name="tasks_platon_setting_notify_grades">Notify about grade changes</string>
     <string name="tasks_platon_setting_notify_messages">Notify about new messages</string>

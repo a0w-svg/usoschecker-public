@@ -270,13 +270,40 @@ object LecturerServices {
                     .put("title_before", prefix)
                     .put("title_after", suffix)
                     .put("office_hours", ApiLanguage.safe(user.opt("office_hours")))
-                    .put("room", StudentServices.text(user, "room"))
+                    .put("room", staffRoom(user.opt("room")))
             )
         }
         return JSONObject()
             .put("users", users)
             .put("hasMore", nextPage || items.length() > limit || total > limit)
             .put("total", maxOf(total, items.length()))
+    }
+
+    /** USOS returns the office as a `services/geo/room` object; cached and demo entries keep a plain number. */
+    @JvmStatic
+    fun staffRoom(value: Any?): String = when (value) {
+        is String -> value.trim()
+        is Number -> value.toString()
+        is JSONObject -> StudentServices.text(value, "number").trim()
+        else -> ""
+    }
+
+    /** "pon. 09.11 · 09:00–11:50" for a same-day span, or "pon. 09.11 09:00 – śr. 11.11 11:50" across days. */
+    @JvmStatic
+    fun lessonSpan(start: String, end: String, language: String?): String {
+        val pattern = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val from = runCatching { java.time.LocalDateTime.parse(start.trim(), pattern) }.getOrNull()
+            ?: return listOf(start, end).filter { it.isNotBlank() }.joinToString(" – ")
+        val to = runCatching { java.time.LocalDateTime.parse(end.trim(), pattern) }.getOrNull()
+        val locale = java.util.Locale.forLanguageTag(language?.takeIf { it.isNotBlank() } ?: "pl")
+        val dayFmt = java.time.format.DateTimeFormatter.ofPattern("EEE dd.MM", locale)
+        val timeFmt = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+        if (to == null) return "${from.format(dayFmt)} · ${from.format(timeFmt)}"
+        return if (from.toLocalDate() == to.toLocalDate()) {
+            "${from.format(dayFmt)} · ${from.format(timeFmt)}–${to.format(timeFmt)}"
+        } else {
+            "${from.format(dayFmt)} ${from.format(timeFmt)} – ${to.format(dayFmt)} ${to.format(timeFmt)}"
+        }
     }
 
     @JvmStatic

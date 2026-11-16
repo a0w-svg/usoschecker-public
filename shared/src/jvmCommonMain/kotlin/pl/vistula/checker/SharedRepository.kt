@@ -74,8 +74,11 @@ class SharedRepository @JvmOverloads constructor(
     fun stamp(): Long = vault.stamp()
 
     @Throws(Exception::class)
-    override fun read(): JSONObject = synchronized(LOCK) {
-        localizedView(vault.read().also { StateSchema.migrate(it) }, languageProvider.get())
+    override fun read(): JSONObject = read(languageProvider.get())
+
+    @Throws(Exception::class)
+    fun read(language: String?): JSONObject = synchronized(LOCK) {
+        localizedView(vault.read().also { StateSchema.migrate(it) }, language)
     }
 
     @Throws(Exception::class)
@@ -146,7 +149,8 @@ class SharedRepository @JvmOverloads constructor(
                 for (field in arrayOf(
                     "requestToken", "requestSecret", "authAttempt", "snapshot", "history", "studentServices", "campusOverride",
                     "retryAt", "authorizationError", "studentNumber", "email", "programme", "studentStatus",
-                    "stage", "admissionDate", "photoUrl", "profileTranslations", "reminderDeliveries", "staffStatus", "studentStatusCode"
+                    "stage", "admissionDate", "photoUrl", "profileTranslations", "reminderDeliveries", "staffStatus", "studentStatusCode",
+                    "lecturerNames"
                 )) {
                     s.remove(field)
                 }
@@ -264,37 +268,50 @@ class SharedRepository @JvmOverloads constructor(
                     }
                     val now = System.currentTimeMillis()
                     val today = LocalDate.now(UsosClient.ZONE).toString()
+                    current.applyTimetableDelta(previous)
                     var changes = Diff.between(previous, current, now, today)
                     val oldHistory = latest.optJSONArray("history")
-                    val history = JSONArray()
-                    val translations = LinkedHashMap<String, List<Change>>()
-                    for (language in arrayOf("en", "uk")) {
-                        translations[language] = Diff.between(previous, current, now, today, language)
-                    }
-                    var i = 0
-                    while (i < changes.size && history.length() < 200) {
-                        val entry = changes[i].json()
-                        val localized = JSONObject()
-                        for ((language, list) in translations) {
-                            localized.put(language, list[i].json())
+                    val history = if (changes.isEmpty() && oldHistory != null) {
+                        oldHistory
+                    } else {
+                        val built = JSONArray()
+                        val translations = LinkedHashMap<String, List<Change>>()
+                        for (language in arrayOf("en", "uk")) {
+                            translations[language] = Diff.between(previous, current, now, today, language)
                         }
-                        history.put(entry.put("localized", localized))
-                        i++
+                        var i = 0
+                        while (i < changes.size && built.length() < 200) {
+                            val entry = changes[i].json()
+                            val localized = JSONObject()
+                            for ((language, list) in translations) {
+                                localized.put(language, list[i].json())
+                            }
+                            built.put(entry.put("localized", localized))
+                            i++
+                        }
+                        if (oldHistory != null) {
+                            var j = 0
+                            while (j < oldHistory.length() && built.length() < 200) {
+                                built.put(oldHistory.get(j))
+                                j++
+                            }
+                        }
+                        built
                     }
                     changes = Diff.between(previous, current, now, today, languageProvider.get())
-                    if (oldHistory != null) {
-                        var j = 0
-                        while (j < oldHistory.length() && history.length() < 200) {
-                            history.put(oldHistory.get(j))
-                            j++
-                        }
-                    }
                     val snapshot = current.json()
                     for (field in arrayOf(
                         "user", "studentNumber", "email", "programme", "studentStatus",
                         "stage", "admissionDate", "photoUrl", "profileTranslations", "staffStatus", "studentStatusCode"
                     )) {
                         if (s.has(field)) latest.put(field, s.get(field))
+                    }
+                    if (current.lecturerNames.isNotEmpty()) {
+                        val cachedNames = latest.optJSONObject("lecturerNames") ?: JSONObject()
+                        for ((id, name) in current.lecturerNames) {
+                            if (name.isNotBlank()) cachedNames.put(id, name)
+                        }
+                        latest.put("lecturerNames", cachedNames)
                     }
                     latest.put("history", history).put("snapshot", snapshot).put("successAt", now).put("error", "")
                         .put("errorKind", "").put("httpStatus", 0)

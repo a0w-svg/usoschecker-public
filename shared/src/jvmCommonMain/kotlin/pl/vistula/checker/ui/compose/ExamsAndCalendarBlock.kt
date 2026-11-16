@@ -63,17 +63,18 @@ internal fun ExamsAndCalendarBlock(env: ExtrasEnv) {
     val live = env.live
     val runAsync = env.runAsync
     val onReloadState = env.onReloadState
-    var selectedExam by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
-    var selectedProgramme by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
-    var selectedStudentProgrammeId by remember(state.optString("accountSession")) { mutableStateOf("") }
-    var programmeStages by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
-    var selectedStage by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
+    val sessionKey = state.optString("accountSession")
+    var selectedExam by remember(sessionKey) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var selectedProgramme by remember(sessionKey) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var selectedStudentProgrammeId by remember(sessionKey) { mutableStateOf("") }
+    var programmeStages by remember(sessionKey) { mutableStateOf<JSONObject?>(null) }
+    var selectedStage by remember(sessionKey) { mutableStateOf<JSONObject?>(null) }
     val calendarCampus = CampusAffiliation.selected(state)
-    var calendarFrom by remember { mutableStateOf(LocalDate.now(UsosClient.ZONE).toString()) }
-    var calendarUntil by remember { mutableStateOf(LocalDate.now(UsosClient.ZONE).plusDays(28).toString()) }
-    var calendarError by remember { mutableStateOf("") }
-    var calendarResults by remember(state.optString("accountSession"), calendarCampus) { mutableStateOf<JSONObject?>(null) }
-    var calendarEvent by remember(state.optString("accountSession"), calendarCampus) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var calendarFrom by remember(sessionKey) { mutableStateOf(LocalDate.now(UsosClient.ZONE).toString()) }
+    var calendarUntil by remember(sessionKey) { mutableStateOf(LocalDate.now(UsosClient.ZONE).plusDays(28).toString()) }
+    var calendarError by remember(sessionKey) { mutableStateOf("") }
+    var calendarResults by remember(sessionKey, calendarCampus) { mutableStateOf<JSONObject?>(null) }
+    var calendarEvent by remember(sessionKey, calendarCampus) { mutableStateOf<Pair<String, JSONObject>?>(null) }
     fun loadCalendarEvent(id: String, title: String) {
         if (state.optString("token") == "demo") calendarEvent = title to DemoStudentServices.demoCalendarEvent(id)
         else runAsync {
@@ -87,14 +88,11 @@ internal fun ExamsAndCalendarBlock(env: ExtrasEnv) {
     }
     SectionHead(
         title = tr("Sesja egzaminacyjna, grupy i punkty ECTS", "Exams, study groups & ECTS credits", "Екзамени, навчальні групи та кредити ECTS"),
-        onClick = {
-            runAsync {
-                if (!AccountRole.lecturerOnly(state) && StudentServices.hasScope(state.optString("scopes"), "studies")) {
-                    runCatching { StudentServiceLoader.refresh(repository, "exams") }
-                }
-                StudentServiceLoader.refresh(repository, "academicCalendar")
-                onReloadState()
+        onClick = env.refreshOrNull {
+            if (!AccountRole.lecturerOnly(state) && StudentServices.hasScope(state.optString("scopes"), "studies")) {
+                runCatching { StudentServiceLoader.refresh(repository, "exams") }
             }
+            StudentServiceLoader.refresh(repository, "academicCalendar")
         },
         modifier = Modifier
     )
@@ -268,7 +266,8 @@ internal fun ExamsAndCalendarBlock(env: ExtrasEnv) {
                 if (groups.length() == 0) Text(tr("Brak dostępnych informacji o grupach.", "No group details available.", "Інформація про групи недоступна."))
                 for (i in 0 until groups.length()) {
                     val group = groups.optJSONObject(i) ?: continue
-                    val parts = listOf(group.optString("number").takeIf { it.isNotBlank() }?.let { tr("Grupa ", "Group ", "Група ") + it }.orEmpty(), group.optString("exam_start"), group.optString("exam_end"), group.optString("room_number").takeIf { it.isNotBlank() }?.let { tr("Sala ", "Room ", "Аудиторія ") + it }.orEmpty())
+                    val span = LecturerServices.lessonSpan(group.optString("exam_start"), group.optString("exam_end"), language)
+                    val parts = listOf(group.optString("number").takeIf { it.isNotBlank() }?.let { tr("Grupa ", "Group ", "Група ") + it }.orEmpty(), span, group.optString("room_number").takeIf { it.isNotBlank() }?.let { tr("Sala ", "Room ", "Аудиторія ") + it }.orEmpty())
                     Text(parts.filter { it.isNotBlank() }.joinToString(" · "))
                 }
                 if (detail.optBoolean("groups_truncated")) Text(tr("Pokazano pierwsze 100 grup.", "Showing the first 100 groups.", "Показано перші 100 груп."))

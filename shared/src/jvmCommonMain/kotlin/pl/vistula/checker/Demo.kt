@@ -21,7 +21,7 @@ object Demo {
     @JvmStatic
     @JvmOverloads
     @Throws(JSONException::class)
-    fun state(changed: Boolean, days: Int = 56): JSONObject {
+    fun state(changed: Boolean, days: Int = pl.vistula.checker.core.TimetableLoader.MAX_DAYS): JSONObject {
         val date = LocalDate.now(UsosClient.ZONE)
         val monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val baseline = Snapshot(monday.toString(), monday.plusDays(days.toLong()).toString())

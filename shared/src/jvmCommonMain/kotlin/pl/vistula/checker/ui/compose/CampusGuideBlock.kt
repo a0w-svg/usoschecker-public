@@ -63,23 +63,19 @@ internal fun CampusGuideBlock(env: ExtrasEnv) {
     val live = env.live
     val runAsync = env.runAsync
     val onReloadState = env.onReloadState
-    var courseQuery by remember { mutableStateOf("") }
-    var courseSearchResults by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
-    var selectedCourse by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
-    var roomIdQuery by remember { mutableStateOf("") }
-    var roomScheduleResult by remember(state.optString("accountSession")) { mutableStateOf<JSONObject?>(null) }
-    var buildingRooms by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONArray>?>(null) }
-    var selectedDormitory by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
-    var selectedAllocationPeriod by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
-    var selectedGuidePage by remember(state.optString("accountSession")) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    val sessionKey = state.optString("accountSession")
+    var courseQuery by remember(sessionKey) { mutableStateOf("") }
+    var courseSearchResults by remember(sessionKey) { mutableStateOf<JSONObject?>(null) }
+    var selectedCourse by remember(sessionKey) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var roomIdQuery by remember(sessionKey) { mutableStateOf("") }
+    var roomScheduleResult by remember(sessionKey) { mutableStateOf<JSONObject?>(null) }
+    var buildingRooms by remember(sessionKey) { mutableStateOf<Pair<String, JSONArray>?>(null) }
+    var selectedDormitory by remember(sessionKey) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var selectedAllocationPeriod by remember(sessionKey) { mutableStateOf<Pair<String, JSONObject>?>(null) }
+    var selectedGuidePage by remember(sessionKey) { mutableStateOf<Pair<String, JSONObject>?>(null) }
     SectionHead(
         title = tr("Informator, akademiki, budynki i katalog zajęć", "Campus guide, dormitories, buildings & courses", "Довідник, гуртожитки, будівлі та каталог занять"),
-        onClick = {
-            runAsync {
-                StudentServiceLoader.refresh(repository, "campusGuide")
-                onReloadState()
-            }
-        },
+        onClick = env.refreshOrNull { StudentServiceLoader.refresh(repository, "campusGuide") },
         modifier = Modifier
     )
     val guideEntry = services?.optJSONObject("campusGuide")
@@ -147,12 +143,15 @@ internal fun CampusGuideBlock(env: ExtrasEnv) {
                 val b = buildings.getJSONObject(i)
                 val buildingId = b.optString("id")
                 val buildingName = StudentServices.localized(b.opt("name"), language).ifEmpty { buildingId }
+                val canInspectRooms = buildingId.isNotEmpty() && (live || state.optString("token") == "demo")
                 ItemRow(
                     title = buildingName,
                     sub = listOf(b.optString("postal_address"), StudentServices.localized(b.opt("campus_name"), language),
-                        if (live && buildingId.isNotEmpty()) tr("Zobacz sale", "View rooms", "Переглянути аудиторії") else "").filter { it.isNotBlank() }.joinToString(" · "),
-                    onClick = if (live && buildingId.isNotEmpty()) ({
-                        runAsync {
+                        if (canInspectRooms) tr("Zobacz sale", "View rooms", "Переглянути аудиторії") else "").filter { it.isNotBlank() }.joinToString(" · "),
+                    onClick = if (canInspectRooms) ({
+                        if (state.optString("token") == "demo") {
+                            buildingRooms = buildingName to DemoStudentServices.demoBuildingRooms(buildingId)
+                        } else runAsync {
                             val creds = repository.read()
                             check(SharedRepository.sameAccount(state, creds))
                             val rooms = ToolServiceData.fetchBuildingRooms(UsosClient(creds), buildingId)
@@ -243,7 +242,9 @@ internal fun CampusGuideBlock(env: ExtrasEnv) {
                 val id = room.optString("id")
                 ItemRow(title = room.optString("number").ifEmpty { id }, sub = tr("Zobacz plan sali", "View room schedule", "Переглянути розклад аудиторії"),
                     onClick = if (id.isNotEmpty()) ({
-                        runAsync {
+                        if (state.optString("token") == "demo") {
+                            roomScheduleResult = DemoStudentServices.demoRoomSchedule(id)
+                        } else runAsync {
                             val creds = repository.read()
                             check(SharedRepository.sameAccount(state, creds))
                             val result = ToolServiceData.fetchRoomSchedule(UsosClient(creds), id, LocalDate.now(UsosClient.ZONE).toString())
@@ -379,7 +380,11 @@ internal fun CampusGuideBlock(env: ExtrasEnv) {
                 } else {
                     for (i in 0 until lessons.length()) {
                         val l = lessons.getJSONObject(i)
-                        Text("${StudentServices.localized(l.opt("name"), language)} · ${l.optString("start_time")} – ${l.optString("end_time")}")
+                        val title = StudentServices.localized(l.opt("name"), language)
+                        val classType = StudentServices.localized(l.opt("classtype_name"), language)
+                        val head = listOf(title, classType.takeIf { it.isNotBlank() && !title.contains(it, ignoreCase = true) }.orEmpty())
+                            .filter { it.isNotEmpty() }.joinToString(" · ")
+                        Text("$head · ${LecturerServices.lessonSpan(l.optString("start_time"), l.optString("end_time"), language)}")
                     }
                 }
             }

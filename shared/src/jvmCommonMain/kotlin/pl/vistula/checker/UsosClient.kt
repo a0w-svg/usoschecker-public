@@ -51,7 +51,18 @@ class UsosClient @JvmOverloads constructor(
     private val scopes: String = StudentServices.normalizeScopes(state.optString("scopes"))
     private val lecturer = pl.vistula.checker.core.AccountRole.lecturer(state)
     private val lecturerOnly = pl.vistula.checker.core.AccountRole.lecturerOnly(state)
-    private val planDays: Int = min(112, max(56, state.optInt("planDays", 56) / 7 * 7))
+    private val planDays: Int = min(TimetableLoader.MAX_DAYS, max(TimetableLoader.MIN_DAYS, state.optInt("planDays", TimetableLoader.MAX_DAYS) / 7 * 7))
+    private val previousSnapshot: Snapshot? = state.optJSONObject("snapshot")?.let {
+        try { Snapshot.from(it) } catch (_: Exception) { null }
+    }
+    private val knownLecturers: Map<String, String> = state.optJSONObject("lecturerNames")?.let { obj ->
+        val map = TreeMap<String, String>()
+        for (k in UsosParser.sortedKeys(obj)) {
+            val v = obj.optString(k).trim()
+            if (v.isNotEmpty()) map[k] = v
+        }
+        map
+    } ?: emptyMap()
 
     fun interface ConnectionSource {
         @Throws(IOException::class)
@@ -703,15 +714,47 @@ class UsosClient @JvmOverloads constructor(
             }
         }
         if (wanted.size > 50) throw JSONException("Too many course-test nodes to load safely")
-        for ((id, nodes) in wanted) {
+        val detailFields = "id|parent_id|type|visible_for_students|task_node_details[points_max|students_points[points|last_changed]]|grade_node_details[students_grade[grade_value[symbol]|last_changed]]"
+        fun fetchNodeDetail(id: String): JSONObject {
             if (budget.expired()) throw JSONException("Course-test detail time limit exceeded")
-            val detail = try {
-                JSONObject(requestDataWithBudget("GET", "services/crstests/node2", mapOf("node_id" to id,
-                    "fields" to "id|parent_id|type|visible_for_students|task_node_details[points_max|students_points[points|last_changed]]|grade_node_details[students_grade[grade_value[symbol]|last_changed]]"),
+            halted?.let { throw it }
+            gate.acquire()
+            try {
+                halted?.let { throw it }
+                if (budget.expired()) throw JSONException("Course-test detail time limit exceeded")
+                return JSONObject(requestDataWithBudget("GET", "services/crstests/node2", mapOf("node_id" to id, "fields" to detailFields),
                     true, token, tokenSecret, null, null, budget).text())
             } catch (e: SocketTimeoutException) {
                 throw JSONException("Course-test details timed out")
+            } catch (e: ApiException) {
+                if (e.authorization || e.retryable || e.status == 401) halt(e)
+                throw e
+            } finally {
+                gate.release()
             }
+        }
+        val detailsById = LinkedHashMap<String, JSONObject>()
+        if (parallelism > 1 && wanted.size > 1) {
+            val pool = Executors.newFixedThreadPool(min(parallelism, wanted.size)) { r -> Thread(r, "usos-crstests").apply { isDaemon = true } }
+            try {
+                val futures = wanted.keys.associateWith { id -> pool.submit(Callable { fetchNodeDetail(id) }) }
+                for ((id, future) in futures) {
+                    try {
+                        detailsById[id] = future.get()
+                    } catch (e: ExecutionException) {
+                        throw (e.cause as? Exception) ?: e
+                    }
+                }
+            } finally {
+                pool.shutdownNow()
+            }
+        } else {
+            for (id in wanted.keys) {
+                detailsById[id] = fetchNodeDetail(id)
+            }
+        }
+        for ((id, nodes) in wanted) {
+            val detail = detailsById.getValue(id)
             if (StudentServices.text(detail, "id") != id) throw JSONException("Course-test node changed")
             if (detail.opt("visible_for_students") !is Boolean) throw JSONException("Missing course-test visibility")
             if (!detail.optBoolean("visible_for_students", true)) {
@@ -761,24 +804,31 @@ class UsosClient @JvmOverloads constructor(
             Consumer { progress(it) }
         )
         progress("Pobieranie nazwisk prowadzących · users/users")
-        val lecturerNames = resolveLecturers(weeks) { ids ->
-            JSONObject(
-                get(
-                    "services/users/users",
-                    mapOf("user_ids" to ids.joinToString("|"), "fields" to "first_name|last_name")
+        val lecturerNames = resolveLecturers(
+            weeks,
+            { ids ->
+                JSONObject(
+                    get(
+                        "services/users/users",
+                        mapOf("user_ids" to ids.joinToString("|"), "fields" to "first_name|last_name")
+                    )
                 )
-            )
-        }
+            },
+            knownLecturers
+        )
         return Timetable(weeks, lecturerNames)
     }
 
-    /** Parsing part of the timetable; runs on the sync thread so records keep their order. */
+    /** Parsing part of the timetable; runs on the sync thread so records keep their order and updates only changes. */
     @Throws(Exception::class)
     private fun applyTimetable(s: Snapshot, timetable: Timetable) {
         reportProgress("Odczyt planu zajęć · " + if (lecturer) "tt/user" else "tt/student")
+        s.lecturerNames.putAll(knownLecturers)
+        s.lecturerNames.putAll(timetable.lecturerNames)
         for (rows in timetable.weeks) {
             parseLanguages(s) { variant -> UsosParser.timetable(variant, rows, timetable.lecturerNames) }
         }
+        s.applyTimetableDelta(previousSnapshot)
     }
 
     private fun enrichGradeUnits(snapshot: Snapshot) {
@@ -831,7 +881,9 @@ class UsosClient @JvmOverloads constructor(
             }
             i += 50
         }
-        // Resolve editor IDs independently; unavailable names never prevent a grade snapshot.
+        // Resolve editor IDs independently; reuse known/timetable lecturer names and only fetch unknown IDs.
+        val resolvedNames = TreeMap<String, String>(knownLecturers)
+        resolvedNames.putAll(snapshot.lecturerNames)
         val authors = ArrayList(
             snapshot.records.values
                 .filter { it.kind == "ocena" }
@@ -839,31 +891,36 @@ class UsosClient @JvmOverloads constructor(
                 .filter { it.isNotEmpty() }
                 .toCollection(TreeSet())
         )
+        val missingAuthors = ArrayList(authors.filter { !resolvedNames.containsKey(it) })
         var j = 0
-        while (j < authors.size) {
+        while (j < missingAuthors.size) {
             try {
                 val names = UsosParser.lecturerNames(
                     JSONObject(
                         get(
                             "services/users/users",
                             mapOf(
-                                "user_ids" to authors.subList(j, min(j + 50, authors.size)).joinToString("|"),
+                                "user_ids" to missingAuthors.subList(j, min(j + 50, missingAuthors.size)).joinToString("|"),
                                 "fields" to "first_name|last_name"
                             )
                         )
                     )
                 )
-                parseLanguages(snapshot) { variant ->
-                    for (grade in variant.records.values) {
-                        val name = names[grade.optMeta("modificationAuthor")]
-                        if (!name.isNullOrEmpty()) grade.metadata.put("modificationAuthorName", name)
-                    }
-                }
+                resolvedNames.putAll(names)
             } catch (e: Exception) {
                 optionalFailure(e)
             }
             j += 50
         }
+        if (authors.isNotEmpty() && resolvedNames.isNotEmpty()) {
+            parseLanguages(snapshot) { variant ->
+                for (grade in variant.records.values) {
+                    val name = resolvedNames[grade.optMeta("modificationAuthor")]
+                    if (!name.isNullOrEmpty()) grade.metadata.put("modificationAuthorName", name)
+                }
+            }
+        }
+        snapshot.lecturerNames.putAll(resolvedNames)
     }
 
     fun interface LecturerSource {
@@ -921,12 +978,17 @@ class UsosClient @JvmOverloads constructor(
         }
 
         @JvmStatic
+        @JvmOverloads
         @Throws(Exception::class)
-        fun resolveLecturers(weeks: List<JSONArray>, source: LecturerSource): Map<String, String> {
+        fun resolveLecturers(
+            weeks: List<JSONArray>,
+            source: LecturerSource,
+            known: Map<String, String> = emptyMap()
+        ): Map<String, String> {
             val unique = TreeSet<String>()
             for (week in weeks) unique.addAll(UsosParser.lecturerIds(week))
-            val ids = ArrayList(unique)
-            val names = TreeMap<String, String>()
+            val names = TreeMap<String, String>(known)
+            val ids = ArrayList(unique.filter { !names.containsKey(it) })
             var i = 0
             while (i < ids.size) {
                 val batch = ids.subList(i, min(i + 50, ids.size))

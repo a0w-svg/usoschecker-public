@@ -51,7 +51,7 @@ class StudentDocumentsController private constructor() {
                         if (document.status.isNotEmpty()) {
                             UiHelper.badge(activity, card, document.status, Surface.ACCENT, Tone.INK)
                         }
-                        val details = UiHelper.disclosure(activity, card, "documents.details", R.string.simple_details)
+                        val details = UiHelper.disclosure(activity, card, "documents.details.${document.id.ifEmpty { i.toString() }}", R.string.simple_details)
                         if (document.typeName.isNotEmpty()) {
                             UiHelper.note(activity, details, document.typeName, Tone.MUTED)
                         }

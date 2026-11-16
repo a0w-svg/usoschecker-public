@@ -1,5 +1,7 @@
 package pl.vistula.checker.ui
 
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -22,12 +24,26 @@ class StaffDirectoryController private constructor() {
     companion object {
         private const val MIN_QUERY = 2
         private const val MAX_QUERY = 80
+        private var currentQuery: String = ""
+        private var currentResults: JSONObject? = null
+        private var currentSession: String = ""
 
         @JvmStatic
         fun render(activity: MainActivity, content: LinearLayout, services: JSONObject) {
             val language = Language.currentLocale(activity).language
+            val session = if (activity.isDemo()) "demo" else activity.serviceAccountState().optString("accountSession")
+            if (session != currentSession) {
+                currentSession = session
+                currentQuery = ""
+                currentResults = null
+            }
+
             ToolScreenUi.header(activity, content, R.string.staff_directory_title) { menu ->
-                ToolScreenUi.action(menu, R.string.btn_refresh) { activity.refreshStudentServices("staffDirectory") }
+                ToolScreenUi.action(menu, R.string.btn_refresh) {
+                    currentResults = null
+                    currentQuery = ""
+                    activity.refreshStudentServices("staffDirectory")
+                }
             }
             val screen = LayoutInflater.from(activity).inflate(R.layout.screen_staff_directory, content, false)
             content.addView(screen)
@@ -37,6 +53,7 @@ class StaffDirectoryController private constructor() {
 
             val layout = screen.findViewById<TextInputLayout>(R.id.staff_search_layout)
             val input = screen.findViewById<TextInputEditText>(R.id.staff_search_input)
+            val button = screen.findViewById<View>(R.id.staff_search_button)
             val results = Results(
                 screen.findViewById(R.id.staff_results_card),
                 screen.findViewById(R.id.staff_results),
@@ -44,26 +61,62 @@ class StaffDirectoryController private constructor() {
                 screen.findViewById(R.id.staff_more)
             )
 
+            if (currentQuery.isNotEmpty() && input.text?.toString().orEmpty() != currentQuery) {
+                input.setText(currentQuery)
+                input.setSelection(currentQuery.length)
+            }
+
+            input.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    val value = s?.toString()?.trim().orEmpty()
+                    currentQuery = value
+                    if (layout.error != null && (value.isEmpty() || value.length in MIN_QUERY..MAX_QUERY)) {
+                        layout.error = null
+                    }
+                    if (value.isEmpty() && currentResults != null) {
+                        currentResults = null
+                        showResults(activity, results, entry.optJSONObject("data") ?: JSONObject(), language)
+                    }
+                }
+                override fun afterTextChanged(s: Editable?) {}
+            })
+
             fun search() {
                 val value = input.text?.toString()?.trim().orEmpty()
+                if (value.isEmpty()) {
+                    layout.error = null
+                    currentQuery = ""
+                    currentResults = null
+                    showResults(activity, results, entry.optJSONObject("data") ?: JSONObject(), language)
+                    return
+                }
                 if (value.length !in MIN_QUERY..MAX_QUERY) {
                     layout.error = activity.getString(R.string.staff_search_invalid)
                     return
                 }
                 layout.error = null
+                currentQuery = value
                 activity.getSystemService(InputMethodManager::class.java)?.hideSoftInputFromWindow(input.windowToken, 0)
+                if (activity.isDemo()) {
+                    val demoData = DemoStudentServices.demoStaffDirectory(value)
+                    currentResults = demoData
+                    showResults(activity, results, demoData, language)
+                    return
+                }
                 activity.universityRead({ client -> ToolServiceData.searchTeachers(client, value) }) { data ->
+                    currentResults = data
                     if (screen.isAttachedToWindow) showResults(activity, results, data, language)
                 }
             }
-            screen.findViewById<View>(R.id.staff_search_button).setOnClickListener { search() }
+            button.setOnClickListener { search() }
             input.setOnEditorActionListener { _, action, _ ->
-                if (action == EditorInfo.IME_ACTION_SEARCH) {
+                if (action == EditorInfo.IME_ACTION_SEARCH || action == EditorInfo.IME_ACTION_DONE) {
                     search()
                     true
                 } else false
             }
-            showResults(activity, results, entry.optJSONObject("data") ?: JSONObject(), language)
+            showResults(activity, results, currentResults ?: entry.optJSONObject("data") ?: JSONObject(), language)
         }
 
         private class Results(val card: View, val list: LinearLayout, val empty: TextView, val more: TextView)
@@ -95,14 +148,16 @@ class StaffDirectoryController private constructor() {
                 StudentServices.text(member, "last_name"),
                 StudentServices.text(member, "title_after")
             ).filter { it.isNotEmpty() }.joinToString(" ")
+            val roomLabel = StudentServices.text(member, "room").takeIf { it.isNotEmpty() }
+                ?.let { activity.getString(R.string.staff_office, it) }
             val details = listOfNotNull(
-                StudentServices.text(member, "room").takeIf { it.isNotEmpty() },
+                roomLabel,
                 StudentServices.localized(member.opt("office_hours"), language).takeIf { it.isNotEmpty() }
             ).joinToString(" · ")
             val id = StudentServices.text(member, "id")
             val title = fullName.ifEmpty { id }
 
-            row.findViewById<TextView>(R.id.staff_name).text = fullName
+            row.findViewById<TextView>(R.id.staff_name).text = fullName.ifEmpty { id }
             row.findViewById<TextView>(R.id.staff_details).apply {
                 text = details
                 visibility = if (details.isEmpty()) View.GONE else View.VISIBLE
@@ -114,7 +169,7 @@ class StaffDirectoryController private constructor() {
                 row.findViewById<View>(R.id.staff_chevron).visibility = View.GONE
                 return
             }
-            tap.contentDescription = listOf(fullName, details).filter { it.isNotEmpty() }.joinToString(", ")
+            tap.contentDescription = listOf(title, details).filter { it.isNotEmpty() }.joinToString(", ")
             tap.setOnClickListener {
                 if (activity.isDemo()) {
                     LecturerScreenController.showStaffScheduleDialog(

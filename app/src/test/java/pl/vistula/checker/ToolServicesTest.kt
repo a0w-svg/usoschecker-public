@@ -34,23 +34,73 @@ class ToolServicesTest {
     }
 
     @Test fun teacherSearchUsesDocumentedResponseAndArguments() {
+        val requests = mutableListOf<String>()
         val client = UsosClient(credentials(), {}) { address ->
-            assertTrue(address.contains("services/users/search_current_teachers?"))
-            assertFalse(address.contains("fields="))
-            Connection("""{"items":[{"user_id":"42","match":"Jan <b>Kowal</b>ski"}],"next_page":true}""")
+            requests += address
+            if (address.contains("services/users/search_current_teachers?")) {
+                assertFalse(address.contains("fields="))
+                Connection("""{"items":[{"user_id":"42","match":"Jan <b>Kowal</b>ski"},{"user_id":"43","match":"Ewa <b>Kowal</b>ska"}],"next_page":true}""")
+            } else {
+                assertTrue(address.contains("services/users/users?"))
+                assertTrue(address.contains("user_ids=42%7C43"))
+                assertTrue(java.net.URLDecoder.decode(address, "UTF-8").contains("room[number]"))
+                Connection("""{"42":{"id":"42","first_name":"Jan","last_name":"Kowalski","titles":{"before":"dr","after":null},"office_hours":{"pl":"Wt 12:00"},"room":{"number":"A1"},"pesel":"private"},"43":null}""")
+            }
         }
         val result = ToolServiceData.searchTeachers(client, "Kowal")
-        val user = result.getJSONArray("users").getJSONObject(0)
+        assertEquals(2, requests.size)
+        val users = result.getJSONArray("users")
+        val user = users.getJSONObject(0)
+        assertEquals("42", user.getString("id"))
+        assertEquals("Jan", user.getString("first_name"))
+        assertEquals("Kowalski", user.getString("last_name"))
+        assertEquals("dr", user.getString("title_before"))
+        assertEquals("A1", user.getString("room"))
+        assertEquals("Wt 12:00", user.getJSONObject("office_hours").getString("pl"))
+        // A user without details keeps the highlighted name from the search.
+        assertEquals("43", users.getJSONObject(1).getString("id"))
+        assertEquals("Ewa Kowalska", users.getJSONObject(1).getString("first_name"))
+        assertFalse(result.toString().contains("private"))
+        assertTrue(result.getBoolean("hasMore"))
+    }
+
+    @Test fun teacherSearchKeepsMatchesWhenDetailsAreUnavailable() {
+        val client = UsosClient(credentials(), {}) { address ->
+            if (address.contains("services/users/search_current_teachers?")) {
+                Connection("""{"items":[{"user_id":"42","match":"Jan <b>Kowal</b>ski"}],"next_page":false}""")
+            } else Connection("""{"message":"denied","error":"method_forbidden"}""", 403)
+        }
+        val user = ToolServiceData.searchTeachers(client, "Kowal").getJSONArray("users").getJSONObject(0)
         assertEquals("42", user.getString("id"))
         assertEquals("Jan Kowalski", user.getString("first_name"))
-        assertTrue(result.getBoolean("hasMore"))
+    }
+
+    @Test fun staffRoomAndLessonSpanReadUsosShapes() {
+        assertEquals("A1", pl.vistula.checker.core.LecturerServices.staffRoom(JSONObject().put("id", "7").put("number", "A1")))
+        assertEquals("312", pl.vistula.checker.core.LecturerServices.staffRoom("312"))
+        assertEquals("", pl.vistula.checker.core.LecturerServices.staffRoom(JSONObject.NULL))
+        assertEquals("pon. 09.11 · 09:00–11:50",
+            pl.vistula.checker.core.LecturerServices.lessonSpan("2026-11-09 09:00:00", "2026-11-09 11:50:00", "pl"))
+        assertEquals("Mon 09.11 · 09:00–11:50",
+            pl.vistula.checker.core.LecturerServices.lessonSpan("2026-11-09 09:00:00", "2026-11-09 11:50:00", "en"))
+        assertEquals("Mon 09.11 08:00 – Mon 16.11 23:59",
+            pl.vistula.checker.core.LecturerServices.lessonSpan("2026-11-09 08:00:00", "2026-11-16 23:59:00", "en"))
+        assertEquals("09:00", pl.vistula.checker.core.LecturerServices.lessonSpan("09:00", "", "pl"))
+        assertEquals(3, DemoStudentServices.demoStaffDirectory().getJSONArray("users").length())
+        assertEquals(1, DemoStudentServices.demoStaffDirectory("Nowak").getJSONArray("users").length())
+        assertEquals("Piotr", DemoStudentServices.demoStaffProfile("staff-2").getString("first_name"))
+        assertEquals("Anna Kowalska", DemoStudentServices.demoThesisDetail("ths-101").getJSONArray("supervisors").getString(0))
+        assertEquals("Jan Nowak", DemoStudentServices.demoThesisDetail("ths-101").getJSONArray("authors").getString(0))
+        assertEquals(1, DemoStudentServices.demoRegistrationRounds("reg-2026Z").length())
+        assertEquals(3, DemoStudentServices.demoBuildingRooms("BLD-MAIN").length())
     }
 
     @Test fun staffProfileRequestsOnlyDirectoryFieldsAndDropsPrivateData() {
         val client = UsosClient(credentials(), {}) { address ->
             assertTrue(address.contains("services/users/user?"))
             assertTrue(address.contains("user_id=42"))
-            Connection("""{"id":"42","first_name":"Jan","last_name":"Kowalski","titles":{"before":"dr"},"office_hours":"Tuesday 12:00","room":"A1","pesel":"private"}""")
+            assertTrue(java.net.URLDecoder.decode(address, "UTF-8").contains("room[number]"))
+            Connection("""{"id":"42","first_name":"Jan","last_name":"Kowalski","titles":{"before":"dr"},"office_hours":"Tuesday 12:00","room":{"id":"7","number":"A1","building_name":{"pl":"Gmach"}},"pesel":"private"}""")
         }
         val profile = ToolServiceData.fetchStaffProfile(client, "42")
         assertEquals("A1", profile.getString("room"))

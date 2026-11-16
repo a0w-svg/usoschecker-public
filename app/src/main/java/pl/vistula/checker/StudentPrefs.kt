@@ -55,9 +55,14 @@ class StudentPrefs(private val context: Context) {
         get() = prefs.getBoolean(Keys.PLATON_NOTIFY_MESSAGES, true)
         set(value) = prefs.edit { putBoolean(Keys.PLATON_NOTIFY_MESSAGES, value) }
 
-    /** Refresh Platon automatically when the Tasks screen opens. */
+    /** Whether Platon synchronisation is enabled by the student; optional and can be turned off at any time. */
+    var platonSyncEnabled: Boolean
+        get() = prefs.getBoolean(Keys.PLATON_SYNC_ENABLED, platonLinked)
+        set(value) = prefs.edit { putBoolean(Keys.PLATON_SYNC_ENABLED, value) }
+
+    /** Refresh Platon automatically when the Tasks screen opens or in background sync (optional, off by default). */
     var platonAutoRefresh: Boolean
-        get() = prefs.getBoolean(Keys.PLATON_AUTO_REFRESH, true)
+        get() = prefs.getBoolean(Keys.PLATON_AUTO_REFRESH, false)
         set(value) = prefs.edit { putBoolean(Keys.PLATON_AUTO_REFRESH, value) }
 
     var taskOrder: String?
@@ -85,6 +90,7 @@ class StudentPrefs(private val context: Context) {
         remove(Keys.PLATON_EXPIRED)
         remove(Keys.PLATON_LAST_ERROR)
         remove(Keys.PLATON_SEMESTERS)
+        remove(Keys.PLATON_SYNC_ENABLED)
     }
 
     object Keys {
@@ -94,6 +100,7 @@ class StudentPrefs(private val context: Context) {
         const val PLATON_EXPIRED = "platonExpired"
         const val PLATON_LAST_ERROR = "platonLastError"
         const val PLATON_SEMESTERS = "platonSemesters"
+        const val PLATON_SYNC_ENABLED = "platonSyncEnabled"
         const val PLATON_NOTIFY_TASKS = "platonNotifyTasks"
         const val PLATON_NOTIFY_GRADES = "platonNotifyGrades"
         const val PLATON_NOTIFY_MESSAGES = "platonNotifyMessages"

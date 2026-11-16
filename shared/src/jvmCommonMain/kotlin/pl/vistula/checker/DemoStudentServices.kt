@@ -172,22 +172,7 @@ object DemoStudentServices {
                         .put("status", "ready_to_sign")
                 )
             )
-        val staffDirectory = JSONObject()
-            .put(
-                "users",
-                JSONArray().put(
-                    JSONObject()
-                        .put("id", "staff-1")
-                        .put("first_name", "Anna")
-                        .put("last_name", "Kowalska")
-                        .put("title_before", "dr inż.")
-                        .put("title_after", "")
-                        .put("office_hours", JSONObject().put("pl", "Wtorki 14:00–15:30").put("en", "Tuesdays 14:00–15:30"))
-                        .put("room", "312")
-                )
-            )
-            .put("hasMore", false)
-            .put("total", 1)
+        val staffDirectory = demoStaffDirectory()
         val registrations = JSONObject()
             .put(
                 "registrations",
@@ -475,19 +460,32 @@ object DemoStudentServices {
                 .put("is_settled", true)
                 .put("currency", "PLN")
                 .put("description", JSONObject().put("pl", "Zwrot nadpłaty").put("en", "Overpayment refund")))
-        val demoTheses = JSONArray().put(
-            JSONObject()
-                .put("id", "ths-101")
-                .put("type", "engineer")
-                .put("title", "Projekt i implementacja mobilnego systemu monitorowania postępów akademickich")
-                .put("titles", JSONObject().put("pl", "Projekt i implementacja mobilnego systemu monitorowania postępów akademickich").put("en", "Design and implementation of mobile academic progress tracking system"))
-                .put("status", "in_progress")
-                .put("supervisors", JSONArray().put(JSONObject().put("id", "staff-1").put("first_name", "Anna").put("last_name", "Kowalska")))
-                .put("authors", JSONArray().put(JSONObject().put("id", "stud-1").put("first_name", "Jan").put("last_name", "Nowak")))
-                .put("faculty_name", JSONObject().put("pl", "Wydział Informatyki").put("en", "Faculty of Computer Science"))
-        )
+        val demoTheses = JSONArray().put(demoThesisDetail("ths-101"))
+        val affiliation = JSONObject()
+            .put("detected", "0000")
+            .put("candidates", JSONArray().put("0000"))
+            .put(
+                "units",
+                JSONArray().put(
+                    JSONObject()
+                        .put("id", "0000")
+                        .put(
+                            "name",
+                            JSONObject()
+                                .put("pl", "Akademia Finansów i Biznesu Vistula")
+                                .put("en", "Vistula University")
+                                .put("uk", "Академія Фінансів і Бізнесу Вістула")
+                        )
+                        .put("campus", "0000")
+                        .put("address", "ul. Stokłosy 3, 02-787 Warszawa")
+                        .put("email", "dziekanat@vistula.edu.pl")
+                        .put("phones", JSONArray().put("+48 22 45 72 300"))
+                        .put("homepage", "https://vistula.edu.pl/")
+                )
+            )
         val now = System.currentTimeMillis()
         return JSONObject()
+            .put("affiliation", JSONObject().put("data", affiliation).put("fetchedAt", now))
             .put("physicalCards", JSONObject().put("data", JSONArray().put(card)).put("fetchedAt", now))
             .put("mcard", JSONObject().put("data", mobile).put("fetchedAt", now))
             .put("documents", JSONObject().put("data", documents).put("fetchedAt", now))
@@ -710,15 +708,54 @@ object DemoStudentServices {
             )
     }
 
+    private fun demoStaffMembers(): List<JSONObject> = listOf(
+        JSONObject()
+            .put("id", "staff-1")
+            .put("first_name", "Anna")
+            .put("last_name", "Kowalska")
+            .put("title_before", "dr inż.")
+            .put("title_after", "")
+            .put("office_hours", JSONObject().put("pl", "Wtorki 14:00–15:30").put("en", "Tuesdays 14:00–15:30").put("uk", "Вівторки 14:00–15:30"))
+            .put("room", "312"),
+        JSONObject()
+            .put("id", "staff-2")
+            .put("first_name", "Piotr")
+            .put("last_name", "Nowak")
+            .put("title_before", "prof. dr hab.")
+            .put("title_after", "")
+            .put("office_hours", JSONObject().put("pl", "Czwartki 11:00–12:30").put("en", "Thursdays 11:00–12:30").put("uk", "Четверги 11:00–12:30"))
+            .put("room", "208"),
+        JSONObject()
+            .put("id", "staff-3")
+            .put("first_name", "Marek")
+            .put("last_name", "Zieliński")
+            .put("title_before", "mgr")
+            .put("title_after", "")
+            .put("office_hours", JSONObject().put("pl", "Środy 13:00–14:30").put("en", "Wednesdays 13:00–14:30").put("uk", "Середи 13:00–14:30"))
+            .put("room", "114")
+    )
+
     @JvmStatic
-    fun demoStaffProfile(userId: String): JSONObject = JSONObject()
-        .put("id", userId.ifEmpty { "staff-1" })
-        .put("first_name", "Anna")
-        .put("last_name", "Kowalska")
-        .put("title_before", "dr inż.")
-        .put("title_after", "")
-        .put("office_hours", JSONObject().put("pl", "Wtorki 14:00–15:30").put("en", "Tuesdays 14:00–15:30"))
-        .put("room", "312")
+    fun demoStaffDirectory(query: String = ""): JSONObject {
+        val needle = query.trim().lowercase(java.util.Locale.ROOT)
+        val matched = demoStaffMembers().filter { member ->
+            needle.isEmpty() || listOf(
+                member.optString("title_before"),
+                member.optString("first_name"),
+                member.optString("last_name"),
+                member.optString("room")
+            ).joinToString(" ").lowercase(java.util.Locale.ROOT).contains(needle)
+        }
+        val users = JSONArray()
+        matched.forEach { users.put(JSONObject(it.toString())) }
+        return JSONObject().put("users", users).put("hasMore", false).put("total", users.length())
+    }
+
+    @JvmStatic
+    fun demoStaffProfile(userId: String): JSONObject {
+        val match = demoStaffMembers().firstOrNull { it.optString("id") == userId } ?: demoStaffMembers().first()
+        return JSONObject(match.toString()).put("id", userId.ifEmpty { match.optString("id") })
+    }
 
     @JvmStatic
     fun demoStaffSchedule(userId: String): JSONArray {
@@ -800,15 +837,36 @@ object DemoStudentServices {
         )
 
     @JvmStatic
-    fun demoThesisDetail(thesisId: String): JSONObject = JSONObject()
-        .put("id", thesisId.ifEmpty { "ths-101" })
-        .put("type", "engineer")
-        .put("title", "Projekt i implementacja mobilnego systemu monitorowania postępów akademickich")
-        .put("titles", JSONObject().put("pl", "Projekt i implementacja mobilnego systemu monitorowania postępów akademickich").put("en", "Design and implementation of mobile academic progress tracking system"))
-        .put("status", "in_progress")
-        .put("faculty_name", JSONObject().put("pl", "Wydział Informatyki").put("en", "Faculty of Computer Science"))
-        .put("supervisors", JSONArray().put(JSONObject().put("id", "staff-1").put("first_name", "Anna").put("last_name", "Kowalska")))
-        .put("authors", JSONArray().put(JSONObject().put("id", "stud-1").put("first_name", "Jan").put("last_name", "Nowak")))
+    fun demoRegistrationRounds(registrationId: String): JSONArray {
+        val start = LocalDate.now(UsosClient.ZONE).minusDays(2)
+        return JSONArray().put(
+            JSONObject()
+                .put("id", "$registrationId-round-1")
+                .put("name", JSONObject().put("pl", "Tura podstawowa").put("en", "Primary round").put("uk", "Основний тур"))
+                .put("status", "open")
+                .put("registration_mode", "direct")
+                .put("start_date", "$start 08:00:00")
+                .put("end_date", "${start.plusDays(7)} 23:59:00")
+        )
+    }
+
+    @JvmStatic
+    fun demoBuildingRooms(buildingId: String): JSONArray = JSONArray()
+        .put(JSONObject().put("id", "312").put("number", "312").put("type", "didactic").put("capacity", 36))
+        .put(JSONObject().put("id", "208").put("number", "208").put("type", "didactic").put("capacity", 24))
+        .put(JSONObject().put("id", "AULA-1").put("number", "Aula 1").put("type", "lecture_hall").put("capacity", 180))
+
+    @JvmStatic
+    fun demoThesisDetail(thesisId: String): JSONObject = pl.vistula.checker.core.LecturerServices.safeThesisDetail(
+        JSONObject()
+            .put("id", thesisId.ifEmpty { "ths-101" })
+            .put("type", "engineer")
+            .put("titles", JSONObject().put("pl", "Projekt i implementacja mobilnego systemu monitorowania postępów akademickich").put("en", "Design and implementation of mobile academic progress tracking system"))
+            .put("status", "in_progress")
+            .put("faculty_name", JSONObject().put("pl", "Wydział Informatyki").put("en", "Faculty of Computer Science"))
+            .put("supervisors", JSONArray().put(JSONObject().put("id", "staff-1").put("first_name", "Anna").put("last_name", "Kowalska")))
+            .put("authors", JSONArray().put(JSONObject().put("id", "stud-1").put("first_name", "Jan").put("last_name", "Nowak")))
+    )
 
     @JvmStatic
     fun demoCourseEdition(courseId: String, termId: String): JSONObject = JSONObject()
